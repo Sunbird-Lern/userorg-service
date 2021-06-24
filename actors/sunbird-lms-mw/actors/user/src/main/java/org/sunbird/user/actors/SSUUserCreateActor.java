@@ -25,7 +25,6 @@ import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
@@ -177,22 +176,10 @@ public class SSUUserCreateActor extends UserBaseActor {
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap = createUserOrgRequestData(userMap);
+    Map<String, Object> userOrgMap = Util.createUserOrgRequestData(userMap);
     cassandraOperation.insertRecord(
         userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
 
-    return userOrgMap;
-  }
-
-  private Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
-    Map<String, Object> userOrgMap = new HashMap<String, Object>();
-    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
-    userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
-    userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
-    userOrgMap.put(JsonKey.IS_DELETED, false);
-    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
     return userOrgMap;
   }
 }

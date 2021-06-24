@@ -1,6 +1,5 @@
 package org.sunbird.user.actors;
 
-import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,7 +61,6 @@ public class SSOUserCreateActor extends UserBaseActor {
   private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private OrgExternalService orgExternalService = new OrgExternalService();
   private ObjectMapper mapper = new ObjectMapper();
-  private ActorRef systemSettingActorRef = null;
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
