@@ -240,7 +240,7 @@ public class ManagedUserActor extends UserBaseActor {
   }
 
   private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap = Util.createUserOrgRequestData(userMap);
+    Map<String, Object> userOrgMap = UserUtil.createUserOrgRequestData(userMap);
     cassandraOperation.insertRecord(
         userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
 
