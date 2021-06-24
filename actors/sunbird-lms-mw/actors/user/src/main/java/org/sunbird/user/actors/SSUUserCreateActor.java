@@ -126,7 +126,7 @@ public class SSUUserCreateActor extends UserBaseActor {
         // user_events
         KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
       } catch (Exception ex) {
-        ex.printStackTrace();
+        logger.error("Exception occurred while writting event to kafka", ex);
       }
       sender().tell(response, self());
     } else {
