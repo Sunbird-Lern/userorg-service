@@ -1,7 +1,6 @@
 /** */
 package org.sunbird.learner.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -211,8 +210,8 @@ public class DataCacheHandler implements Runnable {
       try {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, List<String>> valueMap =
-            objectMapper.convertValue(
-                userProfileConfig, new TypeReference<Map<String, List<String>>>() {});
+            objectMapper.readValue(
+                userProfileConfig, new HashMap<String, List<String>>().getClass());
         setFrameworkFieldsConfig(valueMap);
       } catch (Exception ex) {
         logger.error("Exception occurred while parsing framework details.", ex);
