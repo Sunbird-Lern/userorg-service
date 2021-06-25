@@ -156,10 +156,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateCreateUserV3Request(userRequest);
   }
 
-  public void validateCreateUserV2Request(Request userRequest) {
-    validateCreateUserRequest(userRequest);
-  }
-
   public void fieldsNotAllowed(List<String> fields, Request userRequest) {
     for (String field : fields) {
       if (((userRequest.getRequest().get(field) instanceof String)

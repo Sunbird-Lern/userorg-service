@@ -13,10 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
@@ -31,29 +28,22 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.common.util.Matcher;
-import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationService;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.models.user.org.UserOrg;
-import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserSelfDeclarationDao;
 import org.sunbird.user.dao.impl.UserOrgDaoImpl;
 import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.user.service.AssociationMechanism;
-import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
@@ -64,16 +54,13 @@ import org.sunbird.validator.user.UserRequestValidator;
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
-public class UserUpdateActor extends BaseActor {
+public class UserUpdateActor extends UserBaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
-  private LocationClient locationClient = LocationClientImpl.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
-  private LocationService locationService = LocationServiceImpl.getInstance();
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private UserSelfDeclarationDao userSelfDeclarationDao = UserSelfDeclarationDaoImpl.getInstance();
 
   @Override
@@ -102,16 +89,13 @@ public class UserUpdateActor extends BaseActor {
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
-      setProfileUserTypeAndLocation(userMap, actorMessage);
+      populateUserTypeAndSubType(userMap);
+      populateLocationCodesFromProfileLocation(userMap);
     } else {
-      if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
-        userMap.remove(JsonKey.PROFILE_LOCATION);
-      }
-      if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-        userMap.remove(JsonKey.PROFILE_USERTYPE);
-      }
+      userMap.remove(JsonKey.PROFILE_LOCATION);
+      userMap.remove(JsonKey.PROFILE_USERTYPE);
     }
-    validateLocationCodes(actorMessage);
+    validateAndGetLocationCodes(actorMessage);
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -120,7 +104,7 @@ public class UserUpdateActor extends BaseActor {
       userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
     }
 
-    validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
+    UserUtil.validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser((String) userDbRecord.get(JsonKey.ROOT_ORG_ID));
     encryptExternalDetails(userMap, userDbRecord);
@@ -159,7 +143,6 @@ public class UserUpdateActor extends BaseActor {
         updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
     int userFlagValue = userFlagsToNum(userBooleanMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
-    // As of now disallowing updating manageble user's phone/email, will le allowed in next release
     boolean resetPasswordLink = false;
     if (StringUtils.isNotEmpty(managedById)
         && ((StringUtils.isNotEmpty((String) requestMap.get(JsonKey.EMAIL))
@@ -244,7 +227,6 @@ public class UserUpdateActor extends BaseActor {
           ((Map<String, Object>) resp.getResult().get(JsonKey.RESPONSE)).get(JsonKey.ERRORS));
     }
     sender().tell(response, self());
-    // Managed-users should get ResetPassword Link
     if (resetPasswordLink) {
       sendResetPasswordLink(requestMap, actorMessage.getRequestContext());
     }
@@ -253,150 +235,8 @@ public class UserUpdateActor extends BaseActor {
       completeUserDetails.putAll(requestMap);
       saveUserDetailsToEs(completeUserDetails, actorMessage.getRequestContext());
     }
-    Map<String, Object> targetObject = null;
-    List<Map<String, Object>> correlatedObject = new ArrayList<>();
-    targetObject =
-        TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.USER_ID), TelemetryEnvKey.USER, JsonKey.UPDATE, null);
-    TelemetryUtil.telemetryProcessingCall(
-        userMap, targetObject, correlatedObject, actorMessage.getContext());
-  }
-
-  private void setProfileUserTypeAndLocation(Map<String, Object> userMap, Request actorMessage) {
-    userMap.remove(JsonKey.USER_TYPE);
-    userMap.remove(JsonKey.USER_SUB_TYPE);
-    if (userMap.containsKey(JsonKey.PROFILE_USERTYPE)) {
-      Map<String, Object> userTypeAndSubType =
-          (Map<String, Object>) userMap.get(JsonKey.PROFILE_USERTYPE);
-      userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-      userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
-    }
-    userMap.remove(JsonKey.LOCATION_CODES);
-    if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
-      List<Map<String, String>> profLocList =
-          (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-      List<String> locationCodes = null;
-      if (CollectionUtils.isNotEmpty(profLocList)) {
-        locationCodes =
-            profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
-        userMap.put(JsonKey.LOCATION_CODES, locationCodes);
-      }
-      userMap.remove(JsonKey.PROFILE_LOCATION);
-    }
-  }
-
-  private void validateLocationCodes(Request userRequest) {
-    Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    if ((locationCodes != null) && !(locationCodes instanceof List)) {
-      throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (CollectionUtils.isNotEmpty((List) locationCodes)) {
-      // As of now locationCode can take array of only locationcodes and map of locationCodes which
-      // include type and code of the location
-      String stateCode = null;
-      List<String> set = new ArrayList<>();
-      List<Location> locationList = new ArrayList<>();
-      if (((List) locationCodes).get(0) instanceof String) {
-        List<String> locations = (List<String>) locationCodes;
-        locationList =
-            locationClient.getLocationsByCodes(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locations,
-                userRequest.getRequestContext());
-        for (Location location : locationList) {
-          if (JsonKey.STATE.equals(location.getType())) {
-            stateCode = location.getCode();
-          }
-        }
-      } else {
-        locationList = createLocationLists((List<Map<String, String>>) locationCodes);
-        for (Location location : locationList) {
-          if (JsonKey.STATE.equals(location.getType())) {
-            stateCode = location.getCode();
-          }
-        }
-      }
-      // Throw an exception if location codes update is not passed with state code
-      if (StringUtils.isBlank(stateCode)) {
-        throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-                JsonKey.LOCATION_CODES + " of type State"),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-      Map<String, List<String>> locationTypeConfigMap = DataCacheHandler.getLocationTypeConfig();
-      if (MapUtils.isEmpty(locationTypeConfigMap)
-          || CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
-        Map<String, Object> userProfileConfigMap =
-            FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
-        // If config is not available check the default profile config
-        if (MapUtils.isEmpty(userProfileConfigMap) && !JsonKey.DEFAULT_PERSONA.equals(stateCode)) {
-          stateCode = JsonKey.DEFAULT_PERSONA;
-          if (CollectionUtils.isEmpty(locationTypeConfigMap.get(stateCode))) {
-            userProfileConfigMap =
-                FormApiUtil.getProfileConfig(stateCode, userRequest.getRequestContext());
-            if (MapUtils.isNotEmpty(userProfileConfigMap)) {
-              List<String> locationTypeList =
-                  FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
-              if (CollectionUtils.isNotEmpty(locationTypeList)) {
-                locationTypeConfigMap.put(stateCode, locationTypeList);
-              }
-            }
-          }
-        } else {
-          List<String> locationTypeList =
-              FormApiUtil.getLocationTypeConfigMap(userProfileConfigMap);
-          if (CollectionUtils.isNotEmpty(locationTypeList)) {
-            locationTypeConfigMap.put(stateCode, locationTypeList);
-          }
-        }
-      }
-      List<String> typeList = locationTypeConfigMap.get(stateCode);
-      String stateId = null;
-      for (Location location : locationList) {
-        // for create-MUA we allow locations upto district for remaining we will validate all.
-        if (((userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
-                    || userRequest
-                        .getOperation()
-                        .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))
-                && ((location.getType().equals(JsonKey.STATE))
-                    || (location.getType().equals(JsonKey.DISTRICT))))
-            || (!userRequest.getOperation().equals(ActorOperations.CREATE_USER_V4.getValue())
-                && !userRequest
-                    .getOperation()
-                    .equals(ActorOperations.CREATE_MANAGED_USER.getValue()))) {
-          isValidLocationType(location.getType(), typeList);
-          if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
-            stateId = location.getId();
-          }
-          if (!location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-            set.add(location.getCode());
-          } else {
-            userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-          }
-        }
-      }
-      if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.ORG_EXTERNAL_ID))) {
-        userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
-      }
-      userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
-    }
-  }
-
-  private List<Location> createLocationLists(List<Map<String, String>> locationCodes) {
-    List<Location> locations = new ArrayList<>();
-    for (Map<String, String> locationMap : locationCodes) {
-      Location location = new Location();
-      location.setCode(locationMap.get(JsonKey.CODE));
-      location.setType(locationMap.get(JsonKey.TYPE));
-      locations.add(location);
-    }
-    return locations;
+    generateUserTelemetry(
+        userMap, actorMessage, (String) userMap.get(JsonKey.USER_ID), JsonKey.UPDATE);
   }
 
   private void validateUserTypeAndSubType(
@@ -461,140 +301,7 @@ public class UserUpdateActor extends BaseActor {
     String stateCodeConfig = userRequestValidator.validateUserType(userMap, stateCode, context);
     userRequestValidator.validateUserSubType(userMap, stateCodeConfig);
     // after all validations set userType and userSubtype to profileUsertype
-    profileUserType(userMap, context);
-  }
-
-  private void profileUserType(Map<String, Object> userMap, RequestContext requestContext) {
-    Map<String, String> userTypeAndSubType = new HashMap<>();
-    userMap.remove(JsonKey.PROFILE_USERTYPE);
-    if (userMap.containsKey(JsonKey.USER_TYPE)) {
-      userTypeAndSubType.put(JsonKey.TYPE, (String) userMap.get(JsonKey.USER_TYPE));
-      if (userMap.containsKey(JsonKey.USER_SUB_TYPE)) {
-        userTypeAndSubType.put(JsonKey.SUB_TYPE, (String) userMap.get(JsonKey.USER_SUB_TYPE));
-      } else {
-        userTypeAndSubType.put(JsonKey.SUB_TYPE, null);
-      }
-      try {
-        userMap.put(JsonKey.PROFILE_USERTYPE, mapper.writeValueAsString(userTypeAndSubType));
-      } catch (Exception ex) {
-        logger.error(requestContext, "Exception occurred while mapping", ex);
-        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-      }
-
-      userMap.remove(JsonKey.USER_TYPE);
-      userMap.remove(JsonKey.USER_SUB_TYPE);
-    }
-  }
-
-  public static boolean isValidLocationType(String type, List<String> typeList) {
-    if (null != type && !typeList.contains(type.toLowerCase())) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    return true;
-  }
-
-  private void validateUserFrameworkData(
-      Map<String, Object> userRequestMap,
-      Map<String, Object> userDbRecord,
-      RequestContext context) {
-    if (userRequestMap.containsKey(JsonKey.FRAMEWORK)) {
-      Map<String, Object> framework = (Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK);
-      List<String> frameworkIdList;
-      if (framework.get(JsonKey.ID) instanceof String) {
-        String frameworkIdString = (String) framework.remove(JsonKey.ID);
-        frameworkIdList = new ArrayList<>();
-        frameworkIdList.add(frameworkIdString);
-        framework.put(JsonKey.ID, frameworkIdList);
-      } else {
-        frameworkIdList = (List<String>) framework.get(JsonKey.ID);
-      }
-      userRequestMap.put(JsonKey.FRAMEWORK, framework);
-      List<String> frameworkFields =
-          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
-      List<String> frameworkMandatoryFields =
-          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.MANDATORY_FIELDS);
-      userRequestValidator.validateMandatoryFrameworkFields(
-          userRequestMap, frameworkFields, frameworkMandatoryFields);
-      Map<String, Object> rootOrgMap =
-          Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
-      String hashtagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
-
-      verifyFrameworkId(hashtagId, frameworkIdList, context);
-      Map<String, List<Map<String, String>>> frameworkCachedValue =
-          getFrameworkDetails(frameworkIdList.get(0), context);
-      ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK)).remove(JsonKey.ID);
-      userRequestValidator.validateFrameworkCategoryValues(userRequestMap, frameworkCachedValue);
-      ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK))
-          .put(JsonKey.ID, frameworkIdList);
-    }
-  }
-
-  public static void verifyFrameworkId(
-      String hashtagId, List<String> frameworkIdList, RequestContext context) {
-    List<String> frameworks = DataCacheHandler.getHashtagIdFrameworkIdMap().get(hashtagId);
-    String frameworkId = frameworkIdList.get(0);
-    if (frameworks != null && frameworks.contains(frameworkId)) {
-      return;
-    } else {
-      Map<String, List<Map<String, String>>> frameworkDetails =
-          getFrameworkDetails(frameworkId, context);
-      if (frameworkDetails == null)
-        throw new ProjectCommonException(
-            ResponseCode.errorNoFrameworkFound.getErrorCode(),
-            ResponseCode.errorNoFrameworkFound.getErrorMessage(),
-            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-  }
-
-  public static Map<String, List<Map<String, String>>> getFrameworkDetails(
-      String frameworkId, RequestContext context) {
-    if (DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId) == null) {
-      handleGetFrameworkDetails(frameworkId, context);
-    }
-    return DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId);
-  }
-
-  private static void handleGetFrameworkDetails(String frameworkId, RequestContext context) {
-    Map<String, Object> response = ContentStoreUtil.readFramework(frameworkId, context);
-    Map<String, List<Map<String, String>>> frameworkCacheMap = new HashMap<>();
-    List<String> supportedfFields = DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
-    Map<String, Object> result = (Map<String, Object>) response.get(JsonKey.RESULT);
-    if (MapUtils.isNotEmpty(result)) {
-      Map<String, Object> frameworkDetails = (Map<String, Object>) result.get(JsonKey.FRAMEWORK);
-      if (MapUtils.isNotEmpty(frameworkDetails)) {
-        List<Map<String, Object>> frameworkCategories =
-            (List<Map<String, Object>>) frameworkDetails.get(JsonKey.CATEGORIES);
-        if (CollectionUtils.isNotEmpty(frameworkCategories)) {
-          for (Map<String, Object> frameworkCategoriesValue : frameworkCategories) {
-            String frameworkField = (String) frameworkCategoriesValue.get(JsonKey.CODE);
-            if (supportedfFields.contains(frameworkField)) {
-              List<Map<String, String>> listOfFields = new ArrayList<>();
-              List<Map<String, Object>> frameworkTermList =
-                  (List<Map<String, Object>>) frameworkCategoriesValue.get(JsonKey.TERMS);
-              if (CollectionUtils.isNotEmpty(frameworkTermList)) {
-                for (Map<String, Object> frameworkTerm : frameworkTermList) {
-                  String id = (String) frameworkTerm.get(JsonKey.IDENTIFIER);
-                  String name = (String) frameworkTerm.get(JsonKey.NAME);
-                  Map<String, String> writtenValue = new HashMap<>();
-                  writtenValue.put(JsonKey.ID, id);
-                  writtenValue.put(JsonKey.NAME, name);
-                  listOfFields.add(writtenValue);
-                }
-              }
-              if (StringUtils.isNotBlank(frameworkField)
-                  && CollectionUtils.isNotEmpty(listOfFields))
-                frameworkCacheMap.put(frameworkField, listOfFields);
-            }
-            if (MapUtils.isNotEmpty(frameworkCacheMap))
-              DataCacheHandler.updateFrameworkCategoriesMap(frameworkId, frameworkCacheMap);
-          }
-        }
-      }
-    }
+    populateProfileUserType(userMap, context);
   }
 
   private boolean isCustodianOrgUser(String userRootOrgId) {
@@ -691,38 +398,6 @@ public class UserUpdateActor extends BaseActor {
     userMap.remove(JsonKey.CHANNEL);
   }
 
-  private void convertValidatedLocationCodesToIDs(
-      Map<String, Object> userMap, RequestContext context) {
-    if (userMap.containsKey(JsonKey.LOCATION_IDS)
-        && CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_IDS))) {
-      userMap.remove(JsonKey.LOCATION_IDS);
-    }
-    if (!userMap.containsKey(JsonKey.LOCATION_IDS)
-        && userMap.containsKey(JsonKey.LOCATION_CODES)
-        && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      List<Map<String, String>> locationIdTypeList =
-          locationService.getValidatedRelatedLocationIdAndType(
-              (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);
-      if (locationIdTypeList != null && !locationIdTypeList.isEmpty()) {
-        try {
-          userMap.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(locationIdTypeList));
-        } catch (Exception ex) {
-          logger.error(context, "Exception occurred while mapping", ex);
-          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-        }
-
-        userMap.remove(JsonKey.LOCATION_CODES);
-      } else {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-                ResponseCode.invalidParameterValue.getErrorMessage(),
-                JsonKey.LOCATION_CODES,
-                userMap.get(JsonKey.LOCATION_CODES)));
-      }
-    }
-  }
-
   private void validateRecoveryEmailPhone(
       Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
     String userPrimaryPhone = (String) userDbRecord.get(JsonKey.PHONE);
@@ -782,35 +457,6 @@ public class UserUpdateActor extends BaseActor {
             ResponseCode.recoveryParamsMatchException.getErrorMessage(), recoveryType, type));
   }
 
-  private void removeUnwanted(Map<String, Object> reqMap) {
-    reqMap.remove(JsonKey.ADDRESS);
-    reqMap.remove(JsonKey.EDUCATION);
-    reqMap.remove(JsonKey.JOB_PROFILE);
-    reqMap.remove(JsonKey.ORGANISATION);
-    reqMap.remove(JsonKey.REGISTERED_ORG);
-    reqMap.remove(JsonKey.ROOT_ORG);
-    reqMap.remove(JsonKey.IDENTIFIER);
-    reqMap.remove(JsonKey.ORGANISATIONS);
-    reqMap.remove(JsonKey.IS_DELETED);
-    reqMap.remove(JsonKey.EXTERNAL_ID);
-    reqMap.remove(JsonKey.ID_TYPE);
-    reqMap.remove(JsonKey.EXTERNAL_ID_TYPE);
-    reqMap.remove(JsonKey.PROVIDER);
-    reqMap.remove(JsonKey.EXTERNAL_ID_PROVIDER);
-    reqMap.remove(JsonKey.EXTERNAL_IDS);
-    reqMap.remove(JsonKey.ORGANISATION_ID);
-    reqMap.remove(JsonKey.ROLES);
-    Util.getUserDefaultValue()
-        .keySet()
-        .stream()
-        .forEach(
-            key -> {
-              if (!JsonKey.PASSWORD.equalsIgnoreCase(key)) {
-                reqMap.remove(key);
-              }
-            });
-  }
-
   private Map<String, Boolean> updatedUserFlagsMap(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
     Map<String, Boolean> userBooleanMap = new HashMap<>();
@@ -844,54 +490,6 @@ public class UserUpdateActor extends BaseActor {
       }
     }
     return userFlagValue;
-  }
-
-  private Response insertIntoUserLookUp(Map<String, Object> userMap, RequestContext context) {
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> lookUp = new HashMap<>();
-    if (userMap.get(JsonKey.PHONE) != null) {
-      lookUp.put(JsonKey.TYPE, JsonKey.PHONE);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.PHONE));
-      list.add(lookUp);
-    }
-    if (userMap.get(JsonKey.EMAIL) != null) {
-      lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.EMAIL));
-      list.add(lookUp);
-    }
-    if (CollectionUtils.isNotEmpty((List) userMap.get(JsonKey.EXTERNAL_IDS))) {
-      Map<String, Object> externalId =
-          ((List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS))
-              .stream()
-              .filter(
-                  x -> ((String) x.get(JsonKey.ID_TYPE)).equals((String) x.get(JsonKey.PROVIDER)))
-              .findFirst()
-              .orElse(null);
-      if (MapUtils.isNotEmpty(externalId)) {
-        lookUp = new HashMap<>();
-        lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
-        lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-        // provider is the orgId, not the channel
-        lookUp.put(
-            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
-        list.add(lookUp);
-      }
-    }
-    if (userMap.get(JsonKey.USERNAME) != null) {
-      lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
-      list.add(lookUp);
-    }
-    Response response = null;
-    if (CollectionUtils.isNotEmpty(list)) {
-      response = userLookupService.insertRecords(list, context);
-    }
-    return response;
   }
 
   private void removeUserLookupEntry(

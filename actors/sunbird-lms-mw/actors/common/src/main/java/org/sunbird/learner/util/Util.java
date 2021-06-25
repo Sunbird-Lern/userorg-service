@@ -502,7 +502,9 @@ public final class Util {
               orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier, context);
       List<Map<String, Object>> res = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (null != res && !res.isEmpty()) {
-        return res.get(0);
+        Map<String, Object> result = res.get(0);
+        result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
+        return result;
       }
     }
     return Collections.emptyMap();

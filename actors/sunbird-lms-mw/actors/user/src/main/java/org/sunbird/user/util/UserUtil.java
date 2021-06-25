@@ -31,20 +31,24 @@ import org.sunbird.common.models.util.datasecurity.DecryptionService;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
 import org.sunbird.services.sso.SSOManager;
 import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserLookupService;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.validator.user.UserRequestValidator;
 import scala.concurrent.Future;
 
 public class UserUtil {
@@ -331,8 +335,6 @@ public class UserUtil {
   public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
     userMap.put(
         JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
-    // Since global settings are introduced, profile visibility map should be empty during user
-    // creation
     userMap.put(JsonKey.PROFILE_VISIBILITY, new HashMap<String, String>());
     userMap.put(JsonKey.IS_DELETED, false);
     userMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
@@ -491,9 +493,6 @@ public class UserUtil {
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       validateUserExternalIds(user, context);
     }
-    if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
-      updateExternalIdsStatus(user.getExternalIds());
-    }
   }
 
   /**
@@ -513,14 +512,6 @@ public class UserUtil {
       return (!((encEmailOrPhone).equalsIgnoreCase(dbEmailOrPhone)));
     }
     return false;
-  }
-
-  private static void updateExternalIdsStatus(List<Map<String, String>> externalIds) {
-    externalIds.forEach(
-        externalIdMap -> {
-          // Needed in 3.2
-          // externalIdMap.put(JsonKey.STATUS, JsonKey.SUBMITTED);
-        });
   }
 
   private static Optional<Map<String, String>> checkExternalID(
@@ -894,6 +885,119 @@ public class UserUtil {
     if (CollectionUtils.isNotEmpty(reqMap)) {
       userLookupService.deleteRecords(reqMap, context);
     }
+  }
+
+  public static void validateUserFrameworkData(
+      Map<String, Object> userRequestMap,
+      Map<String, Object> userDbRecord,
+      RequestContext context) {
+    UserRequestValidator userRequestValidator = new UserRequestValidator();
+    if (userRequestMap.containsKey(JsonKey.FRAMEWORK)) {
+      Map<String, Object> framework = (Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK);
+      List<String> frameworkIdList;
+      if (framework.get(JsonKey.ID) instanceof String) {
+        String frameworkIdString = (String) framework.remove(JsonKey.ID);
+        frameworkIdList = new ArrayList<>();
+        frameworkIdList.add(frameworkIdString);
+        framework.put(JsonKey.ID, frameworkIdList);
+      } else {
+        frameworkIdList = (List<String>) framework.get(JsonKey.ID);
+      }
+      userRequestMap.put(JsonKey.FRAMEWORK, framework);
+      List<String> frameworkFields =
+          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
+      List<String> frameworkMandatoryFields =
+          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.MANDATORY_FIELDS);
+      userRequestValidator.validateMandatoryFrameworkFields(
+          userRequestMap, frameworkFields, frameworkMandatoryFields);
+      Map<String, Object> rootOrgMap =
+          Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
+      String hashTagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
+
+      verifyFrameworkId(hashTagId, frameworkIdList, context);
+      Map<String, List<Map<String, String>>> frameworkCachedValue =
+          getFrameworkDetails(frameworkIdList.get(0), context);
+      ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK)).remove(JsonKey.ID);
+      userRequestValidator.validateFrameworkCategoryValues(userRequestMap, frameworkCachedValue);
+      ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK))
+          .put(JsonKey.ID, frameworkIdList);
+    }
+  }
+
+  private static void verifyFrameworkId(
+      String hashTagId, List<String> frameworkIdList, RequestContext context) {
+    List<String> frameworks = DataCacheHandler.getHashtagIdFrameworkIdMap().get(hashTagId);
+    String frameworkId = frameworkIdList.get(0);
+    if (frameworks != null && frameworks.contains(frameworkId)) {
+      return;
+    } else {
+      Map<String, List<Map<String, String>>> frameworkDetails =
+          getFrameworkDetails(frameworkId, context);
+      if (frameworkDetails == null)
+        throw new ProjectCommonException(
+            ResponseCode.errorNoFrameworkFound.getErrorCode(),
+            ResponseCode.errorNoFrameworkFound.getErrorMessage(),
+            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+  }
+
+  private static Map<String, List<Map<String, String>>> getFrameworkDetails(
+      String frameworkId, RequestContext context) {
+    if (DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId) == null) {
+      handleGetFrameworkDetails(frameworkId, context);
+    }
+    return DataCacheHandler.getFrameworkCategoriesMap().get(frameworkId);
+  }
+
+  private static void handleGetFrameworkDetails(String frameworkId, RequestContext context) {
+    Map<String, Object> response = ContentStoreUtil.readFramework(frameworkId, context);
+    Map<String, List<Map<String, String>>> frameworkCacheMap = new HashMap<>();
+    List<String> supportedfFields = DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
+    Map<String, Object> result = (Map<String, Object>) response.get(JsonKey.RESULT);
+    if (MapUtils.isNotEmpty(result)) {
+      Map<String, Object> frameworkDetails = (Map<String, Object>) result.get(JsonKey.FRAMEWORK);
+      if (MapUtils.isNotEmpty(frameworkDetails)) {
+        List<Map<String, Object>> frameworkCategories =
+            (List<Map<String, Object>>) frameworkDetails.get(JsonKey.CATEGORIES);
+        if (CollectionUtils.isNotEmpty(frameworkCategories)) {
+          for (Map<String, Object> frameworkCategoriesValue : frameworkCategories) {
+            String frameworkField = (String) frameworkCategoriesValue.get(JsonKey.CODE);
+            if (supportedfFields.contains(frameworkField)) {
+              List<Map<String, String>> listOfFields = new ArrayList<>();
+              List<Map<String, Object>> frameworkTermList =
+                  (List<Map<String, Object>>) frameworkCategoriesValue.get(JsonKey.TERMS);
+              if (CollectionUtils.isNotEmpty(frameworkTermList)) {
+                for (Map<String, Object> frameworkTerm : frameworkTermList) {
+                  String id = (String) frameworkTerm.get(JsonKey.IDENTIFIER);
+                  String name = (String) frameworkTerm.get(JsonKey.NAME);
+                  Map<String, String> writtenValue = new HashMap<>();
+                  writtenValue.put(JsonKey.ID, id);
+                  writtenValue.put(JsonKey.NAME, name);
+                  listOfFields.add(writtenValue);
+                }
+              }
+              if (StringUtils.isNotBlank(frameworkField)
+                  && CollectionUtils.isNotEmpty(listOfFields))
+                frameworkCacheMap.put(frameworkField, listOfFields);
+            }
+            if (MapUtils.isNotEmpty(frameworkCacheMap))
+              DataCacheHandler.updateFrameworkCategoriesMap(frameworkId, frameworkCacheMap);
+          }
+        }
+      }
+    }
+  }
+
+  public static Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
+    Map<String, Object> userOrgMap = new HashMap<String, Object>();
+    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
+    userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
+    userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+    return userOrgMap;
   }
 }
 
