@@ -413,6 +413,7 @@ public class UserUpdateActor extends UserBaseActor {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
     validatePrimaryEmailOrPhone(userDbRecord, userReqMap);
+    validatePrimaryAndRecoveryKeys(userReqMap);
   }
 
   private void validatePrimaryEmailOrPhone(
