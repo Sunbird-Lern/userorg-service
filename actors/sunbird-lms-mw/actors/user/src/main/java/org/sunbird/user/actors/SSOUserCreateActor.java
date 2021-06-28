@@ -138,9 +138,9 @@ public class SSOUserCreateActor extends UserBaseActor {
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-    UserUtil.validateUserPhoneAndEmailUniqueness(user, JsonKey.CREATE, request.getRequestContext());
     convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     UserUtil.toLower(userMap);
+    UserUtil.validateUserPhoneAndEmailUniqueness(user, JsonKey.CREATE, request.getRequestContext());
     UserUtil.addMaskEmailAndMaskPhone(userMap);
     String userId = ProjectUtil.generateUniqueId();
     userMap.put(JsonKey.ID, userId);
@@ -260,7 +260,7 @@ public class SSOUserCreateActor extends UserBaseActor {
       }
       userMap.put(JsonKey.ROOT_ORG_ID, fetchedRootOrgIdByChannel);
     }
-    Organisation fetchedOrgById = null;
+    Organisation fetchedOrgById;
     if (StringUtils.isNotBlank(requestedOrgId)) {
       fetchedOrgById = organisationClient.esGetOrgById(requestedOrgId, context);
       if (null == fetchedOrgById) {

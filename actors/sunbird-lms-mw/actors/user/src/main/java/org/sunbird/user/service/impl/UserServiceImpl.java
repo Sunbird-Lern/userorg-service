@@ -3,19 +3,17 @@ package org.sunbird.user.service.impl;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
@@ -63,16 +61,6 @@ public class UserServiceImpl implements UserService {
 
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-
-  private static Random rand = new Random(System.nanoTime());
-  private static final String[] alphabet =
-      new String[] {
-        "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f", "g", "h", "i",
-        "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
-      };
-
-  private static String stripChars = "0";
-  private static BigDecimal largePrimeNumber = new BigDecimal(1679979167);
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -153,21 +141,8 @@ public class UserServiceImpl implements UserService {
 
     Map<String, Object> filters = new HashMap<>();
     filters.put(JsonKey.IS_TENANT, true);
-    if (StringUtils.isNotBlank(channel)) {
-      filters.put(JsonKey.CHANNEL, channel);
-    } else {
-      // If channel value is not coming in request then read the default channel value provided from
-      // ENV.
-      if (StringUtils.isNotBlank(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_CHANNEL))) {
-        filters.put(JsonKey.CHANNEL, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_CHANNEL));
-      } else {
-        throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-    }
+    filters.put(JsonKey.CHANNEL, channel);
+
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> esResultF =
@@ -295,7 +270,8 @@ public class UserServiceImpl implements UserService {
     int totalUserNameGenerated = 0;
     String nameLowercase = name.toLowerCase().replaceAll("\\-+", "");
     while (totalUserNameGenerated < GENERATE_USERNAME_COUNT) {
-      String userNameSuffix = generateUniqueString(numOfCharsToAppend);
+      String userNameSuffix =
+          RandomStringUtils.randomAlphanumeric(numOfCharsToAppend).toLowerCase();
 
       StringBuilder userNameSB = new StringBuilder();
       userNameSB.append(nameLowercase).append("_").append(userNameSuffix);
@@ -308,38 +284,6 @@ public class UserServiceImpl implements UserService {
       }
     }
     return new ArrayList<>(userNameSet);
-  }
-
-  private String generateUniqueString(int length) {
-    int totalChars = alphabet.length;
-    BigDecimal exponent = BigDecimal.valueOf(totalChars);
-    exponent = exponent.pow(length);
-    String code = "";
-    BigDecimal number = new BigDecimal(rand.nextInt(1000000));
-    BigDecimal num = number.multiply(largePrimeNumber).remainder(exponent);
-    code = baseN(num, totalChars);
-    int codeLenght = code.length();
-    if (codeLenght < length) {
-      for (int i = codeLenght; i < length; i++) {
-        code = code + alphabet[rand.nextInt(totalChars - 1)];
-      }
-    }
-    if (NumberUtils.isNumber(code.substring(1, 2)) || NumberUtils.isNumber(code.substring(2, 3))) {
-      return code;
-    } else {
-      code = code.substring(0, 1) + alphabet[rand.nextInt(9)] + code.substring(2);
-      return code;
-    }
-  }
-
-  private String baseN(BigDecimal num, int base) {
-    if (num.doubleValue() == 0) {
-      return "0";
-    }
-    double div = Math.floor(num.doubleValue() / base);
-    String val = baseN(new BigDecimal(div), base);
-    return StringUtils.stripStart(val, stripChars)
-        + alphabet[num.remainder(new BigDecimal(base)).intValue()];
   }
 
   @Override
