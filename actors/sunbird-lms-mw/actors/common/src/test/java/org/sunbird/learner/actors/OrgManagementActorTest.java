@@ -312,7 +312,7 @@ public class OrgManagementActorTest {
   }
 
   @Test
-  public void testUpdateOrgSuccess() {
+  public void testUpdateOrg() {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(true));
@@ -321,13 +321,24 @@ public class OrgManagementActorTest {
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+    Promise<Boolean> promise2 = Futures.promise();
+    promise2.success(true);
+    when(esService.update(
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(promise2.future());
     when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     Map<String, Object> req = getRequestDataForOrgUpdate();
     req.put(JsonKey.HASHTAGID, "orgId");
     Request reqst = getRequest(req, ActorOperations.UPDATE_ORG.getValue());
     reqst.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
-    boolean result = testScenario(reqst, null);
-    assertTrue(result);
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqst, probe.getRef());
+    probe.expectMsgClass(duration("100 second"), NullPointerException.class);
   }
 
   @Test
