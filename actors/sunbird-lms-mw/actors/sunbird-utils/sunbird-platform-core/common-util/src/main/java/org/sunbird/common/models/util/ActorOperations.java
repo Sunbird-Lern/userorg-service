@@ -28,6 +28,7 @@ public enum ActorOperations {
   BULK_UPLOAD("bulkUpload"),
   PROCESS_BULK_UPLOAD("processBulkUpload"),
   ASSIGN_ROLES("assignRoles"),
+  ASSIGN_ROLES_V2("assignRolesV2"),
   UNBLOCK_USER("unblockUser"),
   GET_BULK_OP_STATUS("getBulkOpStatus"),
   UPDATE_USER_ORG_ES("updateUserOrgES"),

@@ -21,7 +21,7 @@ import org.sunbird.user.service.UserRoleService;
 import org.sunbird.user.service.impl.UserRoleServiceImpl;
 
 @ActorConfig(
-  tasks = {"getRoles", "assignRoles"},
+  tasks = {"getRoles", "assignRoles", "assignRolesV2"},
   asyncTasks = {},
   dispatcher = "most-used-two-dispatcher"
 )
@@ -43,6 +43,10 @@ public class UserRoleActor extends UserBaseActor {
 
       case "assignRoles":
         assignRoles(request);
+        break;
+
+      case "assignRolesV2":
+        assignRolesV2(request);
         break;
 
       default:
@@ -73,6 +77,41 @@ public class UserRoleActor extends UserBaseActor {
     UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     List<Map<String, Object>> userRolesList =
         userRoleService.updateUserRole(requestMap, actorMessage.getRequestContext());
+    if (!userRolesList.isEmpty()) {
+      response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    }
+    sender().tell(response, self());
+    if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
+      syncUserRoles(
+          JsonKey.USER,
+          (String) requestMap.get(JsonKey.USER_ID),
+          userRolesList,
+          actorMessage.getRequestContext());
+    } else {
+      logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    generateTelemetryEvent(
+        requestMap,
+        (String) requestMap.get(JsonKey.USER_ID),
+        "userLevel",
+        actorMessage.getContext());
+  }
+
+  private void assignRolesV2(Request actorMessage) {
+    logger.info(actorMessage.getRequestContext(), "UserRoleActor: assignRolesV2 called");
+    Response response = new Response();
+    Map<String, Object> requestMap = actorMessage.getRequest();
+    requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
+    requestMap.put(JsonKey.ROLE_OPERATION, "assignRole");
+    RoleService.validateRolesV2(requestMap);
+
+    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+    List<Map<String, Object>> userRolesList =
+        userRoleService.updateUserRoleV2(requestMap, actorMessage.getRequestContext());
     if (!userRolesList.isEmpty()) {
       response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     }

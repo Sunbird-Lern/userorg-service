@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -151,5 +152,136 @@ public class UserRoleServiceImpl implements UserRoleService {
       userRoleListToInsert.add(userRoleMap);
     }
     return userRoleListToInsert;
+  }
+
+  public List<Map<String, Object>> updateUserRoleV2(Map userRequest, RequestContext context) {
+    List<Map<String, Object>> roleList = (List<Map<String, Object>>) userRequest.get(JsonKey.ROLES);
+    List<Map<String, Object>> userRoleListToInsert = new ArrayList<>();
+    List<Map<String, Object>> userRoleListToUpdate = new ArrayList<>();
+    List<Map<String, String>> userRoleListToDelete = new ArrayList<>();
+    String userId = (String) userRequest.get(JsonKey.USER_ID);
+    // Fetch roles in DB for the user
+    List<Map<String, Object>> dbUserRoleList = userRoleDao.getUserRoles(userId, "", context);
+
+    roleList.forEach(
+        roleObj -> {
+          String roleStr = (String) roleObj.get(JsonKey.ROLE);
+          String operation = (String) roleObj.get(JsonKey.OPERATION);
+          List<Map<String, Object>> scope = (List<Map<String, Object>>) roleObj.get(JsonKey.SCOPE);
+
+          Map userRoleMap = new HashMap();
+          userRoleMap.put(JsonKey.ROLE, roleStr);
+          userRoleMap.put(JsonKey.USER_ID, userId);
+
+          if (JsonKey.ADD.equals(operation)) {
+            Optional<Map<String, Object>> dbRoleRecord =
+                dbUserRoleList
+                    .stream()
+                    .filter(db -> roleStr.equals(db.get(JsonKey.ROLE)))
+                    .findFirst();
+            if (dbRoleRecord.isEmpty()) {
+              String scopeListString = null;
+              try {
+                scopeListString = mapper.writeValueAsString(scope);
+              } catch (JsonProcessingException ex) {
+                throw new ProjectCommonException(
+                    ResponseCode.roleSaveError.getErrorCode(),
+                    ResponseCode.roleSaveError.getErrorMessage(),
+                    ResponseCode.SERVER_ERROR.getResponseCode());
+              }
+              userRoleMap.put(JsonKey.SCOPE, scopeListString);
+              userRoleMap.put(JsonKey.CREATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
+              userRoleMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
+              userRoleListToInsert.add(userRoleMap);
+            } else {
+
+              String scopeStr = (String) dbRoleRecord.get().get(JsonKey.SCOPE);
+              List<Map<String, Object>> dbScope = new ArrayList<>();
+              if (StringUtils.isNotEmpty(scopeStr)) {
+                try {
+                  dbScope =
+                      mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
+                } catch (JsonProcessingException ex) {
+                  throw new ProjectCommonException(
+                      ResponseCode.roleSaveError.getErrorCode(),
+                      ResponseCode.roleSaveError.getErrorMessage(),
+                      ResponseCode.SERVER_ERROR.getResponseCode());
+                }
+              }
+              scope.addAll(dbScope);
+              String scopeListString = null;
+              try {
+                scopeListString = mapper.writeValueAsString(scope);
+              } catch (JsonProcessingException ex) {
+                throw new ProjectCommonException(
+                    ResponseCode.roleSaveError.getErrorCode(),
+                    ResponseCode.roleSaveError.getErrorMessage(),
+                    ResponseCode.SERVER_ERROR.getResponseCode());
+              }
+              userRoleMap.put(JsonKey.SCOPE, scopeListString);
+              userRoleMap.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
+              userRoleMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+              userRoleListToUpdate.add(userRoleMap);
+            }
+          } else if (JsonKey.REMOVE.equals(operation)) {
+            Optional<Map<String, Object>> dbRoleRecord =
+                dbUserRoleList
+                    .stream()
+                    .filter(db -> roleStr.equals(db.get(JsonKey.ROLE)))
+                    .findFirst();
+            if (!dbRoleRecord.isEmpty()) {
+              String scopeStr = (String) dbRoleRecord.get().get(JsonKey.SCOPE);
+              List<Map<String, Object>> dbScope = new ArrayList<>();
+              if (StringUtils.isNotEmpty(scopeStr)) {
+                try {
+                  dbScope =
+                      mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
+                } catch (JsonProcessingException ex) {
+                  throw new ProjectCommonException(
+                      ResponseCode.roleSaveError.getErrorCode(),
+                      ResponseCode.roleSaveError.getErrorMessage(),
+                      ResponseCode.SERVER_ERROR.getResponseCode());
+                }
+                dbScope.removeAll(scope);
+                if (dbScope.isEmpty()) {
+                  userRoleListToDelete.add(userRoleMap);
+                } else {
+                  String scopeListString = null;
+                  try {
+                    scopeListString = mapper.writeValueAsString(dbScope);
+                  } catch (JsonProcessingException ex) {
+                    throw new ProjectCommonException(
+                        ResponseCode.roleSaveError.getErrorCode(),
+                        ResponseCode.roleSaveError.getErrorMessage(),
+                        ResponseCode.SERVER_ERROR.getResponseCode());
+                  }
+                  userRoleMap.put(JsonKey.SCOPE, scopeListString);
+                  userRoleMap.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
+                  userRoleMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+                  userRoleListToUpdate.add(userRoleMap);
+                }
+              }
+            } else {
+              userRoleListToDelete.add(userRoleMap);
+            }
+          }
+        });
+    // Update existing role scope, if same role is in request
+    if (CollectionUtils.isNotEmpty(userRoleListToUpdate)) {
+      userRoleDao.updateRoleScope(userRoleListToUpdate, context);
+    }
+    // Delete existing roles of user, if the same is not in request
+    if (CollectionUtils.isNotEmpty(userRoleListToDelete)) {
+      userRoleDao.deleteUserRole(userRoleListToDelete, context);
+    }
+    // Insert roles to DB
+    if (CollectionUtils.isNotEmpty(userRoleListToInsert)) {
+      userRoleDao.assignUserRole(userRoleListToInsert, context);
+    }
+
+    List<Map<String, Object>> userRoleListResponse =
+        userRoleDao.getUserRoles(userId, null, context);
+    // Return updated role list to save to ES
+    return userRoleListResponse;
   }
 }
