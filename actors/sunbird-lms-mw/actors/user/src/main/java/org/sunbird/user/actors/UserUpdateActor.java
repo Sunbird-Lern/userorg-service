@@ -139,8 +139,7 @@ public class UserUpdateActor extends UserBaseActor {
       requestMap.put(JsonKey.USER_SUB_TYPE, null);
     }
 
-    Map<String, Boolean> userBooleanMap =
-        updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
+    Map<String, Boolean> userBooleanMap = updatedUserFlagsMap(userDbRecord);
     int userFlagValue = userFlagsToNum(userBooleanMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     boolean resetPasswordLink = false;
@@ -454,13 +453,8 @@ public class UserUpdateActor extends UserBaseActor {
             ResponseCode.recoveryParamsMatchException.getErrorMessage(), recoveryType, type));
   }
 
-  private Map<String, Boolean> updatedUserFlagsMap(
-      Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
+  private Map<String, Boolean> updatedUserFlagsMap(Map<String, Object> userDbRecord) {
     Map<String, Boolean> userBooleanMap = new HashMap<>();
-
-    // for existing users, it won't contain state-validation
-    // adding in release-2.4.0
-    // userDbRecord- record from es.
     if (!userDbRecord.containsKey(JsonKey.STATE_VALIDATED)) {
       setStateValidation(userDbRecord, userBooleanMap);
     } else {
