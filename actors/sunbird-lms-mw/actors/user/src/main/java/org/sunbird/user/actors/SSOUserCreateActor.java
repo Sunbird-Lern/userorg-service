@@ -71,7 +71,7 @@ public class SSOUserCreateActor extends UserBaseActor {
         createSSOUser(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserManagementActor");
+        onReceiveUnsupportedOperation("SSOUserCreateActor");
     }
   }
 
@@ -198,8 +198,7 @@ public class SSOUserCreateActor extends UserBaseActor {
               request.getRequestContext());
     } else {
       logger.info(
-          request.getRequestContext(),
-          "UserManagementActor:processUserRequest: User creation failure");
+          request.getRequestContext(), "SSOUserCreateActor:processSSOUser: User creation failure");
     }
     Map<String, Object> esResponse = new HashMap<>();
     if (null != resp) {
@@ -302,7 +301,7 @@ public class SSOUserCreateActor extends UserBaseActor {
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
     logger.info(
-        "UserManagementActor:throwParamMatchException:".concat(recoveryType + "")
+        "SSOUserCreateActor:throwParamMatchException:".concat(recoveryType + "")
             + "should not same as primary ".concat(type + ""));
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,
@@ -334,7 +333,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     if (StringUtils.isBlank(orgId)) {
       logger.info(
           context,
-          "UserManagementActor:createUser: No organisation with orgExternalId = "
+          "SSOUserCreateActor:validateExternalIdAndGetOrgId: No organisation with orgExternalId = "
               + orgExternalId
               + " and channel = "
               + channel);
@@ -349,7 +348,7 @@ public class SSOUserCreateActor extends UserBaseActor {
         && !orgId.equals(userMap.get(JsonKey.ORGANISATION_ID))) {
       logger.info(
           context,
-          "UserManagementActor:createUser Mismatch of organisation from orgExternalId="
+          "SSOUserCreateActor:validateExternalIdAndGetOrgId Mismatch of organisation from orgExternalId="
               + orgExternalId
               + " and channel="
               + channel
@@ -388,7 +387,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.info(
-        context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
+        context, "SSOUserCreateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
   }
 

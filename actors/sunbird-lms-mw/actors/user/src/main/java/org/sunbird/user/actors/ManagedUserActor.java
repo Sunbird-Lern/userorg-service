@@ -74,7 +74,7 @@ public class ManagedUserActor extends UserBaseActor {
    */
   private void createManagedUser(Request actorMessage) {
     logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor:createManagedUser method called.");
+        actorMessage.getRequestContext(), "ManagedUserActor:createManagedUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     if (actorMessage
@@ -156,7 +156,7 @@ public class ManagedUserActor extends UserBaseActor {
     } else {
       logger.info(
           actorMessage.getRequestContext(),
-          "UserManagementActor:processUserRequest: User creation failure");
+          "ManagedUserActor:processUserRequestV4: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
       try {

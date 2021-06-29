@@ -59,7 +59,7 @@ public class SSUUserCreateActor extends UserBaseActor {
         createSSUUser(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserManagementActor");
+        onReceiveUnsupportedOperation("SSUUserCreateActor");
     }
   }
 
@@ -70,7 +70,7 @@ public class SSUUserCreateActor extends UserBaseActor {
    */
   private void createSSUUser(Request actorMessage) {
     logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor:createSSUUser method called.");
+        actorMessage.getRequestContext(), "SSUUserCreateActor:createSSUUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     userMap.put(
@@ -117,7 +117,7 @@ public class SSUUserCreateActor extends UserBaseActor {
     } else {
       logger.info(
           actorMessage.getRequestContext(),
-          "UserManagementActor:processUserRequest: User creation failure");
+          "SSUUserCreateActor:processSSUUser: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
       try {

@@ -219,7 +219,7 @@ public class UserUpdateActor extends UserBaseActor {
               actorMessage.getRequestContext());
     } else {
       logger.info(
-          actorMessage.getRequestContext(), "UserManagementActor:updateUser: User update failure");
+          actorMessage.getRequestContext(), "UserUpdateActor:updateUser: User update failure");
     }
     if (null != resp) {
       response.put(
@@ -449,7 +449,7 @@ public class UserUpdateActor extends UserBaseActor {
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
     logger.info(
-        "UserManagementActor:throwParamMatchException:".concat(recoveryType + "")
+        "UserUpdateActor:throwParamMatchException:".concat(recoveryType + "")
             + "should not same as primary ".concat(type + ""));
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,
@@ -517,8 +517,7 @@ public class UserUpdateActor extends UserBaseActor {
   }
 
   private void updateUserOrganisations(Request actorMessage) {
-    logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
+    logger.info(actorMessage.getRequestContext(), "UserUpdateActor: updateUserOrganisation called");
     List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
       orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
@@ -543,7 +542,7 @@ public class UserUpdateActor extends UserBaseActor {
       removeOrganisations(userOrgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
       logger.info(
           actorMessage.getRequestContext(),
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+          "UserUpdateActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
     }
   }
 
@@ -639,8 +638,7 @@ public class UserUpdateActor extends UserBaseActor {
     userRequest.setRequestContext(context);
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
-    logger.info(
-        context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
+    logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
   }
 }
