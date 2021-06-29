@@ -297,11 +297,13 @@ public class UserRoleActorTest {
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
     orgMap.put(JsonKey.ROLE, "anyRole1");
+    orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"ORGANISATION_ID\"}]");
     list.add(orgMap);
     orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
     orgMap.put(JsonKey.ROLE, "anyRole2");
+    orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"ORGANISATION_ID\"}]");
     list.add(orgMap);
     response.put(JsonKey.RESPONSE, list);
     return response;

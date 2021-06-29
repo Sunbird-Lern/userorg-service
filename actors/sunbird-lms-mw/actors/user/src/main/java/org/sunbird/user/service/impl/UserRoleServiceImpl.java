@@ -85,15 +85,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       scopeMap.put(JsonKey.ORGANISATION_ID, organisationId);
     }
     scopeList.add(scopeMap);
-    String scopeListString = null;
-    try {
-      scopeListString = mapper.writeValueAsString(scopeList);
-    } catch (JsonProcessingException e) {
-      throw new ProjectCommonException(
-          ResponseCode.roleSaveError.getErrorCode(),
-          ResponseCode.roleSaveError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
+    String scopeListString = convertScopeListToString(scopeList);
     return scopeListString;
   }
 
@@ -154,6 +146,32 @@ public class UserRoleServiceImpl implements UserRoleService {
     return userRoleListToInsert;
   }
 
+  private String convertScopeListToString(List scopeList) {
+    String scopeListString = null;
+    try {
+      scopeListString = mapper.writeValueAsString(scopeList);
+    } catch (JsonProcessingException e) {
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return scopeListString;
+  }
+
+  private List convertScopeStrToList(String scopeStr) {
+    List<Map<String, Object>> scopeList = new ArrayList<>();
+    try {
+      scopeList = mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
+    } catch (JsonProcessingException ex) {
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return scopeList;
+  }
+
   public List<Map<String, Object>> updateUserRoleV2(Map userRequest, RequestContext context) {
     List<Map<String, Object>> roleList = (List<Map<String, Object>>) userRequest.get(JsonKey.ROLES);
     List<Map<String, Object>> userRoleListToInsert = new ArrayList<>();
@@ -180,49 +198,24 @@ public class UserRoleServiceImpl implements UserRoleService {
                     .filter(db -> roleStr.equals(db.get(JsonKey.ROLE)))
                     .findFirst();
             if (dbRoleRecord.isEmpty()) {
-              String scopeListString = null;
-              try {
-                scopeListString = mapper.writeValueAsString(scope);
-              } catch (JsonProcessingException ex) {
-                throw new ProjectCommonException(
-                    ResponseCode.roleSaveError.getErrorCode(),
-                    ResponseCode.roleSaveError.getErrorMessage(),
-                    ResponseCode.SERVER_ERROR.getResponseCode());
-              }
+              String scopeListString = convertScopeListToString(scope);
               userRoleMap.put(JsonKey.SCOPE, scopeListString);
               userRoleMap.put(JsonKey.CREATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
               userRoleMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
               userRoleListToInsert.add(userRoleMap);
             } else {
-
               String scopeStr = (String) dbRoleRecord.get().get(JsonKey.SCOPE);
-              List<Map<String, Object>> dbScope = new ArrayList<>();
               if (StringUtils.isNotEmpty(scopeStr)) {
-                try {
-                  dbScope =
-                      mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
-                } catch (JsonProcessingException ex) {
-                  throw new ProjectCommonException(
-                      ResponseCode.roleSaveError.getErrorCode(),
-                      ResponseCode.roleSaveError.getErrorMessage(),
-                      ResponseCode.SERVER_ERROR.getResponseCode());
-                }
+                List<Map<String, Object>> dbScope = convertScopeStrToList(scopeStr);
+                scope.addAll(dbScope);
               }
-              scope.addAll(dbScope);
-              String scopeListString = null;
-              try {
-                scopeListString = mapper.writeValueAsString(scope);
-              } catch (JsonProcessingException ex) {
-                throw new ProjectCommonException(
-                    ResponseCode.roleSaveError.getErrorCode(),
-                    ResponseCode.roleSaveError.getErrorMessage(),
-                    ResponseCode.SERVER_ERROR.getResponseCode());
-              }
+              String scopeListString = convertScopeListToString(scope);
               userRoleMap.put(JsonKey.SCOPE, scopeListString);
               userRoleMap.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
               userRoleMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
               userRoleListToUpdate.add(userRoleMap);
             }
+
           } else if (JsonKey.REMOVE.equals(operation)) {
             Optional<Map<String, Object>> dbRoleRecord =
                 dbUserRoleList
@@ -231,30 +224,13 @@ public class UserRoleServiceImpl implements UserRoleService {
                     .findFirst();
             if (!dbRoleRecord.isEmpty()) {
               String scopeStr = (String) dbRoleRecord.get().get(JsonKey.SCOPE);
-              List<Map<String, Object>> dbScope = new ArrayList<>();
               if (StringUtils.isNotEmpty(scopeStr)) {
-                try {
-                  dbScope =
-                      mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
-                } catch (JsonProcessingException ex) {
-                  throw new ProjectCommonException(
-                      ResponseCode.roleSaveError.getErrorCode(),
-                      ResponseCode.roleSaveError.getErrorMessage(),
-                      ResponseCode.SERVER_ERROR.getResponseCode());
-                }
+                List<Map<String, Object>> dbScope = convertScopeStrToList(scopeStr);
                 dbScope.removeAll(scope);
                 if (dbScope.isEmpty()) {
                   userRoleListToDelete.add(userRoleMap);
                 } else {
-                  String scopeListString = null;
-                  try {
-                    scopeListString = mapper.writeValueAsString(dbScope);
-                  } catch (JsonProcessingException ex) {
-                    throw new ProjectCommonException(
-                        ResponseCode.roleSaveError.getErrorCode(),
-                        ResponseCode.roleSaveError.getErrorMessage(),
-                        ResponseCode.SERVER_ERROR.getResponseCode());
-                  }
+                  String scopeListString = convertScopeListToString(dbScope);
                   userRoleMap.put(JsonKey.SCOPE, scopeListString);
                   userRoleMap.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
                   userRoleMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
