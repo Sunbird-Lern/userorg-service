@@ -50,6 +50,51 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testAssignRolesV2Success() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, true, true));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testAssignRolesV2FailueWithoutUserId() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2(false, true, true, true));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testAssignRolesV2FailureWithoutRoles() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, false, true));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testAssignRolesV2FailureWithoutOp() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, true, false));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testAssignRolesV2FailureWithoutScope() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, false, true, true));
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
   public void testAssignRolesFailueWithoutOrgId() {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
@@ -103,6 +148,43 @@ public class UserRoleControllerTest extends BaseApplicationTest {
       innerMap.put(JsonKey.ROLES, roles);
     }
     requestMap.put(JsonKey.REQUEST, innerMap);
+
+    return requestMap;
+  }
+
+  private Map createUserRoleRequestV2(
+      boolean isUserIdReq, boolean isScopeReq, boolean isRoleReq, boolean isOpReq) {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> requestMapObj = new HashMap<>();
+
+    if (isUserIdReq) requestMapObj.put(JsonKey.USER_ID, userId);
+    if (isRoleReq) {
+      List<Map<String, Object>> scopeList = new ArrayList<>();
+      Map<String, Object> scopeMap = new HashMap<>();
+      scopeMap.put(JsonKey.ORGANISATION_ID, "someOrgId");
+      scopeList.add(scopeMap);
+
+      List<Map<String, Object>> rolesList = new ArrayList<>();
+      Map<String, Object> roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "someRole1");
+      if (isOpReq) roleMap.put(JsonKey.OPERATION, JsonKey.ADD);
+      if (isScopeReq) roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+
+      roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "someRole11");
+      roleMap.put(JsonKey.OPERATION, JsonKey.ADD);
+      roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+
+      roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "someRole2");
+      roleMap.put(JsonKey.OPERATION, JsonKey.REMOVE);
+      roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+      requestMapObj.put(JsonKey.ROLES, rolesList);
+    }
+    requestMap.put(JsonKey.REQUEST, requestMapObj);
 
     return requestMap;
   }

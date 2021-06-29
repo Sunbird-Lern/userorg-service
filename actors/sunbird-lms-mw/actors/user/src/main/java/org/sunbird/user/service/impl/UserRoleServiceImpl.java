@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -84,15 +85,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       scopeMap.put(JsonKey.ORGANISATION_ID, organisationId);
     }
     scopeList.add(scopeMap);
-    String scopeListString = null;
-    try {
-      scopeListString = mapper.writeValueAsString(scopeList);
-    } catch (JsonProcessingException e) {
-      throw new ProjectCommonException(
-          ResponseCode.roleSaveError.getErrorCode(),
-          ResponseCode.roleSaveError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
+    String scopeListString = convertScopeListToString(scopeList);
     return scopeListString;
   }
 
@@ -151,5 +144,120 @@ public class UserRoleServiceImpl implements UserRoleService {
       userRoleListToInsert.add(userRoleMap);
     }
     return userRoleListToInsert;
+  }
+
+  private String convertScopeListToString(List scopeList) {
+    String scopeListString = null;
+    try {
+      scopeListString = mapper.writeValueAsString(scopeList);
+    } catch (JsonProcessingException e) {
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return scopeListString;
+  }
+
+  private List convertScopeStrToList(String scopeStr) {
+    List<Map<String, Object>> scopeList = new ArrayList<>();
+    try {
+      scopeList = mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
+    } catch (JsonProcessingException ex) {
+      throw new ProjectCommonException(
+          ResponseCode.roleSaveError.getErrorCode(),
+          ResponseCode.roleSaveError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return scopeList;
+  }
+
+  public List<Map<String, Object>> updateUserRoleV2(Map userRequest, RequestContext context) {
+    List<Map<String, Object>> roleList = (List<Map<String, Object>>) userRequest.get(JsonKey.ROLES);
+    List<Map<String, Object>> userRoleListToInsert = new ArrayList<>();
+    List<Map<String, Object>> userRoleListToUpdate = new ArrayList<>();
+    List<Map<String, String>> userRoleListToDelete = new ArrayList<>();
+    String userId = (String) userRequest.get(JsonKey.USER_ID);
+    // Fetch roles in DB for the user
+    List<Map<String, Object>> dbUserRoleList = userRoleDao.getUserRoles(userId, "", context);
+
+    roleList.forEach(
+        roleObj -> {
+          String roleStr = (String) roleObj.get(JsonKey.ROLE);
+          String operation = (String) roleObj.get(JsonKey.OPERATION);
+          List<Map<String, Object>> scope = (List<Map<String, Object>>) roleObj.get(JsonKey.SCOPE);
+
+          Map userRoleMap = new HashMap();
+          userRoleMap.put(JsonKey.ROLE, roleStr);
+          userRoleMap.put(JsonKey.USER_ID, userId);
+
+          if (JsonKey.ADD.equals(operation)) {
+            Optional<Map<String, Object>> dbRoleRecord =
+                dbUserRoleList
+                    .stream()
+                    .filter(db -> roleStr.equals(db.get(JsonKey.ROLE)))
+                    .findFirst();
+            if (dbRoleRecord.isEmpty()) {
+              String scopeListString = convertScopeListToString(scope);
+              userRoleMap.put(JsonKey.SCOPE, scopeListString);
+              userRoleMap.put(JsonKey.CREATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
+              userRoleMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
+              userRoleListToInsert.add(userRoleMap);
+            } else {
+              String scopeStr = (String) dbRoleRecord.get().get(JsonKey.SCOPE);
+              if (StringUtils.isNotEmpty(scopeStr)) {
+                List<Map<String, Object>> dbScope = convertScopeStrToList(scopeStr);
+                scope.addAll(dbScope);
+              }
+              String scopeListString = convertScopeListToString(scope);
+              userRoleMap.put(JsonKey.SCOPE, scopeListString);
+              userRoleMap.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
+              userRoleMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+              userRoleListToUpdate.add(userRoleMap);
+            }
+
+          } else if (JsonKey.REMOVE.equals(operation)) {
+            Optional<Map<String, Object>> dbRoleRecord =
+                dbUserRoleList
+                    .stream()
+                    .filter(db -> roleStr.equals(db.get(JsonKey.ROLE)))
+                    .findFirst();
+            if (!dbRoleRecord.isEmpty()) {
+              String scopeStr = (String) dbRoleRecord.get().get(JsonKey.SCOPE);
+              if (StringUtils.isNotEmpty(scopeStr)) {
+                List<Map<String, Object>> dbScope = convertScopeStrToList(scopeStr);
+                dbScope.removeAll(scope);
+                if (dbScope.isEmpty()) {
+                  userRoleListToDelete.add(userRoleMap);
+                } else {
+                  String scopeListString = convertScopeListToString(dbScope);
+                  userRoleMap.put(JsonKey.SCOPE, scopeListString);
+                  userRoleMap.put(JsonKey.UPDATED_BY, userRequest.get(JsonKey.REQUESTED_BY));
+                  userRoleMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
+                  userRoleListToUpdate.add(userRoleMap);
+                }
+              }
+            } else {
+              userRoleListToDelete.add(userRoleMap);
+            }
+          }
+        });
+    // Update existing role scope, if same role is in request
+    if (CollectionUtils.isNotEmpty(userRoleListToUpdate)) {
+      userRoleDao.updateRoleScope(userRoleListToUpdate, context);
+    }
+    // Delete existing roles of user, if the same is not in request
+    if (CollectionUtils.isNotEmpty(userRoleListToDelete)) {
+      userRoleDao.deleteUserRole(userRoleListToDelete, context);
+    }
+    // Insert roles to DB
+    if (CollectionUtils.isNotEmpty(userRoleListToInsert)) {
+      userRoleDao.assignUserRole(userRoleListToInsert, context);
+    }
+
+    List<Map<String, Object>> userRoleListResponse =
+        userRoleDao.getUserRoles(userId, null, context);
+    // Return updated role list to save to ES
+    return userRoleListResponse;
   }
 }

@@ -3,15 +3,18 @@
 # ~~~~
 
 # User management APIs
-POST    /v1/user/create				            @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
+# SSO user creation
+POST    /v1/user/create                         @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
 POST	/v2/user/create				            @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
 POST	/v3/user/create				            @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
 POST	/v1/ssouser/create                      @controllers.usermanagement.UserController.createSSOUser(request: play.mvc.Http.Request)
-#/v4/user/create is used only Managed-User creation, this is not for regular user creation.
+# Managed-User creation, this is not for regular user creation.
 POST    /v4/user/create                         @controllers.usermanagement.UserController.createUserV4(request: play.mvc.Http.Request)
 POST    /v1/manageduser/create		            @controllers.usermanagement.UserController.createManagedUser(request: play.mvc.Http.Request)
+# SSU user creation
 POST    /v1/user/signup                         @controllers.usermanagement.UserController.createUserV3(request: play.mvc.Http.Request)
 POST    /v2/user/signup                         @controllers.usermanagement.UserController.createSSUUser(request: play.mvc.Http.Request)
+
 PATCH   /v1/user/update					        @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
 PATCH   /v2/user/update                         @controllers.usermanagement.UserController.updateUserV2(request: play.mvc.Http.Request)
 
@@ -22,15 +25,17 @@ GET  	/v4/user/read/:uid				        @controllers.usermanagement.UserController.g
 GET  	/v5/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV5(uid:String, request: play.mvc.Http.Request)
 GET     /private/user/v1/read/:externalId       @controllers.usermanagement.UserController.getUserByIdV3(externalId:String, request: play.mvc.Http.Request)
 
+GET     /v1/user/managed/:lua_uuid              @controllers.usermanagement.UserController.getManagedUsers(lua_uuid:String, request: play.mvc.Http.Request)
 POST    /v1/user/getuser                        @controllers.usermanagement.UserController.getUserByLoginId(request: play.mvc.Http.Request)
 GET     /v1/user/get/:idType/:id                @controllers.usermanagement.UserController.getUserByKey(idType:String, id:String, request: play.mvc.Http.Request)
+POST    /private/user/v1/lookup                 @controllers.usermanagement.UserController.userLookup(request: play.mvc.Http.Request)
+GET     /v1/user/exists/:key/:value             @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
+GET     /v2/user/exists/:key/:value             @controllers.usermanagement.UserController.userExists(key:String, value:String, request: play.mvc.Http.Request)
+
 POST    /v1/user/search					        @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
 POST    /v2/user/search					        @controllers.usermanagement.UserController.searchUserV2(request: play.mvc.Http.Request)
 POST    /v3/user/search					        @controllers.usermanagement.UserController.searchUserV3(request: play.mvc.Http.Request)
 POST    /private/user/v1/search                 @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
-POST    /private/user/v1/lookup                 @controllers.usermanagement.UserController.userLookup(request: play.mvc.Http.Request)
-GET     /v1/user/managed/:lua_uuid              @controllers.usermanagement.UserController.getManagedUsers(lua_uuid:String, request: play.mvc.Http.Request)
-GET     /v2/user/exists/:key/:value             @controllers.usermanagement.UserController.userExists(key:String, value:String, request: play.mvc.Http.Request)
 
 POST    /v1/user/block                          @controllers.usermanagement.UserStatusController.blockUser(request: play.mvc.Http.Request)
 POST    /v1/user/unblock			            @controllers.usermanagement.UserStatusController.unblockUser(request: play.mvc.Http.Request)
@@ -38,10 +43,11 @@ POST    /v1/user/unblock			            @controllers.usermanagement.UserStatusCon
 GET     /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles(request: play.mvc.Http.Request)
 POST    /v1/user/assign/role			        @controllers.usermanagement.UserRoleController.assignRoles(request: play.mvc.Http.Request)
 POST    /private/user/v1/assign/role	        @controllers.usermanagement.UserRoleController.assignRoles(request: play.mvc.Http.Request)
+POST    /v2/user/assign/role			        @controllers.usermanagement.UserRoleController.assignRolesV2(request: play.mvc.Http.Request)
+POST    /private/user/v2/assign/role			        @controllers.usermanagement.UserRoleController.assignRolesV2(request: play.mvc.Http.Request)
 
 POST    /v1/user/tnc/accept                     @controllers.tac.UserTnCController.acceptTnC(request: play.mvc.Http.Request)
 PATCH   /private/user/v1/account/merge          @controllers.usermanagement.UserMergeController.mergeUser(request: play.mvc.Http.Request)
-GET     /v1/user/exists/:key/:value             @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 PATCH   /v1/user/declarations                   @controllers.usermanagement.UserController.updateUserDeclarations(request: play.mvc.Http.Request)
 
 #Freeup API

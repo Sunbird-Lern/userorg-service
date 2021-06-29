@@ -86,4 +86,22 @@ public class RoleService {
       }
     }
   }
+
+  public static void validateRolesV2(Map<String, Object> requestMap) {
+    Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
+    List<Map<String, Object>> roleList = (List<Map<String, Object>>) requestMap.get(JsonKey.ROLES);
+
+    if (MapUtils.isNotEmpty(roleMap)) {
+      roleList.forEach(
+          roleObj -> {
+            String roleStr = (String) roleObj.get(JsonKey.ROLE);
+            if (null == roleMap.get(roleStr.trim())) {
+              throw new ProjectCommonException(
+                  ResponseCode.invalidRole.getErrorCode(),
+                  ResponseCode.invalidRole.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
+            }
+          });
+    }
+  }
 }
