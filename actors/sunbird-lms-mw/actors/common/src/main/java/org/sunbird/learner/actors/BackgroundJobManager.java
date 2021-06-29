@@ -232,17 +232,12 @@ public class BackgroundJobManager extends BaseActor {
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     logger.info(
         context,
-        "Getting  ********** ES save response for type , identifier == "
-            + type
-            + "  "
-            + identifier
-            + "  "
-            + response);
+        "ES save response for type , identifier == " + type + "  " + identifier + "  " + response);
     if (!StringUtils.isBlank(response)) {
-      logger.info(context, "User Data is saved successfully ES ." + type + "  " + identifier);
+      logger.info(context, "Data saved successfully to ES ." + type + "  " + identifier);
       return true;
     }
-    logger.info(context, "unbale to save the data inside ES with identifier " + identifier);
+    logger.info(context, "unable to save the data inside ES with identifier " + identifier);
     return false;
   }
 
