@@ -3,7 +3,6 @@ package org.sunbird.user.actors;
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -20,7 +19,6 @@ import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
@@ -120,14 +118,7 @@ public class SSUUserCreateActor extends UserBaseActor {
           "SSUUserCreateActor:processSSUUser: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
-      try {
-        ObjectMapper mapper = new ObjectMapper();
-        String event = mapper.writeValueAsString(esResponse);
-        // user_events
-        KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
-      } catch (Exception ex) {
-        logger.error("Exception occurred while writing event to kafka", ex);
-      }
+      writeDataToKafka(esResponse);
       sender().tell(response, self());
     } else {
       Future<Boolean> kcFuture =

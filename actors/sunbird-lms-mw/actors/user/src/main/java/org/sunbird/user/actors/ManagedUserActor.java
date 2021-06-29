@@ -2,7 +2,6 @@ package org.sunbird.user.actors;
 
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
@@ -159,14 +157,7 @@ public class ManagedUserActor extends UserBaseActor {
           "ManagedUserActor:processUserRequestV4: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
-      try {
-        ObjectMapper mapper = new ObjectMapper();
-        String event = mapper.writeValueAsString(esResponse);
-        // user_events
-        KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
-      } catch (Exception ex) {
-        logger.error("Exception occurred while writing event to kafka", ex);
-      }
+      writeDataToKafka(esResponse);
       sender().tell(response, self());
     } else {
       Future<Response> future =

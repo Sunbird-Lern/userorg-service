@@ -21,6 +21,7 @@ import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtil;
 import org.sunbird.learner.util.Util;
@@ -324,6 +325,17 @@ public abstract class UserBaseActor extends BaseActor {
       }
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+    }
+  }
+
+  protected void writeDataToKafka(Map<String, Object> data) {
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      String event = mapper.writeValueAsString(data);
+      // user_events
+      KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
+    } catch (Exception ex) {
+      logger.error("Exception occurred while writing event to kafka", ex);
     }
   }
 
