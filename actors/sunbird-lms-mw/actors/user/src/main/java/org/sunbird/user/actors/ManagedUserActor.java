@@ -125,10 +125,10 @@ public class ManagedUserActor extends UserBaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
-    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-    userMap.put(JsonKey.CHANNEL, channel);
+    userMap.put(
+        JsonKey.ROOT_ORG_ID, DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID));
+    userMap.put(
+        JsonKey.CHANNEL, DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL));
     Map<String, Object> managedByInfo =
         UserUtil.validateManagedByUser(managedBy, actorMessage.getRequestContext());
     convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
@@ -249,7 +249,7 @@ public class ManagedUserActor extends UserBaseActor {
       responseMap.put(JsonKey.CONTENT, activeUserList);
       responseMap.put(JsonKey.COUNT, activeUserList.size());
     } else {
-      responseMap.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
+      responseMap.put(JsonKey.CONTENT, new ArrayList<>());
       responseMap.put(JsonKey.COUNT, 0);
     }
     Response response = new Response();

@@ -106,11 +106,12 @@ public class SSOUserCreateActor extends UserBaseActor {
       userMap.put(JsonKey.CREATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
       if (StringUtils.isBlank((String) userMap.get(JsonKey.CHANNEL))
           && StringUtils.isBlank((String) userMap.get(JsonKey.ROOT_ORG_ID))) {
-        String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-        String custodianRootOrgId =
-            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-        userMap.put(JsonKey.ROOT_ORG_ID, custodianRootOrgId);
-        userMap.put(JsonKey.CHANNEL, channel);
+        userMap.put(
+            JsonKey.ROOT_ORG_ID,
+            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID));
+        userMap.put(
+            JsonKey.CHANNEL,
+            DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL));
         isCustodianOrg = true;
       }
     }
@@ -131,7 +132,7 @@ public class SSOUserCreateActor extends UserBaseActor {
   }
 
   private void processSSOUser(Map<String, Object> userMap, String callerId, Request request) {
-    Map<String, Object> requestMap = null;
+    Map<String, Object> requestMap;
     UserUtil.setUserDefaultValue(userMap, callerId, request.getRequestContext());
     // Update external ids provider with OrgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, request.getRequestContext());
