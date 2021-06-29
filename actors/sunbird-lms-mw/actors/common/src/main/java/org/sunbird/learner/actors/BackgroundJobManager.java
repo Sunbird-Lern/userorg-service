@@ -119,7 +119,6 @@ public class BackgroundJobManager extends BaseActor {
     header = JsonKey.BEARER + header;
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
-    logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> orgMap =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
     if (MapUtils.isNotEmpty(orgMap)) {
@@ -185,7 +184,7 @@ public class BackgroundJobManager extends BaseActor {
     if (response) {
       return true;
     }
-    logger.info(context, "unbale to save the data inside ES with identifier " + identifier);
+    logger.info(context, "unable to save the data to ES with identifier " + identifier);
     return false;
   }
 
@@ -193,10 +192,6 @@ public class BackgroundJobManager extends BaseActor {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
     Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
     if (MapUtils.isNotEmpty(userDetails)) {
-      logger.info(
-          actorMessage.getRequestContext(),
-          "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
-              + userDetails.get(JsonKey.ROOT_ORG_ID));
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.user.getTypeName(),
@@ -253,21 +248,18 @@ public class BackgroundJobManager extends BaseActor {
       String tagId, String body, Map<String, String> header, RequestContext context) {
     String tagStatus = "";
     try {
-      logger.info(
-          context,
-          "BackgroundJobManager:registertag register tag call started with tagid = " + tagId);
+      logger.info(context, "BackgroundJobManager:registertag ,call started with tagid = " + tagId);
       tagStatus = ProjectUtil.registertag(tagId, body, header, context);
       logger.info(
           context,
-          "BackgroundJobManager:registertag  register tag call end with id and status = "
+          "BackgroundJobManager:registertag  ,call end with id and status = "
               + tagId
               + ", "
               + tagStatus);
     } catch (Exception e) {
       logger.error(
           context,
-          "BackgroundJobManager:registertag register tag call failure with error message = "
-              + e.getMessage(),
+          "BackgroundJobManager:registertag ,call failure with error message = " + e.getMessage(),
           e);
     }
     return tagStatus;
@@ -275,7 +267,6 @@ public class BackgroundJobManager extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void insertUserNotesToEs(Request actorMessage) {
-    logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> noteMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.NOTE);
     if (ProjectUtil.isNotNull(noteMap) && noteMap.size() > 0) {
       String id = (String) noteMap.get(JsonKey.ID);
@@ -313,6 +304,6 @@ public class BackgroundJobManager extends BaseActor {
         mergeRequest.getRequestContext());
     logger.info(
         mergeRequest.getRequestContext(),
-        "user details for updated for user in ES with id:" + mergeeId);
+        "user details updated for user in ES with id:" + mergeeId);
   }
 }

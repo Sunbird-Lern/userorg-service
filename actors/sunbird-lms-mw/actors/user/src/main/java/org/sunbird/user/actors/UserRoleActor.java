@@ -2,19 +2,13 @@ package org.sunbird.user.actors;
 
 import java.util.*;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.role.service.RoleService;
-import org.sunbird.learner.organisation.service.OrgService;
-import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.user.service.UserRoleService;
@@ -26,10 +20,6 @@ import org.sunbird.user.service.impl.UserRoleServiceImpl;
   dispatcher = "most-used-two-dispatcher"
 )
 public class UserRoleActor extends UserBaseActor {
-
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -55,7 +45,6 @@ public class UserRoleActor extends UserBaseActor {
   }
 
   private void getRoles() {
-    logger.info("UserRoleActor: getRoles called");
     Response response = DataCacheHandler.getRoleResponse();
     if (response == null) {
       response = RoleService.getUserRoles();
@@ -66,7 +55,6 @@ public class UserRoleActor extends UserBaseActor {
 
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
-    logger.info(actorMessage.getRequestContext(), "UserRoleActor: assignRoles called");
     Response response = new Response();
     Map<String, Object> requestMap = actorMessage.getRequest();
     requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
@@ -102,7 +90,6 @@ public class UserRoleActor extends UserBaseActor {
   }
 
   private void assignRolesV2(Request actorMessage) {
-    logger.info(actorMessage.getRequestContext(), "UserRoleActor: assignRolesV2 called");
     Response response = new Response();
     Map<String, Object> requestMap = actorMessage.getRequest();
     requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
