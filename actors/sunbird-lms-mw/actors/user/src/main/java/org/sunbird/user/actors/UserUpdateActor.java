@@ -448,9 +448,6 @@ public class UserUpdateActor extends UserBaseActor {
   }
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
-    logger.info(
-        "UserUpdateActor:throwParamMatchException:".concat(recoveryType + "")
-            + "should not same as primary ".concat(type + ""));
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,
         MessageFormat.format(

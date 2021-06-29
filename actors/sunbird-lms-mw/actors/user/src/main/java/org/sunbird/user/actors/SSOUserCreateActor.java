@@ -300,9 +300,6 @@ public class SSOUserCreateActor extends UserBaseActor {
   }
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
-    logger.info(
-        "SSOUserCreateActor:throwParamMatchException:".concat(recoveryType + "")
-            + "should not same as primary ".concat(type + ""));
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,
         MessageFormat.format(
