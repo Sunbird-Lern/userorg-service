@@ -87,7 +87,6 @@ public class UserUpdateActor extends UserBaseActor {
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
       populateUserTypeAndSubType(userMap);
       populateLocationCodesFromProfileLocation(userMap);
@@ -98,6 +97,7 @@ public class UserUpdateActor extends UserBaseActor {
     validateAndGetLocationCodes(actorMessage);
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {

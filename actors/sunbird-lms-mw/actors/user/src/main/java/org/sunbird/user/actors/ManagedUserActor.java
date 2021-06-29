@@ -71,8 +71,6 @@ public class ManagedUserActor extends UserBaseActor {
    * @param actorMessage
    */
   private void createManagedUser(Request actorMessage) {
-    logger.info(
-        actorMessage.getRequestContext(), "ManagedUserActor:createManagedUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     if (actorMessage

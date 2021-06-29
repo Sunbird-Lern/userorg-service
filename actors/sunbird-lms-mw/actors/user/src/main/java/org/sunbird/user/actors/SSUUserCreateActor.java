@@ -67,8 +67,6 @@ public class SSUUserCreateActor extends UserBaseActor {
    * @param actorMessage
    */
   private void createSSUUser(Request actorMessage) {
-    logger.info(
-        actorMessage.getRequestContext(), "SSUUserCreateActor:createSSUUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     userMap.put(
