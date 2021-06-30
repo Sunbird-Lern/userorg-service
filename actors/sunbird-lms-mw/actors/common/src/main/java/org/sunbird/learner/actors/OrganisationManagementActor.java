@@ -327,14 +327,10 @@ public class OrganisationManagementActor extends BaseActor {
               updateOrgDao,
               actorMessage.getRequestContext());
       response.getResult().put(JsonKey.ORGANISATION_ID, orgDao.get(JsonKey.ID));
-      sender().tell(response, self());
 
-      // update the ES --
-      Request orgRequest = new Request();
-      orgRequest.setRequestContext(actorMessage.getRequestContext());
-      orgRequest.getRequest().put(JsonKey.ORGANISATION, updateOrgDao);
-      orgRequest.setOperation(ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue());
-      tellToAnother(orgRequest);
+      updateDataToEs(actorMessage, updateOrgDao);
+
+      sender().tell(response, self());
 
       targetObject =
           TelemetryUtil.generateTargetObject(orgId, JsonKey.ORGANISATION, JsonKey.UPDATE, null);
@@ -342,11 +338,9 @@ public class OrganisationManagementActor extends BaseActor {
       telemetryAction.put("updateOrgStatus", "org status updated.");
       TelemetryUtil.telemetryProcessingCall(
           telemetryAction, targetObject, new ArrayList<>(), actorMessage.getContext());
-      return;
     } catch (ProjectCommonException e) {
       logger.error(actorMessage.getRequestContext(), e.getMessage(), e);
       sender().tell(e, self());
-      return;
     }
   }
 
@@ -354,7 +348,7 @@ public class OrganisationManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void updateOrgData(Request actorMessage) {
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    Map<String, Object> targetObject = null;
+    Map<String, Object> targetObject;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     try {
@@ -535,8 +529,6 @@ public class OrganisationManagementActor extends BaseActor {
         }
       }
 
-      sender().tell(response, self());
-
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
       List orgLocationList = new ArrayList<>();
       if (StringUtils.isNotBlank(orgLocation)) {
@@ -550,11 +542,10 @@ public class OrganisationManagementActor extends BaseActor {
       }
       updateOrgDao.put(JsonKey.ORG_LOCATION, orgLocationList);
 
-      Request orgRequest = new Request();
-      orgRequest.setRequestContext(actorMessage.getRequestContext());
-      orgRequest.getRequest().put(JsonKey.ORGANISATION, updateOrgDao);
-      orgRequest.setOperation(ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue());
-      tellToAnother(orgRequest);
+      updateDataToEs(actorMessage, updateOrgDao);
+
+      sender().tell(response, self());
+
       targetObject =
           TelemetryUtil.generateTargetObject(
               (String) dbOrgDetails.get(JsonKey.ID), JsonKey.ORGANISATION, JsonKey.UPDATE, null);
@@ -562,8 +553,15 @@ public class OrganisationManagementActor extends BaseActor {
           updateOrgDao, targetObject, correlatedObject, actorMessage.getContext());
     } catch (ProjectCommonException e) {
       sender().tell(e, self());
-      return;
     }
+  }
+
+  private void updateDataToEs(Request actorMessage, Map<String, Object> updateOrgDao) {
+    esService.update(
+        EsType.organisation.getTypeName(),
+        (String) updateOrgDao.get(JsonKey.ID),
+        updateOrgDao,
+        actorMessage.getRequestContext());
   }
 
   /** Provides the details of the Organisation */

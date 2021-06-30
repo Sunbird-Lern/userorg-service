@@ -87,7 +87,6 @@ public class UserUpdateActor extends UserBaseActor {
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
       populateUserTypeAndSubType(userMap);
       populateLocationCodesFromProfileLocation(userMap);
@@ -98,6 +97,7 @@ public class UserUpdateActor extends UserBaseActor {
     validateAndGetLocationCodes(actorMessage);
     validateUserTypeAndSubType(
         actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
     } else {
@@ -139,8 +139,7 @@ public class UserUpdateActor extends UserBaseActor {
       requestMap.put(JsonKey.USER_SUB_TYPE, null);
     }
 
-    Map<String, Boolean> userBooleanMap =
-        updatedUserFlagsMap(userMap, userDbRecord, actorMessage.getRequestContext());
+    Map<String, Boolean> userBooleanMap = updatedUserFlagsMap(userDbRecord);
     int userFlagValue = userFlagsToNum(userBooleanMap);
     requestMap.put(JsonKey.FLAGS_VALUE, userFlagValue);
     boolean resetPasswordLink = false;
@@ -219,7 +218,7 @@ public class UserUpdateActor extends UserBaseActor {
               actorMessage.getRequestContext());
     } else {
       logger.info(
-          actorMessage.getRequestContext(), "UserManagementActor:updateUser: User update failure");
+          actorMessage.getRequestContext(), "UserUpdateActor:updateUser: User update failure");
     }
     if (null != resp) {
       response.put(
@@ -370,18 +369,17 @@ public class UserUpdateActor extends UserBaseActor {
               context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
-            location -> {
-              externalIds.forEach(
-                  externalIdMap -> {
-                    if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
-                        || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
-                      if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
-                        externalIdMap.put(JsonKey.ID, location.getId());
-                        externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, location.getId());
+            location ->
+                externalIds.forEach(
+                    externalIdMap -> {
+                      if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
+                          || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
+                        if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
+                          externalIdMap.put(JsonKey.ID, location.getId());
+                          externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, location.getId());
+                        }
                       }
-                    }
-                  });
-            });
+                    }));
       }
     }
   }
@@ -448,22 +446,14 @@ public class UserUpdateActor extends UserBaseActor {
   }
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
-    logger.info(
-        "UserManagementActor:throwParamMatchException:".concat(recoveryType + "")
-            + "should not same as primary ".concat(type + ""));
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,
         MessageFormat.format(
             ResponseCode.recoveryParamsMatchException.getErrorMessage(), recoveryType, type));
   }
 
-  private Map<String, Boolean> updatedUserFlagsMap(
-      Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
+  private Map<String, Boolean> updatedUserFlagsMap(Map<String, Object> userDbRecord) {
     Map<String, Boolean> userBooleanMap = new HashMap<>();
-
-    // for existing users, it won't contain state-validation
-    // adding in release-2.4.0
-    // userDbRecord- record from es.
     if (!userDbRecord.containsKey(JsonKey.STATE_VALIDATED)) {
       setStateValidation(userDbRecord, userBooleanMap);
     } else {
@@ -517,8 +507,7 @@ public class UserUpdateActor extends UserBaseActor {
   }
 
   private void updateUserOrganisations(Request actorMessage) {
-    logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor: updateUserOrganisation called");
+    logger.info(actorMessage.getRequestContext(), "UserUpdateActor: updateUserOrganisation called");
     List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
       orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
@@ -543,7 +532,7 @@ public class UserUpdateActor extends UserBaseActor {
       removeOrganisations(userOrgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
       logger.info(
           actorMessage.getRequestContext(),
-          "UserManagementActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
+          "UserUpdateActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
     }
   }
 
@@ -639,8 +628,7 @@ public class UserUpdateActor extends UserBaseActor {
     userRequest.setRequestContext(context);
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
-    logger.info(
-        context, "UserManagementActor:saveUserDetailsToEs: Trigger sync of user details to ES");
+    logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     tellToAnother(userRequest);
   }
 }
