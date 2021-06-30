@@ -321,10 +321,11 @@ public class OrgManagementActorTest {
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+
     Promise<Boolean> promise2 = Futures.promise();
     promise2.success(true);
     when(esService.update(
-            Mockito.any(),
+            Mockito.anyString(),
             Mockito.anyString(),
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))

@@ -369,18 +369,17 @@ public class UserUpdateActor extends UserBaseActor {
               context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
-            location -> {
-              externalIds.forEach(
-                  externalIdMap -> {
-                    if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
-                        || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
-                      if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
-                        externalIdMap.put(JsonKey.ID, location.getId());
-                        externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, location.getId());
+            location ->
+                externalIds.forEach(
+                    externalIdMap -> {
+                      if (externalIdMap.containsValue(JsonKey.DECLARED_STATE)
+                          || externalIdMap.containsValue(JsonKey.DECLARED_DISTRICT)) {
+                        if (location.getCode().equals(externalIdMap.get(JsonKey.ID))) {
+                          externalIdMap.put(JsonKey.ID, location.getId());
+                          externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, location.getId());
+                        }
                       }
-                    }
-                  });
-            });
+                    }));
       }
     }
   }

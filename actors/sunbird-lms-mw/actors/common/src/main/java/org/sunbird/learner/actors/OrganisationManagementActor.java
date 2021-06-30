@@ -557,18 +557,11 @@ public class OrganisationManagementActor extends BaseActor {
   }
 
   private void updateDataToEs(Request actorMessage, Map<String, Object> updateOrgDao) {
-    Future<Boolean> responseF =
-        esService.update(
-            EsType.organisation.getTypeName(),
-            (String) updateOrgDao.get(JsonKey.ID),
-            updateOrgDao,
-            actorMessage.getRequestContext());
-    boolean esResponse = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
-    if (!esResponse) {
-      logger.info(
-          actorMessage.getRequestContext(),
-          "unable to save the data to ES with identifier " + updateOrgDao.get(JsonKey.ID));
-    }
+    esService.update(
+        EsType.organisation.getTypeName(),
+        (String) updateOrgDao.get(JsonKey.ID),
+        updateOrgDao,
+        actorMessage.getRequestContext());
   }
 
   /** Provides the details of the Organisation */
