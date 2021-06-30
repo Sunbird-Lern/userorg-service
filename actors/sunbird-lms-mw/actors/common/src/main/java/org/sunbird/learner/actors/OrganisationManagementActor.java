@@ -564,10 +564,10 @@ public class OrganisationManagementActor extends BaseActor {
             updateOrgDao,
             actorMessage.getRequestContext());
     boolean esResponse = (boolean) ElasticSearchHelper.getResponseFromFuture(responseF);
-    if (esResponse) {
+    if (!esResponse) {
       logger.info(
           actorMessage.getRequestContext(),
-          "unable to save the data inside ES with identifier " + updateOrgDao.get(JsonKey.ID));
+          "unable to save the data to ES with identifier " + updateOrgDao.get(JsonKey.ID));
     }
   }
 
