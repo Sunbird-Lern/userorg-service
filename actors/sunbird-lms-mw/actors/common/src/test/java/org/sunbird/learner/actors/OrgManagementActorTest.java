@@ -335,11 +335,8 @@ public class OrgManagementActorTest {
     req.put(JsonKey.HASHTAGID, "orgId");
     Request reqst = getRequest(req, ActorOperations.UPDATE_ORG.getValue());
     reqst.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    subject.tell(reqst, probe.getRef());
-    probe.expectMsgClass(duration("100 second"), NullPointerException.class);
+    boolean result = testScenario(reqst, null);
+    assertTrue(result);
   }
 
   @Test
