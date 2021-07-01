@@ -297,13 +297,23 @@ public class UserRoleActorTest {
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
     orgMap.put(JsonKey.ROLE, "anyRole1");
-    orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"ORGANISATION_ID\"}]");
+    orgMap.put(
+        JsonKey.SCOPE,
+        "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
     list.add(orgMap);
     orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
     orgMap.put(JsonKey.ROLE, "anyRole2");
     orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"ORGANISATION_ID\"}]");
+    list.add(orgMap);
+    orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.USER_ID, "USER_ID");
+    orgMap.put(JsonKey.ROLE, "anyRole3");
+    orgMap.put(
+        JsonKey.SCOPE,
+        "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
     list.add(orgMap);
     response.put(JsonKey.RESPONSE, list);
     return response;
@@ -351,6 +361,12 @@ public class UserRoleActorTest {
 
       roleMap = new HashMap<>();
       roleMap.put(JsonKey.ROLE, "anyRole2");
+      roleMap.put(JsonKey.OPERATION, JsonKey.REMOVE);
+      roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+
+      roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "anyRole3");
       roleMap.put(JsonKey.OPERATION, JsonKey.REMOVE);
       roleMap.put(JsonKey.SCOPE, scopeList);
       rolesList.add(roleMap);
