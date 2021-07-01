@@ -209,8 +209,7 @@ public class UserRoleServiceImpl implements UserRoleService {
               dbScope = convertScopeStrToList(scopeStr);
             }
             if (JsonKey.ADD.equals(operation)) {
-              dbScope.forEach(
-                  db -> scope.removeIf(sc -> sc.get(JsonKey.SCOPE).equals(db.get(JsonKey.SCOPE))));
+              dbScope.forEach(db -> scope.removeIf(sc -> sc.equals(db)));
               dbScope.addAll(scope);
             } else if (JsonKey.REMOVE.equals(operation)) {
               dbScope.removeAll(scope);
