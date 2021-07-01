@@ -312,7 +312,7 @@ public class OrgManagementActorTest {
   }
 
   @Test
-  public void testUpdateOrgSuccess() {
+  public void testUpdateOrg() {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordsByProperty(true));
@@ -321,6 +321,15 @@ public class OrgManagementActorTest {
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+
+    Promise<Boolean> promise2 = Futures.promise();
+    promise2.success(true);
+    when(esService.update(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(promise2.future());
     when(Util.updateChannel(Mockito.anyMap(), Mockito.any())).thenReturn(true);
     Map<String, Object> req = getRequestDataForOrgUpdate();
     req.put(JsonKey.HASHTAGID, "orgId");

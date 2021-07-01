@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
+import org.sunbird.common.models.util.ActorOperations;
 import org.sunbird.common.models.util.EntryExitLogEvent;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
@@ -62,6 +63,9 @@ public class PrintEntryExitLog {
   public static void printExitLogOnSuccessResponse(
       org.sunbird.common.request.Request request, Response response) {
     try {
+      if (ActorOperations.HEALTH_CHECK.getValue().equalsIgnoreCase(request.getOperation())) {
+        return;
+      }
       EntryExitLogEvent exitLogEvent = getLogEvent(request, "EXIT");
       String url = (String) request.getContext().get(JsonKey.URL);
       List<Map<String, Object>> params = new ArrayList<>();

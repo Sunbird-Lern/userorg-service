@@ -2,7 +2,6 @@ package org.sunbird.user.actors;
 
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.kafka.client.KafkaClient;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
@@ -73,8 +71,6 @@ public class ManagedUserActor extends UserBaseActor {
    * @param actorMessage
    */
   private void createManagedUser(Request actorMessage) {
-    logger.info(
-        actorMessage.getRequestContext(), "UserManagementActor:createManagedUser method called.");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     if (actorMessage
@@ -125,10 +121,10 @@ public class ManagedUserActor extends UserBaseActor {
     UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
-    String channel = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-    String rootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
-    userMap.put(JsonKey.CHANNEL, channel);
+    userMap.put(
+        JsonKey.ROOT_ORG_ID, DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID));
+    userMap.put(
+        JsonKey.CHANNEL, DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_CHANNEL));
     Map<String, Object> managedByInfo =
         UserUtil.validateManagedByUser(managedBy, actorMessage.getRequestContext());
     convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
@@ -156,17 +152,10 @@ public class ManagedUserActor extends UserBaseActor {
     } else {
       logger.info(
           actorMessage.getRequestContext(),
-          "UserManagementActor:processUserRequest: User creation failure");
+          "ManagedUserActor:processUserRequestV4: User creation failure");
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
-      try {
-        ObjectMapper mapper = new ObjectMapper();
-        String event = mapper.writeValueAsString(esResponse);
-        // user_events
-        KafkaClient.send(event, ProjectUtil.getConfigValue("sunbird_user_create_sync_topic"));
-      } catch (Exception ex) {
-        logger.error("Exception occurred while writing event to kafka", ex);
-      }
+      writeDataToKafka(esResponse);
       sender().tell(response, self());
     } else {
       Future<Response> future =
@@ -249,7 +238,7 @@ public class ManagedUserActor extends UserBaseActor {
       responseMap.put(JsonKey.CONTENT, activeUserList);
       responseMap.put(JsonKey.COUNT, activeUserList.size());
     } else {
-      responseMap.put(JsonKey.CONTENT, new ArrayList<Map<String, Object>>());
+      responseMap.put(JsonKey.CONTENT, new ArrayList<>());
       responseMap.put(JsonKey.COUNT, 0);
     }
     Response response = new Response();
