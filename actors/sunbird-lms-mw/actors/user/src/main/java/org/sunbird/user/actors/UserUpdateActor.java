@@ -163,6 +163,7 @@ public class UserUpdateActor extends UserBaseActor {
     }
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
+      List<Map<String, Object>> orgList = new ArrayList();
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
         OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
         Map<String, Object> filters = new HashMap<>();
@@ -199,15 +200,20 @@ public class UserUpdateActor extends UserBaseActor {
         } else {
           Map<String, Object> org =
               (Map<String, Object>) mapper.convertValue(organisations.get(0), Map.class);
-          List<Map<String, Object>> orgList = new ArrayList();
+
           if (MapUtils.isNotEmpty(org)) {
             orgList.add(org);
           }
           actorMessage.getRequest().put(JsonKey.ORGANISATIONS, orgList);
-          actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, userDbRecord.get(JsonKey.ROOT_ORG_ID));
-          updateUserOrganisations(actorMessage);
         }
       }
+      // SB-25162 - call only if profile location is passed with or without school OR if
+      // organisationlist is not empty
+      if (CollectionUtils.isNotEmpty(orgList) || userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+        actorMessage.getRequest().put(JsonKey.ROOT_ORG_ID, userDbRecord.get(JsonKey.ROOT_ORG_ID));
+        updateUserOrganisations(actorMessage);
+      }
+
       Map<String, Object> userRequest = new HashMap<>(userMap);
       userRequest.put(JsonKey.OPERATION_TYPE, JsonKey.UPDATE);
       userRequest.put(JsonKey.CALLER_ID, callerId);
@@ -509,32 +515,30 @@ public class UserUpdateActor extends UserBaseActor {
 
   private void updateUserOrganisations(Request actorMessage) {
     logger.info(actorMessage.getRequestContext(), "UserUpdateActor: updateUserOrganisation called");
+    String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
+    String rootOrgId = (String) actorMessage.getRequest().remove(JsonKey.ROOT_ORG_ID);
+    List<Map<String, Object>> userOrgListDb =
+        UserUtil.getUserOrgDetails(false, userId, actorMessage.getRequestContext());
+    Map<String, Object> userOrgDbMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(userOrgListDb)) {
+      userOrgListDb.forEach(
+          userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
+    }
     List<Map<String, Object>> orgList = null;
     if (null != actorMessage.getRequest().get(JsonKey.ORGANISATIONS)) {
       orgList = (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ORGANISATIONS);
     }
     if (CollectionUtils.isNotEmpty(orgList)) {
-      String userId = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
-      String rootOrgId = (String) actorMessage.getRequest().remove(JsonKey.ROOT_ORG_ID);
-      List<Map<String, Object>> userOrgListDb =
-          UserUtil.getUserOrgDetails(false, userId, actorMessage.getRequestContext());
-      Map<String, Object> userOrgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(userOrgListDb)) {
-        userOrgListDb.forEach(
-            userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
-      }
-
       for (Map<String, Object> org : orgList) {
         createOrUpdateOrganisations(org, userOrgDbMap, actorMessage);
         updateUserSelfDeclaredData(actorMessage, org, userId);
       }
-
-      String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-      removeOrganisations(userOrgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
-      logger.info(
-          actorMessage.getRequestContext(),
-          "UserUpdateActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
     }
+    String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
+    removeOrganisations(userOrgDbMap, rootOrgId, requestedBy, actorMessage.getRequestContext());
+    logger.info(
+        actorMessage.getRequestContext(),
+        "UserUpdateActor:updateUserOrganisations : " + "updateUserOrganisation Completed");
   }
 
   private void createOrUpdateOrganisations(
