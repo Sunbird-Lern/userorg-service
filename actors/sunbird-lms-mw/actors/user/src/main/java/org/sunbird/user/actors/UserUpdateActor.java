@@ -195,7 +195,8 @@ public class UserUpdateActor extends UserBaseActor {
         if (organisations.size() == 0 || organisations.size() > 1) {
           logger.info(
               actorMessage.getRequestContext(),
-              "Got empty search result by orgExternalId and orgLocationId : " + filters);
+              "Got empty or more than one search result by orgExternalId and orgLocationId : "
+                  + filters);
         } else {
           Map<String, Object> org =
               (Map<String, Object>) mapper.convertValue(organisations.get(0), Map.class);
@@ -400,6 +401,8 @@ public class UserUpdateActor extends UserBaseActor {
     userMap.remove(JsonKey.LOGIN_ID);
     userMap.remove(JsonKey.ROLES);
     userMap.remove(JsonKey.CHANNEL);
+    userMap.remove(JsonKey.MASKED_PHONE);
+    userMap.remove(JsonKey.MASKED_EMAIL);
   }
 
   private void validateRecoveryEmailPhone(

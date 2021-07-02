@@ -919,6 +919,34 @@ public class UserRequestValidatorTest {
     }
   }
 
+  @Test
+  public void testCheckEmptyPhone() {
+    Request request = new Request();
+    Map<String, Object> requestObj = request.getRequest();
+    requestObj.put(JsonKey.PHONE, "");
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.checkEmptyPhoneAndEmail(request);
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
+    }
+  }
+
+  @Test
+  public void testCheckEmptyEmail() {
+    Request request = new Request();
+    Map<String, Object> requestObj = request.getRequest();
+    requestObj.put(JsonKey.EMAIL, "");
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.checkEmptyPhoneAndEmail(request);
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
+    }
+  }
+
   private List createUpdateUserDeclarationRequests() {
     Map<String, Object> declarationMap = new HashMap<>();
     declarationMap.put(JsonKey.ORG_ID, "1234");
