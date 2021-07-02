@@ -401,6 +401,8 @@ public class UserUpdateActor extends UserBaseActor {
     userMap.remove(JsonKey.LOGIN_ID);
     userMap.remove(JsonKey.ROLES);
     userMap.remove(JsonKey.CHANNEL);
+    userMap.remove(JsonKey.MASKED_PHONE);
+    userMap.remove(JsonKey.MASKED_EMAIL);
   }
 
   private void validateRecoveryEmailPhone(
