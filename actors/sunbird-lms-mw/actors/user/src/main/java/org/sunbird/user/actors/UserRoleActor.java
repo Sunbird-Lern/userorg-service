@@ -2,12 +2,10 @@ package org.sunbird.user.actors;
 
 import java.util.*;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
@@ -36,7 +34,7 @@ public class UserRoleActor extends UserBaseActor {
         break;
 
       case "assignRolesV2":
-        assignRolesV2(request);
+        assignRoles(request);
         break;
 
       default:
@@ -55,66 +53,33 @@ public class UserRoleActor extends UserBaseActor {
 
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
-    Response response = new Response();
+    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+    List<Map<String, Object>> userRolesList = new ArrayList<>();
+
     Map<String, Object> requestMap = actorMessage.getRequest();
     requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
-    requestMap.put(JsonKey.ROLE_OPERATION, "assignRole");
-    List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
-    RoleService.validateRoles(roles);
 
-    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-    List<Map<String, Object>> userRolesList =
-        userRoleService.updateUserRole(requestMap, actorMessage.getRequestContext());
-    if (!userRolesList.isEmpty()) {
-      response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    }
-    sender().tell(response, self());
-    if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      syncUserRoles(
-          JsonKey.USER,
-          (String) requestMap.get(JsonKey.USER_ID),
-          userRolesList,
-          actorMessage.getRequestContext());
+    if (actorMessage.getOperation().equals(ActorOperations.ASSIGN_ROLES.getValue())) {
+      requestMap.put(JsonKey.ROLE_OPERATION, "assignRole");
+      List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
+      RoleService.validateRoles(roles);
+      userRolesList = userRoleService.updateUserRole(requestMap, actorMessage.getRequestContext());
     } else {
-      logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
-      throw new ProjectCommonException(
-          ResponseCode.roleSaveError.getErrorCode(),
-          ResponseCode.roleSaveError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      List<Map<String, Object>> roleList =
+          (List<Map<String, Object>>) requestMap.get(JsonKey.ROLES);
+      RoleService.validateRolesV2(roleList);
+      userRolesList =
+          userRoleService.updateUserRoleV2(requestMap, actorMessage.getRequestContext());
     }
-    generateTelemetryEvent(
-        requestMap,
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+
+    sender().tell(response, self());
+    syncUserRoles(
+        JsonKey.USER,
         (String) requestMap.get(JsonKey.USER_ID),
-        "userLevel",
-        actorMessage.getContext());
-  }
-
-  private void assignRolesV2(Request actorMessage) {
-    Response response = new Response();
-    Map<String, Object> requestMap = actorMessage.getRequest();
-    requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
-    RoleService.validateRolesV2(requestMap);
-
-    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-    List<Map<String, Object>> userRolesList =
-        userRoleService.updateUserRoleV2(requestMap, actorMessage.getRequestContext());
-    if (!userRolesList.isEmpty()) {
-      response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    }
-    sender().tell(response, self());
-    if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
-      syncUserRoles(
-          JsonKey.USER,
-          (String) requestMap.get(JsonKey.USER_ID),
-          userRolesList,
-          actorMessage.getRequestContext());
-    } else {
-      logger.info(actorMessage.getRequestContext(), "UserRoleActor: No ES call to save user roles");
-      throw new ProjectCommonException(
-          ResponseCode.roleSaveError.getErrorCode(),
-          ResponseCode.roleSaveError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
+        userRolesList,
+        actorMessage.getRequestContext());
     generateTelemetryEvent(
         requestMap,
         (String) requestMap.get(JsonKey.USER_ID),
