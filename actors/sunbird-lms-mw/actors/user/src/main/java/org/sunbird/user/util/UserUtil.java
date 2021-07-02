@@ -584,7 +584,7 @@ public class UserUtil {
 
   @SuppressWarnings("unchecked")
   public static List<Map<String, Object>> getUserOrgDetails(
-      boolean isdeleted, String userId, RequestContext context) {
+      boolean isDeleted, String userId, RequestContext context) {
     List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
@@ -601,7 +601,7 @@ public class UserUtil {
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
-        if (!isdeleted) {
+        if (!isDeleted) {
           responseList
               .stream()
               .forEach(

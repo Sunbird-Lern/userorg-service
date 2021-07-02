@@ -194,7 +194,8 @@ public class UserUpdateActor extends UserBaseActor {
         if (organisations.size() == 0 || organisations.size() > 1) {
           logger.info(
               actorMessage.getRequestContext(),
-              "Got empty search result by orgExternalId and orgLocationId : " + filters);
+              "Got empty or more than one search result by orgExternalId and orgLocationId : "
+                  + filters);
         } else {
           Map<String, Object> org =
               (Map<String, Object>) mapper.convertValue(organisations.get(0), Map.class);

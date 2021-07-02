@@ -280,8 +280,8 @@ public abstract class UserBaseActor extends BaseActor {
   }
 
   protected void populateLocationCodesFromProfileLocation(Map<String, Object> userMap) {
-    userMap.remove(JsonKey.LOCATION_CODES);
     if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+      userMap.remove(JsonKey.LOCATION_CODES);
       List<Map<String, String>> profLocList =
           (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
       List<String> locationCodes = null;
