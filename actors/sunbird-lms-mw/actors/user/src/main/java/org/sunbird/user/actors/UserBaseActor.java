@@ -241,7 +241,7 @@ public abstract class UserBaseActor extends BaseActor {
               getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), locations, context);
     }
 
-    if (((List) locationCodes).get(0) instanceof List) {
+    if (((List) locationCodes).get(0) instanceof Map) {
       locationList = createLocationLists((List<Map<String, String>>) locationCodes);
     }
     return locationList;
@@ -269,7 +269,9 @@ public abstract class UserBaseActor extends BaseActor {
   }
 
   protected boolean isValidLocationType(String type, List<String> typeList) {
-    if (null != type && !typeList.contains(type.toLowerCase())) {
+    if (null != type
+        && CollectionUtils.isNotEmpty(typeList)
+        && !typeList.contains(type.toLowerCase())) {
       throw new ProjectCommonException(
           ResponseCode.invalidValue.getErrorCode(),
           ProjectUtil.formatMessage(

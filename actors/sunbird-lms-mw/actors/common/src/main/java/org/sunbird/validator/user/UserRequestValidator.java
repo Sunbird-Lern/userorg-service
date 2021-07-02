@@ -270,6 +270,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     if (userRequest.getRequest().containsKey(JsonKey.MANAGED_BY)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.managedByNotAllowed);
     }
+    checkEmptyPhoneAndEmail(userRequest);
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
@@ -284,6 +285,23 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateExtIdTypeAndProvider(userRequest);
     validateFrameworkDetails(userRequest);
     validateRecoveryEmailOrPhone(userRequest);
+  }
+
+  public void checkEmptyPhoneAndEmail(Request userRequest) {
+    String phone = (String) userRequest.getRequest().get(JsonKey.PHONE);
+    String email = (String) userRequest.getRequest().get(JsonKey.EMAIL);
+    if (null != phone && phone.equalsIgnoreCase("")) {
+      throwInvalidParamValue(phone, "");
+    }
+    if (null != email && email.equalsIgnoreCase("")) {
+      throwInvalidParamValue(phone, "");
+    }
+  }
+
+  private static void throwInvalidParamValue(String param, String value) {
+    ProjectCommonException.throwClientErrorException(
+        ResponseCode.invalidParameterValue,
+        MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), value, param));
   }
 
   private void validateUserOrgField(Request userRequest) {
