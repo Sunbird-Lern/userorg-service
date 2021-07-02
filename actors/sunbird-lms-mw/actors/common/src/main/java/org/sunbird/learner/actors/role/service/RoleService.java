@@ -75,23 +75,23 @@ public class RoleService {
   public static void validateRoles(List<String> roleList) {
     Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
 
-    if (MapUtils.isNotEmpty(roleMap)) {
-      for (String role : roleList) {
-        if (null == roleMap.get(role.trim())) {
-          throw new ProjectCommonException(
-              ResponseCode.invalidRole.getErrorCode(),
-              ResponseCode.invalidRole.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
-      }
+    if (MapUtils.isNotEmpty(roleMap) && roleList != null) {
+      roleList.forEach(
+          roleObj -> {
+            if (null == roleMap.get(roleObj.trim())) {
+              throw new ProjectCommonException(
+                  ResponseCode.invalidRole.getErrorCode(),
+                  ResponseCode.invalidRole.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
+            }
+          });
     }
   }
 
-  public static void validateRolesV2(Map<String, Object> requestMap) {
+  public static void validateRolesV2(List<Map<String, Object>> roleList) {
     Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
-    List<Map<String, Object>> roleList = (List<Map<String, Object>>) requestMap.get(JsonKey.ROLES);
 
-    if (MapUtils.isNotEmpty(roleMap)) {
+    if (MapUtils.isNotEmpty(roleMap) && roleList != null) {
       roleList.forEach(
           roleObj -> {
             String roleStr = (String) roleObj.get(JsonKey.ROLE);
