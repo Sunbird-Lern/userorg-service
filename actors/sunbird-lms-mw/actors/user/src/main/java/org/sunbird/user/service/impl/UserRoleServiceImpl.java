@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -185,7 +187,9 @@ public class UserRoleServiceImpl implements UserRoleService {
           String roleStr = (String) roleObj.get(JsonKey.ROLE);
           String operation = (String) roleObj.get(JsonKey.OPERATION);
           List<Map<String, Object>> scope = (List<Map<String, Object>>) roleObj.get(JsonKey.SCOPE);
-
+          // removing duplicates in scope from request
+          Set<Map<String, Object>> reqScope = new HashSet<>();
+          scope.removeIf(sc -> !reqScope.add(sc));
           Map userRoleMap = new HashMap();
           userRoleMap.put(JsonKey.ROLE, roleStr);
           userRoleMap.put(JsonKey.USER_ID, userId);
