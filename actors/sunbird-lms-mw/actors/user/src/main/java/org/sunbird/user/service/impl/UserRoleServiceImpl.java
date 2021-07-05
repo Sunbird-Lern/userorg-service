@@ -184,8 +184,11 @@ public class UserRoleServiceImpl implements UserRoleService {
         roleObj -> {
           String roleStr = (String) roleObj.get(JsonKey.ROLE);
           String operation = (String) roleObj.get(JsonKey.OPERATION);
-          List<Map<String, Object>> scope = (List<Map<String, Object>>) roleObj.get(JsonKey.SCOPE);
-
+          List<Map<String, Object>> scope =
+              ((List<Map<String, Object>>) roleObj.get(JsonKey.SCOPE))
+                  .stream()
+                  .distinct()
+                  .collect(Collectors.toList());
           Map userRoleMap = new HashMap();
           userRoleMap.put(JsonKey.ROLE, roleStr);
           userRoleMap.put(JsonKey.USER_ID, userId);
