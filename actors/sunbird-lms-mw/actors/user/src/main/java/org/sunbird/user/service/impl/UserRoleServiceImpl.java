@@ -249,6 +249,14 @@ public class UserRoleServiceImpl implements UserRoleService {
       userRoleDao.assignUserRole(userRoleListToInsert, context);
     }
     // Return updated role list to save to ES
-    return dbUserRoleList;
+    List<Map<String, Object>> roleListResponse = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
+      roleListResponse.addAll(dbUserRoleList);
+      roleListResponse.forEach(
+          map -> {
+            map.put(JsonKey.SCOPE, convertScopeStrToList((String) map.get(JsonKey.SCOPE)));
+          });
+    }
+    return roleListResponse;
   }
 }
