@@ -132,6 +132,8 @@ public class UserProfileReadService {
     }
     if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
       result.put(JsonKey.ROLES, userRolesList);
+    } else {
+      result.remove(JsonKey.ROLES);
     }
     result.put(
         JsonKey.ORGANISATIONS,
@@ -309,6 +311,7 @@ public class UserProfileReadService {
 
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     for (Map<String, Object> userOrg : userOrgList) {
+      userOrg.remove(JsonKey.ROLES);
       String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
       if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
         userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
