@@ -291,10 +291,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     String phone = (String) userRequest.getRequest().get(JsonKey.PHONE);
     String email = (String) userRequest.getRequest().get(JsonKey.EMAIL);
     if (null != phone && phone.equalsIgnoreCase("")) {
-      throwInvalidParamValue(phone, "");
+      throwInvalidParamValue(JsonKey.PHONE, "");
     }
     if (null != email && email.equalsIgnoreCase("")) {
-      throwInvalidParamValue(phone, "");
+      throwInvalidParamValue(JsonKey.EMAIL, "");
     }
   }
 
