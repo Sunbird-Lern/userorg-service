@@ -125,9 +125,6 @@ public class UserRoleActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordByPropertyResponse());
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getCassandraUserRoleResponse());
     when(cassandraOperation.batchInsert(
             Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
         .thenReturn(getSuccessResponse());
@@ -164,6 +161,9 @@ public class UserRoleActorTest {
     when(orgService.getOrgByExternalIdAndProvider(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
     assertTrue(testScenario(true, null, false));
   }
 
