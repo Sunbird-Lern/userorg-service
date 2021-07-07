@@ -254,7 +254,9 @@ public class UserRoleServiceImpl implements UserRoleService {
       roleListResponse.addAll(dbUserRoleList);
       roleListResponse.forEach(
           map -> {
-            map.put(JsonKey.SCOPE, convertScopeStrToList((String) map.get(JsonKey.SCOPE)));
+            if (map.get(JsonKey.SCOPE) instanceof String) {
+              map.put(JsonKey.SCOPE, convertScopeStrToList((String) map.get(JsonKey.SCOPE)));
+            }
           });
     }
     return roleListResponse;
