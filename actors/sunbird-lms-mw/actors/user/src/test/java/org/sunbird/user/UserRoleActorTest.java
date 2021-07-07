@@ -179,6 +179,9 @@ public class UserRoleActorTest {
     when(orgService.getOrgByExternalIdAndProvider(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
     assertTrue(testScenario(true, null, true));
   }
 
@@ -290,7 +293,7 @@ public class UserRoleActorTest {
         .thenReturn(promise.future());
   }
 
-  private static Response getCassandraUserRoleResponse() {
+  private Response getCassandraUserRoleResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
@@ -319,7 +322,7 @@ public class UserRoleActorTest {
     return response;
   }
 
-  private static Response getCassandraResponse() {
+  private Response getCassandraResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
