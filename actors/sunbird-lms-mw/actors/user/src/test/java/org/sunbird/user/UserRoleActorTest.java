@@ -179,6 +179,9 @@ public class UserRoleActorTest {
     when(orgService.getOrgByExternalIdAndProvider(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
     assertTrue(testScenario(true, null, true));
   }
 
