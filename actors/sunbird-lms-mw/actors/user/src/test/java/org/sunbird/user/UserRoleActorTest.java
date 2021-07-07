@@ -76,12 +76,12 @@ import scala.concurrent.duration.Duration;
 public class UserRoleActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
-  private static final Props props = Props.create(UserRoleActor.class);
-  private static final Response response = Mockito.mock(Response.class);
-  private static CassandraOperationImpl cassandraOperation;
-  private static ElasticSearchRestHighImpl esService;
+  private final Props props = Props.create(UserRoleActor.class);
+  private final Response response = Mockito.mock(Response.class);
+  private CassandraOperationImpl cassandraOperation;
+  private ElasticSearchRestHighImpl esService;
 
-  private static Response getRecordByPropertyResponse() {
+  private Response getRecordByPropertyResponse() {
 
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
@@ -179,6 +179,9 @@ public class UserRoleActorTest {
     when(orgService.getOrgByExternalIdAndProvider(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
     assertTrue(testScenario(true, null, true));
   }
 
@@ -290,7 +293,7 @@ public class UserRoleActorTest {
         .thenReturn(promise.future());
   }
 
-  private static Response getCassandraUserRoleResponse() {
+  private Response getCassandraUserRoleResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
@@ -319,7 +322,7 @@ public class UserRoleActorTest {
     return response;
   }
 
-  private static Response getCassandraResponse() {
+  private Response getCassandraResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
