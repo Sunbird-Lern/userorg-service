@@ -293,7 +293,7 @@ public class UserRoleActorTest {
         .thenReturn(promise.future());
   }
 
-  private static Response getCassandraUserRoleResponse() {
+  private Response getCassandraUserRoleResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
@@ -322,7 +322,7 @@ public class UserRoleActorTest {
     return response;
   }
 
-  private static Response getCassandraResponse() {
+  private Response getCassandraResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
