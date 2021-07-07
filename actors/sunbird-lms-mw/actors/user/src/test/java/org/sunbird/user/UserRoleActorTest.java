@@ -76,12 +76,12 @@ import scala.concurrent.duration.Duration;
 public class UserRoleActorTest {
 
   private ActorSystem system = ActorSystem.create("system");
-  private static final Props props = Props.create(UserRoleActor.class);
-  private static final Response response = Mockito.mock(Response.class);
-  private static CassandraOperationImpl cassandraOperation;
-  private static ElasticSearchRestHighImpl esService;
+  private final Props props = Props.create(UserRoleActor.class);
+  private final Response response = Mockito.mock(Response.class);
+  private CassandraOperationImpl cassandraOperation;
+  private ElasticSearchRestHighImpl esService;
 
-  private static Response getRecordByPropertyResponse() {
+  private Response getRecordByPropertyResponse() {
 
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
