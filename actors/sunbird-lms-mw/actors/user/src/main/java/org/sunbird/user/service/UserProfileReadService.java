@@ -138,7 +138,10 @@ public class UserProfileReadService {
     result.put(
         JsonKey.ORGANISATIONS,
         fetchUserOrgList(
-            (String) result.get(JsonKey.ID), userOrgRoles, actorMessage.getRequestContext()));
+            (String) result.get(JsonKey.ID),
+            userOrgRoles,
+            actorMessage.getRequestContext(),
+            readVersion));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -304,14 +307,19 @@ public class UserProfileReadService {
   }
 
   private List<Map<String, Object>> fetchUserOrgList(
-      String userId, Map<String, List<String>> userOrgRoles, RequestContext requestContext) {
+      String userId,
+      Map<String, List<String>> userOrgRoles,
+      RequestContext requestContext,
+      String readVersion) {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
     List<Map<String, Object>> userOrgList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
 
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     for (Map<String, Object> userOrg : userOrgList) {
-      userOrg.remove(JsonKey.ROLES);
+      if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
+        userOrg.remove(JsonKey.ROLES);
+      }
       String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
       if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
         userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
