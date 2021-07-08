@@ -114,7 +114,7 @@ public class ManagedUserActor extends UserBaseActor {
 
   private void processUserRequestV4(
       Map<String, Object> userMap, String managedBy, Request actorMessage) {
-    UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
+    UserUtil.setUserDefaultValue(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
     userMap.put(

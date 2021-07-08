@@ -133,7 +133,7 @@ public class SSOUserCreateActor extends UserBaseActor {
 
   private void processSSOUser(Map<String, Object> userMap, String callerId, Request request) {
     Map<String, Object> requestMap;
-    UserUtil.setUserDefaultValue(userMap, callerId, request.getRequestContext());
+    UserUtil.setUserDefaultValue(userMap, request.getRequestContext());
     // Update external ids provider with OrgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, request.getRequestContext());
     User user = mapper.convertValue(userMap, User.class);
