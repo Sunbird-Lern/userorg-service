@@ -125,7 +125,7 @@ public class SetUserDefaultValueTest {
         .thenReturn(response);
     Map<String, Object> userMap = new HashMap<>();
     userMap.put(JsonKey.FIRST_NAME, "Test User");
-    UserUtil.setUserDefaultValueForV3(userMap, null);
+    UserUtil.setUserDefaultValue(userMap, null);
     assertNotNull(userMap.get(JsonKey.USERNAME));
     assertNotNull(userMap.get(JsonKey.STATUS));
   }

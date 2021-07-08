@@ -144,7 +144,7 @@ public class UserProfileReadActorTest {
     PowerMockito.mockStatic(Util.class);
 
     PowerMockito.mockStatic(UserUtil.class);
-    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());
+    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.any());
 
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.TNC_ACCEPTED_ON, 12345678L);
