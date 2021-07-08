@@ -125,9 +125,6 @@ public class UserRoleActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getRecordByPropertyResponse());
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getCassandraUserRoleResponse());
     when(cassandraOperation.batchInsert(
             Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
         .thenReturn(getSuccessResponse());
@@ -136,6 +133,9 @@ public class UserRoleActorTest {
         .thenReturn(getSuccessResponse());
     cassandraOperation.deleteRecord(
         Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
@@ -152,6 +152,21 @@ public class UserRoleActorTest {
   }
 
   @Test
+  public void testAssignRolesV2SuccessWithValidOrgId() {
+    PowerMockito.mockStatic(OrgServiceImpl.class);
+    OrgService orgService = PowerMockito.mock(OrgService.class);
+    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
+    orgMap.put(JsonKey.HASHTAGID, "1234567890");
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
+    when(orgService.getOrgByExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(orgMap);
+    assertTrue(testScenario(true, null, true));
+  }
+
+  @Test
   public void testAssignRolesSuccessWithValidOrgId() {
     PowerMockito.mockStatic(OrgServiceImpl.class);
     OrgService orgService = PowerMockito.mock(OrgService.class);
@@ -165,24 +180,6 @@ public class UserRoleActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
     assertTrue(testScenario(true, null, false));
-  }
-
-  @Test
-  public void testAssignRolesV2SuccessWithValidOrgId() {
-    PowerMockito.mockStatic(OrgServiceImpl.class);
-    OrgService orgService = PowerMockito.mock(OrgService.class);
-    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
-    Map<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
-    orgMap.put(JsonKey.HASHTAGID, "1234567890");
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
-    when(orgService.getOrgByExternalIdAndProvider(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(orgMap);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getCassandraUserRoleResponse());
-    assertTrue(testScenario(true, null, true));
   }
 
   private boolean testScenario(boolean isOrgIdReq, ResponseCode errorResponse, boolean isV2) {
