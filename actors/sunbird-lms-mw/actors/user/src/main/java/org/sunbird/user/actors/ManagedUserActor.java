@@ -73,11 +73,7 @@ public class ManagedUserActor extends UserBaseActor {
   private void createManagedUser(Request actorMessage) {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
-    if (actorMessage
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.CREATE_MANAGED_USER.getValue())) {
-      populateLocationCodesFromProfileLocation(userMap);
-    }
+    populateLocationCodesFromProfileLocation(userMap);
     validateLocationCodes(actorMessage);
 
     String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
