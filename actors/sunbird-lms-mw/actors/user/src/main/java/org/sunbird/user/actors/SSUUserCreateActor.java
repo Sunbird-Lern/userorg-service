@@ -81,7 +81,7 @@ public class SSUUserCreateActor extends UserBaseActor {
   }
 
   private void processSSUUser(Map<String, Object> userMap, Request actorMessage) {
-    UserUtil.setUserDefaultValueForV3(userMap, actorMessage.getRequestContext());
+    UserUtil.setUserDefaultValue(userMap, actorMessage.getRequestContext());
     removeUnwanted(userMap);
     UserUtil.toLower(userMap);
     // check phone and uniqueness using user look table

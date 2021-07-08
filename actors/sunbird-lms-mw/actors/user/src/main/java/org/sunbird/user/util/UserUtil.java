@@ -332,47 +332,16 @@ public class UserUtil {
     return requestMap;
   }
 
-  public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
-    userMap.put(
-        JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
-    userMap.put(JsonKey.IS_DELETED, false);
-    userMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
-    userMap.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
-
-    if (StringUtils.isBlank((String) userMap.get(JsonKey.USERNAME))) {
-      String firstName = (String) userMap.get(JsonKey.FIRST_NAME);
-      String lastName = (String) userMap.get(JsonKey.LAST_NAME);
-      String name = String.join(" ", firstName, StringUtils.isNotBlank(lastName) ? lastName : "");
-      name = transliterateUserName(name);
-      String userName = getUsername(name, context);
-      if (StringUtils.isNotBlank(userName)) {
-        userMap.put(JsonKey.USERNAME, userName);
-      } else {
-        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
-      }
-    } else {
-      userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
-      if (!userLookupService.checkUsernameUniqueness(
-          (String) userMap.get(JsonKey.USERNAME), false, context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
-      }
-    }
-  }
-
   public static String transliterateUserName(String userName) {
     String translatedUserName = Junidecode.unidecode(userName);
     return translatedUserName;
   }
 
-  public static void setUserDefaultValue(
-      Map<String, Object> userMap, String callerId, RequestContext context) {
+  public static void setUserDefaultValue(Map<String, Object> userMap, RequestContext context) {
     if (!StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
       userMap.put(
           JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
     }
-    // Since global settings are introduced, profile visibility map should be empty during user
-    // creation
-    userMap.put(JsonKey.PROFILE_VISIBILITY, new HashMap<String, String>());
     userMap.put(JsonKey.IS_DELETED, false);
     userMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
     userMap.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
@@ -397,9 +366,6 @@ public class UserUtil {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
       }
     }
-    // create loginId to ensure uniqueness for combination of userName and channel
-    String loginId = Util.getLoginId(userMap);
-    userMap.put(JsonKey.LOGIN_ID, loginId);
   }
 
   private static String getUsername(String name, RequestContext context) {
