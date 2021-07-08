@@ -335,7 +335,6 @@ public class UserUtil {
   public static void setUserDefaultValueForV3(Map<String, Object> userMap, RequestContext context) {
     userMap.put(
         JsonKey.COUNTRY_CODE, propertiesCache.getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE));
-    userMap.put(JsonKey.PROFILE_VISIBILITY, new HashMap<String, String>());
     userMap.put(JsonKey.IS_DELETED, false);
     userMap.put(JsonKey.CREATED_DATE, ProjectUtil.getFormattedDate());
     userMap.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
