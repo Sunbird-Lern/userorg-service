@@ -73,7 +73,7 @@ import scala.concurrent.duration.Duration;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-public class UserRoleActorTest {
+public class UserRoleV2Test {
 
   private ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserRoleActor.class);
@@ -147,15 +147,9 @@ public class UserRoleActorTest {
   }
 
   @Test
-  public void testGetUserRoleSuccess() {
-    assertTrue(testScenario(true, true, null, false));
-  }
-
-  @Test
-  public void testAssignRolesSuccessWithValidOrgId() {
+  public void testAssignRolesV2SuccessWithValidOrgId() {
     PowerMockito.mockStatic(OrgServiceImpl.class);
     OrgService orgService = PowerMockito.mock(OrgService.class);
-
     when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ORGANISATION_ID, "1234567890");
@@ -164,115 +158,10 @@ public class UserRoleActorTest {
     when(orgService.getOrgByExternalIdAndProvider(
             Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(orgMap);
-    assertTrue(testScenario(true, null, false));
-  }
-
-  private boolean testScenario(boolean isOrgIdReq, ResponseCode errorResponse, boolean isV2) {
-    return testScenario(false, isOrgIdReq, errorResponse, isV2);
-  }
-
-  private boolean testScenario(
-      boolean isGetUserRoles, boolean isOrgIdReq, ResponseCode errorResponse, boolean isV2) {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-
-    if (isGetUserRoles) {
-
-      Request reqObj = new Request();
-      reqObj.setOperation(ActorOperations.GET_ROLES.getValue());
-      subject.tell(reqObj, probe.getRef());
-    } else if (isV2) {
-      DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
-      when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
-          .thenReturn(getOrganisationsMap());
-
-      if (errorResponse == null) {
-        when(response.get(Mockito.anyString())).thenReturn(new HashMap<>());
-        mockGetOrgResponse(true);
-      } else {
-        mockGetOrgResponse(false);
-      }
-      subject.tell(createUserRoleRequestV2(true, true, true, true), probe.getRef());
-    } else {
-      DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
-      when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
-          .thenReturn(getOrganisationsMap());
-
-      if (errorResponse == null) {
-        when(response.get(Mockito.anyString())).thenReturn(new HashMap<>());
-        mockGetOrgResponse(true);
-      } else {
-        mockGetOrgResponse(false);
-      }
-      subject.tell(getRequestObj(isOrgIdReq), probe.getRef());
-    }
-    if (errorResponse == null) {
-      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
-      return null != res && res.getResponseCode() == ResponseCode.OK;
-    } else {
-      Response res1 = probe.expectMsgClass(duration("100 second"), Response.class);
-      if (res1.getResult().size() <= 1) {
-        return false;
-      }
-      ProjectCommonException res =
-          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return res.getResponseCode() == errorResponse.getResponseCode();
-    }
-  }
-
-  private Map<String, Object> getOrganisationsMap() {
-
-    Map<String, Object> orgMap = new HashMap<>();
-    List<Map<String, Object>> list = new ArrayList<>();
-    orgMap.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
-    list.add(orgMap);
-    orgMap.put(JsonKey.ORGANISATIONS, list);
-    return orgMap;
-  }
-
-  private Map<String, Object> createResponseGet(boolean isResponseRequired) {
-    HashMap<String, Object> response = new HashMap<>();
-    List<Map<String, Object>> content = new ArrayList<>();
-    HashMap<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.CONTACT_DETAILS, "CONTACT_DETAILS");
-    innerMap.put(JsonKey.ID, "ORGANISATION_ID");
-    innerMap.put(JsonKey.HASHTAGID, "HASHTAGID");
-    HashMap<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
-    List<Map<String, Object>> orgList = new ArrayList<>();
-    orgList.add(orgMap);
-    innerMap.put(JsonKey.ORGANISATIONS, orgList);
-    if (isResponseRequired) {
-      content.add(innerMap);
-    }
-    response.put(JsonKey.CONTENT, content);
-    return response;
-  }
-
-  private Object getRequestObj(boolean isOrgIdReq) {
-    Request reqObj = new Request();
-    List roleLst = new ArrayList();
-    roleLst.add("anyRole");
-    roleLst.add("anyRole1");
-    reqObj.put(JsonKey.ROLES, roleLst);
-    reqObj.put(JsonKey.EXTERNAL_ID, "EXTERNAL_ID");
-    reqObj.put(JsonKey.USER_ID, "USER_ID");
-    reqObj.put(JsonKey.HASHTAGID, "HASHTAGID");
-    reqObj.put(JsonKey.PROVIDER, "PROVIDER");
-    reqObj.put(JsonKey.ROLE_OPERATION, "assignRole");
-    if (isOrgIdReq) {
-      reqObj.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
-    }
-    reqObj.setOperation(ActorOperations.ASSIGN_ROLES.getValue());
-    return reqObj;
-  }
-
-  private void mockGetOrgResponse(boolean isResponseRequired) {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(createResponseGet(isResponseRequired));
-    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any()))
-        .thenReturn(promise.future());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getCassandraUserRoleResponse());
+    assertTrue(testScenario(true, null, true));
   }
 
   private Response getCassandraUserRoleResponse() {
@@ -360,5 +249,113 @@ public class UserRoleActorTest {
     reqObj.setOperation(ActorOperations.ASSIGN_ROLES_V2.getValue());
 
     return reqObj;
+  }
+
+  private boolean testScenario(boolean isOrgIdReq, ResponseCode errorResponse, boolean isV2) {
+    return testScenario(false, isOrgIdReq, errorResponse, isV2);
+  }
+
+  private boolean testScenario(
+      boolean isGetUserRoles, boolean isOrgIdReq, ResponseCode errorResponse, boolean isV2) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    if (isGetUserRoles) {
+
+      Request reqObj = new Request();
+      reqObj.setOperation(ActorOperations.GET_ROLES.getValue());
+      subject.tell(reqObj, probe.getRef());
+    } else if (isV2) {
+      DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
+      when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
+          .thenReturn(getOrganisationsMap());
+
+      if (errorResponse == null) {
+        when(response.get(Mockito.anyString())).thenReturn(new HashMap<>());
+        mockGetOrgResponse(true);
+      } else {
+        mockGetOrgResponse(false);
+      }
+      subject.tell(createUserRoleRequestV2(true, true, true, true), probe.getRef());
+    } else {
+      DecryptionService decryptionService = Mockito.mock(DecryptionService.class);
+      when(decryptionService.decryptData(Mockito.anyMap(), Mockito.any()))
+          .thenReturn(getOrganisationsMap());
+
+      if (errorResponse == null) {
+        when(response.get(Mockito.anyString())).thenReturn(new HashMap<>());
+        mockGetOrgResponse(true);
+      } else {
+        mockGetOrgResponse(false);
+      }
+      subject.tell(getRequestObj(isOrgIdReq), probe.getRef());
+    }
+    if (errorResponse == null) {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      Response res1 = probe.expectMsgClass(duration("100 second"), Response.class);
+      if (res1.getResult().size() <= 1) {
+        return false;
+      }
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+      return res.getResponseCode() == errorResponse.getResponseCode();
+    }
+  }
+
+  private void mockGetOrgResponse(boolean isResponseRequired) {
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(createResponseGet(isResponseRequired));
+    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyVararg(), Mockito.any()))
+        .thenReturn(promise.future());
+  }
+
+  private Object getRequestObj(boolean isOrgIdReq) {
+    Request reqObj = new Request();
+    List roleLst = new ArrayList();
+    roleLst.add("anyRole");
+    roleLst.add("anyRole1");
+    reqObj.put(JsonKey.ROLES, roleLst);
+    reqObj.put(JsonKey.EXTERNAL_ID, "EXTERNAL_ID");
+    reqObj.put(JsonKey.USER_ID, "USER_ID");
+    reqObj.put(JsonKey.HASHTAGID, "HASHTAGID");
+    reqObj.put(JsonKey.PROVIDER, "PROVIDER");
+    reqObj.put(JsonKey.ROLE_OPERATION, "assignRole");
+    if (isOrgIdReq) {
+      reqObj.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
+    }
+    reqObj.setOperation(ActorOperations.ASSIGN_ROLES.getValue());
+    return reqObj;
+  }
+
+  private Map<String, Object> createResponseGet(boolean isResponseRequired) {
+    HashMap<String, Object> response = new HashMap<>();
+    List<Map<String, Object>> content = new ArrayList<>();
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.CONTACT_DETAILS, "CONTACT_DETAILS");
+    innerMap.put(JsonKey.ID, "ORGANISATION_ID");
+    innerMap.put(JsonKey.HASHTAGID, "HASHTAGID");
+    HashMap<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
+    List<Map<String, Object>> orgList = new ArrayList<>();
+    orgList.add(orgMap);
+    innerMap.put(JsonKey.ORGANISATIONS, orgList);
+    if (isResponseRequired) {
+      content.add(innerMap);
+    }
+    response.put(JsonKey.CONTENT, content);
+    return response;
+  }
+
+  private Map<String, Object> getOrganisationsMap() {
+
+    Map<String, Object> orgMap = new HashMap<>();
+    List<Map<String, Object>> list = new ArrayList<>();
+    orgMap.put(JsonKey.ORGANISATION_ID, "ORGANISATION_ID");
+    list.add(orgMap);
+    orgMap.put(JsonKey.ORGANISATIONS, list);
+    return orgMap;
   }
 }
