@@ -209,10 +209,8 @@ public class DataCacheHandler implements Runnable {
     if (StringUtils.isNotBlank(userProfileConfig)) {
       try {
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, List<String>> valueMap =
-            objectMapper.readValue(
-                userProfileConfig, new HashMap<String, List<String>>().getClass());
-        setFrameworkFieldsConfig(valueMap);
+        Map<String, Object> valueMap = objectMapper.readValue(userProfileConfig, Map.class);
+        setFrameworkFieldsConfig((Map<String, List<String>>) valueMap.get(JsonKey.FRAMEWORK));
       } catch (Exception ex) {
         logger.error("Exception occurred while parsing framework details.", ex);
       }
