@@ -39,26 +39,24 @@ public class UserOrgManagementActor extends BaseActor {
 
   private void insertUserOrgDetails(Request request) {
     Map<String, Object> requestMap = request.getRequest();
+    String callerId = (String) requestMap.remove(JsonKey.CALLER_ID);
     // Register user to given orgId(not root orgId)
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
+    if (StringUtils.isNotBlank(callerId)) {
+      requestMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
+    }
     if (StringUtils.isNotBlank(organisationId)) {
-      String callerId = (String) requestMap.remove(JsonKey.CALLER_ID);
-      if (StringUtils.isNotBlank(callerId)) {
-        requestMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SYSTEM_UPLOAD);
-      }
-
       requestMap.put(JsonKey.HASHTAGID, organisationId);
       Util.registerUserToOrg(requestMap, request.getRequestContext());
-
-      if ((StringUtils.isNotBlank(organisationId)
-              && StringUtils.isNotBlank((String) requestMap.get(JsonKey.ROOT_ORG_ID))
-              && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
-          || StringUtils.isBlank(organisationId)) {
-        // Add user to root org
-        requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
-        requestMap.put(JsonKey.HASHTAGID, requestMap.get(JsonKey.ORGANISATION_ID));
-        Util.registerUserToOrg(requestMap, request.getRequestContext());
-      }
+    }
+    if ((StringUtils.isNotBlank(organisationId)
+            && StringUtils.isNotBlank((String) requestMap.get(JsonKey.ROOT_ORG_ID))
+            && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
+        || StringUtils.isBlank(organisationId)) {
+      // Add user to root org
+      requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
+      requestMap.put(JsonKey.HASHTAGID, requestMap.get(JsonKey.ORGANISATION_ID));
+      Util.registerUserToOrg(requestMap, request.getRequestContext());
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -67,31 +65,28 @@ public class UserOrgManagementActor extends BaseActor {
 
   private void updateUserOrgDetails(Request request) {
     Map<String, Object> requestMap = request.getRequest();
+    String callerId = (String) requestMap.remove(JsonKey.CALLER_ID);
     String organisationId = (String) requestMap.get(JsonKey.ORGANISATION_ID);
+    List<Map<String, Object>> userOrgListDb =
+        UserUtil.getUserOrgDetails(
+            false, (String) requestMap.get(JsonKey.ID), request.getRequestContext());
+    Map<String, Object> userOrgDbMap = new HashMap<>();
+    if (CollectionUtils.isNotEmpty(userOrgListDb)) {
+      userOrgListDb.forEach(
+          userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
+    }
     if (StringUtils.isNotBlank(organisationId)) {
-      String callerId = (String) requestMap.remove(JsonKey.CALLER_ID);
-      List<Map<String, Object>> userOrgListDb =
-          UserUtil.getUserOrgDetails(
-              false, (String) requestMap.get(JsonKey.ID), request.getRequestContext());
-      Map<String, Object> userOrgDbMap = new HashMap<>();
-      if (CollectionUtils.isNotEmpty(userOrgListDb)) {
-        userOrgListDb.forEach(
-            userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
-      }
-
       Map<String, Object> userOrg = (Map<String, Object>) userOrgDbMap.get(organisationId);
       requestMap.put(JsonKey.ASSOCIATION_TYPE, getAssociationType(userOrg, callerId, requestMap));
       Util.upsertUserOrgData(requestMap, request.getRequestContext());
-
-      if ((StringUtils.isNotBlank(organisationId)
-              && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
-          || StringUtils.isBlank(organisationId)) {
-        Map<String, Object> rootUserOrg =
-            (Map<String, Object>) userOrgDbMap.get(requestMap.get(JsonKey.ROOT_ORG_ID));
-        requestMap.put(
-            JsonKey.ASSOCIATION_TYPE, getAssociationType(rootUserOrg, callerId, requestMap));
-        Util.upsertUserOrgData(requestMap, request.getRequestContext());
-      }
+    }
+    if ((StringUtils.isNotBlank(organisationId)
+            && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
+        || StringUtils.isBlank(organisationId)) {
+      Map<String, Object> userOrg =
+          (Map<String, Object>) userOrgDbMap.get(requestMap.get(JsonKey.ROOT_ORG_ID));
+      requestMap.put(JsonKey.ASSOCIATION_TYPE, getAssociationType(userOrg, callerId, requestMap));
+      Util.upsertUserOrgData(requestMap, request.getRequestContext());
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);

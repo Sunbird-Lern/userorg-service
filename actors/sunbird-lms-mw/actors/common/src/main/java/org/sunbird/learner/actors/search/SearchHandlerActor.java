@@ -224,7 +224,9 @@ public class SearchHandlerActor extends BaseActor {
                           scope -> {
                             String orgId = scope.get(JsonKey.ORGANISATION_ID);
                             Map<String, Object> userOrg = userOrgIdMap.get(orgId);
-                            ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
+                            if (MapUtils.isNotEmpty(userOrg)) {
+                              ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
+                            }
                           });
                 });
       }
