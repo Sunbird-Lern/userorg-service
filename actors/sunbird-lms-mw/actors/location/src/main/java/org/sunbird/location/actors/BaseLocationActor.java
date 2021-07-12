@@ -7,13 +7,13 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.request.Request;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.keys.GeoLocationJsonKey;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.telemetry.util.TelemetryWriter;
+import org.sunbird.util.PropertiesCache;
 
 /** @author Amit Kumar */
 public abstract class BaseLocationActor extends BaseActor {

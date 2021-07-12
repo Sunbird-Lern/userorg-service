@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.RequestContext;
 
 public class LocationDaoImplTest {
 

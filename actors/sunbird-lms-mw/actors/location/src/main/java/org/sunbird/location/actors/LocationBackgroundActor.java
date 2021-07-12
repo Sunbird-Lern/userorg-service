@@ -4,9 +4,9 @@ import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * This class will handle all background service for locationActor.

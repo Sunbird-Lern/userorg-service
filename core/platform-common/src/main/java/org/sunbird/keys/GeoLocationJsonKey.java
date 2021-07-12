@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.keys;
 
 /** Created by arvind on 19/4/18. */
 public class GeoLocationJsonKey {
