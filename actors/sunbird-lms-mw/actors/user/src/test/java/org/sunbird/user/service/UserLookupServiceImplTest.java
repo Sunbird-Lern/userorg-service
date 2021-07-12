@@ -11,9 +11,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.user.User;
+import org.sunbird.request.RequestContext;
 import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 

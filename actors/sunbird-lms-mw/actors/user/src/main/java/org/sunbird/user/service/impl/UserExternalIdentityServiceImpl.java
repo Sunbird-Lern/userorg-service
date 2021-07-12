@@ -2,7 +2,7 @@ package org.sunbird.user.service.impl;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.request.RequestContext;
 import org.sunbird.user.dao.UserExternalIdentityDao;
 import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.user.service.UserExternalIdentityService;

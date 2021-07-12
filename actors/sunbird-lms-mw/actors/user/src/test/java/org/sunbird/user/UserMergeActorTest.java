@@ -24,23 +24,23 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.ConfigUtil;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.client.KafkaClient;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.models.user.User;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.services.sso.SSOServiceFactory;
 import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.user.actors.UserMergeActor;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
+import org.sunbird.util.ConfigUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
