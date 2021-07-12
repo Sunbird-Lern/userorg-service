@@ -13,6 +13,9 @@
     <packaging>pom</packaging>
     <modules>
         <module>platform-common</module>
+        <module>actor-core</module>
+        <module>sunbird-cassandra-utils</module>
+        <module>sunbird-es-utils</module>
     </modules>
 
 
