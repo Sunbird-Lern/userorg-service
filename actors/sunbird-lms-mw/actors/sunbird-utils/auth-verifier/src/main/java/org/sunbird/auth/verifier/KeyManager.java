@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.PropertiesCache;
 
 public class KeyManager {
 

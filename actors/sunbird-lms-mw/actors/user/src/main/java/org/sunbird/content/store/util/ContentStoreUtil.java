@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
-import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.RequestContext;
+import org.sunbird.http.HttpClientUtil;
 
 public class ContentStoreUtil {
   private static LoggerUtil logger = new LoggerUtil(ContentStoreUtil.class);

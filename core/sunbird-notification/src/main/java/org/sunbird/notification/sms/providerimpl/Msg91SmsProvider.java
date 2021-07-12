@@ -14,7 +14,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.Sms;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.JsonUtil;

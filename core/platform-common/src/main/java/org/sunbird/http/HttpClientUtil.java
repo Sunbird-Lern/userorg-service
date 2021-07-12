@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.http;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,7 @@ import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.sunbird.logging.LoggerUtil;
 
 public class HttpClientUtil {
   private static LoggerUtil logger = new LoggerUtil(HttpClientUtil.class);

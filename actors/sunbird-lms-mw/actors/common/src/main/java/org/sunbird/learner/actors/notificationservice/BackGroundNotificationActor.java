@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.HttpClientUtil;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.request.Request;
+import org.sunbird.http.HttpClientUtil;
 
 @ActorConfig(
   tasks = {},

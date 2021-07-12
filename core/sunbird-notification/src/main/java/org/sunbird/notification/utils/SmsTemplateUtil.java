@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.response.Response;
 
 public class SmsTemplateUtil {
   private static LoggerUtil logger = new LoggerUtil(SmsTemplateUtil.class);

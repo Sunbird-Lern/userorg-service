@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.auth.verifier.KeyManager;
-import org.sunbird.common.models.util.*;
+import org.sunbird.http.HttpClientUtil;
 import org.sunbird.learner.util.SchedulerManager;
 import org.sunbird.learner.util.Util;
 import play.api.Environment;

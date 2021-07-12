@@ -1,11 +1,11 @@
 /** */
 package org.sunbird.notification.utils;
 
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.provider.ISmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.NICGatewaySmsProviderFactory;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * This class will provide object of factory.
