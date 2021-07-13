@@ -4,12 +4,13 @@ import java.sql.Timestamp;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.otp.dao.OTPDao;
 import org.sunbird.learner.util.Util;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.util.PropertiesCache;
 
 public class OTPDaoImpl implements OTPDao {
   private static LoggerUtil logger = new LoggerUtil(OTPDaoImpl.class);

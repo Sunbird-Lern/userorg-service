@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.sql.Timestamp;
 import java.util.Map;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.logging.LoggerUtil;
 
 /** @author anmolgupta */
 @JsonIgnoreProperties(ignoreUnknown = true)

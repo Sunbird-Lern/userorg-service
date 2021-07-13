@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.util.Util;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 public class UserUploadUtil {
   private static LoggerUtil logger = new LoggerUtil(UserUploadUtil.class);

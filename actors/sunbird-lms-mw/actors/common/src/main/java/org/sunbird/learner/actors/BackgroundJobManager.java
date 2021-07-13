@@ -10,14 +10,16 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
 /**
@@ -151,7 +153,7 @@ public class BackgroundJobManager extends BaseActor {
         esMap.put(JsonKey.ORG_LOCATION, orgLocationList);
       }
       // making call to register tag
-      registertag(id, "{}", headerMap, actorMessage.getRequestContext());
+      registerTag(id, "{}", headerMap, actorMessage.getRequestContext());
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.organisation.getTypeName(),
@@ -236,20 +238,21 @@ public class BackgroundJobManager extends BaseActor {
     return false;
   }
 
-  /**
-   * This method will make EkStep api call register the tag.
-   *
-   * @param tagId String unique tag id.
-   * @param body String requested body
-   * @param header Map<String,String>
-   * @return String
-   */
-  private String registertag(
+  private String registerTag(
       String tagId, String body, Map<String, String> header, RequestContext context) {
     String tagStatus = "";
     try {
       logger.info(context, "BackgroundJobManager:registertag ,call started with tagid = " + tagId);
-      tagStatus = ProjectUtil.registertag(tagId, body, header, context);
+      String analyticsBaseUrl = ProjectUtil.getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
+      ProjectUtil.setTraceIdInHeader(header, context);
+      tagStatus =
+          HttpClientUtil.post(
+              analyticsBaseUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_TAG_API_URL)
+                  + "/"
+                  + tagId,
+              body,
+              header);
       logger.info(
           context,
           "BackgroundJobManager:registertag  ,call end with id and status = "

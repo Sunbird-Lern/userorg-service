@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.url.action.dao.UrlActionDao;
 import org.sunbird.models.url.action.UrlAction;
+import org.sunbird.response.Response;
 
 public class UrlActionDaoImpl implements UrlActionDao {
 

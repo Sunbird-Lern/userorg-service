@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.role.dao.RoleDao;
 import org.sunbird.learner.actors.role.dao.impl.RoleDaoImpl;
 import org.sunbird.learner.actors.role.group.service.RoleGroupService;
 import org.sunbird.learner.actors.url.action.service.UrlActionService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.models.role.Role;
+import org.sunbird.response.Response;
 
 public class RoleService {
 

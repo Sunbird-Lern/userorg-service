@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 
 /**
  * Class to provide the location bulk upload functionality.
