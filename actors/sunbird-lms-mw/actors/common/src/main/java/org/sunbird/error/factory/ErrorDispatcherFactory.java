@@ -1,12 +1,11 @@
 package org.sunbird.error.factory;
 
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.error.CsvError;
 import org.sunbird.error.CsvErrorDispatcher;
 import org.sunbird.error.IErrorDispatcher;
 import org.sunbird.error.ListErrorDispatcher;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.PropertiesCache;
 
 /**
  * this is error dispatcher factory class which will judge type of error need to show on the basis
