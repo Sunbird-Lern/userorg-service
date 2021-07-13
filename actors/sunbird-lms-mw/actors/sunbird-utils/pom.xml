@@ -14,6 +14,5 @@
   <name>Sunbird Utils</name>
   <modules>
 	<module>sunbird-platform-core</module>
-    <module>auth-verifier</module>
   </modules>
 </project>

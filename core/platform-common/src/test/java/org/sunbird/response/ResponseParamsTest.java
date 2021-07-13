@@ -1,9 +1,8 @@
 /** */
-package org.sunbird.common.models;
+package org.sunbird.response;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.models.response.ResponseParams;
 
 /** @author Manzarul */
 public class ResponseParamsTest {

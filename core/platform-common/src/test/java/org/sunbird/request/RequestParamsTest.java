@@ -1,9 +1,8 @@
 /** */
-package org.sunbird.common.models;
+package org.sunbird.request;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.request.RequestParams;
 
 /** @author Manzarul */
 public class RequestParamsTest {

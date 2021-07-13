@@ -4,16 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.Map;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.common.util.Time;
-import org.sunbird.common.models.util.*;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 
 public class AccessTokenValidator {
   private static LoggerUtil logger = new LoggerUtil(AccessTokenValidator.class);
   private static ObjectMapper mapper = new ObjectMapper();
+  private static String sso_url = System.getenv(JsonKey.SUNBIRD_SSO_URL);
+  private static String realm = System.getenv(JsonKey.SUNBIRD_SSO_RELAM);
 
   private static Map<String, Object> validateToken(String token) throws JsonProcessingException {
     String[] tokenElements = token.split("\\.");
@@ -99,8 +100,7 @@ public class AccessTokenValidator {
   }
 
   private static boolean checkIss(String iss) {
-    String realmUrl =
-        KeyCloakConnectionProvider.SSO_URL + "realms/" + KeyCloakConnectionProvider.SSO_REALM;
+    String realmUrl = sso_url + "realms/" + realm;
     return (realmUrl.equalsIgnoreCase(iss));
   }
 

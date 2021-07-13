@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.request;
+package org.sunbird.request;
 
 import java.util.HashMap;
 import org.junit.Assert;

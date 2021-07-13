@@ -1,9 +1,10 @@
-package org.sunbird.common.responsecode;
+package org.sunbird.response;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.sunbird.exception.ResponseCode;
 
 public class ResponseCodeTest {
 

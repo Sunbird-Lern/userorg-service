@@ -1,21 +1,16 @@
-/** */
-package org.sunbird.common.models;
+package org.sunbird.response;
 
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
 
-/** @author Manzarul */
-public class ResponseTest {
+public class ClientErrorResponseTest {
 
   @Test
   public void responseCreate() {
-    org.sunbird.common.models.response.Response response =
-        new org.sunbird.common.models.response.Response();
+    Response response = new ClientErrorResponse();
     response.setId("test");
-    response.setResponseCode(ResponseCode.SERVER_ERROR);
     response.setTs("1233444555");
     response.setVer("v1");
     ResponseParams params = new ResponseParams();
@@ -29,7 +24,7 @@ public class ResponseTest {
     Assert.assertEquals(response.getTs(), "1233444555");
     Assert.assertEquals(response.getVer(), "v1");
     Assert.assertEquals(response.getParams(), params);
-    Assert.assertEquals(response.getResponseCode(), ResponseCode.SERVER_ERROR);
+    Assert.assertEquals(response.getResponseCode(), ResponseCode.CLIENT_ERROR);
     Assert.assertEquals(response.getParams().getErr(), params.getErr());
     Assert.assertEquals(response.getParams().getErrmsg(), params.getErrmsg());
     Assert.assertEquals(response.getParams().getMsgid(), params.getMsgid());
@@ -39,7 +34,7 @@ public class ResponseTest {
     Assert.assertNotEquals(response.get("Test"), "test");
     response.putAll(new HashMap<String, Object>());
     response.put("test", "test123");
-    org.sunbird.common.models.response.Response responseClone = response.clone(response);
+    Response responseClone = response.clone(response);
     Assert.assertNotEquals(response, responseClone);
   }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.telemetry.dto.Actor;
 import org.sunbird.telemetry.dto.Context;
 import org.sunbird.telemetry.dto.Telemetry;
