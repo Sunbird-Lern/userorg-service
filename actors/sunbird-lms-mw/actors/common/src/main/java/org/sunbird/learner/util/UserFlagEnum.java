@@ -1,6 +1,6 @@
 package org.sunbird.learner.util;
 
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.keys.JsonKey;
 
 /**
  * UserFlagEnum provides all the flags of user type It contains flagtype and corresponding value in
