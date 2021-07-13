@@ -3,11 +3,12 @@ package controllers.bulkapimanagement;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.BulkUploadActorOperation;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.request.Request;
 import org.sunbird.validator.BaseRequestValidator;
-import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
 

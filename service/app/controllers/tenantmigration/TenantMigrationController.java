@@ -4,7 +4,7 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.ShadowUserMigrateReqValidator;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.common.request.Request;
+import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
