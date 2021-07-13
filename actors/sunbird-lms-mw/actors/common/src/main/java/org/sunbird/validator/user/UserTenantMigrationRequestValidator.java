@@ -1,9 +1,9 @@
 package org.sunbird.validator.user;
 
 import java.util.Map;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 
 /**
  * Request validator class for user tenant migration request.
