@@ -26,6 +26,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.util.PropertiesCache;
 
 /** @author Manzarul */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -34,7 +35,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
   CloudStorageAccount.class,
   CloudBlobClient.class,
   CloudBlobContainer.class,
-  ListBlobItem.class
+  ListBlobItem.class,
+  PropertiesCache.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -57,6 +59,12 @@ public class AzureServiceFactoryTest {
 
   @BeforeClass
   public static void getObject() {
+
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+
     obj = CloudServiceFactory.get("Azure");
     Assert.assertTrue(obj instanceof CloudService);
     Assert.assertNotNull(obj);
@@ -64,6 +72,8 @@ public class AzureServiceFactoryTest {
 
   @Before
   public void addMockRules() {
+
+
     CloudStorageAccount cloudStorageAccount = mock(CloudStorageAccount.class);
     CloudBlobClient cloudBlobClient = mock(CloudBlobClient.class);
     CloudBlobContainer cloudBlobContainer = mock(CloudBlobContainer.class);

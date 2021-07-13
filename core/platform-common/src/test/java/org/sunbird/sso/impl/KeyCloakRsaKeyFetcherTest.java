@@ -1,5 +1,6 @@
 package org.sunbird.sso.impl;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.security.PublicKey;
@@ -22,6 +23,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.sso.KeyCloakConnectionProvider;
+import org.sunbird.util.PropertiesCache;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 // ** @author kirti. Junit test cases *//*
@@ -35,6 +37,7 @@ import org.sunbird.sso.KeyCloakConnectionProvider;
   HttpResponse.class,
   HttpEntity.class,
   EntityUtils.class,
+  PropertiesCache.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -53,6 +56,10 @@ public class KeyCloakRsaKeyFetcherTest {
 
   @Before
   public void setUp() throws Exception {
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
 
     client = PowerMockito.mock(CloseableHttpClient.class);
     PowerMockito.mockStatic(HttpClientBuilder.class);

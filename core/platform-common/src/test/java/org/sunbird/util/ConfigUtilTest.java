@@ -1,8 +1,11 @@
 package org.sunbird.util;
 
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.typesafe.config.Config;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +17,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 
-@PrepareForTest(ConfigUtil.class)
+@PrepareForTest({ConfigUtil.class, PropertiesCache.class})
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
   "javax.management.*",
@@ -32,6 +35,13 @@ public class ConfigUtilTest {
   public static void setup() throws Exception {
     configUtilMock = Mockito.mock(ConfigUtil.class);
     PowerMockito.whenNew(ConfigUtil.class).withAnyArguments().thenReturn(configUtilMock);
+  }
+  @Before
+  public void beforeEachTest(){
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
   }
 
   @Test(expected = ProjectCommonException.class)

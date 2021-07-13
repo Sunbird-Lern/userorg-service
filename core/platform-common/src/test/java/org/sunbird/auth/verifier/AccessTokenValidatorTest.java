@@ -2,12 +2,16 @@ package org.sunbird.auth.verifier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.common.util.Time;
@@ -16,9 +20,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.datasecurity.impl.ServiceFactory;
+import org.sunbird.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CryptoUtil.class, KeyManager.class, Base64Util.class})
+@PrepareForTest({CryptoUtil.class, KeyManager.class, Base64Util.class, PropertiesCache.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -26,11 +32,20 @@ import org.powermock.modules.junit4.PowerMockRunner;
   "jdk.internal.reflect.*"
 })
 public class AccessTokenValidatorTest {
+  @Before
+  public void beforeEachTest(){
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+  }
   @Test
   public void verifyUserAccessToken() throws JsonProcessingException {
     PowerMockito.mockStatic(CryptoUtil.class);
     PowerMockito.mockStatic(Base64Util.class);
     PowerMockito.mockStatic(KeyManager.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
     KeyData keyData = PowerMockito.mock(KeyData.class);
     Mockito.when(KeyManager.getPublicKey(Mockito.anyString())).thenReturn(keyData);
     PublicKey publicKey = PowerMockito.mock(PublicKey.class);

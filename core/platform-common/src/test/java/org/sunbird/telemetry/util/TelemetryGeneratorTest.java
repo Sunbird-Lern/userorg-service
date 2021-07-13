@@ -1,6 +1,8 @@
 package org.sunbird.telemetry.util;
 
 import static org.junit.Assert.assertNotNull;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +11,16 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({PropertiesCache.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -85,6 +92,10 @@ public class TelemetryGeneratorTest {
 
   @Test
   public void testError() {
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
     String audit = TelemetryGenerator.error(context, params);
     assertNotNull(audit);
   }

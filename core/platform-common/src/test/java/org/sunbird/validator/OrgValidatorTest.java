@@ -2,18 +2,34 @@
 package org.sunbird.validator;
 
 import static org.junit.Assert.assertEquals;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
+import org.sunbird.util.PropertiesCache;
 import org.sunbird.validator.orgvalidator.OrgRequestValidator;
 
-/** @author Manzarul */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({PropertiesCache.class})
+@PowerMockIgnore({
+        "javax.management.*",
+        "javax.net.ssl.*",
+        "javax.security.*",
+        "jdk.internal.reflect.*"
+})
 public class OrgValidatorTest {
 
   @Test
@@ -155,6 +171,11 @@ public class OrgValidatorTest {
 
   @Test
   public void validateUpdateOrgWithStatus() {
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
     requestObj.put(JsonKey.STATUS, "true");

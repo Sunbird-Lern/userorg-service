@@ -33,13 +33,14 @@ import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 
 @PrepareForTest({
   ProjectUtil.class,
   KeyCloakConnectionProvider.class,
-  KeycloakRequiredActionLinkUtil.class
+  KeycloakRequiredActionLinkUtil.class,
+  PropertiesCache.class
 })
-@Ignore
 public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
@@ -75,6 +76,11 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   @BeforeClass
   public static void init() {
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+
     PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("somestring");
     try {

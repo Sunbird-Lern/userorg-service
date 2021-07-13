@@ -2,6 +2,8 @@ package org.sunbird.datasecurity.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +13,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
@@ -20,6 +28,14 @@ import org.sunbird.util.PropertiesCache;
 
 /** @author Amit Kumar */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({PropertiesCache.class})
+@PowerMockIgnore({
+        "javax.management.*",
+        "javax.net.ssl.*",
+        "javax.security.*",
+        "jdk.internal.reflect.*"
+})
 public class EncryptionDecriptionServiceTest {
 
   private static String data = "hello sunbird";
@@ -36,6 +52,12 @@ public class EncryptionDecriptionServiceTest {
 
   @BeforeClass
   public static void setUp() {
+
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+
     sunbirdEncryption = System.getenv(JsonKey.SUNBIRD_ENCRYPTION);
     if (StringUtils.isBlank(sunbirdEncryption)) {
       sunbirdEncryption = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_ENCRYPTION);

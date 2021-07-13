@@ -11,6 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -27,7 +28,7 @@ import scala.Option;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
-@PrepareForTest({StorageServiceFactory.class, CloudStorageUtil.class})
+@PrepareForTest({StorageServiceFactory.class, CloudStorageUtil.class, PropertiesCache.class})
 public class CloudStorageUtilTest {
 
   private static final String SIGNED_URL = "singedUrl";
@@ -35,6 +36,11 @@ public class CloudStorageUtilTest {
 
   @Before
   public void initTest() {
+    PowerMockito.mockStatic(PropertiesCache.class);
+    PropertiesCache propertiesCache = mock(PropertiesCache.class);
+    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
+    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+
     BaseStorageService service = mock(BaseStorageService.class);
     mockStatic(StorageServiceFactory.class);
 
@@ -75,7 +81,7 @@ public class CloudStorageUtilTest {
   }
 
   @Test
-  @Ignore
+ // @Ignore
   public void testUploadSuccess() {
     String result =
         CloudStorageUtil.upload(CloudStorageType.AZURE, "container", "key", "/file/path");
