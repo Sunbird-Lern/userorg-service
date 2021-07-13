@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util;
+package org.sunbird.operations;
 
 import org.junit.Assert;
 import org.junit.Test;

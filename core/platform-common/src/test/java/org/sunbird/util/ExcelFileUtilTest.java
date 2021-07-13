@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.util;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,8 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.util.ExcelFileUtil;
-import org.sunbird.util.FileUtil;
 
 public class ExcelFileUtilTest {
 

@@ -1,10 +1,8 @@
-package org.sunbird.common.models.util;
+package org.sunbird.url;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.url.URLShortner;
-import org.sunbird.url.URLShortnerImpl;
 import org.sunbird.util.PropertiesCache;
 
 public class URLShortnerImplTest {

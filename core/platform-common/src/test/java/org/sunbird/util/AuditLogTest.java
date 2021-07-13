@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util;
+package org.sunbird.util;
 
 import java.util.HashMap;
 import java.util.Map;

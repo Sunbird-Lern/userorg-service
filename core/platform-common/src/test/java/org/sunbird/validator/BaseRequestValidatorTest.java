@@ -5,9 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.text.MessageFormat;
 import java.util.*;
 import org.junit.Test;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 
 /** Created by rajatgupta on 20/03/19. */
 public class BaseRequestValidatorTest {

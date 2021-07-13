@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util;
+package org.sunbird.mail;
 
 import javax.mail.PasswordAuthentication;
 import org.junit.AfterClass;
@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.jvnet.mock_javamail.Mailbox;
-import org.sunbird.mail.GMailAuthenticator;
 
 /** @author Manzarul */
 public class EmailTest {

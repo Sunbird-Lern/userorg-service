@@ -1,4 +1,4 @@
-package org.sunbird.common.util;
+package org.sunbird.util;
 
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
