@@ -19,9 +19,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
+import org.sunbird.util.ProjectUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
