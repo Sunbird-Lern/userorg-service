@@ -1,8 +1,9 @@
 package org.sunbird.email;
 
 import akka.actor.ActorRef;
+import org.sunbird.response.Response;
+
 import java.util.Map;
-import org.sunbird.common.models.response.Response;
 
 public interface EmailServiceClient {
   /**

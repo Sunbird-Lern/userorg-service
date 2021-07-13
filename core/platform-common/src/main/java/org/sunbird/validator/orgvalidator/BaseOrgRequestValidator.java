@@ -2,11 +2,11 @@ package org.sunbird.validator.orgvalidator;
 
 import java.text.MessageFormat;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.validator.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.request.Request;
 
 public class BaseOrgRequestValidator extends BaseRequestValidator {
 
