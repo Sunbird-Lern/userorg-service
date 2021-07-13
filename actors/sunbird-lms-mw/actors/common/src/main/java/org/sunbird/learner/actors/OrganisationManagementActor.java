@@ -557,7 +557,7 @@ public class OrganisationManagementActor extends BaseActor {
 
   private void updateDataToEs(Request actorMessage, Map<String, Object> updateOrgDao) {
     esService.update(
-        EsType.organisation.getTypeName(),
+        ProjectUtil.EsType.organisation.getTypeName(),
         (String) updateOrgDao.get(JsonKey.ID),
         updateOrgDao,
         actorMessage.getRequestContext());
@@ -640,7 +640,8 @@ public class OrganisationManagementActor extends BaseActor {
       filters.put(JsonKey.SLUG, slug);
       filters.put(JsonKey.IS_TENANT, true);
       Map<String, Object> esResult =
-          elasticSearchComplexSearch(filters, EsType.organisation.getTypeName(), context);
+          elasticSearchComplexSearch(
+              filters, ProjectUtil.EsType.organisation.getTypeName(), context);
       if (MapUtils.isNotEmpty(esResult)
           && esResult.containsKey(JsonKey.CONTENT)
           && (CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT)))) {
