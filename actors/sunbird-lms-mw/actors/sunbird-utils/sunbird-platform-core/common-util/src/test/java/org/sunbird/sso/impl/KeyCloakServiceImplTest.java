@@ -1,4 +1,4 @@
-package org.sunbird.services.sso.impl;
+package org.sunbird.sso.impl;
 
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
@@ -28,12 +28,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.BaseHttpTest;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.KeyCloakConnectionProvider;
+import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 
 @PrepareForTest({
   ProjectUtil.class,
@@ -79,7 +79,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("somestring");
     try {
-      t = Class.forName("org.sunbird.services.sso.SSOServiceFactory");
+      t = Class.forName("org.sunbird.sso.SSOServiceFactory");
     } catch (ClassNotFoundException e) {
     }
     Keycloak kcp = mock(Keycloak.class);

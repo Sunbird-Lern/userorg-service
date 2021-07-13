@@ -19,9 +19,9 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.mail.SendEmail;
-import org.sunbird.common.models.util.mail.SendgridConnection;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.mail.SendEmail;
+import org.sunbird.mail.SendgridConnection;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -46,7 +46,7 @@ public class EmailServiceActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private SendgridConnection connection = new SendgridConnection();

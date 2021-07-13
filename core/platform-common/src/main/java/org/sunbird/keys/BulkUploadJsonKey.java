@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.keys;
 
 /**
  * Constants for Bulk Upload service.

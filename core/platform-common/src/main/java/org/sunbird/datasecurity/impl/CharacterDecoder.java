@@ -23,7 +23,7 @@
  * questions.
  */
 
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

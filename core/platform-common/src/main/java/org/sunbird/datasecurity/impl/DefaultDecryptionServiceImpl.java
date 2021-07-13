@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -13,7 +13,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 

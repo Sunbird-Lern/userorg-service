@@ -1,4 +1,4 @@
-package org.sunbird.actorutil.email.impl;
+package org.sunbird.email.impl;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
@@ -6,7 +6,7 @@ import akka.util.Timeout;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.sunbird.actorutil.email.EmailServiceClient;
+import org.sunbird.email.EmailServiceClient;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.JsonKey;

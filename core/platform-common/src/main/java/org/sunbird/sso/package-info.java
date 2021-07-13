@@ -1,3 +1,3 @@
 /** */
 /** @author Manzarul */
-package org.sunbird.services.sso;
+package org.sunbird.sso;

@@ -15,7 +15,7 @@ import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.common.models.util.TelemetryEnvKey;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;

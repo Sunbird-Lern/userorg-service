@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util.azure;
+package org.sunbird.azure;
 
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.mock;

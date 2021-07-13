@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +20,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
 

@@ -20,7 +20,7 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -53,7 +53,7 @@ public class UserProfileReadActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserProfileReadService profileReadService = new UserProfileReadService();

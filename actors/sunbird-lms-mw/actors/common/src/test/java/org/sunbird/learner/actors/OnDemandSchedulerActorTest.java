@@ -23,7 +23,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.quartz.scheduler.OnDemandSchedulerManager;
 import org.sunbird.common.quartz.scheduler.SchedulerManager;

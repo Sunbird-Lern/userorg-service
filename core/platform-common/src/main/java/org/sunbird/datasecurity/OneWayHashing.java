@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util.datasecurity;
+package org.sunbird.datasecurity;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

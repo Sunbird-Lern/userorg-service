@@ -1,4 +1,4 @@
-package org.sunbird.common.util;
+package org.sunbird.util;
 
 import org.apache.commons.lang3.StringUtils;
 

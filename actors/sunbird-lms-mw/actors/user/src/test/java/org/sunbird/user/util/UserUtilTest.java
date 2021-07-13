@@ -24,8 +24,8 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -51,7 +51,7 @@ import scala.concurrent.Promise;
   DefaultEncryptionServivceImpl.class,
   Util.class,
   EncryptionService.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",

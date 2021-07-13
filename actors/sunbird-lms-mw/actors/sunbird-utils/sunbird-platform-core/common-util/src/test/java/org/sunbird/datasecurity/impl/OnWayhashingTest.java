@@ -1,11 +1,11 @@
 /** */
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.models.util.datasecurity.OneWayHashing;
+import org.sunbird.datasecurity.OneWayHashing;
 
 /** @author Manzarul */
 public class OnWayhashingTest {

@@ -1,4 +1,4 @@
-package org.sunbird.actorutil.email;
+package org.sunbird.email;
 
 import akka.actor.ActorRef;
 import java.util.Map;

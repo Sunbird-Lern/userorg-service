@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.operations;
 
 /** Enum to represent bulk upload operations */
 public enum BulkUploadActorOperation {

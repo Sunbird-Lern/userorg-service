@@ -1,6 +1,6 @@
-package org.sunbird.services.sso;
+package org.sunbird.sso;
 
-import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
+import org.sunbird.sso.impl.KeyCloakServiceImpl;
 
 /** @author Amit Kumar */
 public class SSOServiceFactory {

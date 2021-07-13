@@ -1,4 +1,4 @@
-package org.sunbird.services.sso.impl;
+package org.sunbird.sso.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

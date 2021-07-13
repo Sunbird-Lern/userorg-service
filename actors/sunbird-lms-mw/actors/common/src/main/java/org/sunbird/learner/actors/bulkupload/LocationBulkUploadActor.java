@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.BulkUploadActorOperation;
+import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.util.Util;

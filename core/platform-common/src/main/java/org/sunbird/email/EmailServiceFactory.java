@@ -1,6 +1,6 @@
-package org.sunbird.actorutil.email;
+package org.sunbird.email;
 
-import org.sunbird.actorutil.email.impl.EmailServiceClientImpl;
+import org.sunbird.email.impl.EmailServiceClientImpl;
 
 public class EmailServiceFactory {
 

@@ -1,4 +1,4 @@
-package org.sunbird.common.request;
+package org.sunbird.telemetry.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;

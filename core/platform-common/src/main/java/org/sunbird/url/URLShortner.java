@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.url;
+package org.sunbird.url;
 
 public interface URLShortner {
 

@@ -1,4 +1,4 @@
-package org.sunbird.common.util;
+package org.sunbird.util;
 
 import java.util.HashMap;
 import java.util.Map;

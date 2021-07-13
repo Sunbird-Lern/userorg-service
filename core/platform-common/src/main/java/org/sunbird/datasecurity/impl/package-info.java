@@ -1,3 +1,3 @@
 /** */
 /** @author Manzarul */
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;

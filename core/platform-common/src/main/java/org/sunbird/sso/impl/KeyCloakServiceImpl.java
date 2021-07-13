@@ -1,4 +1,4 @@
-package org.sunbird.services.sso.impl;
+package org.sunbird.sso.impl;
 
 import static java.util.Arrays.asList;
 import static org.sunbird.common.models.util.ProjectUtil.isNotNull;
@@ -16,10 +16,10 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.*;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.services.sso.SSOManager;
+import org.sunbird.sso.KeyCloakConnectionProvider;
+import org.sunbird.sso.SSOManager;
 
 /**
  * Single sign out service implementation with Key Cloak.

@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util;
+package org.sunbird.util;
 
 import java.net.URLDecoder;
 import java.text.Normalizer;

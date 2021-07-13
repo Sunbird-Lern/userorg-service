@@ -1,10 +1,10 @@
 /** */
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.util.datasecurity.DataMaskingService;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.DataMaskingService;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 
 /**
  * This factory will provide encryption service instance and decryption service instance with

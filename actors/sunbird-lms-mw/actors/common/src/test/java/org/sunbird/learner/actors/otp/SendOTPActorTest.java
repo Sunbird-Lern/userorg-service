@@ -24,10 +24,10 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -40,7 +40,7 @@ import org.sunbird.notification.utils.SMSFactory;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  org.sunbird.datasecurity.impl.ServiceFactory.class,
   CassandraOperationImpl.class,
   CassandraOperation.class,
   DefaultDecryptionServiceImpl.class,
@@ -57,9 +57,9 @@ import org.sunbird.notification.utils.SMSFactory;
   "jdk.internal.reflect.*"
 })
 @SuppressStaticInitializationFor({
-  "org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class",
-  "org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl",
-  "org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl"
+  "org.sunbird.datasecurity.impl.ServiceFactory.class",
+  "org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl",
+  "org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl"
 })
 public class SendOTPActorTest {
   private TestKit probe;
@@ -67,7 +67,7 @@ public class SendOTPActorTest {
 
   public static DefaultEncryptionServivceImpl encService;
   public static DefaultDecryptionServiceImpl decService;
-  public static org.sunbird.common.models.util.datasecurity.impl.ServiceFactory dataServiceFactory;
+  public static org.sunbird.datasecurity.impl.ServiceFactory dataServiceFactory;
   private static final ActorSystem system = ActorSystem.create("system");
   public static final CassandraOperationImpl mockCassandraOperation =
       mock(CassandraOperationImpl.class);
@@ -86,13 +86,13 @@ public class SendOTPActorTest {
     when(EmailTemplateDaoImpl.getInstance()).thenReturn(emailTemplateDao);
     PowerMockito.mockStatic(DefaultDecryptionServiceImpl.class);
     PowerMockito.mockStatic(DefaultEncryptionServivceImpl.class);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     DefaultDecryptionServiceImpl decryptionService =
         Mockito.mock(DefaultDecryptionServiceImpl.class);
     PowerMockito.whenNew(DefaultDecryptionServiceImpl.class)
         .withNoArguments()
         .thenReturn(decryptionService);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null))
         .thenReturn(decryptionService);
     probe = new TestKit(system);

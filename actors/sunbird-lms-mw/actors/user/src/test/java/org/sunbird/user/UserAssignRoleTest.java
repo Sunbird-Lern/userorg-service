@@ -31,7 +31,7 @@ import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
@@ -50,7 +50,7 @@ import scala.concurrent.duration.FiniteDuration;
   EsClientFactory.class,
   CassandraOperationImpl.class,
   DataCacheHandler.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",

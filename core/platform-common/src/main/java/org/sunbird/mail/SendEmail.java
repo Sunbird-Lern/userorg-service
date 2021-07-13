@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.mail;
+package org.sunbird.mail;
 
 import java.io.StringWriter;
 import javax.mail.Message;

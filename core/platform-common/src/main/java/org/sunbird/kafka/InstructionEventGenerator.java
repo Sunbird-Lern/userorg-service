@@ -1,4 +1,4 @@
-package org.sunbird.kafka.client;
+package org.sunbird.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;

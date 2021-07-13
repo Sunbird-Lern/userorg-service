@@ -14,8 +14,7 @@ import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.request.RequestContext;
 import org.sunbird.common.responsecode.ResponseCode;
@@ -29,7 +28,7 @@ public final class OTPUtil {
 
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DecryptionService decService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
 
   private static final int MAXIMUM_OTP_LENGTH = 6;

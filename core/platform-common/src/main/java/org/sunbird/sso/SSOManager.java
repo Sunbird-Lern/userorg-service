@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.services.sso;
+package org.sunbird.sso;
 
 import java.util.Map;
 import org.sunbird.common.request.RequestContext;

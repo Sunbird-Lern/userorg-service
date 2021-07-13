@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util.datasecurity;
+package org.sunbird.datasecurity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.models.util.JsonKey;

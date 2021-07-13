@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.datasecurity;
+package org.sunbird.datasecurity;
 
 import java.util.List;
 import java.util.Map;

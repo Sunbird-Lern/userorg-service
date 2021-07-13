@@ -25,7 +25,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.feed.IFeedService;
@@ -42,7 +42,7 @@ import org.sunbird.user.actors.UserFeedActor;
   CassandraOperationImpl.class,
   IFeedService.class,
   FeedServiceImpl.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 @PowerMockIgnore({

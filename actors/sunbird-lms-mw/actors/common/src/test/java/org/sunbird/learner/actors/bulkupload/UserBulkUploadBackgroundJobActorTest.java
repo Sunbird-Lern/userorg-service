@@ -29,10 +29,10 @@ import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.BulkUploadActorOperation;
+import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -47,7 +47,7 @@ import org.sunbird.validator.user.UserRequestValidator;
 @PrepareForTest({
   ServiceFactory.class,
   TelemetryWriter.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  org.sunbird.datasecurity.impl.ServiceFactory.class,
   UserClientImpl.class,
   OrganisationClientImpl.class,
   SystemSettingClientImpl.class,
@@ -85,8 +85,8 @@ public class UserBulkUploadBackgroundJobActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
 
     encryptionService = PowerMockito.mock(EncryptionService.class);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
     system = ActorSystem.create("system");

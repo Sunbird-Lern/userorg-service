@@ -17,7 +17,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cloud.storage.BaseStorageService;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.util.CloudStorageUtil.CloudStorageType;
+import org.sunbird.util.CloudStorageUtil;
+import org.sunbird.util.CloudStorageUtil.CloudStorageType;
 import scala.Option;
 
 @RunWith(PowerMockRunner.class)

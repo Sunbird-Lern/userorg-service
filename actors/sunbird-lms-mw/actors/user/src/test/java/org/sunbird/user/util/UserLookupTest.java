@@ -19,7 +19,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -34,7 +34,7 @@ import org.sunbird.user.service.impl.UserLookUpServiceImpl;
   ServiceFactory.class,
   CassandraOperationImpl.class,
   DataCacheHandler.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -56,8 +56,8 @@ public class UserLookupTest {
     settingMap.put(JsonKey.EMAIL_UNIQUE, "True");
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
     encryptionService = PowerMockito.mock(EncryptionService.class);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(encryptionService);
     PowerMockito.mockStatic(ServiceFactory.class);

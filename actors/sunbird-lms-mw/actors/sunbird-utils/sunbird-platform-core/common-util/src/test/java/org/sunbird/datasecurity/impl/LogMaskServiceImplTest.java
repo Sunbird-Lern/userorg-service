@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
 import static org.junit.Assert.*;
 

@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.util;
 
 /**
  * Helper class for String formatting operations.

@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;

@@ -1,4 +1,4 @@
-package org.sunbird.services.sso.impl;
+package org.sunbird.sso.impl;
 
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -21,7 +21,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.KeyCloakConnectionProvider;
+import org.sunbird.sso.KeyCloakConnectionProvider;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 // ** @author kirti. Junit test cases *//*

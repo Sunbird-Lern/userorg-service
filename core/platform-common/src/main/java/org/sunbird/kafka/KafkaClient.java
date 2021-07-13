@@ -1,4 +1,4 @@
-package org.sunbird.kafka.client;
+package org.sunbird.kafka;
 
 import java.util.List;
 import java.util.Map;

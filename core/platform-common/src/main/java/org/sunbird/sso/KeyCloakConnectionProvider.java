@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.models.util;
+package org.sunbird.sso;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

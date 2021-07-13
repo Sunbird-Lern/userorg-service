@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.azure;
+package org.sunbird.azure;
 
 import java.util.Arrays;
 import java.util.HashMap;

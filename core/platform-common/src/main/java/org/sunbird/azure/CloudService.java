@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.azure;
+package org.sunbird.azure;
 
 import java.io.File;
 import java.util.List;

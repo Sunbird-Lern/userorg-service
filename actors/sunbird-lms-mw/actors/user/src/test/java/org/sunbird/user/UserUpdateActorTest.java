@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;

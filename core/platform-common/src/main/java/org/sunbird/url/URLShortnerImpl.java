@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util.url;
+package org.sunbird.url;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;

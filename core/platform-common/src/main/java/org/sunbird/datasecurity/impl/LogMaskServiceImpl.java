@@ -1,6 +1,6 @@
-package org.sunbird.common.models.util.datasecurity.impl;
+package org.sunbird.datasecurity.impl;
 
-import org.sunbird.common.models.util.datasecurity.DataMaskingService;
+import org.sunbird.datasecurity.DataMaskingService;
 
 public class LogMaskServiceImpl implements DataMaskingService {
   /**

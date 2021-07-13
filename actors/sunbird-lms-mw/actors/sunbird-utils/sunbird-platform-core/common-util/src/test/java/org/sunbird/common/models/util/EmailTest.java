@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.jvnet.mock_javamail.Mailbox;
-import org.sunbird.common.models.util.mail.GMailAuthenticator;
+import org.sunbird.mail.GMailAuthenticator;
 
 /** @author Manzarul */
 public class EmailTest {

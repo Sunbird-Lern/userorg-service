@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.learner.util.DataCacheHandler;

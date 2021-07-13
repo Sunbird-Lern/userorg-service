@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.operations;
 
 /**
  * This enum will contains different operation for a learner {addCourse, getCourse, update ,

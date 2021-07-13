@@ -9,7 +9,7 @@ import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.user.actors.SSUUserCreateActor;
 

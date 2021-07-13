@@ -29,9 +29,9 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -42,8 +42,8 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.services.sso.SSOServiceFactory;
-import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
+import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.user.actors.UserProfileReadActor;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
@@ -57,7 +57,7 @@ import scala.concurrent.Promise;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  org.sunbird.datasecurity.impl.ServiceFactory.class,
   SSOServiceFactory.class,
   ElasticSearchRestHighImpl.class,
   ElasticSearchHelper.class,
@@ -106,13 +106,13 @@ public class UserProfileReadActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     encService = mock(DefaultEncryptionServivceImpl.class);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(encService);
     decService = mock(DefaultDecryptionServiceImpl.class);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null))
         .thenReturn(decService);
     PowerMockito.mockStatic(SSOServiceFactory.class);

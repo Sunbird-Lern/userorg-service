@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.operations;
 
 public enum LocationActorOperation {
   CREATE_LOCATION("createLocation"),

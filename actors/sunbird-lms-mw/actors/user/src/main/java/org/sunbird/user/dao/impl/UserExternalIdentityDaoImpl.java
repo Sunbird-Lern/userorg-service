@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -23,7 +23,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   private static LoggerUtil logger = new LoggerUtil(UserExternalIdentityDaoImpl.class);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
   @Override

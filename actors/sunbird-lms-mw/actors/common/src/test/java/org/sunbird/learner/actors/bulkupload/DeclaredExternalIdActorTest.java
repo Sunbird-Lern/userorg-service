@@ -28,9 +28,9 @@ import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.BulkUploadActorOperation;
+import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -41,7 +41,7 @@ import org.sunbird.models.organisation.Organisation;
 @PrepareForTest({
   ServiceFactory.class,
   Util.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  org.sunbird.datasecurity.impl.ServiceFactory.class,
   SunbirdMWService.class,
   OrganisationClientImpl.class,
 })
@@ -66,9 +66,9 @@ public class DeclaredExternalIdActorTest {
 
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     decryptionService = mock(DecryptionService.class);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null))
         .thenReturn(decryptionService);
     PowerMockito.mockStatic(SunbirdMWService.class);

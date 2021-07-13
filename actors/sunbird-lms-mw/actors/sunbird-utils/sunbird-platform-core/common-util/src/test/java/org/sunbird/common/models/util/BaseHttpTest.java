@@ -19,8 +19,9 @@ import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
-import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
+import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
+import org.sunbird.sso.KeyCloakConnectionProvider;
+import org.sunbird.sso.impl.KeyCloakServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({

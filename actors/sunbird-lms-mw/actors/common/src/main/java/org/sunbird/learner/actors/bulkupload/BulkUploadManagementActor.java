@@ -14,9 +14,9 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.BulkUploadJsonKey;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.keys.BulkUploadJsonKey;
+import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -66,7 +66,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     ObjectMapper mapper = new ObjectMapper();
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     DecryptionService decryptionService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+        org.sunbird.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null);
     Response response = null;
     List<String> fields =

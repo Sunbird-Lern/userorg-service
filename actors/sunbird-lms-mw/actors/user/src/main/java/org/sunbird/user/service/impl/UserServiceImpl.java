@@ -20,8 +20,8 @@ import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.Slug;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.util.Slug;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
   private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private static UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;

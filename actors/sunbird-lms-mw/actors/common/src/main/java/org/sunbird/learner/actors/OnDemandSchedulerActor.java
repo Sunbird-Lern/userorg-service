@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.ActorOperations;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.common.quartz.scheduler.OnDemandSchedulerManager;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
