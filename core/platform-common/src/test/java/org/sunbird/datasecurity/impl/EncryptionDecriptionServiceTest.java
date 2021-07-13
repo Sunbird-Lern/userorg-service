@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -36,6 +37,7 @@ import org.sunbird.util.PropertiesCache;
         "javax.security.*",
         "jdk.internal.reflect.*"
 })
+@Ignore
 public class EncryptionDecriptionServiceTest {
 
   private static String data = "hello sunbird";

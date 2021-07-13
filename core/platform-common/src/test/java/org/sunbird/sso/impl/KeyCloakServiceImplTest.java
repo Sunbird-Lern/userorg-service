@@ -41,6 +41,7 @@ import org.sunbird.util.PropertiesCache;
   KeycloakRequiredActionLinkUtil.class,
   PropertiesCache.class
 })
+@Ignore
 public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
