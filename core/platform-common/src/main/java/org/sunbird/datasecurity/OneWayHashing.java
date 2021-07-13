@@ -3,7 +3,7 @@ package org.sunbird.datasecurity;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.logging.LoggerUtil;
 
 /**
  * This class will do one way data hashing.
