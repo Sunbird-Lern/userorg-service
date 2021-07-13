@@ -11,15 +11,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.ShadowUser;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.feed.impl.FeedFactory;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.Feed;
 import org.sunbird.models.user.FeedAction;
 import org.sunbird.models.user.FeedStatus;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {

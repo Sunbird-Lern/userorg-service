@@ -2,9 +2,9 @@ package org.sunbird.feed;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.user.Feed;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 /** @author anmolgupta this is an interface class for the user feeds */
 public interface IFeedService {
