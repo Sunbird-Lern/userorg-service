@@ -3,8 +3,8 @@ package org.sunbird.actorutil.org;
 import akka.actor.ActorRef;
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.request.RequestContext;
 
 public interface OrganisationClient {
 
