@@ -2,8 +2,8 @@ package org.sunbird.actorutil.systemsettings;
 
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.systemsetting.SystemSetting;
+import org.sunbird.request.RequestContext;
 
 /**
  * This interface defines methods supported by System Setting service.
