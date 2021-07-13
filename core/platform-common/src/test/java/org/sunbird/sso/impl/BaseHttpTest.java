@@ -21,7 +21,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.KeyCloakConnectionProvider;
-import org.sunbird.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)

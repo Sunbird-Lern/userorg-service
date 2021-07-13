@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import net.sf.junidecode.Junidecode;
+import org.sunbird.logging.LoggerUtil;
 
 /**
  * This class will remove the special character,space from the provided String.
