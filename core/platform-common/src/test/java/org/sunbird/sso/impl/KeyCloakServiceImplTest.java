@@ -25,15 +25,14 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.BaseHttpTest;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.sso.KeyCloakConnectionProvider;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.util.ProjectUtil;
 
 @PrepareForTest({
   ProjectUtil.class,

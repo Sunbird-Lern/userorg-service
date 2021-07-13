@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.sso.impl;
 
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -22,6 +22,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.impl.KeyCloakServiceImpl;
+import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
