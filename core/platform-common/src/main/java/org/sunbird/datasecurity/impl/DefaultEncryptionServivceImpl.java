@@ -22,7 +22,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * Default data encryption service
@@ -52,7 +52,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
   public DefaultEncryptionServivceImpl() {
     sunbirdEncryption = System.getenv(JsonKey.SUNBIRD_ENCRYPTION);
     if (StringUtils.isBlank(sunbirdEncryption)) {
-      sunbirdEncryption = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_ENCRYPTION);
+      sunbirdEncryption = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_ENCRYPTION);
     }
   }
 
@@ -141,7 +141,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
       encryption_key = System.getenv(JsonKey.ENCRYPTION_KEY);
       if (StringUtils.isBlank(encryption_key)) {
         logger.info("Salt value is not provided by Env");
-        encryption_key = PropertiesCache.getInstance().getProperty(JsonKey.ENCRYPTION_KEY);
+        encryption_key = ProjectUtil.getConfigValue(JsonKey.ENCRYPTION_KEY);
       }
     }
     if (StringUtils.isBlank(encryption_key)) {

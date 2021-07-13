@@ -15,7 +15,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.ProjectUtil;
 
 public class DefaultDecryptionServiceImpl implements DecryptionService {
   private static LoggerUtil logger = new LoggerUtil(DefaultDecryptionServiceImpl.class);
@@ -40,7 +40,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
   public DefaultDecryptionServiceImpl() {
     sunbirdEncryption = System.getenv(JsonKey.SUNBIRD_ENCRYPTION);
     if (StringUtils.isBlank(sunbirdEncryption)) {
-      sunbirdEncryption = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_ENCRYPTION);
+      sunbirdEncryption = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_ENCRYPTION);
     }
   }
 

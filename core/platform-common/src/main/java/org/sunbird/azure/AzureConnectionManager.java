@@ -13,7 +13,7 @@ import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * This class will manage azure connection.
@@ -34,8 +34,8 @@ public class AzureConnectionManager {
     if (StringUtils.isBlank(name) || StringUtils.isBlank(key)) {
       logger.info(
           "Azure account name and key is not provided by environment variable." + name + " " + key);
-      accountName = PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_NAME);
-      accountKey = PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_KEY);
+      accountName = ProjectUtil.getConfigValue(JsonKey.ACCOUNT_NAME);
+      accountKey = ProjectUtil.getConfigValue(JsonKey.ACCOUNT_KEY);
       storageAccountString =
           "DefaultEndpointsProtocol=https;AccountName="
               + accountName

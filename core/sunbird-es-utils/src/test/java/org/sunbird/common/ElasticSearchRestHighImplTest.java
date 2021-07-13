@@ -46,6 +46,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ConnectionManager;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
 /**
@@ -71,7 +72,8 @@ import scala.concurrent.Future;
   SearchHit.class,
   SearchHits.class,
   Aggregations.class,
-  ElasticSearchHelper.class
+  ElasticSearchHelper.class,
+  PropertiesCache.class
 })
 public class ElasticSearchRestHighImplTest {
 
@@ -278,6 +280,8 @@ public class ElasticSearchRestHighImplTest {
   private void mockBaseRules() {
     client = mock(RestHighLevelClient.class);
     PowerMockito.mockStatic(ConnectionManager.class);
+    PowerMockito.mockStatic(PropertiesCache.class);
+
     try {
       doNothing().when(ConnectionManager.class, "registerShutDownHook");
     } catch (Exception e) {

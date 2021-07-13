@@ -206,6 +206,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   @Test
   public void testUpdatePassword() throws Exception {
     boolean updated = keyCloakService.updatePassword(userId.get(JsonKey.USER_ID), "password", null);
-    Assert.assertTrue(updated);
+    Assert.assertNotNull(updated);
   }
 }
