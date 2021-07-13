@@ -10,6 +10,7 @@ import org.sunbird.learner.actors.otp.dao.OTPDao;
 import org.sunbird.learner.util.Util;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.util.PropertiesCache;
 
 public class OTPDaoImpl implements OTPDao {
