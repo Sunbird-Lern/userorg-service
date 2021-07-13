@@ -2,9 +2,9 @@
 package org.sunbird.datasecurity.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.datasecurity.DataMaskingService;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.util.ProjectUtil;
 
 /** @author Manzarul */
 public class DefaultDataMaskServiceImpl implements DataMaskingService {

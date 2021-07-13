@@ -2,7 +2,7 @@ package org.sunbird.datasecurity;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.request.RequestContext;
 
 /**
  * This service will have data decryption methods. decryption logic will differ based on imp
