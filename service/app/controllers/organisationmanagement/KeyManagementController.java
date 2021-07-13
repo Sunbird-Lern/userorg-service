@@ -2,7 +2,7 @@ package controllers.organisationmanagement;
 
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.request.Request;
+import org.sunbird.request.Request;
 import org.sunbird.common.request.orgvalidator.KeyManagementValidator;
 import play.mvc.Http;
 import play.mvc.Result;

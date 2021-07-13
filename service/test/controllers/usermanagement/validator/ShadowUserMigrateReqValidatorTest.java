@@ -3,8 +3,8 @@ package controllers.usermanagement.validator;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.*;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 
 public class ShadowUserMigrateReqValidatorTest {
 
