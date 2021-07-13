@@ -12,11 +12,11 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.PropertiesCache;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.util.PropertiesCache;
 
 /** @author Amit Kumar */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
