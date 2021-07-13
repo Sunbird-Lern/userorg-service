@@ -1,8 +1,9 @@
 /** */
 package org.sunbird.sso;
 
+import org.sunbird.request.RequestContext;
+
 import java.util.Map;
-import org.sunbird.common.request.RequestContext;
 
 /** @author Manzarul This interface will handle all call related to single sign out. */
 public interface SSOManager {

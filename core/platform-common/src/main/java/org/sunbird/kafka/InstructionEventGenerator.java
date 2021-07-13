@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.telemetry.dto.TelemetryBJREvent;
 
 public class InstructionEventGenerator {

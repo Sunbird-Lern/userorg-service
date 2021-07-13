@@ -4,9 +4,9 @@ import java.util.Properties;
 import javax.mail.Session;
 import javax.mail.Transport;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.PropertiesCache;
 
 public class SendgridConnection {
 

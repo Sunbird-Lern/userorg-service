@@ -6,7 +6,11 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * Keycloak utility to create required action links.

@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 
 /** @author Amit Kumar */
 public class URLShortnerImpl implements URLShortner {
