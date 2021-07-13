@@ -1,8 +1,9 @@
 package org.sunbird.azure;
 
+import org.sunbird.request.RequestContext;
+
 import java.io.File;
 import java.util.List;
-import org.sunbird.common.request.RequestContext;
 
 /** Created by arvind on 24/8/17. */
 public interface CloudService {

@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.Tika;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
 
 /** @author Manzarul */
 public class AzureFileUtility {

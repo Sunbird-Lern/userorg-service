@@ -1,10 +1,11 @@
 package org.sunbird.azure;
 
+import org.sunbird.util.ProjectUtil;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.models.util.ProjectUtil;
 
 /**
  * Factory class to store the various upload download services like Azure , Amazon S3 etc... Created
