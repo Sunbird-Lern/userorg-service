@@ -3,7 +3,7 @@ package controllers.usermanagement;
 import controllers.BaseController;
 import controllers.usermanagement.validator.UserStatusRequestValidator;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.common.request.Request;
+import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
 

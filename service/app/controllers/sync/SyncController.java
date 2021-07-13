@@ -6,9 +6,10 @@ import controllers.BaseController;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.request.Request;
 import org.sunbird.validator.RequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
