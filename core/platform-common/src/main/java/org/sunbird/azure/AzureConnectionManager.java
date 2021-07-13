@@ -11,9 +11,9 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.PropertiesCache;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.PropertiesCache;
 
 /**
  * This class will manage azure connection.

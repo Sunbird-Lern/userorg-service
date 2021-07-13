@@ -1,11 +1,12 @@
 package org.sunbird.models.organisation;
 
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.responsecode.ResponseCode;
 
 public enum OrgTypeEnum {
   BOARD("board", 5),
