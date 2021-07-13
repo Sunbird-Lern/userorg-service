@@ -8,7 +8,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.validator.user.UserRequestValidator;
 import play.mvc.Http;

@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.request;
+package org.sunbird.validator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -2,7 +2,7 @@ package controllers.usermanagement.validator;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;

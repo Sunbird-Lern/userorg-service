@@ -15,7 +15,7 @@ import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.response.ResponseParams;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.common.models.util.EntryExitLogEvent;
+import org.sunbird.util.EntryExitLogEvent;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.models.util.LoggerUtil;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;

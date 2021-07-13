@@ -1,6 +1,6 @@
 package controllers.usermanagement.validator;
 
-import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;

@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.validator;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;

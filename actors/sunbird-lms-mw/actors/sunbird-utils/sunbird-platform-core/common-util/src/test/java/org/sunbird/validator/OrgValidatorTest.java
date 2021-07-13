@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.common.request;
+package org.sunbird.validator;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.orgvalidator.OrgRequestValidator;
+import org.sunbird.validator.orgvalidator.OrgRequestValidator;
 import org.sunbird.common.responsecode.ResponseCode;
 
 /** @author Manzarul */

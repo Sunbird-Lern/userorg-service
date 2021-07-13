@@ -1,13 +1,15 @@
-package org.sunbird.common.request;
+package org.sunbird.validator;
+
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.util.ProjectUtil;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
 
 public class UserFreeUpRequestValidator extends BaseRequestValidator {
 

@@ -1,6 +1,6 @@
 package org.sunbird.learner.actors;
 
-import static org.sunbird.common.request.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
+import static org.sunbird.validator.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
 
 import java.util.ArrayList;
 import java.util.HashMap;

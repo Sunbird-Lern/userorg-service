@@ -12,7 +12,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.sunbird.common.request.RequestValidator;
+import org.sunbird.validator.RequestValidator;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;

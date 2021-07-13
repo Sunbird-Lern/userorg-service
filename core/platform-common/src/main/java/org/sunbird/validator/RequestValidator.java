@@ -1,4 +1,4 @@
-package org.sunbird.common.request;
+package org.sunbird.validator;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

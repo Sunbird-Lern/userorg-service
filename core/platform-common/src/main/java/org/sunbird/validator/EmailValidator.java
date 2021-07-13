@@ -1,4 +1,4 @@
-package org.sunbird.common.models.util;
+package org.sunbird.validator;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

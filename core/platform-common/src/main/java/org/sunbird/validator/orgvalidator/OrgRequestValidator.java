@@ -1,4 +1,4 @@
-package org.sunbird.common.request.orgvalidator;
+package org.sunbird.validator.orgvalidator;
 
 import java.text.MessageFormat;
 import org.apache.commons.lang3.StringUtils;

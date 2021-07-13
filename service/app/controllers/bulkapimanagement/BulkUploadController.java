@@ -6,7 +6,7 @@ import java.util.concurrent.CompletionStage;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;

@@ -1,10 +1,10 @@
-package org.sunbird.common.request.orgvalidator;
+package org.sunbird.validator.orgvalidator;
 
 import java.text.MessageFormat;
 import java.util.List;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.BaseRequestValidator;
+import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.common.request.Request;
 import org.sunbird.common.responsecode.ResponseCode;
 

@@ -20,7 +20,7 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.common.models.util.EmailValidator;
+import org.sunbird.validator.EmailValidator;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.util.Slug;
 import org.sunbird.dto.SearchDTO;

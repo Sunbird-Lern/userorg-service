@@ -1,4 +1,4 @@
-package org.sunbird.common.request;
+package org.sunbird.validator;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.sunbird.common.models.util.EmailValidator;
 import org.sunbird.util.StringFormatter;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;

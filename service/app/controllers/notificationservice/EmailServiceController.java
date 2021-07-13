@@ -9,7 +9,7 @@ import java.util.concurrent.CompletionStage;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestValidator;
+import org.sunbird.validator.RequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
