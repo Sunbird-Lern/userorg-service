@@ -18,12 +18,12 @@ import org.sunbird.bean.MigrationUser;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ShadowUserProcessor;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class ShadowUserMigrationScheduler extends BaseJob {
   private static LoggerUtil logger = new LoggerUtil(ShadowUserMigrationScheduler.class);
