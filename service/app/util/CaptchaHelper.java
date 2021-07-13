@@ -8,6 +8,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.ProjectUtil;
 
 public class CaptchaHelper {
   private static LoggerUtil logger = new LoggerUtil(CaptchaHelper.class);

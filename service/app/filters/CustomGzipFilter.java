@@ -2,9 +2,9 @@ package filters;
 
 import akka.stream.Materializer;
 import org.apache.http.HttpHeaders;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.HeaderParam;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.HeaderParam;
+import org.sunbird.util.ProjectUtil;
 import play.filters.gzip.GzipFilter;
 import play.filters.gzip.GzipFilterConfig;
 import play.mvc.EssentialAction;

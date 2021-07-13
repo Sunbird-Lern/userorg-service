@@ -2,8 +2,8 @@ package controllers.systemsettings;
 
 import controllers.BaseController;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 import org.sunbird.validator.systemsettings.SystemSettingsRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;

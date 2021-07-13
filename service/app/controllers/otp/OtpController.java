@@ -3,7 +3,7 @@ package controllers.otp;
 import controllers.BaseController;
 import controllers.otp.validator.OtpRequestValidator;
 import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.request.Request;
+import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
 
