@@ -2,8 +2,8 @@ package org.sunbird.actorutil.user;
 
 import akka.actor.ActorRef;
 import java.util.Map;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 
 public interface UserClient {
 
