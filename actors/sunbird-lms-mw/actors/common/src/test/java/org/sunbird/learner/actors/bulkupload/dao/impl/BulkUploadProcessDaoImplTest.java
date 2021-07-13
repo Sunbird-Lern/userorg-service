@@ -16,12 +16,12 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessDao;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 @PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 @RunWith(PowerMockRunner.class)

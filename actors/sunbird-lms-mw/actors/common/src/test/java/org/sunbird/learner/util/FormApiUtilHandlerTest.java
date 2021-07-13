@@ -13,11 +13,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
 import org.sunbird.models.FormUtil.FormUtilRequest;
+import org.sunbird.request.RequestContext;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, FormApiUtilHandlerTest.class})

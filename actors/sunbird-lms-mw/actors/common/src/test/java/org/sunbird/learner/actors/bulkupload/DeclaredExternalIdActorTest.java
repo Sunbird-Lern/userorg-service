@@ -26,16 +26,16 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.operations.BulkUploadActorOperation;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.datasecurity.DecryptionService;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
