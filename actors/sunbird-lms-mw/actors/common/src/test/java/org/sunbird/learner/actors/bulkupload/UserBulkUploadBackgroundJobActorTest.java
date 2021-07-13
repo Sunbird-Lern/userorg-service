@@ -28,20 +28,20 @@ import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.actorutil.user.impl.UserClientImpl;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.operations.BulkUploadActorOperation;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryWriter;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.validator.user.UserRequestValidator;
 
 @PrepareForTest({
