@@ -343,6 +343,7 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testIsEmailvalid() {
     Assert.assertTrue(ProjectUtil.isEmailvalid("xyz@xyz.com"));
     Assert.assertFalse(ProjectUtil.isEmailvalid("xy@z@xyz.com"));
+    Assert.assertFalse(ProjectUtil.isEmailvalid(""));
   }
 
   @Test
