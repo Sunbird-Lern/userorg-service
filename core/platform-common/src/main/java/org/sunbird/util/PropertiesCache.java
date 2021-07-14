@@ -16,9 +16,7 @@ public class PropertiesCache {
   private static LoggerUtil logger = new LoggerUtil(PropertiesCache.class);
 
   private final String[] fileName = {
-    "cassandratablecolumn.properties",
     "elasticsearch.config.properties",
-    "cassandra.config.properties",
     "dbconfig.properties",
     "externalresource.properties",
     "sso.properties",
