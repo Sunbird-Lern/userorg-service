@@ -33,6 +33,36 @@ public class BaseRequestValidatorTest {
   }
 
   @Test
+  public void testCheckMandatoryFieldsPresent() {
+    Map<String, Object> request = new HashMap<>();
+    try {
+      baseRequestValidator.checkMandatoryFieldsPresent(request, "key");
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
+    }
+  }
+
+  @Test
+  public void testCheckReadOnlyAttributesAbsent() {
+    Map<String, Object> request = new HashMap<>();
+    try {
+      baseRequestValidator.checkReadOnlyAttributesAbsent(request, "key");
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
+    }
+  }
+
+  @Test
+  public void testCheckMandatoryFieldsPresent2() {
+    Map<String, Object> request = new HashMap<>();
+    try {
+      baseRequestValidator.checkMandatoryFieldsPresent(request, new ArrayList<>());
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
+    }
+  }
+
+  @Test
   public void testValidateSearchRequestFailureWithInvalidFieldsValueInList() {
     Request request = new Request();
     Map<String, Object> requestObj = new HashMap<>();
