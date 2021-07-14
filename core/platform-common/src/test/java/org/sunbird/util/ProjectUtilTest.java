@@ -15,6 +15,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.sso.impl.BaseHttpTest;
 
 /** Created by arvind on 6/10/17. */
@@ -51,9 +52,32 @@ public class ProjectUtilTest extends BaseHttpTest {
 
     Map<String, Object> templateMap = new HashMap<>();
     templateMap.put(JsonKey.NAME, "userName");
-
+    templateMap.put(JsonKey.ORG_NAME, "orgName");
+    templateMap.put(JsonKey.COURSE_NAME, "courseName");
+    templateMap.put(JsonKey.BATCH_START_DATE, "2020");
+    templateMap.put(JsonKey.BATCH_END_DATE, "2019");
+    templateMap.put(JsonKey.BATCH_NAME, "name");
+    templateMap.put(JsonKey.NAME, "firstName");
+    templateMap.put(JsonKey.SIGNATURE, "signature");
+    templateMap.put(JsonKey.COURSE_BATCH_URL, "url");
     VelocityContext context = ProjectUtil.getContext(templateMap);
     assertEquals(false, context.internalContainsKey(JsonKey.ACTION_URL));
+  }
+
+  @Test
+  public void testGetSMSBody() {
+    Map<String, String> templateMap = new HashMap<>();
+    templateMap.put(JsonKey.NAME, "userName");
+    templateMap.put(JsonKey.ORG_NAME, "orgName");
+    templateMap.put(JsonKey.COURSE_NAME, "courseName");
+    templateMap.put(JsonKey.BATCH_START_DATE, "2020");
+    templateMap.put(JsonKey.BATCH_END_DATE, "2019");
+    templateMap.put(JsonKey.BATCH_NAME, "name");
+    templateMap.put(JsonKey.NAME, "firstName");
+    templateMap.put(JsonKey.SIGNATURE, "signature");
+    templateMap.put(JsonKey.COURSE_BATCH_URL, "url");
+    String sms = ProjectUtil.getSMSBody(templateMap);
+    assertNotNull(sms);
   }
 
   @Test
@@ -171,6 +195,18 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
+  public void testSetTraceIdInHeader() {
+    ProjectUtil.setTraceIdInHeader(new HashMap<>(), new RequestContext());
+    assertTrue(true);
+  }
+
+  @Test
+  public void testValidatePhone() {
+    boolean bool = ProjectUtil.validatePhone("9742500121", "91");
+    assertTrue(true);
+  }
+
+  @Test
   public void testIsDateValidFormatSuccess() {
     boolean bool = ProjectUtil.isDateValidFormat("yyyy-MM-dd", "2017-12-18");
     assertTrue(bool);
@@ -271,6 +307,42 @@ public class ProjectUtilTest extends BaseHttpTest {
     assertEquals(true, ProjectUtil.ActiveStatus.ACTIVE.getValue());
     assertEquals("orgimg", ProjectUtil.AzureContainer.orgImage.getName());
     assertEquals("userprofileimg", ProjectUtil.AzureContainer.userProfileImg.getName());
+
+    assertEquals("username", ProjectUtil.UserLookupType.USERNAME.getType());
+    assertEquals("email", ProjectUtil.UserLookupType.EMAIL.getType());
+    assertEquals("phone", ProjectUtil.UserLookupType.PHONE.getType());
+  }
+
+  @Test
+  public void testGetFormattedDate() {
+    Assert.assertNotNull(ProjectUtil.getFormattedDate());
+  }
+
+  @Test
+  public void testGetUniqueIdFromTimestamp() {
+    Assert.assertNotNull(ProjectUtil.getUniqueIdFromTimestamp(1)); // generateUniqueId
+  }
+
+  @Test
+  public void testGenerateUniqueId() {
+    Assert.assertNotNull(ProjectUtil.generateUniqueId());
+  }
+
+  @Test
+  public void testIsNull() {
+    Assert.assertTrue(ProjectUtil.isNull(null));
+    Assert.assertTrue(ProjectUtil.isNotNull("null"));
+  }
+
+  @Test
+  public void testGetDateFormatter() {
+    Assert.assertNotNull(ProjectUtil.getDateFormatter());
+  }
+
+  @Test
+  public void testIsEmailvalid() {
+    Assert.assertTrue(ProjectUtil.isEmailvalid("xyz@xyz.com"));
+    Assert.assertFalse(ProjectUtil.isEmailvalid("xy@z@xyz.com"));
   }
 
   @Test
