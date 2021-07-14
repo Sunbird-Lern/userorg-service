@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseParams;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 

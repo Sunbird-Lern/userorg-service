@@ -8,10 +8,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.HeaderParam;
-import org.sunbird.common.request.Request;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.HeaderParam;
+import org.sunbird.request.Request;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})

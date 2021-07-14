@@ -10,15 +10,15 @@ import java.util.stream.Collectors;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.BulkUploadActorOperation;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 
 @ActorConfig(
   tasks = {"userBulkUpload"},

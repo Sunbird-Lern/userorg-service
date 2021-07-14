@@ -1,6 +1,6 @@
 package org.sunbird.learner.actors.notificationservice.dao;
 
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.request.RequestContext;
 
 public interface EmailTemplateDao {
 

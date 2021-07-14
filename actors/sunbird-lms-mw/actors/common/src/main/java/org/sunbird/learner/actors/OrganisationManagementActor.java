@@ -17,23 +17,17 @@ import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.EmailValidator;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.Slug;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.validator.EmailValidator;
+import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.util.Slug;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
@@ -41,7 +35,12 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.validator.location.LocationRequestValidator;
 import scala.concurrent.Future;
 
@@ -558,7 +557,7 @@ public class OrganisationManagementActor extends BaseActor {
 
   private void updateDataToEs(Request actorMessage, Map<String, Object> updateOrgDao) {
     esService.update(
-        EsType.organisation.getTypeName(),
+        ProjectUtil.EsType.organisation.getTypeName(),
         (String) updateOrgDao.get(JsonKey.ID),
         updateOrgDao,
         actorMessage.getRequestContext());
@@ -641,7 +640,8 @@ public class OrganisationManagementActor extends BaseActor {
       filters.put(JsonKey.SLUG, slug);
       filters.put(JsonKey.IS_TENANT, true);
       Map<String, Object> esResult =
-          elasticSearchComplexSearch(filters, EsType.organisation.getTypeName(), context);
+          elasticSearchComplexSearch(
+              filters, ProjectUtil.EsType.organisation.getTypeName(), context);
       if (MapUtils.isNotEmpty(esResult)
           && esResult.containsKey(JsonKey.CONTENT)
           && (CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT)))) {

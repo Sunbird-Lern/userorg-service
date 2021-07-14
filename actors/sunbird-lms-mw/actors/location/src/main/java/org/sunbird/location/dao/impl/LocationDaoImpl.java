@@ -10,16 +10,16 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.location.dao.LocationDao;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.location.Location;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 /** @author Amit Kumar */

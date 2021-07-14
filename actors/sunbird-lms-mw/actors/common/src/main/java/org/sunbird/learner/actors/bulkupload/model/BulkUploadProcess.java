@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 
 /** @author arvind. */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -15,10 +15,10 @@ public class BulkUploadProcess implements Serializable {
 
   private static final long serialVersionUID = 1L;
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
 
   private String id;

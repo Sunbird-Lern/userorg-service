@@ -30,19 +30,19 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.user.actors.UserTnCActor;
 import org.sunbird.user.service.UserTncService;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

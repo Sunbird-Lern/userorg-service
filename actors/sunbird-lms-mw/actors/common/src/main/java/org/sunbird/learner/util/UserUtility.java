@@ -1,12 +1,18 @@
 package org.sunbird.learner.util;
 
-import java.util.*;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.models.util.datasecurity.DataMaskingService;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.datasecurity.impl.ServiceFactory;
+import org.sunbird.datasecurity.DataMaskingService;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.EncryptionService;
+import org.sunbird.datasecurity.impl.ServiceFactory;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.PropertiesCache;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is for utility methods for encrypting user data.
@@ -114,10 +120,10 @@ public final class UserUtility {
 
   private static void init() {
     decryptionService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+        org.sunbird.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null);
     maskingService =
-        org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
+        org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
             null);
     String userKey = PropertiesCache.getInstance().getProperty("userkey.encryption");
     userKeyToEncrypt = new ArrayList<>(Arrays.asList(userKey.split(",")));

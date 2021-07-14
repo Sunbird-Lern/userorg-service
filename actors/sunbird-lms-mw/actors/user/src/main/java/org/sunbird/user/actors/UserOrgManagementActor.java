@@ -8,10 +8,10 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.util.UserUtil;
 

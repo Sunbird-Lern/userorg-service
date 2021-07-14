@@ -13,19 +13,19 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.GeoLocationJsonKey;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.GeoLocationJsonKey;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.location.dao.LocationDao;
 import org.sunbird.location.dao.impl.LocationDaoImpl;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 /** @author Amit Kumar */

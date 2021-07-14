@@ -24,23 +24,23 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.ConfigUtil;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.kafka.client.KafkaClient;
+import org.sunbird.kafka.KafkaClient;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.models.user.User;
-import org.sunbird.services.sso.SSOServiceFactory;
-import org.sunbird.services.sso.impl.KeyCloakServiceImpl;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.user.actors.UserMergeActor;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.KafkaConfigConstants;
+import org.sunbird.util.ConfigUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -62,7 +62,7 @@ import org.sunbird.user.util.KafkaConfigConstants;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@SuppressStaticInitializationFor("org.sunbird.kafka.client.KafkaClient")
+@SuppressStaticInitializationFor("org.sunbird.kafka.KafkaClient")
 public class UserMergeActorTest {
   private static int userCounter;
   private static final Props props = Props.create(UserMergeActor.class);
@@ -74,7 +74,7 @@ public class UserMergeActorTest {
   public static KafkaClient kafkaClient;
   public static CassandraOperationImpl cassandraOperation;
   private static KeyCloakServiceImpl ssoManager;
-
+  
   @Before
   public void beforeEachTest() {
     PowerMockito.mockStatic(UserServiceImpl.class);
@@ -98,48 +98,48 @@ public class UserMergeActorTest {
     cassandraOperation = mock(CassandraOperationImpl.class);
     userCounter = 0;
   }
-
+  
   @Test
   public void testMergeUserIsAlreadyDeleted() {
     when(userService.getUserById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(getUserDetails(true))
-        .thenReturn(getUserDetails(true));
+      .thenReturn(getUserDetails(true))
+      .thenReturn(getUserDetails(true));
     when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn("anyUserId");
+      .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result =
-        testScenario(getRequest(ActorOperations.MERGE_USER), ResponseCode.invalidIdentifier);
+      testScenario(getRequest(ActorOperations.MERGE_USER), ResponseCode.invalidIdentifier);
     assertTrue(result);
   }
-
+  
   @Test
   public void testValidMergeUser() throws Exception {
     when(userService.getUserById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(getUserDetails(false))
-        .thenReturn(getUserDetails(false));
+      .thenReturn(getUserDetails(false))
+      .thenReturn(getUserDetails(false));
     when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
     when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn("anyUserId");
+      .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), null);
     assertTrue(result);
   }
-
+  
   private Map<String, String> configSettingsMap() {
     Map<String, String> configMap = new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "anyOrgId");
     return configMap;
   }
-
+  
   public static Response getSuccessResponse() {
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     return response;
   }
-
+  
   private User getUserDetails(boolean b) {
     User user = new User();
     if (userCounter == 0) {
@@ -152,24 +152,24 @@ public class UserMergeActorTest {
     userCounter++;
     return user;
   }
-
+  
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
+    
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
-
+    
     if (errorCode == null) {
       Response res = probe.expectMsgClass(duration("10 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+        || res.getResponseCode() == errorCode.getResponseCode();
     }
   }
-
+  
   Request getRequest(ActorOperations actorOperation) {
     Request reqObj = new Request();
     Map reqMap = new HashMap<>();

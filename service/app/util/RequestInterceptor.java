@@ -12,9 +12,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.auth.verifier.AccessTokenValidator;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.request.HeaderParam;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.HeaderParam;
 import play.mvc.Http;
 
 /**

@@ -13,22 +13,25 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryWriter;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
 /**
@@ -60,10 +63,11 @@ public class SearchHandlerActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())
         || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())
         || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V3.getValue())) {
-      handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
+      handleUserSearch(request, searchQueryMap, ProjectUtil.EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())
         || request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
+      handleOrgSearchAsyncRequest(
+          ProjectUtil.EsType.organisation.getTypeName(), searchQueryMap, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
@@ -142,7 +146,7 @@ public class SearchHandlerActor extends BaseActor {
       }
     }
     // Decrypt the data
-    if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
+    if (ProjectUtil.EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
       List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);

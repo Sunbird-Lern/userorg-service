@@ -1,12 +1,12 @@
 package controllers.tac.validator;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.util.ProjectUtil;
 
 import java.text.MessageFormat;
 

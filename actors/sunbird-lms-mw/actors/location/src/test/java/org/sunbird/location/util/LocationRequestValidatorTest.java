@@ -18,13 +18,13 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

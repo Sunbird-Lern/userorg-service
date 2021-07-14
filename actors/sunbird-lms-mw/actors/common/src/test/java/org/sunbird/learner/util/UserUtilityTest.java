@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.keys.JsonKey;
 
 public class UserUtilityTest {
 

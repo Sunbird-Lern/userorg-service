@@ -9,13 +9,13 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.CassandraUtil;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 /**
  * Data access implementation for BulkUploadProcessTask entity.

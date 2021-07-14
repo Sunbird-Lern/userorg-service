@@ -1,9 +1,9 @@
 package controllers.usermanagement.validator;
 
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 
 public class UserDataEncryptionRequestValidator extends BaseRequestValidator {
 

@@ -7,19 +7,21 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 /** This class provides API's to create, update, get and delete user note */
@@ -287,7 +289,7 @@ public class NotesManagementActor extends BaseActor {
     excludedFields.add(JsonKey.IS_DELETED);
     searchDto.setExcludedFields(excludedFields);
     Future<Map<String, Object>> resultF =
-        esService.search(searchDto, EsType.usernotes.getTypeName(), context);
+        esService.search(searchDto, ProjectUtil.EsType.usernotes.getTypeName(), context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     if (result != null) {
@@ -300,7 +302,7 @@ public class NotesManagementActor extends BaseActor {
     } else {
       result = new HashMap<>();
     }
-    String[] types = {EsType.usernotes.getTypeName()};
+    String[] types = {ProjectUtil.EsType.usernotes.getTypeName()};
     return result;
   }
 
@@ -375,7 +377,7 @@ public class NotesManagementActor extends BaseActor {
 
     if (!StringUtils.isBlank(userId)) {
       Future<Map<String, Object>> dataF =
-          esService.getDataByIdentifier(EsType.user.getTypeName(), userId, context);
+          esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
       Map<String, Object> data =
           (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(dataF);
       if (null != data && !data.isEmpty()) {
@@ -408,7 +410,7 @@ public class NotesManagementActor extends BaseActor {
    */
   private Map<String, Object> getNoteRecordById(String noteId, RequestContext context) {
     Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(EsType.usernotes.getTypeName(), noteId, context);
+        esService.getDataByIdentifier(ProjectUtil.EsType.usernotes.getTypeName(), noteId, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     return result;

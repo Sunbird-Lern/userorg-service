@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.ratelimit.limiter.RateLimit;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 public class RateLimitDaoImpl implements RateLimitDao {
 

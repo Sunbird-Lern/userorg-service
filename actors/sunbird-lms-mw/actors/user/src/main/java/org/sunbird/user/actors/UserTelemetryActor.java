@@ -7,9 +7,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 
 @ActorConfig(

@@ -20,9 +20,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.bean.ClaimStatus;
 import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.response.Response;
 import org.sunbird.user.service.impl.UserServiceImpl;
 
 @RunWith(PowerMockRunner.class)

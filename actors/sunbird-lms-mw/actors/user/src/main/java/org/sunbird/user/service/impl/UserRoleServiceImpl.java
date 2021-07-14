@@ -11,14 +11,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.RequestContext;
 import org.sunbird.user.dao.UserRoleDao;
 import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 import org.sunbird.user.service.UserRoleService;
+import org.sunbird.util.ProjectUtil;
 
 public class UserRoleServiceImpl implements UserRoleService {
   private static UserRoleService roleService = null;

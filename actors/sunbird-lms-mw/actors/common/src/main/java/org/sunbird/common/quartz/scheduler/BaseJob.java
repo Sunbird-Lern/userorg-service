@@ -8,12 +8,12 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
 
 /** @author Mahesh Kumar Gangula */
 public abstract class BaseJob implements Job {
@@ -24,10 +24,10 @@ public abstract class BaseJob implements Job {
   protected HashSet<String> verifiedChannelOrgExternalIdSet = new HashSet<>();
   protected ElasticSearchService elasticSearchService = EsClientFactory.getInstance(JsonKey.REST);
   protected DecryptionService decryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
   protected EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
 
   public void tellToBGRouter(Request request) {

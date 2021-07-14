@@ -6,14 +6,14 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.user.dao.UserLookupDao;
 
 public class UserLookupDaoImpl implements UserLookupDao {
@@ -22,7 +22,7 @@ public class UserLookupDaoImpl implements UserLookupDao {
   private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private static UserLookupDao userLookUpDao = null;
 

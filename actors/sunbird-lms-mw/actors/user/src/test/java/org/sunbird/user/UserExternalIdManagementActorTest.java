@@ -24,15 +24,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.user.actors.UserExternalIdManagementActor;
 import org.sunbird.user.util.UserActorOperations;
 
@@ -41,7 +41,7 @@ import org.sunbird.user.util.UserActorOperations;
   ServiceFactory.class,
   Util.class,
   DataCacheHandler.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  org.sunbird.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
   Util.class,
   EsClientFactory.class
@@ -64,7 +64,7 @@ public class UserExternalIdManagementActorTest {
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
   }

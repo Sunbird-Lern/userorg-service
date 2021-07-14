@@ -14,11 +14,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.location.Location;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * This class will contains method to validate the location api request.

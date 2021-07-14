@@ -3,11 +3,11 @@ package org.sunbird.user.dao.impl;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.user.dao.UserRoleDao;
 
 public final class UserRoleDaoImpl implements UserRoleDao {

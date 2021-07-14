@@ -5,7 +5,7 @@ import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import java.util.HashMap;
 import java.util.Map;
 import org.quartz.*;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.logging.LoggerUtil;
 
 public class OnDemandSchedulerManager extends SchedulerManager {
   private static LoggerUtil logger = new LoggerUtil(OnDemandSchedulerManager.class);

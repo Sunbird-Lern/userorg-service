@@ -18,29 +18,27 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.models.util.datasecurity.DataMaskingService;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.datasecurity.DataMaskingService;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.user.User;
 import org.sunbird.models.user.UserDeclareEntity;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.service.UserExternalIdentityService;
 import org.sunbird.user.service.UserLookupService;
@@ -48,6 +46,8 @@ import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 import org.sunbird.validator.user.UserRequestValidator;
 import scala.concurrent.Future;
 
@@ -55,16 +55,16 @@ public class UserUtil {
   private static LoggerUtil logger = new LoggerUtil(UserUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private static ObjectMapper mapper = new ObjectMapper();
   private static SSOManager ssoManager = SSOServiceFactory.getInstance();
   private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
   private static DataMaskingService maskingService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
           null);
   private static DecryptionService decService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
           null);
   private static UserService userService = UserServiceImpl.getInstance();
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);

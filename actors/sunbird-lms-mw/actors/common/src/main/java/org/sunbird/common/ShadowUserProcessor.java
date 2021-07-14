@@ -13,18 +13,20 @@ import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.feed.FeedUtil;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.UserFlagEnum;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.Util;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 public class ShadowUserProcessor {

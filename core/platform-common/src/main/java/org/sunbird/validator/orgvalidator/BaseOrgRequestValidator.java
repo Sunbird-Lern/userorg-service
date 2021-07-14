@@ -1,0 +1,35 @@
+package org.sunbird.validator.orgvalidator;
+
+import java.text.MessageFormat;
+import org.apache.commons.lang3.StringUtils;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.request.Request;
+
+public class BaseOrgRequestValidator extends BaseRequestValidator {
+
+  public static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+
+  public void validateOrgReference(Request request) {
+    validateParam(
+        (String) request.getRequest().get(JsonKey.ORGANISATION_ID),
+        ResponseCode.mandatoryParamsMissing,
+        JsonKey.ORGANISATION_ID);
+  }
+
+  public void validateTenantOrgChannel(Request request) {
+    if ((null != request.getRequest().get(JsonKey.IS_TENANT)
+            && (Boolean) request.getRequest().get(JsonKey.IS_TENANT))
+        && StringUtils.isEmpty((String) request.getRequest().get(JsonKey.CHANNEL))) {
+      throw new ProjectCommonException(
+          ResponseCode.dependentParameterMissing.getErrorCode(),
+          MessageFormat.format(
+              ResponseCode.dependentParameterMissing.getErrorMessage(),
+              JsonKey.CHANNEL,
+              JsonKey.IS_TENANT),
+          ERROR_CODE);
+    }
+  }
+}

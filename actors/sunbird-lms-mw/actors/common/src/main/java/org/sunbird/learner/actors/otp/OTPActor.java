@@ -6,14 +6,11 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.ClientErrorResponse;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.models.util.datasecurity.impl.LogMaskServiceImpl;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.otp.service.OTPService;
 import org.sunbird.learner.util.OTPUtil;
 import org.sunbird.learner.util.Util;
@@ -21,6 +18,12 @@ import org.sunbird.ratelimit.limiter.OtpRateLimiter;
 import org.sunbird.ratelimit.limiter.RateLimiter;
 import org.sunbird.ratelimit.service.RateLimitService;
 import org.sunbird.ratelimit.service.RateLimitServiceImpl;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.ClientErrorResponse;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.ProjectUtil;
 
 @ActorConfig(
   tasks = {"generateOTP", "verifyOTP"},

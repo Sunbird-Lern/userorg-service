@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
 

@@ -12,12 +12,12 @@ import java.util.Map;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.request.Request;
 import scala.concurrent.Future;
 
 public class SSOUserCreateActorTest extends UserManagementActorTestBase {

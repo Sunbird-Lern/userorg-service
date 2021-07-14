@@ -27,21 +27,21 @@ import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultDecryptionServiceImpl;
-import org.sunbird.common.models.util.datasecurity.impl.DefaultEncryptionServivceImpl;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.learner.actors.notificationservice.EmailServiceActor;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -49,7 +49,7 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   Util.class,
   DataCacheHandler.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class,
+  org.sunbird.datasecurity.impl.ServiceFactory.class,
   ElasticSearchRestHighImpl.class,
   EmailTemplateDaoImpl.class,
   EsClientFactory.class,
@@ -82,7 +82,7 @@ public class EmailServiceActorTest {
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     defaultDecryptionService = mock(DefaultDecryptionServiceImpl.class);
     defaultEncryptionServivce = mock(DefaultEncryptionServivceImpl.class);
@@ -97,13 +97,13 @@ public class EmailServiceActorTest {
     esService = mock(ElasticSearchRestHighImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-    PowerMockito.mockStatic(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class);
+    PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getDecryptionServiceInstance(null))
         .thenReturn(defaultDecryptionService);
-    when(org.sunbird.common.models.util.datasecurity.impl.ServiceFactory
+    when(org.sunbird.datasecurity.impl.ServiceFactory
             .getEncryptionServiceInstance(null))
         .thenReturn(defaultEncryptionServivce);
     when(cassandraOperation.getRecordsByIdsWithSpecifiedColumns(

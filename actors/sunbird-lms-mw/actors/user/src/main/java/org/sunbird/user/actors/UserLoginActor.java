@@ -1,9 +1,9 @@
 package org.sunbird.user.actors;
 
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 
 @ActorConfig(
   tasks = {"userCurrentLogin"},

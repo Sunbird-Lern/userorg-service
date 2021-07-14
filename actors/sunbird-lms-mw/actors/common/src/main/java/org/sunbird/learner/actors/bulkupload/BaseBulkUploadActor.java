@@ -13,14 +13,9 @@ import java.util.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.BulkProcessStatus;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessDao;
 import org.sunbird.learner.actors.bulkupload.dao.BulkUploadProcessTaskDao;
 import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
@@ -28,6 +23,10 @@ import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoIm
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * Actor contains the common functionality for bulk upload.
@@ -160,7 +159,8 @@ public abstract class BaseBulkUploadActor extends BaseActor {
       logger.error(context, "Exception occurred while processing csv file : ", ex);
       BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
       BulkUploadProcess bulkUploadProcess =
-          getBulkUploadProcessForFailedStatus(processId, BulkProcessStatus.FAILED.getValue(), ex);
+          getBulkUploadProcessForFailedStatus(
+              processId, ProjectUtil.BulkProcessStatus.FAILED.getValue(), ex);
       bulkUploadDao.update(bulkUploadProcess, context);
       throw ex;
     } finally {
@@ -296,7 +296,8 @@ public abstract class BaseBulkUploadActor extends BaseActor {
       logger.error(context, ex.getMessage(), ex);
       BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
       BulkUploadProcess bulkUploadProcess =
-          getBulkUploadProcessForFailedStatus(processId, BulkProcessStatus.FAILED.getValue(), ex);
+          getBulkUploadProcessForFailedStatus(
+              processId, ProjectUtil.BulkProcessStatus.FAILED.getValue(), ex);
       bulkUploadDao.update(bulkUploadProcess, context);
       throw ex;
     } finally {

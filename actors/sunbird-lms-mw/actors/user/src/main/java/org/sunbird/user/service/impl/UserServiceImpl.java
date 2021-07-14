@@ -18,26 +18,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actorutil.systemsettings.SystemSettingClient;
 import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.Slug;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.util.Slug;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.AdminUtilHandler;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserUtility;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.systemsetting.SystemSetting;
 import org.sunbird.models.user.User;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserLookupDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
@@ -45,6 +43,7 @@ import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
   private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
           null);
   private static UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
@@ -146,7 +145,7 @@ public class UserServiceImpl implements UserService {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
     Future<Map<String, Object>> esResultF =
-        esUtil.search(searchDTO, EsType.organisation.getTypeName(), context);
+        esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isNotEmpty(esResult)

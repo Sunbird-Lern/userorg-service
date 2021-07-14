@@ -1,7 +1,7 @@
 package org.sunbird.error;
 
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 
 /**
  * this class will dispatch the errors in the csv format

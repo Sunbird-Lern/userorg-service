@@ -1,10 +1,9 @@
 package controllers.usermanagement;
 
 import controllers.BaseController;
-import controllers.usermanagement.validator.ResetPasswordRequestValidator;
 import controllers.usermanagement.validator.UserConsentRequestValidator;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.request.Request;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
 

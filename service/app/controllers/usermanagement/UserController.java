@@ -4,12 +4,12 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
+
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.request.Request;
 import org.sunbird.validator.user.UserRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -233,7 +233,7 @@ public class UserController extends BaseController {
         null,
         null,
         getAllRequestHeaders(httpRequest),
-        EsType.user.getTypeName(),
+        ProjectUtil.EsType.user.getTypeName(),
         httpRequest);
   }
 
@@ -252,7 +252,7 @@ public class UserController extends BaseController {
         null,
         null,
         getAllRequestHeaders(httpRequest),
-        EsType.user.getTypeName(),
+        ProjectUtil.EsType.user.getTypeName(),
         httpRequest);
   }
 
@@ -270,7 +270,7 @@ public class UserController extends BaseController {
         null,
         null,
         getAllRequestHeaders(httpRequest),
-        EsType.user.getTypeName(),
+        ProjectUtil.EsType.user.getTypeName(),
         httpRequest);
   }
 

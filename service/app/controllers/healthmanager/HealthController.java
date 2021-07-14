@@ -9,14 +9,15 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
+
 import modules.SignalHandler;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
@@ -25,7 +26,8 @@ import util.Common;
 /** @author Manzarul */
 public class HealthController extends BaseController {
   private static List<String> list = new ArrayList<>();
-  @Inject SignalHandler signalHandler;
+  @Inject
+  SignalHandler signalHandler;
 
   static {
     list.add("service");

@@ -3,10 +3,10 @@ package org.sunbird.user.service;
 import akka.actor.ActorRef;
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.user.User;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 public interface UserService {
 

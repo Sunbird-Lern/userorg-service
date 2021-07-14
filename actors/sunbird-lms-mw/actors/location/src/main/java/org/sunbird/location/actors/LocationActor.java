@@ -6,13 +6,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.Util;
 import org.sunbird.location.dao.LocationDao;
@@ -20,6 +18,11 @@ import org.sunbird.location.dao.impl.LocationDaoFactory;
 import org.sunbird.location.util.LocationRequestValidator;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * This class will handle all location related request.
