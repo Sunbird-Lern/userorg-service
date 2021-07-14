@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.CassandraPropertyReader;
 import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
 
 public class CassandraConnectionManagerImpl implements CassandraConnectionManager {
   private static LoggerUtil logger = new LoggerUtil(CassandraConnectionManagerImpl.class);
@@ -45,7 +45,7 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
 
   private void createCassandraConnection(String[] hosts) {
     try {
-      PropertiesCache cache = PropertiesCache.getInstance();
+      CassandraPropertyReader cache = CassandraPropertyReader.getInstance();
       PoolingOptions poolingOptions = new PoolingOptions();
       poolingOptions.setCoreConnectionsPerHost(
           HostDistance.LOCAL,
