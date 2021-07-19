@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -47,8 +48,10 @@ public class UserRoleServiceImpl implements UserRoleService {
               userRequest, dbUserRoleListToUpdate, dbUserRoleListToDelete, context);
       // Update existing role scope, if same role is in request
       if (CollectionUtils.isNotEmpty(dbUserRoleListToUpdate)) {
+        List<Map<String, Object>> newUserReqMap =
+            SerializationUtils.clone(new ArrayList<>(dbUserRoleListToUpdate));
+        userRoleListResponse.addAll(newUserReqMap);
         userRoleDao.updateRoleScope(dbUserRoleListToUpdate, context);
-        userRoleListResponse.addAll(dbUserRoleListToUpdate);
       }
       // Delete existing roles of user, if the same is not in request
       if (CollectionUtils.isNotEmpty(dbUserRoleListToDelete)) {
