@@ -13,22 +13,25 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryWriter;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
 /**
@@ -37,7 +40,7 @@ import scala.concurrent.Future;
  * @author Manzarul
  */
 @ActorConfig(
-  tasks = {"userSearch", "userSearchV2", "orgSearch", "orgSearchV2"},
+  tasks = {"userSearch", "userSearchV2", "userSearchV3", "orgSearch", "orgSearchV2"},
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
 )
@@ -58,11 +61,13 @@ public class SearchHandlerActor extends BaseActor {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
     if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())
-        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())) {
-      handleUserSearch(request, searchQueryMap, EsType.user.getTypeName());
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V2.getValue())
+        || request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH_V3.getValue())) {
+      handleUserSearch(request, searchQueryMap, ProjectUtil.EsType.user.getTypeName());
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH.getValue())
         || request.getOperation().equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-      handleOrgSearchAsyncRequest(EsType.organisation.getTypeName(), searchQueryMap, request);
+      handleOrgSearchAsyncRequest(
+          ProjectUtil.EsType.organisation.getTypeName(), searchQueryMap, request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
@@ -108,7 +113,8 @@ public class SearchHandlerActor extends BaseActor {
   private void handleUserSearch(
       Request request, Map<String, Object> searchQueryMap, String filterObjectType)
       throws Exception {
-    if (request.getOperation().equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
+    String searchVersion = request.getOperation();
+    if (searchVersion.equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
       // checking for Backword compatibility
       backwardCompatibility(searchQueryMap);
     }
@@ -140,7 +146,7 @@ public class SearchHandlerActor extends BaseActor {
       }
     }
     // Decrypt the data
-    if (EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
+    if (ProjectUtil.EsType.user.getTypeName().equalsIgnoreCase(filterObjectType)) {
       List<Map<String, Object>> userMapList =
           (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
       List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
@@ -148,7 +154,9 @@ public class SearchHandlerActor extends BaseActor {
       getDefaultValues(userDefaultFieldValue, fields);
       for (Map<String, Object> userMap : userMapList) {
         UserUtility.decryptUserDataFrmES(userMap);
-        updateUserSearchResponseWithOrgLevelRole(userMap, request.getRequestContext());
+        if (!searchVersion.equalsIgnoreCase(ActorOperations.USER_SEARCH_V3.getValue())) {
+          updateUserSearchResponseWithOrgLevelRole(userMap, request.getRequestContext());
+        }
         userMap.remove(JsonKey.ENC_EMAIL);
         userMap.remove(JsonKey.ENC_PHONE);
         Map<String, Object> userTypeDetail;
@@ -220,7 +228,9 @@ public class SearchHandlerActor extends BaseActor {
                           scope -> {
                             String orgId = scope.get(JsonKey.ORGANISATION_ID);
                             Map<String, Object> userOrg = userOrgIdMap.get(orgId);
-                            ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
+                            if (MapUtils.isNotEmpty(userOrg)) {
+                              ((List) userOrg.get(JsonKey.ROLES)).add(userRole);
+                            }
                           });
                 });
       }

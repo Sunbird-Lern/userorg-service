@@ -11,15 +11,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.EntryExitLogEvent;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.datasecurity.impl.LogMaskServiceImpl;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.response.ResponseParams;
+import org.sunbird.util.EntryExitLogEvent;
 
 public class PrintEntryExitLog {
 
@@ -60,8 +61,11 @@ public class PrintEntryExitLog {
   }
 
   public static void printExitLogOnSuccessResponse(
-      org.sunbird.common.request.Request request, Response response) {
+      org.sunbird.request.Request request, Response response) {
     try {
+      if (ActorOperations.HEALTH_CHECK.getValue().equalsIgnoreCase(request.getOperation())) {
+        return;
+      }
       EntryExitLogEvent exitLogEvent = getLogEvent(request, "EXIT");
       String url = (String) request.getContext().get(JsonKey.URL);
       List<Map<String, Object>> params = new ArrayList<>();
@@ -98,7 +102,7 @@ public class PrintEntryExitLog {
   }
 
   public static void printExitLogOnFailure(
-      org.sunbird.common.request.Request request, ProjectCommonException exception) {
+      org.sunbird.request.Request request, ProjectCommonException exception) {
     try {
       EntryExitLogEvent exitLogEvent = getLogEvent(request, "EXIT");
       String requestId = request.getRequestContext().getReqId();

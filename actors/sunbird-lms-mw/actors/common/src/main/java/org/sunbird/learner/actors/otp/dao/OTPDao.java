@@ -1,7 +1,7 @@
 package org.sunbird.learner.actors.otp.dao;
 
 import java.util.Map;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.request.RequestContext;
 
 public interface OTPDao {
 

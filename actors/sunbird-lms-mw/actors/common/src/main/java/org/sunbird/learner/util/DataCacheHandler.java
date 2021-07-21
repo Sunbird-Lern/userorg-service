@@ -1,6 +1,7 @@
 /** */
 package org.sunbird.learner.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -9,13 +10,13 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.role.service.RoleService;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * This class will handle the data cache.
@@ -200,7 +201,20 @@ public class DataCacheHandler implements Runnable {
     }
     tempConfigSettings.put(JsonKey.PHONE_UNIQUE, String.valueOf(true));
     tempConfigSettings.put(JsonKey.EMAIL_UNIQUE, String.valueOf(true));
+    updateFrameWorkCache(tempConfigSettings.get(JsonKey.USER_PROFILE_CONFIG));
     configSettings = tempConfigSettings;
+  }
+
+  private void updateFrameWorkCache(String userProfileConfig) {
+    if (StringUtils.isNotBlank(userProfileConfig)) {
+      try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> valueMap = objectMapper.readValue(userProfileConfig, Map.class);
+        setFrameworkFieldsConfig((Map<String, List<String>>) valueMap.get(JsonKey.FRAMEWORK));
+      } catch (Exception ex) {
+        logger.error("Exception occurred while parsing framework details.", ex);
+      }
+    }
   }
 
   @SuppressWarnings("unchecked")

@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.role.dao.RoleDao;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.role.Role;
+import org.sunbird.response.Response;
 
 public class RoleDaoImpl implements RoleDao {
 

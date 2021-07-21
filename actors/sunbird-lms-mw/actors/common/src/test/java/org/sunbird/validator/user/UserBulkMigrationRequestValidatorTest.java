@@ -8,9 +8,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.bean.MigrationUser;
 import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.bean.ShadowUserUpload;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.util.ProjectUtil;
 
 @PrepareForTest(UserBulkMigrationRequestValidator.class)
 public class UserBulkMigrationRequestValidatorTest {

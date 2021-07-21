@@ -2,9 +2,9 @@
 package mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.ProjectUtil;
 import play.libs.Json;
 
 /**

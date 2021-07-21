@@ -40,15 +40,12 @@ import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtilHandler;
@@ -58,7 +55,10 @@ import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.User;
-import org.sunbird.user.actors.UserManagementActor;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.user.actors.SSOUserCreateActor;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.user.service.impl.UserRoleServiceImpl;
@@ -82,6 +82,7 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
   UserClientImpl.class,
+  UserClient.class,
   OrganisationClientImpl.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
@@ -107,14 +108,14 @@ import scala.concurrent.Promise;
 public abstract class UserManagementActorTestBase {
 
   public ActorSystem system = ActorSystem.create("system");
-  public static final Props props = Props.create(UserManagementActor.class);
+  public final Props props = Props.create(SSOUserCreateActor.class);
   public static Map<String, Object> reqMap;
   public static UserServiceImpl userService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
-  public static UserClient userClient;
+  // public static UserClientImpl userClient;
   protected static OrganisationClient organisationClient;
-  private LocationClient locationClient;
+  public LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static LocationService locationService;
   public static UserRoleServiceImpl userRoleService;
@@ -163,8 +164,8 @@ public abstract class UserManagementActorTestBase {
             Mockito.any()))
         .thenReturn(new HashMap<>());
 
-    PowerMockito.mockStatic(UserClientImpl.class);
-    userClient = mock(UserClientImpl.class);
+    // PowerMockito.mockStatic(UserClientImpl.class);
+    // userClient = mock(UserClientImpl.class);
     PowerMockito.mockStatic(LocationClientImpl.class);
     locationClient = mock(LocationClientImpl.class);
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
@@ -215,7 +216,7 @@ public abstract class UserManagementActorTestBase {
         .thenReturn(esPromise.future());
 
     PowerMockito.mockStatic(UserUtil.class);
-    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.anyString(), Mockito.any());
+    UserUtil.setUserDefaultValue(Mockito.anyMap(), Mockito.any());
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     requestMap.put(JsonKey.TNC_ACCEPTED_ON, 12345678L);
@@ -440,23 +441,6 @@ public abstract class UserManagementActorTestBase {
     return locationTypeConfig;
   }
 
-  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-    subject.tell(reqObj, probe.getRef());
-
-    if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
-      return null != res && res.getResponseCode() == ResponseCode.OK;
-    } else {
-      ProjectCommonException res =
-          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
-    }
-  }
-
   public Map<String, Object> getExternalIdMap() {
 
     Map<String, Object> reqMap = new HashMap<>();
@@ -570,5 +554,58 @@ public abstract class UserManagementActorTestBase {
     idType.put(JsonKey.TYPE, "type");
     locationIdType.add(idType);
     return locationIdType;
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode, Props props) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public boolean testScenario(Request reqObj, ResponseCode errorCode) {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+  }
+
+  public boolean testScenario(
+      Request reqObj, ResponseCode errorCode, ResponseCode responseCode, Props props) {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(reqObj, probe.getRef());
+
+    if (responseCode != null) {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      return null != res && res.getResponseCode() == responseCode;
+    }
+    if (errorCode != null) {
+      ProjectCommonException res =
+          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+      return res.getCode().equals(errorCode.getErrorCode())
+          || res.getResponseCode() == errorCode.getResponseCode();
+    }
+    return true;
   }
 }

@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 
 /**
  * This class will lookup into bulk process table. if process type is new or in progress (more than

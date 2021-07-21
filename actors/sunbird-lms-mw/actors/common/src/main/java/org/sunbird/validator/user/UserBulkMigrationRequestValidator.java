@@ -9,17 +9,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.bean.MigrationUser;
 import org.sunbird.bean.SelfDeclaredUser;
 import org.sunbird.bean.ShadowUserUpload;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.error.CsvError;
 import org.sunbird.error.CsvRowErrorDetails;
 import org.sunbird.error.ErrorEnum;
 import org.sunbird.error.IErrorDispatcher;
 import org.sunbird.error.factory.ErrorDispatcherFactory;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredErrorTypeEnum;
 import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredStatusEnum;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * this class will validate the csv file for shadow db

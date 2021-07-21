@@ -8,10 +8,10 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.user.service.AssociationMechanism;
 import org.sunbird.user.util.UserUtil;
 
@@ -75,13 +75,11 @@ public class UserOrgManagementActor extends BaseActor {
       userOrgListDb.forEach(
           userOrg -> userOrgDbMap.put((String) userOrg.get(JsonKey.ORGANISATION_ID), userOrg));
     }
-
     if (StringUtils.isNotBlank(organisationId)) {
       Map<String, Object> userOrg = (Map<String, Object>) userOrgDbMap.get(organisationId);
       requestMap.put(JsonKey.ASSOCIATION_TYPE, getAssociationType(userOrg, callerId, requestMap));
       Util.upsertUserOrgData(requestMap, request.getRequestContext());
     }
-
     if ((StringUtils.isNotBlank(organisationId)
             && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
         || StringUtils.isBlank(organisationId)) {

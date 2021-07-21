@@ -13,10 +13,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.util.ProjectUtil;
 import play.libs.Files;
 import play.mvc.Http;
 import play.mvc.Http.MultipartFormData;
@@ -40,13 +40,12 @@ public class BaseBulkUploadController extends BaseController {
    *
    * @param operation A defined actor operation
    * @param objectType A defined type of object to set in he request body
-   * @return Created and initialised Request (@see {@link org.sunbird.common.request.Request})
-   *     instance.
+   * @return Created and initialised Request (@see {@link org.sunbird.request.Request}) instance.
    */
-  protected org.sunbird.common.request.Request createAndInitBulkRequest(
+  protected org.sunbird.request.Request createAndInitBulkRequest(
       String operation, String objectType, Boolean validateFileZize, Http.Request httpRequest)
       throws IOException {
-    org.sunbird.common.request.Request reqObj = new org.sunbird.common.request.Request();
+    org.sunbird.request.Request reqObj = new org.sunbird.request.Request();
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
     MultipartFormData body = httpRequest.body().asMultipartFormData();
@@ -73,9 +72,9 @@ public class BaseBulkUploadController extends BaseController {
       byteArray = IOUtils.toByteArray(is);
     } else if (null != requestData) {
       reqObj =
-          (org.sunbird.common.request.Request)
+          (org.sunbird.request.Request)
               mapper.RequestMapper.mapRequest(
-                  httpRequest.body().asJson(), org.sunbird.common.request.Request.class);
+                  httpRequest.body().asJson(), org.sunbird.request.Request.class);
       InputStream is =
           new ByteArrayInputStream(
               ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));

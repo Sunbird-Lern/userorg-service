@@ -11,32 +11,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.background.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.OrgStatus;
-import org.sunbird.common.models.util.PropertiesCache;
-import org.sunbird.common.models.util.datasecurity.DataMaskingService;
-import org.sunbird.common.models.util.datasecurity.DecryptionService;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.models.util.url.URLShortner;
-import org.sunbird.common.models.util.url.URLShortnerImpl;
 import org.sunbird.common.quartz.scheduler.SchedulerManager;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
+import org.sunbird.datasecurity.DataMaskingService;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
+import org.sunbird.url.URLShortner;
+import org.sunbird.url.URLShortnerImpl;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
 /**
@@ -57,14 +56,11 @@ public final class Util {
   private static final String SUNBIRD_WEB_URL = "sunbird_web_url";
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-          null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
   private static DecryptionService decService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(
-          null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
   private static DataMaskingService maskingService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(
-          null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -84,30 +80,32 @@ public final class Util {
    */
   private static void initializeOrgStatusTransition() {
     orgStatusTransition.put(
-        OrgStatus.ACTIVE.getValue(),
+        ProjectUtil.OrgStatus.ACTIVE.getValue(),
         Arrays.asList(
-            OrgStatus.ACTIVE.getValue(),
-            OrgStatus.INACTIVE.getValue(),
-            OrgStatus.BLOCKED.getValue(),
-            OrgStatus.RETIRED.getValue()));
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.INACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
     orgStatusTransition.put(
-        OrgStatus.INACTIVE.getValue(),
-        Arrays.asList(OrgStatus.ACTIVE.getValue(), OrgStatus.INACTIVE.getValue()));
-    orgStatusTransition.put(
-        OrgStatus.BLOCKED.getValue(),
+        ProjectUtil.OrgStatus.INACTIVE.getValue(),
         Arrays.asList(
-            OrgStatus.ACTIVE.getValue(),
-            OrgStatus.BLOCKED.getValue(),
-            OrgStatus.RETIRED.getValue()));
+            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
     orgStatusTransition.put(
-        OrgStatus.RETIRED.getValue(), Arrays.asList(OrgStatus.RETIRED.getValue()));
+        ProjectUtil.OrgStatus.BLOCKED.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.RETIRED.getValue(),
+        Arrays.asList(ProjectUtil.OrgStatus.RETIRED.getValue()));
     orgStatusTransition.put(
         null,
         Arrays.asList(
-            OrgStatus.ACTIVE.getValue(),
-            OrgStatus.INACTIVE.getValue(),
-            OrgStatus.BLOCKED.getValue(),
-            OrgStatus.RETIRED.getValue()));
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.INACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
   }
 
   /** This method will initialize the cassandra data base property */
@@ -502,7 +500,9 @@ public final class Util {
               orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), identifier, context);
       List<Map<String, Object>> res = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (null != res && !res.isEmpty()) {
-        return res.get(0);
+        Map<String, Object> result = res.get(0);
+        result.put(JsonKey.HASHTAGID, result.get(JsonKey.ID));
+        return result;
       }
     }
     return Collections.emptyMap();

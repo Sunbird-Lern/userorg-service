@@ -8,17 +8,17 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.feed.IFeedService;
 import org.sunbird.feed.impl.FeedFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.Feed;
 import org.sunbird.models.user.FeedStatus;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.ProjectUtil;
 
 /** This class contains API related to user feed. */
 @ActorConfig(

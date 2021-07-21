@@ -3,13 +3,12 @@ package controllers.notesmanagement;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import controllers.notesmanagement.validator.NoteRequestValidator;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import java.util.concurrent.CompletionStage;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.concurrent.CompletionStage;
 
 /**
  * Controller class to handle Notes related operation such as create, read/get, search, update and
@@ -29,8 +28,8 @@ public class NotesController extends BaseController {
         (request) -> {
           new NoteRequestValidator().validateNote((Request) request);
           return null;
-        }, 
-            httpRequest);
+        },
+        httpRequest);
   }
 
   /**
@@ -50,7 +49,7 @@ public class NotesController extends BaseController {
         },
         noteId,
         JsonKey.NOTE_ID,
-            httpRequest);
+        httpRequest);
   }
 
   /**
@@ -68,7 +67,7 @@ public class NotesController extends BaseController {
         },
         noteId,
         JsonKey.NOTE_ID,
-            httpRequest);
+        httpRequest);
   }
 
   /**
@@ -77,7 +76,8 @@ public class NotesController extends BaseController {
    * @return
    */
   public CompletionStage<Result> searchNote(Http.Request httpRequest) {
-    return handleRequest(ActorOperations.SEARCH_NOTE.getValue(), httpRequest.body().asJson(), httpRequest);
+    return handleRequest(
+        ActorOperations.SEARCH_NOTE.getValue(), httpRequest.body().asJson(), httpRequest);
   }
 
   /**
@@ -95,6 +95,6 @@ public class NotesController extends BaseController {
         },
         noteId,
         JsonKey.NOTE_ID,
-            httpRequest);
+        httpRequest);
   }
 }

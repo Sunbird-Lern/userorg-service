@@ -29,16 +29,16 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.user.actors.UserManagementActor;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.user.actors.UserRoleActor;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -50,7 +50,7 @@ import scala.concurrent.duration.FiniteDuration;
   EsClientFactory.class,
   CassandraOperationImpl.class,
   DataCacheHandler.class,
-  org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.class
+  org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -91,7 +91,7 @@ public class UserAssignRoleTest {
   @BeforeClass
   public static void setUp() throws Exception {
     system = ActorSystem.create("system");
-    props = Props.create(UserManagementActor.class);
+    props = Props.create(UserRoleActor.class);
 
     userOrg.put(JsonKey.ID, ID);
     userOrg.put(JsonKey.ORGANISATION_ID, orgId);

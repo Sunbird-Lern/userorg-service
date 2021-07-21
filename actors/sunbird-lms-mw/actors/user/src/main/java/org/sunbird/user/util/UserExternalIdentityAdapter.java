@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.keys.JsonKey;
 
 public class UserExternalIdentityAdapter {
 

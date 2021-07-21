@@ -16,8 +16,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
-import org.sunbird.common.models.util.ProjectUtil;
 import org.sunbird.models.location.Location;
+import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ProjectUtil.class, LocationClient.class, LocationClientImpl.class, ActorRef.class})

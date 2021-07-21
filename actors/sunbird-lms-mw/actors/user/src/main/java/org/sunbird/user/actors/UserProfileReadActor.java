@@ -17,23 +17,22 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.models.util.datasecurity.EncryptionService;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.user.service.UserProfileReadService;
+import org.sunbird.util.ProjectUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
 
@@ -42,6 +41,7 @@ import scala.concurrent.Future;
     "getUserDetailsByLoginId",
     "getUserProfileV3",
     "getUserProfileV4",
+    "getUserProfileV5",
     "getUserByKey",
     "checkUserExistence",
     "checkUserExistenceV2"
@@ -53,8 +53,7 @@ public class UserProfileReadActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private EncryptionService encryptionService =
-      org.sunbird.common.models.util.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(
-          null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserProfileReadService profileReadService = new UserProfileReadService();
 
@@ -67,6 +66,9 @@ public class UserProfileReadActor extends BaseActor {
         getUserProfileV3(request);
         break;
       case "getUserProfileV4":
+        getUserProfileV3(request);
+        break;
+      case "getUserProfileV5":
         getUserProfileV3(request);
         break;
       case "getUserDetailsByLoginId":
@@ -288,7 +290,7 @@ public class UserProfileReadActor extends BaseActor {
       }
       userFuture =
           esUtil.getDataByIdentifier(
-              EsType.user.getTypeName(), userId, request.getRequestContext());
+              ProjectUtil.EsType.user.getTypeName(), userId, request.getRequestContext());
       return userFuture.map(
           new Mapper<Map<String, Object>, Response>() {
             @Override
@@ -375,7 +377,8 @@ public class UserProfileReadActor extends BaseActor {
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
     Future<Map<String, Object>> esFuture =
-        esUtil.search(searchDTO, EsType.user.getTypeName(), request.getRequestContext());
+        esUtil.search(
+            searchDTO, ProjectUtil.EsType.user.getTypeName(), request.getRequestContext());
     return esFuture;
   }
 
@@ -421,7 +424,7 @@ public class UserProfileReadActor extends BaseActor {
       }
       futureResponse =
           esUtil.getDataByIdentifier(
-              EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
+              ProjectUtil.EsType.user.getTypeName(), userId, actorMessage.getRequestContext());
       userResponse =
           futureResponse.map(
               new Mapper<Map<String, Object>, Map<String, Object>>() {
@@ -455,7 +458,8 @@ public class UserProfileReadActor extends BaseActor {
       searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
 
       futureResponse =
-          esUtil.search(searchDTO, EsType.user.getTypeName(), actorMessage.getRequestContext());
+          esUtil.search(
+              searchDTO, ProjectUtil.EsType.user.getTypeName(), actorMessage.getRequestContext());
 
       userResponse =
           futureResponse.map(

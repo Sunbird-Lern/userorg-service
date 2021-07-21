@@ -13,8 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.HeaderParam;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.HeaderParam;
 import play.libs.Json;
 import play.mvc.Http;
 

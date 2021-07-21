@@ -1,9 +1,9 @@
 package org.sunbird.systemsettings.dao;
 
 import java.util.List;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.systemsetting.SystemSetting;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 public interface SystemSettingDao {
   /**

@@ -1,10 +1,10 @@
 package org.sunbird.learner.organisation.service.impl;
 
 import java.util.Map;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.organisation.service.OrgService;
+import org.sunbird.request.RequestContext;
 
 public class OrgServiceImpl implements OrgService {
 

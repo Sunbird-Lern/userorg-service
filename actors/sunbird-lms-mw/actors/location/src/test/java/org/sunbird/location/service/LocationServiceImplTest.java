@@ -13,12 +13,12 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.common.Constants;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.location.dao.LocationDao;
 import org.sunbird.location.dao.impl.LocationDaoFactory;
 import org.sunbird.location.dao.impl.LocationDaoImpl;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LocationDaoImpl.class, LocationDaoFactory.class, DataCacheHandler.class})

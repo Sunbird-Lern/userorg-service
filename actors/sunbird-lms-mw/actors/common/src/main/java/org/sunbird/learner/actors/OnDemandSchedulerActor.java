@@ -1,6 +1,6 @@
 package org.sunbird.learner.actors;
 
-import static org.sunbird.common.request.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
+import static org.sunbird.validator.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.common.quartz.scheduler.OnDemandSchedulerManager;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 
 /** @author Amit Kumar */
 @ActorConfig(

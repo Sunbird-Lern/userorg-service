@@ -17,23 +17,13 @@ import org.sunbird.actorutil.location.LocationClient;
 import org.sunbird.actorutil.location.impl.LocationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.EmailValidator;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LocationActorOperation;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.models.util.Slug;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
 import org.sunbird.learner.organisation.service.OrgService;
 import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
@@ -41,7 +31,16 @@ import org.sunbird.learner.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Slug;
+import org.sunbird.validator.EmailValidator;
 import org.sunbird.validator.location.LocationRequestValidator;
 import scala.concurrent.Future;
 
@@ -327,14 +326,10 @@ public class OrganisationManagementActor extends BaseActor {
               updateOrgDao,
               actorMessage.getRequestContext());
       response.getResult().put(JsonKey.ORGANISATION_ID, orgDao.get(JsonKey.ID));
-      sender().tell(response, self());
 
-      // update the ES --
-      Request orgRequest = new Request();
-      orgRequest.setRequestContext(actorMessage.getRequestContext());
-      orgRequest.getRequest().put(JsonKey.ORGANISATION, updateOrgDao);
-      orgRequest.setOperation(ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue());
-      tellToAnother(orgRequest);
+      updateDataToEs(actorMessage, updateOrgDao);
+
+      sender().tell(response, self());
 
       targetObject =
           TelemetryUtil.generateTargetObject(orgId, JsonKey.ORGANISATION, JsonKey.UPDATE, null);
@@ -342,11 +337,9 @@ public class OrganisationManagementActor extends BaseActor {
       telemetryAction.put("updateOrgStatus", "org status updated.");
       TelemetryUtil.telemetryProcessingCall(
           telemetryAction, targetObject, new ArrayList<>(), actorMessage.getContext());
-      return;
     } catch (ProjectCommonException e) {
       logger.error(actorMessage.getRequestContext(), e.getMessage(), e);
       sender().tell(e, self());
-      return;
     }
   }
 
@@ -354,7 +347,7 @@ public class OrganisationManagementActor extends BaseActor {
   @SuppressWarnings("unchecked")
   private void updateOrgData(Request actorMessage) {
     Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    Map<String, Object> targetObject = null;
+    Map<String, Object> targetObject;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
     try {
@@ -535,8 +528,6 @@ public class OrganisationManagementActor extends BaseActor {
         }
       }
 
-      sender().tell(response, self());
-
       String orgLocation = (String) updateOrgDao.get(JsonKey.ORG_LOCATION);
       List orgLocationList = new ArrayList<>();
       if (StringUtils.isNotBlank(orgLocation)) {
@@ -550,11 +541,10 @@ public class OrganisationManagementActor extends BaseActor {
       }
       updateOrgDao.put(JsonKey.ORG_LOCATION, orgLocationList);
 
-      Request orgRequest = new Request();
-      orgRequest.setRequestContext(actorMessage.getRequestContext());
-      orgRequest.getRequest().put(JsonKey.ORGANISATION, updateOrgDao);
-      orgRequest.setOperation(ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue());
-      tellToAnother(orgRequest);
+      updateDataToEs(actorMessage, updateOrgDao);
+
+      sender().tell(response, self());
+
       targetObject =
           TelemetryUtil.generateTargetObject(
               (String) dbOrgDetails.get(JsonKey.ID), JsonKey.ORGANISATION, JsonKey.UPDATE, null);
@@ -562,8 +552,15 @@ public class OrganisationManagementActor extends BaseActor {
           updateOrgDao, targetObject, correlatedObject, actorMessage.getContext());
     } catch (ProjectCommonException e) {
       sender().tell(e, self());
-      return;
     }
+  }
+
+  private void updateDataToEs(Request actorMessage, Map<String, Object> updateOrgDao) {
+    esService.update(
+        ProjectUtil.EsType.organisation.getTypeName(),
+        (String) updateOrgDao.get(JsonKey.ID),
+        updateOrgDao,
+        actorMessage.getRequestContext());
   }
 
   /** Provides the details of the Organisation */
@@ -643,7 +640,8 @@ public class OrganisationManagementActor extends BaseActor {
       filters.put(JsonKey.SLUG, slug);
       filters.put(JsonKey.IS_TENANT, true);
       Map<String, Object> esResult =
-          elasticSearchComplexSearch(filters, EsType.organisation.getTypeName(), context);
+          elasticSearchComplexSearch(
+              filters, ProjectUtil.EsType.organisation.getTypeName(), context);
       if (MapUtils.isNotEmpty(esResult)
           && esResult.containsKey(JsonKey.CONTENT)
           && (CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT)))) {

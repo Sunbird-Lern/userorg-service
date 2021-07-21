@@ -1,9 +1,9 @@
 package controllers.usermanagement.validator;
 
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.validator.BaseRequestValidator;
 
 public class UserStatusRequestValidator extends BaseRequestValidator {
 
@@ -18,5 +18,4 @@ public class UserStatusRequestValidator extends BaseRequestValidator {
   public void validateUserId(String userId) {
     validateParam(userId, ResponseCode.mandatoryParamsMissing, JsonKey.USER_ID);
   }
-  
 }

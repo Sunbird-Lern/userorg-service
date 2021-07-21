@@ -7,15 +7,18 @@ import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.StringFormatter;
+import org.sunbird.validator.BaseRequestValidator;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
@@ -156,10 +159,6 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateCreateUserV3Request(userRequest);
   }
 
-  public void validateCreateUserV2Request(Request userRequest) {
-    validateCreateUserRequest(userRequest);
-  }
-
   public void fieldsNotAllowed(List<String> fields, Request userRequest) {
     for (String field : fields) {
       if (((userRequest.getRequest().get(field) instanceof String)
@@ -274,6 +273,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     if (userRequest.getRequest().containsKey(JsonKey.MANAGED_BY)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.managedByNotAllowed);
     }
+    checkEmptyPhoneAndEmail(userRequest);
     externalIdsValidation(userRequest, JsonKey.UPDATE);
     phoneValidation(userRequest);
     updateUserBasicValidation(userRequest);
@@ -288,6 +288,23 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateExtIdTypeAndProvider(userRequest);
     validateFrameworkDetails(userRequest);
     validateRecoveryEmailOrPhone(userRequest);
+  }
+
+  public void checkEmptyPhoneAndEmail(Request userRequest) {
+    String phone = (String) userRequest.getRequest().get(JsonKey.PHONE);
+    String email = (String) userRequest.getRequest().get(JsonKey.EMAIL);
+    if (null != phone && phone.equalsIgnoreCase("")) {
+      throwInvalidParamValue(JsonKey.PHONE, "");
+    }
+    if (null != email && email.equalsIgnoreCase("")) {
+      throwInvalidParamValue(JsonKey.EMAIL, "");
+    }
+  }
+
+  private static void throwInvalidParamValue(String param, String value) {
+    ProjectCommonException.throwClientErrorException(
+        ResponseCode.invalidParameterValue,
+        MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), value, param));
   }
 
   private void validateUserOrgField(Request userRequest) {

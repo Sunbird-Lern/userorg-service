@@ -1,9 +1,9 @@
 package org.sunbird.location.dao;
 
 import java.util.Map;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.location.Location;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 /** @author Amit Kumar */
 public interface LocationDao {
