@@ -15,8 +15,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, ProjectUtil.class})

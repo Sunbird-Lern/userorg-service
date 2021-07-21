@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.role.dao.RoleDao;
 import org.sunbird.learner.actors.role.dao.impl.RoleDaoImpl;
 import org.sunbird.learner.actors.role.group.service.RoleGroupService;
 import org.sunbird.learner.actors.url.action.service.UrlActionService;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.models.role.Role;
+import org.sunbird.response.Response;
 
 public class RoleService {
 
@@ -75,15 +75,33 @@ public class RoleService {
   public static void validateRoles(List<String> roleList) {
     Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
 
-    if (MapUtils.isNotEmpty(roleMap)) {
-      for (String role : roleList) {
-        if (null == roleMap.get(role.trim())) {
-          throw new ProjectCommonException(
-              ResponseCode.invalidRole.getErrorCode(),
-              ResponseCode.invalidRole.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
-      }
+    if (MapUtils.isNotEmpty(roleMap) && roleList != null) {
+      roleList.forEach(
+          roleObj -> {
+            if (null == roleMap.get(roleObj.trim())) {
+              throw new ProjectCommonException(
+                  ResponseCode.invalidRole.getErrorCode(),
+                  ResponseCode.invalidRole.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
+            }
+          });
+    }
+  }
+
+  public static void validateRolesV2(List<Map<String, Object>> roleList) {
+    Map<String, Object> roleMap = DataCacheHandler.getRoleMap();
+
+    if (MapUtils.isNotEmpty(roleMap) && roleList != null) {
+      roleList.forEach(
+          roleObj -> {
+            String roleStr = (String) roleObj.get(JsonKey.ROLE);
+            if (null == roleMap.get(roleStr.trim())) {
+              throw new ProjectCommonException(
+                  ResponseCode.invalidRole.getErrorCode(),
+                  ResponseCode.invalidRole.getErrorMessage(),
+                  ResponseCode.CLIENT_ERROR.getResponseCode());
+            }
+          });
     }
   }
 }

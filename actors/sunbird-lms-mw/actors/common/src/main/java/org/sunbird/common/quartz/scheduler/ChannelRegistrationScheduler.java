@@ -6,10 +6,10 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobExecutionContext;
 import org.sunbird.actor.background.BackgroundOperations;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 
 public class ChannelRegistrationScheduler extends BaseJob {
   private static LoggerUtil logger = new LoggerUtil(ChannelRegistrationScheduler.class);

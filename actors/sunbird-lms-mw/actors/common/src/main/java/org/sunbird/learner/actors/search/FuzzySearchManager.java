@@ -1,10 +1,15 @@
 package org.sunbird.learner.actors.search;
 
-import java.util.*;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.responsecode.ResponseCode;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 
 public class FuzzySearchManager {
   private static LoggerUtil logger = new LoggerUtil(FuzzySearchManager.class);

@@ -1,19 +1,18 @@
 package controllers.otp.validator;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.StringFormatter;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.StringFormatter;
+import org.sunbird.validator.BaseRequestValidator;
 
 public class OtpRequestValidator extends BaseRequestValidator {
 
@@ -22,18 +21,20 @@ public class OtpRequestValidator extends BaseRequestValidator {
     validateTemplateId(otpRequest);
   }
 
- private void validateTemplateId(Request otpRequest) {
-   String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
-   if(StringUtils.isNotBlank(templateId) && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE) && !templateId.equalsIgnoreCase(JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
-    throw new ProjectCommonException(
-            ResponseCode.invalidIdentifier.getErrorCode(),
-            ProjectUtil.formatMessage(
-                    ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
-            ResponseCode.SERVER_ERROR.getResponseCode());
-   }
- }
+  private void validateTemplateId(Request otpRequest) {
+    String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
+    if (StringUtils.isNotBlank(templateId)
+        && !templateId.equalsIgnoreCase(JsonKey.TEMPLATE_ID_VALUE)
+        && !templateId.equalsIgnoreCase(JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidIdentifier.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
 
- public void validateVerifyOtpRequest(Request otpRequest) {
+  public void validateVerifyOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, true);
   }
 
@@ -74,7 +75,12 @@ public class OtpRequestValidator extends BaseRequestValidator {
     List<String> allowedTypes =
         new ArrayList<String>(
             Arrays.asList(
-                JsonKey.EMAIL, JsonKey.PHONE, JsonKey.PREV_USED_EMAIL, JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE));
+                JsonKey.EMAIL,
+                JsonKey.PHONE,
+                JsonKey.PREV_USED_EMAIL,
+                JsonKey.PREV_USED_PHONE,
+                JsonKey.RECOVERY_EMAIL,
+                JsonKey.RECOVERY_PHONE));
     if (!allowedTypes.contains(type)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidValue,
@@ -87,7 +93,9 @@ public class OtpRequestValidator extends BaseRequestValidator {
                   JsonKey.EMAIL,
                   JsonKey.PHONE,
                   JsonKey.PREV_USED_EMAIL,
-                  JsonKey.PREV_USED_PHONE,JsonKey.RECOVERY_EMAIL,JsonKey.RECOVERY_PHONE)));
+                  JsonKey.PREV_USED_PHONE,
+                  JsonKey.RECOVERY_EMAIL,
+                  JsonKey.RECOVERY_PHONE)));
     }
   }
 }

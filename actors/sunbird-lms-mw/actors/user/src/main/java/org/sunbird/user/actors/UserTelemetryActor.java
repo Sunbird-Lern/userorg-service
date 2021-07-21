@@ -7,9 +7,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 
 @ActorConfig(
@@ -37,9 +37,12 @@ public class UserTelemetryActor extends BaseActor {
     request.getContext().put(JsonKey.ROLLUP, rollUp);
     targetObject =
         TelemetryUtil.generateTargetObject(
-            (String) userMap.get(JsonKey.ID), TelemetryEnvKey.USER, JsonKey.CREATE, null);
+            (String) userMap.get(JsonKey.ID),
+            TelemetryEnvKey.USER,
+            (String) request.getRequest().get(JsonKey.OPERATION_TYPE),
+            null);
     TelemetryUtil.generateCorrelatedObject(userId, TelemetryEnvKey.USER, null, correlatedObject);
-    String signupType =
+    String signUpType =
         request.getContext().get(JsonKey.SIGNUP_TYPE) != null
             ? (String) request.getContext().get(JsonKey.SIGNUP_TYPE)
             : "";
@@ -47,9 +50,9 @@ public class UserTelemetryActor extends BaseActor {
         request.getContext().get(JsonKey.REQUEST_SOURCE) != null
             ? (String) request.getContext().get(JsonKey.REQUEST_SOURCE)
             : "";
-    if (StringUtils.isNotBlank(signupType)) {
+    if (StringUtils.isNotBlank(signUpType)) {
       TelemetryUtil.generateCorrelatedObject(
-          signupType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
+          signUpType, StringUtils.capitalize(JsonKey.SIGNUP_TYPE), null, correlatedObject);
     }
     if (StringUtils.isNotBlank(source)) {
       TelemetryUtil.generateCorrelatedObject(

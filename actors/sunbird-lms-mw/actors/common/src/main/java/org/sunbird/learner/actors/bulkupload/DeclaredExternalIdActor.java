@@ -10,17 +10,20 @@ import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actorutil.org.OrganisationClient;
 import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.bean.SelfDeclaredUser;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.*;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.bulkupload.model.BulkMigrationUser;
 import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredErrorTypeEnum;
 import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredStatusEnum;
 import org.sunbird.learner.actors.bulkupload.util.UserUploadUtil;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 @ActorConfig(
   tasks = {},

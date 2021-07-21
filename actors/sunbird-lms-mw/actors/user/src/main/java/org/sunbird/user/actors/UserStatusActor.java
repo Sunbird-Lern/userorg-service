@@ -5,23 +5,22 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.Status;
-import org.sunbird.common.models.util.TelemetryEnvKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 import org.sunbird.user.service.UserService;
 import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.util.ProjectUtil;
 
 @ActorConfig(
   tasks = {"unblockUser", "blockUser"},
@@ -123,7 +122,8 @@ public class UserStatusActor extends UserBaseActor {
     Map<String, Object> esUserMap = new HashMap<>();
     esUserMap.put(JsonKey.IS_DELETED, isDeleted);
     esUserMap.put(
-        JsonKey.STATUS, isDeleted ? Status.INACTIVE.getValue() : Status.ACTIVE.getValue());
+        JsonKey.STATUS,
+        isDeleted ? ProjectUtil.Status.INACTIVE.getValue() : ProjectUtil.Status.ACTIVE.getValue());
     esUserMap.put(JsonKey.ID, userId);
     esUserMap.put(JsonKey.USER_ID, userId);
     esUserMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());

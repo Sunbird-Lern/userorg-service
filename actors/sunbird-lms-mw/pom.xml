@@ -14,7 +14,6 @@
 	<packaging>pom</packaging>
 	<name>Sunbird LMS MW</name>
 	<modules>
-		<module>actors/sunbird-utils</module>
 		<module>actors</module>
 		<module>service</module>
 	</modules>

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.TelemetryEnvKey;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.user.User;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.service.UserMergeService;
 

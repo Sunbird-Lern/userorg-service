@@ -7,14 +7,14 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.RuntimeSingleton;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.actors.notificationservice.dao.EmailTemplateDao;
 import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
 import org.sunbird.learner.actors.otp.dao.OTPDao;
 import org.sunbird.learner.actors.otp.dao.impl.OTPDaoImpl;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
+import org.sunbird.util.ProjectUtil;
 
 public class OTPService {
   private static LoggerUtil logger = new LoggerUtil(OTPService.class);

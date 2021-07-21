@@ -12,13 +12,13 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.request.RequestValidator;
-import org.sunbird.common.responsecode.ResponseCode;
-import org.sunbird.common.responsecode.ResponseMessage;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.validator.RequestValidator;
 
 public class UserRequestValidatorTest {
 
@@ -916,6 +916,34 @@ public class UserRequestValidatorTest {
       validator.validateUserType(userMap, null, new RequestContext());
     } catch (Exception ex) {
       Assert.assertNotNull(ex);
+    }
+  }
+
+  @Test
+  public void testCheckEmptyPhone() {
+    Request request = new Request();
+    Map<String, Object> requestObj = request.getRequest();
+    requestObj.put(JsonKey.PHONE, "");
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.checkEmptyPhoneAndEmail(request);
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
+    }
+  }
+
+  @Test
+  public void testCheckEmptyEmail() {
+    Request request = new Request();
+    Map<String, Object> requestObj = request.getRequest();
+    requestObj.put(JsonKey.EMAIL, "");
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.checkEmptyPhoneAndEmail(request);
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
     }
   }
 

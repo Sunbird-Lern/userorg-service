@@ -24,14 +24,14 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.HeaderParam;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.request.HeaderParam;
+import org.sunbird.response.Response;
+import org.sunbird.response.ResponseParams;
+import org.sunbird.util.ProjectUtil;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
@@ -264,6 +264,14 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testGetUserDetailsSuccessByUserIdV5() {
+    Result result =
+        performTest("/v5/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testGetUserDetailsSuccessByUserIdV4() {
     Result result =
         performTest("/v4/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
@@ -303,6 +311,13 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testSearchUserSuccessV2() {
     Result result = performTest("/v2/user/search", "POST", searchUserRequest(new HashMap<>()));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testSearchUserSuccessV3() {
+    Result result = performTest("/v3/user/search", "POST", searchUserRequest(new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }

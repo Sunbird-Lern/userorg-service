@@ -29,13 +29,13 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
 import org.sunbird.feed.impl.FeedFactory;
 import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.models.user.Feed;
+import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

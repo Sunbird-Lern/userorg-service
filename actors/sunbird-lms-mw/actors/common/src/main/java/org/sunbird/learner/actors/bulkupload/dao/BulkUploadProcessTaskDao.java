@@ -2,8 +2,8 @@ package org.sunbird.learner.actors.bulkupload.dao;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
+import org.sunbird.request.RequestContext;
 
 /**
  * Class to provide Data access operation for the bulk_upload_process_task table.

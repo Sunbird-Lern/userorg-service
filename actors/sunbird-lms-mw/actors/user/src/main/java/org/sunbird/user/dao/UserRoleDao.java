@@ -2,8 +2,8 @@ package org.sunbird.user.dao;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.RequestContext;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 public interface UserRoleDao {
 

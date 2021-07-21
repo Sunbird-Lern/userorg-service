@@ -2,7 +2,7 @@ package org.sunbird.learner.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.sunbird.common.models.util.JsonKey;
+import org.sunbird.keys.JsonKey;
 
 public class UserFlagUtil {
 

@@ -1,7 +1,7 @@
 package modules;
 
 import com.google.inject.AbstractModule;
-import org.sunbird.common.models.util.LoggerUtil;
+import org.sunbird.logging.LoggerUtil;
 
 public class StartModule extends AbstractModule {
   private LoggerUtil logger = new LoggerUtil(StartModule.class);

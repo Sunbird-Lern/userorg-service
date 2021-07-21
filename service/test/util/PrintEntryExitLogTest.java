@@ -8,12 +8,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.response.ResponseParams;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.response.ResponseParams;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Common.class})
@@ -56,6 +57,22 @@ public class PrintEntryExitLogTest {
       requestContext.setReqId("123-456-789");
       request.setRequestContext(requestContext);
       PrintEntryExitLog.printExitLogOnFailure(request, null);
+      Assert.assertNotNull(request);
+    } catch (Exception e) {
+      Assert.assertNull(e);
+    }
+  }
+
+  @Test
+  public void testPrintExitLogOnSuccess() {
+    try {
+      Request request = new Request();
+      request.getContext().put(JsonKey.METHOD, "GET");
+      request.setOperation("healthCheck");
+      RequestContext requestContext = new RequestContext();
+      requestContext.setReqId("123-456-789");
+      request.setRequestContext(requestContext);
+      PrintEntryExitLog.printExitLogOnSuccessResponse(request, new Response());
       Assert.assertNotNull(request);
     } catch (Exception e) {
       Assert.assertNull(e);

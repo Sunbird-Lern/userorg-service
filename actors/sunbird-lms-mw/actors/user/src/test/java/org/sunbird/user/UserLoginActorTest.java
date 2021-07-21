@@ -8,11 +8,11 @@ import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.user.actors.UserLoginActor;
 
 public class UserLoginActorTest {

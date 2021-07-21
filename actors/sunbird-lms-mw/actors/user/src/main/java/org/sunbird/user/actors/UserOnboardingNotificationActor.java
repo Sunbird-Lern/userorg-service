@@ -4,13 +4,13 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.util.KeycloakRequiredActionLinkUtil;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
-import org.sunbird.services.sso.SSOManager;
-import org.sunbird.services.sso.SSOServiceFactory;
+import org.sunbird.request.Request;
+import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.user.util.UserActorOperations;
 
 @ActorConfig(
@@ -43,7 +43,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       // user created successfully send the onboarding mail
       Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
       if (null != welcomeMailReqObj) {
-         welcomeMailReqObj.setRequestContext(request.getRequestContext());
+        welcomeMailReqObj.setRequestContext(request.getRequestContext());
         tellToAnother(welcomeMailReqObj);
       }
     } else if (request

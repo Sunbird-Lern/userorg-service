@@ -17,7 +17,7 @@ public class UserServiceGenerateUsernameTest {
   private static String teluguName = "సుధీర్";
   private static String tamilName = "எந்த அறியப்படாத பெயர்";
   private static Pattern pattern;
-  private static String userNameValidatorRegex = "(^([a-z])+[_]+[1-9 a-z]{4})";
+  private static String userNameValidatorRegex = "(^([a-z])+[_]+[0-9 a-z]{4})";
   private static UserService userService = new UserServiceImpl();
 
   @Test

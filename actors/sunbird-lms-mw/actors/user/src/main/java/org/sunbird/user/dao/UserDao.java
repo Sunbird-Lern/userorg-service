@@ -2,9 +2,9 @@ package org.sunbird.user.dao;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.models.user.User;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 
 /**
  * This interface will have all methods required for user service api.

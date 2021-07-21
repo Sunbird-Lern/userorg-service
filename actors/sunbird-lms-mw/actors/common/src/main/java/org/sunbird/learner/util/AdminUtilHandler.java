@@ -7,17 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
-import org.sunbird.common.exception.ProjectCommonException;
-import org.sunbird.common.models.util.HttpClientUtil;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.adminutil.AdminUtilRequest;
 import org.sunbird.models.adminutil.AdminUtilRequestData;
 import org.sunbird.models.adminutil.AdminUtilRequestPayload;
 import org.sunbird.models.adminutil.Params;
+import org.sunbird.request.RequestContext;
+import org.sunbird.util.ProjectUtil;
 
 public class AdminUtilHandler {
   private static LoggerUtil logger = new LoggerUtil(AdminUtilHandler.class);

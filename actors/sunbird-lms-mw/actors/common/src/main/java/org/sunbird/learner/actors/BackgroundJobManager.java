@@ -10,14 +10,16 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.Util;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
 /**
@@ -119,7 +121,6 @@ public class BackgroundJobManager extends BaseActor {
     header = JsonKey.BEARER + header;
     headerMap.put(JsonKey.AUTHORIZATION, header);
     headerMap.put("Content-Type", "application/json");
-    logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> orgMap =
         (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
     if (MapUtils.isNotEmpty(orgMap)) {
@@ -152,7 +153,7 @@ public class BackgroundJobManager extends BaseActor {
         esMap.put(JsonKey.ORG_LOCATION, orgLocationList);
       }
       // making call to register tag
-      registertag(id, "{}", headerMap, actorMessage.getRequestContext());
+      registerTag(id, "{}", headerMap, actorMessage.getRequestContext());
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.organisation.getTypeName(),
@@ -185,7 +186,7 @@ public class BackgroundJobManager extends BaseActor {
     if (response) {
       return true;
     }
-    logger.info(context, "unbale to save the data inside ES with identifier " + identifier);
+    logger.info(context, "unable to save the data to ES with identifier " + identifier);
     return false;
   }
 
@@ -193,10 +194,6 @@ public class BackgroundJobManager extends BaseActor {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
     Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
     if (MapUtils.isNotEmpty(userDetails)) {
-      logger.info(
-          actorMessage.getRequestContext(),
-          "BackGroundJobManager:updateUserInfoToEs userRootOrgId "
-              + userDetails.get(JsonKey.ROOT_ORG_ID));
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
           ProjectUtil.EsType.user.getTypeName(),
@@ -232,47 +229,40 @@ public class BackgroundJobManager extends BaseActor {
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
     logger.info(
         context,
-        "Getting  ********** ES save response for type , identifier == "
-            + type
-            + "  "
-            + identifier
-            + "  "
-            + response);
+        "ES save response for type , identifier == " + type + "  " + identifier + "  " + response);
     if (!StringUtils.isBlank(response)) {
-      logger.info(context, "User Data is saved successfully ES ." + type + "  " + identifier);
+      logger.info(context, "Data saved successfully to ES ." + type + "  " + identifier);
       return true;
     }
-    logger.info(context, "unbale to save the data inside ES with identifier " + identifier);
+    logger.info(context, "unable to save the data inside ES with identifier " + identifier);
     return false;
   }
 
-  /**
-   * This method will make EkStep api call register the tag.
-   *
-   * @param tagId String unique tag id.
-   * @param body String requested body
-   * @param header Map<String,String>
-   * @return String
-   */
-  private String registertag(
+  private String registerTag(
       String tagId, String body, Map<String, String> header, RequestContext context) {
     String tagStatus = "";
     try {
+      logger.info(context, "BackgroundJobManager:registertag ,call started with tagid = " + tagId);
+      String analyticsBaseUrl = ProjectUtil.getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
+      ProjectUtil.setTraceIdInHeader(header, context);
+      tagStatus =
+          HttpClientUtil.post(
+              analyticsBaseUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_TAG_API_URL)
+                  + "/"
+                  + tagId,
+              body,
+              header);
       logger.info(
           context,
-          "BackgroundJobManager:registertag register tag call started with tagid = " + tagId);
-      tagStatus = ProjectUtil.registertag(tagId, body, header, context);
-      logger.info(
-          context,
-          "BackgroundJobManager:registertag  register tag call end with id and status = "
+          "BackgroundJobManager:registertag  ,call end with id and status = "
               + tagId
               + ", "
               + tagStatus);
     } catch (Exception e) {
       logger.error(
           context,
-          "BackgroundJobManager:registertag register tag call failure with error message = "
-              + e.getMessage(),
+          "BackgroundJobManager:registertag ,call failure with error message = " + e.getMessage(),
           e);
     }
     return tagStatus;
@@ -280,7 +270,6 @@ public class BackgroundJobManager extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void insertUserNotesToEs(Request actorMessage) {
-    logger.info(actorMessage.getRequestContext(), "Calling method to save inside Es==");
     Map<String, Object> noteMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.NOTE);
     if (ProjectUtil.isNotNull(noteMap) && noteMap.size() > 0) {
       String id = (String) noteMap.get(JsonKey.ID);
@@ -318,6 +307,6 @@ public class BackgroundJobManager extends BaseActor {
         mergeRequest.getRequestContext());
     logger.info(
         mergeRequest.getRequestContext(),
-        "user details for updated for user in ES with id:" + mergeeId);
+        "user details updated for user in ES with id:" + mergeeId);
   }
 }

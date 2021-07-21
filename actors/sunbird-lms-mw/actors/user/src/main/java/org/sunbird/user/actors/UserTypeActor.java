@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 
 @ActorConfig(
   tasks = {"getUserTypes"},

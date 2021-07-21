@@ -19,26 +19,25 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.models.response.Response;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.request.Request;
-import org.sunbird.common.request.RequestContext;
-import org.sunbird.common.responsecode.ResponseCode;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.learner.organisation.dao.OrgDao;
 import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
 import org.sunbird.learner.util.DataCacheHandler;
 import org.sunbird.learner.util.UserFlagUtil;
 import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.organisation.OrgTypeEnum;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.UserOrgDao;
 import org.sunbird.user.dao.UserRoleDao;
@@ -48,6 +47,7 @@ import org.sunbird.user.dao.impl.UserRoleDaoImpl;
 import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 public class UserProfileReadService {
@@ -71,6 +71,7 @@ public class UserProfileReadService {
     String idType = (String) actorMessage.getContext().get(JsonKey.ID_TYPE);
     String provider = (String) actorMessage.getContext().get(JsonKey.PROVIDER);
     boolean isPrivate = (boolean) actorMessage.getContext().get(JsonKey.PRIVATE);
+    String readVersion = actorMessage.getOperation();
     String userId;
     // Check whether its normal read by id call or read by externalId call
     validateProviderAndIdType(provider, idType);
@@ -95,9 +96,52 @@ public class UserProfileReadService {
       }
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    List<Map<String, Object>> userRolesList =
+        userRoleDao.getUserRoles(userId, null, actorMessage.getRequestContext());
+    Map<String, List<String>> userOrgRoles = new HashMap<>();
+    for (Map userRole : userRolesList) {
+      List<Map<String, String>> scopeMap = null;
+      try {
+        scopeMap =
+            mapper.readValue(
+                (String) userRole.get(JsonKey.SCOPE),
+                new ArrayList<Map<String, String>>().getClass());
+      } catch (JsonProcessingException e) {
+        logger.error(
+            actorMessage.getRequestContext(),
+            "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
+            e);
+      }
+      if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
+        userRole.put(JsonKey.SCOPE, scopeMap);
+        userRole.remove(JsonKey.USER_ID);
+      } else {
+        for (Map scope : scopeMap) {
+          String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
+          String role = (String) userRole.get(JsonKey.ROLE);
+          if (userOrgRoles.containsKey(orgId)) {
+            List<String> roles = userOrgRoles.get(orgId);
+            roles.add(role);
+            userOrgRoles.put(orgId, roles);
+          } else {
+            userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
+          }
+        }
+      }
+    }
+    if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
+      result.put(JsonKey.ROLES, userRolesList);
+    } else {
+      result.remove(JsonKey.ROLES);
+    }
     result.put(
         JsonKey.ORGANISATIONS,
-        fetchUserOrgList((String) result.get(JsonKey.ID), actorMessage.getRequestContext()));
+        fetchUserOrgList(
+            (String) result.get(JsonKey.ID),
+            userOrgRoles,
+            actorMessage.getRequestContext(),
+            readVersion));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -262,43 +306,22 @@ public class UserProfileReadService {
     return result;
   }
 
-  private List<Map<String, Object>> fetchUserOrgList(String userId, RequestContext requestContext) {
+  private List<Map<String, Object>> fetchUserOrgList(
+      String userId,
+      Map<String, List<String>> userOrgRoles,
+      RequestContext requestContext,
+      String readVersion) {
     Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
     List<Map<String, Object>> userOrgList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
-    List<Map<String, Object>> userRolesList =
-        userRoleDao.getUserRoles(userId, null, requestContext);
-    Map<String, List<String>> userOrgRoles = new HashMap<>();
-    for (Map userRole : userRolesList) {
-      List<Map<String, String>> scopeMap = null;
-      try {
-        scopeMap =
-            mapper.readValue(
-                (String) userRole.get(JsonKey.SCOPE),
-                new ArrayList<Map<String, String>>().getClass());
-      } catch (JsonProcessingException e) {
-        logger.error(
-            requestContext,
-            "Exception because of mapper read value" + (String) userRole.get(JsonKey.SCOPE),
-            e);
-      }
-      for (Map scope : scopeMap) {
-        String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
-        String role = (String) userRole.get(JsonKey.ROLE);
-        if (userOrgRoles.containsKey(orgId)) {
-          List<String> roles = userOrgRoles.get(orgId);
-          roles.add(role);
-          userOrgRoles.put(orgId, roles);
-        } else {
-          userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
-        }
-      }
-    }
+
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     for (Map<String, Object> userOrg : userOrgList) {
+      if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
+        userOrg.remove(JsonKey.ROLES);
+      }
       String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
-      if (userOrgRoles.containsKey(organisationId)) {
+      if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
         userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
       }
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);

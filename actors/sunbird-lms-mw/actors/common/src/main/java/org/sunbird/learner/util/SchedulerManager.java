@@ -3,8 +3,8 @@ package org.sunbird.learner.util;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.sunbird.common.models.util.LoggerUtil;
-import org.sunbird.common.models.util.ProjectUtil;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.ProjectUtil;
 
 /** @author Manzarul All the scheduler job will be handle by this class. */
 public class SchedulerManager {

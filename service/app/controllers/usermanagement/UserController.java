@@ -4,12 +4,11 @@ import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
-import org.sunbird.common.models.util.ActorOperations;
-import org.sunbird.common.models.util.JsonKey;
-import org.sunbird.common.models.util.ProjectUtil;
-import org.sunbird.common.models.util.ProjectUtil.EsType;
-import org.sunbird.common.request.BaseRequestValidator;
-import org.sunbird.common.request.Request;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
+import org.sunbird.request.Request;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.validator.user.UserRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -173,6 +172,13 @@ public class UserController extends BaseController {
         httpRequest);
   }
 
+  public CompletionStage<Result> getUserByIdV5(String userId, Http.Request httpRequest) {
+    return handleGetUserProfileV3(
+        ActorOperations.GET_USER_PROFILE_V5.getValue(),
+        ProjectUtil.getLmsUserId(userId),
+        httpRequest);
+  }
+
   public CompletionStage<Result> getUserByLoginId(Http.Request httpRequest) {
     final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
 
@@ -226,7 +232,7 @@ public class UserController extends BaseController {
         null,
         null,
         getAllRequestHeaders(httpRequest),
-        EsType.user.getTypeName(),
+        ProjectUtil.EsType.user.getTypeName(),
         httpRequest);
   }
 
@@ -245,7 +251,25 @@ public class UserController extends BaseController {
         null,
         null,
         getAllRequestHeaders(httpRequest),
-        EsType.user.getTypeName(),
+        ProjectUtil.EsType.user.getTypeName(),
+        httpRequest);
+  }
+
+  public CompletionStage<Result> searchUserV3(Http.Request httpRequest) {
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    return handleSearchRequest(
+        ActorOperations.USER_SEARCH_V3.getValue(),
+        httpRequest.body().asJson(),
+        userSearchRequest -> {
+          Request request = (Request) userSearchRequest;
+          request.getContext().put(JsonKey.FIELDS, requestedFields);
+          new BaseRequestValidator().validateSearchRequest(request);
+          return null;
+        },
+        null,
+        null,
+        getAllRequestHeaders(httpRequest),
+        ProjectUtil.EsType.user.getTypeName(),
         httpRequest);
   }
 
