@@ -15,7 +15,7 @@
 
   <modules>
 	  <module>actors/sunbird-lms-mw</module>
-	  <module>service</module>
+	  <module>controller</module>
       <module>reports</module>
       <module>core</module>
   </modules>
