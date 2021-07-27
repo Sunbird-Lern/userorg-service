@@ -183,6 +183,16 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testCreateUserV4Success() {
+    Result result =
+            performTest(
+                    "/v4/user/create",
+                    "POST",
+                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+  }
+
+  @Test
   public void testCreateUserV3V2WithCorrectPass() {
     Result result =
         performTest(
@@ -283,6 +293,13 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testGetUserDetailsV3SuccessByUserId() {
     Result result =
         performTest("/v3/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
+  public void testGetUserDetailsSuccessByKey() {
+    Result result = performTest("/v1/user/get/loginId/testloginid", "GET", (Map) getUserRequest(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
