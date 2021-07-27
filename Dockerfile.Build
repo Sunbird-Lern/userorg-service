@@ -11,5 +11,5 @@ ENV  PATH ${M2_HOME}/bin:${PATH}
 COPY learner /opt/learner/
 WORKDIR /opt/learner/services
 RUN mvn clean install -DskipTests
-WORKDIR /opt/learner/services/controller
+WORKDIR /opt/learner/services/learning-service
 CMD ["mvn", "play2:dist"]
