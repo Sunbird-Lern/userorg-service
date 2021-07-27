@@ -18,6 +18,7 @@
 	  <module>controller</module>
       <module>reports</module>
       <module>core</module>
+      <module>service</module>
   </modules>
     <dependencies>
         <dependency>
