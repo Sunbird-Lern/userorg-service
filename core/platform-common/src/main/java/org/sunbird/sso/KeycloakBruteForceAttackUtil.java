@@ -27,8 +27,11 @@ public class KeycloakBruteForceAttackUtil {
             .realm(KeyCloakConnectionProvider.SSO_REALM)
             .attackDetection()
             .bruteForceUserStatus(fedUserPrefix + userId);
-    logger.info(context, "check attack detection for userId : " + userId + ", " + attackStatus);
-    return ((boolean) attackStatus.get("disabled"));
+    boolean isDisabled = ((boolean) attackStatus.get("disabled"));
+    if (isDisabled) {
+      logger.info(context, "check attack detection for userId : " + userId + ", " + attackStatus);
+    }
+    return isDisabled;
   }
 
   /**
