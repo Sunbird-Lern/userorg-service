@@ -26,7 +26,6 @@ public class KeycloakRequiredActionLinkUtil {
   private static final String USERNAME = "userName";
   private static final String EXPIRATION_IN_SEC = "expirationInSecs";
   private static final String REDIRECT_URI = "redirectUri";
-  private static final String ACCESS_TOKEN = "access_token";
   private static final String SUNBIRD_KEYCLOAK_LINK_EXPIRATION_TIME =
       "sunbird_keycloak_required_action_link_expiration_seconds";
   private static final String SUNBIRD_KEYCLOAK_REQD_ACTION_LINK = "/get-required-action-link";
@@ -75,7 +74,7 @@ public class KeycloakRequiredActionLinkUtil {
     Map<String, String> headers = new HashMap<>();
 
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + getAdminAccessToken(context));
+    headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + KeycloakUtil.getAdminAccessToken(context));
 
     logger.info(
         context,
@@ -99,27 +98,5 @@ public class KeycloakRequiredActionLinkUtil {
 
     Map<String, Object> responseMap = new ObjectMapper().readValue(response, Map.class);
     return (String) responseMap.get(LINK);
-  }
-
-  public static String getAdminAccessToken(RequestContext context) throws Exception {
-    Map<String, String> headers = new HashMap<>();
-    headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-    String url =
-        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
-            + "realms/"
-            + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
-            + "/protocol/openid-connect/token";
-
-    Map<String, String> fields = new HashMap<>();
-    fields.put("client_id", ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_CLIENT_ID));
-    fields.put("client_secret", ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_CLIENT_SECRET));
-    fields.put("grant_type", "client_credentials");
-
-    String response = HttpClientUtil.postFormData(url, fields, headers);
-
-    logger.info(
-        context, "KeycloakRequiredActionLinkUtil:getAdminAccessToken: Response = " + response);
-    Map<String, Object> responseMap = new ObjectMapper().readValue(response, Map.class);
-    return (String) responseMap.get(ACCESS_TOKEN);
   }
 }

@@ -25,12 +25,26 @@ import org.sunbird.learner.util.UserUtility;
 import org.sunbird.learner.util.Util;
 import org.sunbird.models.user.User;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.sso.KeycloakBruteForceAttackUtil;
+import org.sunbird.sso.KeycloakUtil;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.user.dao.UserDao;
 import org.sunbird.user.dao.impl.UserDaoImpl;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UserDao.class, UserDaoImpl.class, Util.class, UserUtility.class})
+@PrepareForTest({
+  UserDao.class,
+  UserDaoImpl.class,
+  Util.class,
+  UserUtility.class,
+  KeycloakBruteForceAttackUtil.class,
+  KeycloakUtil.class,
+  SSOServiceFactory.class,
+  SSOManager.class
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -45,17 +59,34 @@ public class ResetPasswordActorTest {
   ActorSystem system = ActorSystem.create("ResetPasswordActor");
 
   @Before
-  public void beforeEachTest() {
+  public void beforeEachTest() throws Exception {
     userDao = PowerMockito.mock(UserDao.class);
     PowerMockito.mockStatic(UserDaoImpl.class);
     when(UserDaoImpl.getInstance()).thenReturn(userDao);
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
+    PowerMockito.mockStatic(KeycloakUtil.class);
+    PowerMockito.mockStatic(KeycloakBruteForceAttackUtil.class);
     when(Util.getUserRequiredActionLink(Mockito.anyMap(), Mockito.anyBoolean(), Mockito.any()))
         .thenReturn("/url/password");
     when(Util.getSunbirdLoginUrl()).thenReturn("/resource/url");
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());
     when(userDao.getUserById("ValidUserId", null)).thenReturn(getValidUserResponse());
+
+    when(KeycloakUtil.getAdminAccessToken(Mockito.any(RequestContext.class)))
+        .thenReturn("accessToken");
+    when(KeycloakBruteForceAttackUtil.isUserAccountDisabled(
+            Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(true);
+    when(KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
+            Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(true);
+    PowerMockito.mockStatic(SSOServiceFactory.class);
+    SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+    when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+    when(ssoManager.updatePassword(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(true);
   }
 
   @Test
