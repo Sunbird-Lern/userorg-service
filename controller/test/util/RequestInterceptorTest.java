@@ -20,7 +20,7 @@ import play.mvc.Http;
 import play.test.Helpers;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({RequestInterceptor.class, AccessTokenValidator.class})
+@PrepareForTest({AccessTokenValidator.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",

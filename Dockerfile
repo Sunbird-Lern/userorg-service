@@ -9,7 +9,7 @@ RUN apk update \
 #ENV sunbird_learnerstate_actor_port 8088 
 RUN chown -R sunbird:sunbird /home/sunbird
 USER sunbird
-COPY ./service/target/learning-service-1.0-SNAPSHOT-dist.zip /home/sunbird/learner/
+COPY ./controller/target/learning-service-1.0-SNAPSHOT-dist.zip /home/sunbird/learner/
 RUN unzip /home/sunbird/learner/learning-service-1.0-SNAPSHOT-dist.zip -d /home/sunbird/learner/
 WORKDIR /home/sunbird/learner/
 CMD java -XX:+PrintFlagsFinal $JAVA_OPTIONS -Dplay.server.http.idleTimeout=180s -cp '/home/sunbird/learner/learning-service-1.0-SNAPSHOT/lib/*' play.core.server.ProdServerStart  /home/sunbird/learner/learning-service-1.0-SNAPSHOT

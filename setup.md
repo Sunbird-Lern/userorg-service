@@ -79,9 +79,9 @@
 ## Build
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
 2. Run "mvn clean install" to build the services.
-2. Go to "service" and run the command "mvn play2:dist" to generate the dist file for services.
-3. The build file "learning-service-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-lms-service/service/target" folder.
+2. Go to "controller" and run the command "mvn play2:dist" to generate the dist file for controller.
+3. The build file "controller-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-lms-service/controller/target" folder.
 
 ## Run
-1. Unzip the dist file "learning-service-1.0-SNAPSHOT-dist.zip".
-2. Run the command "java -cp 'learning-service-1.0-SNAPSHOT/lib/*' play.core.server.ProdServerStart learning-service-1.0-SNAPSHOT" to start the service.
+1. Unzip the dist file "controller-1.0-SNAPSHOT-dist.zip".
+2. Run the command "java -cp 'controller-1.0-SNAPSHOT/lib/*' play.core.server.ProdServerStart controller-1.0-SNAPSHOT" to start the service.
