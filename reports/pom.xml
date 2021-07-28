@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>learning-service</artifactId>
+            <artifactId>controller</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
