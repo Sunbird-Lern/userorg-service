@@ -14,13 +14,15 @@ import org.sunbird.util.ProjectUtil;
 public class KeycloakBruteForceAttackUtil {
   private static LoggerUtil logger = new LoggerUtil(KeycloakBruteForceAttackUtil.class);
 
+  private KeycloakBruteForceAttackUtil() {}
   /**
    * Get status of a user in brute force detection
    *
    * @param userId
    * @return
    */
-  public static boolean getUserStatus(String userId, RequestContext context) throws Exception {
+  public static boolean isUserAccountDisabled(String userId, RequestContext context)
+      throws Exception {
     String fedUserPrefix =
         "f:"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYCLOAK_USER_FEDERATION_PROVIDER_ID)

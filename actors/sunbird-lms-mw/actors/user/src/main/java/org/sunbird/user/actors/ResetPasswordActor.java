@@ -44,7 +44,8 @@ public class ResetPasswordActor extends BaseActor {
     User user = getUserDao().getUserById(userId, request.getRequestContext());
     if (null != user) {
       boolean isDisabled =
-          KeycloakBruteForceAttackUtil.getUserStatus(user.getUserId(), request.getRequestContext());
+          KeycloakBruteForceAttackUtil.isUserAccountDisabled(
+              user.getUserId(), request.getRequestContext());
       if (isDisabled) {
         KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
             user.getUserId(), request.getRequestContext());

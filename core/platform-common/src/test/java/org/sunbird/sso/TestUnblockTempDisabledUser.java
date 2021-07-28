@@ -23,7 +23,7 @@ import org.sunbird.util.ProjectUtil;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
-public class KeycloakBruteForceAttackUtilTest {
+public class TestUnblockTempDisabledUser {
 
   @BeforeClass
   public static void setup() throws Exception {
@@ -38,11 +38,10 @@ public class KeycloakBruteForceAttackUtilTest {
   }
 
   @Test
-  public void testGetUserStatus() throws Exception {
-    when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap()))
-        .thenReturn("{\"disabled\": true}");
+  public void testUnlockTempDisabledUser() throws Exception {
+    when(HttpClientUtil.delete(Mockito.anyString(), Mockito.anyMap())).thenReturn("");
     boolean isDisabled =
-        KeycloakBruteForceAttackUtil.isUserAccountDisabled(
+        KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
             "54646546-7899721321-4654", new RequestContext());
     assertTrue(isDisabled);
   }

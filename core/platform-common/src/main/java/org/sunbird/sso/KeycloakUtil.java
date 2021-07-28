@@ -14,6 +14,8 @@ import org.sunbird.util.ProjectUtil;
 public class KeycloakUtil {
   private static LoggerUtil logger = new LoggerUtil(KeycloakUtil.class);
 
+  private KeycloakUtil() {}
+
   public static String getAdminAccessToken(RequestContext context) throws Exception {
     Map<String, String> headers = new HashMap<>();
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
