@@ -43,7 +43,7 @@ public class KeycloakUtil {
   public static String getAdminAccessTokenWithoutDomain(RequestContext context) throws Exception {
     String url =
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_LB_IP)
-            + "realms/"
+            + "/auth/realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + "/protocol/openid-connect/token";
     return getAdminAccessToken(context, url);
