@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
@@ -16,8 +15,6 @@ import org.sunbird.models.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.sso.KeycloakBruteForceAttackUtil;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.user.dao.UserDao;
@@ -38,7 +35,7 @@ public class ResetPasswordActor extends BaseActor {
     generateTelemetry(request);
   }
 
-  private void resetPassword(Request request) throws Exception {
+  private void resetPassword(Request request) {
     String userId = (String) request.get(JsonKey.USER_ID);
     logger.info(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
     User user = getUserDao().getUserById(userId, request.getRequestContext());
@@ -49,10 +46,6 @@ public class ResetPasswordActor extends BaseActor {
       if (isDisabled) {
         KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
             user.getUserId(), request.getRequestContext());
-        SSOManager ssoManager = SSOServiceFactory.getInstance();
-        String tempPass =
-            "TempPass" + RandomStringUtils.randomAlphanumeric(10).toLowerCase() + "@123";
-        ssoManager.updatePassword(userId, tempPass, request.getRequestContext());
       }
       generateLink(request, user);
     } else {
