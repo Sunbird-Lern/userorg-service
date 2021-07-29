@@ -635,6 +635,7 @@ public final class JsonKey {
   public static final String UNBLOCK_USER = "UnblockUser";
   public static final String ROLE_OPERATION = "roleOperation";
   public static final String SCOPE_STR = "scopeString";
+  public static final String SUNBIRD_SSO_LB_IP = "sunbird_sso_lb_ip";
 
   private JsonKey() {}
 }
