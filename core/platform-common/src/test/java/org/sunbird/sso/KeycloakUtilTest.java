@@ -3,7 +3,7 @@ package org.sunbird.sso;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -25,8 +25,8 @@ import org.sunbird.util.ProjectUtil;
 })
 public class KeycloakUtilTest {
 
-  @BeforeClass
-  public static void setup() throws Exception {
+  @Before
+  public void setup() {
     PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(ProjectUtil.class);
     when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
@@ -36,7 +36,19 @@ public class KeycloakUtilTest {
 
   @Test
   public void testGetAdminAccessToken() throws Exception {
-    String token = KeycloakUtil.getAdminAccessToken(new RequestContext());
+    String token = KeycloakUtil.getAdminAccessToken(new RequestContext(), "url");
+    assertTrue(token.equals("accesstoken"));
+  }
+
+  @Test
+  public void testGetAdminAccessTokenWithDomain() throws Exception {
+    String token = KeycloakUtil.getAdminAccessTokenWithDomain(new RequestContext());
+    assertTrue(token.equals("accesstoken"));
+  }
+
+  @Test
+  public void testGetAdminAccessTokenWithoutDomain() throws Exception {
+    String token = KeycloakUtil.getAdminAccessTokenWithoutDomain(new RequestContext());
     assertTrue(token.equals("accesstoken"));
   }
 }

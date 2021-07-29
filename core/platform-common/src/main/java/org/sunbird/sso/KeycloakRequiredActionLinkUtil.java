@@ -74,7 +74,9 @@ public class KeycloakRequiredActionLinkUtil {
     Map<String, String> headers = new HashMap<>();
 
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    headers.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + KeycloakUtil.getAdminAccessToken(context));
+    headers.put(
+        JsonKey.AUTHORIZATION,
+        JsonKey.BEARER + KeycloakUtil.getAdminAccessTokenWithDomain(context));
 
     logger.info(
         context,

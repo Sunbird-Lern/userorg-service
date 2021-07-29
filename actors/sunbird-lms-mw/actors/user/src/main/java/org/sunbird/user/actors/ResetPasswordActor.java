@@ -35,7 +35,7 @@ public class ResetPasswordActor extends BaseActor {
     generateTelemetry(request);
   }
 
-  private void resetPassword(Request request) {
+  private void resetPassword(Request request) throws Exception {
     String userId = (String) request.get(JsonKey.USER_ID);
     logger.info(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
     User user = getUserDao().getUserById(userId, request.getRequestContext());
