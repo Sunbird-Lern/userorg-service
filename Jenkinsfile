@@ -33,7 +33,7 @@ node('build-slave') {
                     sh "mvn clean install '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
                 }
                 stage('Package') {
-                    dir('service') {
+                    dir('controller') {
                         sh 'mvn play2:dist'
                     }
                     sh('chmod 777 ./build.sh')
