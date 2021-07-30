@@ -1,4 +1,4 @@
-package org.sunbird.models.user;
+package org.sunbird.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

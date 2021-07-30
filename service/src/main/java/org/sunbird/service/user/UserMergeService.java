@@ -1,7 +1,7 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import java.util.Map;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 
 public interface UserMergeService {
   void triggerUserMergeTelemetry(Map telemetryMap, User merger, Map<String, Object> context);

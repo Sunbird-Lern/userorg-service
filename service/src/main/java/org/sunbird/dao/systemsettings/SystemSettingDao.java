@@ -1,7 +1,7 @@
 package org.sunbird.dao.systemsettings;
 
 import java.util.List;
-import org.sunbird.models.systemsetting.SystemSetting;
+import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

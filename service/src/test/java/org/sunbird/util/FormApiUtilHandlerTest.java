@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -15,8 +15,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
-import org.sunbird.models.FormUtil.FormUtilRequest;
+import org.sunbird.model.formutil.FormApiUtilRequestPayload;
+import org.sunbird.model.formutil.FormUtilRequest;
 import org.sunbird.request.RequestContext;
 
 @RunWith(PowerMockRunner.class)

@@ -1,4 +1,4 @@
-package org.sunbird.models.role.group;
+package org.sunbird.model.role;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

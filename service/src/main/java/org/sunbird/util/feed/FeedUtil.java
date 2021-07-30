@@ -1,4 +1,4 @@
-package org.sunbird.feed;
+package org.sunbird.util.feed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,16 +8,15 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
-import org.sunbird.bean.ShadowUser;
-import org.sunbird.feed.impl.FeedFactory;
+import org.sunbird.model.ShadowUser;
+import org.sunbird.service.feed.IFeedService;
+import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.models.organisation.Organisation;
-import org.sunbird.models.user.Feed;
-import org.sunbird.models.user.FeedAction;
-import org.sunbird.models.user.FeedStatus;
+import org.sunbird.model.user.Feed;
+import org.sunbird.model.user.FeedAction;
+import org.sunbird.model.user.FeedStatus;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
@@ -26,7 +25,7 @@ public class FeedUtil {
   private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
 
   private static IFeedService feedService = FeedFactory.getInstance();
-  private static OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+  private static org.sunbird.client.location.org.OrganisationClient organisationClient = org.sunbird.client.location.org.impl.OrganisationClientImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
   public static Response saveFeed(

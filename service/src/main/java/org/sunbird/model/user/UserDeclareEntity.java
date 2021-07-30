@@ -1,4 +1,4 @@
-package org.sunbird.models.user;
+package org.sunbird.model.user;
 
 import java.sql.Timestamp;
 import java.util.Map;

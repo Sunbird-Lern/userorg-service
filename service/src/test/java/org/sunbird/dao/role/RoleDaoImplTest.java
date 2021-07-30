@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.role.dao.impl;
+package org.sunbird.dao.role;
 
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -17,12 +17,12 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.CassandraUtil;
+import org.sunbird.dao.role.impl.RoleDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.role.dao.RoleDao;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.role.Role;
+import org.sunbird.model.role.Role;
 import org.sunbird.response.Response;
+import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

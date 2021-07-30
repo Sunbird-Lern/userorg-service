@@ -1,15 +1,15 @@
-package org.sunbird.validator.user;
+package org.sunbird.actor.user.validator;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.bean.MigrationUser;
-import org.sunbird.bean.SelfDeclaredUser;
-import org.sunbird.bean.ShadowUserUpload;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.MigrationUser;
+import org.sunbird.model.SelfDeclaredUser;
+import org.sunbird.model.ShadowUserUpload;
 import org.sunbird.util.ProjectUtil;
 
 @PrepareForTest(UserBulkMigrationRequestValidator.class)

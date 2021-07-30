@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
@@ -9,11 +9,11 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.user.util.UserUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
 @ActorConfig(

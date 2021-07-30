@@ -1,4 +1,4 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -25,25 +25,25 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.UserOrgDao;
+import org.sunbird.dao.user.UserRoleDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
+import org.sunbird.dao.user.impl.UserOrgDaoImpl;
+import org.sunbird.dao.user.impl.UserRoleDaoImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.UserOrgDao;
-import org.sunbird.user.dao.UserRoleDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.dao.impl.UserOrgDaoImpl;
-import org.sunbird.user.dao.impl.UserRoleDaoImpl;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

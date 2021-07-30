@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.FormApiUtil;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 

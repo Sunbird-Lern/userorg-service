@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
@@ -16,12 +16,12 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.util.UserActorOperations;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.user.UserActorOperations;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 

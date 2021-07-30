@@ -1,10 +1,10 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.*;
-import org.sunbird.bean.ClaimStatus;
-import org.sunbird.bean.ShadowUser;
+import org.sunbird.model.ClaimStatus;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;

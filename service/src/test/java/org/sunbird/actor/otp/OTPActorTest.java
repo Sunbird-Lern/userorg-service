@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.otp;
+package org.sunbird.actor.otp;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.mock;

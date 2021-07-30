@@ -1,24 +1,24 @@
-package org.sunbird.user.service.impl;
+package org.sunbird.service.user.impl;
 
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.user.UserLookupDao;
+import org.sunbird.dao.user.impl.UserLookupDaoImpl;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.Util;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserLookupDao;
-import org.sunbird.user.dao.impl.UserLookupDaoImpl;
-import org.sunbird.user.service.UserLookupService;
+import org.sunbird.service.user.UserLookupService;
 import org.sunbird.util.ProjectUtil;
 
 public class UserLookUpServiceImpl implements UserLookupService {

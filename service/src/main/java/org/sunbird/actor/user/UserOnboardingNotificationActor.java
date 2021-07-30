@@ -1,17 +1,17 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.util.user.UserActorOperations;
 
 @ActorConfig(
   tasks = {},

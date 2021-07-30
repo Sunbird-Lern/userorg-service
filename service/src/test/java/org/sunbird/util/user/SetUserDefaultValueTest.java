@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import static org.junit.Assert.assertNotNull;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -23,12 +23,12 @@ import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
-import org.sunbird.user.service.impl.UserServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

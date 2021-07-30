@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,14 +30,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
-import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.actorutil.user.UserClient;
-import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.client.location.LocationClient;
+import org.sunbird.client.location.impl.LocationClientImpl;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
+import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.client.user.UserClient;
+import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -46,24 +46,23 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtilHandler;
-import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationService;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.user.actors.SSOUserCreateActor;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
-import org.sunbird.user.service.impl.UserRoleServiceImpl;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.service.location.LocationService;
+import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.organisation.OrgExternalService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.FormApiUtilHandler;
+import org.sunbird.util.Util;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -183,8 +182,8 @@ public abstract class UserManagementActorTestBase {
 
     PowerMockito.mockStatic(LocationServiceImpl.class);
     locationService = mock(LocationServiceImpl.class);
-    when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+    PowerMockito.when(LocationServiceImpl.getInstance()).thenReturn(locationService);
+    PowerMockito.when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationIdType());
 
     PowerMockito.mockStatic(UserServiceImpl.class);

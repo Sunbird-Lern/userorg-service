@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
@@ -37,7 +37,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

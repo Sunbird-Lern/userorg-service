@@ -1,4 +1,4 @@
-package org.sunbird.models.user;
+package org.sunbird.model.user;
 
 public enum FeedAction {
   ORG_MIGRATION_ACTION("OrgMigrationAction");

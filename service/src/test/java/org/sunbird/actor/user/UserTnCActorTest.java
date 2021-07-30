@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -36,12 +36,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.service.user.UserTncService;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.user.actors.UserTnCActor;
-import org.sunbird.user.service.UserTncService;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 

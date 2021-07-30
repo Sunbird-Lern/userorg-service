@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;

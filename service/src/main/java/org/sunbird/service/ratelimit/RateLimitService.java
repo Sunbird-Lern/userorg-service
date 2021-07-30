@@ -1,6 +1,6 @@
-package org.sunbird.ratelimit.service;
+package org.sunbird.service.ratelimit;
 
-import org.sunbird.ratelimit.limiter.RateLimiter;
+import org.sunbird.util.ratelimit.RateLimiter;
 import org.sunbird.request.RequestContext;
 
 public interface RateLimitService {

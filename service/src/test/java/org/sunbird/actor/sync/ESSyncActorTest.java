@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.syncjobmanager;
+package org.sunbird.actor.sync;
 
 import static akka.testkit.JavaTestKit.duration;
 

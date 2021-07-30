@@ -1,4 +1,4 @@
-package org.sunbird.models.url.action;
+package org.sunbird.model.urlaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

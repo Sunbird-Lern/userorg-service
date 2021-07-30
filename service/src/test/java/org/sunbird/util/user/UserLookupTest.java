@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,10 +24,10 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.models.user.User;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.model.user.User;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

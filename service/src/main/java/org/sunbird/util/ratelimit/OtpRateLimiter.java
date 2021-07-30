@@ -1,4 +1,4 @@
-package org.sunbird.ratelimit.limiter;
+package org.sunbird.util.ratelimit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.util.ProjectUtil;

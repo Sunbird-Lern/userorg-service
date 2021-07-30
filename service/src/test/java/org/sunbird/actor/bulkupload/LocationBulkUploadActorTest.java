@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.bulkupload;
+package org.sunbird.actor.bulkupload;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -27,14 +27,14 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
-import org.sunbird.learner.util.Util;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.Util;
 
 /**
  * Test case for Location Bulk upload.

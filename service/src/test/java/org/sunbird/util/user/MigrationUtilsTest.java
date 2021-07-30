@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -17,13 +17,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.bean.ClaimStatus;
-import org.sunbird.bean.ShadowUser;
+import org.sunbird.model.ClaimStatus;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.impl.UserServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.validator.user;
+package org.sunbird.actor.user.validator;
 
 import static org.junit.Assert.assertEquals;
 

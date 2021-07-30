@@ -1,4 +1,4 @@
-package org.sunbird.user.dao;
+package org.sunbird.dao.user;
 
 import java.util.List;
 import java.util.Map;

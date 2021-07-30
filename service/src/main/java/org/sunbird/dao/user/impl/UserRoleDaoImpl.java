@@ -1,14 +1,14 @@
-package org.sunbird.user.dao.impl;
+package org.sunbird.dao.user.impl;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.user.UserRoleDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.Util;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserRoleDao;
 
 public final class UserRoleDaoImpl implements UserRoleDao {
 

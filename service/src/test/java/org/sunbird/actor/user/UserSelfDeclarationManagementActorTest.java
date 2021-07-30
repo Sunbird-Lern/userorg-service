@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
@@ -31,21 +31,20 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.actors.UserSelfDeclarationManagementActor;
-import org.sunbird.user.util.UserActorOperations;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.user.UserActorOperations;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 
@@ -20,8 +20,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 

@@ -1,11 +1,14 @@
-package org.sunbird.actor.user;
+package org.sunbird.actor.role;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actor.user.UserBaseActor;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.role.service.RoleService;
+import org.sunbird.service.role.RoleService;
+import org.sunbird.service.user.UserRoleService;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
@@ -13,8 +16,6 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.service.UserRoleService;
-import org.sunbird.user.service.impl.UserRoleServiceImpl;
 
 @ActorConfig(
   tasks = {"getRoles", "assignRoles", "assignRolesV2"},

@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 public enum UserActorOperations {
   INSERT_USER_ORG_DETAILS("insertUserOrgDetails"),

@@ -1,4 +1,4 @@
-package org.sunbird.actor.user;
+package org.sunbird.actor.feed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Comparator;

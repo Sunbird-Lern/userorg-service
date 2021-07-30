@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -14,14 +14,13 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.content.store.util.ContentStoreUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.user.actors.UserUpdateActor;
+import org.sunbird.util.contentstore.ContentStoreUtil;
 
 @PowerMockIgnore({
   "javax.management.*",

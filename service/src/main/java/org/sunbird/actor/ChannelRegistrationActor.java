@@ -1,4 +1,4 @@
-package org.sunbird.actor.background;
+package org.sunbird.actor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;

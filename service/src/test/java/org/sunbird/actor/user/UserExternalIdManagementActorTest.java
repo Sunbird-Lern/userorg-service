@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -24,17 +24,16 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.actors.UserExternalIdManagementActor;
-import org.sunbird.user.util.UserActorOperations;
+import org.sunbird.util.user.UserActorOperations;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

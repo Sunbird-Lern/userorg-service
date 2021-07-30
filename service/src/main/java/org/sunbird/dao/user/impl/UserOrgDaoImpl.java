@@ -1,17 +1,17 @@
-package org.sunbird.user.dao.impl;
+package org.sunbird.dao.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.org.UserOrg;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserOrgDao;
 
 public final class UserOrgDaoImpl implements UserOrgDao {
 

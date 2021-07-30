@@ -1,4 +1,4 @@
-package org.sunbird.validator.location;
+package org.sunbird.actor.location;
 
 import akka.actor.ActorRef;
 import java.util.ArrayList;
@@ -14,8 +14,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
+import org.sunbird.client.location.LocationClient;
+import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.util.ProjectUtil;
 

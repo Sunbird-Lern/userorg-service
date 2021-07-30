@@ -1,4 +1,4 @@
-package org.sunbird.bean;
+package org.sunbird.model;
 
 import java.io.Serializable;
 

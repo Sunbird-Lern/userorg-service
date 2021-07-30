@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import static org.junit.Assert.*;
 

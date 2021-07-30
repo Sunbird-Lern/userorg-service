@@ -1,4 +1,4 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,11 +11,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.dao.user.impl.UserLookupDaoImpl;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
-import org.sunbird.user.dao.impl.UserLookupDaoImpl;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UserLookupDaoImpl.class})

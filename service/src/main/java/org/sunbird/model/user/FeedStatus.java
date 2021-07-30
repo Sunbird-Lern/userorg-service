@@ -1,4 +1,4 @@
-package org.sunbird.models.user;
+package org.sunbird.model.user;
 
 public enum FeedStatus {
   READ("read"),

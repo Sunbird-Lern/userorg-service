@@ -1,6 +1,6 @@
-package org.sunbird.user.dao;
+package org.sunbird.dao.user;
 
-import org.sunbird.models.user.org.UserOrg;
+import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

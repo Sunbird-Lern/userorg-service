@@ -1,4 +1,4 @@
-package org.sunbird.models.adminutil;
+package org.sunbird.model.adminutil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;

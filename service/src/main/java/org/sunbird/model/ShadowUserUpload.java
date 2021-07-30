@@ -1,8 +1,9 @@
-package org.sunbird.bean;
+package org.sunbird.model;
+
+import org.sunbird.actor.user.validator.UserBulkMigrationRequestValidator;
 
 import java.util.Arrays;
 import java.util.List;
-import org.sunbird.validator.user.UserBulkMigrationRequestValidator;
 
 public class ShadowUserUpload {
 

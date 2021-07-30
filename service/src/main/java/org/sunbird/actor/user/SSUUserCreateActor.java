@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
@@ -13,21 +13,21 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserFlagUtil;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.service.UserLookupService;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.UserUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
 

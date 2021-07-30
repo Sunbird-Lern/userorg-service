@@ -1,4 +1,4 @@
-package org.sunbird.validator.location;
+package org.sunbird.actor.location;
 
 import akka.actor.ActorRef;
 import java.util.ArrayList;
@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
+import org.sunbird.client.location.LocationClient;
+import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;

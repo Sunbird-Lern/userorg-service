@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
@@ -26,10 +26,9 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -37,24 +36,25 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.feed.FeedUtil;
-import org.sunbird.feed.IFeedService;
-import org.sunbird.feed.impl.FeedFactory;
-import org.sunbird.feed.impl.FeedServiceImpl;
-import org.sunbird.helper.ServiceFactory;
-import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
-import org.sunbird.learner.organisation.service.OrgService;
-import org.sunbird.learner.organisation.service.impl.OrgServiceImpl;
-import org.sunbird.models.user.Feed;
+import org.sunbird.model.ShadowUser;
+import org.sunbird.model.user.Feed;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.MigrationUtils;
+import org.sunbird.service.organisation.OrgExternalService;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.feed.FeedUtil;
+import org.sunbird.service.feed.IFeedService;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.FeedServiceImpl;
+import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.util.user.MigrationUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

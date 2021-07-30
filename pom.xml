@@ -14,7 +14,6 @@
   </properties>
 
   <modules>
-	  <module>actors/sunbird-lms-mw</module>
 	  <module>controller</module>
       <module>reports</module>
       <module>core</module>

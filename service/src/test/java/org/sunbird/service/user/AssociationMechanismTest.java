@@ -1,4 +1,4 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import org.junit.Assert;
 import org.junit.Test;

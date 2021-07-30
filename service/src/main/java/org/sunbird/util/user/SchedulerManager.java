@@ -1,8 +1,11 @@
-package org.sunbird.util;
+package org.sunbird.util.user;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.ExecutorManager;
+import org.sunbird.util.ProjectUtil;
 
 /** @author Manzarul All the scheduler job will be handle by this class. */
 public class SchedulerManager {

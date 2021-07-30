@@ -1,4 +1,4 @@
-package org.sunbird.user.service.impl;
+package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.dao.user.UserRoleDao;
+import org.sunbird.dao.user.impl.UserRoleDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
-import org.sunbird.user.dao.UserRoleDao;
-import org.sunbird.user.dao.impl.UserRoleDaoImpl;
-import org.sunbird.user.service.UserRoleService;
+import org.sunbird.service.user.UserRoleService;
 import org.sunbird.util.ProjectUtil;
 
 public class UserRoleServiceImpl implements UserRoleService {

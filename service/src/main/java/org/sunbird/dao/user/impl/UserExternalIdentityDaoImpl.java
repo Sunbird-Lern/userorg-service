@@ -1,4 +1,4 @@
-package org.sunbird.user.dao.impl;
+package org.sunbird.dao.user.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.user.UserExternalIdentityDao;
+import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -15,8 +17,6 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserExternalIdentityDao;
-import org.sunbird.user.dao.UserLookupDao;
 
 public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 

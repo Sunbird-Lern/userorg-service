@@ -1,25 +1,25 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
 
 @ActorConfig(

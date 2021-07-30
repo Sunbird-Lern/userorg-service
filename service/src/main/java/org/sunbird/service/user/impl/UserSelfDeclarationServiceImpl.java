@@ -1,4 +1,4 @@
-package org.sunbird.user.service.impl;
+package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,16 +8,16 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.sunbird.dao.user.UserSelfDeclarationDao;
+import org.sunbird.dao.user.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserSelfDeclarationDao;
-import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
-import org.sunbird.user.service.UserSelfDeclarationService;
+import org.sunbird.service.user.UserSelfDeclarationService;
 
 public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationService {
 

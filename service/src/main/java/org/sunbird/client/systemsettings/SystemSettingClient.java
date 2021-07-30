@@ -2,7 +2,7 @@ package org.sunbird.client.systemsettings;
 
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.sunbird.models.systemsetting.SystemSetting;
+import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;
 
 /**

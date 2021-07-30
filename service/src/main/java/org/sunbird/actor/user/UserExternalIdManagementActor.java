@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.util.UserActorOperations;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.UserActorOperations;
 
 @ActorConfig(
   tasks = {"upsertUserExternalIdentityDetails"},

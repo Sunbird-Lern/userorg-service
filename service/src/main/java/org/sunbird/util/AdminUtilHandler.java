@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -12,12 +12,11 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.adminutil.AdminUtilRequest;
-import org.sunbird.models.adminutil.AdminUtilRequestData;
-import org.sunbird.models.adminutil.AdminUtilRequestPayload;
-import org.sunbird.models.adminutil.Params;
+import org.sunbird.model.adminutil.AdminUtilRequest;
+import org.sunbird.model.adminutil.AdminUtilRequestData;
+import org.sunbird.model.adminutil.AdminUtilRequestPayload;
+import org.sunbird.model.adminutil.Params;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.ProjectUtil;
 
 public class AdminUtilHandler {
   private static LoggerUtil logger = new LoggerUtil(AdminUtilHandler.class);

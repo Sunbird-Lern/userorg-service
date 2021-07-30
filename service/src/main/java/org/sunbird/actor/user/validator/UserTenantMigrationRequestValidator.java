@@ -1,4 +1,4 @@
-package org.sunbird.validator.user;
+package org.sunbird.actor.user.validator;
 
 import java.util.Map;
 import org.sunbird.exception.ResponseCode;

@@ -1,15 +1,15 @@
-package org.sunbird.user.dao.impl;
+package org.sunbird.dao.userconsent.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.userconsent.UserConsentDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.Util;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserConsentDao;
 
 public class UserConsentDaoImpl implements UserConsentDao {
   private static final String TABLE_NAME = "user_consent";

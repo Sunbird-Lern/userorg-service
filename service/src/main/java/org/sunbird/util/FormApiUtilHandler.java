@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -10,11 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.FormUtil.FormApiUtilRequestPayload;
-import org.sunbird.models.FormUtil.FormUtilRequest;
-import org.sunbird.models.adminutil.Params;
+import org.sunbird.model.adminutil.Params;
+import org.sunbird.model.formutil.FormApiUtilRequestPayload;
+import org.sunbird.model.formutil.FormUtilRequest;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.ProjectUtil;
 
 public class FormApiUtilHandler {
 

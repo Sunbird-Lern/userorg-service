@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors;
+package org.sunbird.actor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
@@ -13,13 +13,13 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 /**

@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
@@ -10,28 +10,28 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.user.UserClient;
-import org.sunbird.actorutil.user.impl.UserClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.client.user.UserClient;
+import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserFlagUtil;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.models.location.Location;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.UserUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
 @ActorConfig(

@@ -1,4 +1,4 @@
-package org.sunbird.bean;
+package org.sunbird.model;
 
 public class SelfDeclaredUser extends MigrationUser {
   private String schoolName;

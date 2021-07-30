@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
@@ -10,21 +10,20 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.background.BackgroundOperations;
+import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.otp.service.OTPService;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.service.otp.OTPService;
 
 public final class OTPUtil {
   private static LoggerUtil logger = new LoggerUtil(OTPUtil.class);

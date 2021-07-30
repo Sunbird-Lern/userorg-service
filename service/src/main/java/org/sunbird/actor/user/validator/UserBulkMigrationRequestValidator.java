@@ -1,4 +1,4 @@
-package org.sunbird.validator.user;
+package org.sunbird.actor.user.validator;
 
 import java.util.HashSet;
 import java.util.regex.Pattern;
@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.bean.MigrationUser;
-import org.sunbird.bean.SelfDeclaredUser;
-import org.sunbird.bean.ShadowUserUpload;
+import org.sunbird.model.MigrationUser;
+import org.sunbird.model.SelfDeclaredUser;
+import org.sunbird.model.ShadowUserUpload;
 import org.sunbird.error.CsvError;
 import org.sunbird.error.CsvRowErrorDetails;
 import org.sunbird.error.ErrorEnum;
@@ -17,8 +17,8 @@ import org.sunbird.error.factory.ErrorDispatcherFactory;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredErrorTypeEnum;
-import org.sunbird.learner.actors.bulkupload.model.SelfDeclaredStatusEnum;
+import org.sunbird.model.bulkupload.SelfDeclaredErrorTypeEnum;
+import org.sunbird.model.bulkupload.SelfDeclaredStatusEnum;
 import org.sunbird.util.ProjectUtil;
 
 /**

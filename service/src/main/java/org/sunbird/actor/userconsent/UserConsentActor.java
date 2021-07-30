@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.userconsent;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -13,23 +13,23 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.organisation.OrgDao;
+import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.organisation.dao.OrgDao;
-import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.service.userconsent.UserConsentService;
+import org.sunbird.service.userconsent.impl.UserConsentServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.user.service.UserConsentService;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserConsentServiceImpl;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.DateUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.DateUtil;
 
 @ActorConfig(
   tasks = {"updateUserConsent", "getUserConsent"},

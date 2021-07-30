@@ -1,4 +1,4 @@
-package org.sunbird.user.dao.impl;
+package org.sunbird.dao.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.user.UserSelfDeclarationDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserSelfDeclarationDao;
 
 public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();

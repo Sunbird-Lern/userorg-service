@@ -1,8 +1,8 @@
-package org.sunbird.user.dao;
+package org.sunbird.dao.user;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 
 public interface UserSelfDeclarationDao {

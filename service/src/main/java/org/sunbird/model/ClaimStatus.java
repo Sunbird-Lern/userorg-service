@@ -1,4 +1,4 @@
-package org.sunbird.bean;
+package org.sunbird.model;
 
 /**
  * this class will have user action performed on the shadow user record.

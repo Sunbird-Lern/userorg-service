@@ -1,12 +1,13 @@
-package org.sunbird.user.service.impl;
+package org.sunbird.service.userconsent.impl;
 
 import java.util.List;
 import java.util.Map;
+
+import org.sunbird.dao.userconsent.UserConsentDao;
+import org.sunbird.dao.userconsent.impl.UserConsentDaoImpl;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserConsentDao;
-import org.sunbird.user.dao.impl.UserConsentDaoImpl;
-import org.sunbird.user.service.UserConsentService;
+import org.sunbird.service.userconsent.UserConsentService;
 
 public class UserConsentServiceImpl implements UserConsentService {
 

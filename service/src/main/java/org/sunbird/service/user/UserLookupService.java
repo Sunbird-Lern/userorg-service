@@ -1,8 +1,8 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

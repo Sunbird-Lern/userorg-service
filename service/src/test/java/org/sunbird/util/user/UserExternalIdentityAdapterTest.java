@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 
 public class UserExternalIdentityAdapterTest {
   private ObjectMapper mapper = new ObjectMapper();

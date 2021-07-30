@@ -1,4 +1,4 @@
-package org.sunbird.feed;
+package org.sunbird.util.feed;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -19,23 +19,24 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
-import org.sunbird.bean.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.feed.impl.FeedFactory;
-import org.sunbird.feed.impl.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.ShadowUser;
+import org.sunbird.model.user.Feed;
 import org.sunbird.models.organisation.Organisation;
-import org.sunbird.models.user.Feed;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.FeedServiceImpl;
+import org.sunbird.service.feed.IFeedService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

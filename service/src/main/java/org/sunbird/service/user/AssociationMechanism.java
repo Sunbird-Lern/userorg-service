@@ -1,4 +1,4 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 public class AssociationMechanism {
 

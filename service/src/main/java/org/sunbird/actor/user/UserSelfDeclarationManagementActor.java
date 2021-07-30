@@ -1,29 +1,27 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
+import org.sunbird.dao.user.UserOrgDao;
+import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
+import org.sunbird.service.user.UserSelfDeclarationService;
+import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 import org.sunbird.models.organisation.Organisation;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.user.dao.UserOrgDao;
-import org.sunbird.user.dao.impl.UserOrgDaoImpl;
-import org.sunbird.user.service.UserSelfDeclarationService;
-import org.sunbird.user.service.impl.UserSelfDeclarationServiceImpl;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.user.UserUtil;
 
 @ActorConfig(
   tasks = {"upsertUserSelfDeclarations", "updateUserDeclarations"},
@@ -32,7 +30,7 @@ import org.sunbird.user.util.UserUtil;
 public class UserSelfDeclarationManagementActor extends BaseActor {
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private OrganisationClient organisationClient = new OrganisationClientImpl();
+  private org.sunbird.client.location.org.OrganisationClient organisationClient = new org.sunbird.client.location.org.impl.OrganisationClientImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {

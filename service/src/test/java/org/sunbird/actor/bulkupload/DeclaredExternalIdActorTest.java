@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.bulkupload;
+package org.sunbird.actor.bulkupload;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
@@ -23,25 +23,25 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.service.SunbirdMWService;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
   Util.class,
-  org.sunbird.datasecurity.impl.ServiceFactory.class,
+  ServiceFactory.class,
   SunbirdMWService.class,
   OrganisationClientImpl.class,
 })

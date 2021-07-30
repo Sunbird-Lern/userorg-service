@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.notificationservice;
+package org.sunbird.actor.notification;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
@@ -27,19 +27,19 @@ import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.notificationservice.dao.impl.EmailTemplateDaoImpl;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

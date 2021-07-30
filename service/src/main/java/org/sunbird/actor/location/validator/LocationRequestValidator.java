@@ -20,7 +20,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.GeoLocationJsonKey;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
+import org.sunbird.util.Util;
 import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dao.location.impl.LocationDaoImpl;
 import org.sunbird.models.location.apirequest.UpsertLocationRequest;

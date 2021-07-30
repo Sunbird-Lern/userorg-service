@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -14,40 +14,38 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.org.OrganisationClient;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.dao.user.UserOrgDao;
+import org.sunbird.dao.user.UserSelfDeclarationDao;
+import org.sunbird.dao.user.impl.UserOrgDaoImpl;
+import org.sunbird.dao.user.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.UserFlagUtil;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.location.Location;
-import org.sunbird.models.organisation.Organisation;
-import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserDeclareEntity;
-import org.sunbird.models.user.org.UserOrg;
+import org.sunbird.model.user.UserDeclareEntity;
+import org.sunbird.model.user.UserOrg;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.AssociationMechanism;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.dao.UserOrgDao;
-import org.sunbird.user.dao.UserSelfDeclarationDao;
-import org.sunbird.user.dao.impl.UserOrgDaoImpl;
-import org.sunbird.user.dao.impl.UserSelfDeclarationDaoImpl;
-import org.sunbird.user.service.AssociationMechanism;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.UserActorOperations;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Matcher;
+import org.sunbird.util.UserFlagUtil;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
+import org.sunbird.models.location.Location;
+import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.user.User;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.validator.user.UserRequestValidator;
+import org.sunbird.actor.user.validator.UserRequestValidator;
+import org.sunbird.util.user.UserActorOperations;
+import org.sunbird.util.user.UserUtil;
 
 @ActorConfig(
   tasks = {"updateUser", "updateUserV2"},
@@ -165,7 +163,7 @@ public class UserUpdateActor extends UserBaseActor {
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       List<Map<String, Object>> orgList = new ArrayList();
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
-        OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+        org.sunbird.client.location.org.OrganisationClient organisationClient = org.sunbird.client.location.org.impl.OrganisationClientImpl.getInstance();
         Map<String, Object> filters = new HashMap<>();
         filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
         if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {

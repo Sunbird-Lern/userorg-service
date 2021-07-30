@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -18,13 +18,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.models.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
-import org.sunbird.user.actors.UserUpdateActor;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
 public class UserUpdateActorTest extends UserManagementActorTestBase {

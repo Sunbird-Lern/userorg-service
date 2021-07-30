@@ -1,8 +1,8 @@
-package org.sunbird.feed;
+package org.sunbird.service.feed;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.models.user.Feed;
+import org.sunbird.model.user.Feed;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

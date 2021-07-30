@@ -1,8 +1,8 @@
-package org.sunbird.ratelimit.dao;
+package org.sunbird.dao.ratelimit;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.ratelimit.limiter.RateLimit;
+import org.sunbird.util.ratelimit.RateLimit;
 import org.sunbird.request.RequestContext;
 
 public interface RateLimitDao {

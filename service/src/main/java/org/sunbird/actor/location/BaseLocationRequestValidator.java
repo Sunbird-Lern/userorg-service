@@ -1,4 +1,4 @@
-package org.sunbird.validator.location;
+package org.sunbird.actor.location;
 
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;

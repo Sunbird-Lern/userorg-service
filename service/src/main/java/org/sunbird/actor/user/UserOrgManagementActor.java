@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
-import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.AssociationMechanism;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.service.user.AssociationMechanism;
+import org.sunbird.util.Util;
+import org.sunbird.request.Request;
+import org.sunbird.util.user.UserUtil;
 
 @ActorConfig(
   tasks = {"insertUserOrgDetails", "updateUserOrgDetails"},

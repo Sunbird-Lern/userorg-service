@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +11,6 @@ import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.datasecurity.impl.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.PropertiesCache;
 
 /**
  * This class is for utility methods for encrypting user data.

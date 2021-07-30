@@ -1,9 +1,9 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import java.util.HashMap;
 import org.junit.Test;
-import org.sunbird.models.user.User;
-import org.sunbird.user.service.impl.UserMergeServiceImpl;
+import org.sunbird.model.user.User;
+import org.sunbird.service.user.impl.UserMergeServiceImpl;
 
 public class UserMergeServiceImplTest {
   @Test

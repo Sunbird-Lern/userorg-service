@@ -1,6 +1,5 @@
-package org.sunbird.feed.impl;
+package org.sunbird.service.feed;
 
-import org.sunbird.feed.IFeedService;
 
 /** This class will create instance of FeedService */
 public class FeedFactory {

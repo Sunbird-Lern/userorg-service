@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,12 +8,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.background.BackgroundOperations;
+import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.common.quartz.scheduler.SchedulerManager;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
@@ -34,8 +33,7 @@ import org.sunbird.response.Response;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.url.URLShortner;
 import org.sunbird.url.URLShortnerImpl;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.quartzscheduler.SchedulerManager;
 import scala.concurrent.Future;
 
 /**

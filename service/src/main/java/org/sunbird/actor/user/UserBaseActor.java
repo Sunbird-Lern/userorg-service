@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
@@ -11,26 +11,26 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actorutil.location.LocationClient;
-import org.sunbird.actorutil.location.impl.LocationClientImpl;
+import org.sunbird.client.location.LocationClient;
+import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
-import org.sunbird.learner.util.Util;
-import org.sunbird.location.service.LocationService;
-import org.sunbird.location.service.LocationServiceImpl;
 import org.sunbird.models.location.Location;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.location.LocationService;
+import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.user.service.UserLookupService;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.FormApiUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
 public abstract class UserBaseActor extends BaseActor {
 

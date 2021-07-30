@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertNotNull;
@@ -11,7 +11,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.user.actors.SSUUserCreateActor;
 
 public class SSUUserCreateActorTest extends UserManagementActorTestBase {
 

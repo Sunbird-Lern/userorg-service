@@ -1,4 +1,4 @@
-package org.sunbird.validator.user;
+package org.sunbird.actor.user.validator;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -11,8 +11,8 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.FormApiUtil;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.FormApiUtil;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;

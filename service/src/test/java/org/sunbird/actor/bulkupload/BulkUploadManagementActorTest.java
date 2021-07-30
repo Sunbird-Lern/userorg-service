@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.bulkupload;
+package org.sunbird.actor.bulkupload;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -32,11 +32,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
 /** @author arvind. Junit test cases for bulk upload - user, org */
 @RunWith(PowerMockRunner.class)

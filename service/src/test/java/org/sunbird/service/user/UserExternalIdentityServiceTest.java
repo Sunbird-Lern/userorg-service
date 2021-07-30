@@ -1,4 +1,4 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -20,8 +20,8 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
+import org.sunbird.util.user.UserUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

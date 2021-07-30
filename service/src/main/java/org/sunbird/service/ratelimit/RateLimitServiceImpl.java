@@ -1,4 +1,4 @@
-package org.sunbird.ratelimit.service;
+package org.sunbird.service.ratelimit;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.sunbird.dao.ratelimit.RateLimitDao;
+import org.sunbird.dao.ratelimit.RateLimitDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.ratelimit.dao.RateLimitDao;
-import org.sunbird.ratelimit.dao.RateLimitDaoImpl;
-import org.sunbird.ratelimit.limiter.RateLimit;
-import org.sunbird.ratelimit.limiter.RateLimiter;
+import org.sunbird.util.ratelimit.RateLimit;
+import org.sunbird.util.ratelimit.RateLimiter;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 

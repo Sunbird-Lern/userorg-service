@@ -1,4 +1,4 @@
-package org.sunbird.content.store.util;
+package org.sunbird.util.contentstore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;

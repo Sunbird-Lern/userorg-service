@@ -1,4 +1,4 @@
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -18,8 +18,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.adminutil.AdminUtilRequestData;
-import org.sunbird.models.adminutil.AdminUtilRequestPayload;
+import org.sunbird.model.adminutil.AdminUtilRequestData;
+import org.sunbird.model.adminutil.AdminUtilRequestPayload;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, AdminUtilHandlerTest.class})

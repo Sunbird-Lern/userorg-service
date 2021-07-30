@@ -11,12 +11,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.dao.organisation.OrgDao;
+import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.organisation.dao.OrgDao;
-import org.sunbird.learner.organisation.dao.impl.OrgDaoImpl;
-import org.sunbird.learner.organisation.service.OrgService;
-import org.sunbird.learner.util.Util;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({OrgDao.class, OrgDaoImpl.class, Util.class})

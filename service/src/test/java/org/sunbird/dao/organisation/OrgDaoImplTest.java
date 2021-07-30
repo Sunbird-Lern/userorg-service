@@ -1,4 +1,4 @@
-package org.sunbird.learner.organisation.dao.impl;
+package org.sunbird.dao.organisation;
 
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -18,14 +18,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.CassandraUtil;
+import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.organisation.dao.OrgDao;
-import org.sunbird.learner.organisation.external.identity.service.OrgExternalService;
-import org.sunbird.learner.util.Util;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgExternalService;
+import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -122,7 +122,7 @@ public class OrgDaoImplTest {
               Mockito.any(RequestContext.class)))
           .thenReturn(response);
 
-      PowerMockito.when(
+      when(
               orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                   Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
           .thenReturn("");
@@ -150,7 +150,7 @@ public class OrgDaoImplTest {
               Mockito.anyString(),
               Mockito.any(RequestContext.class)))
           .thenReturn(response);
-      PowerMockito.when(
+      when(
               orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                   Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
           .thenReturn("");

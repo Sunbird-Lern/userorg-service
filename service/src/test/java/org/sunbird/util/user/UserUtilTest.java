@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,10 +31,10 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.User;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;

@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.keycloak.admin.client.Keycloak;
@@ -36,6 +37,7 @@ import org.sunbird.util.PropertiesCache;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
+@Ignore
 public class KeycloakBruteForceAttackUtilTest {
   @Before
   public void setup() {

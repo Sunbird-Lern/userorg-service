@@ -1,5 +1,4 @@
-/** */
-package org.sunbird.learner.util;
+package org.sunbird.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
@@ -12,11 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.role.service.RoleService;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.service.role.RoleService;
 
 /**
  * This class will handle the data cache.

@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
@@ -22,19 +22,19 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.feed.UserFeedActor;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.feed.IFeedService;
-import org.sunbird.feed.impl.FeedServiceImpl;
+import org.sunbird.response.Response;
+import org.sunbird.service.feed.IFeedService;
+import org.sunbird.service.feed.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
-import org.sunbird.response.Response;
-import org.sunbird.user.actors.UserFeedActor;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

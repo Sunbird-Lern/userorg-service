@@ -25,9 +25,9 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.ratelimit.limiter.OtpRateLimiter;
-import org.sunbird.ratelimit.limiter.RateLimit;
 import org.sunbird.response.Response;
+import org.sunbird.util.ratelimit.OtpRateLimiter;
+import org.sunbird.util.ratelimit.RateLimit;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({

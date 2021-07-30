@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.bulkupload;
+package org.sunbird.actor.bulkupload;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -25,24 +25,24 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.RequestRouter;
 import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actorutil.org.impl.OrganisationClientImpl;
-import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.actorutil.user.impl.UserClientImpl;
+import org.sunbird.actor.user.validator.UserRequestValidator;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
+import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.client.user.impl.UserClientImpl;
+import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
+import org.sunbird.dao.bulkupload.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessDaoImpl;
-import org.sunbird.learner.actors.bulkupload.dao.impl.BulkUploadProcessTaskDaoImpl;
-import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcess;
-import org.sunbird.learner.actors.bulkupload.model.BulkUploadProcessTask;
+import org.sunbird.model.bulkupload.BulkUploadProcess;
+import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.validator.user.UserRequestValidator;
 
 @PrepareForTest({
   ServiceFactory.class,
@@ -136,13 +136,13 @@ public class UserBulkUploadBackgroundJobActorTest {
     bulkUploadProcess.setTaskCount(3);
     bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue());
     bulkUploadProcess.setOrganisationId("someOrgId");
-    PowerMockito.when(bulkUploadProcessDao.read(nullable(String.class), Mockito.any()))
+    when(bulkUploadProcessDao.read(nullable(String.class), Mockito.any()))
         .thenReturn(bulkUploadProcess);
-    PowerMockito.when(bulkUploadProcessDao.update(Mockito.any(), Mockito.any()))
+    when(bulkUploadProcessDao.update(Mockito.any(), Mockito.any()))
         .thenReturn(new Response());
-    PowerMockito.when(bulkUploadProcessTaskDao.readByPrimaryKeys(Mockito.anyMap(), Mockito.any()))
+    when(bulkUploadProcessTaskDao.readByPrimaryKeys(Mockito.anyMap(), Mockito.any()))
         .thenReturn(createBulkUploadProcessTasks());
-    PowerMockito.when(bulkUploadProcessTaskDao.updateBatchRecord(Mockito.anyList(), Mockito.any()))
+    when(bulkUploadProcessTaskDao.updateBatchRecord(Mockito.anyList(), Mockito.any()))
         .thenReturn("updated");
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

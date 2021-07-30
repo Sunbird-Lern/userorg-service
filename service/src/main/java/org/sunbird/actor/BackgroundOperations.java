@@ -1,4 +1,4 @@
-package org.sunbird.actor.background;
+package org.sunbird.actor;
 
 /** @author Mahesh Kumar Gangula */
 public enum BackgroundOperations {

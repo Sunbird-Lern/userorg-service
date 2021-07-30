@@ -1,7 +1,7 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import java.util.Map;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

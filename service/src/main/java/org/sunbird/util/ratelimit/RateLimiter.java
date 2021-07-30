@@ -1,4 +1,4 @@
-package org.sunbird.ratelimit.limiter;
+package org.sunbird.util.ratelimit;
 
 public interface RateLimiter {
 

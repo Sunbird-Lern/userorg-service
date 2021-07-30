@@ -1,4 +1,4 @@
-package org.sunbird.user.dao.impl;
+package org.sunbird.dao.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -8,13 +8,13 @@ import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.user.UserDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserDao;
 
 /**
  * Implementation class of UserDao interface.

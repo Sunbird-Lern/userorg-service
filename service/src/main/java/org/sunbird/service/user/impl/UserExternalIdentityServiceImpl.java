@@ -1,13 +1,13 @@
-package org.sunbird.user.service.impl;
+package org.sunbird.service.user.impl;
 
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.sunbird.dao.user.UserExternalIdentityDao;
+import org.sunbird.dao.user.impl.UserExternalIdentityDaoImpl;
 import org.sunbird.request.RequestContext;
-import org.sunbird.user.dao.UserExternalIdentityDao;
-import org.sunbird.user.dao.impl.UserExternalIdentityDaoImpl;
-import org.sunbird.user.service.UserExternalIdentityService;
-import org.sunbird.user.util.UserExternalIdentityAdapter;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.service.user.UserExternalIdentityService;
+import org.sunbird.util.user.UserExternalIdentityAdapter;
+import org.sunbird.util.user.UserUtil;
 
 public class UserExternalIdentityServiceImpl implements UserExternalIdentityService {
   private static UserExternalIdentityDao userExternalIdentityDao =

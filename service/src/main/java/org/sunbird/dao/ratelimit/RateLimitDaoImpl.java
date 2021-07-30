@@ -1,4 +1,4 @@
-package org.sunbird.ratelimit.dao;
+package org.sunbird.dao.ratelimit;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,8 +9,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
-import org.sunbird.ratelimit.limiter.RateLimit;
+import org.sunbird.util.Util;
+import org.sunbird.util.ratelimit.RateLimit;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

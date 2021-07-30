@@ -1,6 +1,6 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
-import static org.sunbird.learner.util.Util.isNotNull;
+import static org.sunbird.util.Util.isNotNull;
 
 import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
@@ -25,13 +25,13 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
+import org.sunbird.service.user.UserProfileReadService;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.service.UserProfileReadService;
 import org.sunbird.util.ProjectUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;

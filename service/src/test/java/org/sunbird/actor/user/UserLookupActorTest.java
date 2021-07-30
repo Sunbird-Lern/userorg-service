@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 
@@ -18,14 +18,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
+import org.sunbird.dao.user.impl.UserLookupDaoImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.dao.impl.UserLookupDaoImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({UserLookupDaoImpl.class, UserDao.class, UserDaoImpl.class})

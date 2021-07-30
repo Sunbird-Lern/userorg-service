@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -7,12 +7,14 @@ import java.util.Map;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.sso.KeycloakBruteForceAttackUtil;
@@ -20,8 +22,6 @@ import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
 
 /** This actor process the request for reset password. */
 @ActorConfig(

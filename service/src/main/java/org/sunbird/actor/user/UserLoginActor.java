@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;

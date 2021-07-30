@@ -1,14 +1,14 @@
-package org.sunbird.user.service.impl;
+package org.sunbird.service.user.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
+import org.sunbird.service.user.UserMergeService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.user.service.UserMergeService;
 
 public class UserMergeServiceImpl implements UserMergeService {
   private static UserMergeService mergeService = null;

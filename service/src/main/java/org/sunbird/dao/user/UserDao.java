@@ -1,8 +1,8 @@
-package org.sunbird.user.dao;
+package org.sunbird.dao.user;
 
 import java.util.List;
 import java.util.Map;
-import org.sunbird.models.user.User;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

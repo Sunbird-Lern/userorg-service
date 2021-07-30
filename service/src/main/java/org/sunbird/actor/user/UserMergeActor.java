@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
@@ -12,18 +12,24 @@ import java.util.stream.Stream;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actorutil.systemsettings.SystemSettingClient;
-import org.sunbird.actorutil.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.client.systemsettings.SystemSettingClient;
+import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.OneWayHashing;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.systemsetting.SystemSetting;
-import org.sunbird.models.user.User;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserMergeServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
+import org.sunbird.model.systemsettings.SystemSetting;
+import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -34,16 +40,10 @@ import org.sunbird.telemetry.dto.Actor;
 import org.sunbird.telemetry.dto.Context;
 import org.sunbird.telemetry.dto.Target;
 import org.sunbird.telemetry.dto.Telemetry;
-import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
-import org.sunbird.user.service.UserService;
-import org.sunbird.user.service.impl.UserMergeServiceImpl;
-import org.sunbird.user.service.impl.UserServiceImpl;
-import org.sunbird.user.util.KafkaConfigConstants;
-import org.sunbird.user.util.UserUtil;
 import org.sunbird.util.ConfigUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.KafkaConfigConstants;
+import org.sunbird.util.user.UserUtil;
 
 @ActorConfig(
   tasks = {"mergeUser"},

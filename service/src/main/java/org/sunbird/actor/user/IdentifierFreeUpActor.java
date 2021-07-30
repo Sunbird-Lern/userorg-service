@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,11 +17,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.service.impl.UserLookUpServiceImpl;
 import org.sunbird.util.ProjectUtil;
 
 @ActorConfig(

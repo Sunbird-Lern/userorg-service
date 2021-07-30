@@ -1,4 +1,4 @@
-package org.sunbird.user;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertNotNull;
@@ -18,18 +18,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.actorutil.user.impl.UserClientImpl;
+import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.user.actors.ManagedUserActor;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.Util;
+import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
 
 @PrepareForTest({Util.class})

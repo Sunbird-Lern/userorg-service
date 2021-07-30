@@ -1,4 +1,4 @@
-package org.sunbird.user.service;
+package org.sunbird.service.user;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -25,10 +25,10 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.DataCacheHandler;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.user.util.UserUtil;
+import org.sunbird.util.user.UserUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

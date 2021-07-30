@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;

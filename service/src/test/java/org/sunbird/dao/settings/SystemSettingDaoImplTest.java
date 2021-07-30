@@ -23,7 +23,7 @@ import org.sunbird.dao.systemsettings.SystemSettingDao;
 import org.sunbird.dao.systemsettings.impl.SystemSettingDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.systemsetting.SystemSetting;
+import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

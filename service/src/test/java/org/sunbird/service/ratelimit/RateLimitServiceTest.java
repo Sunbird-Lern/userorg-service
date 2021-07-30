@@ -1,4 +1,4 @@
-package org.sunbird.ratelimit.service;
+package org.sunbird.service.ratelimit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -24,13 +24,13 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.dao.ratelimit.RateLimitDao;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.ratelimit.dao.RateLimitDao;
-import org.sunbird.ratelimit.limiter.OtpRateLimiter;
-import org.sunbird.ratelimit.limiter.RateLimit;
-import org.sunbird.ratelimit.limiter.RateLimiter;
+import org.sunbird.util.ratelimit.OtpRateLimiter;
+import org.sunbird.util.ratelimit.RateLimit;
+import org.sunbird.util.ratelimit.RateLimiter;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({

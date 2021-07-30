@@ -1,4 +1,4 @@
-package org.sunbird.user.util;
+package org.sunbird.util.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
