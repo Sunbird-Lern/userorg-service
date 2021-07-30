@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.model.ShadowUser;
 import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.feed.FeedFactory;
@@ -25,7 +27,7 @@ public class FeedUtil {
   private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
 
   private static IFeedService feedService = FeedFactory.getInstance();
-  private static org.sunbird.client.location.org.OrganisationClient organisationClient = org.sunbird.client.location.org.impl.OrganisationClientImpl.getInstance();
+  private static OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
   public static Response saveFeed(

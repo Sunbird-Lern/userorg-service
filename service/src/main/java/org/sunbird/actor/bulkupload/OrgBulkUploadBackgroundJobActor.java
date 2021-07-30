@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.client.location.LocationClient;
 import org.sunbird.client.location.impl.LocationClientImpl;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.exception.ResponseCode;
@@ -37,7 +39,7 @@ import org.sunbird.util.Util;
 )
 public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
-  private org.sunbird.client.location.org.OrganisationClient orgClient = new org.sunbird.client.location.org.impl.OrganisationClientImpl();
+  private OrganisationClient orgClient = new OrganisationClientImpl();
   private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
 
   @Override

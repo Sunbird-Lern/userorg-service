@@ -11,6 +11,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.validator.UserRequestValidator;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.client.user.UserClient;
@@ -36,7 +38,7 @@ import org.sunbird.util.Util;
 public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private UserClient userClient = UserClientImpl.getInstance();
-  private org.sunbird.client.location.org.OrganisationClient organisationClient = org.sunbird.client.location.org.impl.OrganisationClientImpl.getInstance();
+  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
 

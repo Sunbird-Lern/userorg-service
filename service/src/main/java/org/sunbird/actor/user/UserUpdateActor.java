@@ -15,6 +15,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.dao.user.UserSelfDeclarationDao;
 import org.sunbird.dao.user.impl.UserOrgDaoImpl;
@@ -163,7 +165,7 @@ public class UserUpdateActor extends UserBaseActor {
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       List<Map<String, Object>> orgList = new ArrayList();
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
-        org.sunbird.client.location.org.OrganisationClient organisationClient = org.sunbird.client.location.org.impl.OrganisationClientImpl.getInstance();
+        OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
         Map<String, Object> filters = new HashMap<>();
         filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
         if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {

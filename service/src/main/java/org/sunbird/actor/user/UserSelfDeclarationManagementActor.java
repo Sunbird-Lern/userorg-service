@@ -5,6 +5,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -30,7 +32,7 @@ import org.sunbird.util.user.UserUtil;
 public class UserSelfDeclarationManagementActor extends BaseActor {
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private org.sunbird.client.location.org.OrganisationClient organisationClient = new org.sunbird.client.location.org.impl.OrganisationClientImpl();
+  private OrganisationClient organisationClient = new OrganisationClientImpl();
 
   @Override
   public void onReceive(Request request) throws Throwable {

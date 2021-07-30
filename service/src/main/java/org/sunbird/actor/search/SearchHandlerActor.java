@@ -10,6 +10,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -45,7 +47,7 @@ import scala.concurrent.Future;
 )
 public class SearchHandlerActor extends BaseActor {
 
-  private org.sunbird.client.location.org.OrganisationClient orgClient = new org.sunbird.client.location.org.impl.OrganisationClientImpl();
+  private OrganisationClient orgClient = new OrganisationClientImpl();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
 
