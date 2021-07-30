@@ -46,7 +46,6 @@ public class KeycloakUtil {
             + "/auth/realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + "/protocol/openid-connect/token";
-    logger.info(context, "url generated for auth token : " + url);
     return getAdminAccessToken(context, url);
   }
 }
