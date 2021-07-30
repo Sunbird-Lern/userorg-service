@@ -8,6 +8,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
@@ -244,6 +245,46 @@ public class HttpClientUtil {
           response.close();
         } catch (Exception ex) {
           logger.error("Exception occurred while closing patch response object", ex);
+        }
+      }
+    }
+  }
+
+  public static String delete(String requestURL, Map<String, String> headers) {
+    CloseableHttpResponse response = null;
+    try {
+      HttpDelete httpDelete = new HttpDelete(requestURL);
+      if (MapUtils.isNotEmpty(headers)) {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+          httpDelete.addHeader(entry.getKey(), entry.getValue());
+        }
+      }
+      response = httpclient.execute(httpDelete);
+      int status = response.getStatusLine().getStatusCode();
+      if (status >= 200 && status < 300) {
+        HttpEntity httpEntity = response.getEntity();
+        StatusLine sl = response.getStatusLine();
+        logger.debug(
+            "Response from delete call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
+        if (null != httpEntity) {
+          byte[] bytes = EntityUtils.toByteArray(httpEntity);
+          return new String(bytes);
+        } else {
+          return "";
+        }
+      } else {
+        getErrorResponse(response, "DELETE");
+        return "";
+      }
+    } catch (Exception ex) {
+      logger.error("Exception occurred while calling delete method", ex);
+      return "";
+    } finally {
+      if (null != response) {
+        try {
+          response.close();
+        } catch (Exception ex) {
+          logger.error("Exception occurred while closing delete response object", ex);
         }
       }
     }

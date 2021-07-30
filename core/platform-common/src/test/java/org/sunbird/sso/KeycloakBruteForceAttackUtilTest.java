@@ -1,35 +1,22 @@
 package org.sunbird.sso;
 
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.AttackDetectionResource;
-import org.keycloak.admin.client.resource.RealmResource;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.http.HttpClientUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
 
-@PrepareForTest({
-  ProjectUtil.class,
-  KeyCloakConnectionProvider.class,
-  Keycloak.class,
-  RealmResource.class,
-  AttackDetectionResource.class,
-  PropertiesCache.class
-})
+@PrepareForTest({ProjectUtil.class, HttpClientUtil.class, KeycloakUtil.class})
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
   "javax.management.*",
@@ -40,27 +27,20 @@ import org.sunbird.util.PropertiesCache;
 @Ignore
 public class KeycloakBruteForceAttackUtilTest {
   @Before
-  public void setup() {
+  public void setup() throws Exception {
     PowerMockito.mockStatic(ProjectUtil.class);
-    PowerMockito.mockStatic(PropertiesCache.class);
-    PropertiesCache propertiesCache = mock(PropertiesCache.class);
-    when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
-    PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+    PowerMockito.mockStatic(HttpClientUtil.class);
+    PowerMockito.mockStatic(KeycloakUtil.class);
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
-    PowerMockito.mockStatic(KeyCloakConnectionProvider.class);
-    Keycloak keycloak = PowerMockito.mock(Keycloak.class);
-    when(KeyCloakConnectionProvider.getConnection()).thenReturn(keycloak);
-    RealmResource realmRes = mock(RealmResource.class);
-    when(keycloak.realm(null)).thenReturn(realmRes);
-    AttackDetectionResource attackDetectionResource = mock(AttackDetectionResource.class);
-    when(realmRes.attackDetection()).thenReturn(attackDetectionResource);
-    Map<String, Object> resp = new HashMap<>();
-    resp.put("disabled", true);
-    when(attackDetectionResource.bruteForceUserStatus(Mockito.anyString())).thenReturn(resp);
+    when(KeycloakUtil.getAdminAccessTokenWithoutDomain(Mockito.any(RequestContext.class)))
+        .thenReturn("accessToken");
+    when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("{\"disabled\":true}");
+    when(HttpClientUtil.delete(Mockito.anyString(), Mockito.anyMap())).thenReturn("");
   }
 
   @Test
-  public void testIsUserAccountDisabled() {
+  public void testIsUserAccountDisabled() throws Exception {
     boolean bool =
         KeycloakBruteForceAttackUtil.isUserAccountDisabled(
             "4564654-789797-121", new RequestContext());
@@ -68,7 +48,7 @@ public class KeycloakBruteForceAttackUtilTest {
   }
 
   @Test
-  public void testUnlockTempDisabledUser() {
+  public void testUnlockTempDisabledUser() throws Exception {
     boolean bool =
         KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
             "4564654-789797-121", new RequestContext());

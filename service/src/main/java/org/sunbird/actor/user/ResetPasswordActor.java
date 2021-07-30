@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.dao.user.UserDao;
@@ -18,8 +17,6 @@ import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.sso.KeycloakBruteForceAttackUtil;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 
@@ -49,10 +46,6 @@ public class ResetPasswordActor extends BaseActor {
       if (isDisabled) {
         KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
             user.getUserId(), request.getRequestContext());
-        SSOManager ssoManager = SSOServiceFactory.getInstance();
-        String tempPass =
-            "TempPass" + RandomStringUtils.randomAlphanumeric(10).toLowerCase() + "@123";
-        ssoManager.updatePassword(userId, tempPass, request.getRequestContext());
       }
       generateLink(request, user);
     } else {

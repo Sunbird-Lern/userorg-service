@@ -73,7 +73,7 @@ public class ResetPasswordActorTest {
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());
     when(userDao.getUserById("ValidUserId", null)).thenReturn(getValidUserResponse());
 
-    when(KeycloakUtil.getAdminAccessToken(Mockito.any(RequestContext.class)))
+    when(KeycloakUtil.getAdminAccessToken(Mockito.any(RequestContext.class), Mockito.anyString()))
         .thenReturn("accessToken");
     when(KeycloakBruteForceAttackUtil.isUserAccountDisabled(
             Mockito.anyString(), Mockito.any(RequestContext.class)))
