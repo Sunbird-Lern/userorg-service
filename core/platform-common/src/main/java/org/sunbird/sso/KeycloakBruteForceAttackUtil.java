@@ -28,7 +28,7 @@ public class KeycloakBruteForceAttackUtil {
       throws Exception {
     String url =
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_LB_IP)
-            + "/auth/realms/"
+            + "/auth/admin/realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + "/attack-detection/brute-force/users/"
             + fedUserPrefix
@@ -52,7 +52,7 @@ public class KeycloakBruteForceAttackUtil {
       throws Exception {
     String url =
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_LB_IP)
-            + "/auth/realms/"
+            + "/auth/admin/realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + "/attack-detection/brute-force/users/"
             + fedUserPrefix
