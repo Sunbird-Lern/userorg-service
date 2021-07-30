@@ -27,8 +27,8 @@ public class KeycloakBruteForceAttackUtil {
   public static boolean isUserAccountDisabled(String userId, RequestContext context)
       throws Exception {
     String url =
-        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
-            + "admin/realms/"
+        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_LB_IP)
+            + "/auth/admin/realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + "/attack-detection/brute-force/users/"
             + fedUserPrefix
@@ -51,8 +51,8 @@ public class KeycloakBruteForceAttackUtil {
   public static boolean unlockTempDisabledUser(String userId, RequestContext context)
       throws Exception {
     String url =
-        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
-            + "admin/realms/"
+        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_LB_IP)
+            + "/auth/admin/realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + "/attack-detection/brute-force/users/"
             + fedUserPrefix
