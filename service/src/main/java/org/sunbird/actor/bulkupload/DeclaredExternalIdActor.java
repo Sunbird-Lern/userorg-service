@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.client.org.OrganisationClient;
+import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.SelfDeclaredUser;
@@ -183,7 +185,7 @@ public class DeclaredExternalIdActor extends BaseActor {
 
   private Organisation getOrgDetails(
       String orgExternalId, String provider, RequestContext context) {
-    org.sunbird.client.location.org.OrganisationClient organisationClient = org.sunbird.client.location.org.impl.OrganisationClientImpl.getInstance();
+    OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
     return organisationClient.esGetOrgByExternalId(orgExternalId, provider, context);
   }
 }
