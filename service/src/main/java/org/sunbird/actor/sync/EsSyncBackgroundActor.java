@@ -235,7 +235,7 @@ public class EsSyncBackgroundActor extends BaseActor {
     return type;
   }
 
-  private org.sunbird.util.Util.DbInfo getDbInfoObj(String objectType) {
+  private Util.DbInfo getDbInfoObj(String objectType) {
     if (objectType.equals(JsonKey.USER)) {
       return Util.dbInfoMap.get(JsonKey.USER_DB);
     } else if (objectType.equals(JsonKey.ORGANISATION)) {
