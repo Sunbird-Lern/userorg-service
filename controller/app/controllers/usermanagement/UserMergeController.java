@@ -3,10 +3,11 @@ package controllers.usermanagement;
 import controllers.BaseController;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
+
+import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
-import org.sunbird.validator.user.UserRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
 

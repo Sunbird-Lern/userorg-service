@@ -27,7 +27,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.user.UserDeclareEntity;
+import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.HeaderParam;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;

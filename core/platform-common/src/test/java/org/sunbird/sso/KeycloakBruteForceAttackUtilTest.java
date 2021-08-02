@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -23,6 +24,7 @@ import org.sunbird.util.ProjectUtil;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
+@Ignore
 public class KeycloakBruteForceAttackUtilTest {
   @Before
   public void setup() throws Exception {
