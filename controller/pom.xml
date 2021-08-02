@@ -259,14 +259,6 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                  <release>11</release>
-                </configuration>
-			</plugin>
-			<plugin>
 				<groupId>com.google.code.play2-maven-plugin</groupId>
 				<artifactId>play2-maven-plugin</artifactId>
 				<version>${play2.plugin.version}</version>
@@ -278,19 +270,6 @@
 				<version>${sbt-compiler.plugin.version}</version>
 				<configuration>
 					<scalacOptions>-feature -deprecation -Xfatal-warnings</scalacOptions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M4</version>
-				<configuration>
-                    <argLine>--illegal-access=permit</argLine>
-					<argLine>@{argLine} -Xmx1024m -XX:MaxPermSize=256m</argLine>
-					<includes>
-						<include>**/*Spec.java</include>
-						<include>**/*Test.java</include>
-					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
