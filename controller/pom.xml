@@ -112,7 +112,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.sunbird</groupId>
-			<artifactId>service</artifactId>
+			<artifactId>mw-service</artifactId>
 			<version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>

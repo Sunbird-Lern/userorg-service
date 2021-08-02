@@ -44,6 +44,7 @@ import org.sunbird.util.Util;
   ServiceFactory.class,
   SunbirdMWService.class,
   OrganisationClientImpl.class,
+        org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",

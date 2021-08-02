@@ -24,20 +24,20 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.dao.ratelimit.RateLimitDao;
+import org.sunbird.dao.ratelimit.RateLimitDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.actors.otp.service.OTPService;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.ratelimit.dao.RateLimitDao;
-import org.sunbird.ratelimit.dao.RateLimitDaoImpl;
-import org.sunbird.ratelimit.limiter.OtpRateLimiter;
-import org.sunbird.ratelimit.service.RateLimitService;
-import org.sunbird.ratelimit.service.RateLimitServiceImpl;
 import org.sunbird.request.Request;
 import org.sunbird.response.ClientErrorResponse;
 import org.sunbird.response.Response;
+import org.sunbird.service.otp.OTPService;
+import org.sunbird.service.ratelimit.RateLimitService;
+import org.sunbird.service.ratelimit.RateLimitServiceImpl;
+import org.sunbird.util.ratelimit.OtpRateLimiter;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
