@@ -7,9 +7,9 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.auth.verifier.KeyManager;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.SchedulerManager;
-import org.sunbird.learner.util.Util;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
+import org.sunbird.util.user.SchedulerManager;
 import play.api.Environment;
 import play.api.inject.ApplicationLifecycle;
 
@@ -48,6 +48,6 @@ public class ApplicationStart {
     SchedulerManager.schedule();
     // Run quartz scheduler in a separate thread as it waits for 4 minutes
     // before scheduling various jobs.
-    new Thread(() -> org.sunbird.common.quartz.scheduler.SchedulerManager.getInstance()).start();
+    new Thread(() -> org.sunbird.quartzscheduler.SchedulerManager.getInstance()).start();
   }
 }
