@@ -8,9 +8,9 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.sunbird</groupId>
-	<artifactId>sunbird-cassandra-utils</artifactId>
+	<artifactId>cassandra-utils</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>Sunbird Cassandra Utils</name>
+	<name>cassandra-utils</name>
 
 	<properties>
         <maven.compiler.release>11</maven.compiler.release>

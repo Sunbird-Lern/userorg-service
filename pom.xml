@@ -14,10 +14,10 @@
   </properties>
 
   <modules>
-	  <module>controller</module>
-      <module>reports</module>
       <module>core</module>
       <module>service</module>
+	  <module>controller</module>
+      <module>reports</module>
   </modules>
     <dependencies>
         <dependency>
