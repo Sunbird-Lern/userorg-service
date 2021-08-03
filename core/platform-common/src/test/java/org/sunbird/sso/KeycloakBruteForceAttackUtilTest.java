@@ -24,7 +24,6 @@ import org.sunbird.util.ProjectUtil;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
-@Ignore
 public class KeycloakBruteForceAttackUtilTest {
   @Before
   public void setup() throws Exception {
