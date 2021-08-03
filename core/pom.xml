@@ -14,9 +14,9 @@
     <modules>
         <module>platform-common</module>
         <module>actor-core</module>
-        <module>sunbird-cassandra-utils</module>
-        <module>sunbird-es-utils</module>
-        <module>sunbird-notification</module>
+        <module>cassandra-utils</module>
+        <module>es-utils</module>
+        <module>notification-utils</module>
     </modules>
 
 
