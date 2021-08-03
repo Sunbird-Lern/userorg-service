@@ -71,9 +71,9 @@ public class SendOTPActor extends BaseActor {
     emailTemplateMap.put(JsonKey.TEMPLATE_ID, template);
     Request emailRequest = null;
     if (StringUtils.isBlank(otpType)) {
-      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, context);
+      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, context);
     } else {
-      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, RESET_PASSWORD, context);
+      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, RESET_PASSWORD, context);
     }
     emailRequest.setRequestContext(context);
     logger.info(

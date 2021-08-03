@@ -15,7 +15,6 @@ import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 

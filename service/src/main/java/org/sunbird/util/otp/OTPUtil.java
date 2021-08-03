@@ -8,26 +8,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
+
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.model.user.User;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.response.Response;
 import org.sunbird.service.otp.OTPService;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 
 public final class OTPUtil {
   private static LoggerUtil logger = new LoggerUtil(OTPUtil.class);
@@ -81,15 +76,15 @@ public final class OTPUtil {
    */
   private static String ensureOtpLength(String otp) {
     if (otp.length() < MIN_OTP_LENGTH) {
-      int multiplier = (int) Math.pow(10, MAXIMUM_OTP_LENGTH - MIN_OTP_LENGTH + 1);
+      int multiplier = (int) Math.pow(10, MAXIMUM_OTP_LENGTH - MIN_OTP_LENGTH + 1.0);
       otp = String.valueOf(Integer.valueOf(otp) * multiplier);
     }
     return otp;
   }
 
-  public static void sendOTPViaSMS(Map<String, Object> otpMap, RequestContext context) {
+  public static boolean sendOTPViaSMS(Map<String, Object> otpMap, RequestContext context) {
     if (StringUtils.isBlank((String) otpMap.get(JsonKey.PHONE))) {
-      return;
+      return false;
     }
 
     Map<String, String> smsTemplate = new HashMap<>();
@@ -134,6 +129,7 @@ public final class OTPUtil {
             + otpMap.get(JsonKey.PHONE)
             + "is "
             + response);
+    return response;
   }
 
   /**
@@ -157,7 +153,7 @@ public final class OTPUtil {
     return null;
   }
 
-  public static Request sendOTPViaEmail(
+  public static Request getRequestToSendOTPViaEmail(
       Map<String, Object> emailTemplateMap, String otpType, RequestContext context) {
     Request request = null;
     if ((StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
@@ -194,14 +190,14 @@ public final class OTPUtil {
     return request;
   }
 
-  public static Request sendOTPViaEmail(
+  public static Request getRequestToSendOTPViaEmail(
       Map<String, Object> emailTemplateMap, RequestContext context) {
-    return sendOTPViaEmail(emailTemplateMap, null, context);
+    return getRequestToSendOTPViaEmail(emailTemplateMap, null, context);
   }
 
   public static String getOTPExpirationInMinutes() {
     String expirationInSeconds = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_OTP_EXPIRATION);
-    int otpExpiration = Integer.valueOf(expirationInSeconds);
+    int otpExpiration = Integer.parseInt(expirationInSeconds);
     int otpExpirationInMinutes = Math.floorDiv(otpExpiration, SECONDS_IN_MINUTES);
     return String.valueOf(otpExpirationInMinutes);
   }
