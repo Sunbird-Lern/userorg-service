@@ -58,7 +58,7 @@ public class OTPActor extends BaseActor {
 
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
-      key = OTPUtil.getEmailPhoneByUserId(userId, type, request.getRequestContext());
+      key = otpService.getEmailPhoneByUserId(userId, type, request.getRequestContext());
       type = getType(type);
       logger.info(
           request.getRequestContext(),
@@ -111,7 +111,7 @@ public class OTPActor extends BaseActor {
 
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
-      key = OTPUtil.getEmailPhoneByUserId(userId, type, request.getRequestContext());
+      key = otpService.getEmailPhoneByUserId(userId, type, request.getRequestContext());
       type = getType(type);
       logger.info(
         request.getRequestContext(),

@@ -2,6 +2,8 @@ package org.sunbird.service.otp;
 
 import java.io.StringWriter;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.runtime.RuntimeServices;
@@ -11,27 +13,23 @@ import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.dao.otp.OTPDao;
 import org.sunbird.dao.otp.impl.OTPDaoImpl;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
+import org.sunbird.datasecurity.DecryptionService;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
 
 public class OTPService {
   private static LoggerUtil logger = new LoggerUtil(OTPService.class);
 
-  private static OTPDao otpDao = OTPDaoImpl.getInstance();
-  private static EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
-  private static UserDao userDao = UserDaoImpl.getInstance();
-
-  public static Map<String, Object> getUserById (String userId, RequestContext context) {
-    return userDao.getUserDetailsById(userId, context);
-  }
-
-  public static String getOTPSMSTemplate(String templateName, RequestContext context) {
-    return emailTemplateDao.getTemplate(templateName, context);
-  }
+  private OTPDao otpDao = OTPDaoImpl.getInstance();
+  private EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
+  private UserService userService = UserServiceImpl.getInstance();
 
   public Map<String, Object> getOTPDetails(String type, String key, RequestContext context) {
     return otpDao.getOTPDetails(type, key, context);
@@ -45,10 +43,33 @@ public class OTPService {
     otpDao.deleteOtp(type, key, context);
   }
 
-  public static String getSmsBody(
+  /**
+   * This method will return either email or phone value of user based on the asked type in request
+   *
+   * @param userId
+   * @param type value can be email, phone, prevUsedEmail or prevUsedPhone
+   * @return
+   */
+  public String getEmailPhoneByUserId(String userId, String type, RequestContext context) {
+    User user = userService.getUserById(userId, context);
+    DecryptionService decService =
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+    String emailPhone = "";
+    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
+      emailPhone = decService.decryptData(user.getEmail(), context);
+    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
+      emailPhone = decService.decryptData(user.getPhone(), context);
+    }
+    if (StringUtils.isBlank(emailPhone)) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
+    }
+    return emailPhone;
+  }
+
+  public String getSmsBody(
       String templateFile, Map<String, String> smsTemplate, RequestContext requestContext) {
     try {
-      String sms = getOTPSMSTemplate(templateFile, requestContext);
+      String sms = emailTemplateDao.getTemplate(templateFile, requestContext);
       RuntimeServices rs = RuntimeSingleton.getRuntimeServices();
       SimpleNode sn = rs.parse(sms, "Sms Information");
       Template t = new Template();

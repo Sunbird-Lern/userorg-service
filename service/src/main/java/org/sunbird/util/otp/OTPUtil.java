@@ -26,9 +26,7 @@ import org.sunbird.util.ProjectUtil;
 
 public final class OTPUtil {
   private static LoggerUtil logger = new LoggerUtil(OTPUtil.class);
-  private static DecryptionService decService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
-
+  private static OTPService otpService = new OTPService();
   private static final int MAXIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
   private static final int RETRY_COUNT = 2;
@@ -97,12 +95,12 @@ public final class OTPUtil {
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME));
     String sms = null;
     if (StringUtils.isBlank(template)) {
-      sms = OTPService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate, context);
+      sms = otpService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate, context);
     } else if (StringUtils.isNotBlank(template)
         && StringUtils.equals(template, JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
-      sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_WARD_LOGIN_TEMPLATE, smsTemplate, context);
+      sms = otpService.getSmsBody(JsonKey.OTP_PHONE_WARD_LOGIN_TEMPLATE, smsTemplate, context);
     } else {
-      sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate, context);
+      sms = otpService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate, context);
     }
     logger.debug(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
 
@@ -130,27 +128,6 @@ public final class OTPUtil {
             + "is "
             + response);
     return response;
-  }
-
-  /**
-   * This method will return either email or phone value of user based on the asked type in request
-   *
-   * @param userId
-   * @param type value can be email, phone, prevUsedEmail or prevUsedPhone
-   * @return
-   */
-  public static String getEmailPhoneByUserId(String userId, String type, RequestContext context) {
-    Map<String, Object> user = OTPService.getUserById(userId, context);
-    if (MapUtils.isNotEmpty(user)) {
-      String emailPhone = decService.decryptData((String) user.get(type), context);
-      if (StringUtils.isBlank(emailPhone)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
-      }
-      return emailPhone;
-    } else {
-      ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound);
-    }
-    return null;
   }
 
   public static Request getRequestToSendOTPViaEmail(
