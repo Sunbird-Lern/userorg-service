@@ -1,4 +1,4 @@
-package org.sunbird.user.actors;
+package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.Mockito.when;
@@ -18,19 +18,33 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.learner.util.UserUtility;
-import org.sunbird.learner.util.Util;
-import org.sunbird.models.user.User;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
+import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.user.dao.UserDao;
-import org.sunbird.user.dao.impl.UserDaoImpl;
+import org.sunbird.sso.KeycloakBruteForceAttackUtil;
+import org.sunbird.sso.KeycloakUtil;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({UserDao.class, UserDaoImpl.class, Util.class, UserUtility.class})
+@PrepareForTest({
+  UserDao.class,
+  UserDaoImpl.class,
+  Util.class,
+  UserUtility.class,
+  KeycloakBruteForceAttackUtil.class,
+  KeycloakUtil.class,
+  SSOServiceFactory.class,
+  SSOManager.class
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -45,17 +59,34 @@ public class ResetPasswordActorTest {
   ActorSystem system = ActorSystem.create("ResetPasswordActor");
 
   @Before
-  public void beforeEachTest() {
+  public void beforeEachTest() throws Exception {
     userDao = PowerMockito.mock(UserDao.class);
     PowerMockito.mockStatic(UserDaoImpl.class);
     when(UserDaoImpl.getInstance()).thenReturn(userDao);
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
+    PowerMockito.mockStatic(KeycloakUtil.class);
+    PowerMockito.mockStatic(KeycloakBruteForceAttackUtil.class);
     when(Util.getUserRequiredActionLink(Mockito.anyMap(), Mockito.anyBoolean(), Mockito.any()))
       .thenReturn("/url/password");
     when(Util.getSunbirdLoginUrl()).thenReturn("/resource/url");
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());
     when(userDao.getUserById("ValidUserId", null)).thenReturn(getValidUserResponse());
+
+    when(KeycloakUtil.getAdminAccessToken(Mockito.any(RequestContext.class), Mockito.anyString()))
+      .thenReturn("accessToken");
+    when(KeycloakBruteForceAttackUtil.isUserAccountDisabled(
+      Mockito.anyString(), Mockito.any(RequestContext.class)))
+      .thenReturn(true);
+    when(KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
+      Mockito.anyString(), Mockito.any(RequestContext.class)))
+      .thenReturn(true);
+    PowerMockito.mockStatic(SSOServiceFactory.class);
+    SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+    when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+    when(ssoManager.updatePassword(
+      Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
+      .thenReturn(true);
   }
 
   @Test
