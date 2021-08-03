@@ -52,7 +52,7 @@ public class ResetPasswordActorTest {
     PowerMockito.mockStatic(UserUtility.class);
     PowerMockito.mockStatic(Util.class);
     when(Util.getUserRequiredActionLink(Mockito.anyMap(), Mockito.anyBoolean(), Mockito.any()))
-        .thenReturn("/url/password");
+      .thenReturn("/url/password");
     when(Util.getSunbirdLoginUrl()).thenReturn("/resource/url");
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());
     when(userDao.getUserById("ValidUserId", null)).thenReturn(getValidUserResponse());
@@ -186,9 +186,9 @@ public class ResetPasswordActorTest {
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+        || res.getResponseCode() == errorCode.getResponseCode();
     }
   }
 }
