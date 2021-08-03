@@ -11,7 +11,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.OTPUtil;
+import org.sunbird.util.otp.OTPUtil;
 
 @ActorConfig(
   tasks = {},
@@ -78,7 +78,7 @@ public class SendOTPActor extends BaseActor {
     emailRequest.setRequestContext(context);
     logger.info(
         context,
-        "SendOTPActor:sendOTP : Calling EmailServiceActor for Key = "
+        "SendOTPActor:sendOTPViaEmail : Calling EmailServiceActor for Key = "
             + logMaskService.maskEmail(key));
     tellToAnother(emailRequest);
   }

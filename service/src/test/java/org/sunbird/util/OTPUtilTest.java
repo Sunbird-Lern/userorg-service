@@ -2,6 +2,7 @@ package org.sunbird.util;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.sunbird.util.otp.OTPUtil;
 
 public class OTPUtilTest {
 

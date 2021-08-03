@@ -1,4 +1,4 @@
-package org.sunbird.util;
+package org.sunbird.util.otp;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
@@ -18,17 +19,18 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.model.user.User;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.otp.OTPService;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
 public final class OTPUtil {
   private static LoggerUtil logger = new LoggerUtil(OTPUtil.class);
-
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
 
@@ -107,7 +109,7 @@ public final class OTPUtil {
     } else {
       sms = OTPService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate, context);
     }
-    logger.info(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
+    logger.debug(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
 
     String countryCode = "";
     if (StringUtils.isBlank((String) otpMap.get(JsonKey.COUNTRY_CODE))) {
@@ -117,12 +119,12 @@ public final class OTPUtil {
     }
     ISmsProvider smsProvider = SMSFactory.getInstance();
 
-    logger.info(
+    logger.debug(
         context,
         "OTPUtil:sendOTPViaSMS: SMS OTP text = "
             + sms
             + " with phone = "
-            + (String) otpMap.get(JsonKey.PHONE));
+            + otpMap.get(JsonKey.PHONE));
 
     boolean response = smsProvider.send((String) otpMap.get(JsonKey.PHONE), countryCode, sms);
 
@@ -142,13 +144,8 @@ public final class OTPUtil {
    * @return
    */
   public static String getEmailPhoneByUserId(String userId, String type, RequestContext context) {
-    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Response response =
-        cassandraOperation.getRecordById(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, context);
-    List<Map<String, Object>> userList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    if (CollectionUtils.isNotEmpty(userList)) {
-      Map<String, Object> user = userList.get(0);
+    Map<String, Object> user = OTPService.getUserById(userId, context);
+    if (MapUtils.isNotEmpty(user)) {
       String emailPhone = decService.decryptData((String) user.get(type), context);
       if (StringUtils.isBlank(emailPhone)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);

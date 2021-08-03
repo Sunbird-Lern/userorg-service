@@ -19,7 +19,7 @@ import org.sunbird.service.otp.OTPService;
 import org.sunbird.service.ratelimit.RateLimitService;
 import org.sunbird.service.ratelimit.RateLimitServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.OTPUtil;
+import org.sunbird.util.otp.OTPUtil;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import org.sunbird.util.ratelimit.OtpRateLimiter;
@@ -51,21 +51,8 @@ public class OTPActor extends BaseActor {
     }
   }
 
-  private String maskOTP(String otp) {
-    return logMaskService.maskOTP(otp);
-  }
-
-  private String maskId(String id, String type) {
-    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
-      return logMaskService.maskEmail(id);
-    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
-      return logMaskService.maskPhone(id);
-    }
-    return "";
-  }
-
   private void generateOTP(Request request) {
-    logger.info(request.getRequestContext(), "OTPActor:generateOTP method call start.");
+    logger.debug(request.getRequestContext(), "OTPActor:generateOTP method call start.");
     String type = (String) request.getRequest().get(JsonKey.TYPE);
     String key = getKey(type, request);
 
@@ -75,7 +62,7 @@ public class OTPActor extends BaseActor {
       type = getType(type);
       logger.info(
           request.getRequestContext(),
-          "OTPActor:OTPUtil.getEmailPhoneByUserId: called for userId = "
+          "OTPActor:generateOTP:getEmailPhoneByUserId: called for userId = "
               + userId
               + " ,key = "
               + maskId(key, type));
@@ -117,25 +104,6 @@ public class OTPActor extends BaseActor {
     sender().tell(response, self());
   }
 
-  private String getType(String type) {
-    switch (type) {
-      case JsonKey.PREV_USED_EMAIL:
-        return JsonKey.EMAIL;
-      case JsonKey.PREV_USED_PHONE:
-        return JsonKey.PHONE;
-      case JsonKey.EMAIL:
-        return JsonKey.EMAIL;
-      case JsonKey.PHONE:
-        return JsonKey.PHONE;
-      case JsonKey.RECOVERY_EMAIL:
-        return JsonKey.EMAIL;
-      case JsonKey.RECOVERY_PHONE:
-        return JsonKey.PHONE;
-      default:
-        return null;
-    }
-  }
-
   private void verifyOTP(Request request) {
     String type = (String) request.getRequest().get(JsonKey.TYPE);
     String key = getKey(type, request);
@@ -145,6 +113,12 @@ public class OTPActor extends BaseActor {
     if (StringUtils.isNotBlank(userId)) {
       key = OTPUtil.getEmailPhoneByUserId(userId, type, request.getRequestContext());
       type = getType(type);
+      logger.info(
+        request.getRequestContext(),
+        "OTPActor:verifyOTP:getEmailPhoneByUserId: called for userId = "
+          + userId
+          + " ,key = "
+          + maskId(key, type));
     }
     Map<String, Object> otpDetails =
         otpService.getOTPDetails(type, key, request.getRequestContext());
@@ -245,9 +219,37 @@ public class OTPActor extends BaseActor {
 
   private String getKey(String type, Request request) {
     String key = (String) request.getRequest().get(JsonKey.KEY);
-    if (JsonKey.EMAIL.equalsIgnoreCase(type) && key != null) {
+    if (JsonKey.EMAIL.equalsIgnoreCase(type) && StringUtils.isNotBlank(key)) {
       return key.toLowerCase();
     }
     return key;
+  }
+
+  private String getType(String type) {
+    switch (type) {
+      case JsonKey.PREV_USED_EMAIL:
+      case JsonKey.RECOVERY_EMAIL:
+      case JsonKey.EMAIL:
+        return JsonKey.EMAIL;
+      case JsonKey.PREV_USED_PHONE:
+      case JsonKey.RECOVERY_PHONE:
+      case JsonKey.PHONE:
+        return JsonKey.PHONE;
+      default:
+        return null;
+    }
+  }
+
+  private String maskOTP(String otp) {
+    return logMaskService.maskOTP(otp);
+  }
+
+  private String maskId(String id, String type) {
+    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
+      return logMaskService.maskEmail(id);
+    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
+      return logMaskService.maskPhone(id);
+    }
+    return "";
   }
 }

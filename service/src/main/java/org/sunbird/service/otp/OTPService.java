@@ -11,8 +11,11 @@ import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.dao.otp.OTPDao;
 import org.sunbird.dao.otp.impl.OTPDaoImpl;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 
@@ -21,6 +24,11 @@ public class OTPService {
 
   private static OTPDao otpDao = OTPDaoImpl.getInstance();
   private static EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
+  private static UserDao userDao = UserDaoImpl.getInstance();
+
+  public static Map<String, Object> getUserById (String userId, RequestContext context) {
+    return userDao.getUserDetailsById(userId, context);
+  }
 
   public static String getOTPSMSTemplate(String templateName, RequestContext context) {
     return emailTemplateDao.getTemplate(templateName, context);
