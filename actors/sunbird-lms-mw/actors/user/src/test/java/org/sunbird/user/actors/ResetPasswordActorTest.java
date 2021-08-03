@@ -1,4 +1,4 @@
-package org.sunbird.actor.user;
+package org.sunbird.user.actors;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.Mockito.when;
@@ -18,14 +18,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
-import org.sunbird.model.user.User;
+import org.sunbird.learner.util.UserUtility;
+import org.sunbird.learner.util.Util;
+import org.sunbird.models.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -33,6 +31,8 @@ import org.sunbird.sso.KeycloakBruteForceAttackUtil;
 import org.sunbird.sso.KeycloakUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.user.dao.UserDao;
+import org.sunbird.user.dao.impl.UserDaoImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
