@@ -147,4 +147,26 @@ public class HttpClientUtilTest {
             "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
     assertNotNull(res);
   }
+
+  @Test
+  public void testDeleteFailure() throws Exception {
+    PowerMockito.mockStatic(HttpClients.class);
+    HttpClientBuilder clientBuilder = PowerMockito.mock(HttpClientBuilder.class);
+    CloseableHttpClient httpclient = PowerMockito.mock(CloseableHttpClient.class);
+    PowerMockito.when(HttpClients.custom()).thenReturn(clientBuilder);
+    PowerMockito.when(clientBuilder.build()).thenReturn(httpclient);
+    CloseableHttpResponse response = PowerMockito.mock(CloseableHttpResponse.class);
+    StatusLine statusLine = PowerMockito.mock(StatusLine.class);
+    PowerMockito.when(response.getStatusLine()).thenReturn(statusLine);
+    PowerMockito.when(statusLine.getStatusCode()).thenReturn(400);
+    HttpEntity entity = PowerMockito.mock(HttpEntity.class);
+    PowerMockito.when(response.getEntity()).thenReturn(entity);
+    PowerMockito.mockStatic(EntityUtils.class);
+    byte[] bytes = "{\"message\":\"success\"}".getBytes();
+    PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
+    PowerMockito.when(httpclient.execute(Mockito.any(HttpPatch.class))).thenReturn(response);
+    HttpClientUtil.getInstance();
+    String res = HttpClientUtil.delete("http://localhost:80/user/read", headers());
+    assertNotNull(res);
+  }
 }
