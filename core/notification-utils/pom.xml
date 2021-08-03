@@ -57,7 +57,7 @@
 		</dependency>
         <dependency>
           <groupId>org.sunbird</groupId>
-          <artifactId>sunbird-cassandra-utils</artifactId>
+          <artifactId>cassandra-utils</artifactId>
           <version>1.0-SNAPSHOT</version>
         </dependency>
 	</dependencies>
