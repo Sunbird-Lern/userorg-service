@@ -5,6 +5,7 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
@@ -20,6 +21,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
@@ -49,7 +51,8 @@ import org.sunbird.response.Response;
   SMSFactory.class,
   Msg91SmsProviderFactory.class,
   EmailTemplateDaoImpl.class,
-  SunbirdMWService.class
+  SunbirdMWService.class,
+  BaseMWService.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -65,10 +68,6 @@ import org.sunbird.response.Response;
 public class SendOTPActorTest {
   private TestKit probe;
   private ActorRef subject;
-
-  public static DefaultEncryptionServivceImpl encService;
-  public static DefaultDecryptionServiceImpl decService;
-  public static org.sunbird.datasecurity.impl.ServiceFactory dataServiceFactory;
   private static final ActorSystem system = ActorSystem.create("system");
   public static final CassandraOperationImpl mockCassandraOperation =
       mock(CassandraOperationImpl.class);
@@ -79,6 +78,11 @@ public class SendOTPActorTest {
 
   @Before
   public void beforeEachTestCase() throws Exception {
+    PowerMockito.mockStatic(BaseMWService.class);
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
+    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
+    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(SMSFactory.class);
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
@@ -97,8 +101,6 @@ public class SendOTPActorTest {
         .thenReturn(decryptionService);
     probe = new TestKit(system);
     subject = system.actorOf(props);
-    /* when(OTPUtil.getOTPExpirationInMinutes()).thenReturn("123456788");*/
-
   }
 
   @Test
@@ -111,18 +113,78 @@ public class SendOTPActorTest {
   }
 
   @Test
-  public void sendOTPTestForMobile() throws Exception {
+  public void sendOTPTestForMobile() {
     request = createOtpRequest("phone", "anyMobileNum", "anyUserId");
     when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("30 second"), Response.class);
-    Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
+    Assert.assertEquals(ResponseCode.OK,response.getResponseCode());
   }
 
   @Test
-  public void sendOTPTestForEmail() throws Exception {
+  public void sendOTPTestWithoutEmailAndPhone() {
+    request = createOtpRequest("phone", "anyMobileNum", "anyUserId");
+    request.getRequest().remove(JsonKey.TYPE);
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+      .thenReturn(
+        "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK,response.getResponseCode());
+  }
+
+  @Test
+  public void sendOTPTestWithPreUsedPhone() {
+    request = createOtpRequest("phone", "anyMobileNum", "anyUserId");
+    request.getRequest().put(JsonKey.TYPE,JsonKey.PREV_USED_PHONE);
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+      .thenReturn(
+        "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
+  }
+
+  @Test
+  public void sendOTPTestWithRecoveryPhone() {
+    request = createOtpRequest("phone", "anyMobileNum", "anyUserId");
+    request.getRequest().put(JsonKey.TYPE,JsonKey.RECOVERY_PHONE);
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+      .thenReturn(
+        "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
+  }
+
+  @Test
+  public void sendOTPTestWithPreUsedEmail() {
+    request = createOtpRequest("email", "anyEmailId", "anyUserId");
+    request.getRequest().put(JsonKey.TYPE,JsonKey.PREV_USED_EMAIL);
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+      .thenReturn(
+        "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
+  }
+
+  @Test
+  public void sendOTPTestWithRecoveryEmail() {
+    request = createOtpRequest("email", "anyEmailId", "anyUserId");
+    request.getRequest().put(JsonKey.TYPE,JsonKey.RECOVERY_EMAIL);
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+      .thenReturn(
+        "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
+  }
+
+  @Test
+  public void sendOTPTestForEmail() {
     PowerMockito.mockStatic(SunbirdMWService.class);
     request = createOtpRequest("email", "anyEmailId", "anyUserId");
     when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
@@ -130,7 +192,19 @@ public class SendOTPActorTest {
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("30 second"), Response.class);
-    Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
+  }
+
+  @Test
+  public void sendOTPTestForEmail2() {
+    PowerMockito.mockStatic(SunbirdMWService.class);
+    request = createOtpRequest("email", "anyEmailId", "");
+    when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
+      .thenReturn(
+        "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
   private Request createOtpRequest(String type, String key, String userId) {
