@@ -88,7 +88,7 @@ public final class OTPUtil {
     smsTemplate.put(
         JsonKey.INSTALLATION_NAME,
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME));
-    String sms = null;
+    String sms;
     if (StringUtils.isBlank(template)) {
       sms = otpService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate, context);
     } else if (StringUtils.isNotBlank(template)
@@ -99,7 +99,7 @@ public final class OTPUtil {
     }
     logger.debug(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
 
-    String countryCode = "";
+    String countryCode;
     if (StringUtils.isBlank((String) otpMap.get(JsonKey.COUNTRY_CODE))) {
       countryCode = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE);
     } else {
