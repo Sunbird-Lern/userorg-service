@@ -157,7 +157,7 @@ public class OTPActorTest {
                 .thenReturn(mockedCassandraResponse);
       subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertEquals(response.getResponseCode(),ResponseCode.OK);
+    Assert.assertEquals(ResponseCode.OK,response.getResponseCode());
   }
 
   @Test
@@ -309,7 +309,7 @@ public class OTPActorTest {
       .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertEquals(response.getResponseCode(),ResponseCode.OK);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
   @Test
