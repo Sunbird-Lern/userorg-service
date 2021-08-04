@@ -84,6 +84,18 @@ public class UserServiceImpl implements UserService {
     return user;
   }
 
+  @Override
+  public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
+    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
+    if (MapUtils.isEmpty(user)) {
+      throw new ProjectCommonException(
+        ResponseCode.userNotFound.getErrorCode(),
+        ResponseCode.userNotFound.getErrorMessage(),
+        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    return user;
+  }
+
   // This function is called during createUserV4 and update of users.
   @Override
   public void validateUserId(Request request, String managedById, RequestContext context) {

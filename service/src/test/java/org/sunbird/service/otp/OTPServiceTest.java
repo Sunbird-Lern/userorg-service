@@ -50,7 +50,7 @@ public class OTPServiceTest {
     User user = new User();
     user.setId("12312-465-4546");
     user.setEmail("xyz@xyz.com");
-    PowerMockito.when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
+    PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     OTPService otpService = new OTPService();
     String userEmail = otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.EMAIL, new RequestContext());
     Assert.assertEquals("xyz@xyz.com",userEmail);
@@ -64,7 +64,7 @@ public class OTPServiceTest {
     User user = new User();
     user.setId("12312-465-4546");
     user.setPhone("9999999999");
-    PowerMockito.when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
+    PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     OTPService otpService = new OTPService();
     String userEmail = otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.PHONE, new RequestContext());
     Assert.assertEquals("9999999999",userEmail);
@@ -78,7 +78,7 @@ public class OTPServiceTest {
     User user = new User();
     user.setId("12312-465-4546");
     user.setPhone("");
-    PowerMockito.when(userService.getUserById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
+    PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     OTPService otpService = new OTPService();
     otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.PHONE, new RequestContext());
   }

@@ -54,7 +54,7 @@ public class OTPActor extends BaseActor {
   private void generateOTP(Request request) {
     logger.debug(request.getRequestContext(), "OTPActor:generateOTP method call start.");
     String type = (String) request.getRequest().get(JsonKey.TYPE);
-    String key = getKey(type, request);
+    String key = (String) request.getRequest().get(JsonKey.KEY);
 
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
@@ -106,7 +106,7 @@ public class OTPActor extends BaseActor {
 
   private void verifyOTP(Request request) {
     String type = (String) request.getRequest().get(JsonKey.TYPE);
-    String key = getKey(type, request);
+    String key = (String) request.getRequest().get(JsonKey.KEY);
     String otpInRequest = (String) request.getRequest().get(JsonKey.OTP);
 
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
@@ -215,14 +215,6 @@ public class OTPActor extends BaseActor {
     sendOtpRequest.getRequest().put(JsonKey.OTP, otp);
     sendOtpRequest.setOperation(ActorOperations.SEND_OTP.getValue());
     tellToAnother(sendOtpRequest);
-  }
-
-  private String getKey(String type, Request request) {
-    String key = (String) request.getRequest().get(JsonKey.KEY);
-    if (JsonKey.EMAIL.equalsIgnoreCase(type) && StringUtils.isNotBlank(key)) {
-      return key.toLowerCase();
-    }
-    return key;
   }
 
   private String getType(String type) {

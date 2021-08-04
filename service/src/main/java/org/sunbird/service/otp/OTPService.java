@@ -51,15 +51,10 @@ public class OTPService {
    * @return
    */
   public String getEmailPhoneByUserId(String userId, String type, RequestContext context) {
-    User user = userService.getUserById(userId, context);
+    Map<String, Object> user = userService.getUserDetailsById(userId, context);
     DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
-    String emailPhone = "";
-    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
-      emailPhone = decService.decryptData(user.getEmail(), context);
-    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
-      emailPhone = decService.decryptData(user.getPhone(), context);
-    }
+    String emailPhone = decService.decryptData((String) user.get(type), context);
     if (StringUtils.isBlank(emailPhone)) {
       ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
     }
