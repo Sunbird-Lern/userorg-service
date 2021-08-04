@@ -27,6 +27,7 @@ import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
@@ -98,6 +99,15 @@ public class SendOTPActorTest {
     subject = system.actorOf(props);
     /* when(OTPUtil.getOTPExpirationInMinutes()).thenReturn("123456788");*/
 
+  }
+
+  @Test
+  public void testWithInvalidRequest() {
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   @Test
