@@ -30,7 +30,6 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -158,7 +157,7 @@ public class OTPActorTest {
                 .thenReturn(mockedCassandraResponse);
       subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-      Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
+    Assert.assertEquals(response.getResponseCode(),ResponseCode.OK);
   }
 
   @Test
@@ -191,10 +190,10 @@ public class OTPActorTest {
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
       probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-    Assert.assertTrue(
+    Assert.assertEquals(
          exception
-        .getCode()
-        .equals(ResponseCode.errorInvalidOTP.getErrorCode()));
+        .getCode(),
+        ResponseCode.errorInvalidOTP.getErrorCode());
   }
 
   @Test
@@ -310,7 +309,7 @@ public class OTPActorTest {
       .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
+    Assert.assertEquals(response.getResponseCode(),ResponseCode.OK);
   }
 
   @Test
