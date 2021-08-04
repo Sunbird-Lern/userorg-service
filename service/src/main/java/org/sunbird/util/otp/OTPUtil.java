@@ -30,6 +30,23 @@ public final class OTPUtil {
 
   private OTPUtil() {}
 
+  /**
+   * generates otp and ensures otp length is greater than or equal to 4 if otp length is less than 4
+   * , regenerate otp (max retry 3)
+   *
+   * @return
+   */
+  public static String generateOTP(RequestContext context) {
+    String otp = generateOTP();
+    int noOfAttempts = 0;
+    while (otp.length() < MIN_OTP_LENGTH && noOfAttempts < RETRY_COUNT) {
+      otp = generateOTP();
+      noOfAttempts++;
+    }
+    logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
+    return ensureOtpLength(otp);
+  }
+
   private static String generateOTP() {
     String otpSize = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_OTP_LENGTH);
     int codeDigits = StringUtils.isBlank(otpSize) ? MAXIMUM_OTP_LENGTH : Integer.valueOf(otpSize);
@@ -43,23 +60,6 @@ public final class OTPUtil {
     String secret = key.getKey();
     int code = gAuth.getTotpPassword(secret);
     return String.valueOf(code);
-  }
-
-  /**
-   * generates otp and ensures otp length is greater than or equal to 4 if otp length is less than 4
-   * , regenerate otp (max retry 3)
-   *
-   * @return
-   */
-  public static String generateOtp(RequestContext context) {
-    String otp = generateOTP();
-    int noOfAttempts = 0;
-    while (otp.length() < MIN_OTP_LENGTH && noOfAttempts < RETRY_COUNT) {
-      otp = generateOTP();
-      noOfAttempts++;
-    }
-    logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
-    return ensureOtpLength(otp);
   }
 
   /**

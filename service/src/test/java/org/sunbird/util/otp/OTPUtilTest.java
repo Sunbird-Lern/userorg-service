@@ -43,7 +43,7 @@ public class OTPUtilTest {
   @Test
   public void generateOtpTest() {
     for (int i = 0; i < 10000; i++) {
-      String code = OTPUtil.generateOtp(null);
+      String code = OTPUtil.generateOTP(null);
       Assert.assertTrue(code.length() >= 4);
     }
   }
