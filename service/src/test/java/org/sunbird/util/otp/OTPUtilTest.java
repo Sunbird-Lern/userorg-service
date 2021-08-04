@@ -70,6 +70,26 @@ public class OTPUtilTest {
   }
 
   @Test
+  public void sendOTPViaSMSTest2() throws Exception {
+    PowerMockito.mockStatic(ProjectUtil.class);
+    when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
+    OTPService otpService = PowerMockito.mock(OTPService.class);
+    PowerMockito.whenNew(OTPService.class).withNoArguments().thenReturn(otpService);
+    when(otpService.getSmsBody(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn("some sms text");
+    ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
+    PowerMockito.mockStatic(SMSFactory.class);
+    when(SMSFactory.getInstance()).thenReturn(smsProvider);
+    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+    Map<String, Object> otpMap = new HashMap<>();
+    otpMap.put(JsonKey.PHONE,"9742511111");
+    otpMap.put(JsonKey.OTP_EXPIRATION_IN_MINUTES,"30");
+    otpMap.put(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME,"displayName");
+    otpMap.put(JsonKey.COUNTRY_CODE,"91");
+    boolean bool = OTPUtil.sendOTPViaSMS(otpMap, new RequestContext());
+    Assert.assertTrue(bool);
+  }
+
+  @Test
   public void sendOTPViaSMSWithoutPhoneTest() {
     Map<String, Object> otpMap = new HashMap<>();
     otpMap.put(JsonKey.TEMPLATE_ID,"someTemplateId");
@@ -116,5 +136,16 @@ public class OTPUtilTest {
 
     Request request = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, new RequestContext());
     Assert.assertNotNull(request);
+  }
+
+  @Test
+  public void getRequestToSendOTPViaEmailTest2() {
+    PowerMockito.mockStatic(ProjectUtil.class);
+    when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
+
+    Map<String, Object> emailTemplateMap = new HashMap<>();
+
+    Request request = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, new RequestContext());
+    Assert.assertNull(request);
   }
 }
