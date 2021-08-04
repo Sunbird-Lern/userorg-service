@@ -73,25 +73,25 @@ public class OTPActor extends BaseActor {
         new RateLimiter[] {OtpRateLimiter.HOUR, OtpRateLimiter.DAY},
         request.getRequestContext());
 
-    String otp = null;
+    String otp;
     Map<String, Object> details = otpService.getOTPDetails(type, key, request.getRequestContext());
 
     if (MapUtils.isEmpty(details)) {
       otp = OTPUtil.generateOTP(request.getRequestContext());
       logger.info(
           request.getRequestContext(),
-          "OTPActor:generateOTP: inserting otp Key = "
+          "OTPActor:generateOTP: new otp generated for Key = "
               + maskId(key, type)
-              + " OTP = "
+              + " & OTP = "
               + maskOTP(otp));
       otpService.insertOTPDetails(type, key, otp, request.getRequestContext());
     } else {
       otp = (String) details.get(JsonKey.OTP);
       logger.info(
           request.getRequestContext(),
-          "OTPActor:generateOTP: Re-issuing otp Key = "
+          "OTPActor:generateOTP: Re-issuing otp for Key = "
               + maskId(key, type)
-              + " OTP = "
+              + " & OTP = "
               + maskOTP(otp));
     }
     logger.info(

@@ -43,7 +43,7 @@ public final class OTPUtil {
       otp = generateOTP();
       noOfAttempts++;
     }
-    logger.info(context, "OTPUtil: generateOtp: otp generated in " + noOfAttempts + " attempts");
+    logger.info(context, "OTPUtil: generateOTP: otp generated in " + noOfAttempts + " attempts");
     return ensureOtpLength(otp);
   }
 
@@ -80,7 +80,6 @@ public final class OTPUtil {
     if (StringUtils.isBlank((String) otpMap.get(JsonKey.PHONE))) {
       return false;
     }
-
     Map<String, String> smsTemplate = new HashMap<>();
     String template = (String) otpMap.get(JsonKey.TEMPLATE_ID);
     smsTemplate.put(JsonKey.OTP, (String) otpMap.get(JsonKey.OTP));
@@ -134,7 +133,7 @@ public final class OTPUtil {
     }
     String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
     String emailSubject = null;
-    if ("resetPassword".equalsIgnoreCase(otpType)) {
+    if (JsonKey.RESET_PASSWORD.equalsIgnoreCase(otpType)) {
       emailSubject = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
     } else {
       // default fallback for all other otpType

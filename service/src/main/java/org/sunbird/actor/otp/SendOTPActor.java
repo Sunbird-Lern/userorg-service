@@ -19,7 +19,6 @@ import org.sunbird.util.otp.OTPUtil;
   dispatcher = "notification-dispatcher"
 )
 public class SendOTPActor extends BaseActor {
-  public static final String RESET_PASSWORD = "resetPassword";
   private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
 
   @Override
@@ -73,7 +72,7 @@ public class SendOTPActor extends BaseActor {
     if (StringUtils.isBlank(otpType)) {
       emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, context);
     } else {
-      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, RESET_PASSWORD, context);
+      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, JsonKey.RESET_PASSWORD, context);
     }
     emailRequest.setRequestContext(context);
     logger.info(
