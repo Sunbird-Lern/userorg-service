@@ -47,9 +47,9 @@ public class OTPServiceTest {
     UserService userService = PowerMockito.mock(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    User user = new User();
-    user.setId("12312-465-4546");
-    user.setEmail("xyz@xyz.com");
+    Map<String,Object> user = new HashMap<>();
+    user.put(JsonKey.USER_ID,"12312-465-4546");
+    user.put(JsonKey.EMAIL,"xyz@xyz.com");
     PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     OTPService otpService = new OTPService();
     String userEmail = otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.EMAIL, new RequestContext());
@@ -61,9 +61,9 @@ public class OTPServiceTest {
     UserService userService = PowerMockito.mock(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    User user = new User();
-    user.setId("12312-465-4546");
-    user.setPhone("9999999999");
+    Map<String,Object> user = new HashMap<>();
+    user.put(JsonKey.USER_ID,"12312-465-4546");
+    user.put(JsonKey.PHONE,"9999999999");
     PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     OTPService otpService = new OTPService();
     String userEmail = otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.PHONE, new RequestContext());
@@ -75,9 +75,9 @@ public class OTPServiceTest {
     UserService userService = PowerMockito.mock(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    User user = new User();
-    user.setId("12312-465-4546");
-    user.setPhone("");
+    Map<String,Object> user = new HashMap<>();
+    user.put(JsonKey.USER_ID,"12312-465-4546");
+    user.put(JsonKey.PHONE,"");
     PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     OTPService otpService = new OTPService();
     otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.PHONE, new RequestContext());
