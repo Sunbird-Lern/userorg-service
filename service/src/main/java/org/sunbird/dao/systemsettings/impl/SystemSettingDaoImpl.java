@@ -1,35 +1,28 @@
 package org.sunbird.dao.systemsettings.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.dao.systemsettings.SystemSettingDao;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 public class SystemSettingDaoImpl implements SystemSettingDao {
-  private static LoggerUtil logger = new LoggerUtil(SystemSettingDaoImpl.class);
 
-  private CassandraOperation cassandraOperation;
+  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private static final String TABLE_NAME = JsonKey.SYSTEM_SETTINGS_DB;
 
-  public SystemSettingDaoImpl(CassandraOperation cassandraOperation) {
-    this.cassandraOperation = cassandraOperation;
-  }
 
   @Override
   public Response write(SystemSetting systemSetting, RequestContext context) {
-    ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> map = mapper.convertValue(systemSetting, Map.class);
     Response response = cassandraOperation.upsertRecord(KEYSPACE_NAME, TABLE_NAME, map, context);
     response.put(JsonKey.ID, map.get(JsonKey.ID));
@@ -51,11 +44,11 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
     return readById(field, context);
   }
 
+  @Override
   public List<SystemSetting> readAll(RequestContext context) {
     Response response = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, context);
     List<Map<String, Object>> list = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     List<SystemSetting> systemSettings = new ArrayList<>();
-    ObjectMapper mapper = new ObjectMapper();
     list.forEach(
         map -> {
           SystemSetting systemSetting = mapper.convertValue(map, SystemSetting.class);
@@ -65,18 +58,6 @@ public class SystemSettingDaoImpl implements SystemSettingDao {
   }
 
   private SystemSetting getSystemSetting(List<Map<String, Object>> list) {
-    try {
-      ObjectMapper mapper = new ObjectMapper();
-      String jsonString = mapper.writeValueAsString((list.get(0)));
-      return mapper.readValue(jsonString, SystemSetting.class);
-    } catch (IOException e) {
-      logger.error(
-          "SystemSetting:getSystemSetting: Exception occurred with error messgae = "
-              + e.getMessage(),
-          e);
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.SERVER_ERROR, ResponseCode.SERVER_ERROR.getErrorMessage());
-    }
-    return null;
+      return mapper.convertValue(list.get(0), SystemSetting.class);
   }
 }

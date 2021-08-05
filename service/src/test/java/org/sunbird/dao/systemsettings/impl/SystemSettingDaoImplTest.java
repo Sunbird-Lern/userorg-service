@@ -1,4 +1,4 @@
-package org.sunbird.dao.settings;
+package org.sunbird.dao.systemsettings.impl;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -21,6 +21,7 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.dao.systemsettings.SystemSettingDao;
 import org.sunbird.dao.systemsettings.impl.SystemSettingDaoImpl;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.systemsettings.SystemSetting;
@@ -51,7 +52,7 @@ public class SystemSettingDaoImplTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    systemSettingDaoImpl = new SystemSettingDaoImpl(cassandraOperation);
+    systemSettingDaoImpl = new SystemSettingDaoImpl();
   }
 
   @Test
@@ -117,7 +118,7 @@ public class SystemSettingDaoImplTest {
     if (!isEmpty)
       response.put(
           JsonKey.RESPONSE,
-          new ArrayList<Map<String, Object>>(Arrays.asList(new HashMap<String, Object>())));
+          new ArrayList<Map<String, Object>>(Arrays.asList(new HashMap<>())));
     else {
       response.put(JsonKey.RESPONSE, new ArrayList<Map<String, Object>>());
     }
