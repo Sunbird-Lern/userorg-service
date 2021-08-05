@@ -41,10 +41,10 @@ public class SystemSettingsService {
     List<SystemSetting> allSystemSettings = null;
     if (MapUtils.isNotEmpty(systemSettings)) {
       allSystemSettings = new ArrayList<>();
-      for (Map.Entry setting : systemSettings.entrySet()) {
+      for (Map.Entry<String, String> setting : systemSettings.entrySet()) {
         allSystemSettings.add(
           new SystemSetting(
-            (String) setting.getKey(), (String) setting.getKey(), (String) setting.getValue()));
+            setting.getKey(), setting.getKey(), setting.getValue()));
       }
     } else {
       allSystemSettings = systemSettingDaoImpl.readAll(context);
