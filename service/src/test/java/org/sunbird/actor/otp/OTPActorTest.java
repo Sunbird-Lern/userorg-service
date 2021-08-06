@@ -32,11 +32,14 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.ClientErrorResponse;
 import org.sunbird.response.Response;
 import org.sunbird.service.otp.OTPService;
 import org.sunbird.service.ratelimit.RateLimitService;
 import org.sunbird.service.ratelimit.RateLimitServiceImpl;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ratelimit.OtpRateLimiter;
 
 @RunWith(PowerMockRunner.class)
@@ -48,7 +51,9 @@ import org.sunbird.util.ratelimit.OtpRateLimiter;
   RateLimitDaoImpl.class,
   RateLimitDao.class,
   RateLimitServiceImpl.class,
-  SunbirdMWService.class
+  SunbirdMWService.class,
+  UserService.class,
+  UserServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -122,6 +127,82 @@ public class OTPActorTest {
     Response mockedCassandraResponse =
         getMockCassandraRecordByIdSuccessResponse(EMAIL_KEY, EMAIL_TYPE, REQUEST_OTP);
     verifyOtpSuccessTest(false, mockedCassandraResponse);
+  }
+
+  @Test
+  public void testVerifyOtpSuccessWithEmailOtp2() throws Exception {
+    Response mockedCassandraResponse =
+      getMockCassandraRecordByIdSuccessResponse(EMAIL_KEY, EMAIL_TYPE, REQUEST_OTP);
+    List<Map<String, Object>> responseList =
+      (List<Map<String, Object>>) mockedCassandraResponse.getResult().get(JsonKey.RESPONSE);
+    responseList.get(0).put(JsonKey.EMAIL,"xyz@xyz.com");
+    Request request = createRequestForVerifyOtp(EMAIL_KEY, EMAIL_TYPE);
+    request.getRequest().put(JsonKey.USER_ID,"123123-546-4566");
+    when(mockCassandraOperation.getRecordById(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.any()))
+      .thenReturn(mockedCassandraResponse);
+    OTPService otpService = PowerMockito.mock(OTPService.class);
+    PowerMockito.whenNew(OTPService.class).withNoArguments().thenReturn(otpService);
+    PowerMockito.when(otpService.getEmailPhoneByUserId(Mockito.anyString(),Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("xyz@xyz.com");
+    when(mockCassandraOperation.getRecordWithTTLById(
+      Mockito.anyString(),
+              Mockito.anyString(),
+                Mockito.anyMap(),
+                Mockito.anyList(),
+                Mockito.anyList(),
+                Mockito.any()))
+                .thenReturn(mockedCassandraResponse);
+      subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK,response.getResponseCode());
+  }
+
+  @Test
+  public void testVerifyOtpFailureWithEmailOtp3() throws Exception {
+    Response mockedCassandraResponse =
+      getMockCassandraRecordByIdSuccessResponse(EMAIL_KEY, EMAIL_TYPE, REQUEST_OTP);
+    List<Map<String, Object>> responseList =
+      (List<Map<String, Object>>) mockedCassandraResponse.getResult().get(JsonKey.RESPONSE);
+    responseList.get(0).put(JsonKey.EMAIL,"xyz@xyz.com");
+    Request request = createRequestForVerifyOtp(EMAIL_KEY, EMAIL_TYPE);
+    request.getRequest().clear();
+    request.getRequest().put(JsonKey.OTP,"");
+    when(mockCassandraOperation.getRecordById(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.any()))
+      .thenReturn(mockedCassandraResponse);
+    OTPService otpService = PowerMockito.mock(OTPService.class);
+    PowerMockito.whenNew(OTPService.class).withNoArguments().thenReturn(otpService);
+    PowerMockito.when(otpService.getEmailPhoneByUserId(Mockito.anyString(),Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("xyz@xyz.com");
+    when(mockCassandraOperation.getRecordWithTTLById(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyMap(),
+      Mockito.anyList(),
+      Mockito.anyList(),
+      Mockito.any()))
+      .thenReturn(mockedCassandraResponse);
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception =
+      probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+    Assert.assertEquals(
+         exception
+        .getCode(),
+        ResponseCode.errorInvalidOTP.getErrorCode());
+  }
+
+  @Test
+  public void testWithInvalidRequest() {
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   private Request createRequestForVerifyOtp(String key, String type) {
@@ -201,7 +282,37 @@ public class OTPActorTest {
         (errorResponse.getResponseCode().name()).equals(ResponseCode.CLIENT_ERROR.name()));
   }
 
-  // @Test
+  @Test
+  public void generateOtpForPhoneSuccess2() {
+    Request request;
+    request = createGenerateOtpRequest(PHONE_TYPE, PHONE_KEY);
+    when(mockCassandraOperation.getRecordsByIdsWithSpecifiedColumnsAndTTL(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyMap(),
+      Mockito.anyList(),
+      Mockito.anyMap(),
+      Mockito.any()))
+      .thenReturn(getRateLimitRecords(5));
+
+    Response mockedCassandraResponse = new Response();
+    when(mockCassandraOperation.getRecordWithTTLById(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyMap(),
+      Mockito.anyList(),
+      Mockito.anyList(),
+      Mockito.any()))
+      .thenReturn(mockedCassandraResponse);
+    when(mockCassandraOperation.insertRecord(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+      .thenReturn(createCassandraInsertSuccessResponse());
+    subject.tell(request, probe.getRef());
+    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
+  }
+
+  @Test
   public void generateOtpForPhoneSuccess() {
     Request request;
     request = createGenerateOtpRequest(PHONE_TYPE, PHONE_KEY);
