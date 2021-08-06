@@ -1,4 +1,4 @@
-package org.sunbird.actor.settings;
+package org.sunbird.actor.systemsettings;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -21,7 +21,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.systemsettings.SystemSettingsActor;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -148,6 +147,15 @@ public class SystemSettingsActorTest {
     subject.tell(actorMessage, probe.getRef());
     Response response = probe.expectMsgAnyClassOf(ACTOR_MAX_WAIT_DURATION, Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void testWithInvalidRequest() {
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   private Map<String, Object> getSystemSettingMap() {
