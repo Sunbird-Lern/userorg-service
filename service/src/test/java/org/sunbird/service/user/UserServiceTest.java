@@ -10,6 +10,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.user.impl.UserServiceImpl;
 
@@ -38,6 +39,6 @@ public class UserServiceTest {
     Map<String, Object> user = new HashMap<>();
     PowerMockito.when(userDao.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
     UserService userService = UserServiceImpl.getInstance();
-    userService.getUserDetailsById("2123-456-8997", new RequestContext());
+    userService.getDecryptedEmailPhoneByUserId("2123-456-8997", JsonKey.EMAIL, new RequestContext());
   }
 }

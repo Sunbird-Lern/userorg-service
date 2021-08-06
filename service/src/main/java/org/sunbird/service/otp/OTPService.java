@@ -46,18 +46,11 @@ public class OTPService {
    * This method will return either email or phone value of user based on the asked type in request
    *
    * @param userId
-   * @param type value can be email, phone, prevUsedEmail or prevUsedPhone
+   * @param type value can be email, phone, recoveryEmail, recoveryPhone , prevUsedEmail or prevUsedPhone
    * @return
    */
   public String getEmailPhoneByUserId(String userId, String type, RequestContext context) {
-    Map<String, Object> user = userService.getUserDetailsById(userId, context);
-    DecryptionService decService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
-    String emailPhone = decService.decryptData((String) user.get(type), context);
-    if (StringUtils.isBlank(emailPhone)) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
-    }
-    return emailPhone;
+    return userService.getDecryptedEmailPhoneByUserId(userId, type, context);
   }
 
   public String getSmsBody(

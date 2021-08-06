@@ -14,8 +14,6 @@ public interface UserService {
 
   User getUserById(String userId, RequestContext context);
 
-  Map<String, Object> getUserDetailsById(String userId, RequestContext context);
-
   void validateUserId(Request request, String managedById, RequestContext context);
 
   void validateUploader(Request request, RequestContext context);
@@ -49,4 +47,6 @@ public interface UserService {
 
   Response saveUserAttributes(
       Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
+
+  String getDecryptedEmailPhoneByUserId(String userId, String type, RequestContext context);
 }

@@ -12,11 +12,7 @@ import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.dao.otp.OTPDao;
 import org.sunbird.dao.otp.impl.OTPDaoImpl;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
-import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
@@ -47,10 +43,7 @@ public class OTPServiceTest {
     UserService userService = PowerMockito.mock(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    Map<String,Object> user = new HashMap<>();
-    user.put(JsonKey.USER_ID,"12312-465-4546");
-    user.put(JsonKey.EMAIL,"xyz@xyz.com");
-    PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
+    PowerMockito.when(userService.getDecryptedEmailPhoneByUserId(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn("xyz@xyz.com");
     OTPService otpService = new OTPService();
     String userEmail = otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.EMAIL, new RequestContext());
     Assert.assertEquals("xyz@xyz.com",userEmail);
@@ -61,26 +54,10 @@ public class OTPServiceTest {
     UserService userService = PowerMockito.mock(UserService.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    Map<String,Object> user = new HashMap<>();
-    user.put(JsonKey.USER_ID,"12312-465-4546");
-    user.put(JsonKey.PHONE,"9999999999");
-    PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
+    PowerMockito.when(userService.getDecryptedEmailPhoneByUserId(Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn("9999999999");
     OTPService otpService = new OTPService();
     String userEmail = otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.PHONE, new RequestContext());
     Assert.assertEquals("9999999999",userEmail);
-  }
-
-  @Test(expected = ProjectCommonException.class)
-  public void getEmailPhoneByUserIdTest3() {
-    UserService userService = PowerMockito.mock(UserService.class);
-    PowerMockito.mockStatic(UserServiceImpl.class);
-    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    Map<String,Object> user = new HashMap<>();
-    user.put(JsonKey.USER_ID,"12312-465-4546");
-    user.put(JsonKey.PHONE,"");
-    PowerMockito.when(userService.getUserDetailsById(Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(user);
-    OTPService otpService = new OTPService();
-    otpService.getEmailPhoneByUserId("12312-465-4546",JsonKey.PHONE, new RequestContext());
   }
 
   @Test

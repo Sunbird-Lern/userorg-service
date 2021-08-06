@@ -24,6 +24,7 @@ import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.dao.user.impl.UserLookupDaoImpl;
+import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
@@ -80,18 +81,6 @@ public class UserServiceImpl implements UserService {
           ResponseCode.userNotFound.getErrorCode(),
           ResponseCode.userNotFound.getErrorMessage(),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-    return user;
-  }
-
-  @Override
-  public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
-    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
-    if (MapUtils.isEmpty(user)) {
-      throw new ProjectCommonException(
-        ResponseCode.userNotFound.getErrorCode(),
-        ResponseCode.userNotFound.getErrorMessage(),
-        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return user;
   }
@@ -442,5 +431,29 @@ public class UserServiceImpl implements UserService {
       logger.error(context, e.getMessage(), e);
     }
     return null;
+  }
+
+  /**
+   * This method will return either email or phone value of user based on the asked type in request
+   *
+   * @param userId
+   * @param type value can be email, phone, recoveryEmail, recoveryPhone , prevUsedEmail or prevUsedPhone
+   * @return
+   */
+  public String getDecryptedEmailPhoneByUserId(String userId, String type, RequestContext context) {
+    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
+    if (MapUtils.isEmpty(user)) {
+      throw new ProjectCommonException(
+        ResponseCode.userNotFound.getErrorCode(),
+        ResponseCode.userNotFound.getErrorMessage(),
+        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    DecryptionService decService =
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+    String emailPhone = decService.decryptData((String) user.get(type), context);
+    if (StringUtils.isBlank(emailPhone)) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
+    }
+    return emailPhone;
   }
 }
