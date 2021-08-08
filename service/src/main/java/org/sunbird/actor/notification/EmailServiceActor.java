@@ -70,15 +70,15 @@ public class EmailServiceActor extends BaseActor {
       // request.
       Map<String, Object> recipientSearchQuery =
         (Map<String, Object>) request.get(JsonKey.RECIPIENT_SEARCH_QUERY);
-      notificationService.validateAndGetEmailList(userIds, emails, recipientSearchQuery, request, requestContext);
+      List<String> emailList = notificationService.validateAndGetEmailList(userIds, emails, recipientSearchQuery, requestContext);
       notificationService.updateFirstNameAndOrgNameInEmailContext(userIds, emails, request, requestContext);
 
-      if (CollectionUtils.isNotEmpty(emails)) {
+      if (CollectionUtils.isNotEmpty(emailList)) {
         String template =
           notificationService.getEmailTemplateFile(
             (String) request.get(JsonKey.EMAIL_TEMPLATE_TYPE),
             requestContext);
-        sendMail(request, emails, template, requestContext);
+        sendMail(request, emailList, template, requestContext);
       }
     }
     Response res = new Response();

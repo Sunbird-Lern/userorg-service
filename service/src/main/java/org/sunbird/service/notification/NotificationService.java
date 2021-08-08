@@ -33,7 +33,7 @@ public class NotificationService {
   private UserService userService = UserServiceImpl.getInstance();
   private OrgService orgService = OrgServiceImpl.getInstance();
 
-  public void processSMS(List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {
+  public boolean processSMS(List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {
     validatePhoneOrEmail(phones, JsonKey.PHONE, requestContext);
     Set<String> phoneList = getEmailOrPhoneListByUserIds(userIds, JsonKey.PHONE, requestContext);
     //Merge All Phone
@@ -42,7 +42,7 @@ public class NotificationService {
     }
     validateRecipientsLimit(phoneList);
 
-    sendSMS(new ArrayList<>(phoneList), smsText, requestContext);
+    return sendSMS(new ArrayList<>(phoneList), smsText, requestContext);
   }
 
   private void findMissingUserIds(
@@ -65,17 +65,11 @@ public class NotificationService {
               ResponseCode.invalidParameterValue.getErrorMessage(),
               userId,
               JsonKey.RECIPIENT_USERIDS));
-          return;
         }
       });
   }
 
   private void validateRecipientsLimit(Set<String> recipients) {
-    if (CollectionUtils.isEmpty(recipients)) {
-      ProjectCommonException.throwClientErrorException(
-        ResponseCode.emailNotSentRecipientsZero,
-        ResponseCode.emailNotSentRecipientsZero.getErrorMessage());
-    }
     int maxLimit;
     try {
       maxLimit =
@@ -95,22 +89,23 @@ public class NotificationService {
     }
   }
 
-  private void sendSMS(
+  private boolean sendSMS(
     List<String> phones, String smsText, RequestContext context) {
     logger.info(
       context, "NotificationService:sendSMS: Sending sendSMS to = " + phones.size() + " phones");
     try {
       ISmsProvider smsProvider = SMSFactory.getInstance();
-      smsProvider.send(phones, smsText);
+      return smsProvider.send(phones, smsText);
     } catch (Exception e) {
       logger.error(
         context,
         "NotificationService:sendSMS: Exception occurred with message = " + e.getMessage(),
         e);
+      return false;
     }
   }
 
-  public List<String> validateAndGetEmailList(List<String> userIds, List<String> emails, Map<String, Object> recipientSearchQuery, Map<String, Object> request, RequestContext requestContext) {
+  public List<String> validateAndGetEmailList(List<String> userIds, List<String> emails, Map<String, Object> recipientSearchQuery, RequestContext requestContext) {
     validatePhoneOrEmail(emails, JsonKey.EMAIL, requestContext);
     List<Map<String, Object>> searchQueryResult = getUserEmailsFromSearchQuery(recipientSearchQuery, requestContext);
     for (Map<String, Object> result : searchQueryResult) {
@@ -134,7 +129,7 @@ public class NotificationService {
         request.put(
           JsonKey.NAME, StringUtils.capitalize((String) request.get(JsonKey.FIRST_NAME)));
       }
-      // fetch orgname inorder to set in the Template context
+      // fetch orgName inorder to set in the Template context
       String orgName =
         getOrgName(
           request, user.getRootOrgId(), requestContext);
@@ -235,7 +230,6 @@ public class NotificationService {
               ResponseCode.invalidParameterValue.getErrorMessage(),
               emailOrPhone,
               JsonKey.RECIPIENT_PHONES));
-          return;
         }
       }
     }
