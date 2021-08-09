@@ -201,7 +201,7 @@ public class NotificationServiceTest {
 
     NotificationService service = new NotificationService();
     List<String> emailList = service.validateAndGetEmailList(userIds, emails, recipientSearchQuery, new RequestContext());
-    Assert.assertTrue(emailList.size() == 1);
+    Assert.assertEquals(1,emailList.size());
   }
 
   @Test

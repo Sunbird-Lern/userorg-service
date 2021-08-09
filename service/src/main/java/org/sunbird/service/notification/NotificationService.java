@@ -34,7 +34,7 @@ public class NotificationService {
   private OrgService orgService = OrgServiceImpl.getInstance();
 
   public boolean processSMS(List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {
-    validatePhoneOrEmail(phones, JsonKey.PHONE, requestContext);
+    validatePhoneOrEmail(phones, JsonKey.PHONE);
     Set<String> phoneList = getEmailOrPhoneListByUserIds(userIds, JsonKey.PHONE, requestContext);
     //Merge All Phone
     if (CollectionUtils.isNotEmpty(phones)) {
@@ -53,9 +53,7 @@ public class NotificationService {
     // contains some invalid userId
     List<String> userIdFromDBList = new ArrayList<>();
     userListInDB.forEach(
-      user -> {
-        userIdFromDBList.add((String) user.get(JsonKey.ID));
-      });
+      user -> userIdFromDBList.add((String) user.get(JsonKey.ID)));
     requestedUserIds.forEach(
       userId -> {
         if (!userIdFromDBList.contains(userId)) {
@@ -106,7 +104,7 @@ public class NotificationService {
   }
 
   public List<String> validateAndGetEmailList(List<String> userIds, List<String> emails, Map<String, Object> recipientSearchQuery, RequestContext requestContext) {
-    validatePhoneOrEmail(emails, JsonKey.EMAIL, requestContext);
+    validatePhoneOrEmail(emails, JsonKey.EMAIL);
     List<Map<String, Object>> searchQueryResult = getUserEmailsFromSearchQuery(recipientSearchQuery, requestContext);
     for (Map<String, Object> result : searchQueryResult) {
       if (StringUtils.isNotBlank((String) result.get(JsonKey.EMAIL))) {
@@ -211,7 +209,7 @@ public class NotificationService {
     return Collections.emptyList();
   }
 
-  private void validatePhoneOrEmail(List<String> emailOrPhones, String type, RequestContext requestContext) {
+  private void validatePhoneOrEmail(List<String> emailOrPhones, String type) {
     if (CollectionUtils.isNotEmpty(emailOrPhones)) {
       for (String emailOrPhone : emailOrPhones) {
         if (JsonKey.EMAIL.equalsIgnoreCase(type) && !ProjectUtil.isEmailvalid(emailOrPhone)) {

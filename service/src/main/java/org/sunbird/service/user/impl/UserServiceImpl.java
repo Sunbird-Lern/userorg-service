@@ -481,9 +481,7 @@ public class UserServiceImpl implements UserService {
     properties.add(JsonKey.ROOT_ORG_ID);
     Response  response = userDao.getUserPropertiesById(userIds, properties, context);
     List<Map<String, Object>> responseList = (List<Map<String, Object>>)response.get(JsonKey.RESPONSE);
-    responseList.stream().forEach(resMap -> {
-      resMap.put(type, getDecryptedValue((String)resMap.get(type), context));
-    });
+    responseList.stream().forEach(resMap -> resMap.put(type, getDecryptedValue((String)resMap.get(type), context)));
     return responseList;
   }
 
