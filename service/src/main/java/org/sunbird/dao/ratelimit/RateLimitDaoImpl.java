@@ -36,12 +36,12 @@ public class RateLimitDaoImpl implements RateLimitDao {
     if (CollectionUtils.isEmpty(rateLimits)) {
       return;
     }
-    List<Integer> ttls =
+    List<Integer> ttl =
         rateLimits.stream().map(rateLimit -> rateLimit.getTTL()).collect(Collectors.toList());
     List<Map<String, Object>> records =
         rateLimits.stream().map(rateLimit -> rateLimit.getRecord()).collect(Collectors.toList());
 
-    cassandraOperation.batchInsertWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, records, ttls, context);
+    cassandraOperation.batchInsertWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, records, ttl, context);
   }
 
   @Override

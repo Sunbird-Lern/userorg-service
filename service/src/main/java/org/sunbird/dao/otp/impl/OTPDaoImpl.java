@@ -75,7 +75,7 @@ public class OTPDaoImpl implements OTPDao {
     compositeKeyMap.put(JsonKey.TYPE, type);
     compositeKeyMap.put(JsonKey.KEY, key);
     cassandraOperation.deleteRecord(JsonKey.SUNBIRD, TABLE_NAME, compositeKeyMap, context);
-    logger.info(context, "OTPDaoImpl:deleteOtp:otp deleted");
+    logger.debug(context, "OTPDaoImpl:deleteOtp:otp deleted");
   }
 
   @Override

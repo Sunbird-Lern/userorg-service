@@ -47,4 +47,6 @@ public interface UserService {
 
   Response saveUserAttributes(
       Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
+
+  String getDecryptedEmailPhoneByUserId(String userId, String type, RequestContext context);
 }

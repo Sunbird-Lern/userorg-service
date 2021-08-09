@@ -11,7 +11,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.OTPUtil;
+import org.sunbird.util.otp.OTPUtil;
 
 @ActorConfig(
   tasks = {},
@@ -19,7 +19,6 @@ import org.sunbird.util.OTPUtil;
   dispatcher = "notification-dispatcher"
 )
 public class SendOTPActor extends BaseActor {
-  public static final String RESET_PASSWORD = "resetPassword";
   private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
 
   @Override
@@ -69,16 +68,16 @@ public class SendOTPActor extends BaseActor {
     emailTemplateMap.put(JsonKey.OTP, otp);
     emailTemplateMap.put(JsonKey.OTP_EXPIRATION_IN_MINUTES, OTPUtil.getOTPExpirationInMinutes());
     emailTemplateMap.put(JsonKey.TEMPLATE_ID, template);
-    Request emailRequest = null;
+    Request emailRequest;
     if (StringUtils.isBlank(otpType)) {
-      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, context);
+      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, context);
     } else {
-      emailRequest = OTPUtil.sendOTPViaEmail(emailTemplateMap, RESET_PASSWORD, context);
+      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, JsonKey.RESET_PASSWORD, context);
     }
     emailRequest.setRequestContext(context);
     logger.info(
         context,
-        "SendOTPActor:sendOTP : Calling EmailServiceActor for Key = "
+        "SendOTPActor:sendOTPViaEmail : Calling EmailServiceActor for Key = "
             + logMaskService.maskEmail(key));
     tellToAnother(emailRequest);
   }

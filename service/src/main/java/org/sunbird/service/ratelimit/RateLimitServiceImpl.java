@@ -43,7 +43,7 @@ public class RateLimitServiceImpl implements RateLimitService {
           .stream()
           .forEach(
               rate -> {
-                if (!MapUtils.isEmpty(rate)) {
+                if (MapUtils.isNotEmpty(rate)) {
                   logger.info(
                       context,
                       "RateLimitServiceImpl:throttleByKey: key = " + key + " rate =" + rate);

@@ -1,4 +1,4 @@
-package org.sunbird.dao.settings;
+package org.sunbird.dao.systemsettings.impl;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -20,7 +20,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.dao.systemsettings.SystemSettingDao;
-import org.sunbird.dao.systemsettings.impl.SystemSettingDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.systemsettings.SystemSetting;
@@ -51,7 +50,7 @@ public class SystemSettingDaoImplTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    systemSettingDaoImpl = new SystemSettingDaoImpl(cassandraOperation);
+    systemSettingDaoImpl = new SystemSettingDaoImpl();
   }
 
   @Test
@@ -79,7 +78,7 @@ public class SystemSettingDaoImplTest {
         .thenReturn(getSystemSettingSuccessResponse(false));
     SystemSetting systemSetting =
         systemSettingDaoImpl.readByField(ROOT_ORG_ID, new RequestContext());
-    Assert.assertTrue(null != systemSetting);
+    Assert.assertNotNull(systemSetting);
   }
 
   @Test
@@ -89,7 +88,7 @@ public class SystemSettingDaoImplTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(true));
     SystemSetting systemSetting = systemSettingDaoImpl.readByField(FIELD, new RequestContext());
-    Assert.assertTrue(null == systemSetting);
+    Assert.assertNull(systemSetting);
   }
 
   @Test
@@ -99,7 +98,7 @@ public class SystemSettingDaoImplTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(false));
     List<SystemSetting> result = systemSettingDaoImpl.readAll(new RequestContext());
-    Assert.assertTrue(null != result);
+    Assert.assertNotNull(result);
   }
 
   @Test
@@ -109,7 +108,7 @@ public class SystemSettingDaoImplTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSystemSettingSuccessResponse(true));
     List<SystemSetting> result = systemSettingDaoImpl.readAll(new RequestContext());
-    Assert.assertTrue(null != result);
+    Assert.assertNotNull(result);
   }
 
   private Response getSystemSettingSuccessResponse(boolean isEmpty) {
@@ -117,7 +116,7 @@ public class SystemSettingDaoImplTest {
     if (!isEmpty)
       response.put(
           JsonKey.RESPONSE,
-          new ArrayList<Map<String, Object>>(Arrays.asList(new HashMap<String, Object>())));
+          new ArrayList<Map<String, Object>>(Arrays.asList(new HashMap<>())));
     else {
       response.put(JsonKey.RESPONSE, new ArrayList<Map<String, Object>>());
     }
