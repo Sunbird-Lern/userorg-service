@@ -27,8 +27,8 @@ import org.sunbird.util.ProjectUtil;
 )
 public class EmailServiceActor extends BaseActor {
 
-  private SendgridConnection connection = new SendgridConnection();
   private NotificationService notificationService = new NotificationService();
+  private SendgridConnection connection = new SendgridConnection();
   private String resetInterval = ProjectUtil.getConfigValue("sendgrid_connection_reset_interval");
   private volatile long timer;
 
@@ -60,13 +60,12 @@ public class EmailServiceActor extends BaseActor {
     } else {
       mode = JsonKey.EMAIL;
     }
-
     if (JsonKey.SMS.equalsIgnoreCase(mode)) {
-      notificationService.processSMS(userIds, phones, (String)request.get(JsonKey.BODY), requestContext);
+      notificationService.processSMS(userIds, phones, (String) request.get(JsonKey.BODY), requestContext);
     }
 
     if (JsonKey.EMAIL.equalsIgnoreCase(mode)) {
-      // Fetch public user emails from Elastic Search based on recipient search query given in
+      // Fetch user emails from Elastic Search based on recipient search query given in
       // request.
       Map<String, Object> recipientSearchQuery =
         (Map<String, Object>) request.get(JsonKey.RECIPIENT_SEARCH_QUERY);
@@ -81,6 +80,7 @@ public class EmailServiceActor extends BaseActor {
         sendMail(request, emailList, template, requestContext);
       }
     }
+
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(res, self());

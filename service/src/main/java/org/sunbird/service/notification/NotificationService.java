@@ -29,7 +29,7 @@ import java.util.Set;
 
 public class NotificationService {
 
-  private LoggerUtil logger = new LoggerUtil(NotificationService.class);
+  private static LoggerUtil logger = new LoggerUtil(NotificationService.class);
   private UserService userService = UserServiceImpl.getInstance();
   private OrgService orgService = OrgServiceImpl.getInstance();
 
