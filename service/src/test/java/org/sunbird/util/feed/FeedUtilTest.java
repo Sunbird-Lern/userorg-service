@@ -68,14 +68,13 @@ public class FeedUtilTest {
   private static OrganisationClient organisationClient;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);
     feedService = mock(FeedServiceImpl.class);
     organisationClient = mock(OrganisationClient.class);
     mockStatic(OrganisationClientImpl.class);
     when(FeedFactory.getInstance()).thenReturn(feedService);
-    when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(feedService.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));

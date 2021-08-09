@@ -3,7 +3,6 @@ package org.sunbird.actor.user;
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -28,13 +27,13 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.response.Response;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedServiceImpl;
+import org.sunbird.service.feed.IFeedService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -70,7 +69,6 @@ public class UserFeedActorTest {
 
     cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
