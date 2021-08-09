@@ -3,6 +3,7 @@ package org.sunbird.service.notification;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.VelocityContext;
 import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -22,6 +23,7 @@ import org.sunbird.util.ProjectUtil;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +175,7 @@ public class NotificationService {
     return orgName;
   }
 
-  private Set<String> getEmailOrPhoneListByUserIds(List<String> userIds, String type, RequestContext requestContext) {
+  public Set<String> getEmailOrPhoneListByUserIds(List<String> userIds, String type, RequestContext requestContext) {
     Set<String> emailOrPhoneList = new HashSet<>();
     if (CollectionUtils.isNotEmpty(userIds)) {
       List<Map<String, Object>> dbUserPhoneEmailList = userService.getDecryptedEmailPhoneByUserIds(userIds, type, requestContext);
@@ -233,4 +235,35 @@ public class NotificationService {
     }
   }
 
+  public Map<String, Object> getV2NotificationRequest(
+    Set<String> phoneOrEmailList, Map<String, Object> requestMap, String mode, String template) {
+    Map<String, Object> notiReq = new HashMap<>();
+    notiReq.put("deliveryType", "message");
+    Map<String, Object> config = new HashMap<>(2);
+    config.put("sender", System.getenv("sunbird_mail_server_from_email"));
+    config.put(JsonKey.SUBJECT, requestMap.remove(JsonKey.SUBJECT));
+    notiReq.put("config", config);
+    Map<String, Object> templateMap = new HashMap<>(2);
+    if (mode.equalsIgnoreCase(JsonKey.SMS)) {
+      templateMap.put(JsonKey.DATA, requestMap.remove(JsonKey.BODY));
+      templateMap.put(JsonKey.PARAMS, Collections.emptyMap());
+      notiReq.put("template", templateMap);
+      notiReq.put(JsonKey.MODE, JsonKey.PHONE);
+    } else {
+      templateMap.put(JsonKey.DATA, template);
+      VelocityContext context = ProjectUtil.getContext(requestMap);
+      Object[] keys = context.getKeys();
+      for (Object obj : keys) {
+        if (obj instanceof String) {
+          String key = (String) obj;
+          requestMap.put(key, context.get(key));
+        }
+      }
+      templateMap.put(JsonKey.PARAMS, requestMap);
+      notiReq.put("template", templateMap);
+      notiReq.put(JsonKey.MODE, JsonKey.EMAIL);
+    }
+    notiReq.put("ids", new ArrayList<>(phoneOrEmailList));
+    return notiReq;
+  }
 }

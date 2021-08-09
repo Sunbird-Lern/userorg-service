@@ -23,14 +23,14 @@ public class BackGroundNotificationActor extends BaseActor {
 
   private void callNotificationService(Request reqObj) {
     Map<String, Object> request = reqObj.getRequest();
-    logger.info(
+    logger.debug(
         reqObj.getRequestContext(),
         "BackGroundNotificationActor:callNotificationService :: Method called.");
     try {
       ObjectMapper mapper = new ObjectMapper();
       String notification_service_base_url = System.getenv("notification_service_base_url");
       String NOTIFICATION_SERVICE_URL = notification_service_base_url + "/v1/notification/send";
-      logger.info(
+      logger.debug(
           reqObj.getRequestContext(),
           "BackGroundNotificationActor:callNotificationService :: calling notification service URL :"
               + NOTIFICATION_SERVICE_URL);

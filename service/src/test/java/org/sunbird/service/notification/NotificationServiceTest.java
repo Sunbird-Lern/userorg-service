@@ -11,6 +11,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
@@ -26,8 +28,10 @@ import org.sunbird.util.ProjectUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -279,15 +283,50 @@ public class NotificationServiceTest {
     Assert.assertNotNull(request);
   }
 
-  //@Test
+  @Test
   public void getEmailTemplateFile() {
-    EmailTemplateDao templateDao = PowerMockito.mock(EmailTemplateDao.class);
-    PowerMockito.mockStatic(EmailTemplateDao.class);
-    //PowerMockito.when(EmailTemplateDaoImpl.getInstance()).thenReturn(templateDao);
-    //PowerMockito.when(templateDao.getTemplate(Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("template");
+    EmailTemplateDao templateDao = PowerMockito.mock(EmailTemplateDaoImpl.class);
+    PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
+    PowerMockito.when(EmailTemplateDaoImpl.getInstance()).thenReturn(templateDao);
+    PowerMockito.when(templateDao.getTemplate(Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("template");
     NotificationService service = new NotificationService();
     String template = service.getEmailTemplateFile("templateName", new RequestContext());
     Assert.assertNotNull(template);
+  }
+
+  @Test(expected = ProjectCommonException.class)
+  public void getEmailTemplateFileWithInvalidTemplateId() {
+    EmailTemplateDao templateDao = PowerMockito.mock(EmailTemplateDaoImpl.class);
+    PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
+    PowerMockito.when(EmailTemplateDaoImpl.getInstance()).thenReturn(templateDao);
+    PowerMockito.when(templateDao.getTemplate(Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("");
+    NotificationService service = new NotificationService();
+    service.getEmailTemplateFile("templateName", new RequestContext());
+  }
+
+  @Test
+  public void getV2NotificationRequest() {
+    Set<String> phoneList = new HashSet<>();
+    phoneList.add("9999999999");
+    Map<String,Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.SUBJECT,"subject");
+    reqMap.put(JsonKey.BODY,"body");
+    NotificationService service = new NotificationService();
+    Map<String, Object> notiReq = service.getV2NotificationRequest(phoneList,reqMap,JsonKey.SMS,"");
+    Assert.assertNotNull(notiReq);
+  }
+
+  @Test
+  public void getV2NotificationRequest2() {
+    Set<String> emailList = new HashSet<>();
+    emailList.add("xyz@xyz.com");
+    Map<String,Object> reqMap = new HashMap<>();
+    reqMap.put(JsonKey.SUBJECT,"subject");
+    reqMap.put(JsonKey.BODY,"body");
+    String template = "Welcome to $instanceName. Your user account has now been created. Click on the link below to #if ($setPasswordLink) set a password #else verify your email ID #end and start using your account:$newline$link";
+    NotificationService service = new NotificationService();
+    Map<String, Object> notiReq = service.getV2NotificationRequest(emailList,reqMap,JsonKey.EMAIL,template);
+    Assert.assertNotNull(notiReq);
   }
 
 }
