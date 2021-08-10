@@ -36,13 +36,10 @@ public class FeedDaoImpl implements IFeedDao {
         context,
         "FeedDaoImpl: insert called for feedId : "
             + feedMap.get(JsonKey.ID)
-            + " and user-id:"
+            + " and userId:"
             + feedMap.get(JsonKey.USER_ID));
-    Response response =
-        getCassandraInstance()
-            .insertRecord(
-                usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feedMap, context);
-    return response;
+    return getCassandraInstance()
+        .insertRecord(usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), feedMap, context);
   }
 
   public Response update(Map<String, Object> feedMap, RequestContext context) {
@@ -50,7 +47,7 @@ public class FeedDaoImpl implements IFeedDao {
         context,
         "FeedDaoImpl: update called for feedId : "
             + feedMap.get(JsonKey.ID)
-            + " and user-id:"
+            + " and userId:"
             + feedMap.get(JsonKey.USER_ID));
     Map<String, Object> compositeKey = new LinkedHashMap<>(3);
     compositeKey.put(JsonKey.USER_ID, feedMap.remove(JsonKey.USER_ID));
@@ -68,8 +65,7 @@ public class FeedDaoImpl implements IFeedDao {
   public Response getFeedsByProperties(Map<String, Object> properties, RequestContext context) {
     logger.debug(
         context,
-        "FeedDaoImpl: getFeedsByProperties called for user-id : "
-            + properties.get(JsonKey.USER_ID));
+        "FeedDaoImpl: getFeedsByProperties called for userId : " + properties.get(JsonKey.USER_ID));
     return getCassandraInstance()
         .getRecordById(
             usrFeedDbInfo.getKeySpace(), usrFeedDbInfo.getTableName(), properties, context);
@@ -77,7 +73,7 @@ public class FeedDaoImpl implements IFeedDao {
 
   public void delete(String id, String userId, String category, RequestContext context) {
     logger.debug(
-        context, "FeedDaoImpl: delete method called for feedId : " + id + " and user-id:" + userId);
+        context, "FeedDaoImpl: delete method called for feedId : " + id + " and userId:" + userId);
     Map<String, String> compositeKey = new LinkedHashMap<>(3);
     compositeKey.put("userid", userId);
     compositeKey.put("category", category);

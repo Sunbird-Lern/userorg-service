@@ -24,7 +24,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class FeedServiceImpl implements IFeedService {
   private static LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
-  public IFeedDao iFeedDao = FeedDaoImpl.getInstance();
+  private static IFeedDao iFeedDao = FeedDaoImpl.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
 
   @Override
@@ -42,8 +42,7 @@ public class FeedServiceImpl implements IFeedService {
       logger.error(context, "FeedServiceImpl:insert Exception occurred while mapping.", ex);
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
-    Response response = iFeedDao.insert(dbMap, context);
-    return response;
+    return iFeedDao.insert(dbMap, context);
   }
 
   @Override
@@ -60,8 +59,7 @@ public class FeedServiceImpl implements IFeedService {
     }
     dbMap.remove(JsonKey.CREATED_ON);
     dbMap.put(JsonKey.UPDATED_ON, new Timestamp(Calendar.getInstance().getTimeInMillis()));
-    Response response = iFeedDao.update(dbMap, context);
-    return response;
+    return iFeedDao.update(dbMap, context);
   }
 
   @Override

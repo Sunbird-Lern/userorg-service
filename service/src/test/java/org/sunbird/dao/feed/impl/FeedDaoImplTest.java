@@ -109,7 +109,7 @@ public class FeedDaoImplTest {
     props.put(JsonKey.USER_ID, "123-456-789");
     IFeedDao iFeedDao = new FeedDaoImpl();
     Response res = iFeedDao.getFeedsByProperties(props, null);
-    Assert.assertTrue(res != null);
+    Assert.assertNotNull(res);
   }
 
   private static Map<String, Object> getFeedMap() {
