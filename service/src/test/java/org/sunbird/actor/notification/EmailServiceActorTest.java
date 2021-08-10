@@ -20,7 +20,6 @@ import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
@@ -131,19 +130,10 @@ public class EmailServiceActorTest {
 
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> reqMap = new HashMap<>();
-    List<String> emailIdList = new ArrayList<>();
-    emailIdList.add("aaa@gmail.com");
     List<String> userIdList = new ArrayList<>();
     userIdList.add("001");
-    Map<String, Object> queryMap = new HashMap<>();
-    Map<String, Object> filterMap = new HashMap<>();
-    filterMap.put(JsonKey.NAME, "anyName");
-    queryMap.put(JsonKey.FILTERS, filterMap);
-    reqMap.put(JsonKey.RECIPIENT_EMAILS, emailIdList);
-    reqMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
     reqMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "default");
     reqMap.put(JsonKey.RECIPIENT_USERIDS, userIdList);
-    reqMap.put(JsonKey.RECIPIENT_SEARCH_QUERY, queryMap);
     List<String> phoneList = new ArrayList<>();
     reqMap.put(JsonKey.RECIPIENT_PHONES, phoneList);
     reqMap.put(JsonKey.MODE,"sms");
