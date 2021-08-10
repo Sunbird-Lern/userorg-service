@@ -1,6 +1,7 @@
 package org.sunbird.actor.notification;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,9 +51,9 @@ public class EmailServiceActor extends BaseActor {
     RequestContext requestContext = actorMessage.getRequestContext();
     Map<String, Object> request =
       (Map<String, Object>) actorMessage.getRequest().get(JsonKey.EMAIL_REQUEST);
-    List<String> userIds = (List<String>) request.get(JsonKey.RECIPIENT_USERIDS);
-    List<String> phones = (List<String>) request.get(JsonKey.RECIPIENT_PHONES);
-    List<String> emails = (List<String>) request.get(JsonKey.RECIPIENT_EMAILS);
+    List<String> userIds = (CollectionUtils.isEmpty((List<String>) request.get(JsonKey.RECIPIENT_USERIDS))) ? new ArrayList<>(): (List<String>) request.get(JsonKey.RECIPIENT_USERIDS);
+    List<String> phones = (CollectionUtils.isEmpty((List<String>) request.get(JsonKey.RECIPIENT_PHONES))) ? new ArrayList<>() : (List<String>) request.get(JsonKey.RECIPIENT_PHONES);
+    List<String> emails = (CollectionUtils.isEmpty((List<String>) request.get(JsonKey.RECIPIENT_EMAILS))) ? new ArrayList<>() : (List<String>) request.get(JsonKey.RECIPIENT_EMAILS);
     String mode;
     if (request.get(JsonKey.MODE) != null
       && JsonKey.SMS.equalsIgnoreCase((String) request.get(JsonKey.MODE))) {
