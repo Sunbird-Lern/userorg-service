@@ -58,7 +58,8 @@ import org.sunbird.service.feed.IFeedService;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class FeedUtilTest {
   private ElasticSearchService esUtil;
