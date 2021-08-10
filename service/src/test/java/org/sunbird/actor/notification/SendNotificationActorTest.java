@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -239,7 +241,7 @@ public class SendNotificationActorTest {
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    assertTrue(exc.getCode().equals(ResponseCode.invalidParameterValue.getErrorCode()));
+    assertEquals(ResponseCode.invalidParameterValue.getErrorCode(),exc.getCode());
   }
 
   @Test
@@ -271,7 +273,7 @@ public class SendNotificationActorTest {
     reqObj.getRequest().put(JsonKey.EMAIL_REQUEST, reqMap);
     subject.tell(reqObj, probe.getRef());
     Response response = probe.expectMsgClass(duration("1000 second"), Response.class);
-    assertTrue(response != null);
+    assertNotNull(response);
   }
 
   @Test
