@@ -36,12 +36,17 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.Feed;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.FeedServiceImpl;
+import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
@@ -49,11 +54,6 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.feed.FeedUtil;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
-import org.sunbird.service.feed.FeedServiceImpl;
-import org.sunbird.helper.ServiceFactory;
-import org.sunbird.keys.JsonKey;
 import org.sunbird.util.user.MigrationUtils;
 
 @RunWith(PowerMockRunner.class)
@@ -111,7 +111,6 @@ public class TenantMigrationActorTest {
     PowerMockito.mockStatic(FeedFactory.class);
     feedService = mock(FeedServiceImpl.class);
     when(FeedFactory.getInstance()).thenReturn(feedService);
-    when(FeedServiceImpl.getCassandraInstance()).thenReturn(cassandraOperation);
     when(feedService.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));

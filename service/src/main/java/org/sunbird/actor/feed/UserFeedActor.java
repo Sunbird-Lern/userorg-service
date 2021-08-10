@@ -8,17 +8,17 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedStatus;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
 /** This class contains API related to user feed. */
 @ActorConfig(
@@ -36,7 +36,7 @@ public class UserFeedActor extends BaseActor {
     Util.initializeContext(request, TelemetryEnvKey.USER);
     RequestContext context = request.getRequestContext();
     String operation = request.getOperation();
-    logger.info(context, "UserFeedActor:onReceive called for operation : " + operation);
+    logger.debug(context, "UserFeedActor:onReceive called for operation : " + operation);
     switch (operation) {
       case "getUserFeedById":
         String userId = (String) request.getRequest().get(JsonKey.USER_ID);
