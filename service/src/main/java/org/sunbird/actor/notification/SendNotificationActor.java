@@ -1,6 +1,8 @@
 package org.sunbird.actor.notification;
 
 import java.util.*;
+
+import org.apache.commons.lang.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
@@ -35,7 +37,7 @@ public class SendNotificationActor extends BaseActor {
     Set<String> phoneOrEmailList;
     Map<String, Object> notificationReq = null;
     String mode = (String) requestMap.remove(JsonKey.MODE);
-    if (request.get(JsonKey.MODE) != null
+    if (StringUtils.isNotBlank(mode)
       && JsonKey.SMS.equalsIgnoreCase(mode)) {
       mode = JsonKey.SMS;
     } else {
