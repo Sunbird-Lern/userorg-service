@@ -66,7 +66,7 @@ public class UserEmailsBySearchQueryTest {
     Map<String , Object> content2 = new HashMap<>();
     content2.put(JsonKey.USER_ID, "1232-45654-5135");
     content2.put(JsonKey.EMAIL, "xyz.com");
-    contents.add(content1);
+    contents.add(content2);
     esResponse.put(JsonKey.CONTENT, contents);
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
