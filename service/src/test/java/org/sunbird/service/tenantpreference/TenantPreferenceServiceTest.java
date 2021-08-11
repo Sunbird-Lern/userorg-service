@@ -47,6 +47,9 @@ public class TenantPreferenceServiceTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    when(cassandraOperation.getRecordsByProperties(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+      .thenReturn(cassandraGetRecordByProperty());
     when(cassandraOperation.insertRecord(
       Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
       .thenReturn(createCassandraInsertSuccessResponse());
@@ -65,30 +68,14 @@ public class TenantPreferenceServiceTest {
     return response;
   }
 
-  //@Test
-  public void validateAndGetTenantPreferencesByIdForCreateTest() {
-    when(cassandraOperation.getRecordsByProperties(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-      .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
-    TenantPreferenceService preferenceService = new TenantPreferenceService();
-    Map<String,Object> preference = preferenceService.validateAndGetTenantPreferencesById("45456464682","someKey",JsonKey.CREATE,new RequestContext());
-    Assert.assertTrue(MapUtils.isEmpty(preference));
-  }
-
   @Test(expected = ProjectCommonException.class)
   public void validateAndGetTenantPreferencesByIdForCreateFailureTest() {
-    when(cassandraOperation.getRecordsByProperties(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-      .thenReturn(cassandraGetRecordByProperty());
     TenantPreferenceService preferenceService = new TenantPreferenceService();
     preferenceService.validateAndGetTenantPreferencesById("45456464682","someKey",JsonKey.CREATE,new RequestContext());
   }
 
   @Test
   public void validateAndGetTenantPreferencesByIdByUpdateFailureTest() {
-    when(cassandraOperation.getRecordsByProperties(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-      .thenReturn(cassandraGetRecordByProperty());
     TenantPreferenceService preferenceService = new TenantPreferenceService();
     Map<String,Object> preference = preferenceService.validateAndGetTenantPreferencesById("45456464682","someKey",JsonKey.UPDATE,new RequestContext());
     Assert.assertTrue(MapUtils.isNotEmpty(preference));
