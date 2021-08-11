@@ -13,7 +13,6 @@ import java.util.Map;
 
 public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
 
-  private static final String TABLE_NAME = JsonKey.TENANT_PREFERENCE_V2_DB;
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   private static TenantPreferenceDao preferenceDao;
@@ -33,7 +32,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
     Response tenantPreferences =
       cassandraOperation.getRecordsByProperties(
         JsonKey.SUNBIRD,
-        TABLE_NAME,
+        JsonKey.TENANT_PREFERENCE_V2_DB,
         properties,
         context);
     return  (List<Map<String, Object>>) tenantPreferences.get(JsonKey.RESPONSE);
@@ -43,7 +42,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
   public Response insertTenantPreference(Map<String, Object> tenantPreference, RequestContext context) {
     return cassandraOperation.insertRecord(
       JsonKey.SUNBIRD,
-      TABLE_NAME,
+      JsonKey.TENANT_PREFERENCE_V2_DB,
       tenantPreference,
       context);
   }
@@ -52,7 +51,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
   public Response updateTenantPreference(Map<String, Object> tenantPreference, Map<String, Object> clusteringKeys, RequestContext context) {
     return cassandraOperation.updateRecord(
       JsonKey.SUNBIRD,
-      TABLE_NAME,
+      JsonKey.TENANT_PREFERENCE_V2_DB,
       tenantPreference,
       clusteringKeys,
       context);
