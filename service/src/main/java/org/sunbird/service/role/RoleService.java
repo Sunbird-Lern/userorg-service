@@ -20,7 +20,6 @@ public class RoleService {
 
   private static RoleDao roleDao = RoleDaoImpl.getInstance();
 
-  @SuppressWarnings("unchecked")
   public static Response getUserRoles() {
     Response response = new Response();
     List<Map<String, Object>> roleMapList = new ArrayList<>();

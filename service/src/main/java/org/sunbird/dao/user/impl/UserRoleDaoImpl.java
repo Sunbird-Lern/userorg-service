@@ -3,17 +3,26 @@ package org.sunbird.dao.user.impl;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.otp.impl.OTPDaoImpl;
 import org.sunbird.dao.user.UserRoleDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import scala.concurrent.Future;
 
 public final class UserRoleDaoImpl implements UserRoleDao {
 
+  private static LoggerUtil logger = new LoggerUtil(UserRoleDaoImpl.class);
   private static final String TABLE_NAME = JsonKey.USER_ROLES;
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   private static UserRoleDaoImpl instance;
 
@@ -21,12 +30,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
 
   public static UserRoleDao getInstance() {
     if (instance == null) {
-      // To make thread safe
-      synchronized (UserRoleDaoImpl.class) {
-        // check again as multiple threads
-        // can reach above step
-        if (instance == null) instance = new UserRoleDaoImpl();
-      }
+      instance = new UserRoleDaoImpl();
     }
     return instance;
   }
@@ -42,7 +46,6 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   public Response updateRoleScope(List<Map<String, Object>> userRoleMap, RequestContext context) {
     Response result = null;
     for (Map<String, Object> dataMap : userRoleMap) {
-
       Map<String, Object> compositeKey = new LinkedHashMap<>(2);
       compositeKey.put(JsonKey.USER_ID, dataMap.remove(JsonKey.USER_ID));
       compositeKey.put(JsonKey.ROLE, dataMap.remove(JsonKey.ROLE));
@@ -74,5 +77,15 @@ public final class UserRoleDaoImpl implements UserRoleDao {
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
 
     return responseList;
+  }
+
+  @Override
+  public boolean updateUserRoleToES(String identifier, Map<String, Object> data, RequestContext context) {
+    Future<Boolean> responseF = esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
+    if ((boolean) ElasticSearchHelper.getResponseFromFuture(responseF)) {
+      return true;
+    }
+    logger.info(context, "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier " + identifier);
+    return false;
   }
 }
