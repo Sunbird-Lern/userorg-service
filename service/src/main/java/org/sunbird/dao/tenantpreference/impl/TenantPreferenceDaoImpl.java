@@ -13,16 +13,14 @@ import java.util.Map;
 
 public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
 
-  private final String TABLE_NAME = JsonKey.TENANT_PREFERENCE_V2_DB;
+  private static final String TABLE_NAME = JsonKey.TENANT_PREFERENCE_V2_DB;
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   private static TenantPreferenceDao preferenceDao;
 
   public static TenantPreferenceDao getInstance() {
     if (preferenceDao == null) {
-      if (preferenceDao == null) {
-        preferenceDao = new TenantPreferenceDaoImpl();
-      }
+      preferenceDao = new TenantPreferenceDaoImpl();
     }
     return preferenceDao;
   }
@@ -38,9 +36,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
         TABLE_NAME,
         properties,
         context);
-    List<Map<String, Object>> preferencesList =
-      (List<Map<String, Object>>) tenantPreferences.get(JsonKey.RESPONSE);
-    return preferencesList;
+    return  (List<Map<String, Object>>) tenantPreferences.get(JsonKey.RESPONSE);
   }
 
   @Override
