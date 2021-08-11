@@ -32,28 +32,17 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
-import org.sunbird.request.RequestContext;
 import org.sunbird.response.ClientErrorResponse;
 import org.sunbird.response.Response;
-import org.sunbird.service.otp.OTPService;
-import org.sunbird.service.ratelimit.RateLimitService;
-import org.sunbird.service.ratelimit.RateLimitServiceImpl;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ratelimit.OtpRateLimiter;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  OTPService.class,
   CassandraOperationImpl.class,
-  RateLimitService.class,
   RateLimitDaoImpl.class,
   RateLimitDao.class,
-  RateLimitServiceImpl.class,
-  SunbirdMWService.class,
-  UserService.class,
-  UserServiceImpl.class
+  SunbirdMWService.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -130,7 +119,7 @@ public class OTPActorTest {
   }
 
   @Test
-  public void testVerifyOtpSuccessWithEmailOtp2() throws Exception {
+  public void testVerifyOtpSuccessWithEmailOtp2() {
     Response mockedCassandraResponse =
       getMockCassandraRecordByIdSuccessResponse(EMAIL_KEY, EMAIL_TYPE, REQUEST_OTP);
     List<Map<String, Object>> responseList =
@@ -144,9 +133,6 @@ public class OTPActorTest {
       Mockito.anyString(),
       Mockito.any()))
       .thenReturn(mockedCassandraResponse);
-    OTPService otpService = PowerMockito.mock(OTPService.class);
-    PowerMockito.whenNew(OTPService.class).withNoArguments().thenReturn(otpService);
-    PowerMockito.when(otpService.getEmailPhoneByUserId(Mockito.anyString(),Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("xyz@xyz.com");
     when(mockCassandraOperation.getRecordWithTTLById(
       Mockito.anyString(),
               Mockito.anyString(),
@@ -161,7 +147,7 @@ public class OTPActorTest {
   }
 
   @Test
-  public void testVerifyOtpFailureWithEmailOtp3() throws Exception {
+  public void testVerifyOtpFailureWithEmailOtp3() {
     Response mockedCassandraResponse =
       getMockCassandraRecordByIdSuccessResponse(EMAIL_KEY, EMAIL_TYPE, REQUEST_OTP);
     List<Map<String, Object>> responseList =
@@ -176,10 +162,7 @@ public class OTPActorTest {
       Mockito.anyString(),
       Mockito.any()))
       .thenReturn(mockedCassandraResponse);
-    OTPService otpService = PowerMockito.mock(OTPService.class);
-    PowerMockito.whenNew(OTPService.class).withNoArguments().thenReturn(otpService);
-    PowerMockito.when(otpService.getEmailPhoneByUserId(Mockito.anyString(),Mockito.anyString(),Mockito.any(RequestContext.class))).thenReturn("xyz@xyz.com");
-    when(mockCassandraOperation.getRecordWithTTLById(
+   when(mockCassandraOperation.getRecordWithTTLById(
       Mockito.anyString(),
       Mockito.anyString(),
       Mockito.anyMap(),
