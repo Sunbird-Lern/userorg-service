@@ -1,9 +1,12 @@
-package org.sunbird.dao.user;
+package org.sunbird.dao.user.impl;
 
+import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.*;
+
+import akka.dispatch.Futures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,15 +18,25 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.dao.user.impl.UserRoleDaoImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.user.UserRoleDao;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({CassandraOperation.class, ServiceFactory.class})
+@PrepareForTest({
+  CassandraOperation.class,
+  ServiceFactory.class,
+  ElasticSearchRestHighImpl.class,
+  ElasticSearchService.class,
+  EsClientFactory.class
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -37,6 +50,17 @@ public class UserRoleDaoImplTest {
 
   @Before
   public void setUp() {
+    PowerMockito.mockStatic(EsClientFactory.class);
+    ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Boolean> promise2 = Futures.promise();
+    promise2.success(true);
+    when(esService.update(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyMap(),
+      Mockito.any(RequestContext.class)))
+      .thenReturn(promise2.future());
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
@@ -44,6 +68,11 @@ public class UserRoleDaoImplTest {
     when(cassandraOperationImpl.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
+    when(cassandraOperationImpl.updateRecord(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+      .thenReturn(response);
+    doNothing().when(cassandraOperationImpl).deleteRecord(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     Response getRolesRes = new Response();
     Map<String, Object> roleMap = new HashMap<>();
     roleMap.put("role", "somerole");
@@ -71,6 +100,42 @@ public class UserRoleDaoImplTest {
     List<Map<String, Object>> res =
         userRoleDao.getUserRoles("someUserId", "someRole", new RequestContext());
     Assert.assertNotNull(res);
+  }
+
+  @Test
+  public void testUpdateRoleScope() {
+    List<Map<String, Object>> userRoleList = new ArrayList<>();
+    Map<String, Object> userRole = new HashMap<>();
+    userRole.put(JsonKey.USER_ID,"userId");
+    userRole.put(JsonKey.ROLE,"role");
+    userRole.put(JsonKey.SCOPE,"scope");
+    userRole.put(JsonKey.ORGANISATION_ID, "randomOrgID");
+    userRoleList.add(userRole);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    Response response = userRoleDao.updateRoleScope(userRoleList, new RequestContext());
+    Assert.assertNotNull(null != response && response.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void testDeleteUserRole() {
+    List<Map<String, String>> userRoleList = new ArrayList<>();
+    Map<String, String> userRole = new HashMap<>();
+    userRole.put(JsonKey.USER_ID,"userId");
+    userRole.put(JsonKey.ORGANISATION_ID, "randomOrgID");
+    userRoleList.add(userRole);
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    userRoleDao.deleteUserRole(userRoleList, new RequestContext());
+    Assert.assertNotNull(userRoleList);
+  }
+
+  @Test
+  public void testUpdateUserRoleToES() {
+    Map<String, Object> userRole = new HashMap<>();
+    userRole.put(JsonKey.USER_ID,"userId");
+    userRole.put(JsonKey.ORGANISATION_ID, "randomOrgID");
+    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+    boolean bool = userRoleDao.updateUserRoleToES("userId", userRole, new RequestContext());
+    Assert.assertTrue(bool);
   }
 
   List<Map<String, Object>> createUserRoleRequest() {

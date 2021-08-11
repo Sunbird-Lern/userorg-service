@@ -6,7 +6,6 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.otp.impl.OTPDaoImpl;
 import org.sunbird.dao.user.UserRoleDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
