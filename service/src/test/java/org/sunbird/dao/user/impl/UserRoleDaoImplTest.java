@@ -65,6 +65,9 @@ public class UserRoleDaoImplTest {
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
+    when(cassandraOperationImpl.batchInsert(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
+      .thenReturn(response);
     when(cassandraOperationImpl.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
@@ -91,7 +94,7 @@ public class UserRoleDaoImplTest {
   public void testCreateUserRole() {
     UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
     Response response = userRoleDao.assignUserRole(createUserRoleRequest(), new RequestContext());
-    Assert.assertNotNull(null != response && response.getResponseCode() == ResponseCode.OK);
+    Assert.assertNotNull(response);
   }
 
   @Test
@@ -113,7 +116,7 @@ public class UserRoleDaoImplTest {
     userRoleList.add(userRole);
     UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
     Response response = userRoleDao.updateRoleScope(userRoleList, new RequestContext());
-    Assert.assertNotNull(null != response && response.getResponseCode() == ResponseCode.OK);
+    Assert.assertEquals(ResponseCode.OK,response.getResponseCode());
   }
 
   @Test
