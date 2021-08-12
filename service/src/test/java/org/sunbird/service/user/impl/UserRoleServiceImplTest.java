@@ -207,7 +207,7 @@ public class UserRoleServiceImplTest {
     userMap.put(JsonKey.ID,"userId");
     userMap.put(JsonKey.ROLES,Arrays.asList("ADMIN"));
     UserRoleService service = UserRoleServiceImpl.getInstance();
-    boolean response = service.updateUserRoleToES("userId", userMap, new RequestContext());
+    Boolean response = service.updateUserRoleToES("userId", userMap, new RequestContext());
     Assert.assertNotNull(response);
   }
 
