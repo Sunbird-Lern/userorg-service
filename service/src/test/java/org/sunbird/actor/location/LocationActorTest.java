@@ -62,11 +62,12 @@ public class LocationActorTest {
   public static void init() {
 
     PowerMockito.mockStatic(EsClientFactory.class);
+    esSearch = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
+
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
-    esSearch = mock(ElasticSearchRestHighImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());

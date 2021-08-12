@@ -5,6 +5,10 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.*;
+
+import akka.dispatch.Futures;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -12,13 +16,21 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
+import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.dao.location.impl.LocationDaoImpl;
+import org.sunbird.dto.SearchDTO;
+import org.sunbird.helper.ServiceFactory;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.models.location.Location;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LocationDaoImpl.class, LocationDaoFactory.class, DataCacheHandler.class})
@@ -30,21 +42,81 @@ import org.sunbird.response.Response;
   "javax.crypto.*"
 })
 public class LocationServiceImplTest {
-
-  @Test
-  public void testGetValidatedRelatedLocationIdAndType() {
+  @Before
+  public void setUp() {
     PowerMockito.mockStatic(LocationDaoFactory.class);
     LocationDao locationDao = mock(LocationDaoImpl.class);
     when(LocationDaoFactory.getInstance()).thenReturn(locationDao);
     PowerMockito.when(locationDao.search(Mockito.any(), Mockito.any()))
-        .thenReturn(getLocationRecords());
+            .thenReturn(getLocationRecords());
+    PowerMockito.when(locationDao.create(Mockito.any(), Mockito.any()))
+            .thenReturn(getSuccessResponse());
+    PowerMockito.when(locationDao.update(Mockito.any(), Mockito.any()))
+            .thenReturn(getSuccessResponse());
+    PowerMockito.when(locationDao.delete(Mockito.any(), Mockito.any()))
+            .thenReturn(getSuccessResponse());
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getLocationOrderMap()).thenReturn(getLocationOrderMap());
+  }
+  @Test
+  public void testGetValidatedRelatedLocationIdAndType() {
+
     LocationService locationService = LocationServiceImpl.getInstance();
     List<String> codeList = getCodeList();
     List<Map<String, String>> locationIdType =
         locationService.getValidatedRelatedLocationIdAndType(codeList, new RequestContext());
     assertEquals(result(), locationIdType);
+  }
+
+  @Test
+  public void testGetValidatedRelatedLocationIds() {
+    LocationService locationService = LocationServiceImpl.getInstance();
+    List<String> codeList = getCodeList();
+    List<String> locationIdType =
+            locationService.getValidatedRelatedLocationIds(codeList, new RequestContext());
+    assertEquals(resultIdList(), locationIdType);
+  }
+  @Test
+  public void testCreateLocation() {
+    LocationService locationService = LocationServiceImpl.getInstance();
+    Location loc = new Location();
+    loc.setId("locId1");
+    loc.setCode("locCode1");
+    loc.setName("locName1");
+    loc.setType("state");
+    Response response =
+            locationService.createLocation(loc, new RequestContext());
+    Assert.assertNotNull(response.getResult().get(JsonKey.ID));
+  }
+
+  @Test
+  public void updateLocation() {
+    LocationService locationService = LocationServiceImpl.getInstance();
+    Location loc = new Location();
+    loc.setId("locId1");
+    loc.setCode("locCode1");
+    loc.setName("locName1");
+    loc.setType("state");
+    Response response = locationService.updateLocation(loc, new RequestContext());
+    Assert.assertNotNull(response.getResult().get(JsonKey.ID));
+  }
+
+  @Test
+  public void deleteLocation() {
+    LocationService locationService = LocationServiceImpl.getInstance();
+    Response response = locationService.deleteLocation("locId1", new RequestContext());
+    Assert.assertNotNull(response);
+  }
+
+  @Test
+  public void searchLocation() {
+    Map<String, Object> filter = new HashMap<>();
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    filter.put(JsonKey.ID, "locId1");
+    searchRequestMap.put(JsonKey.FILTERS, filter);
+    LocationService locationService = LocationServiceImpl.getInstance();
+    Response response = locationService.searchLocation(searchRequestMap, new RequestContext());
+    Assert.assertNotNull(response);
   }
 
   public List<String> getCodeList() {
@@ -79,5 +151,15 @@ public class LocationServiceImplTest {
     idType.put("type", "state");
     result.add(idType);
     return result;
+  }
+  public static List<String> resultIdList() {
+    List<String> result = new ArrayList<>();
+    result.add("id1");
+    return result;
+  }
+  private static Response getSuccessResponse() {
+    Response response = new Response();
+    response.put(JsonKey.ID, "locId1");
+    return response;
   }
 }
