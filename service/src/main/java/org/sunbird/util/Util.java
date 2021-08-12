@@ -33,7 +33,6 @@ import org.sunbird.response.Response;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.url.URLShortner;
 import org.sunbird.url.URLShortnerImpl;
-import org.sunbird.quartzscheduler.SchedulerManager;
 import scala.concurrent.Future;
 
 /**
@@ -67,7 +66,6 @@ public final class Util {
     initializeDBProperty(); // EkStep HttpClient headers init
     headers.put("content-type", "application/json");
     headers.put("accept", "application/json");
-    new Thread(() -> SchedulerManager.getInstance()).start();
   }
 
   private Util() {}
