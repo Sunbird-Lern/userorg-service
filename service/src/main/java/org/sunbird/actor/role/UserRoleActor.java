@@ -31,7 +31,7 @@ public class UserRoleActor extends UserBaseActor {
 
     switch (operation) {
       case "getRoles":
-        getRoles();
+        getRoles(request.getRequestContext());
         break;
 
       case "assignRoles":
@@ -45,10 +45,10 @@ public class UserRoleActor extends UserBaseActor {
     }
   }
 
-  private void getRoles() {
+  private void getRoles(RequestContext context) {
     Response response = DataCacheHandler.getRoleResponse();
     if (response == null) {
-      response = RoleService.getUserRoles();
+      response = new RoleService().getUserRoles(context);
       DataCacheHandler.setRoleResponse(response);
     }
     sender().tell(response, self());

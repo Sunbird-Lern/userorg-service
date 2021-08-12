@@ -62,7 +62,7 @@ public class RoleDaoImplTest {
       when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       when(cassandraOperation.getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, null))
           .thenReturn(response);
-      List<Role> roleList = roleDao.getRoles();
+      List<Role> roleList = roleDao.getRoles(null);
       Assert.assertEquals("TEACHER", roleList.get(0).getName());
 
     } catch (Exception e) {
