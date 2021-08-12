@@ -100,7 +100,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       RequestContext context) {
     String userId = (String) userRequest.get(JsonKey.USER_ID);
     List<String> roles = (List<String>) userRequest.get(JsonKey.ROLES);
-    List<String> userRolesToInsert = new ArrayList<>();
+    List<String> userRolesToInsert;
     // Fetch roles in DB for the user
     List<Map<String, Object>> dbUserRoleList = userRoleDao.getUserRoles(userId, "", context);
     if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
