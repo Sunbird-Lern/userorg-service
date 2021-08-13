@@ -1,8 +1,8 @@
 package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -32,13 +32,19 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.service.userconsent.UserConsentService;
+import org.sunbird.service.userconsent.impl.UserConsentServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
   CassandraOperationImpl.class,
   ElasticSearchRestHighImpl.class,
-  EsClientFactory.class
+  EsClientFactory.class,
+  UserConsentServiceImpl.class,
+  UserServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -51,10 +57,11 @@ public class UserConsentActorTest {
   private static ActorSystem system = ActorSystem.create("system");
   private final Props props = Props.create(UserConsentActor.class);
   public static CassandraOperationImpl cassandraOperation;
+  public static UserService userService;
   private static ElasticSearchService esUtil;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
@@ -171,16 +178,26 @@ public class UserConsentActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
 
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSuccessResponse());
+    PowerMockito.mockStatic(UserConsentServiceImpl.class);
+    PowerMockito.mockStatic(UserServiceImpl.class);
+    UserConsentService userConsentService = PowerMockito.mock(UserConsentServiceImpl.class);
+    PowerMockito.when(UserConsentServiceImpl.getInstance()).thenReturn(userConsentService);
+    userService = PowerMockito.mock(UserServiceImpl.class);
+    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
 
-    when(cassandraOperation.upsertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSuccessResponse());
+    Response response = new Response();
+    response
+        .getResult()
+        .put(
+            JsonKey.ID,
+            "usr-consent:529a57aa-6365-4145-9a35-e8cfc934eb4e:0130107621805015045:do_31313966505806233613406");
+    doNothing()
+        .when(userService)
+        .validateUserId(Mockito.any(), nullable(String.class), Mockito.any());
+    when(userConsentService.updateConsent(Mockito.any(), Mockito.any())).thenReturn(response);
 
     subject.tell(updateUserConsentRequest(), probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
   }
 }

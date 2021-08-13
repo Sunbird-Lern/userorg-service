@@ -1,4 +1,4 @@
-package org.sunbird.service.feed;
+package org.sunbird.service.feed.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +20,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.Feed;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.IFeedService;
 import org.sunbird.util.ProjectUtil;
 
 public class FeedServiceImpl implements IFeedService {
