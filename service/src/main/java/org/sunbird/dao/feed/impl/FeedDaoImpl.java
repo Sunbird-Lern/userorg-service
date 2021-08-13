@@ -9,7 +9,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.feed.FeedServiceImpl;
+import org.sunbird.service.feed.impl.FeedServiceImpl;
 import org.sunbird.util.Util;
 
 public class FeedDaoImpl implements IFeedDao {

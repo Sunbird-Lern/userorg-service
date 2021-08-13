@@ -35,8 +35,8 @@ import org.sunbird.model.user.Feed;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
-import org.sunbird.service.feed.FeedServiceImpl;
 import org.sunbird.service.feed.IFeedService;
+import org.sunbird.service.feed.impl.FeedServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
