@@ -9,10 +9,9 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
 import org.sunbird.dao.location.LocationDao;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
@@ -58,7 +57,7 @@ public class LocationDaoImpl implements LocationDao {
 
   @Override
   public Response search(Map<String, Object> searchQueryMap, RequestContext context) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
     addSortBy(searchDto);
     String type = ProjectUtil.EsType.location.getTypeName();
     Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);

@@ -8,7 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,18 +20,21 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.client.location.LocationClient;
+import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.model.location.Location;
+import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ProjectUtil.class, EsClientFactory.class, ElasticSearchRestHighImpl.class})
+@PrepareForTest({ProjectUtil.class, LocationClient.class, LocationClientImpl.class, EsClientFactory.class, ElasticSearchRestHighImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -39,6 +45,7 @@ import scala.concurrent.Promise;
 public class LocationRequestValidatorTest {
 
   private static ElasticSearchService esService;
+  private static LocationClientImpl locationClient;
 
   @BeforeClass
   public static void before() {
@@ -48,6 +55,21 @@ public class LocationRequestValidatorTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+  }
+
+
+  @Before
+  public void beforeEachTest() throws Exception {
+    locationClient = Mockito.mock(LocationClientImpl.class);
+    PowerMockito.whenNew(LocationClientImpl.class).withNoArguments().thenReturn(locationClient);
+    Location location = new Location();
+    location.setCode("code");
+    location.setId("id");
+    location.setName("Name");
+    location.setType("state");
+    PowerMockito.when(
+            locationClient.getLocationById(Mockito.any(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(location);
   }
 
   @Test
@@ -357,5 +379,18 @@ public class LocationRequestValidatorTest {
       Assert.assertEquals(
           ResponseCode.invalidLocationDeleteRequest.getErrorMessage(), ex.getMessage());
     }
+  }
+
+  @Test
+  public void getValidatedLocationSetTest() {
+    LocationRequestValidator validator = new LocationRequestValidator();
+    Location location = new Location();
+    location.setCode("code");
+    location.setId("id");
+    location.setName("Name");
+    location.setType("state");
+    List<Location> locList = new ArrayList<>();
+    Set<String> loc = validator.getValidatedLocationSet(null, locList);
+    Assert.assertNotNull(loc);
   }
 }

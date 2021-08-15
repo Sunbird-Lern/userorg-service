@@ -1,23 +1,17 @@
 package org.sunbird.actor.location;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
-import org.sunbird.dao.location.LocationDao;
-import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
-import org.sunbird.models.location.Location;
-import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.model.location.Location;
+import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;

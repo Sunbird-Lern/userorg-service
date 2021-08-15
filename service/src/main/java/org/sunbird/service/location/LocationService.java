@@ -1,6 +1,6 @@
 package org.sunbird.service.location;
 
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 

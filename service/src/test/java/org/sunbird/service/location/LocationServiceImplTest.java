@@ -6,7 +6,6 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.*;
 
-import akka.dispatch.Futures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,21 +15,15 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
-import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.dao.location.impl.LocationDaoImpl;
-import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LocationDaoImpl.class, LocationDaoFactory.class, DataCacheHandler.class})

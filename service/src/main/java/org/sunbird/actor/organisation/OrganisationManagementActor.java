@@ -12,6 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actor.location.validator.LocationRequestValidator;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.client.location.LocationClient;
@@ -24,7 +25,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
@@ -42,7 +43,7 @@ import org.sunbird.util.Slug;
 import org.sunbird.util.Util;
 import org.sunbird.validator.EmailValidator;
 import scala.concurrent.Future;
-import org.sunbird.actor.location.LocationRequestValidator;
+
 /**
  * This actor will handle organisation related operation .
  *
