@@ -115,6 +115,7 @@ public class LocationServiceImplTest {
   public List<String> getCodeList() {
     List<String> codeList = new ArrayList<>();
     codeList.add("code1");
+    codeList.add("code2");
     return codeList;
   }
 
@@ -125,7 +126,13 @@ public class LocationServiceImplTest {
     map.put("type", "state");
     map.put("id", "id1");
     map.put("code", "code1");
+    Map<String, Object> map1 = new HashMap<>();
+    map1.put("type", "district");
+    map1.put("id", "id2");
+    map1.put("code", "code2");
+    map1.put("parentId", "id1");
     list.add(map);
+    list.add(map1);
     response.put(Constants.RESPONSE, list);
     return response;
   }
@@ -139,6 +146,10 @@ public class LocationServiceImplTest {
 
   public static List<Map<String, String>> result() {
     List<Map<String, String>> result = new ArrayList<>();
+    Map<String, String> idType1 = new HashMap<>();
+    idType1.put("id", "id2");
+    idType1.put("type", "district");
+    result.add(idType1);
     Map<String, String> idType = new HashMap<>();
     idType.put("id", "id1");
     idType.put("type", "state");
@@ -147,6 +158,7 @@ public class LocationServiceImplTest {
   }
   public static List<String> resultIdList() {
     List<String> result = new ArrayList<>();
+    result.add("id2");
     result.add("id1");
     return result;
   }
