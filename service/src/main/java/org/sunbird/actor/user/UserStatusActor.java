@@ -5,7 +5,9 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.UserStatusService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.Util;
 
@@ -50,20 +52,8 @@ public class UserStatusActor extends UserBaseActor {
       String logMsgPrefix =
         MessageFormat.format("UserStatusActor:updateUserStatus:{0}:{1}: ", operation, userId);
       logger.info(request.getRequestContext(), logMsgPrefix + "Update user data to ES.");
-
-      Request userRequest = new Request();
-      userRequest.setRequestContext(request.getRequestContext());
-      userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-      userRequest.getRequest().put(JsonKey.ID, userId);
-
-      try {
-        tellToAnother(userRequest);
-      } catch (Exception e) {
-        logger.error(
-          request.getRequestContext(),
-          logMsgPrefix + "Exception occurred with error message = " + e.getMessage(),
-          e);
-      }
+      UserService userService = UserServiceImpl.getInstance();
+      userService.updateUserDataToES(userId, userMap, request.getRequestContext());
     }
     generateTelemetryEvent(request.getRequest(), userId, operation, request.getContext());
   }
