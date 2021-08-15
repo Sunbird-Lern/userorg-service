@@ -9,6 +9,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -138,8 +139,18 @@ public class UserStatusActorTest {
     assertTrue(result);
   }
 
-  private Request getRequestObject(String operation) {
+  @Test
+  public void testWithInvalidRequest() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
+  }
 
+  private Request getRequestObject(String operation) {
     Request reqObj = new Request();
     String userId = "someUserId";
     reqObj.setOperation(operation);
@@ -171,7 +182,7 @@ public class UserStatusActorTest {
     } else {
       ProjectCommonException exception =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return (((ProjectCommonException) exception).getCode().equals(expectedErrorResponse));
+      return (exception.getCode().equals(expectedErrorResponse));
     }
   }
 }
