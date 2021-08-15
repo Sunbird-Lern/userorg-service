@@ -99,7 +99,7 @@ public class LocationServiceImpl implements LocationService {
         return locationIdList;
     }
 
-    private List<Location> locationSearch(String param, Object value, RequestContext context) {
+    public List<Location> locationSearch(String param, Object value, RequestContext context) {
         Map<String, Object> filter = new HashMap<>();
         Map<String, Object> searchRequestMap = new HashMap<>();
         List<Location> locationResponseList = new ArrayList<>();
@@ -184,5 +184,14 @@ public class LocationServiceImpl implements LocationService {
                 ProjectUtil.formatMessage(
                         ResponseCode.invalidParameterValue.getErrorMessage(), codeList, JsonKey.LOCATION_CODE),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
+    public Location getLocationById(String param, Object value, RequestContext context){
+        Location loc = null;
+        List<Location> locList = locationSearch(param, value, context);
+        if(CollectionUtils.isNotEmpty(locList)){
+            loc = locList.get(0);
+        }
+        return loc;
     }
 }

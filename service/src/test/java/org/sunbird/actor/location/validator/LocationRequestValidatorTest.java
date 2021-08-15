@@ -45,7 +45,6 @@ import scala.concurrent.Promise;
 public class LocationRequestValidatorTest {
 
   private static ElasticSearchService esService;
-  private static LocationClientImpl locationClient;
 
   @BeforeClass
   public static void before() {
@@ -55,21 +54,6 @@ public class LocationRequestValidatorTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-  }
-
-
-  @Before
-  public void beforeEachTest() throws Exception {
-    locationClient = Mockito.mock(LocationClientImpl.class);
-    PowerMockito.whenNew(LocationClientImpl.class).withNoArguments().thenReturn(locationClient);
-    Location location = new Location();
-    location.setCode("code");
-    location.setId("id");
-    location.setName("Name");
-    location.setType("state");
-    PowerMockito.when(
-            locationClient.getLocationById(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(location);
   }
 
   @Test
@@ -390,7 +374,7 @@ public class LocationRequestValidatorTest {
     location.setName("Name");
     location.setType("state");
     List<Location> locList = new ArrayList<>();
-    Set<String> loc = validator.getValidatedLocationSet(null, locList);
+    Set<String> loc = validator.getValidatedLocationSet(locList, null);
     Assert.assertNotNull(loc);
   }
 }

@@ -793,8 +793,7 @@ public class OrganisationManagementActor extends BaseActor {
       if (CollectionUtils.isNotEmpty((List<String>) request.get(JsonKey.LOCATION_CODE))) {
         locList =
             validator.getValidatedLocationIds(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                (List<String>) request.get(JsonKey.LOCATION_CODE));
+                (List<String>) request.get(JsonKey.LOCATION_CODE),null);
         request.remove(JsonKey.LOCATION_CODE);
       } else {
         return;
@@ -824,13 +823,13 @@ public class OrganisationManagementActor extends BaseActor {
         if (CollectionUtils.isNotEmpty(finalLocList)) {
           locList =
               validator.getValidatedLocationIds(
-                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), finalLocList);
+                  finalLocList, null);
         }
       }
     }
     List<String> locationIdsList =
         validator.getHierarchyLocationIds(
-            getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), locList);
+            locList, null);
     List<Map<String, String>> newOrgLocationList = new ArrayList<>();
     List<Location> locationList =
         locationClient.getLocationByIds(
