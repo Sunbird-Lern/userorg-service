@@ -16,7 +16,7 @@ import org.sunbird.model.bulkupload.BulkMigrationUser;
 import org.sunbird.model.bulkupload.SelfDeclaredErrorTypeEnum;
 import org.sunbird.model.bulkupload.SelfDeclaredStatusEnum;
 import org.sunbird.model.user.UserDeclareEntity;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;

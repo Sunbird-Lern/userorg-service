@@ -638,6 +638,7 @@ public final class JsonKey {
   public static final String SUNBIRD_SSO_LB_IP = "sunbird_sso_lb_ip";
   public static final String RESET_PASSWORD = "resetPassword";
   public static final String TENANT_PREFERENCE_V2_DB = "tenant_preference_v2";
+  public static final String UPDATE_ORG_STATUS = "updateOrgStatus";
 
   private JsonKey() {}
 }

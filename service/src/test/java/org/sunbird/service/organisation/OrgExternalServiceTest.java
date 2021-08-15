@@ -21,7 +21,7 @@ import org.sunbird.common.CassandraUtil;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgExternalService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
@@ -47,11 +47,11 @@ public class OrgExternalServiceTest {
 
   private CassandraOperation cassandraOperation;
   private final String ORG_EXTERNAL_IDENTITY = "org_external_identity";
-  private OrgExternalService orgExternalService;
+  private OrgExternalServiceImpl orgExternalService;
 
   @Before
   public void setUp() {
-    orgExternalService = new OrgExternalService();
+    orgExternalService = new OrgExternalServiceImpl();
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);

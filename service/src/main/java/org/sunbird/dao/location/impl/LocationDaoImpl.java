@@ -58,7 +58,7 @@ public class LocationDaoImpl implements LocationDao {
 
   @Override
   public Response search(Map<String, Object> searchQueryMap, RequestContext context) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
     addSortBy(searchDto);
     String type = ProjectUtil.EsType.location.getTypeName();
     Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);

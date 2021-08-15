@@ -22,8 +22,8 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.organisation.Organisation;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.model.organisation.Organisation;
+import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -54,13 +54,13 @@ public class OrganisationClientImpl implements OrganisationClient {
   @Override
   public String createOrg(ActorRef actorRef, Map<String, Object> orgMap, RequestContext context) {
     logger.info(context, "createOrg called");
-    return upsertOrg(actorRef, orgMap, ActorOperations.CREATE_ORG.getValue(), context);
+    return upsertOrg(actorRef, orgMap, OrganisationActorOperation.CREATE_ORG.getValue(), context);
   }
 
   @Override
   public void updateOrg(ActorRef actorRef, Map<String, Object> orgMap, RequestContext context) {
     logger.info(context, "updateOrg called");
-    upsertOrg(actorRef, orgMap, ActorOperations.UPDATE_ORG.getValue(), context);
+    upsertOrg(actorRef, orgMap, OrganisationActorOperation.UPDATE_ORG.getValue(), context);
   }
 
   private String upsertOrg(
@@ -110,7 +110,7 @@ public class OrganisationClientImpl implements OrganisationClient {
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.ORGANISATION_ID, orgId);
     request.setRequest(requestMap);
-    request.setOperation(ActorOperations.GET_ORG_DETAILS.getValue());
+    request.setOperation(OrganisationActorOperation.GET_ORG_DETAILS.getValue());
     Object obj = null;
     try {
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));

@@ -18,6 +18,8 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -35,6 +37,7 @@ public class ChannelRegistrationActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -71,7 +74,7 @@ public class ChannelRegistrationActor extends BaseActor {
       logger.info(context, "processing start for hashTagId " + map.get(JsonKey.ID));
       if (!StringUtils.isBlank((String) map.get(JsonKey.ID))
           && (!ekstepChannelList.contains(map.get(JsonKey.ID)))
-          && (!Util.registerChannel(map, context))) {
+          && (!orgService.registerChannel(map, context))) {
         bool = false;
       }
     }

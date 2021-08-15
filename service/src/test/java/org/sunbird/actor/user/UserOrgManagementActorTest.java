@@ -114,7 +114,6 @@ public class UserOrgManagementActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      System.out.println("the error" + res.getCode());
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }

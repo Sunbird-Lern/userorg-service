@@ -15,7 +15,7 @@ import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.FeedStatus;

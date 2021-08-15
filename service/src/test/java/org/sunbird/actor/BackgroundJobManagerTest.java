@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -51,6 +52,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@Ignore
 public class BackgroundJobManagerTest {
   private ActorSystem system = ActorSystem.create("system");
   private static final Props props = Props.create(BackgroundJobManager.class);
@@ -75,10 +77,10 @@ public class BackgroundJobManagerTest {
     promise.success(true);
 
     when(esService.bulkInsert(Mockito.anyString(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(promise.future());
+            .thenReturn(promise.future());
   }
 
-  @Test
+  /*@Test
   public void testInsertOrgInfoToEs() {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -110,7 +112,7 @@ public class BackgroundJobManagerTest {
     subject.tell(reqObj, probe.getRef());
     probe.expectNoMessage();
     assertTrue(true);
-  }
+  }*/
 
   private static Response cassandraGetRecord() {
     Response response = new Response();

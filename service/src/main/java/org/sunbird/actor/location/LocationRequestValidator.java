@@ -18,6 +18,9 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.models.location.Location;
+import org.sunbird.request.RequestContext;
+import org.sunbird.service.location.LocationService;
+import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.util.ProjectUtil;
 
 /**
@@ -27,7 +30,7 @@ import org.sunbird.util.ProjectUtil;
  */
 public class LocationRequestValidator extends BaseLocationRequestValidator {
 
-  private LocationClient locationClient = new LocationClientImpl();
+  private LocationService locationService = new LocationServiceImpl();
   private static Map<String, Integer> orderMap = new HashMap<>();
 
   static {
@@ -47,14 +50,13 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * This method will validate the list of location code whether its valid or not. If valid will
    * return the locationId List.
    *
-   * @param actorRef Actor reference.
    * @param codeList List of location code.
    * @return List of location id.
    */
-  public List<String> getValidatedLocationIds(ActorRef actorRef, List<String> codeList) {
+  public List<String> getValidatedLocationIds(List<String> codeList, RequestContext context) {
     Set<String> locationIds = null;
     List<String> codes = new ArrayList<>(codeList);
-    List<Location> locationList = locationClient.getLocationsByCodes(actorRef, codeList, null);
+    List<Location> locationList = locationService.locationSearch(JsonKey.CODE, codeList, context);
     List<String> locationIdList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
@@ -64,7 +66,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
             codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
         throwInvalidParameterValueException(invalidCodeList, JsonKey.LOCATION_CODE);
       } else {
-        locationIds = getValidatedLocationSet(actorRef, locationList);
+        locationIds = getValidatedLocationSet(locationList, context);
       }
     } else {
       throwInvalidParameterValueException(codeList, JsonKey.LOCATION_CODE);
@@ -77,13 +79,12 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * This method will validate the list of location ids whether its valid or not. If valid will
    * return the hierarchy List.
    *
-   * @param actorRef Actor reference.
    * @return List of locationIds.
    */
-  public List<String> getHierarchyLocationIds(ActorRef actorRef, List<String> locationIdsList) {
+  public List<String> getHierarchyLocationIds(List<String> locationIdsList, RequestContext context) {
     Set<String> locationIds = null;
     List<String> codes = new ArrayList<>(locationIdsList);
-    List<Location> locationList = locationClient.getLocationByIds(actorRef, locationIdsList, null);
+    List<Location> locationList = locationService.locationSearch(JsonKey.ID, locationIdsList, context);
     List<String> locationIdList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
@@ -93,7 +94,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
             codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
         throwInvalidParameterValueException(invalidIdsList, JsonKey.LOCATION_IDS);
       } else {
-        locationIds = getValidatedLocationSet(actorRef, locationList);
+        locationIds = getValidatedLocationSet(locationList, context);
       }
     } else {
       throwInvalidParameterValueException(locationIdsList, JsonKey.LOCATION_IDS);
@@ -114,14 +115,13 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
   /**
    * This method will validate the location hierarchy and return the locationIds list.
    *
-   * @param actorRef Actor reference.
    * @param locationList List of location.
    * @return Set of locationId.
    */
-  public Set<String> getValidatedLocationSet(ActorRef actorRef, List<Location> locationList) {
+  public Set<String> getValidatedLocationSet(List<Location> locationList, RequestContext context) {
     Set<Location> locationSet = new HashSet<>();
     for (Location requestedLocation : locationList) {
-      Set<Location> parentLocnSet = getParentLocations(actorRef, requestedLocation);
+      Set<Location> parentLocnSet = getParentLocations(requestedLocation, context);
       if (CollectionUtils.sizeIsEmpty(locationSet)) {
         locationSet.addAll(parentLocnSet);
       } else {
@@ -150,7 +150,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     return locationSet.stream().map(Location::getId).collect(Collectors.toSet());
   }
 
-  private Set<Location> getParentLocations(ActorRef actorRef, Location locationObj) {
+  private Set<Location> getParentLocations(Location locationObj, RequestContext context) {
     Set<Location> locationSet = new LinkedHashSet<>();
     Location location = locationObj;
     int count = getOrder(location.getType());
@@ -158,9 +158,9 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     while (count > 0) {
       Location parent = null;
       if (getOrder(location.getType()) == 0 && StringUtils.isNotEmpty(location.getId())) {
-        parent = locationClient.getLocationById(actorRef, location.getId(), null);
+        parent = locationService.getLocationById(JsonKey.ID,location.getId(), context);
       } else if (StringUtils.isNotEmpty(location.getParentId())) {
-        parent = locationClient.getLocationById(actorRef, location.getParentId(), null);
+        parent = locationService.getLocationById(JsonKey.ID,location.getParentId(), context);
       }
       if (null != parent) {
         locationSet.add(parent);

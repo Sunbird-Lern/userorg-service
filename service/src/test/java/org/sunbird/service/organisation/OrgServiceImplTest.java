@@ -41,9 +41,9 @@ public class OrgServiceImplTest {
     PowerMockito.when(OrgDaoImpl.getInstance()).thenReturn(orgDao);
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ORG_ID, "anyOrgId");
-    PowerMockito.when(
+    /*PowerMockito.when(
             orgDao.getOrgByExternalId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(map);
+        .thenReturn(map);*/
     PowerMockito.when(orgDao.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(map);
     orgService = OrgServiceImpl.getInstance();
   }

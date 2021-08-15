@@ -1,4 +1,4 @@
-package org.sunbird.models.organisation;
+package org.sunbird.model.organisation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -62,7 +62,7 @@ public class LocationRequestValidatorTest {
     location.setName("Name");
     location.setType("state");
     List<Location> locList = new ArrayList<>();
-    Set<String> loc = validator.getValidatedLocationSet(null, locList);
+    Set<String> loc = validator.getValidatedLocationSet(locList,null);
     Assert.assertNotNull(loc);
   }
 }
