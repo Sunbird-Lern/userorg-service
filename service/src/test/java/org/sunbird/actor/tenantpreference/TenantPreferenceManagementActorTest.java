@@ -94,7 +94,7 @@ public class TenantPreferenceManagementActorTest {
   }
 
   @Test
-  public void testCreateSuccessWithTenantPreferenceAlreadyExists() {
+  public void testCreateWithTenantPreferenceAlreadyExists() {
 
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
@@ -110,7 +110,7 @@ public class TenantPreferenceManagementActorTest {
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
   }
 
@@ -129,7 +129,7 @@ public class TenantPreferenceManagementActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
