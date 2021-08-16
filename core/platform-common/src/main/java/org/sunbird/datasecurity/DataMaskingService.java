@@ -56,13 +56,13 @@ public interface DataMaskingService {
    * Mask an OTP
    *
    * @param otp
-   * @return Depending on the length - 6, 4, masks 1 character
+   * @return Depending on the length - 6, 4, masks character
    */
   default String maskOTP(String otp) {
     if (otp.length() >= 6) {
-      return otp.replaceAll("(^[^*]{5}|(?!^)\\G)[^*]", "$1*");
+      return otp.replaceAll("(^[^*]{4}|(?!^)\\G)[^*]", "$1*");
     } else {
-      return otp.replaceAll("(^[^*]{3}|(?!^)\\G)[^*]", "$1*");
+      return otp.replaceAll("(^[^*]{2}|(?!^)\\G)[^*]", "$1*");
     }
   }
 }
