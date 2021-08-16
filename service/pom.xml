@@ -73,18 +73,6 @@
             <version>4.1</version>
         </dependency>
 
-        <!-- adding dependency for quartz scheduler job -->
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.2.1</version>
-        </dependency>
-        <!-- this postgres driver is used for making connection to postgres by quartz scheduler-->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.1.4</version>
-        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
