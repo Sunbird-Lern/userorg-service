@@ -43,7 +43,7 @@ public class ResetPasswordActor extends BaseActor {
 
   private void resetPassword(Request request) throws Exception {
     String userId = (String) request.get(JsonKey.USER_ID);
-    logger.info(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
+    logger.debug(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
     User user = userService.getUserById(userId, request.getRequestContext());
     boolean isDisabled =
       KeycloakBruteForceAttackUtil.isUserAccountDisabled(
