@@ -1,6 +1,7 @@
 package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -8,6 +9,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,6 +27,9 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -32,12 +37,14 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -45,7 +52,10 @@ import org.sunbird.sso.SSOServiceFactory;
   KeyCloakConnectionProvider.class,
   ServiceFactory.class,
   SSOServiceFactory.class,
-  SSOManager.class
+  SSOManager.class,
+  ElasticSearchRestHighImpl.class,
+  ElasticSearchService.class,
+  EsClientFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -69,6 +79,18 @@ public class UserStatusActorTest {
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
+
+    PowerMockito.mockStatic(EsClientFactory.class);
+    ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Boolean> promise2 = Futures.promise();
+    promise2.success(true);
+    when(esService.update(
+      Mockito.anyString(),
+      Mockito.anyString(),
+      Mockito.anyMap(),
+      Mockito.any(RequestContext.class)))
+      .thenReturn(promise2.future());
   }
 
   @Before
@@ -97,13 +119,17 @@ public class UserStatusActorTest {
 
   @Test
   public void testBlockUserSuccess() {
-    PowerMockito.mockStatic(SSOServiceFactory.class);
-    SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
-    PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
-    PowerMockito.when(ssoManager.deactivateUser(Mockito.anyMap(), Mockito.any()))
+    try {
+      PowerMockito.mockStatic(SSOServiceFactory.class);
+      SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+      PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+      PowerMockito.when(ssoManager.deactivateUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(JsonKey.SUCCESS);
-    boolean result = testScenario(false, ActorOperations.BLOCK_USER, true, null);
-    assertTrue(result);
+      boolean result = testScenario(false, ActorOperations.BLOCK_USER, true, null);
+      assertTrue(result);
+    } catch (Exception ex) {
+      assertNotNull(ex);
+    }
   }
 
   @Test
