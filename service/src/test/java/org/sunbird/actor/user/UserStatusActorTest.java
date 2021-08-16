@@ -115,6 +115,8 @@ public class UserStatusActorTest {
     when(usersResource.get(Mockito.any())).thenReturn(userResource);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
+
+    when(userService.updateUserDataToES(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn(true);
   }
 
   @Test
