@@ -1,6 +1,5 @@
 package org.sunbird.actor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,14 +10,11 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
@@ -39,7 +35,6 @@ import scala.concurrent.Future;
   }
 )
 public class BackgroundJobManager extends BaseActor {
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override

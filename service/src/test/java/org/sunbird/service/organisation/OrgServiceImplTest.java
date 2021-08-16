@@ -123,7 +123,7 @@ public class OrgServiceImplTest {
     orgMap.put(JsonKey.ORG_NAME,"orgName");
     OrgService orgService = OrgServiceImpl.getInstance();
     Response res = orgService.updateOrganisation(orgMap, new RequestContext());
-    Assert.assertTrue(res.get(JsonKey.RESPONSE).equals(JsonKey.SUCCESS));
+    Assert.assertEquals(res.get(JsonKey.RESPONSE),JsonKey.SUCCESS);
   }
 
   private Response getRecordsByProperty(boolean empty) {

@@ -230,7 +230,6 @@ public class OrganisationManagementActor extends BaseActor {
         request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
       }
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
-      OrgService orgService = OrgServiceImpl.getInstance();
       Map<String, Object> dbOrgDetails =
           orgService.getOrgById(orgId, actorMessage.getRequestContext());
       if (MapUtils.isEmpty(dbOrgDetails)) {

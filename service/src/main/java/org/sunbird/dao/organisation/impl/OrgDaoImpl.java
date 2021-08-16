@@ -21,9 +21,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class OrgDaoImpl implements OrgDao {
@@ -56,7 +54,6 @@ public class OrgDaoImpl implements OrgDao {
         List orgLocationList = new ArrayList<>();
         if (StringUtils.isNotBlank(orgLocation)) {
           try {
-            ObjectMapper mapper = new ObjectMapper();
             orgLocationList = mapper.readValue(orgLocation, List.class);
           } catch (Exception e) {
             logger.info(

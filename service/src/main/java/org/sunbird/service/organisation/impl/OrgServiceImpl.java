@@ -5,20 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgExternalService;
@@ -32,7 +27,8 @@ public class OrgServiceImpl implements OrgService {
   private ObjectMapper mapper = new ObjectMapper();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgService orgService;
-  private OrgExternalService orgExternalService = new OrgExternalServiceImpl();
+  private OrgExternalService orgExternalService = new OrgExternalServiceImpl();;
+  private String contentType = "application/json";
 
   public static OrgService getInstance() {
     if (orgService == null) {
@@ -138,7 +134,7 @@ public class OrgServiceImpl implements OrgService {
       header = JsonKey.BEARER + header;
     }
     headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
+    headerMap.put("Content-Type", contentType);
     headerMap.put("user-id", "");
     ProjectUtil.setTraceIdInHeader(headerMap, context);
     String reqString = "";
@@ -188,8 +184,8 @@ public class OrgServiceImpl implements OrgService {
   /** @param req Map<String,Object> */
   public boolean updateChannel(Map<String, Object> req, RequestContext context) {
     Map<String, String> headers = new HashMap<>();
-    headers.put("content-type", "application/json");
-    headers.put("accept", "application/json");
+    headers.put("content-type", contentType);
+    headers.put("accept", contentType);
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
     if (StringUtils.isBlank(header)) {
@@ -198,7 +194,7 @@ public class OrgServiceImpl implements OrgService {
       header = JsonKey.BEARER + header;
     }
     headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
+    headerMap.put("Content-Type", contentType);
     headerMap.put("user-id", "");
     ProjectUtil.setTraceIdInHeader(headers, context);
     String reqString = "";
