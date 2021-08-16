@@ -12,19 +12,20 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.Role;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.urlaction.UrlActionService;
 import org.sunbird.util.DataCacheHandler;
 
 public class RoleService {
 
-  private static RoleDao roleDao = RoleDaoImpl.getInstance();
+  private RoleDao roleDao = RoleDaoImpl.getInstance();
+  private RoleGroupService roleGroupService = new RoleGroupService();
 
-  @SuppressWarnings("unchecked")
-  public static Response getUserRoles() {
+  public Response getUserRoles(RequestContext context) {
     Response response = new Response();
     List<Map<String, Object>> roleMapList = new ArrayList<>();
-    List<Role> roleList = roleDao.getRoles();
+    List<Role> roleList = roleDao.getRoles(context);
 
     if (CollectionUtils.isNotEmpty(roleList)) {
 
@@ -37,9 +38,9 @@ public class RoleService {
         List<Map<String, Object>> actionGroupMapList = new ArrayList<>();
         roleMap.put(JsonKey.ACTION_GROUPS, actionGroupMapList);
 
-        Map<String, Object> actionGroupMap = null;
+        Map<String, Object> actionGroupMap;
         for (String roleGroupId : roleGroupIdList) {
-          Map<String, Object> roleGroupMap = RoleGroupService.getRoleGroupMap(roleGroupId);
+          Map<String, Object> roleGroupMap = roleGroupService.getRoleGroupMap(roleGroupId,context);
 
           actionGroupMap = new HashMap<>();
           actionGroupMap.put(JsonKey.ID, roleGroupMap.get(JsonKey.ID));

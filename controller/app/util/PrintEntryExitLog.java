@@ -7,10 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.datasecurity.DataMaskingService;
+import org.sunbird.datasecurity.impl.DefaultDataMaskServiceImpl;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -21,6 +26,7 @@ import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
 import org.sunbird.util.EntryExitLogEvent;
+import org.sunbird.util.ProjectUtil;
 
 public class PrintEntryExitLog {
 
@@ -35,26 +41,14 @@ public class PrintEntryExitLog {
       Map<String, Object> reqMap = request.getRequest();
       Map<String, Object> newReqMap = SerializationUtils.clone(new HashMap<>(reqMap));
       String url = (String) request.getContext().get(JsonKey.URL);
-      if (url.contains("search")) {
-        Map<String, Object> filters = (Map<String, Object>) newReqMap.get(JsonKey.FILTERS);
-        if (MapUtils.isNotEmpty(filters)) {
-          maskAttributes(filters);
-        }
-      }
       if (url.contains("otp")) {
         if (MapUtils.isNotEmpty(newReqMap)) {
           maskOtpAttributes(newReqMap);
         }
       }
-      if (url.contains("lookup")) {
-        if (MapUtils.isNotEmpty(newReqMap)) {
-          maskId((String) newReqMap.get(JsonKey.VALUE), (String) newReqMap.get(JsonKey.KEY));
-        }
-      }
-      maskAttributes(newReqMap);
       params.add(newReqMap);
       entryLogEvent.setEdataParams(params);
-      logger.info(request.getRequestContext(), entryLogEvent.toString());
+      logger.info(request.getRequestContext(), maskPIIData(entryLogEvent.toString()));
     } catch (Exception ex) {
       logger.error("Exception occurred while logging entry log", ex);
     }
@@ -82,7 +76,6 @@ public class PrintEntryExitLog {
             Map<String, Object> resMap = response.getResult();
             Map<String, Object> newRespMap = new HashMap<>();
             newRespMap.putAll(resMap);
-            maskAttributes(newRespMap);
             params.add(newRespMap);
           }
         }
@@ -95,7 +88,7 @@ public class PrintEntryExitLog {
         }
       }
       exitLogEvent.setEdataParams(params);
-      logger.info(request.getRequestContext(), exitLogEvent.toString());
+      logger.info(request.getRequestContext(), maskPIIData(exitLogEvent.toString()));
     } catch (Exception ex) {
       logger.error("Exception occurred while logging exit log", ex);
     }
@@ -153,7 +146,7 @@ public class PrintEntryExitLog {
             + " LOG: method : "
             + request.getContext().get(JsonKey.METHOD)
             + ", url: "
-            + url
+            + maskPIIData(url)
             + " , For Operation : "
             + request.getOperation();
     String requestId =
@@ -162,50 +155,42 @@ public class PrintEntryExitLog {
     return entryLogEvent;
   }
 
-  private static String maskId(String value, String type) {
-    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
-      return logMaskService.maskEmail(value);
-    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
-      return logMaskService.maskPhone(value);
-    } else if (JsonKey.OTP.equalsIgnoreCase(type)) {
-      return logMaskService.maskOTP(value);
+  private static String maskPIIData(String logString) {
+    try {
+      DataMaskingService service = new DefaultDataMaskServiceImpl();
+      StringBuilder builder = new StringBuilder(logString);
+      //Mask Email
+      StringBuilder emailRegex = new StringBuilder(ProjectUtil.EMAIL_PATTERN);
+      emailRegex.deleteCharAt(emailRegex.length() - 1);
+      emailRegex.deleteCharAt(0);
+      String EMAIL_PATTERN = emailRegex.toString();
+      Pattern emailPattern = Pattern.compile(EMAIL_PATTERN);
+      Matcher emailMatcher = emailPattern.matcher(logString);
+      while (emailMatcher.find()) {
+        String tempStr = emailMatcher.group();
+        builder.replace(emailMatcher.start(), emailMatcher.end(), service.maskEmail(tempStr));
+      }
+      //Mask Phone
+      String PHONE_PATTERN = "[0-9]{10}";
+      Pattern phonePattern = Pattern.compile(PHONE_PATTERN);
+      Matcher phoneMatcher = phonePattern.matcher(logString);
+      while (phoneMatcher.find()) {
+        String tempStr = phoneMatcher.group();
+        if (ProjectUtil.validatePhone(tempStr, "")) {
+          builder.replace(phoneMatcher.start(), phoneMatcher.end(), service.maskPhone(tempStr));
+        }
+      }
+      return builder.toString();
+    } catch (Exception ex) {
+      logger.error("Exception occurred while masking PII data", ex);
     }
-    return "";
-  }
-
-  private static void maskAttributes(Map<String, Object> filters) {
-    String phone = (String) filters.get(JsonKey.PHONE);
-    if (StringUtils.isNotBlank(phone)) {
-      filters.put(JsonKey.PHONE, maskId(phone, JsonKey.PHONE));
-    }
-    String email = (String) filters.get(JsonKey.EMAIL);
-    if (StringUtils.isNotBlank(email)) {
-      filters.put(JsonKey.EMAIL, maskId(email, JsonKey.EMAIL));
-    }
-    String otp = (String) filters.get(JsonKey.OTP);
-    if (StringUtils.isNotBlank(otp)) {
-      filters.put(JsonKey.OTP, maskId(otp, JsonKey.OTP));
-    }
-    String password = (String) filters.get(JsonKey.PASSWORD);
-    if (StringUtils.isNotBlank(password)) {
-      filters.put(JsonKey.PASSWORD, "**********");
-    }
+    return logString;
   }
 
   private static void maskOtpAttributes(Map<String, Object> otpReqMap) {
-    String type = (String) otpReqMap.get(JsonKey.TYPE);
-    String key = (String) otpReqMap.get(JsonKey.KEY);
     String otp = (String) otpReqMap.get(JsonKey.OTP);
-    if (StringUtils.isNotBlank(type)) {
-      if (type.equalsIgnoreCase(JsonKey.PHONE)) {
-        otpReqMap.put(JsonKey.TYPE, maskId(key, JsonKey.PHONE));
-      }
-      if (type.equalsIgnoreCase(JsonKey.EMAIL)) {
-        otpReqMap.put(JsonKey.TYPE, maskId(key, JsonKey.EMAIL));
-      }
-    }
     if (StringUtils.isNotBlank(otp)) {
-      otpReqMap.put(JsonKey.OTP, maskId(otp, JsonKey.OTP));
+      otpReqMap.put(JsonKey.OTP, logMaskService.maskOTP(otp));
     }
   }
 }

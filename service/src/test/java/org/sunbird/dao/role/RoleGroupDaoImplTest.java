@@ -44,9 +44,9 @@ public class RoleGroupDaoImplTest {
   private RoleGroupDao roleGroupDao;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     response = new Response();
-    roleGroupDao = new RoleGroupDaoImpl();
+    roleGroupDao = RoleGroupDaoImpl.getInstance();
     List<Map<String, Object>> roleList = new ArrayList<>();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.NAME, "Flag Reviewer");
@@ -62,7 +62,7 @@ public class RoleGroupDaoImplTest {
       when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
       when(cassandraOperation.getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, null))
           .thenReturn(response);
-      List<RoleGroup> roleGroups = roleGroupDao.getRoleGroups();
+      List<RoleGroup> roleGroups = roleGroupDao.getRoleGroups(null);
       Assert.assertEquals("Flag Reviewer", roleGroups.get(0).getName());
 
     } catch (Exception e) {

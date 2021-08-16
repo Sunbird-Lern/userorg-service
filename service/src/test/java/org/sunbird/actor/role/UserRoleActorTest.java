@@ -1,4 +1,4 @@
-package org.sunbird.actor.user;
+package org.sunbird.actor.role;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
