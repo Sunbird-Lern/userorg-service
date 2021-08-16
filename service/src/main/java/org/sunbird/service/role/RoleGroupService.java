@@ -9,14 +9,15 @@ import org.sunbird.dao.role.RoleGroupDao;
 import org.sunbird.dao.role.impl.RoleGroupDaoImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.RoleGroup;
+import org.sunbird.request.RequestContext;
 
 public class RoleGroupService {
 
   private static RoleGroupDao roleGroupDao = RoleGroupDaoImpl.getInstance();
 
-  public static Map<String, Object> getRoleGroupMap(String roleName) {
+  public Map<String, Object> getRoleGroupMap(String roleName, RequestContext context) {
     Map<String, Object> response = new HashMap<>();
-    List<RoleGroup> roleGroupList = roleGroupDao.getRoleGroups();
+    List<RoleGroup> roleGroupList = roleGroupDao.getRoleGroups(context);
 
     if (CollectionUtils.isNotEmpty(roleGroupList)) {
       for (RoleGroup roleGroup : roleGroupList) {

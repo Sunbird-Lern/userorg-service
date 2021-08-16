@@ -167,7 +167,7 @@ public class DataCacheHandler implements Runnable {
   }
 
   private void cacheRoleForRead() {
-    roleCacheResponse = RoleService.getUserRoles();
+    roleCacheResponse = new RoleService().getUserRoles(null);
   }
 
   public static Response getRoleResponse() {
