@@ -1,6 +1,7 @@
 package org.sunbird.dao.role;
 
 import org.sunbird.model.role.RoleGroup;
+import org.sunbird.request.RequestContext;
 
 import java.util.List;
 
@@ -11,5 +12,5 @@ public interface RoleGroupDao {
      *
      * @return List of role groups.
      */
-    List<RoleGroup> getRoleGroups();
+    List<RoleGroup> getRoleGroups(RequestContext context);
 }

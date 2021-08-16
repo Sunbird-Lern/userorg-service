@@ -33,8 +33,6 @@ import scala.concurrent.Future;
   asyncTasks = {
     "mergeUserToElastic",
     "updateUserInfoToElastic",
-    "updateUserRoles",
-    "updateOrgInfoToElastic",
     "updateUserOrgES",
     "insertUserNotesToElastic",
     "updateUserNotesToElastic",
@@ -51,8 +49,6 @@ public class BackgroundJobManager extends BaseActor {
       updateUserInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ROLES_ES.getValue())) {
-      updateUserRoleToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
       insertUserNotesToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_NOTES_ES.getValue())) {
@@ -62,24 +58,6 @@ public class BackgroundJobManager extends BaseActor {
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void updateUserRoleToEs(Request actorMessage) {
-    List<Map<String, Object>> roles =
-        (List<Map<String, Object>>) actorMessage.getRequest().get(JsonKey.ROLES);
-    String type = (String) actorMessage.get(JsonKey.TYPE);
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.USER_ID, actorMessage.get(JsonKey.USER_ID));
-    if (type.equals(JsonKey.USER)) {
-      result.put(JsonKey.ROLES, roles);
-    }
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.user.getTypeName(),
-        (String) result.get(JsonKey.USER_ID),
-        result,
-        actorMessage.getRequestContext());
   }
 
   @SuppressWarnings("unchecked")

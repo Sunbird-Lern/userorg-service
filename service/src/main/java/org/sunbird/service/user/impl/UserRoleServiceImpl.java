@@ -2,13 +2,6 @@ package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,21 +14,29 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.util.ProjectUtil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 public class UserRoleServiceImpl implements UserRoleService {
-  private static UserRoleService roleService = null;
+  private static UserRoleService userRoleService = null;
   private ObjectMapper mapper = new ObjectMapper();
-  UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+  private UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
 
   public static UserRoleService getInstance() {
-    if (roleService == null) {
-      roleService = new UserRoleServiceImpl();
+    if (userRoleService == null) {
+      userRoleService = new UserRoleServiceImpl();
     }
-    return roleService;
+    return userRoleService;
   }
   // Handles roleList in List<String> format
   public List<Map<String, Object>> updateUserRole(Map userRequest, RequestContext context) {
     List<Map<String, Object>> userRoleListResponse = new ArrayList<>();
-    List<String> userRolesToInsert = new ArrayList<>();
+    List<String> userRolesToInsert;
     List<Map> scopeList = new LinkedList();
     String scopeListString = createRoleScope(scopeList, userRequest);
     userRequest.put(JsonKey.SCOPE_STR, scopeListString);
@@ -99,7 +100,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       RequestContext context) {
     String userId = (String) userRequest.get(JsonKey.USER_ID);
     List<String> roles = (List<String>) userRequest.get(JsonKey.ROLES);
-    List<String> userRolesToInsert = new ArrayList<>();
+    List<String> userRolesToInsert;
     // Fetch roles in DB for the user
     List<Map<String, Object>> dbUserRoleList = userRoleDao.getUserRoles(userId, "", context);
     if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
@@ -150,7 +151,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
   private String convertScopeListToString(List scopeList) {
-    String scopeListString = null;
+    String scopeListString;
     try {
       scopeListString = mapper.writeValueAsString(scopeList);
     } catch (JsonProcessingException e) {
@@ -163,7 +164,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
   private List convertScopeStrToList(String scopeStr) {
-    List<Map<String, Object>> scopeList = new ArrayList<>();
+    List<Map<String, Object>> scopeList;
     try {
       scopeList = mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
     } catch (JsonProcessingException ex) {
@@ -261,5 +262,10 @@ public class UserRoleServiceImpl implements UserRoleService {
           });
     }
     return roleListResponse;
+  }
+
+  @Override
+  public boolean updateUserRoleToES(String identifier, Map<String, Object> data, RequestContext context) {
+    return userRoleDao.updateUserRoleToES(identifier, data, context);
   }
 }

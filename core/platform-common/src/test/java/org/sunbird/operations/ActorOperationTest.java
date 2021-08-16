@@ -35,7 +35,6 @@ public class ActorOperationTest {
     Assert.assertEquals("updateUserOrgES", ActorOperations.UPDATE_USER_ORG_ES.getValue());
     Assert.assertEquals("updateUserRoles", ActorOperations.UPDATE_USER_ROLES_ES.getValue());
     Assert.assertEquals("sync", ActorOperations.SYNC.getValue());
-    Assert.assertEquals("scheduleBulkUpload", ActorOperations.SCHEDULE_BULK_UPLOAD.getValue());
     Assert.assertEquals("fileStorageService", ActorOperations.FILE_STORAGE_SERVICE.getValue());
     Assert.assertEquals("healthCheck", ActorOperations.HEALTH_CHECK.getValue());
     Assert.assertEquals("sendMail", ActorOperations.SEND_MAIL.getValue());
