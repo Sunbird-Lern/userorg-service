@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.model.ClaimStatus;
-import org.sunbird.model.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -24,16 +22,18 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.ClaimStatus;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
@@ -45,7 +45,6 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
-import org.sunbird.util.UserFlagEnum;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.MigrationUtils;
 import org.sunbird.util.user.UserActorOperations;
@@ -168,7 +167,7 @@ public class TenantMigrationActor extends BaseActor {
         UserServiceImpl.getInstance()
             .esGetPublicUserProfileById(
                 (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
-    validateUserCustodianOrgId(
+    /*validateUserCustodianOrgId(
         (String) userDetails.get(JsonKey.ROOT_ORG_ID), request.getRequestContext());
     validateChannelAndGetRootOrgId(request);
     Map<String, String> rollup = new HashMap<>();
@@ -203,7 +202,7 @@ public class TenantMigrationActor extends BaseActor {
       deactivateUserFromKC((String) userUpdateRequest.get(JsonKey.ID), request.getRequestContext());
     }
     logger.info(
-        request.getRequestContext(), "TenantMigrationActor:migrateUser user record got updated.");
+        request.getRequestContext(), "TenantMigrationActor:migrateUser user record got updated.");*/
     // Update user org details
     Response userOrgResponse =
         updateUserOrg(request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
@@ -450,7 +449,7 @@ public class TenantMigrationActor extends BaseActor {
     return response;
   }
 
-  private Response updateUserOrg(Request request, List<Map<String, Object>> userOrgList) {
+  /*private Response updateUserOrg(Request request, List<Map<String, Object>> userOrgList) {
     logger.info(request.getRequestContext(), "TenantMigrationActor:updateUserOrg called.");
     Response response = new Response();
     deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
@@ -482,7 +481,7 @@ public class TenantMigrationActor extends BaseActor {
       }
     }
     return response;
-  }
+  }*/
 
   private void createUserOrgRequestAndUpdate(String userId, String orgId, RequestContext context) {
     Map<String, Object> userOrgRequest = new HashMap<>();

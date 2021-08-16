@@ -10,38 +10,32 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
-import org.sunbird.datasecurity.OneWayHashing;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserMergeServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserMergeServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.telemetry.dto.Actor;
-import org.sunbird.telemetry.dto.Context;
-import org.sunbird.telemetry.dto.Target;
-import org.sunbird.telemetry.dto.Telemetry;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ConfigUtil;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.KafkaConfigConstants;
 import org.sunbird.util.user.UserUtil;
 
@@ -72,20 +66,20 @@ public class UserMergeActor extends UserBaseActor {
    * @param userRequest
    * @throws IOException
    */
-  private void updateUserMergeDetails(Request userRequest) throws IOException {
+  private void updateUserMergeDetails(Request userRequest) {
     logger.info(
         userRequest.getRequestContext(), "UserMergeActor:updateUserMergeDetails: starts : ");
     Response response = new Response();
     Map mergeeDBMap = new HashMap<String, Object>();
     HashMap requestMap = (HashMap) userRequest.getRequest();
     RequestContext context = userRequest.getRequestContext();
-    Map userCertMap = (Map) requestMap.clone();
+    Map telemetryMap = (HashMap) requestMap.clone();
     Map headers = (Map) userRequest.getContext().get(JsonKey.HEADER);
     String mergeeId = (String) requestMap.get(JsonKey.FROM_ACCOUNT_ID);
     String mergerId = (String) requestMap.get(JsonKey.TO_ACCOUNT_ID);
     // validating tokens
     checkTokenDetails(headers, mergeeId, mergerId, userRequest.getRequestContext());
-    Map telemetryMap = (HashMap) requestMap.clone();
+
     User mergee = userService.getUserById(mergeeId, userRequest.getRequestContext());
     User merger = userService.getUserById(mergerId, userRequest.getRequestContext());
     String custodianId = getCustodianValue(userRequest.getRequestContext());
@@ -118,9 +112,6 @@ public class UserMergeActor extends UserBaseActor {
       result.put(JsonKey.STATUS, JsonKey.SUCCESS);
       response.put(JsonKey.RESULT, result);
       sender().tell(response, self());
-
-      // update user-course-cert details
-      mergeCertCourseDetails(mergee, merger, userRequest.getRequestContext());
 
       // update mergee details in ES
       mergeUserDetailsToEs(userRequest);
@@ -185,56 +176,6 @@ public class UserMergeActor extends UserBaseActor {
           e);
     }
     return custodianId;
-  }
-
-  /**
-   * This method creates Kafka topic for user-cert
-   *
-   * @param mergee
-   * @param merger
-   * @throws IOException
-   */
-  private void mergeCertCourseDetails(User mergee, User merger, RequestContext context)
-      throws IOException {
-    String content = null;
-    Telemetry userCertMergeRequest = createAccountMergeTopicData(mergee, merger);
-
-    content = objectMapper.writeValueAsString(userCertMergeRequest);
-    logger.info(context, "UserMergeActor:mergeCertCourseDetails: Kafka producer topic::" + content);
-    ProducerRecord<String, String> record = new ProducerRecord<>(topic, content);
-    if (producer != null) {
-      producer.send(record);
-    } else {
-      logger.info(
-          context, "UserMergeActor:mergeCertCourseDetails: Kafka producer is not initialised.");
-    }
-  }
-
-  private Telemetry createAccountMergeTopicData(User mergee, User merger) {
-    Map<String, Object> edata = new HashMap<>();
-    Telemetry mergeUserEvent = new Telemetry();
-    Actor actor = new Actor();
-    actor.setId(JsonKey.TELEMETRY_ACTOR_USER_MERGE_ID);
-    actor.setType(JsonKey.SYSTEM);
-    mergeUserEvent.setActor(actor);
-    mergeUserEvent.setEid(JsonKey.BE_JOB_REQUEST);
-    edata.put(JsonKey.ACTION, JsonKey.TELEMETRY_EDATA_USER_MERGE_ACTION);
-    edata.put(JsonKey.FROM_ACCOUNT_ID, mergee.getId());
-    edata.put(JsonKey.TO_ACCOUNT_ID, merger.getId());
-    edata.put(JsonKey.ROOT_ORG_ID, merger.getRootOrgId());
-    edata.put(JsonKey.ITERATION, 1);
-    mergeUserEvent.setEdata(edata);
-    Context context = new Context();
-    org.sunbird.telemetry.dto.Producer dataProducer = new org.sunbird.telemetry.dto.Producer();
-    dataProducer.setVer("1.0");
-    dataProducer.setId(JsonKey.TELEMETRY_PRODUCER_USER_MERGE_ID);
-    context.setPdata(dataProducer);
-    mergeUserEvent.setContext(context);
-    Target target = new Target();
-    target.setId(OneWayHashing.encryptVal(mergee.getId() + "_" + merger.getId()));
-    target.setType(JsonKey.TELEMETRY_TARGET_USER_MERGE_TYPE);
-    mergeUserEvent.setObject(target);
-    return mergeUserEvent;
   }
 
   private void mergeUserDetailsToEs(Request userRequest) {
