@@ -29,8 +29,8 @@ public class OrganisationRequestValidator {
 
     public LoggerUtil logger = new LoggerUtil(this.getClass());
     private OrgService orgService = OrgServiceImpl.getInstance();
-    private static final LocationRequestValidator validator = new LocationRequestValidator();
     private LocationService locationService = new LocationServiceImpl();
+    private LocationRequestValidator validator = new LocationRequestValidator();
 
     public void validateExternalId(Map<String, Object> request, RequestContext context){
         String channel = (String) request.get(JsonKey.CHANNEL);
@@ -150,9 +150,10 @@ public class OrganisationRequestValidator {
                 (List<Map<String, String>>) request.get(JsonKey.ORG_LOCATION);
         if (CollectionUtils.isEmpty(orgLocationList)) {
             // Request is from org upload
-            if (CollectionUtils.isNotEmpty((List<String>) request.get(JsonKey.LOCATION_CODE))) {
+            List<String> locCodeList = (List<String>) request.get(JsonKey.LOCATION_CODE);
+            if (CollectionUtils.isNotEmpty(locCodeList)) {
                 locList =
-                        validator.getValidatedLocationIds((List<String>) request.get(JsonKey.LOCATION_CODE), context);
+                        validator.getValidatedLocationIds(locCodeList, context);
                 request.remove(JsonKey.LOCATION_CODE);
             } else {
                 return;

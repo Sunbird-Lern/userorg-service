@@ -30,21 +30,8 @@ import org.sunbird.util.ProjectUtil;
  */
 public class LocationRequestValidator extends BaseLocationRequestValidator {
 
+  Map<String, Integer> orderMap = new HashMap<>();
   private LocationService locationService = new LocationServiceImpl();
-  private static Map<String, Integer> orderMap = new HashMap<>();
-
-  static {
-    List<String> subTypeList =
-        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
-    for (String str : subTypeList) {
-      List<String> typeList =
-          (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
-              .collect(Collectors.toList()));
-      for (int i = 0; i < typeList.size(); i++) {
-        orderMap.put(typeList.get(i), i);
-      }
-    }
-  }
 
   /**
    * This method will validate the list of location code whether its valid or not. If valid will
@@ -172,6 +159,22 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
   }
 
   public int getOrder(String type) {
+    orderMap = locationTypeOrderInit();
     return orderMap.get(type);
+  }
+
+  public Map<String, Integer> locationTypeOrderInit(){
+    Map<String, Integer> orderMapTemp  = new HashMap<>();
+    List<String> subTypeList =
+            Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+    for (String str : subTypeList) {
+      List<String> typeList =
+              (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
+                      .collect(Collectors.toList()));
+      for (int i = 0; i < typeList.size(); i++) {
+        orderMapTemp.put(typeList.get(i), i);
+      }
+    }
+    return orderMapTemp;
   }
 }

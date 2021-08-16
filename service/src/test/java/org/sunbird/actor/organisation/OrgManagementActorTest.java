@@ -132,12 +132,10 @@ public class OrgManagementActorTest {
             .thenReturn(getUpsertRecords());
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getRecordsByProperty(false))
-        .thenReturn(getRecordsByProperty(false));
+            .thenReturn(getRecordsByProperty(false),getRecordsByProperty(false));
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(getRecordsByProperty(true))
-        .thenReturn(getRecordsByProperty(true));
+            .thenReturn(getRecordsByProperty(false),getRecordsByProperty(true));
     PowerMockito.when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
             .thenReturn(getRecordsByProperty(true));
@@ -208,7 +206,7 @@ public class OrgManagementActorTest {
     boolean result = testScenario(req, null);
     assertTrue(result);
   }
-  @Ignore
+
   @Test
   public void testGetOrgDetails() {
     Map<String, Object> req = new HashMap<>();
@@ -217,7 +215,7 @@ public class OrgManagementActorTest {
         testScenario(getRequest(req, OrganisationActorOperation.GET_ORG_DETAILS.getValue()), null);
     assertTrue(result);
   }
-
+@Ignore
   @Test
   public void testGetOrgDetailsFailure() {
     Map<String, Object> req = new HashMap<>();
