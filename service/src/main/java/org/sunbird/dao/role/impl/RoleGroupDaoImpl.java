@@ -9,6 +9,7 @@ import org.sunbird.dao.role.RoleGroupDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.RoleGroup;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 public class RoleGroupDaoImpl implements RoleGroupDao {
@@ -27,9 +28,9 @@ public class RoleGroupDaoImpl implements RoleGroupDao {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<RoleGroup> getRoleGroups() {
+    public List<RoleGroup> getRoleGroups(RequestContext context) {
         Response roleGroupResults =
-                getCassandraOperation().getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
+                getCassandraOperation().getAllRecords(KEYSPACE_NAME, TABLE_NAME, context);
         TypeReference<List<RoleGroup>> roleGroupType = new TypeReference<List<RoleGroup>>() {};
         List<Map<String, Object>> roleGroupMapList =
                 (List<Map<String, Object>>) roleGroupResults.get(JsonKey.RESPONSE);
