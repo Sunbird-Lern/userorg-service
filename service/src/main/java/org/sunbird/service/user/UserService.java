@@ -12,6 +12,8 @@ public interface UserService {
 
   Response createUser(Map<String, Object> user, RequestContext context);
 
+  Response updateUser(Map<String, Object> user, RequestContext context);
+
   User getUserById(String userId, RequestContext context);
 
   void validateUserId(Request request, String managedById, RequestContext context);
@@ -53,4 +55,6 @@ public interface UserService {
   List<Map<String, Object>> getDecryptedEmailPhoneByUserIds(List<String> userIds, String type, RequestContext context);
 
   List<Map<String, Object>> getUserEmailsBySearchQuery(Map<String, Object> searchQuery, RequestContext context);
+
+  boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
 }
