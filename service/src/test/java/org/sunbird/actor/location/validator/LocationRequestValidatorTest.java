@@ -358,4 +358,6 @@ public class LocationRequestValidatorTest {
           ResponseCode.invalidLocationDeleteRequest.getErrorMessage(), ex.getMessage());
     }
   }
+
+
 }
