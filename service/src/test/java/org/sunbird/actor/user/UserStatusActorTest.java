@@ -1,11 +1,5 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -39,23 +33,33 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import scala.concurrent.Promise;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-  UserServiceImpl.class,
   KeyCloakConnectionProvider.class,
   ServiceFactory.class,
   SSOServiceFactory.class,
   SSOManager.class,
   ElasticSearchRestHighImpl.class,
   ElasticSearchService.class,
-  EsClientFactory.class
+  EsClientFactory.class,
+  ServiceFactory.class,
+  CassandraOperationImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -69,7 +73,6 @@ public class UserStatusActorTest {
   private static final Props props = Props.create(UserStatusActor.class);
   private static final ActorSystem system = ActorSystem.create("system");
   private static final User user = mock(User.class);
-  private static UserService userService = null;
   private static CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
 
   @BeforeClass
@@ -100,11 +103,6 @@ public class UserStatusActorTest {
     UserRepresentation userRepresentation = mock(UserRepresentation.class);
     RealmResource realmResource = mock(RealmResource.class);
     Keycloak keycloak = mock(Keycloak.class);
-
-    PowerMockito.mockStatic(UserServiceImpl.class);
-    userService = mock(UserService.class);
-    when(UserServiceImpl.getInstance()).thenReturn(userService);
-
     PowerMockito.mockStatic(KeyCloakConnectionProvider.class);
     when(KeyCloakConnectionProvider.getConnection()).thenReturn(keycloak);
     when(keycloak.realm(Mockito.anyString())).thenReturn(realmResource);
@@ -115,13 +113,23 @@ public class UserStatusActorTest {
     UserResource userResource = mock(UserResource.class);
     when(usersResource.get(Mockito.any())).thenReturn(userResource);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
-    when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
   }
 
   @Test
   public void testBlockUserSuccess() {
     try {
-      when(userService.updateUserDataToES(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn(true);
+      Response response2 = new Response();
+      Map<String, Object> user = new HashMap<>();
+      user.put(JsonKey.ID, "46545665465465");
+      user.put(JsonKey.IS_DELETED, false);
+      user.put(JsonKey.FIRST_NAME, "firstName");
+      List<Map<String, Object>> userList = new ArrayList<>();
+      userList.add(user);
+      response2.getResult().put(JsonKey.RESPONSE, userList);
+      when(cassandraOperation.getRecordById(
+        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response2);
+
       PowerMockito.mockStatic(SSOServiceFactory.class);
       SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
       PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
@@ -136,6 +144,17 @@ public class UserStatusActorTest {
 
   @Test
   public void testBlockUserFailureWithUserAlreadyInactive() {
+    Response response2 = new Response();
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.ID, "46545665465465");
+    user.put(JsonKey.IS_DELETED, true);
+    user.put(JsonKey.FIRST_NAME, "firstName");
+    List<Map<String, Object>> userList = new ArrayList<>();
+    userList.add(user);
+    response2.getResult().put(JsonKey.RESPONSE, userList);
+    when(cassandraOperation.getRecordById(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+      .thenReturn(response2);
     boolean result =
         testScenario(
             true,
@@ -147,7 +166,18 @@ public class UserStatusActorTest {
 
   @Test
   public void testUnblockUserSuccess() {
-    when(userService.updateUserDataToES(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn(true);
+    Response response2 = new Response();
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.ID, "46545665465465");
+    user.put(JsonKey.IS_DELETED, true);
+    user.put(JsonKey.FIRST_NAME, "firstName");
+    List<Map<String, Object>> userList = new ArrayList<>();
+    userList.add(user);
+    response2.getResult().put(JsonKey.RESPONSE, userList);
+    when(cassandraOperation.getRecordById(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+      .thenReturn(response2);
+
     PowerMockito.mockStatic(SSOServiceFactory.class);
     SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
     PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
@@ -159,6 +189,17 @@ public class UserStatusActorTest {
 
   @Test
   public void testUnblockUserFailureWithUserAlreadyActive() {
+    Response response2 = new Response();
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.ID, "46545665465465");
+    user.put(JsonKey.IS_DELETED, false);
+    user.put(JsonKey.FIRST_NAME, "firstName");
+    List<Map<String, Object>> userList = new ArrayList<>();
+    userList.add(user);
+    response2.getResult().put(JsonKey.RESPONSE, userList);
+    when(cassandraOperation.getRecordById(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+      .thenReturn(response2);
     boolean result =
         testScenario(
             false,
@@ -206,11 +247,11 @@ public class UserStatusActorTest {
 
     Response res;
     if (isSuccess) {
-      res = probe.expectMsgClass(duration("10 second"), Response.class);
+      res = probe.expectMsgClass(duration("100 second"), Response.class);
       return (res != null && "SUCCESS".equals(res.getResult().get(JsonKey.RESPONSE)));
     } else {
       ProjectCommonException exception =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
       return (exception.getCode().equals(expectedErrorResponse));
     }
   }

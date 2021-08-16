@@ -20,6 +20,7 @@ import java.util.Map;
 public class UserStatusActor extends UserBaseActor {
 
   private UserStatusService userStatusService = new UserStatusService();
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -51,7 +52,6 @@ public class UserStatusActor extends UserBaseActor {
       String logMsgPrefix =
         MessageFormat.format("UserStatusActor:updateUserStatus:{0}:{1}: ", operation, userId);
       logger.info(request.getRequestContext(), logMsgPrefix + "Update user data to ES.");
-      UserService userService = UserServiceImpl.getInstance();
       userService.updateUserDataToES(userId, userMap, request.getRequestContext());
     }
     generateTelemetryEvent(request.getRequest(), userId, operation, request.getContext());
