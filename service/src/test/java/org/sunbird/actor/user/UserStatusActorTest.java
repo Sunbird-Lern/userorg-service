@@ -69,6 +69,7 @@ public class UserStatusActorTest {
   private static final Props props = Props.create(UserStatusActor.class);
   private static final ActorSystem system = ActorSystem.create("system");
   private static final User user = mock(User.class);
+  private static UserService userService = null;
   private static CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
 
   @BeforeClass
@@ -101,7 +102,7 @@ public class UserStatusActorTest {
     Keycloak keycloak = mock(Keycloak.class);
 
     PowerMockito.mockStatic(UserServiceImpl.class);
-    UserService userService = mock(UserService.class);
+    userService = mock(UserService.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
 
     PowerMockito.mockStatic(KeyCloakConnectionProvider.class);
@@ -115,13 +116,12 @@ public class UserStatusActorTest {
     when(usersResource.get(Mockito.any())).thenReturn(userResource);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
     when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
-
-    when(userService.updateUserDataToES(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn(true);
   }
 
   @Test
   public void testBlockUserSuccess() {
     try {
+      when(userService.updateUserDataToES(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn(true);
       PowerMockito.mockStatic(SSOServiceFactory.class);
       SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
       PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
@@ -147,6 +147,7 @@ public class UserStatusActorTest {
 
   @Test
   public void testUnblockUserSuccess() {
+    when(userService.updateUserDataToES(Mockito.anyString(),Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn(true);
     PowerMockito.mockStatic(SSOServiceFactory.class);
     SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
     PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
