@@ -55,9 +55,10 @@ public class UserServiceImpl implements UserService {
   private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
   private EncryptionService encryptionService =
     org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
-  private static UserDao userDao = UserDaoImpl.getInstance();
+  private UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
-  private static UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+  private UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   private static final int GENERATE_USERNAME_COUNT = 10;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
@@ -514,5 +515,15 @@ public class UserServiceImpl implements UserService {
         });
     }
     return usersList;
+  }
+
+  @Override
+  public boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context) {
+    Future<Boolean> responseF = esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
+    if ((boolean) ElasticSearchHelper.getResponseFromFuture(responseF)) {
+      return true;
+    }
+    logger.info(context, "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier " + identifier);
+    return false;
   }
 }

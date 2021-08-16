@@ -53,4 +53,6 @@ public interface UserService {
   List<Map<String, Object>> getDecryptedEmailPhoneByUserIds(List<String> userIds, String type, RequestContext context);
 
   List<Map<String, Object>> getUserEmailsBySearchQuery(Map<String, Object> searchQuery, RequestContext context);
+
+  boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
 }
