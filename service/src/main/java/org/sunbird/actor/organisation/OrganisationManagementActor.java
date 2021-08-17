@@ -102,9 +102,7 @@ public class OrganisationManagementActor extends BaseActor {
     request.put(JsonKey.ROOT_ORG_ID, uniqueId);
 
     if (JsonKey.BULK_ORG_UPLOAD.equalsIgnoreCase(callerId)) {
-      if (null == request.get(JsonKey.STATUS)) {
-        request.put(JsonKey.STATUS, ProjectUtil.OrgStatus.ACTIVE.getValue());
-      }
+      request.computeIfAbsent((JsonKey.STATUS), k -> ProjectUtil.OrgStatus.ACTIVE.getValue());
     } else {
       request.put(JsonKey.STATUS, ProjectUtil.OrgStatus.ACTIVE.getValue());
     }

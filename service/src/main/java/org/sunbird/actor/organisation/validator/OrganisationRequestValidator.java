@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class OrganisationRequestValidator {
 
-    public LoggerUtil logger = new LoggerUtil(this.getClass());
+    private static LoggerUtil logger = new LoggerUtil(OrganisationRequestValidator.class);
     private OrgService orgService = OrgServiceImpl.getInstance();
     private LocationService locationService = new LocationServiceImpl();
     private LocationRequestValidator validator = new LocationRequestValidator();
@@ -130,7 +130,7 @@ public class OrganisationRequestValidator {
 
     public void isTenantIdValid(String id, RequestContext context) {
         Map<String, Object> orgDbMap = orgService.getOrgById(id, context);
-        boolean isValid = MapUtils.isNotEmpty(orgDbMap) ? (boolean) orgDbMap.get(JsonKey.IS_TENANT) : false;
+        boolean isValid = MapUtils.isNotEmpty(orgDbMap) && (boolean) orgDbMap.get(JsonKey.IS_TENANT);
 
         if (!isValid) {
             logger.info(
@@ -159,27 +159,11 @@ public class OrganisationRequestValidator {
                 return;
             }
         } else {
-            List<String> finalLocList = locList;
-            // If request orglocation is a list of map , which has location id, not location code
-            orgLocationList
-                    .stream()
-                    .forEach(
-                            loc -> {
-                                if (loc.containsKey(JsonKey.ID)) {
-                                    finalLocList.add(loc.get(JsonKey.ID));
-                                }
-                            });
-            // If request orglocation is a list of map , which doesn't have location id, but has location
-            // code
+            // If request orglocation is a list of map , which has location id
+            List<String>  finalLocList = getLocationCodeorIdList(orgLocationList, JsonKey.ID);
+            // If request orglocation is a list of map , which has location code
             if (CollectionUtils.isEmpty(finalLocList)) {
-                orgLocationList
-                        .stream()
-                        .forEach(
-                                loc -> {
-                                    if (loc.containsKey(JsonKey.CODE)) {
-                                        finalLocList.add(loc.get(JsonKey.CODE));
-                                    }
-                                });
+                finalLocList = getLocationCodeorIdList(orgLocationList, JsonKey.CODE);
                 if (CollectionUtils.isNotEmpty(finalLocList)) {
                     locList =
                             validator.getValidatedLocationIds(finalLocList, context);
@@ -200,6 +184,18 @@ public class OrganisationRequestValidator {
                             newOrgLocationList.add(map);
                         });
         request.put(JsonKey.ORG_LOCATION, newOrgLocationList);
+    }
+    public List<String> getLocationCodeorIdList(List<Map<String, String>> orgLocationList, String key){
+        List<String>  finalLocList = new ArrayList<>();
+        orgLocationList
+                .stream()
+                .forEach(
+                        loc -> {
+                            if (loc.containsKey(key)) {
+                                finalLocList.add(loc.get(key));
+                            }
+                        });
+        return finalLocList;
     }
 
     public boolean validateChannelUniqueness(

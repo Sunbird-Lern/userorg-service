@@ -8,6 +8,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
@@ -30,14 +31,10 @@ public class OrganisationBackgroundActor extends BaseActor {
 
     @Override
     public void onReceive(Request request) throws Throwable {
-        String operation = request.getOperation();
-
-        switch (operation) {
-            case "upsertOrganisationDataToES":
-                upsertOrganisationDataToES(request);
-                break;
-            default:
-                onReceiveUnsupportedOperation("OrganisationBackgroundActor");
+        if (request.getOperation().equalsIgnoreCase(OrganisationActorOperation.UPSERT_ORGANISATION_TO_ES.getValue())) {
+            upsertOrganisationDataToES(request);
+        } else {
+            onReceiveUnsupportedOperation("OrganisationBackgroundActor");
         }
     }
     private void upsertOrganisationDataToES(Request request) {
@@ -51,10 +48,9 @@ public class OrganisationBackgroundActor extends BaseActor {
             headerMap.put("Content-Type", "application/json");
             registerTag((String) organisation.get(JsonKey.ID), "{}", headerMap, request.getRequestContext());
         }
-        //TODO : Why do we remove this?
         organisation.remove(JsonKey.CONTACT_DETAILS);
         String orgLocation = (String) organisation.get(JsonKey.ORG_LOCATION);
-        List orgLocationList = new ArrayList<>();
+        List<Map<String,Object>> orgLocationList = new ArrayList<>();
         if (StringUtils.isNotBlank(orgLocation)) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
