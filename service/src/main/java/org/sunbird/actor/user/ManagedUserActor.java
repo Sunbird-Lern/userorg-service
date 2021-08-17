@@ -24,7 +24,7 @@ import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.UserFlagUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
