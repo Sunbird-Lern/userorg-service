@@ -47,6 +47,7 @@ import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.feed.impl.FeedServiceImpl;
+import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
@@ -358,8 +359,8 @@ public class TenantMigrationActorTest {
         .thenReturn("anyRootOrgId");
 
     try {
-      OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
-      PowerMockito.whenNew(OrgExternalService.class)
+      OrgExternalServiceImpl orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);
+      PowerMockito.whenNew(OrgExternalServiceImpl.class)
           .withAnyArguments()
           .thenReturn(orgExternalService);
       when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
