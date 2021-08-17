@@ -2,8 +2,8 @@ package org.sunbird.client.location;
 
 import akka.actor.ActorRef;
 import java.util.List;
-import org.sunbird.models.location.Location;
-import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.model.location.Location;
+import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.request.RequestContext;
 
 /**
