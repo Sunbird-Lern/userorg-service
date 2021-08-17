@@ -1,4 +1,4 @@
-package org.sunbird.models.location.apirequest;
+package org.sunbird.model.location;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

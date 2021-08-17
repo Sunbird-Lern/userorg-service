@@ -11,7 +11,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
@@ -24,12 +24,31 @@ public class LocationServiceImpl implements LocationService {
         if (locationService == null) locationService = new LocationServiceImpl();
         return locationService;
     }
+    @Override
+    public Response createLocation(Location location, RequestContext context) {
+        return locationDao.create(location, context);
+    }
+
+    @Override
+    public Response updateLocation(Location location, RequestContext context) {
+        return locationDao.update(location, context);
+    }
+
+    @Override
+    public Response deleteLocation(String locationId, RequestContext context) {
+        return locationDao.delete(locationId, context);
+    }
+
+    @Override
+    public Response searchLocation(Map<String, Object> searchQueryMap, RequestContext context) {
+        return locationDao.search(searchQueryMap, context);
+    }
 
     @Override
     public List<Map<String, String>> getValidatedRelatedLocationIdAndType(
             List<String> codeList, RequestContext context) {
         List<Location> locationIdTypeList = locationSearch(JsonKey.CODE, codeList, context);
-        List<Map<String, String>> locationIdType = null;
+        List<Map<String, String>> locationIdType = new ArrayList<>();
         List<String> codes = new ArrayList<>(codeList);
         if (CollectionUtils.isNotEmpty(locationIdTypeList)) {
             if (locationIdTypeList.size() != codes.size()) {
@@ -39,12 +58,45 @@ public class LocationServiceImpl implements LocationService {
                         codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
                 throwInvalidParameterValueException(invalidCodeList);
             } else {
-                locationIdType = getValidatedRelatedLocationList(locationIdTypeList, context);
+                Map<String, Location> locationMap = getValidatedRelatedLocation(locationIdTypeList, context);
+                locationMap
+                        .entrySet()
+                        .forEach(
+                                m -> {
+                                    Map<String, String> locationIdTypeMap = new HashMap();
+                                    locationIdTypeMap.put(JsonKey.ID, m.getValue().getId());
+                                    locationIdTypeMap.put(JsonKey.TYPE, m.getValue().getType());
+                                    locationIdType.add(locationIdTypeMap);
+                                });
             }
         } else {
             throwInvalidParameterValueException(codeList);
         }
         return locationIdType;
+    }
+
+    public List<String> getValidatedRelatedLocationIds(
+            List<String> codeList, RequestContext context) {
+        Set<String> locationIds = null;
+        List<String> codes = new ArrayList<>(codeList);
+        List<Location> locationList = locationSearch(JsonKey.CODE, codeList, context);
+        List<String> locationIdList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(locationList)) {
+            if (locationList.size() != codes.size()) {
+                List<String> resCodeList =
+                        locationList.stream().map(Location::getCode).collect(Collectors.toList());
+                List<String> invalidCodeList =
+                        codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
+                throwInvalidParameterValueException(invalidCodeList);
+            } else {
+                Map<String, Location> locationMap = getValidatedRelatedLocation(locationList, context);
+                locationIds = locationMap.values().stream().map(Location::getId).collect(Collectors.toSet());
+            }
+        } else {
+            throwInvalidParameterValueException(codeList);
+        }
+        locationIdList.addAll(locationIds);
+        return locationIdList;
     }
 
     public List<Location> locationSearch(String param, Object value, RequestContext context) {
@@ -53,7 +105,7 @@ public class LocationServiceImpl implements LocationService {
         List<Location> locationResponseList = new ArrayList<>();
         filter.put(param, value);
         searchRequestMap.put(JsonKey.FILTERS, filter);
-        Response response = locationDao.search(searchRequestMap, context);
+        Response response = searchLocation(searchRequestMap, context);
         if (response != null) {
             List<Map<String, Object>> responseList =
                     (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
@@ -67,7 +119,7 @@ public class LocationServiceImpl implements LocationService {
         return locationResponseList;
     }
 
-    public List<Map<String, String>> getValidatedRelatedLocationList(
+    private Map<String, Location> getValidatedRelatedLocation(
             List<Location> locationList, RequestContext context) {
         Map<String, Location> locationMap = new HashMap<>();
         for (Location requestedLocation : locationList) {
@@ -91,17 +143,7 @@ public class LocationServiceImpl implements LocationService {
                 }
             }
         }
-        List<Map<String, String>> locationMapList = new ArrayList<>();
-        locationMap
-                .entrySet()
-                .forEach(
-                        m -> {
-                            Map<String, String> locationIdTypeMap = new HashMap();
-                            locationIdTypeMap.put(JsonKey.ID, m.getValue().getId());
-                            locationIdTypeMap.put(JsonKey.TYPE, m.getValue().getType());
-                            locationMapList.add(locationIdTypeMap);
-                        });
-        return locationMapList;
+        return locationMap;
     }
 
     private Set<Location> getParentLocations(Location locationObj, RequestContext context) {
@@ -125,7 +167,7 @@ public class LocationServiceImpl implements LocationService {
         return locationSet;
     }
 
-    public int getOrder(String type) {
+    private int getOrder(String type) {
         return DataCacheHandler.getLocationOrderMap().get(type);
     }
 
@@ -143,6 +185,7 @@ public class LocationServiceImpl implements LocationService {
                         ResponseCode.invalidParameterValue.getErrorMessage(), codeList, JsonKey.LOCATION_CODE),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
     }
+
     public Location getLocationById(String param, Object value, RequestContext context){
         Location loc = null;
         List<Location> locList = locationSearch(param, value, context);
