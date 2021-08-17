@@ -32,8 +32,8 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.service.feed.FeedServiceImpl;
 import org.sunbird.service.feed.IFeedService;
+import org.sunbird.service.feed.impl.FeedServiceImpl;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

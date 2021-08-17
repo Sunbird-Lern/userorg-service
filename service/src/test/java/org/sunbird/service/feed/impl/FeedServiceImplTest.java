@@ -1,4 +1,4 @@
-package org.sunbird.service.feed;
+package org.sunbird.service.feed.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
@@ -23,6 +22,8 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -31,7 +32,6 @@ import org.sunbird.response.Response;
   FeedDaoImpl.class,
   IFeedDao.class
 })
-@SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
