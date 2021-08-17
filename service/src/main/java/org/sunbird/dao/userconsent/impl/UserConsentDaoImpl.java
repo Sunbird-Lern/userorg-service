@@ -1,20 +1,18 @@
 package org.sunbird.dao.userconsent.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.dao.userconsent.UserConsentDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.Util;
 
 public class UserConsentDaoImpl implements UserConsentDao {
   private static final String TABLE_NAME = "user_consent";
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
 
   private static UserConsentDao consentDao = null;
 
@@ -33,12 +31,9 @@ public class UserConsentDaoImpl implements UserConsentDao {
   @Override
   public List<Map<String, Object>> getConsent(
       Map<String, Object> consentReq, RequestContext context) {
-    Map<String, Object> consentMap = null;
     Response response =
         cassandraOperation.getRecordsByProperties(
             Util.KEY_SPACE_NAME, TABLE_NAME, consentReq, context);
-    List<Map<String, Object>> responseList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    return responseList;
+    return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }
 }
