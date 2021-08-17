@@ -17,7 +17,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
