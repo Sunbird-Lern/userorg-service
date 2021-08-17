@@ -73,7 +73,7 @@ public class OrgDaoImpl implements OrgDao {
   @Override
   public Response create(Map<String, Object> orgMap, RequestContext context) {
     try {
-      List orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+      List<Map<String,Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
       if (CollectionUtils.isNotEmpty(orgLocation)) {
         String orgLoc = mapper.writeValueAsString(orgLocation);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
@@ -87,7 +87,7 @@ public class OrgDaoImpl implements OrgDao {
   @Override
   public Response update(Map<String, Object> orgMap, RequestContext context) {
     try {
-      List orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+      List<Map<String,Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
       if (CollectionUtils.isNotEmpty(orgLocation)) {
         String orgLoc = mapper.writeValueAsString(orgLocation);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);

@@ -101,7 +101,12 @@ public class OrganisationRequestValidatorTest {
         List codeList = getOrgLocationLists();
         Map requestMap = new HashMap<String,Object>();
         requestMap.put(JsonKey.ORG_LOCATION,codeList);
+        try {
         validator.validateOrgLocation(requestMap, new RequestContext());
+        } catch (ProjectCommonException ex) {
+            Assert.assertNotNull(ex);
+            Assert.assertEquals(ex.getCode(), ResponseCode.invalidParameterValue.getErrorCode());
+        }
     }
 
     @Test
