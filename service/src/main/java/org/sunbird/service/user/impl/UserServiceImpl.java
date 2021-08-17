@@ -3,15 +3,6 @@ package org.sunbird.service.user.impl;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -31,9 +22,6 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.AdminUtilHandler;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserUtility;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.adminutil.AdminUtilRequestData;
 import org.sunbird.model.systemsettings.SystemSetting;
@@ -42,13 +30,25 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
+import org.sunbird.util.AdminUtilHandler;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Slug;
+import org.sunbird.util.UserUtility;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class UserServiceImpl implements UserService {
 
@@ -73,6 +73,11 @@ public class UserServiceImpl implements UserService {
   @Override
   public Response createUser(Map<String, Object> user, RequestContext context) {
     return userDao.createUser(user, context);
+  }
+
+  @Override
+  public Response updateUser(Map<String, Object> user, RequestContext context) {
+    return userDao.updateUser(user, context);
   }
 
   @Override
