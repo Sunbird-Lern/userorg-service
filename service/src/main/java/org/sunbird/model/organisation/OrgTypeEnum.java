@@ -1,4 +1,4 @@
-package org.sunbird.models.organisation;
+package org.sunbird.model.organisation;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

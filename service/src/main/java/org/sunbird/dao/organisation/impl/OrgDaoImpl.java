@@ -1,5 +1,6 @@
 package org.sunbird.dao.organisation.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,21 +9,29 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.factory.EsClientFactory;
+import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.organisation.OrgDao;
+import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.util.Util;
+import org.sunbird.util.ProjectUtil;
+import scala.concurrent.Future;
 
 public class OrgDaoImpl implements OrgDao {
-
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private LoggerUtil logger = new LoggerUtil(OrgDaoImpl.class);
+  private ObjectMapper mapper = new ObjectMapper();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private OrgExternalService orgExternalService = new OrgExternalService();
-  private static OrgDao orgDao = null;
+  private static OrgDao orgDao;
+  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String ORG_TABLE_NAME = JsonKey.ORGANISATION;
 
   public static OrgDao getInstance() {
     if (orgDao == null) {
@@ -34,10 +43,9 @@ public class OrgDaoImpl implements OrgDao {
   @Override
   public Map<String, Object> getOrgById(String orgId, RequestContext context) {
     if (StringUtils.isNotBlank(orgId)) {
-      Util.DbInfo orgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
       Response response =
           cassandraOperation.getRecordById(
-              orgDb.getKeySpace(), orgDb.getTableName(), orgId, context);
+                  KEYSPACE_NAME, ORG_TABLE_NAME, orgId, context);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
@@ -46,7 +54,6 @@ public class OrgDaoImpl implements OrgDao {
         List orgLocationList = new ArrayList<>();
         if (StringUtils.isNotBlank(orgLocation)) {
           try {
-            ObjectMapper mapper = new ObjectMapper();
             orgLocationList = mapper.readValue(orgLocation, List.class);
           } catch (Exception e) {
             logger.info(
@@ -64,10 +71,49 @@ public class OrgDaoImpl implements OrgDao {
   }
 
   @Override
-  public Map<String, Object> getOrgByExternalId(
-      String externalId, String provider, RequestContext context) {
-    String orgId =
-        orgExternalService.getOrgIdFromOrgExternalIdAndProvider(externalId, provider, context);
-    return getOrgById(orgId, context);
+  public Response create(Map<String, Object> orgMap, RequestContext context) {
+    try {
+      List<Map<String,Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+      if (CollectionUtils.isNotEmpty(orgLocation)) {
+        String orgLoc = mapper.writeValueAsString(orgLocation);
+        orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
+      }
+    } catch (JsonProcessingException e) {
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+    }
+    return cassandraOperation.insertRecord(KEYSPACE_NAME, ORG_TABLE_NAME, orgMap, context);
+  }
+
+  @Override
+  public Response update(Map<String, Object> orgMap, RequestContext context) {
+    try {
+      List<Map<String,Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+      if (CollectionUtils.isNotEmpty(orgLocation)) {
+        String orgLoc = mapper.writeValueAsString(orgLocation);
+        orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
+      }
+    } catch (JsonProcessingException e) {
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+    }
+    return cassandraOperation.updateRecord(KEYSPACE_NAME, ORG_TABLE_NAME, orgMap, context);
+  }
+
+  @Override
+  public Response search(Map<String, Object> searchQueryMap, RequestContext context) {
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
+    String type = ProjectUtil.EsType.organisation.getTypeName();
+    Future<Map<String, Object>> resultF = esService.search(searchDto, type, context);
+    Map<String, Object> result =
+            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+    Response response = new Response();
+    if (result != null) {
+      response.put(JsonKey.COUNT, result.get(JsonKey.COUNT));
+      response.put(JsonKey.RESPONSE, result.get(JsonKey.CONTENT));
+    } else {
+      List<Map<String, Object>> list = new ArrayList<>();
+      response.put(JsonKey.COUNT, list.size());
+      response.put(JsonKey.RESPONSE, list);
+    }
+    return response;
   }
 }

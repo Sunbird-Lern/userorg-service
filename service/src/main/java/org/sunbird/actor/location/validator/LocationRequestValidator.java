@@ -76,22 +76,6 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
   }
 
   /**
-   * This method will validate location code
-   *
-   * @param code
-   * @return boolean
-   */
-  public static boolean isValidLocationCode(String code) {
-    Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(GeoLocationJsonKey.PROPERTY_NAME, GeoLocationJsonKey.CODE);
-    reqMap.put(GeoLocationJsonKey.PROPERTY_VALUE, code);
-    Response response = locationDao.getRecordByProperty(reqMap, null);
-    List<Map<String, Object>> locationMapList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-    return (!locationMapList.isEmpty());
-  }
-
-  /**
    * This method will validate location type
    *
    * @param type

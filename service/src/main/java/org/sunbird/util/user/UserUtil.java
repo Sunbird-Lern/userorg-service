@@ -20,6 +20,8 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.user.UserDao;
+import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
@@ -68,6 +70,7 @@ public class UserUtil {
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
   private static UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private static UserDao userDao = UserDaoImpl.getInstance();
 
   private UserUtil() {}
 
@@ -600,21 +603,17 @@ public class UserUtil {
 
   public static Map<String, Object> validateManagedByUser(
       String managedBy, RequestContext context) {
-    Future<Map<String, Object>> managedByInfoF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), managedBy, context);
-    Map<String, Object> managedByInfo =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(managedByInfoF);
+    Map<String, Object> managedByInfo = userDao.getUserDetailsById(managedBy, context);
     if (ProjectUtil.isNull(managedByInfo)
         || StringUtils.isBlank((String) managedByInfo.get(JsonKey.FIRST_NAME))
         || StringUtils.isNotBlank((String) managedByInfo.get(JsonKey.MANAGED_BY))
         || (null != managedByInfo.get(JsonKey.IS_DELETED)
             && (boolean) (managedByInfo.get(JsonKey.IS_DELETED)))) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
-          ResponseCode.invalidRequestData.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+        ResponseCode.userNotFound.getErrorCode(),
+        ResponseCode.userNotFound.getErrorMessage(),
+        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
-    UserUtility.decryptUserDataFrmES(managedByInfo);
     return managedByInfo;
   }
 

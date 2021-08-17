@@ -39,7 +39,7 @@ import org.sunbird.util.UserFlagUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.organisation.OrgTypeEnum;
+import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;

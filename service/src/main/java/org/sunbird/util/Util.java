@@ -19,7 +19,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
@@ -46,7 +45,6 @@ public final class Util {
   public static final int DEFAULT_ELASTIC_DATA_LIMIT = 10000;
   public static final String KEY_SPACE_NAME = "sunbird";
   private static Properties prop = new Properties();
-  private static Map<String, String> headers = new HashMap<>();
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
@@ -60,9 +58,7 @@ public final class Util {
 
   static {
     initializeOrgStatusTransition();
-    initializeDBProperty(); // EkStep HttpClient headers init
-    headers.put("content-type", "application/json");
-    headers.put("accept", "application/json");
+    initializeDBProperty();
   }
 
   private Util() {}
@@ -303,118 +299,6 @@ public final class Util {
       return list.get(0);
     }
     return null;
-  }
-
-  /** @param req Map<String,Object> */
-  public static boolean registerChannel(Map<String, Object> req, RequestContext context) {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headerMap, context);
-    String reqString = "";
-    String regStatus = "";
-    try {
-      logger.info(
-          context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
-      Map<String, Object> map = new HashMap<>();
-      Map<String, Object> reqMap = new HashMap<>();
-      Map<String, Object> channelMap = new HashMap<>();
-      channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
-      channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
-      if (req.containsKey(JsonKey.LICENSE)
-          && StringUtils.isNotBlank((String) req.get(JsonKey.LICENSE))) {
-        channelMap.put(JsonKey.DEFAULT_LICENSE, req.get(JsonKey.LICENSE));
-      }
-
-      String defaultFramework = (String) req.get(JsonKey.DEFAULT_FRAMEWORK);
-      if (StringUtils.isNotBlank(defaultFramework))
-        channelMap.put(JsonKey.DEFAULT_FRAMEWORK, defaultFramework);
-      reqMap.put(JsonKey.CHANNEL, channelMap);
-      map.put(JsonKey.REQUEST, reqMap);
-
-      reqString = mapper.writeValueAsString(map);
-      logger.info(
-          context, "Util:registerChannel: Channel registration request data = " + reqString);
-      regStatus =
-          HttpClientUtil.post(
-              (ekStepBaseUrl
-                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
-              reqString,
-              headerMap);
-      logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
-    } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while registering channel in ekstep." + e.getMessage(), e);
-    }
-
-    return regStatus.contains("OK");
-  }
-
-  /** @param req Map<String,Object> */
-  public static boolean updateChannel(Map<String, Object> req, RequestContext context) {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headers, context);
-    String reqString = "";
-    String regStatus = "";
-    try {
-      logger.info(
-          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
-      Map<String, Object> map = new HashMap<>();
-      Map<String, Object> reqMap = new HashMap<>();
-      Map<String, Object> channelMap = new HashMap<>();
-      channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
-      channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
-      String license = (String) req.get(JsonKey.LICENSE);
-      if (StringUtils.isNotBlank(license)) {
-        channelMap.put(JsonKey.DEFAULT_LICENSE, license);
-      }
-      reqMap.put(JsonKey.CHANNEL, channelMap);
-      map.put(JsonKey.REQUEST, reqMap);
-
-      reqString = mapper.writeValueAsString(map);
-
-      regStatus =
-          HttpClientUtil.patch(
-              (ekStepBaseUrl
-                      + PropertiesCache.getInstance()
-                          .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
-                  + "/"
-                  + req.get(JsonKey.ID),
-              reqString,
-              headerMap);
-      logger.info(
-          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
-    } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
-    }
-    return regStatus.contains("OK");
   }
 
   public static void initializeContext(Request request, String env) {

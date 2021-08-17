@@ -23,10 +23,11 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
-import org.sunbird.models.organisation.OrgTypeEnum;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.organisation.OrgTypeEnum;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
@@ -198,7 +199,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     String orgId;
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
-      orgId = orgClient.createOrg(getActorRef(ActorOperations.CREATE_ORG.getValue()), row, context);
+      orgId = orgClient.createOrg(getActorRef(OrganisationActorOperation.CREATE_ORG.getValue()), row, context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -236,7 +237,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
-      orgClient.updateOrg(getActorRef(ActorOperations.UPDATE_ORG.getValue()), row, context);
+      orgClient.updateOrg(getActorRef(OrganisationActorOperation.UPDATE_ORG.getValue()), row, context);
     } catch (Exception ex) {
       logger.error(
           context,

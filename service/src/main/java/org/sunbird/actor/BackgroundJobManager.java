@@ -1,24 +1,18 @@
 package org.sunbird.actor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
@@ -33,15 +27,12 @@ import scala.concurrent.Future;
   asyncTasks = {
     "mergeUserToElastic",
     "updateUserInfoToElastic",
-    "insertOrgInfoToElastic",
-    "updateOrgInfoToElastic",
     "updateUserOrgES",
     "insertUserNotesToElastic",
     "updateUserNotesToElastic",
   }
 )
 public class BackgroundJobManager extends BaseActor {
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
@@ -49,10 +40,6 @@ public class BackgroundJobManager extends BaseActor {
     String operation = request.getOperation();
     if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue())) {
       updateUserInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue())) {
-      updateOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_ORG_INFO_ELASTIC.getValue())) {
-      insertOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
@@ -90,67 +77,6 @@ public class BackgroundJobManager extends BaseActor {
         ProjectUtil.EsType.user.getTypeName(),
         (String) result.get(JsonKey.IDENTIFIER),
         result,
-        actorMessage.getRequestContext());
-  }
-
-  @SuppressWarnings("unchecked")
-  private void insertOrgInfoToEs(Request actorMessage) {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = ProjectUtil.getConfigValue(JsonKey.EKSTEP_AUTHORIZATION);
-    header = JsonKey.BEARER + header;
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    Map<String, Object> orgMap =
-        (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
-    if (MapUtils.isNotEmpty(orgMap)) {
-      Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-      String id = (String) orgMap.get(JsonKey.ID);
-      Response orgResponse =
-          cassandraOperation.getRecordById(
-              orgDbInfo.getKeySpace(),
-              orgDbInfo.getTableName(),
-              id,
-              actorMessage.getRequestContext());
-      List<Map<String, Object>> orgList =
-          (List<Map<String, Object>>) orgResponse.getResult().get(JsonKey.RESPONSE);
-      Map<String, Object> esMap = new HashMap<>();
-      if (!(orgList.isEmpty())) {
-        esMap = orgList.get(0);
-        esMap.remove(JsonKey.CONTACT_DETAILS);
-        String orgLocation = (String) esMap.get(JsonKey.ORG_LOCATION);
-        List orgLocationList = new ArrayList<>();
-        if (StringUtils.isNotBlank(orgLocation)) {
-          try {
-            ObjectMapper mapper = new ObjectMapper();
-            orgLocationList = mapper.readValue(orgLocation, List.class);
-          } catch (Exception e) {
-            logger.info(
-                actorMessage.getRequestContext(),
-                "Exception occurred while converting orgLocation to List<Map<String,String>>.");
-          }
-        }
-        esMap.put(JsonKey.ORG_LOCATION, orgLocationList);
-      }
-      // making call to register tag
-      registerTag(id, "{}", headerMap, actorMessage.getRequestContext());
-      insertDataToElastic(
-          ProjectUtil.EsIndex.sunbird.getIndexName(),
-          ProjectUtil.EsType.organisation.getTypeName(),
-          id,
-          esMap,
-          actorMessage.getRequestContext());
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void updateOrgInfoToEs(Request actorMessage) {
-    Map<String, Object> orgMap =
-        (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION);
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.organisation.getTypeName(),
-        (String) orgMap.get(JsonKey.ID),
-        orgMap,
         actorMessage.getRequestContext());
   }
 
@@ -217,35 +143,6 @@ public class BackgroundJobManager extends BaseActor {
     return false;
   }
 
-  private String registerTag(
-      String tagId, String body, Map<String, String> header, RequestContext context) {
-    String tagStatus = "";
-    try {
-      logger.info(context, "BackgroundJobManager:registertag ,call started with tagid = " + tagId);
-      String analyticsBaseUrl = ProjectUtil.getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
-      ProjectUtil.setTraceIdInHeader(header, context);
-      tagStatus =
-          HttpClientUtil.post(
-              analyticsBaseUrl
-                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_TAG_API_URL)
-                  + "/"
-                  + tagId,
-              body,
-              header);
-      logger.info(
-          context,
-          "BackgroundJobManager:registertag  ,call end with id and status = "
-              + tagId
-              + ", "
-              + tagStatus);
-    } catch (Exception e) {
-      logger.error(
-          context,
-          "BackgroundJobManager:registertag ,call failure with error message = " + e.getMessage(),
-          e);
-    }
-    return tagStatus;
-  }
 
   @SuppressWarnings("unchecked")
   private void insertUserNotesToEs(Request actorMessage) {

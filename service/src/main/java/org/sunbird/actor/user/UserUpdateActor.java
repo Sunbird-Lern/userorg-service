@@ -42,7 +42,7 @@ import org.sunbird.util.UserFlagUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.model.location.Location;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.User;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.actor.user.validator.UserRequestValidator;

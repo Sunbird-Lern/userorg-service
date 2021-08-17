@@ -26,6 +26,8 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -46,7 +48,7 @@ import scala.concurrent.Promise;
 public class UtilTest {
   private static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
-
+  private OrgService orgService = OrgServiceImpl.getInstance();
   @Before
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
@@ -95,7 +97,7 @@ public class UtilTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = Util.registerChannel(map, new RequestContext());
+    Boolean bool = orgService.registerChannel(map, new RequestContext());
     Assert.assertNotNull(bool);
   }
 
@@ -105,7 +107,7 @@ public class UtilTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = Util.updateChannel(map, new RequestContext());
+    Boolean bool = orgService.updateChannel(map, new RequestContext());
     Assert.assertNotNull(bool);
   }
 

@@ -2,8 +2,7 @@ package org.sunbird.util.user;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.dispatch.Futures;
 import java.util.ArrayList;
@@ -100,6 +99,8 @@ public class UserUtilTest {
             cassandraOperationImpl.deleteRecord(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
+    doNothing().when(cassandraOperationImpl).deleteRecord(
+        Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     PowerMockito.mockStatic(Util.class);
   }
 
