@@ -2,12 +2,16 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mock;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,11 +22,20 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.common.Constants;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.helper.ServiceFactory;
+import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.service.user.ResetPasswordService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.model.user.User;
@@ -36,14 +49,14 @@ import org.sunbird.sso.SSOServiceFactory;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-  UserDao.class,
-  UserDaoImpl.class,
-  Util.class,
+  ServiceFactory.class,
+  CassandraOperationImpl.class,
   UserUtility.class,
   KeycloakBruteForceAttackUtil.class,
   KeycloakUtil.class,
   SSOServiceFactory.class,
-  SSOManager.class
+  SSOManager.class,
+  HttpClientUtil.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -54,25 +67,50 @@ import org.sunbird.sso.SSOServiceFactory;
 })
 public class ResetPasswordActorTest {
 
-  private UserDao userDao;
+  private CassandraOperation cassandraOperation = null;
   Props props = Props.create(ResetPasswordActor.class);
   ActorSystem system = ActorSystem.create("ResetPasswordActor");
 
+  private void getRecordByIdNonEmptyResponse() {
+    Response response = new Response();
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.ID,"ValidUserId");
+    user.put(JsonKey.EMAIL,"anyEmail@gmail.com");
+    user.put(JsonKey.CHANNEL,"TN");
+    user.put(JsonKey.PHONE,"9876543210");
+    user.put(JsonKey.MASKED_EMAIL,"any****@gmail.com");
+    user.put(JsonKey.MASKED_PHONE,"987*****0");
+    user.put(JsonKey.IS_DELETED,false);
+    user.put(JsonKey.USER_ID,"ValidUserId");
+    user.put(JsonKey.FIRST_NAME,"Demo Name");
+    user.put(JsonKey.USERNAME,"validUserName");
+    List<Map<String, Object>> userList = new ArrayList<>();
+    userList.add(user);
+    response.getResult().put(JsonKey.RESPONSE, userList);
+    PowerMockito.when(cassandraOperation.getRecordById(
+      JsonKey.SUNBIRD, JsonKey.USER, "ValidUserId", null))
+      .thenReturn(response);
+  }
+
+  private void getRecordByIdEmptyResponse() {
+    Response response = new Response();
+    PowerMockito.when(cassandraOperation.getRecordById(
+      JsonKey.SUNBIRD, JsonKey.USER, "invalidUserId", null))
+      .thenReturn(response);
+  }
+
   @Before
   public void beforeEachTest() throws Exception {
-    userDao = PowerMockito.mock(UserDao.class);
-    PowerMockito.mockStatic(UserDaoImpl.class);
-    when(UserDaoImpl.getInstance()).thenReturn(userDao);
+    PowerMockito.mockStatic(HttpClientUtil.class);
+    when(HttpClientUtil.post(Mockito.anyString(),Mockito.anyString(),Mockito.anyMap())).thenReturn("{\"link\":\"success\"}");
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(UserUtility.class);
-    PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(KeycloakUtil.class);
     PowerMockito.mockStatic(KeycloakBruteForceAttackUtil.class);
-    when(Util.getUserRequiredActionLink(Mockito.anyMap(), Mockito.anyBoolean(), Mockito.any()))
-        .thenReturn("/url/password");
-    when(Util.getSunbirdLoginUrl()).thenReturn("/resource/url");
     when(UserUtility.decryptUserData(Mockito.anyMap())).thenReturn(getUserDbMap());
-    when(userDao.getUserById("ValidUserId", null)).thenReturn(getValidUserResponse());
-
+    getRecordByIdNonEmptyResponse();
     when(KeycloakUtil.getAdminAccessToken(Mockito.any(RequestContext.class), Mockito.anyString()))
         .thenReturn("accessToken");
     when(KeycloakBruteForceAttackUtil.isUserAccountDisabled(
@@ -91,7 +129,7 @@ public class ResetPasswordActorTest {
 
   @Test
   public void testResetPasswordWithInvalidUserIdFailure() {
-    when(userDao.getUserById("invalidUserId", null)).thenReturn(null);
+    getRecordByIdEmptyResponse();
     boolean result = testScenario(getInvalidRequest(), ResponseCode.userNotFound);
     Assert.assertTrue(result);
   }

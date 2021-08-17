@@ -2,9 +2,6 @@ package org.sunbird.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,10 +27,11 @@ import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
-import org.sunbird.url.URLShortner;
-import org.sunbird.url.URLShortnerImpl;
 import scala.concurrent.Future;
+
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for actors
@@ -50,7 +48,6 @@ public final class Util {
   private static Properties prop = new Properties();
   private static Map<String, String> headers = new HashMap<>();
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
-  private static final String SUNBIRD_WEB_URL = "sunbird_web_url";
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
@@ -456,11 +453,7 @@ public final class Util {
   public static String getSunbirdWebUrlPerTenent(Map<String, Object> userMap) {
     StringBuilder webUrl = new StringBuilder();
     String slug = "";
-    if (StringUtils.isBlank(System.getenv(SUNBIRD_WEB_URL))) {
-      webUrl.append(propertiesCache.getProperty(SUNBIRD_WEB_URL));
-    } else {
-      webUrl.append(System.getenv(SUNBIRD_WEB_URL));
-    }
+    webUrl.append(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_WEB_URL));
     if (!StringUtils.isBlank((String) userMap.get(JsonKey.ROOT_ORG_ID))) {
       Map<String, Object> orgMap = getOrgDetails((String) userMap.get(JsonKey.ROOT_ORG_ID), null);
       slug = (String) orgMap.get(JsonKey.SLUG);
@@ -468,23 +461,6 @@ public final class Util {
     if (!StringUtils.isBlank(slug)) {
       webUrl.append("/" + slug);
     }
-    return webUrl.toString();
-  }
-
-  /**
-   * As per requirement this page need to be redirect to /resources always.
-   *
-   * @return url of login page
-   */
-  public static String getSunbirdLoginUrl() {
-    StringBuilder webUrl = new StringBuilder();
-    String slug = "/resources";
-    if (StringUtils.isBlank(System.getenv(SUNBIRD_WEB_URL))) {
-      webUrl.append(propertiesCache.getProperty(SUNBIRD_WEB_URL));
-    } else {
-      webUrl.append(System.getenv(SUNBIRD_WEB_URL));
-    }
-    webUrl.append(slug);
     return webUrl.toString();
   }
 
@@ -912,44 +888,6 @@ public final class Util {
       templateMap.put(JsonKey.LINK, verifyEmailLink);
       templateMap.put(JsonKey.SET_PW_LINK, null);
     }
-  }
-
-  public static String getUserRequiredActionLink(
-      Map<String, Object> templateMap, boolean isUrlShortRequired, RequestContext context) {
-    URLShortner urlShortner = new URLShortnerImpl();
-    String redirectUri =
-        StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
-            ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
-            : null;
-    logger.info(context, "Util:getUserRequiredActionLink redirectURI = " + redirectUri);
-    if (StringUtils.isBlank((String) templateMap.get(JsonKey.PASSWORD))) {
-      String url =
-          KeycloakRequiredActionLinkUtil.getLink(
-              (String) templateMap.get(JsonKey.USERNAME),
-              redirectUri,
-              KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD,
-              context);
-
-      templateMap.put(
-          JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
-      return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
-
-    } else {
-      String url =
-          KeycloakRequiredActionLinkUtil.getLink(
-              (String) templateMap.get(JsonKey.USERNAME),
-              redirectUri,
-              KeycloakRequiredActionLinkUtil.VERIFY_EMAIL,
-              context);
-      templateMap.put(
-          JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
-      return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
-    }
-  }
-
-  public static void getUserRequiredActionLink(
-      Map<String, Object> templateMap, RequestContext context) {
-    getUserRequiredActionLink(templateMap, true, context);
   }
 
   public static void sendSMS(Map<String, Object> userMap) {
