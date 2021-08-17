@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import org.sunbird.actor.location.BaseLocationRequestValidator;
+import org.sunbird.actor.location.validator.BaseLocationRequestValidator;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;

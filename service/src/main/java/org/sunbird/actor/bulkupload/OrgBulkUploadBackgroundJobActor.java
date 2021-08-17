@@ -22,7 +22,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.models.organisation.OrgTypeEnum;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;

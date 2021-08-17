@@ -14,4 +14,6 @@ public interface UserRoleDao {
   void deleteUserRole(List<Map<String, String>> userRoleMap, RequestContext context);
 
   List<Map<String, Object>> getUserRoles(String userId, String role, RequestContext context);
+
+  boolean updateUserRoleToES(String identifier, Map<String, Object> data, RequestContext context);
 }

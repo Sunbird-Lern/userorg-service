@@ -1,24 +1,27 @@
 package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.ResetPasswordService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.KeycloakBruteForceAttackUtil;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /** This actor process the request for reset password. */
 @ActorConfig(
@@ -27,6 +30,9 @@ import org.sunbird.telemetry.util.TelemetryUtil;
   dispatcher = "most-used-one-dispatcher"
 )
 public class ResetPasswordActor extends BaseActor {
+
+  private UserService userService = UserServiceImpl.getInstance();
+  private ResetPasswordService resetPasswordService = new ResetPasswordService();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -37,20 +43,16 @@ public class ResetPasswordActor extends BaseActor {
 
   private void resetPassword(Request request) throws Exception {
     String userId = (String) request.get(JsonKey.USER_ID);
-    logger.info(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
-    User user = getUserDao().getUserById(userId, request.getRequestContext());
-    if (null != user) {
-      boolean isDisabled =
-          KeycloakBruteForceAttackUtil.isUserAccountDisabled(
-              user.getUserId(), request.getRequestContext());
-      if (isDisabled) {
-        KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
-            user.getUserId(), request.getRequestContext());
-      }
-      generateLink(request, user);
-    } else {
-      ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound);
+    logger.debug(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
+    User user = userService.getUserById(userId, request.getRequestContext());
+    boolean isDisabled =
+      KeycloakBruteForceAttackUtil.isUserAccountDisabled(
+        user.getUserId(), request.getRequestContext());
+    if (isDisabled) {
+      KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
+        user.getUserId(), request.getRequestContext());
     }
+    generateLink(request, user);
   }
 
   private void generateLink(Request request, User user) {
@@ -60,19 +62,19 @@ public class ResetPasswordActor extends BaseActor {
     Map<String, Object> userMap = mapper.convertValue(user, Map.class);
     UserUtility.decryptUserData(userMap);
     userMap.put(JsonKey.USERNAME, userMap.get(JsonKey.USERNAME));
-    userMap.put(JsonKey.REDIRECT_URI, Util.getSunbirdLoginUrl());
-    String url = Util.getUserRequiredActionLink(userMap, false, request.getRequestContext());
+    userMap.put(JsonKey.REDIRECT_URI, resetPasswordService.getSunbirdLoginUrl());
+    String url = resetPasswordService.getUserRequiredActionLink(userMap, false, request.getRequestContext());
     userMap.put(JsonKey.SET_PASSWORD_LINK, url);
-    if ((String) userMap.get(JsonKey.SET_PASSWORD_LINK) != null) {
-      logger.info(
+    if (StringUtils.isNotBlank(url)) {
+      logger.debug(
           request.getRequestContext(),
           "ResetPasswordActor:generateLink: link generated for reset password.");
       Response response = new Response();
       response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-      response.put(JsonKey.LINK, (String) userMap.get(JsonKey.SET_PASSWORD_LINK));
+      response.put(JsonKey.LINK, url);
       sender().tell(response, self());
     } else {
-      logger.info(
+      logger.debug(
           request.getRequestContext(),
           "ResetPasswordActor:generateLink: not able to generate reset password link.");
       ProjectCommonException.throwServerErrorException(ResponseCode.internalError);
@@ -80,7 +82,7 @@ public class ResetPasswordActor extends BaseActor {
   }
 
   private void generateTelemetry(Request request) {
-    Map<String, Object> targetObject = null;
+    Map<String, Object> targetObject;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     targetObject =
         TelemetryUtil.generateTargetObject(
@@ -107,9 +109,5 @@ public class ResetPasswordActor extends BaseActor {
       user.setEmail(user.getPrevUsedEmail());
     }
     return user;
-  }
-
-  private UserDao getUserDao() {
-    return UserDaoImpl.getInstance();
   }
 }

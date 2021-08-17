@@ -27,9 +27,7 @@ public class ApplicationStart {
     // initialize HttpClientUtil class
     HttpClientUtil.getInstance();
     applicationLifecycle.addStopHook(
-        () -> {
-          return CompletableFuture.completedFuture(null);
-        });
+        () -> CompletableFuture.completedFuture(null));
     KeyManager.init();
   }
 
@@ -46,8 +44,5 @@ public class ApplicationStart {
   private static void checkCassandraConnections() {
     Util.checkCassandraDbConnections();
     SchedulerManager.schedule();
-    // Run quartz scheduler in a separate thread as it waits for 4 minutes
-    // before scheduling various jobs.
-    new Thread(() -> org.sunbird.quartzscheduler.SchedulerManager.getInstance()).start();
   }
 }

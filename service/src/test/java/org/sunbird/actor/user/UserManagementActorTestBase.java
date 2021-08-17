@@ -46,7 +46,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.location.Location;
+import org.sunbird.model.location.Location;
 import org.sunbird.models.organisation.Organisation;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
