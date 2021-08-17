@@ -60,7 +60,7 @@ import scala.concurrent.Promise;
 })
 public class IdentifierFreeUpActorTest {
   private ElasticSearchService elasticSearchService;
-  public static CassandraOperation cassandraOperation;
+  public CassandraOperation cassandraOperation;
   Props props = Props.create(IdentifierFreeUpActor.class);
   ActorSystem system = ActorSystem.create("IdentifierFreeUpActor");
 
@@ -77,25 +77,12 @@ public class IdentifierFreeUpActorTest {
   }
 
   @Test
-  public void testFreeUpWhenUserNotExists() {
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, new ArrayList<>());
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(response);
-    boolean result =
-        testScenario(
-            getFreeUpRequest(ActorOperations.FREEUP_USER_IDENTITY), ResponseCode.invalidUserId);
-    assertTrue(result);
-  }
-
-  @Test
   public void testFreeUpWhenOnlyFreeUpEmail() {
     String id = "anyUserId";
     Request reqObj = new Request();
     Map reqMap = new HashMap<>();
     reqMap.put(JsonKey.ID, "anyUserId");
-    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>(Arrays.asList("email")));
+    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>(Arrays.asList("email","phone")));
     reqObj.setRequest(reqMap);
     reqObj.setOperation(ActorOperations.FREEUP_USER_IDENTITY.getValue());
     Response response = new Response();
@@ -130,60 +117,18 @@ public class IdentifierFreeUpActorTest {
     assertTrue(result);
   }
 
-  @Test
-  public void testFreeUpWhenOnlyFreeUpPhone() {
-    String id = "anyUserId";
-    Request reqObj = new Request();
-    Map reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ID, "anyUserId");
-    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>(Arrays.asList("phone")));
-    reqObj.setRequest(reqMap);
-    reqObj.setOperation(ActorOperations.FREEUP_USER_IDENTITY.getValue());
-    Response response = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> userDbMap = new HashMap<>();
-    userDbMap.put(JsonKey.EMAIL, "userPrimaryEmail");
-    userDbMap.put(JsonKey.PHONE, "9876543210");
-    userDbMap.put(JsonKey.PREV_USED_EMAIL, null);
-    userDbMap.put(JsonKey.PREV_USED_PHONE, null);
-    userDbMap.put(JsonKey.MASKED_EMAIL, "user*******");
-    userDbMap.put(JsonKey.MASKED_PHONE, "98***08908");
-    userDbMap.put(JsonKey.FLAGS_VALUE, 7);
-    userDbMap.put(JsonKey.ID, id);
-    responseList.add(userDbMap);
-    response.put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(response);
-    when(cassandraOperation.updateRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(new Response());
-
-    doNothing()
-        .when(cassandraOperation)
-        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
-    Promise<Boolean> promise = Futures.promise();
-    promise.success(true);
-    when(elasticSearchService.update(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(promise.future());
-    when(ElasticSearchHelper.getResponseFromFuture(promise.future())).thenReturn(true);
-    boolean result = testScenario(reqObj, null);
-    assertTrue(result);
-  }
-
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       System.out.println("the success response is" + res);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
       System.out.println("the failure response is  " + res);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
