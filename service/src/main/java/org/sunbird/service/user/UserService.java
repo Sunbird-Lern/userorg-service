@@ -12,6 +12,8 @@ public interface UserService {
 
   Response createUser(Map<String, Object> user, RequestContext context);
 
+  Response updateUser(Map<String, Object> user, RequestContext context);
+
   User getUserById(String userId, RequestContext context);
 
   void validateUserId(Request request, String managedById, RequestContext context);
