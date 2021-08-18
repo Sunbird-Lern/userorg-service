@@ -211,4 +211,13 @@ public class UserRoleServiceImplTest {
     Assert.assertNotNull(response);
   }
 
+  @Test
+  public void getUserRolesTest () {
+    UserRoleService service = UserRoleServiceImpl.getInstance();
+    List<Map<String, Object>> response = service.getUserRoles("userId", new RequestContext());
+    Assert.assertNotNull(response);
+  }
+
+
+
 }

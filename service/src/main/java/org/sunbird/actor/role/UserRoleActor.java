@@ -18,11 +18,13 @@ import java.util.List;
 import java.util.Map;
 
 @ActorConfig(
-  tasks = {"getRoles", "assignRoles", "assignRolesV2"},
+  tasks = {"getRoles", "assignRoles", "assignRolesV2", "getUserRolesById"},
   asyncTasks = {},
   dispatcher = "most-used-two-dispatcher"
 )
 public class UserRoleActor extends UserBaseActor {
+
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -40,9 +42,22 @@ public class UserRoleActor extends UserBaseActor {
         assignRoles(request);
         break;
 
+      case "getUserRolesById":
+        getUserRolesById(request);
+        break;
+
       default:
         onReceiveUnsupportedOperation("UserRoleActor");
     }
+  }
+
+  private void getUserRolesById(Request request) {
+    Map<String, Object> requestMap = request.getRequest();
+    String userId = (String) requestMap.get(JsonKey.USER_ID);
+    List<Map<String,Object>> userRoles = userRoleService.getUserRoles(userId, request.getRequestContext());
+    Response response = new Response();
+    response.put(JsonKey.ROLES,userRoles);
+    sender().tell(response, self());
   }
 
   private void getRoles(RequestContext context) {
@@ -56,7 +71,6 @@ public class UserRoleActor extends UserBaseActor {
 
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
-    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     List<Map<String, Object>> userRolesList;
 
     Map<String, Object> requestMap = actorMessage.getRequest();
