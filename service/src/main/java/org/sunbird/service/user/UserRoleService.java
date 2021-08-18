@@ -3,7 +3,6 @@ package org.sunbird.service.user;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.cert.ocsp.Req;
 import org.sunbird.request.RequestContext;
 
 public interface UserRoleService {

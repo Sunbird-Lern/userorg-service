@@ -11,14 +11,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.RequestContext;
-import org.sunbird.service.user.UserProfileReadService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.util.ProjectUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -278,13 +275,13 @@ public class UserRoleServiceImpl implements UserRoleService {
   public List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
     List<Map<String, Object>> userRolesList =
       userRoleDao.getUserRoles(userId, null, context);
-    for (Map userRole : userRolesList) {
+    for (Map<String, Object> userRole : userRolesList) {
       List<Map<String, String>> scopeMap = null;
       try {
         scopeMap =
           mapper.readValue(
             (String) userRole.get(JsonKey.SCOPE),
-            new ArrayList<Map<String, String>>().getClass());
+            ArrayList.class);
       } catch (JsonProcessingException e) {
         logger.error(
           context,
