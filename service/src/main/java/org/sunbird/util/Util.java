@@ -780,7 +780,7 @@ public final class Util {
       setRequiredActionLink(userMap);
       if (StringUtils.isBlank((String) userMap.get(JsonKey.SET_PASSWORD_LINK))
           && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
-        logger.info("Util:sendSMS: SMS not sent as generated link is empty");
+        logger.info(context, "Util:sendSMS: SMS not sent as generated link is empty");
         return;
       }
       Map<String, String> smsTemplate = new HashMap<>();
@@ -791,8 +791,8 @@ public final class Util {
       if (StringUtils.isBlank(sms)) {
         sms = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_WELCOME_MSG);
       }
-      logger.info("SMS text : " + sms);
-      String countryCode = "";
+      logger.debug(context, "SMS text : " + sms);
+      String countryCode;
       if (StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
         countryCode =
             PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE);
@@ -800,14 +800,9 @@ public final class Util {
         countryCode = (String) userMap.get(JsonKey.COUNTRY_CODE);
       }
       ISmsProvider smsProvider = SMSFactory.getInstance();
-      logger.info("SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE));
+      logger.debug(context, "SMS text : " + sms + " with phone " + userMap.get(JsonKey.PHONE));
       boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
-      logger.info("Response from smsProvider : " + response);
-      if (response) {
-        logger.info("Welcome Message sent successfully to ." + (String) userMap.get(JsonKey.PHONE));
-      } else {
-        logger.info("Welcome Message failed for ." + (String) userMap.get(JsonKey.PHONE));
-      }
+      logger.info(context, "Response from smsProvider : " + response);
     }
   }
 
