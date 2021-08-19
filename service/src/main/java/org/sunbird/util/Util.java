@@ -774,7 +774,7 @@ public final class Util {
     }
   }
 
-  public static void sendSMS(Map<String, Object> userMap) {
+  public static void sendSMS(Map<String, Object> userMap, RequestContext context) {
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PHONE))) {
       String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       setRequiredActionLink(userMap);
@@ -801,7 +801,7 @@ public final class Util {
       }
       ISmsProvider smsProvider = SMSFactory.getInstance();
       logger.info("SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE));
-      boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms);
+      boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
       logger.info("Response from smsProvider : " + response);
       if (response) {
         logger.info("Welcome Message sent successfully to ." + (String) userMap.get(JsonKey.PHONE));

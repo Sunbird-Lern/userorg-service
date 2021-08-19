@@ -27,6 +27,7 @@ import org.sunbird.notification.sms.providerimpl.Msg91SmsProvider;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.notification.utils.SmsTemplateUtil;
+import org.sunbird.request.RequestContext;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
@@ -104,7 +105,7 @@ public class Msg91PostMethodTest {
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
-    boolean response = megObj.send("4321111111", sms);
+    boolean response = megObj.send("4321111111", sms, new RequestContext());
     Assert.assertTrue(response);
   }
 
@@ -128,7 +129,7 @@ public class Msg91PostMethodTest {
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
-    boolean response = megObj.send("4321111111", sms);
+    boolean response = megObj.send("4321111111", sms, new RequestContext());
     Assert.assertFalse(response);
   }
 
@@ -155,7 +156,7 @@ public class Msg91PostMethodTest {
     List<String> phoneList = new ArrayList<>();
     phoneList.add("5464654653");
     phoneList.add("7897951543");
-    boolean response = megObj.send(phoneList, sms);
+    boolean response = megObj.send(phoneList, sms, new RequestContext());
     Assert.assertTrue(response);
   }
 
@@ -182,7 +183,7 @@ public class Msg91PostMethodTest {
     List<String> phoneList = new ArrayList<>();
     phoneList.add("5464654653");
     phoneList.add("7897951543");
-    boolean response = megObj.send(phoneList, sms);
+    boolean response = megObj.send(phoneList, sms, new RequestContext());
     Assert.assertFalse(response);
   }
 
@@ -206,7 +207,7 @@ public class Msg91PostMethodTest {
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
-    boolean response = megObj.send("4321111111", "+91", sms);
+    boolean response = megObj.send("4321111111", "+91", sms, new RequestContext());
     Assert.assertTrue(response);
   }
 
@@ -230,7 +231,7 @@ public class Msg91PostMethodTest {
     Msg91SmsProvider megObj = new Msg91SmsProvider();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
-    boolean response = megObj.send("4321111111", "+91", sms);
+    boolean response = megObj.send("4321111111", "+91", sms, new RequestContext());
     Assert.assertFalse(response);
   }
 }

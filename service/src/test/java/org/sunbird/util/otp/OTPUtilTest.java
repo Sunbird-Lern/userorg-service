@@ -58,7 +58,7 @@ public class OTPUtilTest {
     ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
     PowerMockito.mockStatic(SMSFactory.class);
     when(SMSFactory.getInstance()).thenReturn(smsProvider);
-    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(true);
     Map<String, Object> otpMap = new HashMap<>();
     otpMap.put(JsonKey.PHONE,"9742511111");
     otpMap.put(JsonKey.TEMPLATE_ID,"someTemplateId");
@@ -79,7 +79,7 @@ public class OTPUtilTest {
     ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
     PowerMockito.mockStatic(SMSFactory.class);
     when(SMSFactory.getInstance()).thenReturn(smsProvider);
-    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(true);
     Map<String, Object> otpMap = new HashMap<>();
     otpMap.put(JsonKey.PHONE,"9742511111");
     otpMap.put(JsonKey.OTP_EXPIRATION_IN_MINUTES,"30");
@@ -99,7 +99,7 @@ public class OTPUtilTest {
     ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
     PowerMockito.mockStatic(SMSFactory.class);
     when(SMSFactory.getInstance()).thenReturn(smsProvider);
-    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString())).thenReturn(true);
+    when(smsProvider.send(Mockito.anyString(),Mockito.anyString(),Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(true);
     Map<String, Object> otpMap = new HashMap<>();
     otpMap.put(JsonKey.PHONE,"9742511111");
     otpMap.put(JsonKey.TEMPLATE_ID,JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID);
