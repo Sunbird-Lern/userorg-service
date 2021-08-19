@@ -1,13 +1,5 @@
 package org.sunbird.notification.sms.providerimpl;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import com.google.inject.internal.cglib.core.$Constants;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,6 +14,13 @@ import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.request.RequestContext;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Msg91SmsProvider implements ISmsProvider {
   private static LoggerUtil logger = new LoggerUtil(Msg91SmsProvider.class);
