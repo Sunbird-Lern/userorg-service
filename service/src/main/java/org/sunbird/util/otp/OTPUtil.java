@@ -114,7 +114,7 @@ public final class OTPUtil {
             + " with phone = "
             + otpMap.get(JsonKey.PHONE));
 
-    boolean response = smsProvider.send((String) otpMap.get(JsonKey.PHONE), countryCode, sms);
+    boolean response = smsProvider.send((String) otpMap.get(JsonKey.PHONE), countryCode, sms, context);
 
     logger.info(
         context,

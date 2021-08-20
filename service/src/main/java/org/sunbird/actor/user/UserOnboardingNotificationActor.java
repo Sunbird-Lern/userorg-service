@@ -61,7 +61,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
     }
 
     if (StringUtils.isNotBlank((String) requestMap.get(JsonKey.PHONE))) {
-      Util.sendSMS(requestMap);
+      Util.sendSMS(requestMap, request.getRequestContext());
     }
     SSOManager ssoManager = SSOServiceFactory.getInstance();
     if (StringUtils.isBlank((String) requestMap.get(JsonKey.PASSWORD))) {
