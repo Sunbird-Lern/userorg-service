@@ -3,6 +3,7 @@ package org.sunbird.notification.sms.provider;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.notification.utils.SmsTemplateUtil;
+import org.sunbird.request.RequestContext;
 
 public interface ISmsProvider {
 
@@ -25,7 +26,7 @@ public interface ISmsProvider {
    * @param smsText Sms text
    * @return boolean
    */
-  boolean send(String phoneNumber, String smsText);
+  boolean send(String phoneNumber, String smsText, RequestContext context);
 
   /**
    * This method will send SMS on user provider country code, basically it will override the value
@@ -36,7 +37,7 @@ public interface ISmsProvider {
    * @param smsText
    * @return boolean
    */
-  boolean send(String phoneNumber, String countryCode, String smsText);
+  boolean send(String phoneNumber, String countryCode, String smsText, RequestContext context);
 
   /**
    * This method will send the SMS to list of phone number at the same time. default country code
@@ -46,5 +47,5 @@ public interface ISmsProvider {
    * @param smsText Sms text
    * @return boolean
    */
-  boolean send(List<String> phoneNumber, String smsText);
+  boolean send(List<String> phoneNumber, String smsText, RequestContext context);
 }
