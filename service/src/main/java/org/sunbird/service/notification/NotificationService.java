@@ -95,7 +95,7 @@ public class NotificationService {
       context, "NotificationService:sendSMS: Sending sendSMS to = " + phones.size() + " phones");
     try {
       ISmsProvider smsProvider = SMSFactory.getInstance();
-      return smsProvider.send(phones, smsText);
+      return smsProvider.send(phones, smsText, context);
     } catch (Exception e) {
       logger.error(
         context,

@@ -27,6 +27,7 @@ import org.sunbird.notification.sms.providerimpl.NICGatewaySmsProvider;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.notification.utils.SmsTemplateUtil;
+import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -96,7 +97,7 @@ public class NICGatewaySmsProviderTest {
     NICGatewaySmsProvider megObj = new NICGatewaySmsProvider();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
-    boolean response = megObj.send("4321111111", sms);
+    boolean response = megObj.send("4321111111", sms, new RequestContext());
     Assert.assertFalse(response);
   }
 }
