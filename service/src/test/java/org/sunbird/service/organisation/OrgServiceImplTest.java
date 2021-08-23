@@ -70,6 +70,8 @@ public class OrgServiceImplTest {
     PowerMockito.when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(getRecordsByProperty(true));
+    PowerMockito.when(cassandraOperation.getRecordsByPrimaryKeys(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(getRecordsByProperty(false));
 
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(ElasticSearchHelper.class);
@@ -91,6 +93,16 @@ public class OrgServiceImplTest {
   public void testGetOrgById() {
     OrgService orgService = OrgServiceImpl.getInstance();
     Map<String, Object> map = orgService.getOrgById("id", new RequestContext());
+    Assert.assertNotNull(map);
+  }
+
+  @Test
+  public void testGetOrgByIds() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    List<String> orgIds = new ArrayList<>();
+    orgIds.add("id1");
+    orgIds.add("id2");
+    List<Map<String, Object>> map = orgService.getOrgByIds(orgIds, new RequestContext());
     Assert.assertNotNull(map);
   }
 

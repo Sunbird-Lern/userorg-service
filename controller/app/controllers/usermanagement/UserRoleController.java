@@ -29,11 +29,13 @@ public class UserRoleController extends BaseController {
 
   public CompletionStage<Result> getUserRolesById(String userId, Http.Request httpRequest) {
     String usrId = ProjectUtil.getLmsUserId(userId);
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
     return handleRequest(
       ActorOperations.GET_USER_ROLES_BY_ID.getValue(),
       httpRequest.body().asJson(),
       req -> {
         Request request = (Request) req;
+        request.getContext().put(JsonKey.FIELDS, requestedFields);
         request.getContext().put(JsonKey.USER_ID, usrId);
         request.getRequest().put(JsonKey.USER_ID, usrId);
         return null;

@@ -50,24 +50,46 @@ public class OrgDaoImpl implements OrgDao {
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
         Map<String, Object> orgMap = responseList.get(0);
-        String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
-        List orgLocationList = new ArrayList<>();
-        if (StringUtils.isNotBlank(orgLocation)) {
-          try {
-            orgLocationList = mapper.readValue(orgLocation, List.class);
-          } catch (Exception e) {
-            logger.info(
-                context,
-                "Exception occurred while converting orgLocation to List<Map<String,String>>.");
-          }
-        }
-        orgMap.put(JsonKey.ORG_LOCATION, orgLocationList);
-        orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
-        orgMap.remove(JsonKey.CONTACT_DETAILS);
+        enrichOrgDetails(orgMap,context);
         return orgMap;
       }
     }
     return Collections.emptyMap();
+  }
+
+  @Override
+  public List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context) {
+    if (CollectionUtils.isNotEmpty(orgIds)) {
+      Response response =
+        cassandraOperation.getRecordsByPrimaryKeys(
+          KEYSPACE_NAME, ORG_TABLE_NAME, orgIds, JsonKey.ID, context);
+      List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+      if (CollectionUtils.isNotEmpty(responseList)) {
+        responseList.stream().forEach(orgMap -> {
+          enrichOrgDetails(orgMap, context);
+        });
+        return responseList;
+      }
+    }
+    return Collections.emptyList();
+  }
+
+  private void enrichOrgDetails(Map<String, Object> orgMap, RequestContext context) {
+    String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
+    List orgLocationList = new ArrayList<>();
+    if (StringUtils.isNotBlank(orgLocation)) {
+      try {
+        orgLocationList = mapper.readValue(orgLocation, List.class);
+      } catch (Exception e) {
+        logger.info(
+          context,
+          "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+      }
+    }
+    orgMap.put(JsonKey.ORG_LOCATION, orgLocationList);
+    orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
+    orgMap.remove(JsonKey.CONTACT_DETAILS);
   }
 
   @Override

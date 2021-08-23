@@ -18,6 +18,7 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 import java.util.ArrayList;
@@ -55,6 +56,9 @@ public class GetUserRoleTest {
     when(cassandraOperation.getRecordById(
       Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
       .thenReturn(getCassandraUserRoleResponse());
+    PowerMockito.when(cassandraOperation.getRecordsByPrimaryKeys(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(getRecordsByIds(false));
+
   }
 
   @Test
@@ -64,10 +68,36 @@ public class GetUserRoleTest {
 
     Request request = new Request();
     request.getRequest().put(JsonKey.USER_ID,"userId");
+    request.getContext().put(JsonKey.FIELDS,"orgName");
     request.setOperation("getUserRolesById");
+    request.setRequestContext(new RequestContext());
     subject.tell(request, probe.getRef());
     Response response = probe.expectMsgClass(duration("100 second"), Response.class);
     Assert.assertNotNull(response);
+  }
+
+  private Response getRecordsByIds(boolean empty) {
+    Response res = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    if (!empty) {
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.ID, "id1");
+      map.put(JsonKey.IS_DELETED, true);
+      map.put(JsonKey.CHANNEL, "channel1");
+      map.put(JsonKey.IS_TENANT, true);
+      map.put(JsonKey.ORG_NAME,"OrgName1");
+      list.add(map);
+
+      Map<String, Object> map2 = new HashMap<>();
+      map2.put(JsonKey.ID, "id2");
+      map2.put(JsonKey.IS_DELETED, true);
+      map2.put(JsonKey.CHANNEL, "channel2");
+      map2.put(JsonKey.IS_TENANT, true);
+      map2.put(JsonKey.ORG_NAME,"OrgName2");
+      list.add(map2);
+    }
+    res.put(JsonKey.RESPONSE, list);
+    return res;
   }
 
   private Response getCassandraUserRoleResponse() {
@@ -79,13 +109,13 @@ public class GetUserRoleTest {
     orgMap.put(JsonKey.ROLE, "anyRole1");
     orgMap.put(
       JsonKey.SCOPE,
-      "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
+      "[{\"organisationId\":\"id1\"},{\"organisationId\":\"id2\"}]");
     list.add(orgMap);
     orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
     orgMap.put(JsonKey.ROLE, "anyRole2");
-    orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"ORGANISATION_ID\"}]");
+    orgMap.put(JsonKey.SCOPE, "[{\"organisationId\":\"id2\"}]");
     list.add(orgMap);
     orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
@@ -93,7 +123,7 @@ public class GetUserRoleTest {
     orgMap.put(JsonKey.ROLE, "anyRole3");
     orgMap.put(
       JsonKey.SCOPE,
-      "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
+      "[{\"organisationId\":\"id1\"},{\"organisationId\":\"id2\"}]");
     list.add(orgMap);
     response.put(JsonKey.RESPONSE, list);
     return response;
