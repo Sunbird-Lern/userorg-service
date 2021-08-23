@@ -66,9 +66,7 @@ public class OrgDaoImpl implements OrgDao {
       List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
-        responseList.stream().forEach(orgMap -> {
-          enrichOrgDetails(orgMap, context);
-        });
+        responseList.stream().forEach(orgMap -> enrichOrgDetails(orgMap, context));
         return responseList;
       }
     }
