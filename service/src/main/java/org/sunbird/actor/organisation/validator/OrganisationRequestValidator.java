@@ -168,6 +168,8 @@ public class OrganisationRequestValidator {
                     locList =
                             validator.getValidatedLocationIds(finalLocList, context);
                 }
+            }else{
+                locList = finalLocList;
             }
         }
         List<String> locationIdsList =
