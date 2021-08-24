@@ -80,7 +80,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
         deactivateUserFromKC(
             (String) userUpdateRequest.get(JsonKey.ID), request.getRequestContext());
       }
-      logger.info(
+      logger.debug(
           request.getRequestContext(), "TenantMigrationActor:migrateUser user record got updated.");
       // Update user org details
       Response userOrgResponse =
@@ -103,7 +103,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
 
   private String validateOrgExternalIdOrOrgIdAndGetOrgId(
       Map<String, Object> migrateReq, RequestContext context) {
-    logger.info(context, "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called.");
+    logger.debug(context, "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called.");
     String orgId = "";
     if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_ID))
         || StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
@@ -112,7 +112,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
         OrgService orgService = OrgServiceImpl.getInstance();
         Map<String, Object> result = orgService.getOrgById(orgId, context);
         if (MapUtils.isEmpty(result)) {
-          logger.info(
+          logger.debug(
               context,
               "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called. OrgId is Invalid");
           ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
@@ -139,7 +139,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
                 (String) migrateReq.get(JsonKey.CHANNEL),
                 context);
         if (StringUtils.isBlank(orgId)) {
-          logger.info(
+          logger.debug(
               context,
               "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called. OrgExternalId is Invalid");
           ProjectCommonException.throwClientErrorException(
@@ -188,7 +188,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
       Map<String, Object> userDbMap = new HashMap<>();
       userDbMap.put(JsonKey.USER_ID, userId);
       String status = getSSOManager().deactivateUser(userDbMap, context);
-      logger.info(
+      logger.debug(
           context,
           "TenantMigrationActor:deactivateUserFromKC:user status in deactivating Keycloak"
               + status);
@@ -205,7 +205,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
   }
 
   private Response updateUserOrg(Request request, List<Map<String, Object>> userOrgList) {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:updateUserOrg called.");
+    logger.debug(request.getRequestContext(), "TenantMigrationActor:updateUserOrg called.");
     Response response = new Response();
     deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
     Map<String, Object> userDetails = request.getRequest();
@@ -220,7 +220,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
       try {
         createUserOrgRequestAndUpdate(
             (String) userDetails.get(JsonKey.USER_ID), orgId, request.getRequestContext());
-        logger.info(
+        logger.debug(
             request.getRequestContext(),
             "TenantMigrationActor:updateUserOrg user org data got updated.");
       } catch (Exception ex) {
@@ -240,7 +240,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
 
   private void deleteOldUserOrgMapping(
       List<Map<String, Object>> userOrgList, RequestContext context) {
-    logger.info(
+    logger.debug(
         context,
         "TenantMigrationActor:deleteOldUserOrgMapping: delete old user org association started.");
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();

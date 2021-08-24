@@ -64,7 +64,7 @@ public class TenantMigrationActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:onReceive called.");
+    logger.debug(request.getRequestContext(), "TenantMigrationActor:onReceive called.");
     Util.initializeContext(request, StringUtils.capitalize(JsonKey.CONSUMER));
     String operation = request.getOperation();
     if (systemSettingActorRef == null) {
@@ -84,7 +84,7 @@ public class TenantMigrationActor extends BaseActor {
 
   private void migrateSelfDeclaredUser(Request request) {
     Response response = null;
-    logger.info(
+    logger.debug(
         request.getRequestContext(), "TenantMigrationActor:migrateSelfDeclaredUser called.");
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     // update user declaration table status
@@ -100,7 +100,7 @@ public class TenantMigrationActor extends BaseActor {
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(responseList)) {
-      logger.info(
+      logger.debug(
           request.getRequestContext(),
           "TenantMigrationActor:migrateSelfDeclaredUser record not found for user: " + userId);
       ProjectCommonException.throwServerErrorException(
@@ -138,7 +138,7 @@ public class TenantMigrationActor extends BaseActor {
 
   @SuppressWarnings("unchecked")
   private void migrateUser(Request request, boolean notify) {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:migrateUser called.");
+    logger.debug(request.getRequestContext(), "TenantMigrationActor:migrateUser called.");
     Map<String, Object> reqMap = new HashMap<>(request.getRequest());
     Map<String, Object> targetObject = null;
     Response response = null;
@@ -198,7 +198,7 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private Response updateUserExternalIds(Request request) {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:updateUserExternalIds called.");
+    logger.debug(request.getRequestContext(), "TenantMigrationActor:updateUserExternalIds called.");
     Response response = new Response();
     Map<String, Object> userExtIdsReq = new HashMap<>();
     userExtIdsReq.put(JsonKey.ID, request.getRequest().get(JsonKey.USER_ID));
@@ -227,7 +227,7 @@ public class TenantMigrationActor extends BaseActor {
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
           (String) request.getRequest().get(JsonKey.USER_ID),
           request.getRequestContext());
-      logger.info(
+      logger.debug(
           request.getRequestContext(),
           "TenantMigrationActor:updateUserExternalIds user externalIds got updated.");
     } catch (Exception ex) {
