@@ -17,6 +17,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.TenantMigrationService;
 import org.sunbird.sso.SSOManager;
@@ -131,7 +132,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
           }
         }
       } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
-        OrgExternalService orgExternalService = new OrgExternalService();
+        OrgExternalService orgExternalService = new OrgExternalServiceImpl();
         orgId =
             orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
                 (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),

@@ -22,6 +22,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.TenantMigrationService;
 import org.sunbird.service.user.UserService;
@@ -46,14 +47,14 @@ import org.sunbird.service.user.UserService;
 public class TenantMigrationServiceImplTest {
 
   private CassandraOperation cassandraOperation = null;
-  private static OrgExternalService orgExternalService = null;
+  private static OrgExternalServiceImpl orgExternalService;
 
   @Before
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
     PowerMockito.mockStatic(OrgServiceImpl.class);
-    PowerMockito.mockStatic(OrgExternalService.class);
+    PowerMockito.mockStatic(OrgExternalServiceImpl.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     Response updateResponse = new Response();
@@ -66,8 +67,8 @@ public class TenantMigrationServiceImplTest {
     PowerMockito.when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getOrgandLocation());
-    orgExternalService = PowerMockito.mock(OrgExternalService.class);
-    whenNew(OrgExternalService.class).withNoArguments().thenReturn(orgExternalService);
+    orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);
+    whenNew(OrgExternalServiceImpl.class).withNoArguments().thenReturn(orgExternalService);
     when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
             Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn("anyRootOrgId");
