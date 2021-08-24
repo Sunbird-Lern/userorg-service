@@ -11,11 +11,11 @@ public class LogMaskServiceImplTest {
   @Test
   public void maskEmail() {
     HashMap<String, String> emailMaskExpectations =
-        new HashMap<String, String>() {
+        new HashMap<>() {
           {
             put("abc@gmail.com", "ab*@gmail.com");
             put("abcd@yahoo.com", "ab**@yahoo.com");
-            put("abcdefgh@testmail.org", "abcd****@testmail.org");
+            put("abcdefgh@testmail.org", "ab******@testmail.org");
           }
         };
     emailMaskExpectations.forEach(
@@ -27,10 +27,10 @@ public class LogMaskServiceImplTest {
   @Test
   public void maskPhone() {
     HashMap<String, String> phoneMaskExpectations =
-        new HashMap<String, String>() {
+        new HashMap<>() {
           {
-            put("0123456789", "012345678*");
-            put("123-456-789", "123-456-7**");
+            put("0123456789", "01234*****");
+            put("123-456-789", "123-4******");
             put("123", "123");
           }
         };
@@ -43,13 +43,13 @@ public class LogMaskServiceImplTest {
   @Test
   public void maskOTP() {
     HashMap<String, String> phoneMaskExpectations =
-        new HashMap<String, String>() {
+        new HashMap<>() {
           {
-            put("123456", "12345*");
-            put("1234567", "12345**");
+            put("123456", "1234**");
+            put("1234567", "1234***");
 
-            put("1234", "123*");
-            put("123", "123");
+            put("1234", "12**");
+            put("123", "12*");
           }
         };
     phoneMaskExpectations.forEach(

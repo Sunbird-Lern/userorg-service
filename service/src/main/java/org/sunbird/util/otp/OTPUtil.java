@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.keys.JsonKey;
@@ -114,7 +113,8 @@ public final class OTPUtil {
             + " with phone = "
             + otpMap.get(JsonKey.PHONE));
 
-    boolean response = smsProvider.send((String) otpMap.get(JsonKey.PHONE), countryCode, sms);
+    boolean response =
+        smsProvider.send((String) otpMap.get(JsonKey.PHONE), countryCode, sms, context);
 
     logger.info(
         context,

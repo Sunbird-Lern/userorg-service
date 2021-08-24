@@ -17,10 +17,6 @@ public class ActorOperationTest {
         "createTanentPreference", ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
     Assert.assertEquals("createUser", ActorOperations.CREATE_USER.getValue());
     Assert.assertEquals("updateUser", ActorOperations.UPDATE_USER.getValue());
-    Assert.assertEquals("createOrg", ActorOperations.CREATE_ORG.getValue());
-    Assert.assertEquals("updateOrg", ActorOperations.UPDATE_ORG.getValue());
-    Assert.assertEquals("updateOrgStatus", ActorOperations.UPDATE_ORG_STATUS.getValue());
-    Assert.assertEquals("getOrgDetails", ActorOperations.GET_ORG_DETAILS.getValue());
     Assert.assertEquals(
         "updateUserInfoToElastic", ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     Assert.assertEquals("getRoles", ActorOperations.GET_ROLES.getValue());
@@ -39,7 +35,6 @@ public class ActorOperationTest {
     Assert.assertEquals("updateUserOrgES", ActorOperations.UPDATE_USER_ORG_ES.getValue());
     Assert.assertEquals("updateUserRoles", ActorOperations.UPDATE_USER_ROLES_ES.getValue());
     Assert.assertEquals("sync", ActorOperations.SYNC.getValue());
-    Assert.assertEquals("scheduleBulkUpload", ActorOperations.SCHEDULE_BULK_UPLOAD.getValue());
     Assert.assertEquals("fileStorageService", ActorOperations.FILE_STORAGE_SERVICE.getValue());
     Assert.assertEquals("healthCheck", ActorOperations.HEALTH_CHECK.getValue());
     Assert.assertEquals("sendMail", ActorOperations.SEND_MAIL.getValue());

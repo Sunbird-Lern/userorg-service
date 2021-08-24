@@ -10,17 +10,17 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
-import org.sunbird.model.ShadowUser;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.ShadowUser;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.FeedStatus;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {

@@ -5,12 +5,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.request.Request;
+import org.sunbird.service.user.ResetPasswordService;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 
 @ActorConfig(
@@ -18,6 +19,8 @@ import org.sunbird.util.user.UserActorOperations;
   asyncTasks = {"processOnBoardingMailAndSms", "processPasswordResetMailAndSms"}
 )
 public class UserOnboardingNotificationActor extends BaseActor {
+
+  private ResetPasswordService resetPasswordService = new ResetPasswordService();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -36,7 +39,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
     UserUtility.decryptUserData(requestMap);
     requestMap.put(JsonKey.USERNAME, requestMap.get(JsonKey.USERNAME));
     requestMap.put(JsonKey.REDIRECT_URI, Util.getSunbirdWebUrlPerTenent(requestMap));
-    Util.getUserRequiredActionLink(requestMap, request.getRequestContext());
+    resetPasswordService.getUserRequiredActionLink(requestMap, true, request.getRequestContext());
     if (request
         .getOperation()
         .equals(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue())) {
@@ -57,7 +60,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
     }
 
     if (StringUtils.isNotBlank((String) requestMap.get(JsonKey.PHONE))) {
-      Util.sendSMS(requestMap);
+      Util.sendSMS(requestMap, request.getRequestContext());
     }
     SSOManager ssoManager = SSOServiceFactory.getInstance();
     if (StringUtils.isBlank((String) requestMap.get(JsonKey.PASSWORD))) {

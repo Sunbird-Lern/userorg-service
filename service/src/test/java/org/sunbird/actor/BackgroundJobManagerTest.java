@@ -1,20 +1,17 @@
 package org.sunbird.actor;
 
-import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -28,8 +25,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
-import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
@@ -51,6 +46,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@Ignore
 public class BackgroundJobManagerTest {
   private ActorSystem system = ActorSystem.create("system");
   private static final Props props = Props.create(BackgroundJobManager.class);
@@ -78,7 +74,7 @@ public class BackgroundJobManagerTest {
         .thenReturn(promise.future());
   }
 
-  @Test
+  /*@Test
   public void testInsertOrgInfoToEs() {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
@@ -110,7 +106,7 @@ public class BackgroundJobManagerTest {
     subject.tell(reqObj, probe.getRef());
     probe.expectNoMessage();
     assertTrue(true);
-  }
+  }*/
 
   private static Response cassandraGetRecord() {
     Response response = new Response();

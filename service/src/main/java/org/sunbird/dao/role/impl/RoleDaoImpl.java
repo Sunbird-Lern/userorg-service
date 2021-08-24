@@ -9,6 +9,7 @@ import org.sunbird.dao.role.RoleDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.Role;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.Util;
 
@@ -27,10 +28,10 @@ public class RoleDaoImpl implements RoleDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Role> getRoles() {
+  public List<Role> getRoles(RequestContext context) {
     Response roleResults =
-        getCassandraOperation().getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, null);
-    TypeReference<List<Role>> roleMapType = new TypeReference<List<Role>>() {};
+        getCassandraOperation().getAllRecords(Util.KEY_SPACE_NAME, TABLE_NAME, context);
+    TypeReference<List<Role>> roleMapType = new TypeReference<>() {};
     List<Map<String, Object>> roleMapList =
         (List<Map<String, Object>>) roleResults.get(JsonKey.RESPONSE);
     List<Role> roleList = mapper.convertValue(roleMapList, roleMapType);

@@ -22,7 +22,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
@@ -30,10 +29,6 @@ import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
-import org.sunbird.url.URLShortner;
-import org.sunbird.url.URLShortnerImpl;
-import org.sunbird.quartzscheduler.SchedulerManager;
 import scala.concurrent.Future;
 
 /**
@@ -49,9 +44,7 @@ public final class Util {
   public static final int DEFAULT_ELASTIC_DATA_LIMIT = 10000;
   public static final String KEY_SPACE_NAME = "sunbird";
   private static Properties prop = new Properties();
-  private static Map<String, String> headers = new HashMap<>();
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
-  private static final String SUNBIRD_WEB_URL = "sunbird_web_url";
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
@@ -64,10 +57,7 @@ public final class Util {
 
   static {
     initializeOrgStatusTransition();
-    initializeDBProperty(); // EkStep HttpClient headers init
-    headers.put("content-type", "application/json");
-    headers.put("accept", "application/json");
-    new Thread(() -> SchedulerManager.getInstance()).start();
+    initializeDBProperty();
   }
 
   private Util() {}
@@ -310,118 +300,6 @@ public final class Util {
     return null;
   }
 
-  /** @param req Map<String,Object> */
-  public static boolean registerChannel(Map<String, Object> req, RequestContext context) {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headerMap, context);
-    String reqString = "";
-    String regStatus = "";
-    try {
-      logger.info(
-          context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
-      Map<String, Object> map = new HashMap<>();
-      Map<String, Object> reqMap = new HashMap<>();
-      Map<String, Object> channelMap = new HashMap<>();
-      channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
-      channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
-      if (req.containsKey(JsonKey.LICENSE)
-          && StringUtils.isNotBlank((String) req.get(JsonKey.LICENSE))) {
-        channelMap.put(JsonKey.DEFAULT_LICENSE, req.get(JsonKey.LICENSE));
-      }
-
-      String defaultFramework = (String) req.get(JsonKey.DEFAULT_FRAMEWORK);
-      if (StringUtils.isNotBlank(defaultFramework))
-        channelMap.put(JsonKey.DEFAULT_FRAMEWORK, defaultFramework);
-      reqMap.put(JsonKey.CHANNEL, channelMap);
-      map.put(JsonKey.REQUEST, reqMap);
-
-      reqString = mapper.writeValueAsString(map);
-      logger.info(
-          context, "Util:registerChannel: Channel registration request data = " + reqString);
-      regStatus =
-          HttpClientUtil.post(
-              (ekStepBaseUrl
-                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
-              reqString,
-              headerMap);
-      logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
-    } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while registering channel in ekstep." + e.getMessage(), e);
-    }
-
-    return regStatus.contains("OK");
-  }
-
-  /** @param req Map<String,Object> */
-  public static boolean updateChannel(Map<String, Object> req, RequestContext context) {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headers, context);
-    String reqString = "";
-    String regStatus = "";
-    try {
-      logger.info(
-          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
-      Map<String, Object> map = new HashMap<>();
-      Map<String, Object> reqMap = new HashMap<>();
-      Map<String, Object> channelMap = new HashMap<>();
-      channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
-      channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
-      String license = (String) req.get(JsonKey.LICENSE);
-      if (StringUtils.isNotBlank(license)) {
-        channelMap.put(JsonKey.DEFAULT_LICENSE, license);
-      }
-      reqMap.put(JsonKey.CHANNEL, channelMap);
-      map.put(JsonKey.REQUEST, reqMap);
-
-      reqString = mapper.writeValueAsString(map);
-
-      regStatus =
-          HttpClientUtil.patch(
-              (ekStepBaseUrl
-                      + PropertiesCache.getInstance()
-                          .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
-                  + "/"
-                  + req.get(JsonKey.ID),
-              reqString,
-              headerMap);
-      logger.info(
-          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
-    } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
-    }
-    return regStatus.contains("OK");
-  }
-
   public static void initializeContext(Request request, String env) {
     Map<String, Object> requestContext = request.getContext();
     env = StringUtils.isNotBlank(env) ? env : "";
@@ -458,11 +336,7 @@ public final class Util {
   public static String getSunbirdWebUrlPerTenent(Map<String, Object> userMap) {
     StringBuilder webUrl = new StringBuilder();
     String slug = "";
-    if (StringUtils.isBlank(System.getenv(SUNBIRD_WEB_URL))) {
-      webUrl.append(propertiesCache.getProperty(SUNBIRD_WEB_URL));
-    } else {
-      webUrl.append(System.getenv(SUNBIRD_WEB_URL));
-    }
+    webUrl.append(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_WEB_URL));
     if (!StringUtils.isBlank((String) userMap.get(JsonKey.ROOT_ORG_ID))) {
       Map<String, Object> orgMap = getOrgDetails((String) userMap.get(JsonKey.ROOT_ORG_ID), null);
       slug = (String) orgMap.get(JsonKey.SLUG);
@@ -470,23 +344,6 @@ public final class Util {
     if (!StringUtils.isBlank(slug)) {
       webUrl.append("/" + slug);
     }
-    return webUrl.toString();
-  }
-
-  /**
-   * As per requirement this page need to be redirect to /resources always.
-   *
-   * @return url of login page
-   */
-  public static String getSunbirdLoginUrl() {
-    StringBuilder webUrl = new StringBuilder();
-    String slug = "/resources";
-    if (StringUtils.isBlank(System.getenv(SUNBIRD_WEB_URL))) {
-      webUrl.append(propertiesCache.getProperty(SUNBIRD_WEB_URL));
-    } else {
-      webUrl.append(System.getenv(SUNBIRD_WEB_URL));
-    }
-    webUrl.append(slug);
     return webUrl.toString();
   }
 
@@ -916,51 +773,13 @@ public final class Util {
     }
   }
 
-  public static String getUserRequiredActionLink(
-      Map<String, Object> templateMap, boolean isUrlShortRequired, RequestContext context) {
-    URLShortner urlShortner = new URLShortnerImpl();
-    String redirectUri =
-        StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
-            ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
-            : null;
-    logger.info(context, "Util:getUserRequiredActionLink redirectURI = " + redirectUri);
-    if (StringUtils.isBlank((String) templateMap.get(JsonKey.PASSWORD))) {
-      String url =
-          KeycloakRequiredActionLinkUtil.getLink(
-              (String) templateMap.get(JsonKey.USERNAME),
-              redirectUri,
-              KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD,
-              context);
-
-      templateMap.put(
-          JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
-      return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
-
-    } else {
-      String url =
-          KeycloakRequiredActionLinkUtil.getLink(
-              (String) templateMap.get(JsonKey.USERNAME),
-              redirectUri,
-              KeycloakRequiredActionLinkUtil.VERIFY_EMAIL,
-              context);
-      templateMap.put(
-          JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
-      return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
-    }
-  }
-
-  public static void getUserRequiredActionLink(
-      Map<String, Object> templateMap, RequestContext context) {
-    getUserRequiredActionLink(templateMap, true, context);
-  }
-
-  public static void sendSMS(Map<String, Object> userMap) {
+  public static void sendSMS(Map<String, Object> userMap, RequestContext context) {
     if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PHONE))) {
       String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
       setRequiredActionLink(userMap);
       if (StringUtils.isBlank((String) userMap.get(JsonKey.SET_PASSWORD_LINK))
           && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
-        logger.info("Util:sendSMS: SMS not sent as generated link is empty");
+        logger.info(context, "Util:sendSMS: SMS not sent as generated link is empty");
         return;
       }
       Map<String, String> smsTemplate = new HashMap<>();
@@ -971,8 +790,8 @@ public final class Util {
       if (StringUtils.isBlank(sms)) {
         sms = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_WELCOME_MSG);
       }
-      logger.info("SMS text : " + sms);
-      String countryCode = "";
+      logger.debug(context, "SMS text : " + sms);
+      String countryCode;
       if (StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
         countryCode =
             PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE);
@@ -980,14 +799,10 @@ public final class Util {
         countryCode = (String) userMap.get(JsonKey.COUNTRY_CODE);
       }
       ISmsProvider smsProvider = SMSFactory.getInstance();
-      logger.info("SMS text : " + sms + " with phone " + (String) userMap.get(JsonKey.PHONE));
-      boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms);
-      logger.info("Response from smsProvider : " + response);
-      if (response) {
-        logger.info("Welcome Message sent successfully to ." + (String) userMap.get(JsonKey.PHONE));
-      } else {
-        logger.info("Welcome Message failed for ." + (String) userMap.get(JsonKey.PHONE));
-      }
+      logger.debug(context, "SMS text : " + sms + " with phone " + userMap.get(JsonKey.PHONE));
+      boolean response =
+          smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
+      logger.info(context, "Response from smsProvider : " + response);
     }
   }
 

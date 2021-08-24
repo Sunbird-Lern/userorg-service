@@ -12,6 +12,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
+import org.sunbird.request.RequestContext;
 
 public class NICGatewaySmsProvider implements ISmsProvider {
   private static LoggerUtil logger = new LoggerUtil(NICGatewaySmsProvider.class);
@@ -28,27 +29,28 @@ public class NICGatewaySmsProvider implements ISmsProvider {
   }
 
   @Override
-  public boolean send(String phoneNumber, String smsText) {
-    return sendSms(phoneNumber, smsText);
+  public boolean send(String phoneNumber, String smsText, RequestContext context) {
+    return sendSms(phoneNumber, smsText, context);
   }
 
   @Override
-  public boolean send(String phoneNumber, String countryCode, String smsText) {
-    return sendSms(phoneNumber, smsText);
+  public boolean send(
+      String phoneNumber, String countryCode, String smsText, RequestContext context) {
+    return sendSms(phoneNumber, smsText, context);
   }
 
   @Override
-  public boolean send(List<String> phoneNumbers, String smsText) {
+  public boolean send(List<String> phoneNumbers, String smsText, RequestContext context) {
     phoneNumbers
         .stream()
         .forEach(
             phone -> {
-              sendSms(phone, smsText);
+              sendSms(phone, smsText, context);
             });
     return true;
   }
 
-  public boolean sendSms(String mobileNumber, String smsText) {
+  public boolean sendSms(String mobileNumber, String smsText, RequestContext context) {
     try {
       String recipient = mobileNumber;
       if (recipient.length() == 10) {
@@ -79,13 +81,13 @@ public class NICGatewaySmsProvider implements ISmsProvider {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> resultMap;
         resultMap = mapper.readValue(response, Map.class);
-        logger.info("NICGatewaySmsProvider:Result:" + resultMap);
+        logger.info(context, "NICGatewaySmsProvider:Result:" + resultMap);
         return true;
       } else {
         return false;
       }
     } catch (Exception ex) {
-      logger.error("Exception occurred while sending sms.", ex);
+      logger.error(context, "Exception occurred while sending sms.", ex);
       return false;
     }
   }

@@ -12,17 +12,17 @@ import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserSelfDeclarationService;
-import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserSelfDeclarationService;
+import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 
 @ActorConfig(

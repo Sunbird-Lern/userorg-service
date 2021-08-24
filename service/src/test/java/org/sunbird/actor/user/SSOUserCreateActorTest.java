@@ -14,10 +14,10 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class SSOUserCreateActorTest extends UserManagementActorTestBase {

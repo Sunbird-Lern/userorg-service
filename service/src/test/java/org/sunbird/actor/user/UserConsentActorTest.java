@@ -2,7 +2,8 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -23,9 +24,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.userconsent.UserConsentActor;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
@@ -38,14 +36,7 @@ import org.sunbird.service.userconsent.UserConsentService;
 import org.sunbird.service.userconsent.impl.UserConsentServiceImpl;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  ServiceFactory.class,
-  CassandraOperationImpl.class,
-  ElasticSearchRestHighImpl.class,
-  EsClientFactory.class,
-  UserConsentServiceImpl.class,
-  UserServiceImpl.class
-})
+@PrepareForTest({ServiceFactory.class, UserConsentServiceImpl.class, UserServiceImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -58,21 +49,13 @@ public class UserConsentActorTest {
   private final Props props = Props.create(UserConsentActor.class);
   public static CassandraOperationImpl cassandraOperation;
   public static UserService userService;
-  private static ElasticSearchService esUtil;
+  public static UserConsentService userConsentService;
 
   @Before
   public void setUp() {
-    PowerMockito.mockStatic(ServiceFactory.class);
-    cassandraOperation = mock(CassandraOperationImpl.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-
-    PowerMockito.mockStatic(EsClientFactory.class);
-    esUtil = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
-
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(getOrg());
+    PowerMockito.mockStatic(UserConsentServiceImpl.class);
+    userConsentService = PowerMockito.mock(UserConsentServiceImpl.class);
+    PowerMockito.when(UserConsentServiceImpl.getInstance()).thenReturn(userConsentService);
   }
 
   public static Response getSuccessResponse() {
@@ -146,42 +129,12 @@ public class UserConsentActorTest {
   }
 
   @Test
-  public void getUserConsentTestSuccess() {
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSuccessResponse());
-
-    subject.tell(getUserConsentRequest(), probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
-  }
-
-  @Test
-  public void getUserConsentTestNotFound() {
-    TestKit probe = new TestKit(system);
-    ActorRef subject = system.actorOf(props);
-
-    when(cassandraOperation.getRecordsByProperties(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSuccessNoRecordResponse());
-
-    subject.tell(getUserConsentRequest(), probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
-  }
-
-  @Test
   public void updateUserConsentTest() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
 
-    PowerMockito.mockStatic(UserConsentServiceImpl.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
-    UserConsentService userConsentService = PowerMockito.mock(UserConsentServiceImpl.class);
-    PowerMockito.when(UserConsentServiceImpl.getInstance()).thenReturn(userConsentService);
+
     userService = PowerMockito.mock(UserServiceImpl.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
 
@@ -198,6 +151,33 @@ public class UserConsentActorTest {
 
     subject.tell(updateUserConsentRequest(), probe.getRef());
     Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+    Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+  }
+
+  @Test
+  public void getUserConsentTestSuccess() {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Map<String, Object> consentMap = new HashMap();
+    List<Map<String, Object>> consentList = new ArrayList<>();
+    consentMap.put(JsonKey.ID, "someID");
+    consentMap.put(JsonKey.CONSENT_USER_ID, "someCosentUserID");
+    consentMap.put(JsonKey.CONSENT_CONSUMER_ID, "someCosentConsumerID");
+    consentMap.put(JsonKey.CONSENT_OBJECT_ID, "CONSENT_OBJECT_ID");
+    consentMap.put(JsonKey.CONSENT_CONSUMER_TYPE, "organisation");
+    consentMap.put(JsonKey.CONSENT_OBJECT_TYPE, "organisation");
+    consentMap.put(JsonKey.STATUS, "active");
+    consentMap.put(JsonKey.CONSENT_EXPIRY, "CONSENT_EXPIRY");
+    consentMap.put(JsonKey.CATEGORIES, "collection");
+    consentMap.put(JsonKey.CONSENT_CREATED_ON, "CONSENT_CREATED_ON");
+    consentMap.put(JsonKey.CONSENT_LAST_UPDATED_ON, "CONSENT_LAST_UPDATED_ON");
+    consentList.add(consentMap);
+    when(userConsentService.getConsent(Mockito.any())).thenReturn(consentList);
+
+    subject.tell(getUserConsentRequest(), probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
   }
 }

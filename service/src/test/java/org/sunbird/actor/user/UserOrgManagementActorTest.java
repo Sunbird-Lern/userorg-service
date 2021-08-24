@@ -20,10 +20,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({Util.class, UserUtility.class})
@@ -114,7 +114,6 @@ public class UserOrgManagementActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      System.out.println("the error" + res.getCode());
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }

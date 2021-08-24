@@ -46,15 +46,15 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.models.location.Location;
-import org.sunbird.models.organisation.Organisation;
+import org.sunbird.model.location.Location;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
-import org.sunbird.service.organisation.OrgExternalService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
@@ -89,7 +89,7 @@ import scala.concurrent.Promise;
   BaseMWService.class,
   SunbirdMWService.class,
   ActorSelection.class,
-  OrgExternalService.class,
+  OrgExternalServiceImpl.class,
   LocationServiceImpl.class,
   UserRoleServiceImpl.class
 })
@@ -183,7 +183,8 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(LocationServiceImpl.class);
     locationService = mock(LocationServiceImpl.class);
     PowerMockito.when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    PowerMockito.when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationIdType());
 
     PowerMockito.mockStatic(UserServiceImpl.class);

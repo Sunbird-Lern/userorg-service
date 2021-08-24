@@ -24,8 +24,12 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.notification.sms.provider.ISmsProvider;
+import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -35,6 +39,8 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   ElasticSearchHelper.class,
   CassandraOperationImpl.class,
+  SMSFactory.class,
+  ISmsProvider.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -46,6 +52,7 @@ import scala.concurrent.Promise;
 public class UtilTest {
   private static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Before
   public void beforeEachTest() {
@@ -95,7 +102,7 @@ public class UtilTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = Util.registerChannel(map, new RequestContext());
+    Boolean bool = orgService.registerChannel(map, new RequestContext());
     Assert.assertNotNull(bool);
   }
 
@@ -105,7 +112,7 @@ public class UtilTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = Util.updateChannel(map, new RequestContext());
+    Boolean bool = orgService.updateChannel(map, new RequestContext());
     Assert.assertNotNull(bool);
   }
 
@@ -138,6 +145,42 @@ public class UtilTest {
     when(cassandraOperationImpl.insertRecord(JsonKey.SUNBIRD, "user_organisation", map, null))
         .thenReturn(response);
     Assert.assertNotNull(response);
+  }
+
+  @Test
+  public void sendSMSTest() {
+    PowerMockito.mockStatic(SMSFactory.class);
+    ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
+    when(SMSFactory.getInstance()).thenReturn(smsProvider);
+    when(smsProvider.send(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(true);
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.PHONE, "9999999999");
+    map.put(JsonKey.SET_PASSWORD_LINK, "resetPasswordLink");
+    map.put(JsonKey.VERIFY_EMAIL_LINK, "emailVerifyLink");
+    Util.sendSMS(map, new RequestContext());
+    Assert.assertNotNull(map);
+  }
+
+  @Test
+  public void sendSMSTest2() {
+    PowerMockito.mockStatic(SMSFactory.class);
+    ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
+    when(SMSFactory.getInstance()).thenReturn(smsProvider);
+    when(smsProvider.send(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(true);
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.PHONE, "9999999999");
+    Util.sendSMS(map, new RequestContext());
+    Assert.assertNotNull(map);
   }
 
   public static Map<String, Object> getEsResponseMap() {

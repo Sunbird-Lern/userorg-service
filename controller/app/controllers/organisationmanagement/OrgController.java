@@ -3,6 +3,7 @@ package controllers.organisationmanagement;
 import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
 import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.validator.BaseRequestValidator;
@@ -14,7 +15,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> createOrg(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.CREATE_ORG.getValue(),
+        OrganisationActorOperation.CREATE_ORG.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateCreateOrgRequest((Request) orgRequest);
@@ -26,7 +27,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> updateOrg(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.UPDATE_ORG.getValue(),
+        OrganisationActorOperation.UPDATE_ORG.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateUpdateOrgRequest((Request) orgRequest);
@@ -38,7 +39,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> updateOrgStatus(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.UPDATE_ORG_STATUS.getValue(),
+        OrganisationActorOperation.UPDATE_ORG_STATUS.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateUpdateOrgStatusRequest((Request) orgRequest);
@@ -50,7 +51,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> getOrgDetails(Http.Request httpRequest) {
     return handleRequest(
-        ActorOperations.GET_ORG_DETAILS.getValue(),
+        OrganisationActorOperation.GET_ORG_DETAILS.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
           new OrgRequestValidator().validateOrgReference((Request) orgRequest);

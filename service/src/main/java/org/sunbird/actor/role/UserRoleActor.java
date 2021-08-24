@@ -1,21 +1,20 @@
 package org.sunbird.actor.role;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.UserBaseActor;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.role.RoleService;
-import org.sunbird.service.user.UserRoleService;
-import org.sunbird.service.user.impl.UserRoleServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.role.RoleService;
+import org.sunbird.service.user.UserRoleService;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 
 @ActorConfig(
   tasks = {"getRoles", "assignRoles", "assignRolesV2"},
@@ -31,12 +30,10 @@ public class UserRoleActor extends UserBaseActor {
 
     switch (operation) {
       case "getRoles":
-        getRoles();
+        getRoles(request.getRequestContext());
         break;
 
       case "assignRoles":
-        assignRoles(request);
-        break;
 
       case "assignRolesV2":
         assignRoles(request);
@@ -47,10 +44,10 @@ public class UserRoleActor extends UserBaseActor {
     }
   }
 
-  private void getRoles() {
+  private void getRoles(RequestContext context) {
     Response response = DataCacheHandler.getRoleResponse();
     if (response == null) {
-      response = RoleService.getUserRoles();
+      response = new RoleService().getUserRoles(context);
       DataCacheHandler.setRoleResponse(response);
     }
     sender().tell(response, self());
@@ -59,7 +56,7 @@ public class UserRoleActor extends UserBaseActor {
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
     UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-    List<Map<String, Object>> userRolesList = new ArrayList<>();
+    List<Map<String, Object>> userRolesList;
 
     Map<String, Object> requestMap = actorMessage.getRequest();
     requestMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.USER_ID));
@@ -100,7 +97,7 @@ public class UserRoleActor extends UserBaseActor {
     request.getRequest().put(JsonKey.TYPE, type);
     request.getRequest().put(JsonKey.USER_ID, userId);
     request.getRequest().put(JsonKey.ROLES, userRolesList);
-    logger.info(context, "UserRoleActor:syncUserRoles: Syncing to ES");
+    logger.debug(context, "UserRoleActor:syncUserRoles: Syncing to ES");
     try {
       tellToAnother(request);
     } catch (Exception ex) {

@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.client.location.LocationClient;
@@ -17,8 +16,8 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
-import org.sunbird.models.location.Location;
-import org.sunbird.models.location.apirequest.UpsertLocationRequest;
+import org.sunbird.model.location.Location;
+import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
