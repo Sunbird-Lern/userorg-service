@@ -93,7 +93,10 @@ public class NICGatewaySmsProvider implements ISmsProvider {
 
   /** this method will do the SMS properties initialization. */
   public static boolean init() {
-    baseUrl = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_base_url");
+    baseUrl = System.getenv("nic_sms_gateway_provider_base_url");
+    if (JsonUtil.isStringNullOREmpty(baseUrl)) {
+      baseUrl = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_base_url");
+    }
     senderId = System.getenv("nic_sms_gateway_provider_senderid");
     if (JsonUtil.isStringNullOREmpty(senderId)) {
       senderId = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_senderid");
