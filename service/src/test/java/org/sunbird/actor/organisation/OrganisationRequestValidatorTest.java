@@ -95,19 +95,6 @@ public class OrganisationRequestValidatorTest {
         validator.validateOrgLocation(requestMap, new RequestContext());
     }
 
-    @Test
-    public void validateOrgLocationWithOrgLocationTest() {
-        OrganisationRequestValidator validator = new OrganisationRequestValidator();
-        List codeList = getOrgLocationLists();
-        Map requestMap = new HashMap<String,Object>();
-        requestMap.put(JsonKey.ORG_LOCATION,codeList);
-        try {
-        validator.validateOrgLocation(requestMap, new RequestContext());
-        } catch (ProjectCommonException ex) {
-            Assert.assertNotNull(ex);
-            Assert.assertEquals(ex.getCode(), ResponseCode.invalidParameterValue.getErrorCode());
-        }
-    }
 
     @Test
     public void validateChannelInvalidChannelTest(){
@@ -135,6 +122,27 @@ public class OrganisationRequestValidatorTest {
             Assert.assertEquals(ex.getCode(), ResponseCode.errorInactiveOrg.getErrorCode());
         }
     }
+    @Test
+    public void validateOrgLocationWithInvalidOrgLocationTest() {
+        OrganisationRequestValidator validator = new OrganisationRequestValidator();
+        List codeList = getInvalidOrgLocationLists();
+        Map requestMap = new HashMap<String,Object>();
+        requestMap.put(JsonKey.ORG_LOCATION,codeList);
+        try {
+            validator.validateOrgLocation(requestMap, new RequestContext());
+        } catch (ProjectCommonException ex) {
+            Assert.assertNotNull(ex);
+            Assert.assertEquals(ex.getCode(), ResponseCode.invalidParameterValue.getErrorCode());
+        }
+    }
+    @Test
+    public void validateOrgLocationWithOrgLocationTest() {
+        OrganisationRequestValidator validator = new OrganisationRequestValidator();
+        List codeList = getOrgLocationLists();
+        Map requestMap = new HashMap<String,Object>();
+        requestMap.put(JsonKey.ORG_LOCATION,codeList);
+        validator.validateOrgLocation(requestMap, new RequestContext());
+    }
     public static List<String> getLocationIdsLists() {
         List<String> locationIds = new ArrayList<>();
         locationIds.add("location1");
@@ -147,7 +155,19 @@ public class OrganisationRequestValidatorTest {
         locationCodes.add("code2");
         return locationCodes;
     }
-
+    public static List<Map<String, String>> getInvalidOrgLocationLists() {
+        List<Map<String, String>> locationCodes = new ArrayList<>();
+        Map map = new HashMap<String,Object>();
+        map.put(JsonKey.ID,"location3");
+        map.put(JsonKey.TYPE,"state");
+        locationCodes.add(map);
+        Map map1 = new HashMap<String,Object>();
+        map1.put(JsonKey.ID,"location5");
+        map1.put(JsonKey.TYPE,"district");
+        map1.put(JsonKey.PARENT_ID,"location4");
+        locationCodes.add(map1);
+        return locationCodes;
+    }
     public static List<Map<String, String>> getOrgLocationLists() {
         List<Map<String, String>> locationCodes = new ArrayList<>();
         Map map = new HashMap<String,Object>();
