@@ -322,27 +322,6 @@ public class BaseController extends Controller {
   }
 
   /**
-   * This method will create failure response
-   *
-   * @param request Request
-   * @param code ResponseCode
-   * @param headerCode ResponseCode
-   * @return Response
-   */
-  public static Response createFailureResponse(
-      Request request, ResponseCode code, ResponseCode headerCode) {
-
-    Response response = new Response();
-    response.setVer(getApiVersion(request.path()));
-    response.setId(getApiResponseId(request));
-    response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(headerCode);
-    response.setParams(
-        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
-    return response;
-  }
-
-  /**
    * This method will create data for success response.
    *
    * @param request play.mvc.Http.Request
@@ -383,7 +362,6 @@ public class BaseController extends Controller {
    * @return String
    */
   public static String getApiVersion(String request) {
-
     return request.split("[/]")[1];
   }
 
@@ -833,8 +811,10 @@ public class BaseController extends Controller {
   public void setContextData(Http.Request httpReq, org.sunbird.request.Request reqObj) {
     try {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
+      logger.info("Request Context Info : "+context);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
+          objectMapper.readValue(context, new TypeReference<>() {
+          });
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));

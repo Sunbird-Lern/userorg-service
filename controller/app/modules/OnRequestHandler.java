@@ -2,14 +2,6 @@ package modules;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controllers.BaseController;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.WeakHashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -26,13 +18,25 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import util.Attrs;
+import util.Common;
 import util.RequestInterceptor;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
+import static util.Common.createResponseParamObj;
 
 public class OnRequestHandler implements ActionCreator {
 
   private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
   private ObjectMapper mapper = new ObjectMapper();
   public static boolean isServiceHealthy = true;
+  private static final String debugEnabled = "false";
 
   @Override
   public Action createAction(Http.Request request, Method method) {
@@ -44,8 +48,8 @@ public class OnRequestHandler implements ActionCreator {
       UUID uuid = UUID.randomUUID();
       requestId = uuid.toString();
     }
-    logger.info("Original Url: " + request.uri());
-    logger.info("Original Captcha: " + request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
+    logger.debug("Original Url: " + request.uri());
+    logger.debug("Original Captcha: " + request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
 
     return new Action.Simple() {
       @Override
@@ -61,13 +65,6 @@ public class OnRequestHandler implements ActionCreator {
               request.addAttr(
                   Attrs.MANAGED_FOR, (String) userAuthentication.get(JsonKey.MANAGED_FOR));
         }
-        if (userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY) != null) {
-          request =
-              request.addAttr(
-                  Attrs.AUTH_WITH_MASTER_KEY,
-                  (String) userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY));
-        }
-
         // call method to set all the required params for the telemetry event(log)...
         request = initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
@@ -96,7 +93,7 @@ public class OnRequestHandler implements ActionCreator {
         && !request.path().endsWith(JsonKey.HEALTH)) {
       if (!isServiceHealthy) {
         ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;
-        Response resp = BaseController.createFailureResponse(request, headerCode, headerCode);
+        Response resp = createFailureResponse(request, headerCode, headerCode);
         return CompletableFuture.completedFuture(
             Results.status(ResponseCode.SERVICE_UNAVAILABLE.getResponseCode(), Json.toJson(resp)));
       }
@@ -114,14 +111,13 @@ public class OnRequestHandler implements ActionCreator {
    */
   public CompletionStage<Result> onDataValidationError(
       Http.Request request, String errorMessage, int responseCode) {
-    logger.info("Data error found--" + errorMessage);
-    ResponseCode code = ResponseCode.getResponse(errorMessage);
-    ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
-    Response resp = BaseController.createFailureResponse(request, code, headerCode);
+    String context = Common.getFromRequest(request, Attrs.CONTEXT);
+    logger.info("onDataValidationError: Data error found with context info : "+context +" , Error Msg: " + errorMessage);
+    Response resp = createFailureResponse(request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  private Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();
@@ -214,6 +210,25 @@ public class OnRequestHandler implements ActionCreator {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     return request;
+  }
+
+  /**
+   * This method will create failure response
+   *
+   * @param request Request
+   * @param code ResponseCode
+   * @param headerCode ResponseCode
+   * @return Response
+   */
+  private static Response createFailureResponse(
+    Http.Request request, ResponseCode code, ResponseCode headerCode) {
+    Response response = new Response();
+    response.setVer(request.path().split("[/]")[1]);
+    response.setTs(ProjectUtil.getFormattedDate());
+    response.setResponseCode(headerCode);
+    response.setParams(
+      createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
+    return response;
   }
 
   private String getEnv(Http.Request request) {

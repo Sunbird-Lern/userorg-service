@@ -146,6 +146,7 @@ public class RequestInterceptor {
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
                 managedForId = managedFor;
               } else {
+                logger.info("Invalid Token : "+accessToken.get());
                 clientId = JsonKey.UNAUTHORIZED;
               }
             }

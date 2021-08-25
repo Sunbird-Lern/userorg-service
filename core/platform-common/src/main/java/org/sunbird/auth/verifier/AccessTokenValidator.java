@@ -94,7 +94,10 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyUserAccessToken: verify ", ex);
+      logger.error("Exception in verifyUserAccessToken: Token : "+token, ex);
+    }
+    if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
+      logger.info("verifyUserAccessToken: Invalid User Token: "+token);
     }
     return userId;
   }
