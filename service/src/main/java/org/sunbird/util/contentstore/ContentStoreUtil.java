@@ -42,7 +42,7 @@ public class ContentStoreUtil {
               + ProjectUtil.getConfigValue(urlPath)
               + "/"
               + id;
-      String response = HttpClientUtil.get(requestUrl, headers);
+      String response = HttpClientUtil.get(requestUrl, headers, null);
 
       resultMap = mapper.readValue(response, Map.class);
       if (!((String) resultMap.get(JsonKey.RESPONSE_CODE)).equalsIgnoreCase(JsonKey.OK)) {

@@ -379,16 +379,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testSendGetRequestSuccessWithEkStepBaseUrl() throws Exception {
-    String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-    if (StringUtils.isBlank(ekStepBaseUrl)) {
-      ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-    }
-    String response = HttpClientUtil.get(ekStepBaseUrl + "/search/health", headers);
-    assertNotNull(response);
-  }
-
-  @Test
   public void testGetLmsUserIdSuccessWithoutFedUserId() {
     String userid = ProjectUtil.getLmsUserId("1234567890");
     assertEquals("1234567890", userid);

@@ -25,6 +25,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import scala.concurrent.Promise;
@@ -65,7 +66,7 @@ public class OrganisationBackgroundActorTest {
                 .thenReturn("anyString");
 
         PowerMockito.mockStatic(HttpClientUtil.class);
-        when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+        when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
                 .thenReturn("anyStatus");
 
         PowerMockito.mockStatic(EsClientFactory.class);

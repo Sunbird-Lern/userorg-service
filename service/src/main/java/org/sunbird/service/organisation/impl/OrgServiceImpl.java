@@ -171,7 +171,8 @@ public class OrgServiceImpl implements OrgService {
                       (ekStepBaseUrl
                               + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
                       reqString,
-                      headerMap);
+                      headerMap,
+                      context);
       logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
     } catch (Exception e) {
       logger.error(
@@ -229,7 +230,8 @@ public class OrgServiceImpl implements OrgService {
                               + "/"
                               + req.get(JsonKey.ID),
                       reqString,
-                      headerMap);
+                      headerMap,
+                      context);
       logger.info(
               context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
