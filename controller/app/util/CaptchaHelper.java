@@ -46,7 +46,7 @@ public class CaptchaHelper {
               .toString();
       logger.info("Calling Api: " + url);
       logger.info("Captcha: " + captcha);
-      String response = HttpClientUtil.postFormData(url, requestMap, headers);
+      String response = HttpClientUtil.postFormData(url, requestMap, headers, null);
       Map<String, Object> responseMap = mapper.readValue(response, Map.class);
       isCaptchaValid = (boolean) responseMap.get("success");
       if (!isCaptchaValid) {
