@@ -25,12 +25,15 @@ public class AccessTokenValidator {
     Map<Object, Object> headerData =
         mapper.readValue(new String(decodeFromBase64(header)), Map.class);
     String keyId = headerData.get("kid").toString();
+    logger.info("**learner calling accesstoken verifyRSASign()");
     boolean isValid =
         CryptoUtil.verifyRSASign(
             payLoad,
             decodeFromBase64(signature),
             KeyManager.getPublicKey(keyId).getPublicKey(),
             JsonKey.SHA_256_WITH_RSA);
+
+    logger.info("**learner accesstoken verifyRSASign() :" + isValid);
     if (isValid) {
       Map<String, Object> tokenBody =
           mapper.readValue(new String(decodeFromBase64(body)), Map.class);
@@ -38,6 +41,7 @@ public class AccessTokenValidator {
       if (isExp) {
         return Collections.EMPTY_MAP;
       }
+      logger.info("**learner accesstoken validated token tokenBody :" + tokenBody);
       return tokenBody;
     }
     return Collections.EMPTY_MAP;
@@ -86,6 +90,8 @@ public class AccessTokenValidator {
     String userId = JsonKey.UNAUTHORIZED;
     try {
       Map<String, Object> payload = validateToken(token);
+
+      logger.info("learner accesstoken validateToken() :" + payload.toString());
       if (MapUtils.isNotEmpty(payload) && checkIss((String) payload.get("iss"))) {
         userId = (String) payload.get(JsonKey.SUB);
         if (StringUtils.isNotBlank(userId)) {

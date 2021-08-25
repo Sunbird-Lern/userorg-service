@@ -131,6 +131,7 @@ public class RequestInterceptor {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
         clientId = AccessTokenValidator.verifyUserToken(accessToken.get());
+        logger.info("**learner accesstoken verified :" + clientId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
@@ -149,11 +150,13 @@ public class RequestInterceptor {
                 logger.info("Invalid Token : "+accessToken.get());
                 clientId = JsonKey.UNAUTHORIZED;
               }
+              logger.info("**learner managed accesstoken verified :" + clientId);
             }
           } else {
             logger.debug("Ignoring x-authenticated-for token...");
           }
         }
+        logger.info("**learner added userid to userAuthentication  :" + clientId);
         userAuthentication.put(JsonKey.USER_ID, clientId);
         userAuthentication.put(JsonKey.MANAGED_FOR, managedForId);
       }
@@ -176,6 +179,7 @@ public class RequestInterceptor {
         userAuthentication.put(JsonKey.USER_ID, JsonKey.ANONYMOUS);
       }
     }
+    logger.info("**learner userAuthentication  :" + userAuthentication.toString());
     return userAuthentication;
   }
 

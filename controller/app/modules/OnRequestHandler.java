@@ -59,6 +59,9 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
+        logger.info("**learner request :"+request);
+        logger.info("**learner request header :"+request.getHeaders().toMap());
+        logger.info("**learner request body :"+request.body().asJson());
         // From 3.0.0 checking user access-token and managed-by from the request header
         Map userAuthentication = RequestInterceptor.verifyRequestData(request);
         String message = (String) userAuthentication.get(JsonKey.USER_ID);
