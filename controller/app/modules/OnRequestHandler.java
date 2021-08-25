@@ -36,7 +36,6 @@ public class OnRequestHandler implements ActionCreator {
   private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
   private ObjectMapper mapper = new ObjectMapper();
   public static boolean isServiceHealthy = true;
-  private static final String debugEnabled = "false";
 
   @Override
   public Action createAction(Http.Request request, Method method) {
