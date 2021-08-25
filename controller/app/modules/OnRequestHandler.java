@@ -30,8 +30,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static util.Common.createResponseParamObj;
-
 public class OnRequestHandler implements ActionCreator {
 
   private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
