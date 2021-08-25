@@ -108,9 +108,9 @@ public class NICGatewaySmsProvider implements ISmsProvider {
     if (JsonUtil.isStringNullOREmpty(password)) {
       password = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_password");
     }
-    dltEntityId = System.getenv("diksha_dlt_entity_id");
+    dltEntityId = System.getenv("dlt_entity_id");
     if (JsonUtil.isStringNullOREmpty(dltEntityId)) {
-      dltEntityId = PropertiesCache.getInstance().getProperty("diksha_dlt_entity_id");
+      dltEntityId = PropertiesCache.getInstance().getProperty("dlt_entity_id");
     }
     return validateSettings();
   }
