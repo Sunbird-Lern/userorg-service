@@ -50,6 +50,8 @@ public class OnRequestHandler implements ActionCreator {
     }
     logger.debug("Original Url: " + request.uri());
     logger.debug("Original Captcha: " + request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
+    logger.info("learner request header :"+request.getHeaders().toMap());
+    logger.info("learner request body :"+request.body().asJson());
 
     return new Action.Simple() {
       @Override
