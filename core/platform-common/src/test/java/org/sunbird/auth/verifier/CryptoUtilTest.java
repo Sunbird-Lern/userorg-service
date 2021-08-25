@@ -13,7 +13,7 @@ public class CryptoUtilTest {
     byte[] signature = Base64Util.decode(data, 11);
     //PublicKey key = KeyManager.getPublicKey("keyId").getPublicKey();
     String algorithm = JsonKey.SHA_256_WITH_RSA;
-    boolean bool = CryptoUtil.verifyRSASign(payLoad, signature, null, algorithm);
+    Boolean bool = CryptoUtil.verifyRSASign(payLoad, signature, null, algorithm);
     Assert.assertNotNull(bool);
   }
 }
