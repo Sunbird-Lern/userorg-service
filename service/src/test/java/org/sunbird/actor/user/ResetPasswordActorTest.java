@@ -102,7 +102,7 @@ public class ResetPasswordActorTest {
   @Before
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(HttpClientUtil.class);
-    when(HttpClientUtil.post(Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(), Mockito.any(RequestContext.class))).thenReturn("{\"link\":\"success\"}");
+    when(HttpClientUtil.post(Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(), Mockito.any())).thenReturn("{\"link\":\"success\"}");
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
