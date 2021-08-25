@@ -156,9 +156,7 @@ public class RequestInterceptor {
         userAuthentication.put(JsonKey.USER_ID, clientId);
         userAuthentication.put(JsonKey.MANAGED_FOR, managedForId);
       } else {
-        Map<String, List<String>> headers = request.getHeaders().toMap();
-        headers.remove(JsonKey.AUTHORIZATION);
-        logger.info("Token not present in request: "+headers);
+        logger.info("Token not present in request: "+request.getHeaders().toMap());
       }
     } else {
       if (accessToken.isPresent()) {
