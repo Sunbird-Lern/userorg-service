@@ -2,6 +2,7 @@ package modules;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import controllers.BaseController;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -93,7 +94,7 @@ public class OnRequestHandler implements ActionCreator {
         && !request.path().endsWith(JsonKey.HEALTH)) {
       if (!isServiceHealthy) {
         ResponseCode headerCode = ResponseCode.SERVICE_UNAVAILABLE;
-        Response resp = createFailureResponse(request, headerCode, headerCode);
+        Response resp = BaseController.createFailureResponse(request, headerCode, headerCode);
         return CompletableFuture.completedFuture(
             Results.status(ResponseCode.SERVICE_UNAVAILABLE.getResponseCode(), Json.toJson(resp)));
       }
@@ -113,7 +114,7 @@ public class OnRequestHandler implements ActionCreator {
       Http.Request request, String errorMessage, int responseCode) {
     String context = Common.getFromRequest(request, Attrs.CONTEXT);
     logger.info("onDataValidationError: Data error found with context info : "+context +" , Error Msg: " + errorMessage);
-    Response resp = createFailureResponse(request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
+    Response resp = BaseController.createFailureResponse(request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
@@ -210,25 +211,6 @@ public class OnRequestHandler implements ActionCreator {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     return request;
-  }
-
-  /**
-   * This method will create failure response
-   *
-   * @param request Request
-   * @param code ResponseCode
-   * @param headerCode ResponseCode
-   * @return Response
-   */
-  private static Response createFailureResponse(
-    Http.Request request, ResponseCode code, ResponseCode headerCode) {
-    Response response = new Response();
-    response.setVer(request.path().split("[/]")[1]);
-    response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(headerCode);
-    response.setParams(
-      createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
-    return response;
   }
 
   private String getEnv(Http.Request request) {

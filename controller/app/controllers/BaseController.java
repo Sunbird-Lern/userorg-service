@@ -322,6 +322,25 @@ public class BaseController extends Controller {
   }
 
   /**
+   * This method will create failure response
+   *
+   * @param request Request
+   * @param code ResponseCode
+   * @param headerCode ResponseCode
+   * @return Response
+   */
+  public static Response createFailureResponse(
+    Http.Request request, ResponseCode code, ResponseCode headerCode) {
+    Response response = new Response();
+    response.setVer(request.path().split("[/]")[1]);
+    response.setTs(ProjectUtil.getFormattedDate());
+    response.setResponseCode(headerCode);
+    response.setParams(
+      createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
+    return response;
+  }
+
+  /**
    * This method will create data for success response.
    *
    * @param request play.mvc.Http.Request
