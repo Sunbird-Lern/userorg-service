@@ -93,7 +93,10 @@ public class NICGatewaySmsProvider implements ISmsProvider {
 
   /** this method will do the SMS properties initialization. */
   public static boolean init() {
-    baseUrl = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_base_url");
+    baseUrl = System.getenv("nic_sms_gateway_provider_base_url");
+    if (JsonUtil.isStringNullOREmpty(baseUrl)) {
+      baseUrl = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_base_url");
+    }
     senderId = System.getenv("nic_sms_gateway_provider_senderid");
     if (JsonUtil.isStringNullOREmpty(senderId)) {
       senderId = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_senderid");
@@ -106,9 +109,9 @@ public class NICGatewaySmsProvider implements ISmsProvider {
     if (JsonUtil.isStringNullOREmpty(password)) {
       password = PropertiesCache.getInstance().getProperty("nic_sms_gateway_provider_password");
     }
-    dltEntityId = System.getenv("diksha_dlt_entity_id");
+    dltEntityId = System.getenv("dlt_entity_id");
     if (JsonUtil.isStringNullOREmpty(dltEntityId)) {
-      dltEntityId = PropertiesCache.getInstance().getProperty("diksha_dlt_entity_id");
+      dltEntityId = PropertiesCache.getInstance().getProperty("dlt_entity_id");
     }
     return validateSettings();
   }
