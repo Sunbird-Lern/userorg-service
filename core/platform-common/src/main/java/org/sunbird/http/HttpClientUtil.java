@@ -85,13 +85,7 @@ public class HttpClientUtil {
       logger.error(context,"Exception occurred while calling get method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error(context,"Exception occurred while closing get response object", ex);
-        }
-      }
+      closeResponse(response, context, "GET");
     }
   }
 
@@ -113,13 +107,7 @@ public class HttpClientUtil {
       logger.error(context,"Exception occurred while calling Post method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error(context,"Exception occurred while closing Post response object", ex);
-        }
-      }
+      closeResponse(response, context, "POST");
     }
   }
 
@@ -148,13 +136,7 @@ public class HttpClientUtil {
       logger.error(context,"Exception occurred while calling postFormData method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error(context,"Exception occurred while closing postFormData response object", ex);
-        }
-      }
+      closeResponse(response, context, "postFormData");
     }
   }
 
@@ -176,13 +158,7 @@ public class HttpClientUtil {
       logger.error(context,"Exception occurred while calling patch method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error(context,"Exception occurred while closing patch response object", ex);
-        }
-      }
+      closeResponse(response, context, "PATCH");
     }
   }
 
@@ -201,13 +177,7 @@ public class HttpClientUtil {
       logger.error(context,"Exception occurred while calling delete method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error(context,"Exception occurred while closing delete response object", ex);
-        }
-      }
+      closeResponse(response, context, "DELETE");
     }
   }
 
@@ -250,6 +220,16 @@ public class HttpClientUtil {
           + sl.getReasonPhrase());
     } catch (Exception ex) {
       logger.error(context, "Exception occurred while fetching response for method "+method, ex);
+    }
+  }
+
+  private static void closeResponse(CloseableHttpResponse response, RequestContext context, String method) {
+    if (null != response) {
+      try {
+        response.close();
+      } catch (Exception ex) {
+        logger.error(context,"Exception occurred while closing "+method+" response object", ex);
+      }
     }
   }
 }
