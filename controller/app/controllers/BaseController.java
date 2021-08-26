@@ -330,15 +330,13 @@ public class BaseController extends Controller {
    * @return Response
    */
   public static Response createFailureResponse(
-      Request request, ResponseCode code, ResponseCode headerCode) {
-
+    Http.Request request, ResponseCode code, ResponseCode headerCode) {
     Response response = new Response();
-    response.setVer(getApiVersion(request.path()));
-    response.setId(getApiResponseId(request));
+    response.setVer(request.path().split("[/]")[1]);
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
     response.setParams(
-        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
+      createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     return response;
   }
 
@@ -383,7 +381,6 @@ public class BaseController extends Controller {
    * @return String
    */
   public static String getApiVersion(String request) {
-
     return request.split("[/]")[1];
   }
 
@@ -833,8 +830,10 @@ public class BaseController extends Controller {
   public void setContextData(Http.Request httpReq, org.sunbird.request.Request reqObj) {
     try {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
+      logger.info("Request Context Info : "+context);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
+          objectMapper.readValue(context, new TypeReference<>() {
+          });
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
