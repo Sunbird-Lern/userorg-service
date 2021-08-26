@@ -25,15 +25,12 @@ public class AccessTokenValidator {
     Map<Object, Object> headerData =
         mapper.readValue(new String(decodeFromBase64(header)), Map.class);
     String keyId = headerData.get("kid").toString();
-    logger.info("**learner calling accesstoken verifyRSASign()");
     boolean isValid =
         CryptoUtil.verifyRSASign(
             payLoad,
             decodeFromBase64(signature),
             KeyManager.getPublicKey(keyId).getPublicKey(),
             JsonKey.SHA_256_WITH_RSA);
-
-    logger.info("**learner accesstoken verifyRSASign() :" + isValid);
     if (isValid) {
       Map<String, Object> tokenBody =
           mapper.readValue(new String(decodeFromBase64(body)), Map.class);
@@ -41,7 +38,6 @@ public class AccessTokenValidator {
       if (isExp) {
         return Collections.EMPTY_MAP;
       }
-      logger.info("**learner accesstoken validated token tokenBody :" + tokenBody);
       return tokenBody;
     }
     return Collections.EMPTY_MAP;
@@ -81,7 +77,7 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in AccessTokenValidator: verify ", ex);
+      logger.error("Exception in verifyManagedUserToken: Token : "+managedEncToken, ex);
     }
     return managedFor;
   }
@@ -91,7 +87,7 @@ public class AccessTokenValidator {
     try {
       Map<String, Object> payload = validateToken(token);
 
-      logger.info("learner accesstoken validateToken() :" + payload.toString());
+      logger.info("learner access token validateToken() :" + payload.toString());
       if (MapUtils.isNotEmpty(payload) && checkIss((String) payload.get("iss"))) {
         userId = (String) payload.get(JsonKey.SUB);
         if (StringUtils.isNotBlank(userId)) {
@@ -100,7 +96,10 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyUserAccessToken: verify ", ex);
+      logger.error("Exception in verifyUserAccessToken: Token : "+token, ex);
+    }
+    if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
+      logger.info("verifyUserAccessToken: Invalid User Token: "+token);
     }
     return userId;
   }
