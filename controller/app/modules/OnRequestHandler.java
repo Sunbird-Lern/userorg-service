@@ -3,13 +3,6 @@ package modules;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.WeakHashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -26,7 +19,16 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import util.Attrs;
+import util.Common;
 import util.RequestInterceptor;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class OnRequestHandler implements ActionCreator {
 
@@ -44,9 +46,8 @@ public class OnRequestHandler implements ActionCreator {
       UUID uuid = UUID.randomUUID();
       requestId = uuid.toString();
     }
-    logger.info("Original Url: " + request.uri());
-    logger.info("Original Captcha: " + request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
-
+    logger.debug("Original Url: " + request.uri());
+    logger.debug("Original Captcha: " + request.getQueryString(JsonKey.CAPTCHA_RESPONSE));
     return new Action.Simple() {
       @Override
       public CompletionStage<Result> call(Http.Request request) {
@@ -61,13 +62,6 @@ public class OnRequestHandler implements ActionCreator {
               request.addAttr(
                   Attrs.MANAGED_FOR, (String) userAuthentication.get(JsonKey.MANAGED_FOR));
         }
-        if (userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY) != null) {
-          request =
-              request.addAttr(
-                  Attrs.AUTH_WITH_MASTER_KEY,
-                  (String) userAuthentication.get(JsonKey.AUTH_WITH_MASTER_KEY));
-        }
-
         // call method to set all the required params for the telemetry event(log)...
         request = initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
@@ -114,14 +108,13 @@ public class OnRequestHandler implements ActionCreator {
    */
   public CompletionStage<Result> onDataValidationError(
       Http.Request request, String errorMessage, int responseCode) {
-    logger.info("Data error found--" + errorMessage);
-    ResponseCode code = ResponseCode.getResponse(errorMessage);
-    ResponseCode headerCode = ResponseCode.CLIENT_ERROR;
-    Response resp = BaseController.createFailureResponse(request, code, headerCode);
+    String context = Common.getFromRequest(request, Attrs.CONTEXT);
+    logger.info("onDataValidationError: Data error found with context info : "+context +" , Error Msg: " + errorMessage);
+    Response resp = BaseController.createFailureResponse(request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  private Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
     try {
       String actionMethod = request.method();
       String url = request.uri();
