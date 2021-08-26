@@ -16,6 +16,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.http.HttpClientUtil;
+import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
@@ -54,7 +55,7 @@ public class CaptchaHelperTest {
     ObjectMapper objectMapper = new ObjectMapper();
     String s = objectMapper.writeValueAsString(map);
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
-    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(s);
   }
 }

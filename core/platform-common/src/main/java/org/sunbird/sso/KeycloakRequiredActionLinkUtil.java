@@ -94,7 +94,7 @@ public class KeycloakRequiredActionLinkUtil {
             + "realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK;
-    String response = HttpClientUtil.post(url, mapper.writeValueAsString(request), headers);
+    String response = HttpClientUtil.post(url, mapper.writeValueAsString(request), headers, context);
 
     logger.info(context, "KeycloakRequiredActionLinkUtil:generateLink: Response = " + response);
 
