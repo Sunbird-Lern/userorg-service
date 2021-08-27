@@ -141,7 +141,7 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         // create body
         ProviderDetails providerDetails =
-            new ProviderDetails(sender, smsRoute, country, 1, smsList);
+            new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
 
         String providerDetailsString = JsonUtil.toJson(providerDetails);
 
@@ -384,7 +384,7 @@ public class Msg91SmsProvider implements ISmsProvider {
       smsList.add(sms);
 
       // create body
-      ProviderDetails providerDetails = new ProviderDetails(sender, smsRoute, country, 1, smsList);
+      ProviderDetails providerDetails = new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
 
       String providerDetailsString = JsonUtil.toJson(providerDetails);
 
