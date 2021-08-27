@@ -16,12 +16,13 @@ public class ProviderDetails implements Serializable {
   private String DLT_TE_ID;
   private List<Sms> sms;
 
-  public ProviderDetails(String sender, String route, String country, int unicode, List<Sms> sms) {
+  public ProviderDetails(String sender, String route, String country, int unicode, List<Sms> sms, String DLT_TE_ID) {
     this.sender = sender;
     this.route = route;
     this.country = country;
     this.sms = sms;
     this.unicode = unicode;
+    this.DLT_TE_ID = DLT_TE_ID;
   }
 
   /** @return the serialversionuid */
@@ -57,9 +58,5 @@ public class ProviderDetails implements Serializable {
   /** @return the DLT_TE_ID */
   public String getDLT_TE_ID() {
     return DLT_TE_ID;
-  }
-
-  public void setDLT_TE_ID(String DLT_TE_ID) {
-    this.DLT_TE_ID = DLT_TE_ID;
   }
 }
