@@ -1,298 +1,137 @@
-<project
-		xmlns="http://maven.apache.org/POM/4.0.0"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<parent>
-		<groupId>org.sunbird</groupId>
-		<artifactId>lms-service</artifactId>
-		<version>1.0-SNAPSHOT</version>
-	</parent>
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>learning-service</artifactId>
-	<version>1.0-SNAPSHOT</version>
-
-	<packaging>play2</packaging>
-
-	<repositories>
-		<repository>
-			<id>scalaz-bintray</id>
-			<name>Scalaz Bintray - releases</name>
-			<url>https://dl.bintray.com/scalaz/releases/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>typesafe-releases-plugins</id>
-			<url>https://repo.typesafe.com/typesafe/releases/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-	<properties>
-		<play2.version>2.7.2</play2.version>
-		<play2.plugin.version>1.0.0-rc5</play2.plugin.version>
-		<sbt-compiler.plugin.version>1.0.0</sbt-compiler.plugin.version>
-		<scala.major.version>2.11</scala.major.version>
-		<scala.version>2.11.12</scala.version>
-		<learner.akka.version>2.5.19</learner.akka.version>
-	</properties>
-
-	<dependencies>
-		<!-- Don't move this dependency below play dependency otherwise it will
-			be overriden by play jackson jar, which uses older version -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.10.1</version>
-		</dependency>
-		<!-- Add actor here itself to avoid netty jar conflict. -->
-		<dependency>
-			<groupId>org.sunbird</groupId>
-			<artifactId>platform-common</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-guice_${scala.major.version}</artifactId>
-			<version>${play2.version}</version>
-            <exclusions>
-              <exclusion>
-                <groupId>com.google.inject</groupId>
-                <artifactId>guice</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>com.google.inject.extensions</groupId>
-                <artifactId>guice-assistedinject</artifactId>
-              </exclusion>
-            </exclusions>
-		</dependency>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>lms-service</artifactId>
+        <groupId>org.sunbird</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <groupId>org.sunbird</groupId>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>service</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <learner.akka.version>2.5.19</learner.akka.version>
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <scoverage.plugin.version>1.1.1</scoverage.plugin.version>
+        <slf4j.version>1.6.1</slf4j.version>
+        <logback.version>1.0.7</logback.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
         <dependency>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
-          <version>3.0</version>
+            <groupId>org.sunbird</groupId>
+            <artifactId>actor-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.inject.extensions/guice-assistedinject -->
         <dependency>
-          <groupId>com.google.inject.extensions</groupId>
-          <artifactId>guice-assistedinject</artifactId>
-          <version>3.0</version>
+            <groupId>org.sunbird</groupId>
+            <artifactId>platform-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-logback_2.11</artifactId>
-			<version>${play2.version}</version>
-			<scope>runtime</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-api</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-netty-server_2.11</artifactId>
-			<version>2.7.2</version>
-			<scope>runtime</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.scala-lang</groupId>
-					<artifactId>scala-library</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe</groupId>
-			<artifactId>config</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.sunbird</groupId>
-			<artifactId>mw-service</artifactId>
-			<version>1.0-SNAPSHOT</version>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-testkit_2.11</artifactId>
+            <version>${learner.akka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sunbird</groupId>
+            <artifactId>es-utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.sunbird</groupId>
+            <artifactId>cassandra-utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <exclusions>
+                <exclusion>
+                    <groupId>com.carrotsearch</groupId>
+                    <artifactId>hppc</artifactId>
+                </exclusion>
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
             </exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play_${scala.major.version}</artifactId>
-			<version>${play2.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>joda-time</groupId>
-					<artifactId>joda-time</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-                <exclusion>
-                    <artifactId>slf4j-api</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                  <groupId>com.typesafe.akka</groupId>
-                  <artifactId>akka-protobuf_2.11</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>com.typesafe.akka</groupId>
-                  <artifactId>akka-stream_2.11</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>com.typesafe.akka</groupId>
-                  <artifactId>akka-actor_2.11</artifactId>
-                </exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-specs2_${scala.major.version}</artifactId>
-			<version>${play2.version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.code.gson</groupId>
-					<artifactId>gson</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version>
-		</dependency>
-		<!-- required for IntegrationSpec -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-slf4j_${scala.major.version}</artifactId>
-			<version>${learner.akka.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-testkit_${scala.major.version}</artifactId>
-			<version>${learner.akka.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>2.0.2</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito2</artifactId>
-			<version>2.0.2</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>filters-helpers_${scala.major.version}</artifactId>
-			<version>${play2.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-akka-http-server_${scala.major.version}</artifactId>
-			<version>${play2.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.danielwegener</groupId>
-			<artifactId>logback-kafka-appender</artifactId>
-			<version>0.2.0-RC2</version>
-		</dependency>
-        <dependency>
-          <groupId>ch.qos.logback.contrib</groupId>
-          <artifactId>logback-jackson</artifactId>
-          <version>0.1.5</version>
-        </dependency>
-
-        <!-- ch.qos.logback.contrib.json.classic.JsonLayout -->
-        <dependency>
-          <groupId>ch.qos.logback.contrib</groupId>
-          <artifactId>logback-json-classic</artifactId>
-          <version>0.1.5</version>
         </dependency>
         <dependency>
-          <groupId>net.logstash.logback</groupId>
-          <artifactId>logstash-logback-encoder</artifactId>
-          <version>6.3</version>
+            <groupId>org.sunbird</groupId>
+            <artifactId>notification-utils</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.warrenstrange/googleauth -->
+        <dependency>
+            <groupId>com.warrenstrange</groupId>
+            <artifactId>googleauth</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intuit.fuzzymatcher</groupId>
+            <artifactId>fuzzy-matcher</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <!--These below dependency required for testcase to pass with jdk-11 upgrade else throws exception related to
+        java.lang.ClassFormatError: Nest member class_info_index 96 has bad constant type in class file-->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.24.1-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>8.12.5</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
-	<build>
-		<sourceDirectory>${basedir}/app</sourceDirectory>
-		<testSourceDirectory>${basedir}/test</testSourceDirectory>
-		<resources>
-			<resource>
-				<directory>${basedir}/conf</directory>
-			</resource>
-		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+    <build>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+        <pluginManagement>
+        <plugins>
+            <!-- to run application -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
                 <configuration>
-                  <release>11</release>
+                    <mainClass>org.sunbird.middleware.Application</mainClass>
                 </configuration>
-			</plugin>
-			<plugin>
-				<groupId>com.google.code.play2-maven-plugin</groupId>
-				<artifactId>play2-maven-plugin</artifactId>
-				<version>${play2.plugin.version}</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
-				<artifactId>sbt-compiler-maven-plugin</artifactId>
-				<version>${sbt-compiler.plugin.version}</version>
-				<configuration>
-					<scalacOptions>-feature -deprecation -Xfatal-warnings</scalacOptions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M4</version>
-				<configuration>
-                    <argLine>--illegal-access=permit</argLine>
-					<argLine>@{argLine} -Xmx1024m -XX:MaxPermSize=256m</argLine>
-					<includes>
-						<include>**/*Spec.java</include>
-						<include>**/*Test.java</include>
-					</includes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+        </plugins>
+        </pluginManagement>
+    </build>
 </project>
-

@@ -35,7 +35,7 @@ public class URLShortnerImplTest {
   @Test
   public void urlShortTest() {
     URLShortner shortner = new URLShortnerImpl();
-    String url = shortner.shortUrl("https://staging.open-sunbird.org/");
+    String url = shortner.shortUrl("https://staging.open-sunbird.org/", null);
     Assert.assertNotNull(url);
   }
 
@@ -50,7 +50,7 @@ public class URLShortnerImplTest {
     }
 
     URLShortnerImpl shortnerImpl = new URLShortnerImpl();
-    String url = shortnerImpl.getUrl();
+    String url = shortnerImpl.getUrl(null);
     Assert.assertEquals(url, webUrl);
   }
 }
