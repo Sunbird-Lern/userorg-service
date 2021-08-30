@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionStage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.util.ProjectUtil;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
@@ -23,6 +24,25 @@ public class UserRoleController extends BaseController {
 
   public CompletionStage<Result> assignRolesV2(Http.Request httpRequest) {
     return handleAssignRoleRequest(ActorOperations.ASSIGN_ROLES_V2.getValue(), httpRequest);
+  }
+
+  public CompletionStage<Result> getUserRolesById(String userId, Http.Request httpRequest) {
+    String usrId = ProjectUtil.getLmsUserId(userId);
+    final String requestedFields = httpRequest.getQueryString(JsonKey.FIELDS);
+    return handleRequest(
+      ActorOperations.GET_USER_ROLES_BY_ID.getValue(),
+      httpRequest.body().asJson(),
+      req -> {
+        Request request = (Request) req;
+        request.getContext().put(JsonKey.FIELDS, requestedFields);
+        request.getContext().put(JsonKey.USER_ID, usrId);
+        request.getRequest().put(JsonKey.USER_ID, usrId);
+        return null;
+      },
+      usrId,
+      JsonKey.USER_ID,
+      false,
+      httpRequest);
   }
 
   private CompletionStage<Result> handleAssignRoleRequest(
