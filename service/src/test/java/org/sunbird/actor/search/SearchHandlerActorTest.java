@@ -271,10 +271,6 @@ public class SearchHandlerActorTest {
 
   @Test
   public void testInvalidOperation() {
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-    PowerMockito.mockStatic(BaseMWService.class);
-    BaseMWService.getRemoteRouter(Mockito.anyString());
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
 
