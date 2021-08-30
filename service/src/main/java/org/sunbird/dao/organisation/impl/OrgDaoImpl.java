@@ -121,10 +121,8 @@ public class OrgDaoImpl implements OrgDao {
   @Override
   public Response search(Map<String, Object> searchQueryMap, RequestContext context) {
     SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
-    String type = ProjectUtil.EsType.organisation.getTypeName();
-    Future<Map<String, Object>> resultF = esService.search(searchDto, type, context);
     Map<String, Object> result =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
+      (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(search(searchDto, context));
     Response response = new Response();
     if (result != null) {
       response.put(JsonKey.COUNT, result.get(JsonKey.COUNT));
@@ -135,5 +133,11 @@ public class OrgDaoImpl implements OrgDao {
       response.put(JsonKey.RESPONSE, list);
     }
     return response;
+  }
+
+  @Override
+  public Future<Map<String, Object>> search(SearchDTO searchDTO, RequestContext context) {
+    String type = ProjectUtil.EsType.organisation.getTypeName();
+    return esService.search(searchDTO, type, context);
   }
 }

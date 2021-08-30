@@ -3,6 +3,8 @@ package org.sunbird.service.user;
 import akka.actor.ActorRef;
 import java.util.List;
 import java.util.Map;
+
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -55,6 +57,8 @@ public interface UserService {
   List<Map<String, Object>> getDecryptedEmailPhoneByUserIds(List<String> userIds, String type, RequestContext context);
 
   List<Map<String, Object>> getUserEmailsBySearchQuery(Map<String, Object> searchQuery, RequestContext context);
+
+  Map<String, Object> searchUser(SearchDTO searchDTO, RequestContext context);
 
   boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
 }
