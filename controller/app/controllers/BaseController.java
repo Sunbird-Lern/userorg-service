@@ -527,7 +527,8 @@ public class BaseController extends Controller {
     try {
       String reqContext = Common.getFromRequest(request, Attrs.CONTEXT);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
+          objectMapper.readValue(reqContext, new TypeReference<>() {
+          });
       org.sunbird.request.Request reqForTelemetry = new org.sunbird.request.Request();
       Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
       params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
@@ -550,7 +551,7 @@ public class BaseController extends Controller {
               (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
       TelemetryWriter.write(reqForTelemetry);
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error("Exception occurred while generating Telemetry.", ex);
     }
   }
 
