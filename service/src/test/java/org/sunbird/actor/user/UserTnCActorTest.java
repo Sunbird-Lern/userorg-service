@@ -136,6 +136,17 @@ public class UserTnCActorTest {
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
 
+  @Test
+  public void testWithInvalidRequest() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
+  }
+
   private TestKit setManagedUSerRequest(String version) {
     mockCassandraOperation();
     Request reqObj = new Request();

@@ -135,13 +135,4 @@ public class IdentifierFreeUpActorTest {
     }
   }
 
-  private Request getFreeUpRequest(ActorOperations actorOperation) {
-    Request reqObj = new Request();
-    Map reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ID, "wrongUserId");
-    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>());
-    reqObj.setRequest(reqMap);
-    reqObj.setOperation(actorOperation.getValue());
-    return reqObj;
-  }
 }

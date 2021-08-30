@@ -211,23 +211,6 @@ public class ResetPasswordActorTest {
     return request;
   }
 
-  private User getValidUserResponse() {
-    User user = new User();
-    user.setId("ValidUserId");
-    user.setEmail("anyEmail@gmail.com");
-    user.setChannel("TN");
-    user.setPhone("9876543210");
-    user.setMaskedEmail("any****@gmail.com");
-    user.setMaskedPhone("987*****0");
-    user.setIsDeleted(false);
-    user.setFlagsValue(3);
-    user.setUserType("TEACHER");
-    user.setUserId("ValidUserId");
-    user.setFirstName("Demo Name");
-    user.setUserName("validUserName");
-    return user;
-  }
-
   private Map<String, Object> getUserDbMap() {
     Map<String, Object> userDbMap = new HashMap<>();
     userDbMap.put(JsonKey.SET_PASSWORD_LINK, "/password/link/url");

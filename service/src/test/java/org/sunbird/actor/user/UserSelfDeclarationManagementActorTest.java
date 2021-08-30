@@ -36,6 +36,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 import org.sunbird.model.user.UserDeclareEntity;
@@ -71,7 +72,6 @@ public class UserSelfDeclarationManagementActorTest {
   private static final Props props = Props.create(UserSelfDeclarationManagementActor.class);
   private ActorSystem system = ActorSystem.create("system");
   private static CassandraOperationImpl cassandraOperation;
-  private ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService;
 
   @BeforeClass
@@ -81,12 +81,6 @@ public class UserSelfDeclarationManagementActorTest {
     PowerMockito.mockStatic(EmailTemplateDaoImpl.class);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
-  }
-
-  private static Response getSuccessResponse() {
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    return response;
   }
 
   @Before
@@ -359,7 +353,16 @@ public class UserSelfDeclarationManagementActorTest {
 
   @Test
   public void testUpdateUserSelfDeclarations() throws Exception {
-
+    Response response = new Response();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "id");
+    map.put(JsonKey.IS_TENANT, false);
+    orgList.add(map);
+    response.put(JsonKey.RESPONSE, orgList);
+    when(cassandraOperation.getRecordById(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+      .thenReturn(response);
     Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
 
     doNothing()
@@ -369,10 +372,22 @@ public class UserSelfDeclarationManagementActorTest {
             Mockito.anyList(),
             Mockito.anyMap(),
             Mockito.any());
+
     boolean result =
         testScenario(
             getRequest(true, false, false, reqMap, ActorOperations.UPDATE_USER_DECLARATIONS), null);
     assertTrue(result);
+  }
+
+  @Test
+  public void testWithInvalidRequest() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   public Map createUpdateUserDeclrationRequests() {
