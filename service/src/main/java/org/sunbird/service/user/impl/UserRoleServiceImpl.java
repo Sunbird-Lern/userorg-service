@@ -10,6 +10,7 @@ import org.sunbird.dao.user.impl.UserRoleDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.util.ProjectUtil;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class UserRoleServiceImpl implements UserRoleService {
+  private LoggerUtil logger = new LoggerUtil(UserRoleServiceImpl.class);
   private static UserRoleService userRoleService = null;
   private ObjectMapper mapper = new ObjectMapper();
   private UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
@@ -267,5 +269,28 @@ public class UserRoleServiceImpl implements UserRoleService {
   @Override
   public boolean updateUserRoleToES(String identifier, Map<String, Object> data, RequestContext context) {
     return userRoleDao.updateUserRoleToES(identifier, data, context);
+  }
+
+  @Override
+  public List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
+    List<Map<String, Object>> userRolesList =
+      userRoleDao.getUserRoles(userId, null, context);
+    for (Map<String, Object> userRole : userRolesList) {
+      List<Map<String, String>> scopeMap = null;
+      try {
+        scopeMap =
+          mapper.readValue(
+            (String) userRole.get(JsonKey.SCOPE),
+            ArrayList.class);
+      } catch (JsonProcessingException e) {
+        logger.error(
+          context,
+          "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
+          e);
+      }
+      userRole.put(JsonKey.SCOPE, scopeMap);
+      userRole.remove(JsonKey.USER_ID);
+    }
+    return userRolesList;
   }
 }

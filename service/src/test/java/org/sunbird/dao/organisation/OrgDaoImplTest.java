@@ -85,6 +85,33 @@ public class OrgDaoImplTest {
   }
 
   @Test
+  public void getOrgByIds() {
+    PowerMockito.when(cassandraOperation.getRecordsByPrimaryKeys(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.anyString(), Mockito.any(RequestContext.class))).thenReturn(getRecordsByProperty(false));
+    List<String> orgIds = new ArrayList<>();
+    orgIds.add("id1");
+    orgIds.add("id2");
+    OrgDao orgDao = OrgDaoImpl.getInstance();
+    List<Map<String, Object>> resp = orgDao.getOrgByIds(orgIds, new RequestContext());
+    Assert.assertNotNull(resp);
+  }
+
+  private Response getRecordsByProperty(boolean empty) {
+    Response res = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    if (!empty) {
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.ID, "orgId");
+      map.put(JsonKey.IS_DELETED, true);
+      map.put(JsonKey.CHANNEL, "channel1");
+      map.put(JsonKey.IS_TENANT, true);
+      list.add(map);
+    }
+    res.put(JsonKey.RESPONSE, list);
+    return res;
+  }
+
+  @Test
   public void testGetOrgByIdWithEmptyResponse() {
     try {
       Response response = new Response();
