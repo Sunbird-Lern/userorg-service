@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
@@ -132,15 +133,14 @@ public class SearchHandlerActor extends BaseActor {
           getResponseOnFuzzyRequest(
               getFuzzyFilterMap(searchQueryMap),
               (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
-      if (responseList.size() != 0) {
-        result.replace(JsonKey.COUNT, responseList.size());
-        result.replace(JsonKey.CONTENT, responseList);
-      } else {
+      if (responseList.size() == 0) {
         throw new ProjectCommonException(
-            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
-            String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
-            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
+          ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
+          String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
+          ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
       }
+      result.replace(JsonKey.COUNT, responseList.size());
+      result.replace(JsonKey.CONTENT, responseList);
     }
     // Decrypt the data
     List<Map<String, Object>> userMapList =
@@ -250,72 +250,68 @@ public class SearchHandlerActor extends BaseActor {
   private void handleOrgSearchAsyncRequest(Map<String, Object> searchQueryMap, Request request) {
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
-    if (filterMap.containsKey(JsonKey.IS_SCHOOL)) {
-      Boolean isSchool = (Boolean) filterMap.remove(JsonKey.IS_SCHOOL);
-      if (isSchool) {
-        filterMap.put(JsonKey.ORGANISATION_TYPE, 2);
-      }
+    if (filterMap.containsKey(JsonKey.IS_SCHOOL) &&
+      BooleanUtils.isTrue((Boolean) filterMap.remove(JsonKey.IS_SCHOOL))) {
+      filterMap.put(JsonKey.ORGANISATION_TYPE, 2);
     }
 
     if (ActorOperations.ORG_SEARCH.getValue().equalsIgnoreCase(request.getOperation())
-        && filterMap.containsKey(JsonKey.IS_ROOT_ORG)) {
-      Boolean isRootOrg = (Boolean) filterMap.remove(JsonKey.IS_ROOT_ORG);
-      if (isRootOrg) {
+        && filterMap.containsKey(JsonKey.IS_ROOT_ORG)
+        && BooleanUtils.isTrue((Boolean) filterMap.remove(JsonKey.IS_ROOT_ORG))) {
         filterMap.put(JsonKey.IS_TENANT, true);
-      }
     }
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     Future<Map<String, Object>> futureResponse =
         orgService.searchOrg(searchDto, request.getRequestContext());
     Future<Response> response =
         futureResponse.map(
-            new Mapper<Map<String, Object>, Response>() {
-              @Override
-              public Response apply(Map<String, Object> responseMap) {
-                logger.info(
-                    request.getRequestContext(),
-                    "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
-                Response response = new Response();
-                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
-                getDefaultValues(orgDefaultFieldValue, fields);
-                List<Map<String, Object>> contents =
-                    (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
-                contents
-                    .stream()
-                    .forEach(
-                        org -> {
-                          if (request
-                              .getOperation()
-                              .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-                            Util.getOrgDefaultValue()
-                                .keySet()
-                                .stream()
-                                .forEach(key -> org.remove(key));
-                            org.remove(JsonKey.LOCATION_IDS);
-                          } else {
-                            // Put all default value for backward compatibility
-                            org.putAll(orgDefaultFieldValue);
-                            org.put(JsonKey.IS_ROOT_ORG, org.get(JsonKey.IS_TENANT));
-                          }
-                          if ((CollectionUtils.isNotEmpty(fields)
-                                  && fields.contains(JsonKey.HASHTAGID))
-                              || (CollectionUtils.isEmpty(fields))) {
-                            org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
-                          }
-                          if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
-                            int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
-                            boolean isSchool =
-                                (orgType
-                                        == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
-                                    ? true
-                                    : false;
-                            org.put(JsonKey.IS_SCHOOL, isSchool);
-                          }
-                        });
-                response.put(JsonKey.RESPONSE, responseMap);
-                return response;
-              }
-            },
+          new Mapper<>() {
+            @Override
+            public Response apply(Map<String, Object> responseMap) {
+              logger.info(
+                request.getRequestContext(),
+                "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
+              Response response = new Response();
+              Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
+              getDefaultValues(orgDefaultFieldValue, fields);
+              List<Map<String, Object>> contents =
+                (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
+              contents
+                .stream()
+                .forEach(
+                  org -> {
+                    if (request
+                      .getOperation()
+                      .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
+                      Util.getOrgDefaultValue()
+                        .keySet()
+                        .stream()
+                        .forEach(key -> org.remove(key));
+                      org.remove(JsonKey.LOCATION_IDS);
+                    } else {
+                      // Put all default value for backward compatibility
+                      org.putAll(orgDefaultFieldValue);
+                      org.put(JsonKey.IS_ROOT_ORG, org.get(JsonKey.IS_TENANT));
+                    }
+                    if ((CollectionUtils.isNotEmpty(fields)
+                      && fields.contains(JsonKey.HASHTAGID))
+                      || (CollectionUtils.isEmpty(fields))) {
+                      org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                    }
+                    if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
+                      int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
+                      boolean isSchool =
+                        (orgType
+                          == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
+                          ? true
+                          : false;
+                      org.put(JsonKey.IS_SCHOOL, isSchool);
+                    }
+                  });
+              response.put(JsonKey.RESPONSE, responseMap);
+              return response;
+            }
+          },
             getContext().dispatcher());
     Patterns.pipe(response, getContext().dispatcher()).to(sender());
     Request telemetryReq = new Request();
