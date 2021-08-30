@@ -53,8 +53,8 @@ public class UserGetRequestValidator extends BaseRequestValidator {
 
   public void validateGetUserByKeyRequestaWithCaptcha(Request request, Http.Request httpRequest) {
     String captcha = httpRequest.getQueryString(JsonKey.CAPTCHA_RESPONSE);
-    logger.info("QueryString: " + httpRequest.uri());
-    logger.info("Captach: " + captcha);
+    logger.debug("QueryString: " + httpRequest.uri());
+    logger.debug("Captach: " + captcha);
     String mobileApp = httpRequest.getQueryString(JsonKey.MOBILE_APP);
     if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
         && !new CaptchaHelper().validate(captcha, mobileApp)) {

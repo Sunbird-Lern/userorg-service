@@ -118,7 +118,7 @@ public class OrgManagementActorTest {
     basicRequestData = getBasicData();
 
       PowerMockito.mockStatic(HttpClientUtil.class);
-      when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+      when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
           .thenReturn("OK");
 
     when(cassandraOperation.getAllRecords(

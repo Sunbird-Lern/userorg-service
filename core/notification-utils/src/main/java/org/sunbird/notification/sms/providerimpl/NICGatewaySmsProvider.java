@@ -75,7 +75,7 @@ public class NICGatewaySmsProvider implements ISmsProvider {
       Map<String, String> headers = new HashMap<>();
       headers.put("Content-Type", "application/json");
       headers.put("Accept", "application/json");
-      String response = HttpClientUtil.get(URI.toString(), headers);
+      String response = HttpClientUtil.get(URI.toString(), headers, context);
       if (StringUtils.isNotBlank(response)) {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> resultMap;

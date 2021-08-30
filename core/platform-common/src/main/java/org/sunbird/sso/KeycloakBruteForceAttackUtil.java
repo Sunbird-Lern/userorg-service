@@ -33,7 +33,7 @@ public class KeycloakBruteForceAttackUtil {
             + "/attack-detection/brute-force/users/"
             + fedUserPrefix
             + userId;
-    String response = HttpClientUtil.get(url, getHeaders(context));
+    String response = HttpClientUtil.get(url, getHeaders(context), context);
     logger.info(context, "KeycloakBruteForceAttackUtil:getUserStatus: Response = " + response);
     Map<String, Object> attackStatus = new ObjectMapper().readValue(response, Map.class);
     boolean isDisabled = ((boolean) attackStatus.get("disabled"));
@@ -57,7 +57,7 @@ public class KeycloakBruteForceAttackUtil {
             + "/attack-detection/brute-force/users/"
             + fedUserPrefix
             + userId;
-    HttpClientUtil.delete(url, getHeaders(context));
+    HttpClientUtil.delete(url, getHeaders(context), context);
     logger.info(context, "clear Brute Force For User for userId : " + userId);
     return true;
   }

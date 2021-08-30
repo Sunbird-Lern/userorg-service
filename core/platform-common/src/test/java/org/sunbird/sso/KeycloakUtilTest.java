@@ -29,7 +29,7 @@ public class KeycloakUtilTest {
   public void setup() {
     PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.mockStatic(ProjectUtil.class);
-    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
         .thenReturn("{\"access_token\":\"accesstoken\"}");
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
   }

@@ -29,6 +29,7 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.HeaderParam;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
 import org.sunbird.util.ProjectUtil;
@@ -577,7 +578,7 @@ public class UserControllerTest extends BaseApplicationTest {
     ObjectMapper objectMapper = new ObjectMapper();
     String s = objectMapper.writeValueAsString(map);
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
-    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap(),Mockito.any(RequestContext.class)))
         .thenReturn(s);
     Result result = performTest("/v2/user/exists/email/demo@gmail.com", "GET", null);
     assertTrue(getResponseStatus(result) == 200);

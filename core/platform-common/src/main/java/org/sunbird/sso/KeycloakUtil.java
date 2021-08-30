@@ -24,7 +24,7 @@ public class KeycloakUtil {
     fields.put("client_secret", ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_CLIENT_SECRET));
     fields.put("grant_type", "client_credentials");
 
-    String response = HttpClientUtil.postFormData(url, fields, headers);
+    String response = HttpClientUtil.postFormData(url, fields, headers, context);
     logger.debug(context, "KeycloakUtil:getAdminAccessToken: Response = " + response);
     Map<String, Object> responseMap = new ObjectMapper().readValue(response, Map.class);
     return (String) responseMap.get("access_token");

@@ -34,9 +34,9 @@ public class KeycloakBruteForceAttackUtilTest {
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
     when(KeycloakUtil.getAdminAccessTokenWithoutDomain(Mockito.any(RequestContext.class)))
         .thenReturn("accessToken");
-    when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap()))
+    when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
         .thenReturn("{\"disabled\":true}");
-    when(HttpClientUtil.delete(Mockito.anyString(), Mockito.anyMap())).thenReturn("");
+    when(HttpClientUtil.delete(Mockito.anyString(), Mockito.anyMap(),Mockito.any(RequestContext.class))).thenReturn("");
   }
 
   @Test

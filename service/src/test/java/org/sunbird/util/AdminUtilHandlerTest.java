@@ -20,6 +20,7 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.adminutil.AdminUtilRequestData;
 import org.sunbird.model.adminutil.AdminUtilRequestPayload;
+import org.sunbird.request.RequestContext;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, AdminUtilHandlerTest.class})
@@ -51,7 +52,7 @@ public class AdminUtilHandlerTest {
     reqData.add(new AdminUtilRequestData("parentId", "childId1"));
     reqData.add(new AdminUtilRequestData("parentId", "childId2"));
 
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any()))
         .thenReturn(
             "{\"id\": \"ekstep.api.am.adminutil.sign.payload\",\"ver\": \"1.0\",\"ets\":1591589862198,\"params\": {\"status\": \"successful\",\"err\": null,\"errmsg\": null,\"msgid\": \"\",\"resmsgid\": \"328749cb-45e3-4b26-aea6-b7f4b97d548b\"}, \"result\": {\"data\": [{\"parentId\": \"parentId\", \"sub\":\"childId1\",\"token\":\"encryptedtoken1\"},{\"parentId\": \"parentId\",\"sub\": \"childId2\",\"token\":\"encryptedtoken2\"}]}}");
     Map<String, Object> encryptedTokenList =
@@ -72,7 +73,7 @@ public class AdminUtilHandlerTest {
     reqData.add(new AdminUtilRequestData("parentId", "childId1"));
     reqData.add(new AdminUtilRequestData("parentId", "childId2"));
 
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any()))
         .thenThrow(new RuntimeException("Exception Messsage"));
     try {
       Map<String, Object> encryptedTokenList =
