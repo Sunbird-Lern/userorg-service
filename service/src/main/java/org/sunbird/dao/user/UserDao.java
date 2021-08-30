@@ -7,7 +7,6 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import scala.concurrent.Future;
 
 /**
  * This interface will have all methods required for user service api.

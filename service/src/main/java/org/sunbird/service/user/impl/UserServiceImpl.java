@@ -10,8 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
