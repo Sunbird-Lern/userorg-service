@@ -11,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -20,6 +21,7 @@ import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
+import scala.concurrent.Future;
 
 public class OrgServiceImpl implements OrgService {
 
@@ -76,6 +78,11 @@ public class OrgServiceImpl implements OrgService {
       orgResponseList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
     return orgResponseList;
+  }
+
+  @Override
+  public Future<Map<String, Object>> searchOrg(SearchDTO searchDTO, RequestContext context) {
+    return orgDao.search(searchDTO, context);
   }
 
   public void createOrgExternalIdRecord(

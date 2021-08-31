@@ -142,7 +142,7 @@ public class Msg91SmsProvider implements ISmsProvider {
         // create body
         ProviderDetails providerDetails =
             new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
-        String providerDetailsString = JsonUtil.toJson(providerDetails);
+        String providerDetailsString = JsonUtil.toJson(providerDetails, context);
         providerDetailsString = providerDetailsString.replaceAll("dlt_TE_ID","DLT_TE_ID");
 
         if (!JsonUtil.isStringNullOREmpty(providerDetailsString)) {
@@ -385,7 +385,7 @@ public class Msg91SmsProvider implements ISmsProvider {
 
       // create body
       ProviderDetails providerDetails = new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
-      String providerDetailsString = JsonUtil.toJson(providerDetails);
+      String providerDetailsString = JsonUtil.toJson(providerDetails, context);
       providerDetailsString = providerDetailsString.replaceAll("dlt_TE_ID","DLT_TE_ID");
 
       if (!JsonUtil.isStringNullOREmpty(providerDetailsString)) {

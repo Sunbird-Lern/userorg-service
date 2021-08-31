@@ -66,7 +66,7 @@ public class OrganisationRequestValidatorTest {
         PowerMockito.mockStatic(OrgDaoImpl.class);
         orgDao = PowerMockito.mock(OrgDaoImpl.class);
         when(OrgDaoImpl.getInstance()).thenReturn(orgDao);
-        Mockito.when(orgDao.search(Mockito.any(), Mockito.any()))
+        Mockito.when(orgDao.search(Mockito.anyMap(), Mockito.any(RequestContext.class)))
                 .thenReturn(getOrgResponse(),getInactiveOrgResponse());
 
         PowerMockito.mockStatic(ServiceFactory.class);
