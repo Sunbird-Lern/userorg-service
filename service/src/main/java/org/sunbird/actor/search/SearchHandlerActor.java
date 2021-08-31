@@ -268,7 +268,7 @@ public class SearchHandlerActor extends BaseActor {
           new Mapper<>() {
             @Override
             public Response apply(Map<String, Object> responseMap) {
-              logger.info(
+              logger.debug(
                 request.getRequestContext(),
                 "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
               Response response = new Response();
