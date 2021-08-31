@@ -133,7 +133,7 @@ public class SearchHandlerActor extends BaseActor {
           getResponseOnFuzzyRequest(
               getFuzzyFilterMap(searchQueryMap),
               (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
-      if (responseList.size() == 0) {
+      if (responseList.isEmpty()) {
         throw new ProjectCommonException(
           ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
           String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
