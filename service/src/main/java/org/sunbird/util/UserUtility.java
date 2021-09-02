@@ -38,9 +38,8 @@ public final class UserUtility {
     return encryptSpecificUserData(userMap, userKeyToEncrypt);
   }
 
-  @SuppressWarnings("unchecked")
   public static Map<String, Object> encryptSpecificUserData(
-      Map<String, Object> userMap, List<String> fieldsToEncrypt) throws Exception {
+      Map<String, Object> userMap, List<String> fieldsToEncrypt) {
     EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
     // Encrypt user basic info
     for (String key : fieldsToEncrypt) {
@@ -86,8 +85,7 @@ public final class UserUtility {
     return userMap;
   }
 
-  public static Map<String, Object> encryptUserSearchFilterQueryData(Map<String, Object> map)
-      throws Exception {
+  public static Map<String, Object> encryptUserSearchFilterQueryData(Map<String, Object> map) {
     Map<String, Object> filterMap = (Map<String, Object>) map.get(JsonKey.FILTERS);
     EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
     // Encrypt user basic info
@@ -99,7 +97,7 @@ public final class UserUtility {
     return filterMap;
   }
 
-  public static String encryptData(String data) throws Exception {
+  public static String encryptData(String data) {
     EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
     return service.encryptData(data, null);
   }

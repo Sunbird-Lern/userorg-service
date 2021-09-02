@@ -16,6 +16,7 @@ import net.sf.junidecode.Junidecode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
@@ -30,9 +31,6 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.model.user.UserDeclareEntity;
@@ -47,10 +45,12 @@ import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.util.contentstore.ContentStoreUtil;
-import org.sunbird.actor.user.validator.UserRequestValidator;
 import scala.concurrent.Future;
 
 public class UserUtil {
@@ -610,9 +610,9 @@ public class UserUtil {
         || (null != managedByInfo.get(JsonKey.IS_DELETED)
             && (boolean) (managedByInfo.get(JsonKey.IS_DELETED)))) {
       throw new ProjectCommonException(
-        ResponseCode.userNotFound.getErrorCode(),
-        ResponseCode.userNotFound.getErrorMessage(),
-        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+          ResponseCode.userNotFound.getErrorCode(),
+          ResponseCode.userNotFound.getErrorMessage(),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return managedByInfo;
   }
@@ -760,8 +760,7 @@ public class UserUtil {
   public static void encryptDeclarationFields(
       List<Map<String, Object>> declarations,
       Map<String, Object> userDbRecords,
-      RequestContext context)
-      throws Exception {
+      RequestContext context) {
     for (Map<String, Object> declareFields : declarations) {
       Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
       if (MapUtils.isNotEmpty(userInfoMap)) {

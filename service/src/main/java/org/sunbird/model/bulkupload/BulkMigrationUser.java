@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.sql.Timestamp;
 import java.util.Map;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
 import org.sunbird.logging.LoggerUtil;
 
 /** @author anmolgupta */
@@ -238,17 +236,7 @@ public class BulkMigrationUser {
     }
 
     private String encryptData(String decryptedData) {
-      long encStartTime = System.currentTimeMillis();
-      try {
-        String encryptedData = encryptionService.encryptData(decryptedData, null);
-        return encryptedData;
-      } catch (Exception e) {
-        logger.error("BulkMigrationUser:encryptData:error occurred while encrypting data", e);
-        throw new ProjectCommonException(
-            ResponseCode.SERVER_ERROR.getErrorCode(),
-            ResponseCode.userDataEncryptionError.getErrorMessage(),
-            ResponseCode.userDataEncryptionError.getResponseCode());
-      }
+      return encryptionService.encryptData(decryptedData, null);
     }
 
     public BulkMigrationUser build() {

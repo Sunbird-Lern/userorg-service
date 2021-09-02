@@ -10,8 +10,6 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.dao.user.UserExternalIdentityDao;
 import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -74,16 +72,5 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
     return dbResExternalIds;
-  }
-
-  private String getEncryptedData(String value) {
-    try {
-      return encryptionService.encryptData(value, null);
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
   }
 }

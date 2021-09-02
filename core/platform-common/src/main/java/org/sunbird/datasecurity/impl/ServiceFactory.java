@@ -19,7 +19,7 @@ public class ServiceFactory {
   private static DataMaskingService maskingService;
 
   static {
-    encryptionService = new DefaultEncryptionServivceImpl();
+    encryptionService = new DefaultEncryptionServiceImpl();
     decryptionService = new DefaultDecryptionServiceImpl();
     maskingService = new DefaultDataMaskServiceImpl();
   }

@@ -32,24 +32,24 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
-import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserExternalIdentityService;
-import org.sunbird.service.user.UserProfileReadService;
-import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserExternalIdentityService;
+import org.sunbird.service.user.UserProfileReadService;
+import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.sso.impl.KeyCloakServiceImpl;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
 
@@ -88,7 +88,7 @@ public class UserProfileReadActorTest {
   private static Map<String, Object> reqMap;
   private static UserServiceImpl userService;
   private static CassandraOperationImpl cassandraOperation;
-  private static DefaultEncryptionServivceImpl encService;
+  private static DefaultEncryptionServiceImpl encService;
   private static DefaultDecryptionServiceImpl decService;
   private static KeyCloakServiceImpl ssoManager;
   private static final String VALID_USER_ID = "VALID-USER-ID";
@@ -106,7 +106,7 @@ public class UserProfileReadActorTest {
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
-    encService = mock(DefaultEncryptionServivceImpl.class);
+    encService = mock(DefaultEncryptionServiceImpl.class);
     when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null))
         .thenReturn(encService);
     decService = mock(DefaultDecryptionServiceImpl.class);
@@ -533,52 +533,6 @@ public class UserProfileReadActorTest {
     reqMap = getUserProfileByKeyRequest(JsonKey.PHONE, VALID_PHONE);
     setCassandraResponse(getCassandraResponse(true));
     boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testCheckUserExistenceV1WithEmail() {
-    Response response1 = new Response();
-    Map<String, Object> userMap = new HashMap<>();
-    userMap.put(JsonKey.FIRST_NAME, "Name");
-    userMap.put(JsonKey.LAST_NAME, "Name");
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
-        .thenReturn(response1);
-    setEsResponse(userMap);
-    reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
-    setEsSearchResponse(getUserExistsSearchResponseMap());
-    boolean result = testScenario(getRequest(reqMap, "checkUserExistence"), null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testCheckUserExistenceV2WithEmail() {
-    Response response1 = new Response();
-    Map<String, Object> userMap = new HashMap<>();
-    userMap.put(JsonKey.USER_ID, "123456790-789456-741258");
-    userMap.put(JsonKey.FIRST_NAME, "Name");
-    userMap.put(JsonKey.LAST_NAME, "Name");
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    responseList.add(userMap);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any()))
-        .thenReturn(response1);
-    setEsResponse(userMap);
-    reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
-    setEsSearchResponse(getUserExistsSearchResponseMap());
-    boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testCheckUserExistenceV2WithLoginid() {
-    reqMap = getUserProfileByKeyRequest(JsonKey.LOGIN_ID, VALID_EMAIL);
-    setEsSearchResponse(getUserExistsSearchResponseMap());
-    boolean result = testScenario(getRequest(reqMap, ActorOperations.CHECK_USER_EXISTENCEV2), null);
     assertTrue(result);
   }
 

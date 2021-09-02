@@ -27,8 +27,7 @@ public interface EncryptionService {
    * @return Map<String,Object>
    * @throws Exception
    */
-  Map<String, Object> encryptData(Map<String, Object> data, RequestContext context)
-      throws Exception;
+  Map<String, Object> encryptData(Map<String, Object> data, RequestContext context);
 
   /**
    * This method will take list of map as an input to encrypt the data, after encryption it will
@@ -40,8 +39,7 @@ public interface EncryptionService {
    * @return List<Map<String,Object>>
    * @throws Exception
    */
-  List<Map<String, Object>> encryptData(List<Map<String, Object>> data, RequestContext context)
-      throws Exception;
+  List<Map<String, Object>> encryptData(List<Map<String, Object>> data, RequestContext context);
 
   /**
    * This method will take String as an input and encrypt the String and return back.
@@ -51,5 +49,5 @@ public interface EncryptionService {
    * @return String
    * @throws Exception
    */
-  String encryptData(String data, RequestContext context) throws Exception;
+  String encryptData(String data, RequestContext context);
 }

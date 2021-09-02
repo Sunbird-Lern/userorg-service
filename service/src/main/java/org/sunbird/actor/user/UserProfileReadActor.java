@@ -2,7 +2,6 @@ package org.sunbird.actor.user;
 
 import static org.sunbird.util.Util.isNotNull;
 
-import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import java.util.HashMap;
@@ -25,14 +24,14 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserProfileReadService;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserProfileReadService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import scala.Tuple2;
 import scala.concurrent.Future;
 
@@ -42,9 +41,7 @@ import scala.concurrent.Future;
     "getUserProfileV3",
     "getUserProfileV4",
     "getUserProfileV5",
-    "getUserByKey",
-    "checkUserExistence",
-    "checkUserExistenceV2"
+    "getUserByKey"
   },
   asyncTasks = {},
   dispatcher = "most-used-one-dispatcher"
@@ -77,12 +74,6 @@ public class UserProfileReadActor extends BaseActor {
       case "getUserByKey":
         getKey(request);
         break;
-      case "checkUserExistence":
-        checkUserExistence(request);
-        break;
-      case "checkUserExistenceV2":
-        checkUserExistenceV2(request);
-        break;
       default:
         onReceiveUnsupportedOperation("UserProfileReadActor");
     }
@@ -98,20 +89,9 @@ public class UserProfileReadActor extends BaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     if (null != userMap.get(JsonKey.LOGIN_ID)) {
       String loginId = (String) userMap.get(JsonKey.LOGIN_ID);
-      try {
-        loginId =
-            encryptionService.encryptData(
-                (String) userMap.get(JsonKey.LOGIN_ID), actorMessage.getRequestContext());
-      } catch (Exception e) {
-        logger.error(actorMessage.getRequestContext(), e.getMessage(), e);
-        ProjectCommonException exception =
-            new ProjectCommonException(
-                ResponseCode.userDataEncryptionError.getErrorCode(),
-                ResponseCode.userDataEncryptionError.getErrorMessage(),
-                ResponseCode.SERVER_ERROR.getResponseCode());
-        sender().tell(exception, self());
-        return;
-      }
+      loginId =
+          encryptionService.encryptData(
+              (String) userMap.get(JsonKey.LOGIN_ID), actorMessage.getRequestContext());
       SearchDTO searchDto = new SearchDTO();
       Map<String, Object> filter = new HashMap<>();
       filter.put(JsonKey.LOGIN_ID, loginId);
@@ -267,119 +247,6 @@ public class UserProfileReadActor extends BaseActor {
       logger.error(context, ex.getMessage(), ex);
     }
     return null;
-  }
-
-  private Future<Response> checkUserExists(Request request, boolean isV1) {
-    Future<Map<String, Object>> userFuture;
-    String key = (String) request.get(JsonKey.KEY);
-    if (JsonKey.PHONE.equalsIgnoreCase(key)
-        || JsonKey.EMAIL.equalsIgnoreCase(key)
-        || JsonKey.USERNAME.equalsIgnoreCase(key)) {
-      String value = (String) request.get(JsonKey.VALUE);
-      String userId =
-          getUserIdByUserLookUp(
-              key.toLowerCase(), StringUtils.lowerCase(value), request.getRequestContext());
-      if (StringUtils.isBlank(userId)) {
-        return Futures.future(
-            () -> {
-              Response resp = new Response();
-              resp.put(JsonKey.EXISTS, false);
-              return resp;
-            },
-            getContext().dispatcher());
-      }
-      userFuture =
-          esUtil.getDataByIdentifier(
-              ProjectUtil.EsType.user.getTypeName(), userId, request.getRequestContext());
-      return userFuture.map(
-          new Mapper<Map<String, Object>, Response>() {
-            @Override
-            public Response apply(Map<String, Object> response) {
-              Response resp = new Response();
-              resp.put(JsonKey.EXISTS, true);
-              if (!isV1) {
-                resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
-                String name = (String) response.get(JsonKey.FIRST_NAME);
-                if (StringUtils.isNotEmpty((String) response.get(JsonKey.LAST_NAME))) {
-                  name += " " + response.get(JsonKey.LAST_NAME);
-                }
-                resp.put(JsonKey.NAME, name);
-              }
-              String logMsg = String.format("userExists %s ", request.get(JsonKey.VALUE));
-              logger.info(request.getRequestContext(), logMsg);
-              return resp;
-            }
-          },
-          getContext().dispatcher());
-
-    } else {
-      userFuture = userSearchDetails(request);
-      return userFuture.map(
-          new Mapper<Map<String, Object>, Response>() {
-            @Override
-            public Response apply(Map<String, Object> responseMap) {
-              List<Map<String, Object>> respList = (List) responseMap.get(JsonKey.CONTENT);
-              long size = respList.size();
-              boolean isExists = (size > 0);
-
-              Response resp = new Response();
-              resp.put(JsonKey.EXISTS, isExists);
-
-              if (isExists && !isV1) {
-                Map<String, Object> response = respList.get(0);
-                resp.put(JsonKey.EXISTS, true);
-                resp.put(JsonKey.ID, response.get(JsonKey.USER_ID));
-                String name = (String) response.get(JsonKey.FIRST_NAME);
-                if (StringUtils.isNotEmpty((String) response.get(JsonKey.LAST_NAME))) {
-                  name += " " + response.get(JsonKey.LAST_NAME);
-                }
-                resp.put(JsonKey.NAME, name);
-              }
-
-              String logMsg =
-                  String.format(
-                      "userExists %s results size = %d", request.get(JsonKey.VALUE), size);
-              logger.info(request.getRequestContext(), logMsg);
-              return resp;
-            }
-          },
-          getContext().dispatcher());
-    }
-  }
-
-  private void checkUserExistence(Request request) {
-    Future<Response> userResponse = checkUserExists(request, true);
-    Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
-  }
-
-  private void checkUserExistenceV2(Request request) {
-    Future<Response> userResponse = checkUserExists(request, false);
-    Patterns.pipe(userResponse, getContext().dispatcher()).to(sender());
-  }
-
-  private Future<Map<String, Object>> userSearchDetails(Request request) {
-    Map<String, Object> searchMap = new WeakHashMap<>();
-    String value = (String) request.get(JsonKey.VALUE);
-    String encryptedValue = null;
-    try {
-      encryptedValue =
-          encryptionService.encryptData(StringUtils.lowerCase(value), request.getRequestContext());
-    } catch (Exception var11) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-    searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);
-    logger.info(
-        request.getRequestContext(),
-        "UserProfileReadActor:checkUserExistence: search map prepared " + searchMap);
-    SearchDTO searchDTO = new SearchDTO();
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, searchMap);
-    Future<Map<String, Object>> esFuture =
-        esUtil.search(
-            searchDTO, ProjectUtil.EsType.user.getTypeName(), request.getRequestContext());
-    return esFuture;
   }
 
   private String getUserIdByUserLookUp(String type, String value, RequestContext context) {
