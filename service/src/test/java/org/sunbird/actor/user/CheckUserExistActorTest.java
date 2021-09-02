@@ -28,6 +28,7 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -84,13 +85,12 @@ public class CheckUserExistActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response1);
-    setEsResponse(userMap);
+    setEsSearchResponse(getUserExistsSearchResponseMap());
   }
 
   @Test
   public void testCheckUserExistenceV1WithEmail() {
     Map<String, Object> reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, "xyz@xyz.com");
-    setEsSearchResponse(getUserExistsSearchResponseMap());
     boolean result = testScenario(getRequest(reqMap, "checkUserExistence"), null);
     assertTrue(result);
   }
@@ -98,7 +98,6 @@ public class CheckUserExistActorTest {
   @Test
   public void testCheckUserExistenceV2WithEmail() {
     Map<String, Object> reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, "xyz@xyz.com\"");
-    setEsSearchResponse(getUserExistsSearchResponseMap());
     boolean result = testScenario(getRequest(reqMap, "checkUserExistenceV2"), null);
     assertTrue(result);
   }
@@ -106,7 +105,6 @@ public class CheckUserExistActorTest {
   @Test
   public void testCheckUserExistenceV2WithLoginid() {
     Map<String, Object> reqMap = getUserProfileByKeyRequest(JsonKey.LOGIN_ID, "amit@ch");
-    setEsSearchResponse(getUserExistsSearchResponseMap());
     boolean result = testScenario(getRequest(reqMap, "checkUserExistenceV2"), null);
     assertTrue(result);
   }
@@ -133,7 +131,7 @@ public class CheckUserExistActorTest {
   public void setEsSearchResponse(Map<String, Object> esResponse) {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esResponse);
-    when(esService.search(Mockito.anyObject(), Mockito.anyString(), Mockito.any()))
+    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
   }
 
@@ -146,13 +144,6 @@ public class CheckUserExistActorTest {
     reqObj.setContext(innerMap);
     reqObj.setOperation(actorOperation);
     return reqObj;
-  }
-
-  public void setEsResponse(Map<String, Object> esResponse) {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(esResponse);
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
   }
 
   private boolean testScenario(Request reqObj, ResponseCode errorCode) {
