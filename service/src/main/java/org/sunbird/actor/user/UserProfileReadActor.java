@@ -50,7 +50,7 @@ public class UserProfileReadActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private UserProfileReadService profileReadService = new UserProfileReadService();
 

@@ -21,7 +21,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
   private static LoggerUtil logger = new LoggerUtil(UserExternalIdentityDaoImpl.class);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
 
   @Override
   public String getUserIdByExternalId(String extId, String provider, RequestContext context) {

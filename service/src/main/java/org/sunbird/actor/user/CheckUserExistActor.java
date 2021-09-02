@@ -100,7 +100,7 @@ public class CheckUserExistActor extends BaseActor {
     Map<String, Object> searchMap = new WeakHashMap<>();
     String value = (String) request.get(JsonKey.VALUE);
     EncryptionService encryptionService =
-        org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+        org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
     String encryptedValue =
         encryptionService.encryptData(StringUtils.lowerCase(value), request.getRequestContext());
     searchMap.put((String) request.get(JsonKey.KEY), encryptedValue);

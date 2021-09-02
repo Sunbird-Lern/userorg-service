@@ -45,11 +45,11 @@ public final class Util {
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static DecryptionService decService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static DataMaskingService maskingService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 

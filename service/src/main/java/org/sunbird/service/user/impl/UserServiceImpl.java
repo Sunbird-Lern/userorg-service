@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
   private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
   private EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
   private UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
@@ -457,7 +457,7 @@ public class UserServiceImpl implements UserService {
   private String getDecryptedValue(String key, RequestContext context) {
     if (StringUtils.isNotBlank(key)) {
       DecryptionService decService =
-          org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+          org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
       return decService.decryptData(key, context);
     }
     return "";

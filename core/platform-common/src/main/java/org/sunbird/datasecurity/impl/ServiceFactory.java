@@ -1,7 +1,6 @@
 /** */
 package org.sunbird.datasecurity.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
@@ -29,19 +28,10 @@ public class ServiceFactory {
    * DefaultEncryptionServiceImpl instance to get a particular service impl instance , need to
    * change the object creation and provided logic.
    *
-   * @param val String ( pass null or empty in case of defaultImple object.)
    * @return EncryptionService
    */
-  public static EncryptionService getEncryptionServiceInstance(String val) {
-    if (StringUtils.isBlank(val)) {
-      return encryptionService;
-    }
-    switch (val) {
-      case "defaultEncryption":
-        return encryptionService;
-      default:
-        return encryptionService;
-    }
+  public static EncryptionService getEncryptionServiceInstance() {
+    return encryptionService;
   }
 
   /**
@@ -49,30 +39,13 @@ public class ServiceFactory {
    * DefaultDecryptionServiceImpl instance to get a particular service impl instance , need to
    * change the object creation and provided logic.
    *
-   * @param val String ( pass null or empty in case of defaultImple object.)
    * @return DecryptionService
    */
-  public static DecryptionService getDecryptionServiceInstance(String val) {
-    if (StringUtils.isBlank(val)) {
-      return decryptionService;
-    }
-    switch (val) {
-      case "defaultDecryption":
-        return decryptionService;
-      default:
-        return decryptionService;
-    }
+  public static DecryptionService getDecryptionServiceInstance() {
+    return decryptionService;
   }
 
-  public static DataMaskingService getMaskingServiceInstance(String val) {
-    if (StringUtils.isBlank(val)) {
-      return maskingService;
-    }
-    switch (val) {
-      case "defaultMasking":
-        return maskingService;
-      default:
-        return maskingService;
-    }
+  public static DataMaskingService getMaskingServiceInstance() {
+    return maskingService;
   }
 }

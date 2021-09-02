@@ -107,10 +107,10 @@ public class UserProfileReadActorTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
     encService = mock(DefaultEncryptionServiceImpl.class);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance())
         .thenReturn(encService);
     decService = mock(DefaultDecryptionServiceImpl.class);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance())
         .thenReturn(decService);
     PowerMockito.mockStatic(SSOServiceFactory.class);
     ssoManager = mock(KeyCloakServiceImpl.class);

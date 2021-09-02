@@ -130,7 +130,7 @@ public class BulkMigrationUser {
 
   public static class BulkMigrationUserBuilder {
     private EncryptionService encryptionService =
-        org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+        org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
     private String id;
     private String data;
     private String failureResult;

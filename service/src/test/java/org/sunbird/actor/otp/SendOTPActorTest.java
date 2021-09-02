@@ -97,7 +97,7 @@ public class SendOTPActorTest {
     PowerMockito.whenNew(DefaultDecryptionServiceImpl.class)
         .withNoArguments()
         .thenReturn(decryptionService);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance())
         .thenReturn(decryptionService);
     probe = new TestKit(system);
     subject = system.actorOf(props);
