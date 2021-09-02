@@ -88,8 +88,7 @@ public class UserProfileReadActor extends BaseActor {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     if (null != userMap.get(JsonKey.LOGIN_ID)) {
-      String loginId = (String) userMap.get(JsonKey.LOGIN_ID);
-      loginId =
+      String loginId =
           encryptionService.encryptData(
               (String) userMap.get(JsonKey.LOGIN_ID), actorMessage.getRequestContext());
       SearchDTO searchDto = new SearchDTO();

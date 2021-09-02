@@ -84,10 +84,7 @@ public class DefaultEncryptionServiceImpl implements EncryptionService {
   @Override
   public String encryptData(String data, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
-      if (StringUtils.isBlank(data)) {
-        return data;
-      }
-      if (null != data) {
+      if (StringUtils.isNotBlank(data)) {
         return encrypt(data, context);
       } else {
         return data;

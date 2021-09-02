@@ -5,13 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.sql.Timestamp;
 import java.util.Map;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.logging.LoggerUtil;
 
 /** @author anmolgupta */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BulkMigrationUser {
-  private static LoggerUtil logger = new LoggerUtil(BulkMigrationUser.class);
 
   private static final long serialVersionUID = 1L;
   private String id;

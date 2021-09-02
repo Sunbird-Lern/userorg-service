@@ -34,7 +34,7 @@ public final class UserUtility {
 
   private UserUtility() {}
 
-  public static Map<String, Object> encryptUserData(Map<String, Object> userMap) throws Exception {
+  public static Map<String, Object> encryptUserData(Map<String, Object> userMap) {
     return encryptSpecificUserData(userMap, userKeyToEncrypt);
   }
 
