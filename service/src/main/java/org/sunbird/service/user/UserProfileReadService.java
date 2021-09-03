@@ -31,6 +31,8 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.location.LocationService;
+import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
@@ -55,6 +57,7 @@ public class UserProfileReadService {
   private UserTncService tncService = new UserTncService();
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private LocationService locationService = LocationServiceImpl.getInstance();
   private Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
   private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
@@ -124,7 +127,6 @@ public class UserProfileReadService {
     if (!isPrivate && StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
-
     getManagedToken(actorMessage, userId, result, managedBy);
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
@@ -416,56 +418,6 @@ public class UserProfileReadService {
     return declaredFields;
   }
 
-  private void decryptUserExternalIds(
-      List<Map<String, String>> dbResExternalIds, RequestContext context) {
-    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
-      dbResExternalIds
-          .stream()
-          .forEach(
-              s -> {
-                s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
-                s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-                if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
-                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                  if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-
-                    String decryptedOriginalExternalId =
-                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID), context);
-                    s.put(JsonKey.ID, decryptedOriginalExternalId);
-
-                  } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                    List<String> locationIds = new ArrayList<>(2);
-                    locationIds.add(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                    List<Map<String, Object>> locationList = getUserLocations(locationIds, context);
-                    if (CollectionUtils.isNotEmpty(locationList)) {
-                      Map<String, Object> location = locationList.get(0);
-                      s.put(
-                          JsonKey.ID,
-                          (location == null
-                              ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
-                              : (String) location.get(JsonKey.CODE)));
-                    }
-                  }
-                }
-
-                s.remove(JsonKey.EXTERNAL_ID);
-                s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
-                s.remove(JsonKey.ORIGINAL_ID_TYPE);
-                s.remove(JsonKey.ORIGINAL_PROVIDER);
-                s.remove(JsonKey.CREATED_BY);
-                s.remove(JsonKey.LAST_UPDATED_BY);
-                s.remove(JsonKey.LAST_UPDATED_ON);
-                s.remove(JsonKey.CREATED_ON);
-                s.remove(JsonKey.USER_ID);
-                s.remove(JsonKey.SLUG);
-              });
-    }
-  }
-
   public void updateTnc(Map<String, Object> userMap) {
     Map<String, Object> tncConfigMap = null;
     try {
@@ -510,36 +462,41 @@ public class UserProfileReadService {
     try {
       List<Map<String, String>> dbResExternalIds =
           userExternalIdentityService.getExternalIds(userId, mergeDeclarations, context);
-
-      decryptUserExternalIds(dbResExternalIds, context);
       // update orgId to provider in externalIds
       String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
-      if (CollectionUtils.isNotEmpty(dbResExternalIds)
-          && StringUtils.isNotBlank(rootOrgId)
-          && StringUtils.isNotBlank(dbResExternalIds.get(0).get(JsonKey.PROVIDER))
-          && ((dbResExternalIds.get(0).get(JsonKey.PROVIDER)).equalsIgnoreCase(rootOrgId))) {
-
-        String provider = (String) user.get(JsonKey.CHANNEL);
-        dbResExternalIds
-            .stream()
-            .forEach(
-                s -> {
-                  if (s.get(JsonKey.PROVIDER) != null
-                      && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
-                    s.put(JsonKey.ID_TYPE, provider);
-                  }
-                  s.put(JsonKey.PROVIDER, provider);
-                });
-
-      } else {
-        UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-      }
+      String provider = (String) user.get(JsonKey.CHANNEL);
+      updateExternalIdsOrgIdWithProvider(dbResExternalIds, rootOrgId, provider, context);
       return dbResExternalIds;
     } catch (Exception ex) {
       logger.error(
           context, "Exception occurred while fetching user externalId. " + ex.getMessage(), ex);
     }
     return new ArrayList<>();
+  }
+
+  private void updateExternalIdsOrgIdWithProvider(
+      List<Map<String, String>> dbResExternalIds,
+      String rootOrgId,
+      String provider,
+      RequestContext context) {
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)
+        && StringUtils.isNotBlank(rootOrgId)
+        && StringUtils.isNotBlank(dbResExternalIds.get(0).get(JsonKey.PROVIDER))
+        && ((dbResExternalIds.get(0).get(JsonKey.PROVIDER)).equalsIgnoreCase(rootOrgId))) {
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (s.get(JsonKey.PROVIDER) != null
+                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                  s.put(JsonKey.ID_TYPE, provider);
+                }
+                s.put(JsonKey.PROVIDER, provider);
+              });
+
+    } else {
+      UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
+    }
   }
 
   public void addExtraFieldsInUserProfileResponse(
@@ -682,11 +639,8 @@ public class UserProfileReadService {
               JsonKey.ID,
               JsonKey.EXTERNAL_ID,
               JsonKey.ORGANISATION_TYPE);
-      Response userOrgResponse =
-          cassandraOperation.getPropertiesValueById(
-              OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
       List<Map<String, Object>> userOrgResponseList =
-          (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
+          orgService.getOrgByIds(orgIds, fields, context);
       if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
         return userOrgResponseList
             .stream()
@@ -698,29 +652,15 @@ public class UserProfileReadService {
 
   private Map<String, Map<String, Object>> fetchAllLocationsById(
       Map<String, Map<String, Object>> orgInfoMap, RequestContext context) {
-
     Set<String> locationSet = new HashSet<>();
     for (Map<String, Object> org : orgInfoMap.values()) {
       List<String> locationIds = null;
-      try {
-        if (StringUtils.isNotBlank((String) org.get(JsonKey.ORG_LOCATION))) {
-          List<Map<String, String>> orgLocList =
-              mapper.readValue(
-                  (String) org.get(JsonKey.ORG_LOCATION),
-                  new TypeReference<List<Map<String, String>>>() {});
-          if (CollectionUtils.isNotEmpty(orgLocList)) {
-            locationIds =
-                orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-            org.put(JsonKey.ORG_LOCATION, orgLocList);
-          } else {
-            org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(
-            context,
-            "Exception occurred while mapping " + (String) org.get(JsonKey.ORG_LOCATION),
-            ex);
+      List<Map<String, String>> orgLocList = (List) org.get(JsonKey.ORG_LOCATION);
+      if (CollectionUtils.isNotEmpty(orgLocList)) {
+        locationIds = orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        org.put(JsonKey.ORG_LOCATION, orgLocList);
+      } else {
+        org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
       }
       if (CollectionUtils.isNotEmpty(locationIds)) {
         locationIds.forEach(
@@ -734,7 +674,8 @@ public class UserProfileReadService {
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
-      List<Map<String, Object>> locationResponseList = getUserLocations(locList, context);
+      List<Map<String, Object>> locationResponseList =
+          locationService.getLocationsByIds(locList, null, context);
       return locationResponseList
           .stream()
           .collect(Collectors.toMap(obj -> (String) obj.get("id"), val -> val));

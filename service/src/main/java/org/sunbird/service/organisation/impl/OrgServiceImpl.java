@@ -52,6 +52,12 @@ public class OrgServiceImpl implements OrgService {
   }
 
   @Override
+  public List<Map<String, Object>> getOrgByIds(
+      List<String> orgIds, List<String> fields, RequestContext context) {
+    return orgDao.getOrgByIds(orgIds, fields, context);
+  }
+
+  @Override
   public Map<String, Object> getOrgByExternalIdAndProvider(
       String externalId, String provider, RequestContext context) {
     String orgId =

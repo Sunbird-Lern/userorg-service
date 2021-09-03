@@ -2,7 +2,6 @@ package org.sunbird.dao.organisation;
 
 import java.util.List;
 import java.util.Map;
-
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -21,4 +20,7 @@ public interface OrgDao {
   Future<Map<String, Object>> search(SearchDTO searchDTO, RequestContext context);
 
   List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context);
+
+  List<Map<String, Object>> getOrgByIds(
+      List<String> orgIds, List<String> fields, RequestContext context);
 }

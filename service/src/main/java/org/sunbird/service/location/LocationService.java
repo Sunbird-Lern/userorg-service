@@ -18,7 +18,7 @@ public interface LocationService {
   List<Map<String, String>> getValidatedRelatedLocationIdAndType(
       List<String> codeList, RequestContext context);
 
-  public List<String> getValidatedRelatedLocationIds(List<String> codeList, RequestContext context);
+  List<String> getValidatedRelatedLocationIds(List<String> codeList, RequestContext context);
 
   List<Location> locationSearch(String param, Object value, RequestContext context);
 
