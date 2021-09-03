@@ -38,6 +38,19 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
     return userExternalIdentityDao.getUserExternalIds(userId, context);
   }
 
+  @Override
+  public List<Map<String, String>> getExternalIds(
+      String userId, boolean mergeDeclaration, RequestContext context) {
+    List<Map<String, String>> dbResExternalIds = getUserExternalIds(userId, context);
+    if (mergeDeclaration) {
+      List<Map<String, String>> dbSelfDeclaredExternalIds = getSelfDeclaredDetails(userId, context);
+      if (CollectionUtils.isNotEmpty(dbSelfDeclaredExternalIds)) {
+        dbResExternalIds.addAll(dbSelfDeclaredExternalIds);
+      }
+    }
+    return dbResExternalIds;
+  }
+
   /**
    * Fetch userid using channel info from usr_external_identity table
    *

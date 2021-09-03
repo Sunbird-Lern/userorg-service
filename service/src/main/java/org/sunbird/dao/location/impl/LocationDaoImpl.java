@@ -1,26 +1,25 @@
 package org.sunbird.dao.location.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.dao.location.LocationDao;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /** @author Amit Kumar */
 public class LocationDaoImpl implements LocationDao {
@@ -79,6 +78,13 @@ public class LocationDaoImpl implements LocationDao {
   public Response read(String locationId, RequestContext context) {
     return cassandraOperation.getRecordById(
         KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, context);
+  }
+
+  @Override
+  public Response getLocationsByIds(
+      List<String> locationIds, List<String> locationFields, RequestContext context) {
+    return cassandraOperation.getPropertiesValueById(
+        KEYSPACE_NAME, LOCATION_TABLE_NAME, locationIds, locationFields, context);
   }
 
   @Override
