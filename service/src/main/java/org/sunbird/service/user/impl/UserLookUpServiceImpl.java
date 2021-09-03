@@ -4,17 +4,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.dao.user.impl.UserLookupDaoImpl;
-import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -22,11 +17,7 @@ import org.sunbird.service.user.UserLookupService;
 import org.sunbird.util.ProjectUtil;
 
 public class UserLookUpServiceImpl implements UserLookupService {
-  private static LoggerUtil logger = new LoggerUtil(UserLookUpServiceImpl.class);
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
-  private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
+
   private static UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
   private static UserLookupService userLookupService = null;
 

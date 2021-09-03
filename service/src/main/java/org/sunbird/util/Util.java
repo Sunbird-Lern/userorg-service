@@ -2,6 +2,9 @@ package org.sunbird.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,8 +17,6 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
@@ -27,10 +28,6 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import scala.concurrent.Future;
-
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for actors
@@ -48,11 +45,11 @@ public final class Util {
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static DecryptionService decService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static DataMaskingService maskingService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -365,14 +362,7 @@ public final class Util {
   }
 
   public static String encryptData(String value) {
-    try {
-      return encryptionService.encryptData(value, null);
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
+    return encryptionService.encryptData(value, null);
   }
 
   /**
@@ -801,7 +791,8 @@ public final class Util {
       }
       ISmsProvider smsProvider = SMSFactory.getInstance();
       logger.debug(context, "SMS text : " + sms + " with phone " + userMap.get(JsonKey.PHONE));
-      boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
+      boolean response =
+          smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
       logger.info(context, "Response from smsProvider : " + response);
     }
   }

@@ -86,7 +86,7 @@ public class UserBulkUploadBackgroundJobActorTest {
 
     encryptionService = PowerMockito.mock(EncryptionService.class);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance())
         .thenReturn(encryptionService);
     system = ActorSystem.create("system");
     PowerMockito.mockStatic(UserClientImpl.class);
@@ -138,8 +138,7 @@ public class UserBulkUploadBackgroundJobActorTest {
     bulkUploadProcess.setOrganisationId("someOrgId");
     when(bulkUploadProcessDao.read(nullable(String.class), Mockito.any()))
         .thenReturn(bulkUploadProcess);
-    when(bulkUploadProcessDao.update(Mockito.any(), Mockito.any()))
-        .thenReturn(new Response());
+    when(bulkUploadProcessDao.update(Mockito.any(), Mockito.any())).thenReturn(new Response());
     when(bulkUploadProcessTaskDao.readByPrimaryKeys(Mockito.anyMap(), Mockito.any()))
         .thenReturn(createBulkUploadProcessTasks());
     when(bulkUploadProcessTaskDao.updateBatchRecord(Mockito.anyList(), Mockito.any()))
