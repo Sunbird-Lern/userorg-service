@@ -51,11 +51,6 @@ public class FetchUserRoleActor extends BaseActor {
                 role.remove(JsonKey.UPDATED_DATE);
               });
     }
-    try {
-      Thread.sleep(6000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
     response.put(JsonKey.ROLES, userRoles);
     sender().tell(response, self());
   }

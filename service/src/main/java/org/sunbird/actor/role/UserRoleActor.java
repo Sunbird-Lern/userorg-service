@@ -9,8 +9,6 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.role.RoleService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
@@ -26,7 +24,6 @@ import org.sunbird.util.Util;
 public class UserRoleActor extends UserBaseActor {
 
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -39,7 +36,6 @@ public class UserRoleActor extends UserBaseActor {
         break;
 
       case "assignRoles":
-
       case "assignRolesV2":
         assignRoles(request);
         break;
