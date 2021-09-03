@@ -1,6 +1,7 @@
 package org.sunbird.actor.role;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.List;
+import java.util.Map;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.UserBaseActor;
 import org.sunbird.keys.JsonKey;
@@ -8,8 +9,6 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.role.RoleService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
@@ -17,22 +16,14 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 @ActorConfig(
-  tasks = {"getRoles", "assignRoles", "assignRolesV2", "getUserRolesById"},
+  tasks = {"getRoles", "assignRoles", "assignRolesV2"},
   asyncTasks = {},
   dispatcher = "most-used-two-dispatcher"
 )
 public class UserRoleActor extends UserBaseActor {
 
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -45,50 +36,13 @@ public class UserRoleActor extends UserBaseActor {
         break;
 
       case "assignRoles":
-
       case "assignRolesV2":
         assignRoles(request);
         break;
 
-      case "getUserRolesById":
-        getUserRolesById(request);
-        break;  
-
       default:
         onReceiveUnsupportedOperation("UserRoleActor");
     }
-  }
-
-  private void getUserRolesById(Request request) {
-    Map<String, Object> requestMap = request.getRequest();
-    String userId = (String) requestMap.get(JsonKey.USER_ID);
-    List<Map<String,Object>> userRoles = userRoleService.getUserRoles(userId, request.getRequestContext());
-    String requestedFields = (String) request.getContext().get(JsonKey.FIELDS);
-    if (StringUtils.isNotBlank(requestedFields) && requestedFields.contains(JsonKey.ORG_NAME)) {
-      Set<String> orgIds = new HashSet<>();
-      userRoles.stream().forEach(
-        userRole ->
-          ((List<Map<String, String>>)userRole.get(JsonKey.SCOPE))
-            .stream()
-            .forEach(scope -> orgIds.add(scope.get(JsonKey.ORGANISATION_ID))));
-      List<Map<String,Object>> orgList = orgService.getOrgByIds(new ArrayList<>(orgIds), request.getRequestContext());
-      Map<String, String> orgIdMap = new HashMap<>();
-      orgList.stream().forEach(org -> orgIdMap.put((String)org.get(JsonKey.ID), (String) org.get(JsonKey.ORG_NAME)));
-      userRoles.stream().forEach(
-        userRole ->
-          ((List<Map<String, String>>)userRole.get(JsonKey.SCOPE))
-            .stream()
-            .forEach(scope ->
-            {
-              String orgId = scope.get(JsonKey.ORGANISATION_ID);
-              if (StringUtils.isNotBlank(orgId) && orgIdMap.containsKey(orgId)) {
-                scope.put(JsonKey.ORG_NAME,orgIdMap.get(orgId));
-              }
-            }));
-    }
-    Response response = new Response();
-    response.put(JsonKey.ROLES,userRoles);
-    sender().tell(response, self());
   }
 
   private void getRoles(RequestContext context) {
