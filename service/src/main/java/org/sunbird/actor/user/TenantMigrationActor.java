@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.model.ClaimStatus;
-import org.sunbird.model.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -24,19 +22,21 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.ClaimStatus;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
@@ -78,9 +78,9 @@ public class TenantMigrationActor extends BaseActor {
   public static final int USER_EXTERNAL_ID_MISMATCH = -1;
   private IFeedService feedService = FeedFactory.getInstance();
   private DecryptionService decryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance("");
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private DataMaskingService maskingService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance("");
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

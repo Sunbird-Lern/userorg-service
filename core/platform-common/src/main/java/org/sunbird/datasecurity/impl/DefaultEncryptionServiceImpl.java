@@ -1,19 +1,12 @@
-/** */
 package org.sunbird.datasecurity.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.datasecurity.EncryptionService;
@@ -29,8 +22,8 @@ import org.sunbird.util.ProjectUtil;
  *
  * @author Manzarul
  */
-public class DefaultEncryptionServivceImpl implements EncryptionService {
-  private static LoggerUtil logger = new LoggerUtil(DefaultEncryptionServivceImpl.class);
+public class DefaultEncryptionServiceImpl implements EncryptionService {
+  private static final LoggerUtil logger = new LoggerUtil(DefaultEncryptionServiceImpl.class);
 
   private static String encryption_key = "";
 
@@ -49,7 +42,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
     }
   }
 
-  public DefaultEncryptionServivceImpl() {
+  public DefaultEncryptionServiceImpl() {
     sunbirdEncryption = System.getenv(JsonKey.SUNBIRD_ENCRYPTION);
     if (StringUtils.isBlank(sunbirdEncryption)) {
       sunbirdEncryption = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_ENCRYPTION);
@@ -57,8 +50,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
   }
 
   @Override
-  public Map<String, Object> encryptData(Map<String, Object> data, RequestContext context)
-      throws Exception {
+  public Map<String, Object> encryptData(Map<String, Object> data, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (data == null) {
         return data;
@@ -68,7 +60,7 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
         Entry<String, Object> entry = itr.next();
         if (!(entry.getValue() instanceof Map || entry.getValue() instanceof List)
             && null != entry.getValue()) {
-          data.put(entry.getKey(), encrypt(entry.getValue() + ""));
+          data.put(entry.getKey(), encrypt(entry.getValue() + "", context));
         }
       }
     }
@@ -77,26 +69,23 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
 
   @Override
   public List<Map<String, Object>> encryptData(
-      List<Map<String, Object>> data, RequestContext context) throws Exception {
+      List<Map<String, Object>> data, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
       if (data == null || data.isEmpty()) {
         return data;
       }
       for (Map<String, Object> map : data) {
-        encryptData(map, null);
+        encryptData(map, context);
       }
     }
     return data;
   }
 
   @Override
-  public String encryptData(String data, RequestContext context) throws Exception {
+  public String encryptData(String data, RequestContext context) {
     if (JsonKey.ON.equalsIgnoreCase(sunbirdEncryption)) {
-      if (StringUtils.isBlank(data)) {
-        return data;
-      }
-      if (null != data) {
-        return encrypt(data);
+      if (StringUtils.isNotBlank(data)) {
+        return encrypt(data, context);
       } else {
         return data;
       }
@@ -110,20 +99,24 @@ public class DefaultEncryptionServivceImpl implements EncryptionService {
    *
    * @param value String password
    * @return encrypted password.
-   * @throws NoSuchPaddingException
-   * @throws NoSuchAlgorithmException
-   * @throws InvalidKeyException
-   * @throws BadPaddingException
-   * @throws IllegalBlockSizeException
-   * @throws UnsupportedEncodingException
    */
   @SuppressWarnings("restriction")
-  public static String encrypt(String value) throws IllegalBlockSizeException, BadPaddingException {
+  public static String encrypt(String value, RequestContext context) {
     String valueToEnc = null;
     String eValue = value;
     for (int i = 0; i < ITERATIONS; i++) {
       valueToEnc = encryption_key + eValue;
-      byte[] encValue = c.doFinal(valueToEnc.getBytes(StandardCharsets.UTF_8));
+      byte[] encValue = new byte[0];
+      try {
+        encValue = c.doFinal(valueToEnc.getBytes(StandardCharsets.UTF_8));
+      } catch (Exception e) {
+        logger.error(
+            context, "Exception while encrypting user data, with message : " + e.getMessage(), e);
+        throw new ProjectCommonException(
+            ResponseCode.userDataEncryptionError.getErrorCode(),
+            ResponseCode.userDataEncryptionError.getErrorMessage(),
+            ResponseCode.SERVER_ERROR.getResponseCode());
+      }
       eValue = new BASE64Encoder().encode(encValue);
     }
     return eValue;

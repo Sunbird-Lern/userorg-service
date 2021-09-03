@@ -34,14 +34,13 @@ public final class UserUtility {
 
   private UserUtility() {}
 
-  public static Map<String, Object> encryptUserData(Map<String, Object> userMap) throws Exception {
+  public static Map<String, Object> encryptUserData(Map<String, Object> userMap) {
     return encryptSpecificUserData(userMap, userKeyToEncrypt);
   }
 
-  @SuppressWarnings("unchecked")
   public static Map<String, Object> encryptSpecificUserData(
-      Map<String, Object> userMap, List<String> fieldsToEncrypt) throws Exception {
-    EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
+      Map<String, Object> userMap, List<String> fieldsToEncrypt) {
+    EncryptionService service = ServiceFactory.getEncryptionServiceInstance();
     // Encrypt user basic info
     for (String key : fieldsToEncrypt) {
       if (userMap.containsKey(key)) {
@@ -57,7 +56,7 @@ public final class UserUtility {
 
   public static Map<String, Object> decryptSpecificUserData(
       Map<String, Object> userMap, List<String> fieldsToDecrypt) {
-    DecryptionService service = ServiceFactory.getDecryptionServiceInstance(null);
+    DecryptionService service = ServiceFactory.getDecryptionServiceInstance();
     // Decrypt user basic info
     for (String key : fieldsToDecrypt) {
       if (userMap.containsKey(key)) {
@@ -72,7 +71,7 @@ public final class UserUtility {
   }
 
   public static Map<String, Object> decryptUserDataFrmES(Map<String, Object> userMap) {
-    DecryptionService service = ServiceFactory.getDecryptionServiceInstance(null);
+    DecryptionService service = ServiceFactory.getDecryptionServiceInstance();
     // Decrypt user basic info
     for (String key : userKeyToDecrypt) {
       if (userMap.containsKey(key)) {
@@ -86,10 +85,9 @@ public final class UserUtility {
     return userMap;
   }
 
-  public static Map<String, Object> encryptUserSearchFilterQueryData(Map<String, Object> map)
-      throws Exception {
+  public static Map<String, Object> encryptUserSearchFilterQueryData(Map<String, Object> map) {
     Map<String, Object> filterMap = (Map<String, Object>) map.get(JsonKey.FILTERS);
-    EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
+    EncryptionService service = ServiceFactory.getEncryptionServiceInstance();
     // Encrypt user basic info
     for (String key : userKeyToEncrypt) {
       if (filterMap.containsKey(key)) {
@@ -99,8 +97,8 @@ public final class UserUtility {
     return filterMap;
   }
 
-  public static String encryptData(String data) throws Exception {
-    EncryptionService service = ServiceFactory.getEncryptionServiceInstance(null);
+  public static String encryptData(String data) {
+    EncryptionService service = ServiceFactory.getEncryptionServiceInstance();
     return service.encryptData(data, null);
   }
 
@@ -117,9 +115,8 @@ public final class UserUtility {
   }
 
   private static void init() {
-    decryptionService =
-        org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
-    maskingService = org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
+    decryptionService = org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
+    maskingService = org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
     String userKey = PropertiesCache.getInstance().getProperty("userkey.encryption");
     userKeyToEncrypt = new ArrayList<>(Arrays.asList(userKey.split(",")));
     logger.info("UserUtility:init:user encrypt  attributes got".concat(userKey + ""));

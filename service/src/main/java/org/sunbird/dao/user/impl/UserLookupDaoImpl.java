@@ -10,11 +10,11 @@ import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 
 public class UserLookupDaoImpl implements UserLookupDao {
   private static LoggerUtil logger = new LoggerUtil(UserLookupDaoImpl.class);
@@ -22,7 +22,7 @@ public class UserLookupDaoImpl implements UserLookupDao {
   private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static UserLookupDao userLookUpDao = null;
 
   public static UserLookupDao getInstance() {
