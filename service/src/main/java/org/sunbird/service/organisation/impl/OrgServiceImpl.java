@@ -16,7 +16,6 @@ import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
-import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class OrgServiceImpl implements OrgService {
@@ -37,9 +36,7 @@ public class OrgServiceImpl implements OrgService {
 
   @Override
   public Map<String, Object> getOrgById(String orgId, RequestContext context) {
-    Map<String, Object> org = orgDao.getOrgById(orgId, context);
-    org.putAll(Util.getOrgDefaultValue());
-    return org;
+    return orgDao.getOrgById(orgId, context);
   }
 
   @Override

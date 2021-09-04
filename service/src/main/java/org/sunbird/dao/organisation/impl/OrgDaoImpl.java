@@ -22,6 +22,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class OrgDaoImpl implements OrgDao {
@@ -93,6 +94,7 @@ public class OrgDaoImpl implements OrgDao {
     orgMap.put(JsonKey.ORG_LOCATION, orgLocationList);
     orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
     orgMap.remove(JsonKey.CONTACT_DETAILS);
+    orgMap.putAll(Util.getOrgDefaultValue());
   }
 
   @Override

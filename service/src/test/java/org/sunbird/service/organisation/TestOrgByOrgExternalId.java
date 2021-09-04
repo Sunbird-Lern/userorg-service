@@ -100,10 +100,6 @@ public class TestOrgByOrgExternalId {
       map.put(JsonKey.CHANNEL, "channel1");
       map.put(JsonKey.IS_TENANT, true);
       map.put(JsonKey.ORG_ID, "orgId");
-      map.put(
-          JsonKey.ORG_LOCATION,
-          "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");
-
       list.add(map);
     }
     res.put(JsonKey.RESPONSE, list);
