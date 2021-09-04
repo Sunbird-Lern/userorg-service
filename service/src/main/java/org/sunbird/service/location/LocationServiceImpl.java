@@ -190,7 +190,6 @@ public class LocationServiceImpl implements LocationService {
       ObjectMapper mapper = new ObjectMapper();
       return mapper.convertValue(responseList.get(0), Location.class);
     }
-
     return null;
   }
 
