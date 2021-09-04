@@ -58,7 +58,7 @@ public class OrgDaoImpl implements OrgDao {
 
   @Override
   public List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context) {
-    return getOrgByIds(orgIds, null, context);
+    return getOrgByIds(orgIds, Collections.emptyList(), context);
   }
 
   @Override

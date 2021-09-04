@@ -1,11 +1,7 @@
 package org.sunbird.service.organisation.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.organisation.OrgDao;
@@ -48,7 +44,7 @@ public class OrgServiceImpl implements OrgService {
 
   @Override
   public List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context) {
-    return orgDao.getOrgByIds(orgIds, context);
+    return getOrgByIds(orgIds, Collections.emptyList(), context);
   }
 
   @Override
