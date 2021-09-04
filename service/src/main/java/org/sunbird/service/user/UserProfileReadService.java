@@ -16,14 +16,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.organisation.OrgTypeEnum;
@@ -35,33 +29,27 @@ import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.service.user.impl.UserOrgServiceImpl;
-import org.sunbird.service.user.impl.UserRoleServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.service.user.impl.*;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserFlagUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
-import scala.concurrent.Future;
 
 public class UserProfileReadService {
 
   private LoggerUtil logger = new LoggerUtil(UserProfileReadService.class);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private Util.DbInfo locationDbInfo = Util.dbInfoMap.get(JsonKey.LOCATION);
   private UserService userService = UserServiceImpl.getInstance();
   private OrgService orgService = OrgServiceImpl.getInstance();
   private UserTncService tncService = new UserTncService();
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
   private LocationService locationService = LocationServiceImpl.getInstance();
-  private Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
+  private UserSelfDeclarationService userSelfDeclarationService =
+      UserSelfDeclarationServiceImpl.getInstance();
   private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
 
   public Response getUserProfileData(Request actorMessage) {
@@ -372,52 +360,6 @@ public class UserProfileReadService {
     return responseMap;
   }
 
-  private List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
-    Map<String, Object> req = new HashMap<>();
-    req.put(JsonKey.USER_ID, userId);
-    Response response =
-        cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, context);
-    List<Map<String, Object>> resExternalIds;
-    List<Map<String, Object>> finalRes = new ArrayList<>();
-    if (null != response && null != response.getResult()) {
-      resExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(resExternalIds)) {
-        resExternalIds.forEach(
-            item -> {
-              Map<String, Object> declaration = new HashMap<>();
-              Map<String, String> declaredFields =
-                  (Map<String, String>) item.get(JsonKey.USER_INFO);
-              if (MapUtils.isNotEmpty(declaredFields)) {
-                decryptDeclarationFields(declaredFields, context);
-              }
-              declaration.put(JsonKey.STATUS, item.get(JsonKey.STATUS));
-              declaration.put(JsonKey.ERROR_TYPE, item.get(JsonKey.ERROR_TYPE));
-              declaration.put(JsonKey.ORG_ID, item.get(JsonKey.ORG_ID));
-              declaration.put(JsonKey.PERSONA, item.get(JsonKey.PERSONA));
-              declaration.put(JsonKey.INFO, declaredFields);
-              finalRes.add(declaration);
-            });
-      }
-    }
-    return finalRes;
-  }
-
-  private Map<String, String> decryptDeclarationFields(
-      Map<String, String> declaredFields, RequestContext context) {
-    if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
-      declaredFields.put(
-          JsonKey.DECLARED_EMAIL,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL), context));
-    }
-    if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
-      declaredFields.put(
-          JsonKey.DECLARED_PHONE,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE), context));
-    }
-    return declaredFields;
-  }
-
   public void updateTnc(Map<String, Object> userMap) {
     Map<String, Object> tncConfigMap = null;
     try {
@@ -537,7 +479,8 @@ public class UserProfileReadService {
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
         List<Map<String, Object>> declarations =
-            fetchUserDeclarations((String) result.get(JsonKey.ID), context);
+            userSelfDeclarationService.fetchUserDeclarations(
+                (String) result.get(JsonKey.ID), context);
         result.put(JsonKey.DECLARATIONS, declarations);
       }
       if (CollectionUtils.isEmpty((List<Map<String, String>>) result.get(JsonKey.EXTERNAL_IDS))
@@ -576,7 +519,7 @@ public class UserProfileReadService {
               userLocation.add(schoolLocation);
             }
           } else {
-            logger.info(context, "School details are blank for orgid = " + organisationId);
+            logger.info(context, "School details are blank for orgId = " + organisationId);
           }
         }
       }
@@ -585,14 +528,11 @@ public class UserProfileReadService {
 
   public Map<String, Object> searchLocation(
       Map<String, Object> searchQueryMap, RequestContext context) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-    String type = ProjectUtil.EsType.location.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (MapUtils.isNotEmpty(result)
-        && CollectionUtils.isNotEmpty((List<Map<String, Object>>) result.get(JsonKey.CONTENT))) {
-      return ((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).get(0);
+    Response locationResponse = locationService.searchLocation(searchQueryMap, context);
+    List<Map<String, Object>> locationList =
+        (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(locationList)) {
+      return (locationList).get(0);
     }
     return Collections.emptyMap();
   }
@@ -602,14 +542,7 @@ public class UserProfileReadService {
     if (CollectionUtils.isNotEmpty(locationIds)) {
       List<String> locationFields =
           Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-      Response locationResponse =
-          cassandraOperation.getPropertiesValueById(
-              locationDbInfo.getKeySpace(),
-              locationDbInfo.getTableName(),
-              locationIds,
-              locationFields,
-              context);
-      return (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+      return locationService.getLocationsByIds(locationIds, locationFields, context);
     }
     return new ArrayList<>();
   }
