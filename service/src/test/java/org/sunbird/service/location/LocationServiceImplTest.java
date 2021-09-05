@@ -43,6 +43,9 @@ public class LocationServiceImplTest {
         .thenReturn(getLocationRecords());
     PowerMockito.when(locationDao.read(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationRecords());
+    PowerMockito.when(
+            locationDao.getLocationsByIds(Mockito.anyList(), Mockito.anyList(), Mockito.any()))
+        .thenReturn(getLocationRecords());
     PowerMockito.when(locationDao.create(Mockito.any(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     PowerMockito.when(locationDao.update(Mockito.any(), Mockito.any()))
@@ -51,6 +54,23 @@ public class LocationServiceImplTest {
         .thenReturn(getSuccessResponse());
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getLocationOrderMap()).thenReturn(getLocationOrderMap());
+  }
+
+  @Test
+  public void getLocationByIdTest() {
+    LocationService locationService = LocationServiceImpl.getInstance();
+    Location location = locationService.getLocationById("locationId", new RequestContext());
+    Assert.assertNotNull(location);
+  }
+
+  @Test
+  public void getLocationByIdsTest() {
+    LocationService locationService = LocationServiceImpl.getInstance();
+    List<String> locationIds = new ArrayList<>();
+    locationIds.add("locationId");
+    List<Map<String, Object>> locationList =
+        locationService.getLocationsByIds(locationIds, new ArrayList<>(), new RequestContext());
+    Assert.assertNotNull(locationList);
   }
 
   @Test
