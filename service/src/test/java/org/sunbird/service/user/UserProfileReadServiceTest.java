@@ -300,34 +300,6 @@ public class UserProfileReadServiceTest {
   }
 
   // @Test
-  public void getUserProfileWithEmptyResultTest() throws JsonProcessingException {
-    PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    Response response = new Response();
-    List<Map<String, Object>> resp = new ArrayList<>();
-    response.put(JsonKey.RESPONSE, resp);
-    when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(response);
-    UserDao userDao = PowerMockito.mock(UserDao.class);
-    PowerMockito.mockStatic(UserDaoImpl.class);
-    Mockito.when(UserDaoImpl.getInstance()).thenReturn(userDao);
-    PowerMockito.mockStatic(UserUtility.class);
-    PowerMockito.mockStatic(Util.class);
-    Mockito.when(UserUtility.decryptUserData(Mockito.anyMap()))
-        .thenReturn(getUserDbMap("1234567890"));
-    Mockito.when(userDao.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(null);
-    UserProfileReadService userProfileReadService = new UserProfileReadService();
-    try {
-      userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
-    } catch (ProjectCommonException ex) {
-      Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.userNotFound.getErrorCode());
-    }
-  }
-
-  // @Test
   public void getLockedUserProfileTest() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
@@ -367,19 +339,6 @@ public class UserProfileReadServiceTest {
     reqObj.setRequest(reqMap);
     reqObj.setContext(innerMap);
     reqObj.setOperation(ActorOperations.GET_USER_PROFILE_V3.getValue());
-    return reqObj;
-  }
-
-  private Request getProfileReadRequestV4(String userId) {
-    Request reqObj = new Request();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.REQUESTED_BY, "1234567890");
-    innerMap.put(JsonKey.PRIVATE, false);
-    innerMap.put(JsonKey.FIELDS, "topic,organisations,roles,locations,declarations,externalIds");
-    Map<String, Object> reqMap = getUserProfileRequest(userId);
-    reqObj.setRequest(reqMap);
-    reqObj.setContext(innerMap);
-    reqObj.setOperation(ActorOperations.GET_USER_PROFILE_V4.getValue());
     return reqObj;
   }
 
