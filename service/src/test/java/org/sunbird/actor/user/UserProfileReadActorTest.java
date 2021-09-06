@@ -525,6 +525,19 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
+  @Test
+  public void testGetUserByLoginId2() {
+    Request request = new Request();
+    request.setOperation(ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
+    request.put(JsonKey.LOGIN_ID, "loginId");
+    request.getContext().put(JsonKey.PRIVATE, false);
+    when(userService.searchUser(Mockito.any(SearchDTO.class), Mockito.any(RequestContext.class)))
+        .thenReturn(getUserExistsSearchResponseMap());
+    setCassandraResponse(getCassandraResponse(true));
+    boolean result = testScenario(request, ResponseCode.RESOURCE_NOT_FOUND);
+    assertTrue(result);
+  }
+
   // @Test
   public void testGetUserByPhoneKeyFailureWithInvalidPhone() {
     reqMap = getUserProfileByKeyRequest(JsonKey.PHONE, INVALID_PHONE);
