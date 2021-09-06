@@ -162,15 +162,17 @@ public class UserProfileReadService {
     Map<String, List<String>> userOrgRoles = new HashMap<>();
     for (Map userRole : userRolesList) {
       List<Map<String, String>> scopeMap = (List<Map<String, String>>) userRole.get(JsonKey.SCOPE);
-      for (Map scope : scopeMap) {
-        String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
-        String role = (String) userRole.get(JsonKey.ROLE);
-        if (userOrgRoles.containsKey(orgId)) {
-          List<String> roles = userOrgRoles.get(orgId);
-          roles.add(role);
-          userOrgRoles.put(orgId, roles);
-        } else {
-          userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
+      if (CollectionUtils.isNotEmpty(scopeMap)) {
+        for (Map scope : scopeMap) {
+          String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
+          String role = (String) userRole.get(JsonKey.ROLE);
+          if (userOrgRoles.containsKey(orgId)) {
+            List<String> roles = userOrgRoles.get(orgId);
+            roles.add(role);
+            userOrgRoles.put(orgId, roles);
+          } else {
+            userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
+          }
         }
       }
     }
