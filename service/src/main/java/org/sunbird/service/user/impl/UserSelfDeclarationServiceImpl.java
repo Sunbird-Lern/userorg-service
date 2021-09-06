@@ -3,11 +3,9 @@ package org.sunbird.service.user.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.sunbird.dao.user.UserSelfDeclarationDao;
 import org.sunbird.dao.user.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -18,6 +16,7 @@ import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserSelfDeclarationService;
+import org.sunbird.util.user.UserUtil;
 
 public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationService {
 
@@ -118,9 +117,47 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
     userSelfDeclarationDao.upsertUserSelfDeclaredFields(userDeclareEntity, context);
   }
 
+  @Override
+  public List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
+    List<Map<String, Object>> finalRes = new ArrayList<>();
+    List<Map<String, Object>> resExternalIds =
+        userSelfDeclarationDao.getUserSelfDeclaredFields(userId, context);
+    if (CollectionUtils.isNotEmpty(resExternalIds)) {
+      resExternalIds.forEach(
+          item -> {
+            Map<String, Object> declaration = new HashMap<>();
+            Map<String, String> declaredFields = (Map<String, String>) item.get(JsonKey.USER_INFO);
+            if (MapUtils.isNotEmpty(declaredFields)) {
+              decryptDeclarationFields(declaredFields, context);
+            }
+            declaration.put(JsonKey.STATUS, item.get(JsonKey.STATUS));
+            declaration.put(JsonKey.ERROR_TYPE, item.get(JsonKey.ERROR_TYPE));
+            declaration.put(JsonKey.ORG_ID, item.get(JsonKey.ORG_ID));
+            declaration.put(JsonKey.PERSONA, item.get(JsonKey.PERSONA));
+            declaration.put(JsonKey.INFO, declaredFields);
+            finalRes.add(declaration);
+          });
+    }
+    return finalRes;
+  }
+
+  private Map<String, String> decryptDeclarationFields(
+      Map<String, String> declaredFields, RequestContext context) {
+    if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
+      declaredFields.put(
+          JsonKey.DECLARED_EMAIL,
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL), context));
+    }
+    if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
+      declaredFields.put(
+          JsonKey.DECLARED_PHONE,
+          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE), context));
+    }
+    return declaredFields;
+  }
+
   private void addUserSelfDeclaredDetails(
       UserDeclareEntity userDeclareEntity, RequestContext context) {
-
     List<Map<String, Object>> dbSelfDeclaredResults =
         userSelfDeclarationDao.getUserSelfDeclaredFields(userDeclareEntity, context);
     Map<String, Object> extIdMap =

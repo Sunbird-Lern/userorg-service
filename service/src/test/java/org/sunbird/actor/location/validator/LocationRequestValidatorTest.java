@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,7 +23,6 @@ import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.dao.location.impl.LocationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -33,12 +31,19 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ProjectUtil.class, EsClientFactory.class, ElasticSearchRestHighImpl.class, LocationDaoImpl.class, LocationDaoFactory.class})
+@PrepareForTest({
+  ProjectUtil.class,
+  EsClientFactory.class,
+  ElasticSearchRestHighImpl.class,
+  LocationDaoImpl.class,
+  LocationDaoFactory.class
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -59,10 +64,10 @@ public class LocationRequestValidatorTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-
   }
+
   @Before
-  public void beforeTest(){
+  public void beforeTest() {
 
     PowerMockito.mockStatic(LocationDaoFactory.class);
     locationDao = mock(LocationDaoImpl.class);
@@ -391,69 +396,92 @@ public class LocationRequestValidatorTest {
     Set<String> loc = validator.getValidatedLocationSet(locList, null);
     Assert.assertNotNull(loc);
   }
+
   @Test
   public void getValidatedLocationIdsTest() {
 
     PowerMockito.when(locationDao.search(Mockito.any(), Mockito.any()))
-            .thenReturn(getLocationRecords());
+        .thenReturn(getLocationRecords());
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put("type", "state");
+    map.put("id", "id1");
+    map.put("code", "code1");
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    PowerMockito.when(locationDao.read(Mockito.any(), Mockito.any())).thenReturn(response);
     LocationRequestValidator validator = new LocationRequestValidator();
     List<String> locList = new ArrayList<>();
     locList.add("code1");
     locList.add("code2");
-    List<String> loc = validator.getValidatedLocationIds(locList, null);
+    List<String> loc = validator.getValidatedLocationIds(locList, new RequestContext());
     Assert.assertNotNull(loc);
   }
+
   @Test
   public void getHierarchyLocationIdsTest() {
 
     PowerMockito.when(locationDao.search(Mockito.any(), Mockito.any()))
-            .thenReturn(getLocationRecords());
+        .thenReturn(getLocationRecords());
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put("type", "state");
+    map.put("id", "id1");
+    map.put("code", "code1");
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    PowerMockito.when(locationDao.read(Mockito.any(), Mockito.any())).thenReturn(response);
     LocationRequestValidator validator = new LocationRequestValidator();
     List<String> locList = new ArrayList<>();
     locList.add("id1");
     locList.add("id2");
-    List<String> loc = validator.getHierarchyLocationIds(locList, null);
+    List<String> loc = validator.getHierarchyLocationIds(locList, new RequestContext());
     Assert.assertNotNull(loc);
   }
 
   @Test
-  public void validateSearchLocationRequestTest(){
+  public void validateSearchLocationRequestTest() {
     LocationRequestValidator validator = new LocationRequestValidator();
     List<String> filters = new ArrayList<>();
-    Map<String,Object> reqMap = new HashMap<>();
+    Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.FILTERS, filters);
     Request req = new Request();
     req.setRequest(reqMap);
     try {
       validator.validateSearchLocationRequest(req);
-    }catch (ProjectCommonException ex){
+    } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
+
   @Test
-  public void validateSearchLocationEmptyRequestTest(){
+  public void validateSearchLocationEmptyRequestTest() {
     LocationRequestValidator validator = new LocationRequestValidator();
-    Map<String,Object> reqMap = new HashMap<>();
+    Map<String, Object> reqMap = new HashMap<>();
     Request req = new Request();
     req.setRequest(reqMap);
     try {
       validator.validateSearchLocationRequest(req);
-    }catch (ProjectCommonException ex){
+    } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
+
   @Test
-  public void validateDeleteLocationRequestTest(){
+  public void validateDeleteLocationRequestTest() {
     LocationRequestValidator validator = new LocationRequestValidator();
     try {
       validator.validateDeleteLocationRequest("");
-    }catch (ProjectCommonException ex){
+    } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       Assert.assertEquals(ex.getCode(), ResponseCode.locationIdRequired.getErrorCode());
     }
   }
+
   private static Response getLocationRecords() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();

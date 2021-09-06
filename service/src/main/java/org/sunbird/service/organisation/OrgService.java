@@ -2,7 +2,6 @@ package org.sunbird.service.organisation;
 
 import java.util.List;
 import java.util.Map;
-
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -13,6 +12,9 @@ public interface OrgService {
   Map<String, Object> getOrgById(String orgId, RequestContext context);
 
   List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context);
+
+  List<Map<String, Object>> getOrgByIds(
+      List<String> orgIds, List<String> fields, RequestContext context);
 
   Map<String, Object> getOrgByExternalIdAndProvider(
       String externalId, String provider, RequestContext context);
@@ -26,10 +28,9 @@ public interface OrgService {
   Future<Map<String, Object>> searchOrg(SearchDTO searchDTO, RequestContext context);
 
   void createOrgExternalIdRecord(
-          String channel, String externalId, String orgId, RequestContext context);
+      String channel, String externalId, String orgId, RequestContext context);
 
-  void deleteOrgExternalIdRecord(
-          String channel, String externalId, RequestContext context);
+  void deleteOrgExternalIdRecord(String channel, String externalId, RequestContext context);
 
   String getOrgIdFromSlug(String slug, RequestContext context);
 
