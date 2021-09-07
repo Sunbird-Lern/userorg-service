@@ -33,6 +33,7 @@ import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.datasecurity.impl.DefaultEncryptionServiceImpl;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -40,6 +41,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserExternalIdentityService;
 import org.sunbird.service.user.UserProfileReadService;
@@ -136,7 +138,6 @@ public class UserProfileReadActorTest {
         .thenReturn("anyChannel");
     when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
         .thenReturn("rootOrgId");
-
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(Util.class);
 
@@ -444,7 +445,7 @@ public class UserProfileReadActorTest {
     return response;
   }
 
-  // @Test
+  @Test
   public void testGetUserByEmailKey() throws Exception {
     Response response1 = new Response();
     Map<String, Object> userMap = new HashMap<>();
@@ -506,15 +507,34 @@ public class UserProfileReadActorTest {
     PowerMockito.mockStatic(UserUtil.class);
     when(UserUtil.getExternalIds(Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(new ArrayList<>());
-    boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
+    boolean result =
+        testScenario(
+            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.RESOURCE_NOT_FOUND);
     assertTrue(result);
   }
 
-  // @Test
-  public void testGetUserByEmailKeySuccessWithValidEmail() {
-    reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, VALID_EMAIL);
+  @Test
+  public void testGetUserByLoginId() {
+    reqMap = getUserProfileByKeyRequest(JsonKey.LOGIN_ID, "loginId");
+    when(userService.searchUser(Mockito.any(SearchDTO.class), Mockito.any(RequestContext.class)))
+        .thenReturn(getUserExistsSearchResponseMap());
     setCassandraResponse(getCassandraResponse(true));
-    boolean result = testScenario(getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), null);
+    boolean result =
+        testScenario(
+            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.RESOURCE_NOT_FOUND);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testGetUserByLoginId2() {
+    Request request = new Request();
+    request.setOperation(ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
+    request.put(JsonKey.LOGIN_ID, "loginId");
+    request.getContext().put(JsonKey.PRIVATE, false);
+    when(userService.searchUser(Mockito.any(SearchDTO.class), Mockito.any(RequestContext.class)))
+        .thenReturn(getUserExistsSearchResponseMap());
+    setCassandraResponse(getCassandraResponse(true));
+    boolean result = testScenario(request, ResponseCode.RESOURCE_NOT_FOUND);
     assertTrue(result);
   }
 
@@ -536,17 +556,11 @@ public class UserProfileReadActorTest {
     assertTrue(result);
   }
 
-  public void setEsSearchResponse(Map<String, Object> esResponse) {
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(esResponse);
-    when(esService.search(Mockito.anyObject(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
-  }
-
   private static Map<String, Object> getUserExistsSearchResponseMap() {
     Map<String, Object> map = new HashMap<>();
     Map<String, Object> response = new HashMap<>();
     response.put(JsonKey.EXISTS, "true");
+    response.put(JsonKey.USER_ID, "userId");
     response.put(JsonKey.FIRST_NAME, "Name");
     response.put(JsonKey.LAST_NAME, "Name");
     List contentList = new ArrayList<>();
@@ -577,7 +591,7 @@ public class UserProfileReadActorTest {
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
 
