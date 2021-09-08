@@ -633,36 +633,19 @@ public class UserProfileReadService {
         if (StringUtils.isNotBlank(organisationId) && !organisationId.equalsIgnoreCase(rootOrgId)) {
           if (StringUtils.isNotBlank((String) organisations.get(i).get(JsonKey.ORG_NAME))
               && StringUtils.isNotBlank((String) organisations.get(i).get(JsonKey.EXTERNAL_ID))) {
-            Map<String, Object> filterMap = new HashMap<>();
-            Map<String, Object> searchQueryMap = new HashMap<>();
-            filterMap.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
-            filterMap.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
-            filterMap.put(JsonKey.CODE, organisations.get(i).get(JsonKey.EXTERNAL_ID));
-            searchQueryMap.put(JsonKey.FILTERS, filterMap);
-            Map<String, Object> schoolLocation = searchLocation(searchQueryMap, context);
-            if (MapUtils.isNotEmpty(schoolLocation)) {
-              userLocation.add(schoolLocation);
-            }
+            Map<String, Object> schoolLocation = new HashMap<>();
+            schoolLocation.put(JsonKey.NAME, organisations.get(i).get(JsonKey.ORG_NAME));
+            schoolLocation.put(JsonKey.TYPE, JsonKey.LOCATION_TYPE_SCHOOL);
+            schoolLocation.put(JsonKey.CODE, organisations.get(i).get(JsonKey.EXTERNAL_ID));
+            schoolLocation.put(JsonKey.ID, organisationId);
+            schoolLocation.put(JsonKey.PARENT_ID, "");
+            userLocation.add(schoolLocation);
           } else {
             logger.info(context, "School details are blank for orgid = " + organisationId);
           }
         }
       }
     }
-  }
-
-  public Map<String, Object> searchLocation(
-      Map<String, Object> searchQueryMap, RequestContext context) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-    String type = ProjectUtil.EsType.location.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (MapUtils.isNotEmpty(result)
-        && CollectionUtils.isNotEmpty((List<Map<String, Object>>) result.get(JsonKey.CONTENT))) {
-      return ((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).get(0);
-    }
-    return Collections.emptyMap();
   }
 
   private List<Map<String, Object>> getUserLocations(
