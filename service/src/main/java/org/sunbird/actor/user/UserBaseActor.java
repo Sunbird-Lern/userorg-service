@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.client.location.LocationClient;
 import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -36,6 +37,8 @@ public abstract class UserBaseActor extends BaseActor {
 
   protected UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   protected LocationClient locationClient = LocationClientImpl.getInstance();
+  protected UserCreateRequestValidator userCreateRequestValidator =
+      new UserCreateRequestValidator();
 
   protected void generateUserTelemetry(
       Map<String, Object> userMap, Request request, String userId, String operationType) {
@@ -157,16 +160,16 @@ public abstract class UserBaseActor extends BaseActor {
 
   protected void validateAndGetLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    validateLocationCodesDataType(locationCodes);
+    userCreateRequestValidator.validateLocationCodesDataType(locationCodes);
     if (CollectionUtils.isNotEmpty((List) locationCodes)) {
       List<Location> locationList = getLocationList(locationCodes, userRequest.getRequestContext());
-      String stateCode = validateAndGetStateLocationCode(locationList);
+      String stateCode = UserCreateRequestValidator.validateAndGetStateLocationCode(locationList);
       List<String> allowedLocationTypeList =
           getStateLocationTypeConfig(stateCode, userRequest.getRequestContext());
       String stateId = null;
       List<String> set = new ArrayList<>();
       for (Location location : locationList) {
-        isValidLocationType(location.getType(), allowedLocationTypeList);
+        UserCreateRequestValidator.isValidLocationType(location.getType(), allowedLocationTypeList);
         if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
           stateId = location.getId();
         }
@@ -211,25 +214,6 @@ public abstract class UserBaseActor extends BaseActor {
     return locationTypeConfigMap.get(stateCode);
   }
 
-  protected String validateAndGetStateLocationCode(List<Location> locationList) {
-    String stateCode = "";
-    for (Location location : locationList) {
-      if (JsonKey.STATE.equals(location.getType())) {
-        stateCode = location.getCode();
-      }
-    }
-    // Throw an exception if location codes update does not contains state code
-    if (StringUtils.isBlank(stateCode)) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.mandatoryParamsMissing.getErrorMessage(),
-              JsonKey.LOCATION_CODES + " of type State"),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    return stateCode;
-  }
-
   protected List<Location> getLocationList(Object locationCodes, RequestContext context) {
     // As of now locationCode can take array of only location codes and map of location Codes which
     // include type and code of the location
@@ -247,16 +231,6 @@ public abstract class UserBaseActor extends BaseActor {
     return locationList;
   }
 
-  protected void validateLocationCodesDataType(Object locationCodes) {
-    if ((locationCodes != null) && !(locationCodes instanceof List)) {
-      throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-  }
-
   protected List<Location> createLocationLists(List<Map<String, String>> locationCodes) {
     List<Location> locations = new ArrayList<>();
     for (Map<String, String> locationMap : locationCodes) {
@@ -266,19 +240,6 @@ public abstract class UserBaseActor extends BaseActor {
       locations.add(location);
     }
     return locations;
-  }
-
-  protected boolean isValidLocationType(String type, List<String> typeList) {
-    if (null != type
-        && CollectionUtils.isNotEmpty(typeList)
-        && !typeList.contains(type.toLowerCase())) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    return true;
   }
 
   protected void populateLocationCodesFromProfileLocation(Map<String, Object> userMap) {
