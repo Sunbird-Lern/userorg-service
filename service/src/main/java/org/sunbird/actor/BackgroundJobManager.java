@@ -16,21 +16,9 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-/**
- * This class will handle all the background job.
- *
- * @author Manzarul
- * @author Amit Kumar
- */
 @ActorConfig(
   tasks = {},
-  asyncTasks = {
-    "mergeUserToElastic",
-    "updateUserInfoToElastic",
-    "updateUserOrgES",
-    "insertUserNotesToElastic",
-    "updateUserNotesToElastic",
-  }
+  asyncTasks = {"mergeUserToElastic", "updateUserInfoToElastic", "updateUserOrgES"}
 )
 public class BackgroundJobManager extends BaseActor {
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
@@ -42,10 +30,6 @@ public class BackgroundJobManager extends BaseActor {
       updateUserInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
-      insertUserNotesToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_NOTES_ES.getValue())) {
-      updateUserNotesToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.MERGE_USER_TO_ELASTIC.getValue())) {
       mergeUserDetailsToEs(request);
     } else {
@@ -141,34 +125,6 @@ public class BackgroundJobManager extends BaseActor {
     }
     logger.info(context, "unable to save the data inside ES with identifier " + identifier);
     return false;
-  }
-
-
-  @SuppressWarnings("unchecked")
-  private void insertUserNotesToEs(Request actorMessage) {
-    Map<String, Object> noteMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.NOTE);
-    if (ProjectUtil.isNotNull(noteMap) && noteMap.size() > 0) {
-      String id = (String) noteMap.get(JsonKey.ID);
-      insertDataToElastic(
-          ProjectUtil.EsIndex.sunbird.getIndexName(),
-          ProjectUtil.EsType.usernotes.getTypeName(),
-          id,
-          noteMap,
-          actorMessage.getRequestContext());
-    } else {
-      logger.info(actorMessage.getRequestContext(), "No data found to save inside Es for Notes--");
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void updateUserNotesToEs(Request actorMessage) {
-    Map<String, Object> noteMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.NOTE);
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.usernotes.getTypeName(),
-        (String) noteMap.get(JsonKey.ID),
-        noteMap,
-        actorMessage.getRequestContext());
   }
 
   private void mergeUserDetailsToEs(Request mergeRequest) {
