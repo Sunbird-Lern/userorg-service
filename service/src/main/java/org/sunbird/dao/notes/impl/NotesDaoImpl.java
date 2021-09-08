@@ -91,9 +91,7 @@ public class NotesDaoImpl implements NotesDao {
   public Map<String, Object> getNoteById(String noteId, RequestContext context) {
     Future<Map<String, Object>> resultF =
         esService.getDataByIdentifier(ProjectUtil.EsType.usernotes.getTypeName(), noteId, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    return result;
+    return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
   }
 
   private boolean insertDataToElastic(
@@ -101,7 +99,7 @@ public class NotesDaoImpl implements NotesDao {
     String type = ProjectUtil.EsType.usernotes.getTypeName();
     Future<String> responseF = esService.save(type, identifier, data, context);
     String response = (String) ElasticSearchHelper.getResponseFromFuture(responseF);
-    if (!StringUtils.isBlank(response)) {
+    if (StringUtils.isNotBlank(response)) {
       return true;
     }
     logger.debug(context, "unable to save the data inside ES with identifier " + identifier);

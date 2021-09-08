@@ -114,7 +114,7 @@ public class NotesManagementActor extends BaseActor {
 
   private void getNote(Request actorMessage) {
     RequestContext context = actorMessage.getRequestContext();
-    logger.debug(context, "Update Note method call start");
+    logger.debug(context, "Get Note method call start");
     try {
       String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
@@ -144,7 +144,7 @@ public class NotesManagementActor extends BaseActor {
 
   private void searchNote(Request actorMessage) {
     RequestContext context = actorMessage.getRequestContext();
-    logger.debug(context, "Update Note method call start");
+    logger.debug(context, "Search Note method call start");
     try {
       Map<String, Object> searchQueryMap = actorMessage.getRequest();
       searchQueryMap.put(JsonKey.REQUESTED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));

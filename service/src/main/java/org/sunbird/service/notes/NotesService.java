@@ -76,7 +76,7 @@ public class NotesService {
     return notesDao.getNoteById(noteId, context);
   }
 
-  public Boolean validUser(String userId, RequestContext context) {
+  public boolean validUser(String userId, RequestContext context) {
     if (!StringUtils.isBlank(userId)) {
       try {
         userService.getUserById(userId, context);
@@ -97,12 +97,11 @@ public class NotesService {
     return result;
   }
 
-  public Boolean validateUserForNoteUpdate(String userId, String noteId, RequestContext context) {
-    Boolean result = false;
+  public boolean validateUserForNoteUpdate(String userId, String noteId, RequestContext context) {
     Map<String, Object> noteData = getNoteById(noteId, context);
-    if (MapUtils.isEmpty(noteData)) return result;
+    if (MapUtils.isEmpty(noteData)) return false;
     if (!StringUtils.isBlank(userId)) {
-      result = true;
+      return true;
     }
     if (!userId.equalsIgnoreCase((String) noteData.get(JsonKey.USER_ID))) {
       throw new ProjectCommonException(
@@ -110,6 +109,6 @@ public class NotesService {
           ResponseCode.errorForbidden.getErrorMessage(),
           ResponseCode.FORBIDDEN.getResponseCode());
     }
-    return result;
+    return false;
   }
 }
