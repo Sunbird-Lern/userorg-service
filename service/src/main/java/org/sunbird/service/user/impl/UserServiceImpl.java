@@ -36,11 +36,7 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
-import org.sunbird.util.AdminUtilHandler;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Slug;
-import org.sunbird.util.UserUtility;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
@@ -78,11 +74,18 @@ public class UserServiceImpl implements UserService {
   public User getUserById(String userId, RequestContext context) {
     User user = userDao.getUserById(userId, context);
     if (null == user) {
-      throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
     }
+    return user;
+  }
+
+  @Override
+  public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
+    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
+    if (MapUtils.isEmpty(user)) {
+      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
+    }
+    user.putAll(Util.getUserDefaultValue());
     return user;
   }
 

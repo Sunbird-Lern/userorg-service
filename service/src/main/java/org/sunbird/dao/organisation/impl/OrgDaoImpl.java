@@ -22,6 +22,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class OrgDaoImpl implements OrgDao {
@@ -44,13 +45,12 @@ public class OrgDaoImpl implements OrgDao {
   public Map<String, Object> getOrgById(String orgId, RequestContext context) {
     if (StringUtils.isNotBlank(orgId)) {
       Response response =
-          cassandraOperation.getRecordById(
-                  KEYSPACE_NAME, ORG_TABLE_NAME, orgId, context);
+          cassandraOperation.getRecordById(KEYSPACE_NAME, ORG_TABLE_NAME, orgId, context);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
         Map<String, Object> orgMap = responseList.get(0);
-        enrichOrgDetails(orgMap,context);
+        enrichOrgDetails(orgMap, context);
         return orgMap;
       }
     }
@@ -59,12 +59,18 @@ public class OrgDaoImpl implements OrgDao {
 
   @Override
   public List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context) {
+    return getOrgByIds(orgIds, Collections.emptyList(), context);
+  }
+
+  @Override
+  public List<Map<String, Object>> getOrgByIds(
+      List<String> orgIds, List<String> fields, RequestContext context) {
     if (CollectionUtils.isNotEmpty(orgIds)) {
       Response response =
-        cassandraOperation.getRecordsByPrimaryKeys(
-          KEYSPACE_NAME, ORG_TABLE_NAME, orgIds, JsonKey.ID, context);
+          cassandraOperation.getPropertiesValueById(
+              KEYSPACE_NAME, ORG_TABLE_NAME, orgIds, fields, context);
       List<Map<String, Object>> responseList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+          (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
         responseList.stream().forEach(orgMap -> enrichOrgDetails(orgMap, context));
         return responseList;
@@ -81,19 +87,20 @@ public class OrgDaoImpl implements OrgDao {
         orgLocationList = mapper.readValue(orgLocation, List.class);
       } catch (Exception e) {
         logger.info(
-          context,
-          "Exception occurred while converting orgLocation to List<Map<String,String>>.");
+            context,
+            "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
     }
     orgMap.put(JsonKey.ORG_LOCATION, orgLocationList);
     orgMap.put(JsonKey.HASHTAGID, orgMap.get(JsonKey.ID));
     orgMap.remove(JsonKey.CONTACT_DETAILS);
+    orgMap.putAll(Util.getOrgDefaultValue());
   }
 
   @Override
   public Response create(Map<String, Object> orgMap, RequestContext context) {
     try {
-      List<Map<String,Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+      List<Map<String, Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
       if (CollectionUtils.isNotEmpty(orgLocation)) {
         String orgLoc = mapper.writeValueAsString(orgLocation);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
@@ -107,7 +114,7 @@ public class OrgDaoImpl implements OrgDao {
   @Override
   public Response update(Map<String, Object> orgMap, RequestContext context) {
     try {
-      List<Map<String,Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
+      List<Map<String, Object>> orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
       if (CollectionUtils.isNotEmpty(orgLocation)) {
         String orgLoc = mapper.writeValueAsString(orgLocation);
         orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
@@ -122,7 +129,7 @@ public class OrgDaoImpl implements OrgDao {
   public Response search(Map<String, Object> searchQueryMap, RequestContext context) {
     SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
     Map<String, Object> result =
-      (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(search(searchDto, context));
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(search(searchDto, context));
     Response response = new Response();
     if (result != null) {
       response.put(JsonKey.COUNT, result.get(JsonKey.COUNT));
