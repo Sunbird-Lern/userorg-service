@@ -26,9 +26,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
-import org.sunbird.actor.router.RequestRouter;
-import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -55,13 +52,10 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   LocationRequestValidator.class,
   EsClientFactory.class,
-  RequestRouter.class,
-  BaseMWService.class,
-  SunbirdMWService.class,
   ActorSelection.class,
   OrgExternalServiceImpl.class,
-        HttpClientUtil.class,
-        LocationServiceImpl.class
+  HttpClientUtil.class,
+  LocationServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -90,61 +84,64 @@ public class OrgManagementActorTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
-
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
     locationService = mock(LocationServiceImpl.class);
     whenNew(LocationServiceImpl.class).withNoArguments().thenReturn(locationService);
-    when(locationService.locationSearch(Mockito.anyString(),Mockito.any(),Mockito.any())).thenReturn(getLocationLists());
+    when(locationService.locationSearch(Mockito.anyString(), Mockito.any(), Mockito.any()))
+        .thenReturn(getLocationLists());
 
     locationRequestValidator = mock(LocationRequestValidator.class);
     whenNew(LocationRequestValidator.class).withNoArguments().thenReturn(locationRequestValidator);
-    when(locationRequestValidator.getValidatedLocationIds(Mockito.any(),Mockito.any())).thenReturn(getLocationIdsLists());
-    when(locationRequestValidator.getHierarchyLocationIds(Mockito.any(),Mockito.any())).thenReturn(getLocationIdsLists());
+    when(locationRequestValidator.getValidatedLocationIds(Mockito.any(), Mockito.any()))
+        .thenReturn(getLocationIdsLists());
+    when(locationRequestValidator.getHierarchyLocationIds(Mockito.any(), Mockito.any()))
+        .thenReturn(getLocationIdsLists());
 
     externalService = mock(OrgExternalServiceImpl.class);
     whenNew(OrgExternalServiceImpl.class).withNoArguments().thenReturn(externalService);
-    when(externalService.getOrgIdFromOrgExternalIdAndProvider(Mockito.anyString(),Mockito.anyString(),Mockito.any())).thenReturn("orgId");
+    when(externalService.getOrgIdFromOrgExternalIdAndProvider(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn("orgId");
 
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
     basicRequestData = getBasicData();
 
-      PowerMockito.mockStatic(HttpClientUtil.class);
-      when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
-          .thenReturn("OK");
+    PowerMockito.mockStatic(HttpClientUtil.class);
+    when(HttpClientUtil.post(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn("OK");
 
     when(cassandraOperation.getAllRecords(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyList(), Mockito.any()))
-            .thenReturn(getAllRecords());
+        .thenReturn(getAllRecords());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getSuccess());
+        .thenReturn(getSuccess());
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getUpsertRecords());
+        .thenReturn(getUpsertRecords());
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getRecordsByProperty(false),getRecordsByProperty(false));
+        .thenReturn(getRecordsByProperty(false), getRecordsByProperty(false));
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(getRecordsByProperty(false),getRecordsByProperty(true));
-    PowerMockito.when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getRecordsByProperty(true));
+        .thenReturn(getRecordsByProperty(false), getRecordsByProperty(true));
+    PowerMockito.when(
+            cassandraOperation.getRecordsByCompositeKey(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getRecordsByProperty(true));
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponse(false));
     PowerMockito.when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
-
+        .thenReturn(promise.future());
   }
 
   @Test
@@ -164,7 +161,8 @@ public class OrgManagementActorTest {
     req.put(JsonKey.EMAIL, "invalid_email_format.com");
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()), ResponseCode.emailFormatError);
+            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
+            ResponseCode.emailFormatError);
     assertTrue(result);
   }
 
@@ -174,7 +172,8 @@ public class OrgManagementActorTest {
     req.put(JsonKey.ORG_TYPE, "invalidValue");
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()), ResponseCode.invalidValue);
+            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
+            ResponseCode.invalidValue);
     assertTrue(result);
   }
 
@@ -202,7 +201,8 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
     Request req =
         getRequest(
-            getRequestDataForOrgCreate(basicRequestData), OrganisationActorOperation.CREATE_ORG.getValue());
+            getRequestDataForOrgCreate(basicRequestData),
+            OrganisationActorOperation.CREATE_ORG.getValue());
     boolean result = testScenario(req, null);
     assertTrue(result);
   }
@@ -215,7 +215,8 @@ public class OrgManagementActorTest {
         testScenario(getRequest(req, OrganisationActorOperation.GET_ORG_DETAILS.getValue()), null);
     assertTrue(result);
   }
-@Ignore
+
+  @Ignore
   @Test
   public void testGetOrgDetailsFailure() {
     Map<String, Object> req = new HashMap<>();
@@ -227,7 +228,6 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-
   @Test
   public void testCreateOrgSuccessWithoutExternalIdAndProvider() {
 
@@ -238,9 +238,11 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
     Map<String, Object> map = getRequestDataForOrgCreate(basicRequestData);
     map.remove(JsonKey.EXTERNAL_ID);
-    boolean result = testScenario(getRequest(map, OrganisationActorOperation.CREATE_ORG.getValue()), null);
+    boolean result =
+        testScenario(getRequest(map, OrganisationActorOperation.CREATE_ORG.getValue()), null);
     assertTrue(result);
   }
+
   @Ignore
   @Test
   public void testCreateOrgSuccess() {
@@ -250,7 +252,7 @@ public class OrgManagementActorTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(response);
     PowerMockito.when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
+        .thenReturn(promise.future());
 
     Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
     req.put(JsonKey.HASHTAGID, "orgId");
@@ -260,6 +262,7 @@ public class OrgManagementActorTest {
     boolean result = testScenario(reqst, null);
     assertTrue(result);
   }
+
   @Test
   public void testCreateOrgFailureWithoutChannel() {
     Map<String, Object> map = getRequestDataForOrgCreate(basicRequestData);
@@ -307,7 +310,8 @@ public class OrgManagementActorTest {
     req.put(JsonKey.EXTERNAL_ID, "extId");
     Request request =
         getRequest(
-            getRequestDataForOrgCreate(basicRequestData), OrganisationActorOperation.CREATE_ORG.getValue());
+            getRequestDataForOrgCreate(basicRequestData),
+            OrganisationActorOperation.CREATE_ORG.getValue());
     boolean result = testScenario(request, null);
     assertTrue(result);
   }
@@ -318,7 +322,8 @@ public class OrgManagementActorTest {
     map.put(JsonKey.EMAIL, "invalid_email_format.com");
     boolean result =
         testScenario(
-            getRequest(map, OrganisationActorOperation.UPDATE_ORG.getValue()), ResponseCode.emailFormatError);
+            getRequest(map, OrganisationActorOperation.UPDATE_ORG.getValue()),
+            ResponseCode.emailFormatError);
     assertTrue(result);
   }
 
@@ -331,12 +336,14 @@ public class OrgManagementActorTest {
     locations.add(location);
     return locations;
   }
+
   public List<String> getLocationIdsLists() {
     List<String> locationIds = new ArrayList<>();
     locationIds.add("location1");
     locationIds.add("location2");
     return locationIds;
   }
+
   private Response getSuccess() {
     Response res = new Response();
     res.setResponseCode(ResponseCode.OK);
@@ -374,6 +381,7 @@ public class OrgManagementActorTest {
     res.put(JsonKey.RESPONSE, list);
     return res;
   }
+
   private Response getRecordsById(boolean empty) {
     Response res = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
@@ -388,6 +396,7 @@ public class OrgManagementActorTest {
     res.put(JsonKey.RESPONSE, list);
     return res;
   }
+
   private Response getUpsertRecords() {
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);

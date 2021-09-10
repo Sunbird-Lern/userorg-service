@@ -11,7 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -23,10 +22,6 @@ import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.user.UserActorOperations;
 
-@ActorConfig(
-  tasks = {"upsertUserExternalIdentityDetails"},
-  asyncTasks = {"upsertUserExternalIdentityDetails"}
-)
 public class UserExternalIdManagementActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -38,7 +33,7 @@ public class UserExternalIdManagementActor extends BaseActor {
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserExternalIdentityDetails(request);
     } else {
-      onReceiveUnsupportedOperation("UserExternalIdManagementActor");
+      onReceiveUnsupportedOperation();
     }
   }
 

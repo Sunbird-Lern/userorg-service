@@ -1,7 +1,6 @@
 package controllers.notesmanagement.validator;
 
 import controllers.BaseApplicationTest;
-import controllers.DummyActor;
 import java.util.*;
 import modules.OnRequestHandler;
 import org.junit.Before;
@@ -23,7 +22,6 @@ public class NoteRequestValidatorTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
     request = new Request();
     headerMap = new HashMap<>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), Arrays.asList("Some consumer ID"));

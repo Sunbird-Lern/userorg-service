@@ -8,25 +8,19 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserTncService;
-import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserTncService;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {"userTnCAccept"},
-  asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class UserTnCActor extends BaseActor {
   private UserTncService tncService = new UserTncService();
   private ObjectMapper mapper = new ObjectMapper();
@@ -39,7 +33,7 @@ public class UserTnCActor extends BaseActor {
     if (operation.equalsIgnoreCase(ActorOperations.USER_TNC_ACCEPT.getValue())) {
       acceptTNC(request);
     } else {
-      onReceiveUnsupportedOperation("UserTnCActor");
+      onReceiveUnsupportedOperation();
     }
   }
 

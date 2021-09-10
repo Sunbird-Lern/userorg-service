@@ -1,10 +1,12 @@
 package org.sunbird.actor.otp;
 
+import akka.actor.ActorRef;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
@@ -13,20 +15,19 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.otp.OTPUtil;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"sendOTP"},
-  dispatcher = "notification-dispatcher"
-)
 public class SendOTPActor extends BaseActor {
   private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
+
+  @Inject
+  @Named("email_service_actor")
+  private ActorRef emailServiceActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
     if (ActorOperations.SEND_OTP.getValue().equals(request.getOperation())) {
       sendOTP(request);
     } else {
-      onReceiveUnsupportedOperation("SendOTPActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -72,14 +73,15 @@ public class SendOTPActor extends BaseActor {
     if (StringUtils.isBlank(otpType)) {
       emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, context);
     } else {
-      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, JsonKey.RESET_PASSWORD, context);
+      emailRequest =
+          OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, JsonKey.RESET_PASSWORD, context);
     }
     emailRequest.setRequestContext(context);
     logger.info(
         context,
         "SendOTPActor:sendOTPViaEmail : Calling EmailServiceActor for Key = "
             + logMaskService.maskEmail(key));
-    tellToAnother(emailRequest);
+    emailServiceActor.tell(emailRequest, self());
   }
 
   private void sendOTPViaSMS(String key, String otp, String template, RequestContext context) {

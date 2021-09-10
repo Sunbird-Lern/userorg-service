@@ -4,7 +4,6 @@ import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -16,10 +15,6 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"mergeUserToElastic", "updateUserInfoToElastic", "updateUserOrgES"}
-)
 public class BackgroundJobManager extends BaseActor {
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
@@ -33,7 +28,7 @@ public class BackgroundJobManager extends BaseActor {
     } else if (operation.equalsIgnoreCase(ActorOperations.MERGE_USER_TO_ELASTIC.getValue())) {
       mergeUserDetailsToEs(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 

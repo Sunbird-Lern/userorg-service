@@ -1,10 +1,11 @@
 package org.sunbird.actor.notification;
 
+import akka.actor.ActorRef;
 import java.util.*;
-
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -12,21 +13,20 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.notification.NotificationService;
 
-@ActorConfig(
-  tasks = {"v2Notification"},
-  asyncTasks = {},
-  dispatcher = "notification-dispatcher"
-)
 public class SendNotificationActor extends BaseActor {
 
-  NotificationService notificationService = new NotificationService();
+  private NotificationService notificationService = new NotificationService();
+
+  @Inject
+  @Named("background_notification_actor")
+  private ActorRef backGroundNotificationActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.V2_NOTIFICATION.getValue())) {
       sendNotification(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -37,23 +37,29 @@ public class SendNotificationActor extends BaseActor {
     Set<String> phoneOrEmailList;
     Map<String, Object> notificationReq = null;
     String mode = (String) requestMap.remove(JsonKey.MODE);
-    if (StringUtils.isNotBlank(mode)
-      && JsonKey.SMS.equalsIgnoreCase(mode)) {
+    if (StringUtils.isNotBlank(mode) && JsonKey.SMS.equalsIgnoreCase(mode)) {
       mode = JsonKey.SMS;
     } else {
       mode = JsonKey.EMAIL;
     }
     if (JsonKey.SMS.equalsIgnoreCase(mode)) {
-      phoneOrEmailList = notificationService.getEmailOrPhoneListByUserIds(userIds, JsonKey.PHONE, request.getRequestContext());
-      notificationReq = notificationService.getV2NotificationRequest(phoneOrEmailList, requestMap, JsonKey.SMS, null);
+      phoneOrEmailList =
+          notificationService.getEmailOrPhoneListByUserIds(
+              userIds, JsonKey.PHONE, request.getRequestContext());
+      notificationReq =
+          notificationService.getV2NotificationRequest(
+              phoneOrEmailList, requestMap, JsonKey.SMS, null);
     }
     if (JsonKey.EMAIL.equalsIgnoreCase(mode)) {
-      phoneOrEmailList = notificationService.getEmailOrPhoneListByUserIds(userIds, JsonKey.EMAIL, request.getRequestContext());
+      phoneOrEmailList =
+          notificationService.getEmailOrPhoneListByUserIds(
+              userIds, JsonKey.EMAIL, request.getRequestContext());
       String template =
-        notificationService.getEmailTemplateFile(
+          notificationService.getEmailTemplateFile(
               (String) requestMap.get(JsonKey.EMAIL_TEMPLATE_TYPE), request.getRequestContext());
       notificationReq =
-        notificationService.getV2NotificationRequest(phoneOrEmailList, requestMap, JsonKey.EMAIL, template);
+          notificationService.getV2NotificationRequest(
+              phoneOrEmailList, requestMap, JsonKey.EMAIL, template);
     }
     logger.debug(
         request.getRequestContext(),
@@ -79,7 +85,6 @@ public class SendNotificationActor extends BaseActor {
     bgRequest.setRequestId(requestId);
     bgRequest.getRequest().putAll(reqMap);
     bgRequest.setOperation("processNotification");
-    tellToAnother(bgRequest);
+    backGroundNotificationActor.tell(bgRequest, self());
   }
-
 }

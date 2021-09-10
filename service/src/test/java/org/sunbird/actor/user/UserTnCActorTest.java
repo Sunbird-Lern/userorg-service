@@ -26,7 +26,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -36,11 +35,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserTncService;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserTncService;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
@@ -49,7 +48,6 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  SunbirdMWService.class,
   DataCacheHandler.class,
   UserTncService.class
 })
@@ -86,8 +84,6 @@ public class UserTnCActorTest {
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(DataCacheHandler.class);
     PowerMockito.mockStatic(ServiceFactory.class);
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
     mockCassandraOperationGetUserCall(getUser(null));
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
@@ -143,7 +139,8 @@ public class UserTnCActorTest {
     Request request = new Request();
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
-    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 

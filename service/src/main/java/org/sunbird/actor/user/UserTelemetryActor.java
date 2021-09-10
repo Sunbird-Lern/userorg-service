@@ -6,16 +6,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"generateUserTelemetry"}
-)
 public class UserTelemetryActor extends BaseActor {
 
   @Override
@@ -23,7 +18,7 @@ public class UserTelemetryActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase("generateUserTelemetry")) {
       generateTelemetry(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 

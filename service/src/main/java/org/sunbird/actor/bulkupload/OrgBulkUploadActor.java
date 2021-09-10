@@ -1,5 +1,6 @@
 package org.sunbird.actor.bulkupload;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.sunbird.actor.router.ActorConfig;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
@@ -20,7 +21,6 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
-import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -30,14 +30,18 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {"orgBulkUpload"},
-  asyncTasks = {}
-)
 public class OrgBulkUploadActor extends BaseBulkUploadActor {
 
   private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+
+  @Inject
+  @Named("org_bulk_upload_background_job_actor")
+  private ActorRef orgBulkUploadBackgroundJobActor;
+
+  @Inject
+  @Named("system_settings_actor")
+  private ActorRef systemSettingsActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -47,7 +51,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
     if (operation.equalsIgnoreCase("orgBulkUpload")) {
       upload(request);
     } else {
-      onReceiveUnsupportedOperation("OrgBulkUploadActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -55,7 +59,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     Object dataObject =
         systemSettingClient.getSystemSettingByFieldAndKey(
-            getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+            systemSettingsActor,
             "orgProfileConfig",
             "csv",
             new TypeReference<Map>() {},
@@ -145,6 +149,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
         validateAndParseRecords(
             fileByteArray, processId, additionalInfo, supportedColumnsMap, true, context);
     processBulkUpload(
+        orgBulkUploadBackgroundJobActor,
         recordCount,
         processId,
         bulkUploadProcess,

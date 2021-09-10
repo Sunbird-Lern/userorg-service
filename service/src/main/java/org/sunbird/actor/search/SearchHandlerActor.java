@@ -1,15 +1,17 @@
 package org.sunbird.actor.search;
 
+import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
@@ -34,20 +36,14 @@ import org.sunbird.util.Util;
 import org.sunbird.util.search.FuzzySearchManager;
 import scala.concurrent.Future;
 
-/**
- * This class will handle search operation for all different type of index and types
- *
- * @author Manzarul
- */
-@ActorConfig(
-  tasks = {"userSearch", "userSearchV2", "userSearchV3", "orgSearch", "orgSearchV2"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class SearchHandlerActor extends BaseActor {
 
   private OrgService orgService = OrgServiceImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
+
+  @Inject
+  @Named("search_telemetry_actor")
+  private ActorRef searchTelemetryGenerator;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -55,7 +51,7 @@ public class SearchHandlerActor extends BaseActor {
     Util.initializeContext(request, TelemetryEnvKey.USER);
     Map<String, Object> searchQueryMap = request.getRequest();
     if (MapUtils.isNotEmpty(searchQueryMap)
-      && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
+        && MapUtils.isNotEmpty(((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)))) {
       ((Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS)).remove(JsonKey.OBJECT_TYPE);
     }
     String operation = request.getOperation();
@@ -70,7 +66,7 @@ public class SearchHandlerActor extends BaseActor {
         handleOrgSearchAsyncRequest(searchQueryMap, request);
         break;
       default:
-        onReceiveUnsupportedOperation(request.getOperation());
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -111,8 +107,7 @@ public class SearchHandlerActor extends BaseActor {
     }
   }
 
-  private void handleUserSearch(
-      Request request, Map<String, Object> searchQueryMap)
+  private void handleUserSearch(Request request, Map<String, Object> searchQueryMap)
       throws Exception {
     String searchVersion = request.getOperation();
     if (searchVersion.equalsIgnoreCase(ActorOperations.USER_SEARCH.getValue())) {
@@ -135,16 +130,15 @@ public class SearchHandlerActor extends BaseActor {
               (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
       if (responseList.isEmpty()) {
         throw new ProjectCommonException(
-          ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
-          String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
-          ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
+            String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
       }
       result.replace(JsonKey.COUNT, responseList.size());
       result.replace(JsonKey.CONTENT, responseList);
     }
     // Decrypt the data
-    List<Map<String, Object>> userMapList =
-      (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+    List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Map<String, Object> userDefaultFieldValue = Util.getUserDefaultValue();
     getDefaultValues(userDefaultFieldValue, fields);
@@ -171,10 +165,10 @@ public class SearchHandlerActor extends BaseActor {
         }
         if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
           if (CollectionUtils.isNotEmpty(
-            (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
+              (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION))) {
             userLocList = (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
             locationIds =
-              userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+                userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
             userMap.put(JsonKey.LOCATION_IDS, locationIds);
           } else {
             userMap.put(JsonKey.LOCATION_IDS, null);
@@ -192,7 +186,8 @@ public class SearchHandlerActor extends BaseActor {
     updateUserDetailsWithOrgName(requestedFields, userMapList, request.getRequestContext());
     response.put(JsonKey.RESPONSE, result);
     sender().tell(response, self());
-    generateSearchTelemetryEvent(searchDto, ProjectUtil.EsType.user.getTypeName(), result, request.getContext());
+    generateSearchTelemetryEvent(
+        searchDto, ProjectUtil.EsType.user.getTypeName(), result, request.getContext());
   }
 
   private void updateUserSearchResponseWithOrgLevelRole(
@@ -250,68 +245,68 @@ public class SearchHandlerActor extends BaseActor {
   private void handleOrgSearchAsyncRequest(Map<String, Object> searchQueryMap, Request request) {
     List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
     Map<String, Object> filterMap = (Map<String, Object>) searchQueryMap.get(JsonKey.FILTERS);
-    if (filterMap.containsKey(JsonKey.IS_SCHOOL) &&
-      BooleanUtils.isTrue((Boolean) filterMap.remove(JsonKey.IS_SCHOOL))) {
+    if (filterMap.containsKey(JsonKey.IS_SCHOOL)
+        && BooleanUtils.isTrue((Boolean) filterMap.remove(JsonKey.IS_SCHOOL))) {
       filterMap.put(JsonKey.ORGANISATION_TYPE, 2);
     }
 
     if (ActorOperations.ORG_SEARCH.getValue().equalsIgnoreCase(request.getOperation())
         && filterMap.containsKey(JsonKey.IS_ROOT_ORG)
         && BooleanUtils.isTrue((Boolean) filterMap.remove(JsonKey.IS_ROOT_ORG))) {
-        filterMap.put(JsonKey.IS_TENANT, true);
+      filterMap.put(JsonKey.IS_TENANT, true);
     }
     SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
     Future<Map<String, Object>> futureResponse =
         orgService.searchOrg(searchDto, request.getRequestContext());
     Future<Response> response =
         futureResponse.map(
-          new Mapper<>() {
-            @Override
-            public Response apply(Map<String, Object> responseMap) {
-              logger.debug(
-                request.getRequestContext(),
-                "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
-              Response response = new Response();
-              Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
-              getDefaultValues(orgDefaultFieldValue, fields);
-              List<Map<String, Object>> contents =
-                (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
-              contents
-                .stream()
-                .forEach(
-                  org -> {
-                    if (request
-                      .getOperation()
-                      .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
-                      Util.getOrgDefaultValue()
-                        .keySet()
-                        .stream()
-                        .forEach(key -> org.remove(key));
-                      org.remove(JsonKey.LOCATION_IDS);
-                    } else {
-                      // Put all default value for backward compatibility
-                      org.putAll(orgDefaultFieldValue);
-                      org.put(JsonKey.IS_ROOT_ORG, org.get(JsonKey.IS_TENANT));
-                    }
-                    if ((CollectionUtils.isNotEmpty(fields)
-                      && fields.contains(JsonKey.HASHTAGID))
-                      || (CollectionUtils.isEmpty(fields))) {
-                      org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
-                    }
-                    if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
-                      int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
-                      boolean isSchool =
-                        (orgType
-                          == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
-                          ? true
-                          : false;
-                      org.put(JsonKey.IS_SCHOOL, isSchool);
-                    }
-                  });
-              response.put(JsonKey.RESPONSE, responseMap);
-              return response;
-            }
-          },
+            new Mapper<>() {
+              @Override
+              public Response apply(Map<String, Object> responseMap) {
+                logger.debug(
+                    request.getRequestContext(),
+                    "SearchHandlerActor:handleOrgSearchAsyncRequest org search call ");
+                Response response = new Response();
+                Map<String, Object> orgDefaultFieldValue = new HashMap<>(Util.getOrgDefaultValue());
+                getDefaultValues(orgDefaultFieldValue, fields);
+                List<Map<String, Object>> contents =
+                    (List<Map<String, Object>>) responseMap.get(JsonKey.CONTENT);
+                contents
+                    .stream()
+                    .forEach(
+                        org -> {
+                          if (request
+                              .getOperation()
+                              .equalsIgnoreCase(ActorOperations.ORG_SEARCH_V2.getValue())) {
+                            Util.getOrgDefaultValue()
+                                .keySet()
+                                .stream()
+                                .forEach(key -> org.remove(key));
+                            org.remove(JsonKey.LOCATION_IDS);
+                          } else {
+                            // Put all default value for backward compatibility
+                            org.putAll(orgDefaultFieldValue);
+                            org.put(JsonKey.IS_ROOT_ORG, org.get(JsonKey.IS_TENANT));
+                          }
+                          if ((CollectionUtils.isNotEmpty(fields)
+                                  && fields.contains(JsonKey.HASHTAGID))
+                              || (CollectionUtils.isEmpty(fields))) {
+                            org.put(JsonKey.HASHTAGID, org.get(JsonKey.ID));
+                          }
+                          if (null != org.get(JsonKey.ORGANISATION_TYPE)) {
+                            int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
+                            boolean isSchool =
+                                (orgType
+                                        == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
+                                    ? true
+                                    : false;
+                            org.put(JsonKey.IS_SCHOOL, isSchool);
+                          }
+                        });
+                response.put(JsonKey.RESPONSE, responseMap);
+                return response;
+              }
+            },
             getContext().dispatcher());
     Patterns.pipe(response, getContext().dispatcher()).to(sender());
     Request telemetryReq = new Request();
@@ -320,7 +315,7 @@ public class SearchHandlerActor extends BaseActor {
     telemetryReq.getRequest().put("indexType", ProjectUtil.EsType.organisation.getTypeName());
     telemetryReq.getRequest().put("searchDto", searchDto);
     telemetryReq.setOperation("generateSearchTelemetry");
-    tellToAnother(telemetryReq);
+    searchTelemetryGenerator.tell(telemetryReq, self());
   }
 
   private void getDefaultValues(Map<String, Object> orgDefaultFieldValue, List<String> fields) {
@@ -361,14 +356,14 @@ public class SearchHandlerActor extends BaseActor {
           filteredRequestedFields.add(JsonKey.ID);
         }
         if (fields.contains(JsonKey.ORG_NAME.toLowerCase())) {
-          Map<String, Map<String,Object>> filteredOrg = fetchOrgDetails(userMapList, context);
+          Map<String, Map<String, Object>> filteredOrg = fetchOrgDetails(userMapList, context);
           userMapList
               .stream()
               .forEach(
                   userMap -> {
                     String rootOrgId = (String) userMap.get(JsonKey.ROOT_ORG_ID);
                     if (StringUtils.isNotBlank(rootOrgId)) {
-                      Map<String,Object> org = filteredOrg.get(rootOrgId);
+                      Map<String, Object> org = filteredOrg.get(rootOrgId);
                       if (null != org) {
                         userMap.put(JsonKey.ROOT_ORG_NAME, org.get(JsonKey.ORG_NAME));
                       }
@@ -382,7 +377,7 @@ public class SearchHandlerActor extends BaseActor {
                               userOrg -> {
                                 String userOrgId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
                                 if (StringUtils.isNotBlank(userOrgId)) {
-                                  Map<String,Object> org = filteredOrg.get(userOrgId);
+                                  Map<String, Object> org = filteredOrg.get(userOrgId);
                                   if (null != org) {
                                     userOrg.put(JsonKey.ORG_NAME, org.get(JsonKey.ORG_NAME));
                                   }
@@ -402,9 +397,8 @@ public class SearchHandlerActor extends BaseActor {
   }
 
   @SuppressWarnings("unchecked")
-  private Map<String, Map<String,Object>> fetchOrgDetails(
-      List<Map<String, Object>> userMapList,
-      RequestContext context) {
+  private Map<String, Map<String, Object>> fetchOrgDetails(
+      List<Map<String, Object>> userMapList, RequestContext context) {
     Set<String> orgIdList = new HashSet<>();
     userMapList
         .stream()
@@ -430,13 +424,13 @@ public class SearchHandlerActor extends BaseActor {
             });
 
     List<String> orgIds = new ArrayList<>(orgIdList);
-    List<Map<String,Object>> organisations = orgService.getOrgByIds(orgIds, context);
-    Map<String, Map<String,Object>> orgMap = new HashMap<>();
+    List<Map<String, Object>> organisations = orgService.getOrgByIds(orgIds, context);
+    Map<String, Map<String, Object>> orgMap = new HashMap<>();
     organisations
         .stream()
         .forEach(
             org -> {
-              orgMap.put((String)org.get(JsonKey.ID), org);
+              orgMap.put((String) org.get(JsonKey.ID), org);
             });
     return orgMap;
   }

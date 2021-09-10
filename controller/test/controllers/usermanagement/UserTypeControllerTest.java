@@ -23,6 +23,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @Ignore
 @PrepareForTest(OnRequestHandler.class)
@@ -30,7 +31,7 @@ import play.test.Helpers;
 public class UserTypeControllerTest extends BaseApplicationTest {
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.USER_TYPE_ACTOR, DummyActor.class);
   }
 
   @Test

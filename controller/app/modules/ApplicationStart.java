@@ -3,7 +3,6 @@ package modules;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.auth.verifier.KeyManager;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
@@ -22,12 +21,10 @@ public class ApplicationStart {
   public ApplicationStart(ApplicationLifecycle applicationLifecycle, Environment environment) {
     setEnvironment(environment);
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
-    SunbirdMWService.init();
     checkCassandraConnections();
     // initialize HttpClientUtil class
     HttpClientUtil.getInstance();
-    applicationLifecycle.addStopHook(
-        () -> CompletableFuture.completedFuture(null));
+    applicationLifecycle.addStopHook(() -> CompletableFuture.completedFuture(null));
     KeyManager.init();
   }
 

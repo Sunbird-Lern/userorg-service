@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
@@ -36,11 +35,6 @@ import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-/** This actor will handle bulk upload operation . */
-@ActorConfig(
-  tasks = {"bulkUpload", "getBulkOpStatus"},
-  asyncTasks = {}
-)
 public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
   private BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
@@ -56,7 +50,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         .equalsIgnoreCase(ActorOperations.GET_BULK_OP_STATUS.getValue())) {
       getUploadStatus(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -453,7 +447,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
       request.setRequestContext(context);
       request.put(JsonKey.PROCESS_ID, processId);
       request.setOperation(ActorOperations.PROCESS_BULK_UPLOAD.getValue());
-      tellToAnother(request);
+      // tellToAnother(request);
     }
     logger.info(
         context,

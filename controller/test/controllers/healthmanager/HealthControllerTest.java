@@ -23,6 +23,7 @@ import org.sunbird.request.HeaderParam;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 import util.RequestInterceptor;
 
 /** Created by arvind on 5/12/17. */
@@ -36,7 +37,7 @@ public class HealthControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() throws Exception {
-    setup(DummyActor.class);
+    setup(ACTORS.HEALTH_ACTOR, DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});

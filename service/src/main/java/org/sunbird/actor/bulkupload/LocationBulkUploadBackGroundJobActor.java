@@ -1,5 +1,6 @@
 package org.sunbird.actor.bulkupload;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -7,9 +8,9 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.client.location.LocationClient;
 import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -19,20 +20,19 @@ import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.location.UpsertLocationRequest;
-import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"locationBulkUploadBackground"}
-)
 public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private LocationClient locationClient = new LocationClientImpl();
+
+  @Inject
+  @Named("location_actor")
+  private ActorRef locationActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -73,9 +73,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
         try {
           location =
               locationClient.getLocationByCode(
-                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                  (String) row.get(JsonKey.CODE),
-                  context);
+                  locationActor, (String) row.get(JsonKey.CODE), context);
         } catch (Exception ex) {
           setTaskStatus(task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), row, null);
         }
@@ -138,9 +136,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     ObjectMapper mapper = new ObjectMapper();
     try {
       locationClient.updateLocation(
-          getActorRef(LocationActorOperation.UPDATE_LOCATION.getValue()),
-          mapper.convertValue(row, UpsertLocationRequest.class),
-          context);
+          locationActor, mapper.convertValue(row, UpsertLocationRequest.class), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -173,9 +169,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     try {
       locationId =
           locationClient.createLocation(
-              getActorRef(LocationActorOperation.CREATE_LOCATION.getValue()),
-              mapper.convertValue(row, UpsertLocationRequest.class),
-              context);
+              locationActor, mapper.convertValue(row, UpsertLocationRequest.class), context);
     } catch (Exception ex) {
       logger.error(
           context,

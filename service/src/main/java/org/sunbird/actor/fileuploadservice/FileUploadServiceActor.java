@@ -1,4 +1,4 @@
-package org.sunbird.learner.actors.fileuploadservice;
+package org.sunbird.actor.fileuploadservice;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.azure.CloudService;
 import org.sunbird.azure.CloudServiceFactory;
 import org.sunbird.exception.ProjectCommonException;
@@ -18,11 +17,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 
-/** Class to upload the file on cloud storage. Created by arvind on 28/8/17. */
-@ActorConfig(
-  tasks = {"fileStorageService"},
-  asyncTasks = {}
-)
 public class FileUploadServiceActor extends BaseActor {
 
   @Override
@@ -30,7 +24,7 @@ public class FileUploadServiceActor extends BaseActor {
     if (request.getOperation().equalsIgnoreCase(ActorOperations.FILE_STORAGE_SERVICE.getValue())) {
       processFileUpload(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 

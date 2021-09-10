@@ -1,8 +1,11 @@
 package controllers.bulkapimanagement;
 
+import akka.actor.ActorRef;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.BulkUploadActorOperation;
@@ -12,8 +15,23 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 public class BulkUploadController extends BaseBulkUploadController {
+  @Inject
+  @Named("user_bulk_upload_actor")
+  private ActorRef userBulkUploadActor;
 
-  BaseRequestValidator baseRequestValidator = new BaseRequestValidator();
+  @Inject
+  @Named("org_bulk_upload_actor")
+  private ActorRef orgBulkUploadActor;
+
+  @Inject
+  @Named("location_bulk_upload_actor")
+  private ActorRef locationBulkUploadActor;
+
+  @Inject
+  @Named("bulk_upload_management_actor")
+  private ActorRef bulkUploadManagementActor;
+
+  private BaseRequestValidator baseRequestValidator = new BaseRequestValidator();
 
   public CompletionStage<Result> userBulkUpload(Http.Request httpRequest) {
     try {
@@ -24,22 +42,7 @@ public class BulkUploadController extends BaseBulkUploadController {
               true,
               httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
-    } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
-    }
-  }
-
-  public CompletionStage<Result> userBulkMigrate(Http.Request httpRequest) {
-    try {
-      Request request =
-          createAndInitBulkRequest(
-              BulkUploadActorOperation.USER_BULK_MIGRATION.getValue(),
-              JsonKey.USER,
-              true,
-              httpRequest);
-      setContextAndPrintEntryLog(httpRequest, request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(userBulkUploadActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -54,7 +57,7 @@ public class BulkUploadController extends BaseBulkUploadController {
               true,
               httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(orgBulkUploadActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -71,7 +74,7 @@ public class BulkUploadController extends BaseBulkUploadController {
       setContextAndPrintEntryLog(httpRequest, request);
       baseRequestValidator.checkMandatoryFieldsPresent(
           (Map<String, Object>) request.getRequest().get(JsonKey.DATA), JsonKey.LOCATION_TYPE);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(locationBulkUploadActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -79,6 +82,7 @@ public class BulkUploadController extends BaseBulkUploadController {
 
   public CompletionStage<Result> getUploadStatus(String processId, Http.Request httpRequest) {
     return handleRequest(
+        bulkUploadManagementActor,
         ActorOperations.GET_BULK_OP_STATUS.getValue(),
         null,
         null,

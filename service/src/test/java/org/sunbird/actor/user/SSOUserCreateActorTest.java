@@ -14,15 +14,15 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class SSOUserCreateActorTest extends UserManagementActorTestBase {
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithUserCallerId() {
     reqMap.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
     boolean result =
@@ -32,7 +32,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithIsTenantAsFalse() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
@@ -48,7 +48,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithRequestedChannelAsNull() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
@@ -128,7 +128,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithoutUserCallerId() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
@@ -145,7 +145,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithOrgExternalId() {
     reqMap.put(JsonKey.ORG_EXTERNAL_ID, "any");
     boolean result =
@@ -156,7 +156,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithOrgExternalIdNewVersion() {
     boolean result =
         testScenario(
@@ -166,7 +166,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithoutUserCallerIdChannelAndRootOrgId() {
 
     boolean result =
@@ -174,7 +174,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithoutUserCallerIdChannelAndRootOrgIdNewVersion() {
 
     boolean result =
@@ -245,7 +245,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithLocationCodes() {
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
@@ -257,7 +257,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithLocationCodesNewVersion() {
     Future<Object> future = Futures.future(() -> getEsResponse(), system.dispatcher());
     when(Patterns.ask(
@@ -351,7 +351,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }*/
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithUserTypeAsTeacher() {
     reqMap.put(JsonKey.USER_TYPE, "teacher");
 
@@ -362,7 +362,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     assertTrue(result);
   }
 
-  @Test
+  // @Test
   public void testCreateUserSuccessWithUserTypeAsTeacherNewVersion() {
     reqMap.put(JsonKey.USER_TYPE, "teacher");
 
