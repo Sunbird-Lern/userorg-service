@@ -31,7 +31,11 @@ public class ResetPasswordServiceTest {
   @Test
   public void getUserRequiredActionLinkTestForVerifyEmailLink() throws Exception {
     PowerMockito.mockStatic(HttpClientUtil.class);
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(HttpClientUtil.post(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn("{\"link\":\"success\"}");
 
     PowerMockito.mockStatic(KeycloakUtil.class);
@@ -50,7 +54,11 @@ public class ResetPasswordServiceTest {
   @Test
   public void getUserRequiredActionLinkTestForResetPasswordLink() throws Exception {
     PowerMockito.mockStatic(HttpClientUtil.class);
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(HttpClientUtil.post(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn("{\"link\":\"success\"}");
 
     PowerMockito.mockStatic(KeycloakUtil.class);

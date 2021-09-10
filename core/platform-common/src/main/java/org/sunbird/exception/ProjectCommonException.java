@@ -103,6 +103,14 @@ public class ProjectCommonException extends RuntimeException {
         ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 
+  public static void throwResourceNotFoundException(
+      ResponseCode responseCode, String exceptionMessage) {
+    throw new ProjectCommonException(
+        responseCode.getErrorCode(),
+        StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
+        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+  }
+
   public static void throwServerErrorException(ResponseCode responseCode, String exceptionMessage) {
     throw new ProjectCommonException(
         responseCode.getErrorCode(),

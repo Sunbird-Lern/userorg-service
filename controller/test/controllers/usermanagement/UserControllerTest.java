@@ -29,6 +29,7 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.HeaderParam;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
 import org.sunbird.util.ProjectUtil;
@@ -185,10 +186,10 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testCreateUserV4Success() {
     Result result =
-            performTest(
-                    "/v4/user/create",
-                    "POST",
-                    (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+        performTest(
+            "/v4/user/create",
+            "POST",
+            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
   }
 
@@ -299,7 +300,8 @@ public class UserControllerTest extends BaseApplicationTest {
 
   @Test
   public void testGetUserDetailsSuccessByKey() {
-    Result result = performTest("/v1/user/get/loginId/testloginid", "GET", (Map) getUserRequest(null, loginId));
+    Result result =
+        performTest("/v1/user/get/loginId/testloginid", "GET", (Map) getUserRequest(null, loginId));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -577,7 +579,11 @@ public class UserControllerTest extends BaseApplicationTest {
     ObjectMapper objectMapper = new ObjectMapper();
     String s = objectMapper.writeValueAsString(map);
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
-    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+    when(HttpClientUtil.postFormData(
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(s);
     Result result = performTest("/v2/user/exists/email/demo@gmail.com", "GET", null);
     assertTrue(getResponseStatus(result) == 200);

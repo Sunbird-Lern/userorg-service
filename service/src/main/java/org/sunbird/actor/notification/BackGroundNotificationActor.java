@@ -43,7 +43,8 @@ public class BackGroundNotificationActor extends BaseActor {
       headers.put("Content-type", "application/json");
       headers.put("requestId", reqObj.getRequestId());
       ProjectUtil.setTraceIdInHeader(headers, reqObj.getRequestContext());
-      String response = HttpClientUtil.post(NOTIFICATION_SERVICE_URL, json, headers);
+      String response =
+          HttpClientUtil.post(NOTIFICATION_SERVICE_URL, json, headers, reqObj.getRequestContext());
       logger.info(
           reqObj.getRequestContext(),
           "BackGroundNotificationActor:callNotificationService :: Response =" + response);

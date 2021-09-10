@@ -1,15 +1,12 @@
 package org.sunbird.service.organisation.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -19,6 +16,7 @@ import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
+import scala.concurrent.Future;
 
 public class OrgServiceImpl implements OrgService {
 
@@ -39,6 +37,17 @@ public class OrgServiceImpl implements OrgService {
   @Override
   public Map<String, Object> getOrgById(String orgId, RequestContext context) {
     return orgDao.getOrgById(orgId, context);
+  }
+
+  @Override
+  public List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context) {
+    return getOrgByIds(orgIds, Collections.emptyList(), context);
+  }
+
+  @Override
+  public List<Map<String, Object>> getOrgByIds(
+      List<String> orgIds, List<String> fields, RequestContext context) {
+    return orgDao.getOrgByIds(orgIds, fields, context);
   }
 
   @Override
@@ -71,6 +80,11 @@ public class OrgServiceImpl implements OrgService {
       orgResponseList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
     return orgResponseList;
+  }
+
+  @Override
+  public Future<Map<String, Object>> searchOrg(SearchDTO searchDTO, RequestContext context) {
+    return orgDao.search(searchDTO, context);
   }
 
   public void createOrgExternalIdRecord(
@@ -170,7 +184,8 @@ public class OrgServiceImpl implements OrgService {
               (ekStepBaseUrl
                   + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
               reqString,
-              headerMap);
+              headerMap,
+              context);
       logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
     } catch (Exception e) {
       logger.error(
@@ -228,7 +243,8 @@ public class OrgServiceImpl implements OrgService {
                   + "/"
                   + req.get(JsonKey.ID),
               reqString,
-              headerMap);
+              headerMap,
+              context);
       logger.info(
           context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {

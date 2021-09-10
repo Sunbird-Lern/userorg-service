@@ -124,24 +124,12 @@ public class IdentifierFreeUpActorTest {
 
     if (errorCode == null) {
       Response res = probe.expectMsgClass(duration("100 second"), Response.class);
-      System.out.println("the success response is" + res);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      System.out.println("the failure response is  " + res);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
-  }
-
-  private Request getFreeUpRequest(ActorOperations actorOperation) {
-    Request reqObj = new Request();
-    Map reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ID, "wrongUserId");
-    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>());
-    reqObj.setRequest(reqMap);
-    reqObj.setOperation(actorOperation.getValue());
-    return reqObj;
   }
 }

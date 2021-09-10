@@ -34,7 +34,11 @@ public class FormApiUtilHandlerEmptyConfigTest {
   @Test
   public void testGetFormApiEmptyConfig() {
 
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+    when(HttpClientUtil.post(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyObject(),
+            Mockito.any(RequestContext.class)))
         .thenReturn("");
     Map<String, Object> dataConfigMap =
         FormApiUtil.getProfileConfig("locationCode", new RequestContext());
@@ -44,7 +48,11 @@ public class FormApiUtilHandlerEmptyConfigTest {
   @Test
   public void testGetFormApiEmptyResponseConfig() {
 
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+    when(HttpClientUtil.post(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyObject(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiEmptyResponse());
     Map<String, Object> dataConfigMap =
         FormApiUtil.getProfileConfig("locationCode", new RequestContext());

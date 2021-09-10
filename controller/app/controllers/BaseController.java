@@ -330,11 +330,9 @@ public class BaseController extends Controller {
    * @return Response
    */
   public static Response createFailureResponse(
-      Request request, ResponseCode code, ResponseCode headerCode) {
-
+      Http.Request request, ResponseCode code, ResponseCode headerCode) {
     Response response = new Response();
-    response.setVer(getApiVersion(request.path()));
-    response.setId(getApiResponseId(request));
+    response.setVer(request.path().split("[/]")[1]);
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
     response.setParams(
@@ -383,7 +381,6 @@ public class BaseController extends Controller {
    * @return String
    */
   public static String getApiVersion(String request) {
-
     return request.split("[/]")[1];
   }
 
@@ -530,7 +527,7 @@ public class BaseController extends Controller {
     try {
       String reqContext = Common.getFromRequest(request, Attrs.CONTEXT);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(reqContext, new TypeReference<Map<String, Object>>() {});
+          objectMapper.readValue(reqContext, new TypeReference<>() {});
       org.sunbird.request.Request reqForTelemetry = new org.sunbird.request.Request();
       Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
       params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
@@ -553,7 +550,7 @@ public class BaseController extends Controller {
               (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT)));
       TelemetryWriter.write(reqForTelemetry);
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error("Exception occurred while generating Telemetry.", ex);
     }
   }
 
@@ -833,8 +830,8 @@ public class BaseController extends Controller {
   public void setContextData(Http.Request httpReq, org.sunbird.request.Request reqObj) {
     try {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
-      Map<String, Object> requestInfo =
-          objectMapper.readValue(context, new TypeReference<Map<String, Object>>() {});
+      logger.info("Request Context Info : " + context);
+      Map<String, Object> requestInfo = objectMapper.readValue(context, new TypeReference<>() {});
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));

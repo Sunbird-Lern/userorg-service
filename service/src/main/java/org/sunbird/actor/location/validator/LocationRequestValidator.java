@@ -459,9 +459,9 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     while (count > 0) {
       Location parent = null;
       if (getOrder(location.getType()) == 0 && StringUtils.isNotEmpty(location.getId())) {
-        parent = locationService.getLocationById(JsonKey.ID, location.getId(), context);
+        parent = locationService.getLocationById(location.getId(), context);
       } else if (StringUtils.isNotEmpty(location.getParentId())) {
-        parent = locationService.getLocationById(JsonKey.ID, location.getParentId(), context);
+        parent = locationService.getLocationById(location.getParentId(), context);
       }
       if (null != parent) {
         locationSet.add(parent);

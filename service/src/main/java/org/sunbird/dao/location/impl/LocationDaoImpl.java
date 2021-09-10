@@ -81,6 +81,13 @@ public class LocationDaoImpl implements LocationDao {
   }
 
   @Override
+  public Response getLocationsByIds(
+      List<String> locationIds, List<String> locationFields, RequestContext context) {
+    return cassandraOperation.getPropertiesValueById(
+        KEYSPACE_NAME, LOCATION_TABLE_NAME, locationIds, locationFields, context);
+  }
+
+  @Override
   public Response getRecordByProperty(Map<String, Object> queryMap, RequestContext context) {
     Map<String, Object> searchQueryMap = new HashMap<>();
     searchQueryMap.put(JsonKey.FILTERS, queryMap);

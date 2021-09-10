@@ -36,7 +36,7 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class,
   EsClientFactory.class,
   CassandraOperationImpl.class,
-  ServiceFactory.class,
+  ServiceFactory.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -50,12 +50,8 @@ import scala.concurrent.Promise;
   "org.xml.*"
 })
 public class OrgServiceImplTest {
-
   @Before
   public void setUp() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ORG_ID, "anyOrgId");
-
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
@@ -63,7 +59,7 @@ public class OrgServiceImplTest {
     PowerMockito.when(
             cassandraOperation.getRecordsByCompositeKey(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
+        .thenReturn(getRecordsByProperty(false));
     PowerMockito.when(
             cassandraOperation.updateRecord(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -71,7 +67,24 @@ public class OrgServiceImplTest {
     PowerMockito.when(
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(true));
+        .thenReturn(getRecordsByProperty(false));
+
+    PowerMockito.when(
+            cassandraOperation.getRecordsByPrimaryKeys(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyList(),
+                Mockito.anyString(),
+                Mockito.any(RequestContext.class)))
+        .thenReturn(getRecordsByProperty(false));
+    PowerMockito.when(
+            cassandraOperation.getPropertiesValueById(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyList(),
+                Mockito.anyList(),
+                Mockito.any(RequestContext.class)))
+        .thenReturn(getRecordsByProperty(false));
 
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(ElasticSearchHelper.class);
@@ -97,17 +110,19 @@ public class OrgServiceImplTest {
   }
 
   @Test
-  public void testDeleteExternalId() {
+  public void testGetOrgByIds() {
     OrgService orgService = OrgServiceImpl.getInstance();
-    orgService.deleteOrgExternalIdRecord("channel", "externalId", new RequestContext());
+    List<String> orgIds = new ArrayList<>();
+    orgIds.add("id1");
+    orgIds.add("id2");
+    List<Map<String, Object>> map = orgService.getOrgByIds(orgIds, new RequestContext());
+    Assert.assertNotNull(map);
   }
 
   @Test
-  public void testGetOrgByExternalIdAndProvider() {
+  public void testDeleteExternalId() {
     OrgService orgService = OrgServiceImpl.getInstance();
-    Map<String, Object> map =
-        orgService.getOrgByExternalIdAndProvider("extId", "provider", new RequestContext());
-    Assert.assertNotNull(map);
+    orgService.deleteOrgExternalIdRecord("channel", "externalId", new RequestContext());
   }
 
   @Test
@@ -136,6 +151,11 @@ public class OrgServiceImplTest {
       map.put(JsonKey.IS_DELETED, true);
       map.put(JsonKey.CHANNEL, "channel1");
       map.put(JsonKey.IS_TENANT, true);
+      map.put(JsonKey.ORG_ID, "orgId");
+      map.put(
+          JsonKey.ORG_LOCATION,
+          "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");
+
       list.add(map);
     }
     res.put(JsonKey.RESPONSE, list);

@@ -24,7 +24,6 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.util.Util;
 
 @RunWith(PowerMockRunner.class)
@@ -33,7 +32,6 @@ import org.sunbird.util.Util;
   ServiceFactory.class,
   CassandraOperation.class,
   CassandraUtil.class,
-  OrgExternalServiceImpl.class,
   Util.class
 })
 @PowerMockIgnore({
@@ -46,15 +44,10 @@ import org.sunbird.util.Util;
 public class OrgDaoImplTest {
 
   private static CassandraOperation cassandraOperation;
-  private static OrgExternalServiceImpl orgExternalService = null;
 
   @BeforeClass
   public static void setUp() throws Exception {
     PowerMockito.mockStatic(Util.class);
-    orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);
-    PowerMockito.whenNew(OrgExternalServiceImpl.class)
-        .withNoArguments()
-        .thenReturn(orgExternalService);
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
@@ -84,6 +77,39 @@ public class OrgDaoImplTest {
     } catch (Exception e) {
       Assert.assertNotNull(e);
     }
+  }
+
+  @Test
+  public void getOrgByIds() {
+    PowerMockito.when(
+            cassandraOperation.getPropertiesValueById(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyList(),
+                Mockito.anyList(),
+                Mockito.any(RequestContext.class)))
+        .thenReturn(getRecordsByProperty(false));
+    List<String> orgIds = new ArrayList<>();
+    orgIds.add("id1");
+    orgIds.add("id2");
+    OrgDao orgDao = OrgDaoImpl.getInstance();
+    List<Map<String, Object>> resp = orgDao.getOrgByIds(orgIds, new RequestContext());
+    Assert.assertNotNull(resp);
+  }
+
+  private Response getRecordsByProperty(boolean empty) {
+    Response res = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    if (!empty) {
+      Map<String, Object> map = new HashMap<>();
+      map.put(JsonKey.ID, "orgId");
+      map.put(JsonKey.IS_DELETED, true);
+      map.put(JsonKey.CHANNEL, "channel1");
+      map.put(JsonKey.IS_TENANT, true);
+      list.add(map);
+    }
+    res.put(JsonKey.RESPONSE, list);
+    return res;
   }
 
   @Test

@@ -57,14 +57,14 @@ public class UserUtil {
   private static LoggerUtil logger = new LoggerUtil(UserUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static ObjectMapper mapper = new ObjectMapper();
   private static SSOManager ssoManager = SSOServiceFactory.getInstance();
   private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
   private static DataMaskingService maskingService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
   private static DecryptionService decService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static UserService userService = UserServiceImpl.getInstance();
   private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static UserExternalIdentityService userExternalIdentityService =
@@ -760,8 +760,7 @@ public class UserUtil {
   public static void encryptDeclarationFields(
       List<Map<String, Object>> declarations,
       Map<String, Object> userDbRecords,
-      RequestContext context)
-      throws Exception {
+      RequestContext context) {
     for (Map<String, Object> declareFields : declarations) {
       Map<String, Object> userInfoMap = (Map<String, Object>) declareFields.get(JsonKey.INFO);
       if (MapUtils.isNotEmpty(userInfoMap)) {

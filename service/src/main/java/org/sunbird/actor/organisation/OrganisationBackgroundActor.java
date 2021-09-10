@@ -87,7 +87,8 @@ public class OrganisationBackgroundActor extends BaseActor {
                   + "/"
                   + tagId,
               body,
-              header);
+              header,
+              context);
       logger.info(
           context,
           "OrganisationBackgroundActor:registertag  ,call end with id and status = "

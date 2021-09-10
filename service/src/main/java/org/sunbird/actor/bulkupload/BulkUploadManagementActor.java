@@ -65,7 +65,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     ObjectMapper mapper = new ObjectMapper();
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     DecryptionService decryptionService =
-        org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+        org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
     Response response = null;
     List<String> fields =
         Arrays.asList(

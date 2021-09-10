@@ -1,5 +1,6 @@
 package org.sunbird.http;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,11 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.MapUtils;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -22,6 +19,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
 
 public class HttpClientUtil {
   private static LoggerUtil logger = new LoggerUtil(HttpClientUtil.class);
@@ -68,7 +66,7 @@ public class HttpClientUtil {
     return httpClientUtil;
   }
 
-  public static String get(String requestURL, Map<String, String> headers) {
+  public static String get(String requestURL, Map<String, String> headers, RequestContext context) {
     CloseableHttpResponse response = null;
     try {
       HttpGet httpGet = new HttpGet(requestURL);
@@ -78,53 +76,17 @@ public class HttpClientUtil {
         }
       }
       response = httpclient.execute(httpGet);
-      int status = response.getStatusLine().getStatusCode();
-      if (status >= 200 && status < 300) {
-        HttpEntity httpEntity = response.getEntity();
-        byte[] bytes = EntityUtils.toByteArray(httpEntity);
-        StatusLine sl = response.getStatusLine();
-        logger.debug(
-            "Response from get call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        return new String(bytes);
-      } else {
-        getErrorResponse(response, "GET");
-        return "";
-      }
+      return getResponse(response, context, "GET");
     } catch (Exception ex) {
-      logger.error("Exception occurred while calling get method", ex);
+      logger.error(context, "Exception occurred while calling get method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error("Exception occurred while closing get response object", ex);
-        }
-      }
+      closeResponse(response, context, "GET");
     }
   }
 
-  private static void getErrorResponse(CloseableHttpResponse response, String method) {
-    try {
-      HttpEntity httpEntity = response.getEntity();
-      byte[] bytes = EntityUtils.toByteArray(httpEntity);
-      StatusLine sl = response.getStatusLine();
-      String resp = new String(bytes);
-      logger.info(
-          "Response from : "
-              + method
-              + " call "
-              + resp
-              + " status "
-              + sl.getStatusCode()
-              + " - "
-              + sl.getReasonPhrase());
-    } catch (Exception ex) {
-      logger.error("Exception occurred while fetching response", ex);
-    }
-  }
-
-  public static String post(String requestURL, String params, Map<String, String> headers) {
+  public static String post(
+      String requestURL, String params, Map<String, String> headers, RequestContext context) {
     CloseableHttpResponse response = null;
     try {
       HttpPost httpPost = new HttpPost(requestURL);
@@ -137,34 +99,20 @@ public class HttpClientUtil {
       httpPost.setEntity(entity);
 
       response = httpclient.execute(httpPost);
-      int status = response.getStatusLine().getStatusCode();
-      if (status >= 200 && status < 300) {
-        HttpEntity httpEntity = response.getEntity();
-        byte[] bytes = EntityUtils.toByteArray(httpEntity);
-        StatusLine sl = response.getStatusLine();
-        logger.debug(
-            "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        return new String(bytes);
-      } else {
-        getErrorResponse(response, "POST");
-        return "";
-      }
+      return getResponse(response, context, "POST");
     } catch (Exception ex) {
-      logger.error("Exception occurred while calling Post method", ex);
+      logger.error(context, "Exception occurred while calling Post method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error("Exception occurred while closing Post response object", ex);
-        }
-      }
+      closeResponse(response, context, "POST");
     }
   }
 
   public static String postFormData(
-      String requestURL, Map<String, String> params, Map<String, String> headers) {
+      String requestURL,
+      Map<String, String> params,
+      Map<String, String> headers,
+      RequestContext context) {
     CloseableHttpResponse response = null;
     try {
       HttpPost httpPost = new HttpPost(requestURL);
@@ -183,33 +131,17 @@ public class HttpClientUtil {
       httpPost.setEntity(entity);
 
       response = httpclient.execute(httpPost);
-      int status = response.getStatusLine().getStatusCode();
-      if (status >= 200 && status < 300) {
-        HttpEntity httpEntity = response.getEntity();
-        byte[] bytes = EntityUtils.toByteArray(httpEntity);
-        StatusLine sl = response.getStatusLine();
-        logger.debug(
-            "Response from post call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        return new String(bytes);
-      } else {
-        getErrorResponse(response, "POST FORM DATA");
-        return "";
-      }
+      return getResponse(response, context, "postFormData");
     } catch (Exception ex) {
-      logger.error("Exception occurred while calling Post method", ex);
+      logger.error(context, "Exception occurred while calling postFormData method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error("Exception occurred while closing Post response object", ex);
-        }
-      }
+      closeResponse(response, context, "postFormData");
     }
   }
 
-  public static String patch(String requestURL, String params, Map<String, String> headers) {
+  public static String patch(
+      String requestURL, String params, Map<String, String> headers, RequestContext context) {
     CloseableHttpResponse response = null;
     try {
       HttpPatch httpPatch = new HttpPatch(requestURL);
@@ -222,35 +154,17 @@ public class HttpClientUtil {
       httpPatch.setEntity(entity);
 
       response = httpclient.execute(httpPatch);
-      int status = response.getStatusLine().getStatusCode();
-      if (status >= 200 && status < 300) {
-        HttpEntity httpEntity = response.getEntity();
-        byte[] bytes = EntityUtils.toByteArray(httpEntity);
-        StatusLine sl = response.getStatusLine();
-        logger.debug(
-            "Response from patch call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        String resp = new String(bytes);
-        logger.info("Got response from patch call : " + resp);
-        return resp;
-      } else {
-        getErrorResponse(response, "PATCH");
-        return "";
-      }
+      return getResponse(response, context, "PATCH");
     } catch (Exception ex) {
-      logger.error("Exception occurred while calling patch method", ex);
+      logger.error(context, "Exception occurred while calling patch method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error("Exception occurred while closing patch response object", ex);
-        }
-      }
+      closeResponse(response, context, "PATCH");
     }
   }
 
-  public static String delete(String requestURL, Map<String, String> headers) {
+  public static String delete(
+      String requestURL, Map<String, String> headers, RequestContext context) {
     CloseableHttpResponse response = null;
     try {
       HttpDelete httpDelete = new HttpDelete(requestURL);
@@ -260,32 +174,73 @@ public class HttpClientUtil {
         }
       }
       response = httpclient.execute(httpDelete);
-      int status = response.getStatusLine().getStatusCode();
-      if (status >= 200 && status < 300) {
-        HttpEntity httpEntity = response.getEntity();
-        StatusLine sl = response.getStatusLine();
-        logger.debug(
-            "Response from delete call : " + sl.getStatusCode() + " - " + sl.getReasonPhrase());
-        if (null != httpEntity) {
-          byte[] bytes = EntityUtils.toByteArray(httpEntity);
-          return new String(bytes);
-        } else {
-          return "";
-        }
-      } else {
-        getErrorResponse(response, "DELETE");
-        return "";
-      }
+      return getResponse(response, context, "DELETE");
     } catch (Exception ex) {
-      logger.error("Exception occurred while calling delete method", ex);
+      logger.error(context, "Exception occurred while calling delete method", ex);
       return "";
     } finally {
-      if (null != response) {
-        try {
-          response.close();
-        } catch (Exception ex) {
-          logger.error("Exception occurred while closing delete response object", ex);
-        }
+      closeResponse(response, context, "DELETE");
+    }
+  }
+
+  private static String getResponse(
+      CloseableHttpResponse response, RequestContext context, String method) throws IOException {
+    int status = response.getStatusLine().getStatusCode();
+    if (status >= 200 && status < 300) {
+      HttpEntity httpEntity = response.getEntity();
+      StatusLine sl = response.getStatusLine();
+      logger.debug(
+          context,
+          "Response from "
+              + method
+              + " call : "
+              + sl.getStatusCode()
+              + " - "
+              + sl.getReasonPhrase());
+      if (null != httpEntity) {
+        byte[] bytes = EntityUtils.toByteArray(httpEntity);
+        String resp = new String(bytes);
+        logger.info(context, "Got response from " + method + " call : " + resp);
+        return resp;
+      } else {
+        return "";
+      }
+    } else {
+      getErrorResponse(response, method, context);
+      return "";
+    }
+  }
+
+  private static void getErrorResponse(
+      CloseableHttpResponse response, String method, RequestContext context) {
+    try {
+      HttpEntity httpEntity = response.getEntity();
+      byte[] bytes = EntityUtils.toByteArray(httpEntity);
+      StatusLine sl = response.getStatusLine();
+      String resp = new String(bytes);
+      logger.info(
+          context,
+          "Response from : "
+              + method
+              + " call "
+              + resp
+              + " status "
+              + sl.getStatusCode()
+              + " - "
+              + sl.getReasonPhrase());
+    } catch (Exception ex) {
+      logger.error(context, "Exception occurred while fetching response for method " + method, ex);
+    }
+  }
+
+  private static void closeResponse(
+      CloseableHttpResponse response, RequestContext context, String method) {
+    if (null != response) {
+      try {
+        response.close();
+      } catch (Exception ex) {
+        logger.error(
+            context, "Exception occurred while closing " + method + " response object", ex);
       }
     }
   }

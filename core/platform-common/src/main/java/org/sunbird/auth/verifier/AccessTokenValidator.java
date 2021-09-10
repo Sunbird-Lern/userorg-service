@@ -77,7 +77,7 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in AccessTokenValidator: verify ", ex);
+      logger.error("Exception in verifyManagedUserToken: Token : " + managedEncToken, ex);
     }
     return managedFor;
   }
@@ -86,6 +86,8 @@ public class AccessTokenValidator {
     String userId = JsonKey.UNAUTHORIZED;
     try {
       Map<String, Object> payload = validateToken(token);
+
+      logger.info("learner access token validateToken() :" + payload.toString());
       if (MapUtils.isNotEmpty(payload) && checkIss((String) payload.get("iss"))) {
         userId = (String) payload.get(JsonKey.SUB);
         if (StringUtils.isNotBlank(userId)) {
@@ -94,7 +96,10 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyUserAccessToken: verify ", ex);
+      logger.error("Exception in verifyUserAccessToken: Token : " + token, ex);
+    }
+    if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
+      logger.info("verifyUserAccessToken: Invalid User Token: " + token);
     }
     return userId;
   }

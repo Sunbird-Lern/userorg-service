@@ -54,7 +54,8 @@ public class CaptchaHelperTest {
     ObjectMapper objectMapper = new ObjectMapper();
     String s = objectMapper.writeValueAsString(map);
     when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("anyString");
-    when(HttpClientUtil.postFormData(Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap()))
+    when(HttpClientUtil.postFormData(
+            Mockito.anyString(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(s);
   }
 }

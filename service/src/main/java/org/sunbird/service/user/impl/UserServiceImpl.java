@@ -18,8 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
@@ -38,11 +36,7 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
-import org.sunbird.util.AdminUtilHandler;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Slug;
-import org.sunbird.util.UserUtility;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
@@ -53,14 +47,11 @@ public class UserServiceImpl implements UserService {
 
   private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
   private EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
   private UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-
   private static final int GENERATE_USERNAME_COUNT = 10;
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -83,11 +74,18 @@ public class UserServiceImpl implements UserService {
   public User getUserById(String userId, RequestContext context) {
     User user = userDao.getUserById(userId, context);
     if (null == user) {
-      throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
     }
+    return user;
+  }
+
+  @Override
+  public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
+    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
+    if (MapUtils.isEmpty(user)) {
+      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
+    }
+    user.putAll(Util.getUserDefaultValue());
     return user;
   }
 
@@ -128,17 +126,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context) {
-    Future<Map<String, Object>> esResultF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
-    Map<String, Object> esResult =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
-    if (esResult == null || esResult.size() == 0) {
-      throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-    return esResult;
+    return userDao.getEsUserById(userId, context);
   }
 
   @Override
@@ -150,10 +138,7 @@ public class UserServiceImpl implements UserService {
 
     SearchDTO searchDTO = new SearchDTO();
     searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Future<Map<String, Object>> esResultF =
-        esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), context);
-    Map<String, Object> esResult =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+    Map<String, Object> esResult = userDao.search(searchDTO, context);
     if (MapUtils.isNotEmpty(esResult)
         && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
       Map<String, Object> esContent =
@@ -330,6 +315,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public String getUserIdByUserLookUp(String key, String value, RequestContext context) {
+    List<Map<String, Object>> records =
+        userLookupDao.getRecordByType(key.toLowerCase(), value.toLowerCase(), true, context);
+    if (CollectionUtils.isNotEmpty(records)) {
+      return (String) records.get(0).get(JsonKey.USER_ID);
+    }
+    return "";
+  }
+
+  @Override
   public String getCustodianOrgId(ActorRef actorRef, RequestContext context) {
     String custodianOrgId = "";
     try {
@@ -465,7 +460,7 @@ public class UserServiceImpl implements UserService {
   private String getDecryptedValue(String key, RequestContext context) {
     if (StringUtils.isNotBlank(key)) {
       DecryptionService decService =
-          org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+          org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
       return decService.decryptData(key, context);
     }
     return "";
@@ -498,14 +493,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<Map<String, Object>> getUserEmailsBySearchQuery(
       Map<String, Object> searchQuery, RequestContext context) {
-    Future<Map<String, Object>> esResultF =
-        esUtil.search(
-            ElasticSearchHelper.createSearchDTO(searchQuery),
-            ProjectUtil.EsType.user.getTypeName(),
-            context);
     List<Map<String, Object>> usersList = new ArrayList<>();
     Map<String, Object> esResult =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+        searchUser(ElasticSearchHelper.createSearchDTO(searchQuery), context);
     if (MapUtils.isNotEmpty(esResult)
         && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
       usersList = (List<Map<String, Object>>) esResult.get(JsonKey.CONTENT);
@@ -528,17 +518,13 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public Map<String, Object> searchUser(SearchDTO searchDTO, RequestContext context) {
+    return userDao.search(searchDTO, context);
+  }
+
+  @Override
   public boolean updateUserDataToES(
       String identifier, Map<String, Object> data, RequestContext context) {
-    Future<Boolean> responseF =
-        esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
-    if ((boolean) ElasticSearchHelper.getResponseFromFuture(responseF)) {
-      return true;
-    }
-    logger.info(
-        context,
-        "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier "
-            + identifier);
-    return false;
+    return userDao.updateUserDataToES(identifier, data, context);
   }
 }

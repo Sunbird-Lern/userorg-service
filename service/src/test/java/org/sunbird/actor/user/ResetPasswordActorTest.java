@@ -28,7 +28,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -93,7 +92,8 @@ public class ResetPasswordActorTest {
   @Before
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(HttpClientUtil.class);
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+    when(HttpClientUtil.post(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn("{\"link\":\"success\"}");
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
@@ -201,23 +201,6 @@ public class ResetPasswordActorTest {
     request.setRequest(reqMap);
     request.setOperation("resetPassword");
     return request;
-  }
-
-  private User getValidUserResponse() {
-    User user = new User();
-    user.setId("ValidUserId");
-    user.setEmail("anyEmail@gmail.com");
-    user.setChannel("TN");
-    user.setPhone("9876543210");
-    user.setMaskedEmail("any****@gmail.com");
-    user.setMaskedPhone("987*****0");
-    user.setIsDeleted(false);
-    user.setFlagsValue(3);
-    user.setUserType("TEACHER");
-    user.setUserId("ValidUserId");
-    user.setFirstName("Demo Name");
-    user.setUserName("validUserName");
-    return user;
   }
 
   private Map<String, Object> getUserDbMap() {

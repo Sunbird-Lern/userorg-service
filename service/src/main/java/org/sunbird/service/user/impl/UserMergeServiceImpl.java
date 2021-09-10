@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.service.user.UserMergeService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
@@ -13,7 +12,6 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 
 public class UserMergeServiceImpl implements UserMergeService {
   private static UserMergeService mergeService = null;
-  public LoggerUtil logger = new LoggerUtil(this.getClass());
 
   public static UserMergeService getInstance() {
     if (mergeService == null) {

@@ -10,4 +10,6 @@ public interface UserRoleService {
   List<Map<String, Object>> updateUserRoleV2(Map userRequest, RequestContext context);
 
   boolean updateUserRoleToES(String identifier, Map<String, Object> data, RequestContext context);
+
+  List<Map<String, Object>> getUserRoles(String userId, RequestContext context);
 }

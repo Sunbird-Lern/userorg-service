@@ -22,8 +22,6 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.organisation.OrgDao;
-import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -37,8 +35,7 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   ServiceFactory.class,
-  CassandraOperationImpl.class,
-  OrgDaoImpl.class
+  CassandraOperationImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -49,7 +46,6 @@ import scala.concurrent.Promise;
 })
 public class OrganisationRequestValidatorTest {
   private static ElasticSearchService esService;
-  private OrgDao orgDao;
 
   @Before
   public void beforeEachTest() {
@@ -61,16 +57,10 @@ public class OrganisationRequestValidatorTest {
     PowerMockito.when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
 
-    PowerMockito.mockStatic(OrgDaoImpl.class);
-    orgDao = PowerMockito.mock(OrgDaoImpl.class);
-    when(OrgDaoImpl.getInstance()).thenReturn(orgDao);
-    Mockito.when(orgDao.search(Mockito.any(), Mockito.any()))
-        .thenReturn(getOrgResponse(), getInactiveOrgResponse());
-
     PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordById(
+    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+    when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getOrgListResponse());
   }
@@ -204,33 +194,14 @@ public class OrganisationRequestValidatorTest {
     return response;
   }
 
-  private Response getOrgResponse() {
-    Response response = new Response();
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> orgMap = new HashMap<>();
-    list.add(orgMap);
-    response.put(JsonKey.COUNT, list.size());
-    response.put(JsonKey.RESPONSE, list);
-    return response;
-  }
-
   private Response getOrgListResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.IS_TENANT, true);
+    orgMap.put(JsonKey.ID, "location1");
+    orgMap.put(JsonKey.TYPE, "state");
     list.add(orgMap);
-    response.put(JsonKey.RESPONSE, list);
-    return response;
-  }
-
-  private Response getInactiveOrgResponse() {
-    Response response = new Response();
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.STATUS, 0);
-    list.add(orgMap);
-    response.put(JsonKey.COUNT, list.size());
     response.put(JsonKey.RESPONSE, list);
     return response;
   }

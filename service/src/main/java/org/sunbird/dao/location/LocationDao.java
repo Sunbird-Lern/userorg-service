@@ -1,5 +1,6 @@
 package org.sunbird.dao.location;
 
+import java.util.List;
 import java.util.Map;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
@@ -41,6 +42,9 @@ public interface LocationDao {
    * @return response Response
    */
   Response read(String locationId, RequestContext context);
+
+  Response getLocationsByIds(
+      List<String> locationIds, List<String> locationFields, RequestContext context);
 
   /**
    * @param queryMap

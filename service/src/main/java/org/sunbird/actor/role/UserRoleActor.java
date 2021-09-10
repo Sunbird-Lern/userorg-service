@@ -23,6 +23,8 @@ import org.sunbird.util.Util;
 )
 public class UserRoleActor extends UserBaseActor {
 
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
@@ -34,7 +36,6 @@ public class UserRoleActor extends UserBaseActor {
         break;
 
       case "assignRoles":
-
       case "assignRolesV2":
         assignRoles(request);
         break;
@@ -55,7 +56,6 @@ public class UserRoleActor extends UserBaseActor {
 
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
-    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     List<Map<String, Object>> userRolesList;
 
     Map<String, Object> requestMap = actorMessage.getRequest();

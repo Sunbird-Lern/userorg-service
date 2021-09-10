@@ -12,7 +12,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -376,16 +375,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testIsEmailValidSuccess() {
     boolean bool = ProjectUtil.isEmailvalid("xyz@xyz.com");
     assertTrue(bool);
-  }
-
-  @Test
-  public void testSendGetRequestSuccessWithEkStepBaseUrl() throws Exception {
-    String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-    if (StringUtils.isBlank(ekStepBaseUrl)) {
-      ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-    }
-    String response = HttpClientUtil.get(ekStepBaseUrl + "/search/health", headers);
-    assertNotNull(response);
   }
 
   @Test

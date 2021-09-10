@@ -47,7 +47,11 @@ public class FormApiUtilHandlerTest {
   @Test
   public void testGetFormApiConfig() {
 
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
+    when(HttpClientUtil.post(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyObject(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiResponse());
     Map<String, Object> dataConfigMap =
         FormApiUtil.getProfileConfig("locationCode", new RequestContext());

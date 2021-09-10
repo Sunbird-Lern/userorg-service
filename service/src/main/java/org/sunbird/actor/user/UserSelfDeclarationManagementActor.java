@@ -1,22 +1,25 @@
 package org.sunbird.actor.user;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserSelfDeclarationService;
 import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
@@ -32,7 +35,7 @@ import org.sunbird.util.user.UserUtil;
 public class UserSelfDeclarationManagementActor extends BaseActor {
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private OrganisationClient organisationClient = new OrganisationClientImpl();
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -57,9 +60,9 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
    * @param actorMessage
    */
   private void updateUserDeclarations(Request actorMessage) {
-    logger.info(
+    logger.debug(
         actorMessage.getRequestContext(),
-        "UserManagementActor:updateUserDeclarations method called.");
+        "UserSelfDeclarationManagementActor:updateUserDeclarations method called.");
 
     Util.initializeContext(actorMessage, TelemetryEnvKey.USER);
     String callerId = (String) actorMessage.getContext().get(JsonKey.CALLER_ID);
@@ -91,9 +94,9 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
           updateSchoolInfoInSelfDeclaration(
               (String) userMap.get(JsonKey.USER_ID), actorMessage.getRequestContext(), userInfo);
         }
-        logger.info(
+        logger.debug(
             actorMessage.getRequestContext(),
-            "UserManagementActor:updateUserDeclarations method userDeclareEntity obj: "
+            "UserSelfDeclarationManagementActor:updateUserDeclarations method userDeclareEntity obj: "
                 + userDeclareEntity);
         userDeclareEntityList.add(userDeclareEntity);
       }
@@ -139,10 +142,12 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
     for (Map<String, Object> userOrg : userOrgLst) {
       if (!userOrg.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
         String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
-        Organisation organisation = organisationClient.esGetOrgById(organisationId, context);
-        if (null != organisation && null != organisation.isTenant() && !organisation.isTenant()) {
-          userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.getExternalId());
-          userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.getOrgName());
+        Map<String, Object> organisation = orgService.getOrgById(organisationId, context);
+        if (MapUtils.isNotEmpty(organisation)
+            && null != organisation.get(JsonKey.IS_TENANT)
+            && BooleanUtils.isFalse((Boolean) organisation.get(JsonKey.IS_TENANT))) {
+          userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.get(JsonKey.EXTERNAL_ID));
+          userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.get(JsonKey.ORG_NAME));
         }
       }
     }

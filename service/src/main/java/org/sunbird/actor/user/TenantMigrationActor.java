@@ -58,9 +58,9 @@ public class TenantMigrationActor extends BaseActor {
   private static final String MASK_IDENTIFIER = "maskIdentifier";
   private TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
   private DecryptionService decryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance("");
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private DataMaskingService maskingService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance("");
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

@@ -24,7 +24,7 @@ import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServiceImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -47,7 +47,7 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  DefaultEncryptionServivceImpl.class,
+  DefaultEncryptionServiceImpl.class,
   Util.class,
   EncryptionService.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class

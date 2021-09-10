@@ -157,9 +157,9 @@ public class LocationServiceImpl implements LocationService {
     while (count > 0) {
       Location parent = null;
       if (getOrder(location.getType()) == 0 && StringUtils.isNotEmpty(location.getId())) {
-        parent = getLocation(location.getId(), context);
+        parent = getLocationById(location.getId(), context);
       } else if (StringUtils.isNotEmpty(location.getParentId())) {
-        parent = getLocation(location.getParentId(), context);
+        parent = getLocationById(location.getParentId(), context);
       }
       if (null != parent) {
         locationSet.add(parent);
@@ -174,13 +174,6 @@ public class LocationServiceImpl implements LocationService {
     return DataCacheHandler.getLocationOrderMap().get(type);
   }
 
-  private Location getLocation(String locationId, RequestContext context) {
-    List<Location> locations = locationSearch(JsonKey.ID, locationId, context);
-    if (locations.isEmpty()) return null;
-
-    return locations.get(0);
-  }
-
   private void throwInvalidParameterValueException(List<String> codeList) {
     throw new ProjectCommonException(
         ResponseCode.invalidParameterValue.getErrorCode(),
@@ -189,12 +182,21 @@ public class LocationServiceImpl implements LocationService {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
-  public Location getLocationById(String param, Object value, RequestContext context) {
-    Location loc = null;
-    List<Location> locList = locationSearch(param, value, context);
-    if (CollectionUtils.isNotEmpty(locList)) {
-      loc = locList.get(0);
+  public Location getLocationById(String locationId, RequestContext context) {
+    Response response = locationDao.read(locationId, context);
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(responseList)) {
+      ObjectMapper mapper = new ObjectMapper();
+      return mapper.convertValue(responseList.get(0), Location.class);
     }
-    return loc;
+    return null;
+  }
+
+  @Override
+  public List<Map<String, Object>> getLocationsByIds(
+      List<String> locationIds, List<String> locationFields, RequestContext context) {
+    Response response = locationDao.getLocationsByIds(locationIds, locationFields, context);
+    return (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
   }
 }

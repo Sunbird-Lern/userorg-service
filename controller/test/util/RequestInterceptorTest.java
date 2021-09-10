@@ -85,6 +85,27 @@ public class RequestInterceptorTest {
   }
 
   @Test
+  public void testVerifyRequestDataReturnsAuthorizedUser2() {
+    tokenValidator = mock(AccessTokenValidator.class);
+    PowerMockito.mockStatic(AccessTokenValidator.class);
+    ObjectNode requestNode = JsonNodeFactory.instance.objectNode();
+    ObjectNode userNode = JsonNodeFactory.instance.objectNode();
+    userNode.put(JsonKey.USER_ID, "56c2d9a3-fae9-4341-9862-4eeeead2e9a1");
+    requestNode.put(JsonKey.REQUEST, userNode);
+    Http.RequestBuilder requestBuilder =
+        Helpers.fakeRequest(Helpers.POST, "http://localhost:9000/v1/group/create")
+            .bodyJson(requestNode);
+    Http.Request req = requestBuilder.build();
+    when(tokenValidator.verifyUserToken(Mockito.anyString())).thenReturn("authorized-user");
+    when(tokenValidator.verifyManagedUserToken(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+        .thenReturn("authorized-user");
+    assertEquals(
+        RequestInterceptor.verifyRequestData(requestBuilder.build()).get(JsonKey.USER_ID),
+        JsonKey.UNAUTHORIZED);
+  }
+
+  @Test
   public void testVerifyRequestDataReturnsAuthorizedUserForGET() {
     tokenValidator = mock(AccessTokenValidator.class);
     PowerMockito.mockStatic(AccessTokenValidator.class);

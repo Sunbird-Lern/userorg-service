@@ -9,4 +9,7 @@ public interface OrgExternalDao {
   Response addOrgExtId(Map<String, Object> orgExtMap, RequestContext context);
 
   void deleteOrgExtId(Map<String, String> orgExtMap, RequestContext context);
+
+  String getOrgIdFromOrgExternalIdAndProvider(
+      String externalId, String provider, RequestContext context);
 }

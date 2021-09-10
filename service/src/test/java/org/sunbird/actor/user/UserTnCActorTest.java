@@ -36,11 +36,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserTncService;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserTncService;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
@@ -134,6 +134,18 @@ public class UserTnCActorTest {
             .expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
+  }
+
+  @Test
+  public void testWithInvalidRequest() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   private TestKit setManagedUSerRequest(String version) {

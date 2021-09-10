@@ -75,9 +75,9 @@ public class EncryptionDecriptionServiceTest {
     map2.put(JsonKey.LAST_NAME, "KUMAR");
     mapList2 = new ArrayList<>();
     mapList2.add(map2);
-    encryptionService = ServiceFactory.getEncryptionServiceInstance(null);
-    decryptionService = ServiceFactory.getDecryptionServiceInstance(null);
-    maskingService = ServiceFactory.getMaskingServiceInstance(null);
+    encryptionService = ServiceFactory.getEncryptionServiceInstance();
+    decryptionService = ServiceFactory.getDecryptionServiceInstance();
+    maskingService = ServiceFactory.getMaskingServiceInstance();
     try {
       encryptedData = encryptionService.encryptData(data, null);
       decryptedData = decryptionService.decryptData(encryptedData, null);

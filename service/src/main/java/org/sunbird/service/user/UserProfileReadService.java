@@ -1,38 +1,16 @@
 package org.sunbird.service.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.organisation.OrgDao;
-import org.sunbird.dao.organisation.impl.OrgDaoImpl;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.UserOrgDao;
-import org.sunbird.dao.user.UserRoleDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
-import org.sunbird.dao.user.impl.UserOrgDaoImpl;
-import org.sunbird.dao.user.impl.UserRoleDaoImpl;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.organisation.OrgTypeEnum;
@@ -40,30 +18,27 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
+import org.sunbird.service.location.LocationService;
+import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.user.impl.*;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
-import scala.concurrent.Future;
 
 public class UserProfileReadService {
 
   private LoggerUtil logger = new LoggerUtil(UserProfileReadService.class);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private Util.DbInfo locationDbInfo = Util.dbInfoMap.get(JsonKey.LOCATION);
   private UserService userService = UserServiceImpl.getInstance();
+  private OrgService orgService = OrgServiceImpl.getInstance();
   private UserTncService tncService = new UserTncService();
-  private UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
-  private OrgDao orgDao = OrgDaoImpl.getInstance();
-  private Util.DbInfo OrgDb = Util.dbInfoMap.get(JsonKey.ORG_DB);
-  private UserDao userDao = UserDaoImpl.getInstance();
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private LocationService locationService = LocationServiceImpl.getInstance();
+  private UserSelfDeclarationService userSelfDeclarationService =
+      UserSelfDeclarationServiceImpl.getInstance();
   private UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
 
   public Response getUserProfileData(Request actorMessage) {
@@ -83,57 +58,27 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage);
-    result.putAll(Util.getUserDefaultValue());
     Map<String, Object> rootOrg =
-        orgDao.getOrgById(
+        orgService.getOrgById(
             (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
-    if (MapUtils.isNotEmpty(rootOrg)) {
-      rootOrg.putAll(Util.getOrgDefaultValue());
-      if (actorMessage
-          .getOperation()
-          .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-        Util.getOrgDefaultValue().keySet().stream().forEach(key -> rootOrg.remove(key));
-      }
+    if (MapUtils.isNotEmpty(rootOrg)
+        && actorMessage
+            .getOperation()
+            .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
+      Util.getOrgDefaultValue().keySet().stream().forEach(key -> rootOrg.remove(key));
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
-    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+
     List<Map<String, Object>> userRolesList =
-        userRoleDao.getUserRoles(userId, null, actorMessage.getRequestContext());
-    Map<String, List<String>> userOrgRoles = new HashMap<>();
-    for (Map userRole : userRolesList) {
-      List<Map<String, String>> scopeMap = null;
-      try {
-        scopeMap =
-            mapper.readValue(
-                (String) userRole.get(JsonKey.SCOPE),
-                new ArrayList<Map<String, String>>().getClass());
-      } catch (JsonProcessingException e) {
-        logger.error(
-            actorMessage.getRequestContext(),
-            "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
-            e);
-      }
-      if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
-        userRole.put(JsonKey.SCOPE, scopeMap);
-        userRole.remove(JsonKey.USER_ID);
-      } else {
-        for (Map scope : scopeMap) {
-          String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
-          String role = (String) userRole.get(JsonKey.ROLE);
-          if (userOrgRoles.containsKey(orgId)) {
-            List<String> roles = userOrgRoles.get(orgId);
-            roles.add(role);
-            userOrgRoles.put(orgId, roles);
-          } else {
-            userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
-          }
-        }
-      }
-    }
+        userRoleService.getUserRoles(userId, actorMessage.getRequestContext());
     if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
       result.put(JsonKey.ROLES, userRolesList);
     } else {
       result.remove(JsonKey.ROLES);
+    }
+    Map<String, List<String>> userOrgRoles = null;
+    if (!readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
+      userOrgRoles = getUserOrgRoles(userRolesList);
     }
     result.put(
         JsonKey.ORGANISATIONS,
@@ -146,7 +91,7 @@ public class UserProfileReadService {
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
     String managedBy = (String) result.get(JsonKey.MANAGED_BY);
-    logger.info(
+    logger.debug(
         actorMessage.getRequestContext(),
         "requested By and requested user id == "
             + requestedById
@@ -159,7 +104,6 @@ public class UserProfileReadService {
     if (!isPrivate && StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
       ProjectCommonException.throwUnauthorizedErrorException();
     }
-
     getManagedToken(actorMessage, userId, result, managedBy);
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);
     if (StringUtils.isNotBlank(userId)
@@ -203,18 +147,38 @@ public class UserProfileReadService {
     return response;
   }
 
-  public void appendUserTypeAndLocation(Map<String, Object> result, Request actormessage) {
+  private Map<String, List<String>> getUserOrgRoles(List<Map<String, Object>> userRolesList) {
+    Map<String, List<String>> userOrgRoles = new HashMap<>();
+    for (Map userRole : userRolesList) {
+      List<Map<String, String>> scopeMap = (List<Map<String, String>>) userRole.get(JsonKey.SCOPE);
+      if (CollectionUtils.isNotEmpty(scopeMap)) {
+        for (Map scope : scopeMap) {
+          String orgId = (String) scope.get(JsonKey.ORGANISATION_ID);
+          String role = (String) userRole.get(JsonKey.ROLE);
+          if (userOrgRoles.containsKey(orgId)) {
+            List<String> roles = userOrgRoles.get(orgId);
+            roles.add(role);
+            userOrgRoles.put(orgId, roles);
+          } else {
+            userOrgRoles.put(orgId, new ArrayList(Arrays.asList(role)));
+          }
+        }
+      }
+    }
+    return userOrgRoles;
+  }
+
+  public void appendUserTypeAndLocation(Map<String, Object> result, Request actorMessage) {
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {
       if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPE))) {
         userTypeDetails =
             mapper.readValue(
-                (String) result.get(JsonKey.PROFILE_USERTYPE),
-                new TypeReference<Map<String, Object>>() {});
+                (String) result.get(JsonKey.PROFILE_USERTYPE), new TypeReference<>() {});
       }
     } catch (Exception e) {
       logger.error(
-          actormessage.getRequestContext(),
+          actorMessage.getRequestContext(),
           "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPE),
           e);
     }
@@ -225,8 +189,7 @@ public class UserProfileReadService {
       if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_LOCATION))) {
         userLocList =
             mapper.readValue(
-                (String) result.get(JsonKey.PROFILE_LOCATION),
-                new TypeReference<List<Map<String, String>>>() {});
+                (String) result.get(JsonKey.PROFILE_LOCATION), new TypeReference<>() {});
         if (CollectionUtils.isNotEmpty(userLocList)) {
           locationIds =
               userLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
@@ -234,11 +197,11 @@ public class UserProfileReadService {
       }
     } catch (Exception ex) {
       logger.error(
-          actormessage.getRequestContext(),
-          "Exception occurred while mapping " + (String) result.get(JsonKey.PROFILE_LOCATION),
+          actorMessage.getRequestContext(),
+          "Exception occurred while mapping " + result.get(JsonKey.PROFILE_LOCATION),
           ex);
     }
-    if (actormessage
+    if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V3.getValue())) {
       if (MapUtils.isNotEmpty(userTypeDetails)) {
@@ -249,7 +212,6 @@ public class UserProfileReadService {
         result.put(JsonKey.USER_SUB_TYPE, null);
       }
       result.put(JsonKey.LOCATION_IDS, locationIds);
-      result.putAll(Util.getUserDefaultValue());
     } else {
       result.remove(JsonKey.USER_TYPE);
       result.remove(JsonKey.USER_SUB_TYPE);
@@ -287,7 +249,7 @@ public class UserProfileReadService {
     if (withTokens && StringUtils.isNotEmpty(managedBy)) {
       String managedToken = (String) actorMessage.getContext().get(JsonKey.MANAGED_TOKEN);
       if (StringUtils.isEmpty(managedToken)) {
-        logger.info(
+        logger.debug(
             actorMessage.getRequestContext(),
             "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId);
         List<Map<String, Object>> userList = new ArrayList<>();
@@ -311,11 +273,9 @@ public class UserProfileReadService {
       Map<String, List<String>> userOrgRoles,
       RequestContext requestContext,
       String readVersion) {
-    Response response = userOrgDao.getUserOrgListByUserId(userId, requestContext);
-    List<Map<String, Object>> userOrgList =
-        (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
-
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
+    List<Map<String, Object>> userOrgList =
+        userOrgService.getUserOrgListByUserId(userId, requestContext);
     for (Map<String, Object> userOrg : userOrgList) {
       if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
         userOrg.remove(JsonKey.ROLES);
@@ -326,36 +286,32 @@ public class UserProfileReadService {
       }
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
       if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
-        AssociationMechanism associationMechanism = new AssociationMechanism();
-        if (null != userOrg.get(JsonKey.ASSOCIATION_TYPE)) {
-          int associationType = (int) userOrg.get(JsonKey.ASSOCIATION_TYPE);
-          associationMechanism.setAssociationType(associationType);
-          userOrg.put(
-              JsonKey.IS_SSO, associationMechanism.isAssociationType(AssociationMechanism.SSO));
-          userOrg.put(
-              JsonKey.IS_SELF_DECLARATION,
-              associationMechanism.isAssociationType(AssociationMechanism.SELF_DECLARATION));
-          userOrg.put(
-              JsonKey.IS_SYSTEM_UPLOAD,
-              associationMechanism.isAssociationType(AssociationMechanism.SYSTEM_UPLOAD));
-        }
+        updateAssociationMechanism(userOrg);
         usrOrgList.add(userOrg);
       }
     }
     return usrOrgList;
   }
 
+  private void updateAssociationMechanism(Map<String, Object> userOrg) {
+    AssociationMechanism associationMechanism = new AssociationMechanism();
+    if (null != userOrg.get(JsonKey.ASSOCIATION_TYPE)) {
+      int associationType = (int) userOrg.get(JsonKey.ASSOCIATION_TYPE);
+      associationMechanism.setAssociationType(associationType);
+      userOrg.put(JsonKey.IS_SSO, associationMechanism.isAssociationType(AssociationMechanism.SSO));
+      userOrg.put(
+          JsonKey.IS_SELF_DECLARATION,
+          associationMechanism.isAssociationType(AssociationMechanism.SELF_DECLARATION));
+      userOrg.put(
+          JsonKey.IS_SYSTEM_UPLOAD,
+          associationMechanism.isAssociationType(AssociationMechanism.SYSTEM_UPLOAD));
+    }
+  }
+
   private Map<String, Object> validateUserIdAndGetUserDetails(
       String userId, RequestContext context) {
-    Map<String, Object> user = userDao.getUserDetailsById(userId, context);
-    // check user found or not
-    if (MapUtils.isEmpty(user)) {
-      throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
-    }
-    // check whether is_deletd true or false
+    Map<String, Object> user = userService.getUserDetailsById(userId, context);
+    // check whether user active or not
     Boolean isDeleted = (Boolean) user.get(JsonKey.IS_DELETED);
     if (null != isDeleted && isDeleted.booleanValue()) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
@@ -369,7 +325,7 @@ public class UserProfileReadService {
     String userId =
         userExternalIdentityService.getUserV1(
             id, provider, idType, actorMessage.getRequestContext());
-    if (userId == null) {
+    if (StringUtils.isBlank(userId)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.externalIdNotFound,
           ProjectUtil.formatMessage(
@@ -393,102 +349,6 @@ public class UserProfileReadService {
     }
     responseMap.remove(JsonKey.ADDRESS);
     return responseMap;
-  }
-
-  private List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
-    Map<String, Object> req = new HashMap<>();
-    req.put(JsonKey.USER_ID, userId);
-    Response response =
-        cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, context);
-    List<Map<String, Object>> resExternalIds;
-    List<Map<String, Object>> finalRes = new ArrayList<>();
-    if (null != response && null != response.getResult()) {
-      resExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(resExternalIds)) {
-        resExternalIds.forEach(
-            item -> {
-              Map<String, Object> declaration = new HashMap<>();
-              Map<String, String> declaredFields =
-                  (Map<String, String>) item.get(JsonKey.USER_INFO);
-              if (MapUtils.isNotEmpty(declaredFields)) {
-                decryptDeclarationFields(declaredFields, context);
-              }
-              declaration.put(JsonKey.STATUS, item.get(JsonKey.STATUS));
-              declaration.put(JsonKey.ERROR_TYPE, item.get(JsonKey.ERROR_TYPE));
-              declaration.put(JsonKey.ORG_ID, item.get(JsonKey.ORG_ID));
-              declaration.put(JsonKey.PERSONA, item.get(JsonKey.PERSONA));
-              declaration.put(JsonKey.INFO, declaredFields);
-              finalRes.add(declaration);
-            });
-      }
-    }
-    return finalRes;
-  }
-
-  private Map<String, String> decryptDeclarationFields(
-      Map<String, String> declaredFields, RequestContext context) {
-    if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
-      declaredFields.put(
-          JsonKey.DECLARED_EMAIL,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL), context));
-    }
-    if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
-      declaredFields.put(
-          JsonKey.DECLARED_PHONE,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE), context));
-    }
-    return declaredFields;
-  }
-
-  private void decryptUserExternalIds(
-      List<Map<String, String>> dbResExternalIds, RequestContext context) {
-    if (CollectionUtils.isNotEmpty(dbResExternalIds)) {
-      dbResExternalIds
-          .stream()
-          .forEach(
-              s -> {
-                s.put(JsonKey.ID, s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                s.put(JsonKey.ID_TYPE, s.get(JsonKey.ORIGINAL_ID_TYPE));
-                s.put(JsonKey.PROVIDER, s.get(JsonKey.ORIGINAL_PROVIDER));
-                if (StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_EXTERNAL_ID))
-                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                    && StringUtils.isNotBlank(s.get(JsonKey.ORIGINAL_PROVIDER))) {
-                  if (JsonKey.DECLARED_EMAIL.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      || JsonKey.DECLARED_PHONE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-
-                    String decrytpedOriginalExternalId =
-                        UserUtil.getDecryptedData(s.get(JsonKey.ORIGINAL_EXTERNAL_ID), context);
-                    s.put(JsonKey.ID, decrytpedOriginalExternalId);
-
-                  } else if (JsonKey.DECLARED_DISTRICT.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))
-                      || JsonKey.DECLARED_STATE.equals(s.get(JsonKey.ORIGINAL_ID_TYPE))) {
-                    List<String> locationIds = new ArrayList<>(2);
-                    locationIds.add(s.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-                    List<Map<String, Object>> locationList = getUserLocations(locationIds, context);
-                    if (CollectionUtils.isNotEmpty(locationList)) {
-                      Map<String, Object> location = locationList.get(0);
-                      s.put(
-                          JsonKey.ID,
-                          (location == null
-                              ? s.get(JsonKey.ORIGINAL_EXTERNAL_ID)
-                              : (String) location.get(JsonKey.CODE)));
-                    }
-                  }
-                }
-
-                s.remove(JsonKey.EXTERNAL_ID);
-                s.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
-                s.remove(JsonKey.ORIGINAL_ID_TYPE);
-                s.remove(JsonKey.ORIGINAL_PROVIDER);
-                s.remove(JsonKey.CREATED_BY);
-                s.remove(JsonKey.LAST_UPDATED_BY);
-                s.remove(JsonKey.LAST_UPDATED_ON);
-                s.remove(JsonKey.CREATED_ON);
-                s.remove(JsonKey.USER_ID);
-                s.remove(JsonKey.SLUG);
-              });
-    }
   }
 
   public void updateTnc(Map<String, Object> userMap) {
@@ -534,37 +394,42 @@ public class UserProfileReadService {
       String userId, Map<String, Object> user, boolean mergeDeclarations, RequestContext context) {
     try {
       List<Map<String, String>> dbResExternalIds =
-          UserUtil.getExternalIds(userId, mergeDeclarations, context);
-
-      decryptUserExternalIds(dbResExternalIds, context);
+          userExternalIdentityService.getExternalIds(userId, mergeDeclarations, context);
       // update orgId to provider in externalIds
       String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
-      if (CollectionUtils.isNotEmpty(dbResExternalIds)
-          && StringUtils.isNotBlank(rootOrgId)
-          && StringUtils.isNotBlank(dbResExternalIds.get(0).get(JsonKey.PROVIDER))
-          && ((dbResExternalIds.get(0).get(JsonKey.PROVIDER)).equalsIgnoreCase(rootOrgId))) {
-
-        String provider = (String) user.get(JsonKey.CHANNEL);
-        dbResExternalIds
-            .stream()
-            .forEach(
-                s -> {
-                  if (s.get(JsonKey.PROVIDER) != null
-                      && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
-                    s.put(JsonKey.ID_TYPE, provider);
-                  }
-                  s.put(JsonKey.PROVIDER, provider);
-                });
-
-      } else {
-        UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
-      }
+      String provider = (String) user.get(JsonKey.CHANNEL);
+      updateExternalIdsOrgIdWithProvider(dbResExternalIds, rootOrgId, provider, context);
       return dbResExternalIds;
     } catch (Exception ex) {
       logger.error(
           context, "Exception occurred while fetching user externalId. " + ex.getMessage(), ex);
     }
     return new ArrayList<>();
+  }
+
+  private void updateExternalIdsOrgIdWithProvider(
+      List<Map<String, String>> dbResExternalIds,
+      String rootOrgId,
+      String provider,
+      RequestContext context) {
+    if (CollectionUtils.isNotEmpty(dbResExternalIds)
+        && StringUtils.isNotBlank(rootOrgId)
+        && StringUtils.isNotBlank(dbResExternalIds.get(0).get(JsonKey.PROVIDER))
+        && ((dbResExternalIds.get(0).get(JsonKey.PROVIDER)).equalsIgnoreCase(rootOrgId))) {
+      dbResExternalIds
+          .stream()
+          .forEach(
+              s -> {
+                if (s.get(JsonKey.PROVIDER) != null
+                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+                  s.put(JsonKey.ID_TYPE, provider);
+                }
+                s.put(JsonKey.PROVIDER, provider);
+              });
+
+    } else {
+      UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
+    }
   }
 
   public void addExtraFieldsInUserProfileResponse(
@@ -605,7 +470,8 @@ public class UserProfileReadService {
       }
       if (fields.contains(JsonKey.DECLARATIONS)) {
         List<Map<String, Object>> declarations =
-            fetchUserDeclarations((String) result.get(JsonKey.ID), context);
+            userSelfDeclarationService.fetchUserDeclarations(
+                (String) result.get(JsonKey.ID), context);
         result.put(JsonKey.DECLARATIONS, declarations);
       }
       if (CollectionUtils.isEmpty((List<Map<String, String>>) result.get(JsonKey.EXTERNAL_IDS))
@@ -644,7 +510,7 @@ public class UserProfileReadService {
               userLocation.add(schoolLocation);
             }
           } else {
-            logger.info(context, "School details are blank for orgid = " + organisationId);
+            logger.info(context, "School details are blank for orgId = " + organisationId);
           }
         }
       }
@@ -653,14 +519,11 @@ public class UserProfileReadService {
 
   public Map<String, Object> searchLocation(
       Map<String, Object> searchQueryMap, RequestContext context) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
-    String type = ProjectUtil.EsType.location.getTypeName();
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, type, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (MapUtils.isNotEmpty(result)
-        && CollectionUtils.isNotEmpty((List<Map<String, Object>>) result.get(JsonKey.CONTENT))) {
-      return ((List<Map<String, Object>>) result.get(JsonKey.CONTENT)).get(0);
+    Response locationResponse = locationService.searchLocation(searchQueryMap, context);
+    List<Map<String, Object>> locationList =
+        (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+    if (CollectionUtils.isNotEmpty(locationList)) {
+      return (locationList).get(0);
     }
     return Collections.emptyMap();
   }
@@ -670,14 +533,7 @@ public class UserProfileReadService {
     if (CollectionUtils.isNotEmpty(locationIds)) {
       List<String> locationFields =
           Arrays.asList(JsonKey.CODE, JsonKey.NAME, JsonKey.TYPE, JsonKey.PARENT_ID, JsonKey.ID);
-      Response locationResponse =
-          cassandraOperation.getPropertiesValueById(
-              locationDbInfo.getKeySpace(),
-              locationDbInfo.getTableName(),
-              locationIds,
-              locationFields,
-              context);
-      return (List<Map<String, Object>>) locationResponse.get(JsonKey.RESPONSE);
+      return locationService.getLocationsByIds(locationIds, locationFields, context);
     }
     return new ArrayList<>();
   }
@@ -707,11 +563,8 @@ public class UserProfileReadService {
               JsonKey.ID,
               JsonKey.EXTERNAL_ID,
               JsonKey.ORGANISATION_TYPE);
-      Response userOrgResponse =
-          cassandraOperation.getPropertiesValueById(
-              OrgDb.getKeySpace(), OrgDb.getTableName(), orgIds, fields, context);
       List<Map<String, Object>> userOrgResponseList =
-          (List<Map<String, Object>>) userOrgResponse.get(JsonKey.RESPONSE);
+          orgService.getOrgByIds(orgIds, fields, context);
       if (CollectionUtils.isNotEmpty(userOrgResponseList)) {
         return userOrgResponseList
             .stream()
@@ -723,29 +576,15 @@ public class UserProfileReadService {
 
   private Map<String, Map<String, Object>> fetchAllLocationsById(
       Map<String, Map<String, Object>> orgInfoMap, RequestContext context) {
-
     Set<String> locationSet = new HashSet<>();
     for (Map<String, Object> org : orgInfoMap.values()) {
       List<String> locationIds = null;
-      try {
-        if (StringUtils.isNotBlank((String) org.get(JsonKey.ORG_LOCATION))) {
-          List<Map<String, String>> orgLocList =
-              mapper.readValue(
-                  (String) org.get(JsonKey.ORG_LOCATION),
-                  new TypeReference<List<Map<String, String>>>() {});
-          if (CollectionUtils.isNotEmpty(orgLocList)) {
-            locationIds =
-                orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
-            org.put(JsonKey.ORG_LOCATION, orgLocList);
-          } else {
-            org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(
-            context,
-            "Exception occurred while mapping " + (String) org.get(JsonKey.ORG_LOCATION),
-            ex);
+      List<Map<String, String>> orgLocList = (List) org.get(JsonKey.ORG_LOCATION);
+      if (CollectionUtils.isNotEmpty(orgLocList)) {
+        locationIds = orgLocList.stream().map(m -> m.get(JsonKey.ID)).collect(Collectors.toList());
+        org.put(JsonKey.ORG_LOCATION, orgLocList);
+      } else {
+        org.put(JsonKey.ORG_LOCATION, new ArrayList<>());
       }
       if (CollectionUtils.isNotEmpty(locationIds)) {
         locationIds.forEach(
@@ -759,7 +598,8 @@ public class UserProfileReadService {
     }
     if (CollectionUtils.isNotEmpty(locationSet)) {
       List<String> locList = new ArrayList<>(locationSet);
-      List<Map<String, Object>> locationResponseList = getUserLocations(locList, context);
+      List<Map<String, Object>> locationResponseList =
+          locationService.getLocationsByIds(locList, null, context);
       return locationResponseList
           .stream()
           .collect(Collectors.toMap(obj -> (String) obj.get("id"), val -> val));

@@ -31,6 +31,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
@@ -401,11 +402,20 @@ public class LocationRequestValidatorTest {
 
     PowerMockito.when(locationDao.search(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationRecords());
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put("type", "state");
+    map.put("id", "id1");
+    map.put("code", "code1");
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    PowerMockito.when(locationDao.read(Mockito.any(), Mockito.any())).thenReturn(response);
     LocationRequestValidator validator = new LocationRequestValidator();
     List<String> locList = new ArrayList<>();
     locList.add("code1");
     locList.add("code2");
-    List<String> loc = validator.getValidatedLocationIds(locList, null);
+    List<String> loc = validator.getValidatedLocationIds(locList, new RequestContext());
     Assert.assertNotNull(loc);
   }
 
@@ -414,11 +424,20 @@ public class LocationRequestValidatorTest {
 
     PowerMockito.when(locationDao.search(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationRecords());
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> map = new HashMap<>();
+    map.put("type", "state");
+    map.put("id", "id1");
+    map.put("code", "code1");
+    list.add(map);
+    response.put(Constants.RESPONSE, list);
+    PowerMockito.when(locationDao.read(Mockito.any(), Mockito.any())).thenReturn(response);
     LocationRequestValidator validator = new LocationRequestValidator();
     List<String> locList = new ArrayList<>();
     locList.add("id1");
     locList.add("id2");
-    List<String> loc = validator.getHierarchyLocationIds(locList, null);
+    List<String> loc = validator.getHierarchyLocationIds(locList, new RequestContext());
     Assert.assertNotNull(loc);
   }
 

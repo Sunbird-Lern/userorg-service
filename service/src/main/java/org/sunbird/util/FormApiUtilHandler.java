@@ -71,7 +71,8 @@ public class FormApiUtilHandler {
               ProjectUtil.getConfigValue(JsonKey.PORTAL_SERVICE_PORT)
                   + ProjectUtil.getConfigValue(JsonKey.FORM_API_ENDPOINT),
               body,
-              headers);
+              headers,
+              context);
       if (StringUtils.isNotEmpty(response)) {
         data = mapper.readValue(response, Map.class);
         if (MapUtils.isNotEmpty(data)) {

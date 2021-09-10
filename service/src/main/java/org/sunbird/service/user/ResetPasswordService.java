@@ -31,8 +31,8 @@ public class ResetPasswordService {
               context);
 
       templateMap.put(
-          JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
-      return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
+          JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url, context) : url);
+      return isUrlShortRequired ? urlShortner.shortUrl(url, context) : url;
 
     } else {
       String url =
@@ -42,8 +42,8 @@ public class ResetPasswordService {
               KeycloakRequiredActionLinkUtil.VERIFY_EMAIL,
               context);
       templateMap.put(
-          JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url) : url);
-      return isUrlShortRequired ? urlShortner.shortUrl(url) : url;
+          JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url, context) : url);
+      return isUrlShortRequired ? urlShortner.shortUrl(url, context) : url;
     }
   }
 

@@ -6,15 +6,22 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.user.UserDao;
+import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
+import scala.concurrent.Future;
 
 /**
  * Implementation class of UserDao interface.
@@ -23,7 +30,9 @@ import org.sunbird.response.Response;
  */
 public class UserDaoImpl implements UserDao {
 
+  private LoggerUtil logger = new LoggerUtil(UserDaoImpl.class);
   private static final String TABLE_NAME = "user";
+  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private static UserDao userDao = null;
@@ -78,5 +87,42 @@ public class UserDaoImpl implements UserDao {
       List<String> userIds, List<String> properties, RequestContext context) {
     return cassandraOperation.getPropertiesValueById(
         Util.KEY_SPACE_NAME, TABLE_NAME, userIds, properties, context);
+  }
+
+  @Override
+  public Map<String, Object> search(SearchDTO searchDTO, RequestContext context) {
+    Future<Map<String, Object>> esResultF =
+        esUtil.search(searchDTO, ProjectUtil.EsType.user.getTypeName(), context);
+    return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+  }
+
+  @Override
+  public Map<String, Object> getEsUserById(String userId, RequestContext context) {
+    Future<Map<String, Object>> esResultF =
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
+    Map<String, Object> esResult =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+    if (esResult == null || esResult.size() == 0) {
+      throw new ProjectCommonException(
+          ResponseCode.userNotFound.getErrorCode(),
+          ResponseCode.userNotFound.getErrorMessage(),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    return esResult;
+  }
+
+  @Override
+  public boolean updateUserDataToES(
+      String identifier, Map<String, Object> data, RequestContext context) {
+    Future<Boolean> responseF =
+        esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
+    if ((boolean) ElasticSearchHelper.getResponseFromFuture(responseF)) {
+      return true;
+    }
+    logger.info(
+        context,
+        "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier "
+            + identifier);
+    return false;
   }
 }

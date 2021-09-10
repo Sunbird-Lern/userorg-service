@@ -86,7 +86,7 @@ public class UserBulkUploadBackgroundJobActorTest {
 
     encryptionService = PowerMockito.mock(EncryptionService.class);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance())
         .thenReturn(encryptionService);
     system = ActorSystem.create("system");
     PowerMockito.mockStatic(UserClientImpl.class);

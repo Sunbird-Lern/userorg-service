@@ -124,7 +124,6 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
-    System.out.println(reqMap);
     return reqObj;
   }
 
@@ -156,7 +155,6 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
-    System.out.println(reqMap);
     return reqObj;
   }
 

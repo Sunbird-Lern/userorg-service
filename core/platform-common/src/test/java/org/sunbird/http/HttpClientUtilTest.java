@@ -72,7 +72,7 @@ public class HttpClientUtilTest {
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpGet.class))).thenReturn(response);
     HttpClientUtil.getInstance();
-    String res = HttpClientUtil.get("http://localhost:80/user/read", headers());
+    String res = HttpClientUtil.get("http://localhost:80/user/read", headers(), null);
     assertNotNull(res);
   }
 
@@ -96,7 +96,7 @@ public class HttpClientUtilTest {
     HttpClientUtil.getInstance();
     String res =
         HttpClientUtil.post(
-            "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
+            "http://localhost:80/user/read", "{\"message\":\"success\"}", headers(), null);
     assertNotNull(res);
   }
 
@@ -120,7 +120,8 @@ public class HttpClientUtilTest {
     Map<String, String> fields = new HashMap<>();
     fields.put("message", "success");
     HttpClientUtil.getInstance();
-    String res = HttpClientUtil.postFormData("http://localhost:80/user/read", fields, headers());
+    String res =
+        HttpClientUtil.postFormData("http://localhost:80/user/read", fields, headers(), null);
     assertNotNull(res);
   }
 
@@ -144,7 +145,7 @@ public class HttpClientUtilTest {
     HttpClientUtil.getInstance();
     String res =
         HttpClientUtil.patch(
-            "http://localhost:80/user/read", "{\"message\":\"success\"}", headers());
+            "http://localhost:80/user/read", "{\"message\":\"success\"}", headers(), null);
     assertNotNull(res);
   }
 
@@ -166,7 +167,7 @@ public class HttpClientUtilTest {
     PowerMockito.when(EntityUtils.toByteArray(Mockito.any(HttpEntity.class))).thenReturn(bytes);
     PowerMockito.when(httpclient.execute(Mockito.any(HttpPatch.class))).thenReturn(response);
     HttpClientUtil.getInstance();
-    String res = HttpClientUtil.delete("http://localhost:80/user/read", headers());
+    String res = HttpClientUtil.delete("http://localhost:80/user/read", headers(), null);
     assertNotNull(res);
   }
 }

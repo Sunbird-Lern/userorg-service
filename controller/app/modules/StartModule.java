@@ -13,7 +13,7 @@ public class StartModule extends AbstractModule {
       bind(SignalHandler.class).asEagerSingleton();
       bind(ApplicationStart.class).asEagerSingleton();
     } catch (Exception | Error e) {
-      e.printStackTrace();
+      logger.error("Exception occurred while starting play module", e);
     }
     logger.info("StartModule:configure: End");
   }

@@ -3,6 +3,7 @@ package org.sunbird.service.user;
 import akka.actor.ActorRef;
 import java.util.List;
 import java.util.Map;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -15,6 +16,8 @@ public interface UserService {
   Response updateUser(Map<String, Object> user, RequestContext context);
 
   User getUserById(String userId, RequestContext context);
+
+  Map<String, Object> getUserDetailsById(String userId, RequestContext context);
 
   void validateUserId(Request request, String managedById, RequestContext context);
 
@@ -47,6 +50,8 @@ public interface UserService {
 
   Response userLookUpByKey(String key, String value, List<String> fields, RequestContext context);
 
+  String getUserIdByUserLookUp(String key, String value, RequestContext context);
+
   Response saveUserAttributes(
       Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
 
@@ -57,6 +62,8 @@ public interface UserService {
 
   List<Map<String, Object>> getUserEmailsBySearchQuery(
       Map<String, Object> searchQuery, RequestContext context);
+
+  Map<String, Object> searchUser(SearchDTO searchDTO, RequestContext context);
 
   boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
 }
