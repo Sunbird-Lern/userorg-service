@@ -1,11 +1,13 @@
 package org.sunbird.actor.user;
 
+import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.pattern.Patterns;
+import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import java.util.Arrays;
 import java.util.Map;
@@ -386,11 +388,11 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
       Futures.future(() -> reqMap, system.dispatcher());
     when(pipe.to(Mockito.any(ActorRef.class))).thenReturn(future1);
     when(Patterns.pipe(Mockito.any(Future.class), Mockito.any())).thenReturn(pipe);*/
-
-    boolean result =
-        testScenario(
-            getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
-            null);
-    assertTrue(true);
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    subject.tell(
+        getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
+        probe.getRef());
+    probe.expectMsgClass(duration("1000 second"), NullPointerException.class);
   }
 }
