@@ -85,6 +85,10 @@ public class SendNotificationActor extends BaseActor {
     bgRequest.setRequestId(requestId);
     bgRequest.getRequest().putAll(reqMap);
     bgRequest.setOperation("processNotification");
-    backGroundNotificationActor.tell(bgRequest, self());
+    try {
+      backGroundNotificationActor.tell(bgRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending notification", ex);
+    }
   }
 }

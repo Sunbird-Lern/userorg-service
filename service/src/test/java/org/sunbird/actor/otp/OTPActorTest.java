@@ -255,7 +255,7 @@ public class OTPActorTest {
         (errorResponse.getResponseCode().name()).equals(ResponseCode.CLIENT_ERROR.name()));
   }
 
-  // @Test
+  @Test
   public void generateOtpForPhoneSuccess2() {
     Request request;
     request = createGenerateOtpRequest(PHONE_TYPE, PHONE_KEY);
@@ -285,7 +285,7 @@ public class OTPActorTest {
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
-  // @Test
+  @Test
   public void generateOtpForPhoneSuccess() {
     Request request;
     request = createGenerateOtpRequest(PHONE_TYPE, PHONE_KEY);
@@ -315,7 +315,7 @@ public class OTPActorTest {
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
-  // @Test
+  @Test
   public void generateOtpForEmailSuccess() {
     Request request;
     request = createGenerateOtpRequest(EMAIL_TYPE, EMAIL_KEY);
@@ -344,7 +344,7 @@ public class OTPActorTest {
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
-  // @Test
+  @Test
   public void generateOtpForEmailSuccessForUser() {
     Request request;
     request = createOtpRequest(EMAIL_TYPE, EMAIL_KEY, USER_ID);
@@ -376,7 +376,7 @@ public class OTPActorTest {
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
-  // @Test
+  @Test
   public void generateOtpForInvalidType() {
     Request request;
     request = createGenerateOtpRequest("InvalidType", "InvalidType");

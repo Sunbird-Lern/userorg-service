@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -60,6 +61,10 @@ public class SendNotificationActorTest {
   private ActorSystem system = ActorSystem.create("system");
   private static CassandraOperationImpl cassandraOperation;
 
+  @InjectMocks
+  ActorRef backGroundNotificationActor =
+      system.actorOf(Props.create(BackGroundNotificationActor.class));
+
   @BeforeClass
   public static void setUp() {
     PowerMockito.mockStatic(ProjectUtil.class);
@@ -69,6 +74,8 @@ public class SendNotificationActorTest {
 
   @Before
   public void beforeTest() {
+    // backGroundNotificationActor =
+    // system.actorOf(Props.create(BackGroundNotificationActor.class));
     PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(HttpClientUtil.class);
@@ -106,7 +113,7 @@ public class SendNotificationActorTest {
     return response;
   }
 
-  // @Test
+  @Test
   public void testSendEmailSuccess() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),
@@ -225,7 +232,7 @@ public class SendNotificationActorTest {
     assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), exc.getCode());
   }
 
-  // @Test
+  @Test
   public void testSendSMSSuccess() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),

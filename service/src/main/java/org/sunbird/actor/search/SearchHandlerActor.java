@@ -315,7 +315,11 @@ public class SearchHandlerActor extends BaseActor {
     telemetryReq.getRequest().put("indexType", ProjectUtil.EsType.organisation.getTypeName());
     telemetryReq.getRequest().put("searchDto", searchDto);
     telemetryReq.setOperation("generateSearchTelemetry");
-    searchTelemetryGenerator.tell(telemetryReq, self());
+    try {
+      searchTelemetryGenerator.tell(telemetryReq, self());
+    } catch (Exception ex) {
+      logger.error("Exception while saving telemetry", ex);
+    }
   }
 
   private void getDefaultValues(Map<String, Object> orgDefaultFieldValue, List<String> fields) {

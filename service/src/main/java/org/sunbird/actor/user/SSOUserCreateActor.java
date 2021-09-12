@@ -393,7 +393,11 @@ public class SSOUserCreateActor extends UserBaseActor {
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.debug(
         context, "SSOUserCreateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    try {
+      backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while saving user data to ES", ex);
+    }
   }
 
   private void sendEmailAndSms(Map<String, Object> userMap, RequestContext context) {
@@ -402,6 +406,10 @@ public class SSOUserCreateActor extends UserBaseActor {
     EmailAndSmsRequest.getRequest().putAll(userMap);
     EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
-    userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
+    try {
+      userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending notification", ex);
+    }
   }
 }

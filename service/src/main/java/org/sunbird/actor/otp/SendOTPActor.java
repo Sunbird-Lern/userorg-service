@@ -81,7 +81,11 @@ public class SendOTPActor extends BaseActor {
         context,
         "SendOTPActor:sendOTPViaEmail : Calling EmailServiceActor for Key = "
             + logMaskService.maskEmail(key));
-    emailServiceActor.tell(emailRequest, self());
+    try {
+      emailServiceActor.tell(emailRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending OTP via email", ex);
+    }
   }
 
   private void sendOTPViaSMS(String key, String otp, String template, RequestContext context) {

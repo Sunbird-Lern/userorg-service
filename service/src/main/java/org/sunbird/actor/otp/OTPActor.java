@@ -215,7 +215,11 @@ public class OTPActor extends BaseActor {
     sendOtpRequest.getRequest().put(JsonKey.KEY, key);
     sendOtpRequest.getRequest().put(JsonKey.OTP, otp);
     sendOtpRequest.setOperation(ActorOperations.SEND_OTP.getValue());
-    sendOTPActor.tell(sendOtpRequest, self());
+    try {
+      sendOTPActor.tell(sendOtpRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending OTP", ex);
+    }
   }
 
   private String getType(String type) {

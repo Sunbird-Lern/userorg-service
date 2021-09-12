@@ -12,11 +12,11 @@ public class ActorStartModule extends AbstractModule implements AkkaGuiceSupport
 
   @Override
   protected void configure() {
-    logger.info("binding actors for dependency injection");
+    logger.debug("binding actors for dependency injection");
     final RouterConfig config = new FromConfig();
     for (ACTORS actor : ACTORS.values()) {
-      bindActor(actor.getActorClass(), actor.getActorName(), (props) -> props.withRouter(config));
+      bindActor(actor.getActorClass(), actor.getActorName(), props -> props.withRouter(config));
     }
-    logger.info("binding completed");
+    logger.debug("binding completed");
   }
 }

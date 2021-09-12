@@ -126,7 +126,7 @@ public class EmailServiceActorTest {
     assertTrue(response != null);
   }
 
-  // @Test
+  @Test
   public void testSendEmailSuccess() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),
@@ -162,7 +162,7 @@ public class EmailServiceActorTest {
     assertTrue(response != null);
   }
 
-  // @Test
+  @Test
   public void testWithInvalidRequest() {
     Request request = new Request();
     TestKit probe = new TestKit(system);

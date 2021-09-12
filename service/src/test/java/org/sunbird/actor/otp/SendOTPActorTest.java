@@ -150,7 +150,7 @@ public class SendOTPActorTest {
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
-  // @Test
+  @Test
   public void sendOTPTestWithPreUsedEmail() {
     request = createOtpRequest("email", "anyEmailId", "anyUserId");
     request.getRequest().put(JsonKey.TYPE, JsonKey.PREV_USED_EMAIL);
@@ -162,7 +162,7 @@ public class SendOTPActorTest {
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
-  // @Test
+  @Test
   public void sendOTPTestWithRecoveryEmail() {
     request = createOtpRequest("email", "anyEmailId", "anyUserId");
     request.getRequest().put(JsonKey.TYPE, JsonKey.RECOVERY_EMAIL);
@@ -174,7 +174,7 @@ public class SendOTPActorTest {
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
-  // @Test
+  @Test
   public void sendOTPTestForEmail() {
     request = createOtpRequest("email", "anyEmailId", "anyUserId");
     when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))
@@ -185,7 +185,7 @@ public class SendOTPActorTest {
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
-  // @Test
+  @Test
   public void sendOTPTestForEmail2() {
     request = createOtpRequest("email", "anyEmailId", "");
     when(emailTemplateDao.getTemplate(Mockito.anyString(), Mockito.any()))

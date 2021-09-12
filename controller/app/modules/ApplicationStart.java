@@ -22,7 +22,6 @@ public class ApplicationStart {
     setEnvironment(environment);
     ssoPublicKey = System.getenv(JsonKey.SSO_PUBLIC_KEY);
     checkCassandraConnections();
-    // initialize HttpClientUtil class
     HttpClientUtil.getInstance();
     applicationLifecycle.addStopHook(() -> CompletableFuture.completedFuture(null));
     KeyManager.init();

@@ -90,7 +90,7 @@ public class SearchHandlerActorTest {
     return response;
   }
 
-  // @Test
+  @Test
   public void searchOrg() {
     PowerMockito.mockStatic(EsClientFactory.class);
     ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
