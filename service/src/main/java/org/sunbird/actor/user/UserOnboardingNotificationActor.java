@@ -1,8 +1,11 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.service.user.ResetPasswordService;
@@ -13,24 +16,25 @@ import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 
-import java.util.Map;
-
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"processOnBoardingMailAndSms", "processPasswordResetMailAndSms"}
-)
 public class UserOnboardingNotificationActor extends BaseActor {
 
   private ResetPasswordService resetPasswordService = new ResetPasswordService();
 
+  @Inject
+  @Named("email_service_actor")
+  private ActorRef emailServiceActor;
+
   @Override
   public void onReceive(Request request) throws Throwable {
-    if (UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
-        .getValue()
-        .equalsIgnoreCase(request.getOperation())) {
+    if ((UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
+            .getValue()
+            .equalsIgnoreCase(request.getOperation()))
+        || (UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS
+            .getValue()
+            .equalsIgnoreCase(request.getOperation()))) {
       sendEmailAndSms(request);
     } else {
-      onReceiveUnsupportedOperation("ProcessOnBoardingMailAndSmsActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -48,7 +52,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       Request welcomeMailReqObj = Util.sendOnboardingMail(requestMap);
       if (null != welcomeMailReqObj) {
         welcomeMailReqObj.setRequestContext(request.getRequestContext());
-        tellToAnother(welcomeMailReqObj);
+        emailServiceActor.tell(welcomeMailReqObj, self());
       }
     } else if (request
         .getOperation()
@@ -56,7 +60,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       Request resetMailReqObj = Util.sendResetPassMail(requestMap);
       resetMailReqObj.setRequestContext(request.getRequestContext());
       if (null != resetMailReqObj) {
-        tellToAnother(resetMailReqObj);
+        emailServiceActor.tell(resetMailReqObj, self());
       }
     }
 

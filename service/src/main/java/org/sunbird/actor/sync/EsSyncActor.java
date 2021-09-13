@@ -5,10 +5,10 @@ import akka.pattern.Patterns;
 import akka.util.Timeout;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.actor.router.BackgroundRequestRouter;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -19,12 +19,11 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
-/** Sync data between Cassandra and Elastic Search. */
-@ActorConfig(
-  tasks = {"sync"},
-  asyncTasks = {}
-)
 public class EsSyncActor extends BaseActor {
+
+  @Inject
+  @Named("es_sync_background_actor")
+  private ActorRef esSyncBackgroundActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -33,7 +32,7 @@ public class EsSyncActor extends BaseActor {
     if (operation.equalsIgnoreCase(ActorOperations.SYNC.getValue())) {
       triggerBackgroundSync(request);
     } else {
-      onReceiveUnsupportedOperation("EsSyncActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -51,13 +50,10 @@ public class EsSyncActor extends BaseActor {
         Response response = new Response();
         response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
         sender().tell(response, self());
-
-        tellToAnother(backgroundSyncRequest);
+        esSyncBackgroundActor.tell(backgroundSyncRequest, self());
       } else {
         Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-        ActorRef actorRef =
-            BackgroundRequestRouter.getActor(ActorOperations.BACKGROUND_SYNC.getValue());
-        Future<Object> future = Patterns.ask(actorRef, backgroundSyncRequest, t);
+        Future<Object> future = Patterns.ask(esSyncBackgroundActor, backgroundSyncRequest, t);
         Response response = (Response) Await.result(future, t.duration());
         response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
         sender().tell(response, self());

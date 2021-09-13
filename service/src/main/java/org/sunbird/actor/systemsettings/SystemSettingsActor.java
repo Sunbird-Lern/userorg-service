@@ -2,19 +2,13 @@ package org.sunbird.actor.systemsettings;
 
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.systemsettings.SystemSettingsService;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.systemsettings.SystemSettingsService;
 
-@ActorConfig(
-  tasks = {"getSystemSetting", "getAllSystemSettings", "setSystemSetting"},
-  asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class SystemSettingsActor extends BaseActor {
 
   private SystemSettingsService service = new SystemSettingsService();
@@ -32,14 +26,16 @@ public class SystemSettingsActor extends BaseActor {
         setSystemSetting(request);
         break;
       default:
-        onReceiveUnsupportedOperation(request.getOperation());
+        onReceiveUnsupportedOperation();
         break;
     }
   }
 
   private void getSystemSetting(Request actorMessage) {
-    SystemSetting setting = service.getSystemSettingByKey((String)actorMessage.getContext().get(JsonKey.FIELD),
-      actorMessage.getRequestContext());
+    SystemSetting setting =
+        service.getSystemSettingByKey(
+            (String) actorMessage.getContext().get(JsonKey.FIELD),
+            actorMessage.getRequestContext());
     Response response = new Response();
     response.put(JsonKey.RESPONSE, setting);
     sender().tell(response, self());

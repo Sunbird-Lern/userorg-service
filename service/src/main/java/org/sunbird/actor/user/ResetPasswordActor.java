@@ -1,9 +1,11 @@
 package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -19,16 +21,6 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-/** This actor process the request for reset password. */
-@ActorConfig(
-  tasks = {"resetPassword"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class ResetPasswordActor extends BaseActor {
 
   private UserService userService = UserServiceImpl.getInstance();
@@ -46,11 +38,11 @@ public class ResetPasswordActor extends BaseActor {
     logger.debug(request.getRequestContext(), "ResetPasswordActor:resetPassword: method called.");
     User user = userService.getUserById(userId, request.getRequestContext());
     boolean isDisabled =
-      KeycloakBruteForceAttackUtil.isUserAccountDisabled(
-        user.getUserId(), request.getRequestContext());
+        KeycloakBruteForceAttackUtil.isUserAccountDisabled(
+            user.getUserId(), request.getRequestContext());
     if (isDisabled) {
       KeycloakBruteForceAttackUtil.unlockTempDisabledUser(
-        user.getUserId(), request.getRequestContext());
+          user.getUserId(), request.getRequestContext());
     }
     generateLink(request, user);
   }
@@ -63,7 +55,8 @@ public class ResetPasswordActor extends BaseActor {
     UserUtility.decryptUserData(userMap);
     userMap.put(JsonKey.USERNAME, userMap.get(JsonKey.USERNAME));
     userMap.put(JsonKey.REDIRECT_URI, resetPasswordService.getSunbirdLoginUrl());
-    String url = resetPasswordService.getUserRequiredActionLink(userMap, false, request.getRequestContext());
+    String url =
+        resetPasswordService.getUserRequiredActionLink(userMap, false, request.getRequestContext());
     userMap.put(JsonKey.SET_PASSWORD_LINK, url);
     if (StringUtils.isNotBlank(url)) {
       logger.debug(

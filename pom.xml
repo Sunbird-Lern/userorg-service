@@ -30,6 +30,27 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <argLine>
+                        @{argLine} --illegal-access=permit
+                    </argLine>
+                    <properties>
+                        <property>
+                            <name>parallel</name>
+                            <value>methods</value>
+                        </property>
+                        <property>
+                            <name>dataproviderthreadcount</name>
+                            <value>30</value>
+                        </property>
+                    </properties>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.5</version>
@@ -37,8 +58,6 @@
                     <destFile>${basedir}/target/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/jacoco-unit.exec</dataFile>
                     <excludes>
-                        <exclude>**/common/**</exclude>
-                        <exclude>**/router/**</exclude>
                         <exclude>**/Reverse*/**</exclude>
                         <exclude>**/routes.*</exclude>
                         <exclude>**/routes$javascript.**</exclude>

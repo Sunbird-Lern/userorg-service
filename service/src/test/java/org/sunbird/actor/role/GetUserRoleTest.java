@@ -21,7 +21,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
@@ -31,7 +30,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, BaseMWService.class, CassandraOperationImpl.class})
+@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -45,7 +44,6 @@ public class GetUserRoleTest {
 
   @Before
   public void beforeEachTest() {
-    PowerMockito.mockStatic(BaseMWService.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);

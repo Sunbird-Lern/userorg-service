@@ -19,6 +19,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.HeaderParam;
 import play.mvc.Result;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
@@ -28,7 +29,7 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.TENANT_MIGRATION_ACTOR, DummyActor.class);
     headerMap = new HashMap<>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), Arrays.asList("Some consumer ID"));
     headerMap.put(HeaderParam.X_Device_ID.getName(), Arrays.asList("Some device ID"));

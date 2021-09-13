@@ -25,7 +25,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
@@ -47,9 +46,8 @@ import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.feed.impl.FeedServiceImpl;
-import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
@@ -76,7 +74,6 @@ import org.sunbird.util.user.MigrationUtils;
   UserService.class,
   OrgServiceImpl.class,
   ActorSelection.class,
-  BaseMWService.class,
   OrgService.class
 })
 @PowerMockIgnore({
@@ -105,8 +102,6 @@ public class TenantMigrationActorTest {
     PowerMockito.mockStatic(OrgService.class);
 
     ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
 
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);

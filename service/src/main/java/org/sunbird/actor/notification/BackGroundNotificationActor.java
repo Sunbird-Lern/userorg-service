@@ -5,16 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"processNotification"},
-  dispatcher = "notification-dispatcher"
-)
 public class BackGroundNotificationActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -43,7 +37,8 @@ public class BackGroundNotificationActor extends BaseActor {
       headers.put("Content-type", "application/json");
       headers.put("requestId", reqObj.getRequestId());
       ProjectUtil.setTraceIdInHeader(headers, reqObj.getRequestContext());
-      String response = HttpClientUtil.post(NOTIFICATION_SERVICE_URL, json, headers, reqObj.getRequestContext());
+      String response =
+          HttpClientUtil.post(NOTIFICATION_SERVICE_URL, json, headers, reqObj.getRequestContext());
       logger.info(
           reqObj.getRequestContext(),
           "BackGroundNotificationActor:callNotificationService :: Response =" + response);

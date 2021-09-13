@@ -30,7 +30,6 @@ import modules.ApplicationStart;
 import modules.OnRequestHandler;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -64,18 +63,8 @@ public class BaseController extends Controller {
   private static ObjectMapper objectMapper = new ObjectMapper();
   public static final int AKKA_WAIT_TIME = 30;
   private static final String version = "v1";
-  private static Object actorRef = null;
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
   private static final String debugEnabled = "false";
-
-  static {
-    try {
-      actorRef = SunbirdMWService.getRequestRouter();
-    } catch (Exception ex) {
-      logger.error(
-          "Exception occured while getting actor ref in base controller " + ex.getMessage(), ex);
-    }
-  }
 
   private org.sunbird.request.Request initRequest(
       org.sunbird.request.Request request, String operation, Request httpRequest) {
@@ -128,65 +117,87 @@ public class BaseController extends Controller {
     return initRequest(request, operation, httpRequest);
   }
 
-  protected CompletionStage<Result> handleRequest(String operation, Http.Request httpRequest) {
-    return handleRequest(operation, null, null, null, null, false, httpRequest);
+  protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef, String operation, Http.Request httpRequest) {
+    return handleRequest(actorRef, operation, null, null, null, null, false, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-      String operation, JsonNode requestBodyJson, Request httpRequest) {
-    return handleRequest(operation, requestBodyJson, null, null, null, true, httpRequest);
+      ActorRef actorRef, String operation, JsonNode requestBodyJson, Request httpRequest) {
+    return handleRequest(actorRef, operation, requestBodyJson, null, null, null, true, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-      String operation, java.util.function.Function requestValidatorFn, Request httpRequest) {
-    return handleRequest(operation, null, requestValidatorFn, null, null, false, httpRequest);
+      ActorRef actorRef,
+      String operation,
+      java.util.function.Function requestValidatorFn,
+      Request httpRequest) {
+    return handleRequest(
+        actorRef, operation, null, requestValidatorFn, null, null, false, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       JsonNode requestBodyJson,
       Function requestValidatorFn,
       Request httpRequest) {
     return handleRequest(
-        operation, requestBodyJson, requestValidatorFn, null, null, true, httpRequest);
+        actorRef, operation, requestBodyJson, requestValidatorFn, null, null, true, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
-      String operation, String pathId, String pathVariable, Request httpRequest) {
-    return handleRequest(operation, null, null, pathId, pathVariable, false, httpRequest);
+      ActorRef actorRef,
+      String operation,
+      String pathId,
+      String pathVariable,
+      Request httpRequest) {
+    return handleRequest(actorRef, operation, null, null, pathId, pathVariable, false, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       String pathId,
       String pathVariable,
       boolean isJsonBodyRequired,
       Request httpRequest) {
     return handleRequest(
-        operation, null, null, pathId, pathVariable, isJsonBodyRequired, httpRequest);
+        actorRef, operation, null, null, pathId, pathVariable, isJsonBodyRequired, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       JsonNode requestBodyJson,
       Function requestValidatorFn,
       Map<String, String> headers,
       Request httpRequest) {
     return handleRequest(
-        operation, requestBodyJson, requestValidatorFn, null, null, headers, true, httpRequest);
+        actorRef,
+        operation,
+        requestBodyJson,
+        requestValidatorFn,
+        null,
+        null,
+        headers,
+        true,
+        httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       Function requestValidatorFn,
       String pathId,
       String pathVariable,
       Request httpRequest) {
     return handleRequest(
-        operation, null, requestValidatorFn, pathId, pathVariable, false, httpRequest);
+        actorRef, operation, null, requestValidatorFn, pathId, pathVariable, false, httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       JsonNode requestBodyJson,
       Function requestValidatorFn,
@@ -194,10 +205,18 @@ public class BaseController extends Controller {
       String pathVariable,
       Request httpRequest) {
     return handleRequest(
-        operation, requestBodyJson, requestValidatorFn, pathId, pathVariable, true, httpRequest);
+        actorRef,
+        operation,
+        requestBodyJson,
+        requestValidatorFn,
+        pathId,
+        pathVariable,
+        true,
+        httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       JsonNode requestBodyJson,
       java.util.function.Function requestValidatorFn,
@@ -206,6 +225,7 @@ public class BaseController extends Controller {
       boolean isJsonBodyRequired,
       Request httpRequest) {
     return handleRequest(
+        actorRef,
         operation,
         requestBodyJson,
         requestValidatorFn,
@@ -217,6 +237,7 @@ public class BaseController extends Controller {
   }
 
   protected CompletionStage<Result> handleRequest(
+      ActorRef actorRef,
       String operation,
       JsonNode requestBodyJson,
       Function requestValidatorFn,
@@ -239,7 +260,7 @@ public class BaseController extends Controller {
       if (headers != null) request.getContext().put(JsonKey.HEADER, headers);
       setContextAndPrintEntryLog(httpRequest, request);
       if (requestValidatorFn != null) requestValidatorFn.apply(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(actorRef, request, timeout, null, httpRequest);
     } catch (Exception e) {
       logger.error(
           request.getRequestContext(),
@@ -258,6 +279,7 @@ public class BaseController extends Controller {
   }
 
   protected CompletionStage<Result> handleSearchRequest(
+      ActorRef actorRef,
       String operation,
       JsonNode requestBodyJson,
       Function requestValidatorFn,
@@ -289,7 +311,7 @@ public class BaseController extends Controller {
         ((Map) (request.getRequest().get(JsonKey.FILTERS)))
             .put(JsonKey.OBJECT_TYPE, esObjectTypeList);
       }
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(actorRef, request, timeout, null, httpRequest);
     } catch (Exception e) {
       logger.error(
           request.getRequestContext(),
@@ -312,16 +334,6 @@ public class BaseController extends Controller {
   }
 
   /**
-   * This method will provide remote Actor selection
-   *
-   * @return Object
-   */
-  public Object getActorRef() {
-
-    return actorRef;
-  }
-
-  /**
    * This method will create failure response
    *
    * @param request Request
@@ -330,13 +342,13 @@ public class BaseController extends Controller {
    * @return Response
    */
   public static Response createFailureResponse(
-    Http.Request request, ResponseCode code, ResponseCode headerCode) {
+      Http.Request request, ResponseCode code, ResponseCode headerCode) {
     Response response = new Response();
     response.setVer(request.path().split("[/]")[1]);
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
     response.setParams(
-      createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
+        createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     return response;
   }
 
@@ -527,8 +539,7 @@ public class BaseController extends Controller {
     try {
       String reqContext = Common.getFromRequest(request, Attrs.CONTEXT);
       Map<String, Object> requestInfo =
-          objectMapper.readValue(reqContext, new TypeReference<>() {
-          });
+          objectMapper.readValue(reqContext, new TypeReference<>() {});
       org.sunbird.request.Request reqForTelemetry = new org.sunbird.request.Request();
       Map<String, Object> params = (Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO);
       params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
@@ -804,10 +815,6 @@ public class BaseController extends Controller {
     return builder.toString();
   }
 
-  public static void setActorRef(Object obj) {
-    actorRef = obj;
-  }
-
   private static Map<String, Object> generateTelemetryInfoForError(Request request) {
     try {
       Map<String, Object> map = new HashMap<>();
@@ -831,10 +838,8 @@ public class BaseController extends Controller {
   public void setContextData(Http.Request httpReq, org.sunbird.request.Request reqObj) {
     try {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
-      logger.info("Request Context Info : "+context);
-      Map<String, Object> requestInfo =
-          objectMapper.readValue(context, new TypeReference<>() {
-          });
+      logger.info("Request Context Info : " + context);
+      Map<String, Object> requestInfo = objectMapper.readValue(context, new TypeReference<>() {});
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));

@@ -23,6 +23,7 @@ import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
@@ -39,7 +40,7 @@ public class NotesControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.NOTES_MANAGEMENT_ACTOR, DummyActor.class);
   }
 
   @Test

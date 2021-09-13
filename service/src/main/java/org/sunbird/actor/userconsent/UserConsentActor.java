@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -22,10 +21,6 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {"updateUserConsent", "getUserConsent"},
-  asyncTasks = {}
-)
 public class UserConsentActor extends BaseActor {
 
   private UserService userService = UserServiceImpl.getInstance();
@@ -43,7 +38,7 @@ public class UserConsentActor extends BaseActor {
         getUserConsent(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserConsentActor");
+        onReceiveUnsupportedOperation();
         break;
     }
   }

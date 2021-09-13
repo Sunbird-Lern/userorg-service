@@ -1,11 +1,13 @@
 package org.sunbird.actor.user;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -25,14 +27,6 @@ import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-@ActorConfig(
-  tasks = {"upsertUserSelfDeclarations", "updateUserDeclarations"},
-  asyncTasks = {"upsertUserSelfDeclarations", "updateUserSelfDeclarationsErrorType"}
-)
 public class UserSelfDeclarationManagementActor extends BaseActor {
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
@@ -52,7 +46,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
         upsertUserSelfDeclaredDetails(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserSelfDeclarationManagementActor");
+        onReceiveUnsupportedOperation();
     }
   }
   /**
@@ -144,7 +138,9 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
       if (!userOrg.get(JsonKey.ORGANISATION_ID).equals(custodianRootOrgId)) {
         String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
         Map<String, Object> organisation = orgService.getOrgById(organisationId, context);
-        if (MapUtils.isNotEmpty(organisation) && null != organisation.get(JsonKey.IS_TENANT) && BooleanUtils.isFalse((Boolean) organisation.get(JsonKey.IS_TENANT))) {
+        if (MapUtils.isNotEmpty(organisation)
+            && null != organisation.get(JsonKey.IS_TENANT)
+            && BooleanUtils.isFalse((Boolean) organisation.get(JsonKey.IS_TENANT))) {
           userInfo.put(JsonKey.DECLARED_SCHOOL_UDISE_CODE, organisation.get(JsonKey.EXTERNAL_ID));
           userInfo.put(JsonKey.DECLARED_SCHOOL_NAME, organisation.get(JsonKey.ORG_NAME));
         }

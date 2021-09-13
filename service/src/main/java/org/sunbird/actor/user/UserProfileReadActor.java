@@ -6,7 +6,6 @@ import java.util.WeakHashMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
@@ -21,17 +20,6 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {
-    "getUserDetailsByLoginId",
-    "getUserProfileV3",
-    "getUserProfileV4",
-    "getUserProfileV5",
-    "getUserByKey"
-  },
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class UserProfileReadActor extends BaseActor {
 
   private EncryptionService encryptionService =
@@ -56,7 +44,7 @@ public class UserProfileReadActor extends BaseActor {
         getUserByKey(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserProfileReadActor");
+        onReceiveUnsupportedOperation();
     }
   }
 

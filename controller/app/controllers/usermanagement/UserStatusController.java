@@ -1,8 +1,11 @@
 package controllers.usermanagement;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import controllers.usermanagement.validator.UserStatusRequestValidator;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import play.mvc.Http;
@@ -10,8 +13,13 @@ import play.mvc.Result;
 
 public class UserStatusController extends BaseController {
 
+  @Inject
+  @Named("user_status_actor")
+  private ActorRef userStatusActor;
+
   public CompletionStage<Result> blockUser(Http.Request httpRequest) {
     return handleRequest(
+        userStatusActor,
         ActorOperations.BLOCK_USER.getValue(),
         httpRequest.body().asJson(),
         request -> {
@@ -23,6 +31,7 @@ public class UserStatusController extends BaseController {
 
   public CompletionStage<Result> unblockUser(Http.Request httpRequest) {
     return handleRequest(
+        userStatusActor,
         ActorOperations.UNBLOCK_USER.getValue(),
         httpRequest.body().asJson(),
         request -> {

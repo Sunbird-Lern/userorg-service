@@ -27,9 +27,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
-import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.client.location.LocationClient;
 import org.sunbird.client.location.impl.LocationClientImpl;
@@ -85,9 +82,6 @@ import scala.concurrent.Promise;
   OrganisationClientImpl.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
-  RequestRouter.class,
-  BaseMWService.class,
-  SunbirdMWService.class,
   ActorSelection.class,
   OrgExternalServiceImpl.class,
   LocationServiceImpl.class,
@@ -123,12 +117,6 @@ public abstract class UserManagementActorTestBase {
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
-
     cassandraOperation = mock(CassandraOperationImpl.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -183,7 +171,8 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(LocationServiceImpl.class);
     locationService = mock(LocationServiceImpl.class);
     PowerMockito.when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    PowerMockito.when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationIdType());
 
     PowerMockito.mockStatic(UserServiceImpl.class);

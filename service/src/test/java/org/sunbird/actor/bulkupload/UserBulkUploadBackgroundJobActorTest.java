@@ -23,8 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.RequestRouter;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
@@ -54,11 +52,9 @@ import org.sunbird.util.ProjectUtil;
   BulkUploadProcessDaoImpl.class,
   BulkUploadProcess.class,
   BulkUploadProcessTaskDaoImpl.class,
-  RequestRouter.class,
   BaseActor.class,
   ActorRef.class,
-  ActorSelection.class,
-  BaseMWService.class
+  ActorSelection.class
 })
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
@@ -100,8 +96,6 @@ public class UserBulkUploadBackgroundJobActorTest {
     when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
     userRequestValidator = new UserRequestValidator();
     ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
     when(systemSettingClient.getSystemSettingByFieldAndKey(
             Mockito.any(ActorRef.class),
             Mockito.anyString(),

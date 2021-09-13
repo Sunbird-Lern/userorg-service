@@ -1,11 +1,14 @@
 /** */
 package controllers.sync;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -21,6 +24,10 @@ import util.Common;
  * @author Manzarul
  */
 public class SyncController extends BaseController {
+
+  @Inject
+  @Named("es_sync_actor")
+  private ActorRef esSyncActor;
 
   /**
    * This method will do data Sync form Cassandra db to Elasticsearch.
@@ -42,7 +49,7 @@ public class SyncController extends BaseController {
       map.put(JsonKey.DATA, reqObj.getRequest());
       reqObj.setRequest(map);
       setContextAndPrintEntryLog(httpRequest, reqObj);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+      return actorResponseHandler(esSyncActor, reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }

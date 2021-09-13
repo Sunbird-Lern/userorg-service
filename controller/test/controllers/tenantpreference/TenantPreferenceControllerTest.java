@@ -24,6 +24,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 public class TenantPreferenceControllerTest extends BaseApplicationTest {
@@ -32,7 +33,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.TENANT_PREFERENCE_ACTOR, DummyActor.class);
     headerMap = new HashMap<>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), Arrays.asList("Some consumer ID"));
     headerMap.put(HeaderParam.X_Device_ID.getName(), Arrays.asList("Some device ID"));

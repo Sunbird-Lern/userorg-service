@@ -1,5 +1,6 @@
 package org.sunbird.actor.bulkupload;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -456,13 +457,13 @@ public abstract class BaseBulkUploadActor extends BaseActor {
   }
 
   public void processBulkUpload(
+      ActorRef actorRef,
       int recordCount,
       String processId,
       BulkUploadProcess bulkUploadProcess,
       String operation,
       String[] allowedFields,
-      RequestContext context)
-      throws IOException {
+      RequestContext context) {
     logger.info(
         context, "BaseBulkUploadActor: processBulkUpload called with operation = " + operation);
     BulkUploadProcessDao bulkUploadDao = new BulkUploadProcessDaoImpl();
@@ -474,8 +475,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
     request.put(JsonKey.PROCESS_ID, processId);
     request.put(JsonKey.FIELDS, allowedFields);
     request.setOperation(operation);
-
-    tellToAnother(request);
+    actorRef.tell(request, self());
   }
 
   public BulkUploadProcess getBulkUploadProcess(
