@@ -114,15 +114,6 @@
         <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
         <pluginManagement>
         <plugins>
-            <!-- to run application -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <configuration>
-                    <mainClass>org.sunbird.middleware.Application</mainClass>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>

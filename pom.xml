@@ -38,6 +38,16 @@
                     <argLine>
                         --illegal-access=permit
                     </argLine>
+                    <properties>
+                        <property>
+                            <name>parallel</name>
+                            <value>methods</value>
+                        </property>
+                        <property>
+                            <name>dataproviderthreadcount</name>
+                            <value>30</value>
+                        </property>
+                    </properties>
                 </configuration>
             </plugin>
             <plugin>
