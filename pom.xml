@@ -58,8 +58,6 @@
                     <destFile>${basedir}/target/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/jacoco-unit.exec</dataFile>
                     <excludes>
-                        <exclude>**/common/**</exclude>
-                        <exclude>**/router/**</exclude>
                         <exclude>**/Reverse*/**</exclude>
                         <exclude>**/routes.*</exclude>
                         <exclude>**/routes$javascript.**</exclude>
