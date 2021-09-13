@@ -36,7 +36,7 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <argLine>
-                        --illegal-access=permit
+                        @{argLine} --illegal-access=permit
                     </argLine>
                     <properties>
                         <property>
