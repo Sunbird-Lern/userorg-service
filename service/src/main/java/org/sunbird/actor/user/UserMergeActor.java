@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import java.io.IOException;
@@ -9,9 +10,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.dao.user.UserDao;
@@ -22,33 +24,29 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserMergeServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserMergeServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.Actor;
 import org.sunbird.telemetry.dto.Context;
 import org.sunbird.telemetry.dto.Target;
 import org.sunbird.telemetry.dto.Telemetry;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ConfigUtil;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.KafkaConfigConstants;
 import org.sunbird.util.user.UserUtil;
 
-@ActorConfig(
-  tasks = {"mergeUser"},
-  asyncTasks = {}
-)
 public class UserMergeActor extends UserBaseActor {
   String topic = null;
   Producer<String, String> producer = null;
@@ -56,6 +54,14 @@ public class UserMergeActor extends UserBaseActor {
   private UserService userService = UserServiceImpl.getInstance();
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
+
+  @Inject
+  @Named("system_settings_actor")
+  private ActorRef systemSettingsActor;
+
+  @Inject
+  @Named("background_job_manager_actor")
+  private ActorRef backgroundJobManager;
 
   @Override
   public void onReceive(Request userRequest) throws Throwable {
@@ -168,9 +174,7 @@ public class UserMergeActor extends UserBaseActor {
       if (custodianId == null || custodianId.isEmpty()) {
         SystemSetting custodianIdSetting =
             systemSettingClient.getSystemSettingByField(
-                getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
-                JsonKey.CUSTODIAN_ORG_ID,
-                context);
+                systemSettingsActor, JsonKey.CUSTODIAN_ORG_ID, context);
         if (custodianIdSetting != null) {
           configSettingMap.put(custodianIdSetting.getId(), custodianIdSetting.getValue());
           custodianId = custodianIdSetting.getValue();
@@ -243,7 +247,7 @@ public class UserMergeActor extends UserBaseActor {
         userRequest.getRequestContext(),
         "UserMergeActor: mergeUserDetailsToEs: Trigger sync of user details to ES for user id"
             + userRequest.getRequest().get(JsonKey.FROM_ACCOUNT_ID));
-    tellToAnother(userRequest);
+    backgroundJobManager.tell(userRequest, self());
   }
 
   private void prepareMergeeAccountData(User mergee, Map mergeeDBMap) {

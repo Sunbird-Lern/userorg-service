@@ -11,7 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
@@ -28,11 +27,6 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-/** Background sync of data between Cassandra and Elastic Search. */
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"backgroundSync"}
-)
 public class EsSyncBackgroundActor extends BaseActor {
 
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -44,7 +38,7 @@ public class EsSyncBackgroundActor extends BaseActor {
     if (ActorOperations.BACKGROUND_SYNC.getValue().equalsIgnoreCase(operation)) {
       sync(request);
     } else {
-      onReceiveUnsupportedOperation("EsSyncBackgroundActor");
+      onReceiveUnsupportedOperation();
     }
   }
 

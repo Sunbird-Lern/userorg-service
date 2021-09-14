@@ -4,18 +4,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 
-@ActorConfig(
-  tasks = {"getUserRolesById"},
-  asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class FetchUserRoleActor extends BaseActor {
 
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
@@ -30,7 +24,7 @@ public class FetchUserRoleActor extends BaseActor {
         break;
 
       default:
-        onReceiveUnsupportedOperation(request.getOperation());
+        onReceiveUnsupportedOperation();
     }
   }
 

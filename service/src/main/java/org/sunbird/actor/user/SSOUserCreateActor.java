@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,10 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -20,38 +23,32 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
-import org.sunbird.service.organisation.OrgService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.service.user.AssociationMechanism;
-import org.sunbird.service.user.UserRoleService;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserRoleServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Matcher;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.Util;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgExternalService;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.user.AssociationMechanism;
+import org.sunbird.service.user.UserRoleService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Matcher;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
-import org.sunbird.actor.user.validator.UserRequestValidator;
+import org.sunbird.util.UserFlagUtil;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {"createUser", "createSSOUser"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class SSOUserCreateActor extends UserBaseActor {
 
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
@@ -61,6 +58,18 @@ public class SSOUserCreateActor extends UserBaseActor {
   private ObjectMapper mapper = new ObjectMapper();
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+
+  @Inject
+  @Named("user_profile_update_actor")
+  private ActorRef userProfileUpdateActor;
+
+  @Inject
+  @Named("background_job_manager_actor")
+  private ActorRef backgroundJobManager;
+
+  @Inject
+  @Named("user_on_boarding_notification_actor")
+  private ActorRef userOnBoardingNotificationActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -72,7 +81,7 @@ public class SSOUserCreateActor extends UserBaseActor {
         createSSOUser(request);
         break;
       default:
-        onReceiveUnsupportedOperation("SSOUserCreateActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -194,9 +203,7 @@ public class SSOUserCreateActor extends UserBaseActor {
       }
       resp =
           userService.saveUserAttributes(
-              userRequest,
-              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
-              request.getRequestContext());
+              userRequest, userProfileUpdateActor, request.getRequestContext());
     } else {
       logger.info(
           request.getRequestContext(), "SSOUserCreateActor:processSSOUser: User creation failure");
@@ -384,9 +391,13 @@ public class SSOUserCreateActor extends UserBaseActor {
     userRequest.setRequestContext(context);
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
-    logger.info(
+    logger.debug(
         context, "SSOUserCreateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    tellToAnother(userRequest);
+    try {
+      backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while saving user data to ES", ex);
+    }
   }
 
   private void sendEmailAndSms(Map<String, Object> userMap, RequestContext context) {
@@ -395,6 +406,10 @@ public class SSOUserCreateActor extends UserBaseActor {
     EmailAndSmsRequest.getRequest().putAll(userMap);
     EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
-    tellToAnother(EmailAndSmsRequest);
+    try {
+      userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending notification", ex);
+    }
   }
 }

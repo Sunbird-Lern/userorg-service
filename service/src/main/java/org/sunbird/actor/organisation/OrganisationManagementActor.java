@@ -1,17 +1,18 @@
 package org.sunbird.actor.organisation;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.organisation.validator.OrganisationRequestValidator;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -30,25 +31,22 @@ import org.sunbird.util.Slug;
 import org.sunbird.util.Util;
 import org.sunbird.validator.EmailValidator;
 
-/**
- * This actor will handle organisation related operation .
- *
- * @author Arvind
- */
-@ActorConfig(
-  tasks = {"createOrg", "updateOrg", "updateOrgStatus", "getOrgDetails", "assignKeys"},
-  asyncTasks = {}
-)
 public class OrganisationManagementActor extends BaseActor {
   private OrgService orgService = OrgServiceImpl.getInstance();
   private OrganisationRequestValidator orgValidator = new OrganisationRequestValidator();
+
+  @Inject
+  @Named("org_background_actor")
+  private ActorRef organisationBackgroundActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.ORGANISATION);
     if (request.getOperation().equalsIgnoreCase(OrganisationActorOperation.CREATE_ORG.getValue())) {
       createOrg(request);
-    } else if (request.getOperation().equalsIgnoreCase(OrganisationActorOperation.UPDATE_ORG.getValue())) {
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(OrganisationActorOperation.UPDATE_ORG.getValue())) {
       updateOrgData(request);
     } else if (request
         .getOperation()
@@ -58,10 +56,12 @@ public class OrganisationManagementActor extends BaseActor {
         .getOperation()
         .equalsIgnoreCase(OrganisationActorOperation.GET_ORG_DETAILS.getValue())) {
       getOrgDetails(request);
-    } else if (request.getOperation().equalsIgnoreCase(OrganisationActorOperation.ASSIGN_KEYS.getValue())) {
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(OrganisationActorOperation.ASSIGN_KEYS.getValue())) {
       assignKey(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -136,11 +136,13 @@ public class OrganisationManagementActor extends BaseActor {
         "OrgManagementActor : createOrg : Created org id is ----." + uniqueId);
     result.getResult().put(JsonKey.ORGANISATION_ID, uniqueId);
     sender().tell(result, self());
-    saveDataToES(request,JsonKey.INSERT,actorMessage.getRequestContext());
-    generateTelemetry(uniqueId, (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION), JsonKey.CREATE, actorMessage);
+    saveDataToES(request, JsonKey.INSERT, actorMessage.getRequestContext());
+    generateTelemetry(
+        uniqueId,
+        (Map<String, Object>) actorMessage.getRequest().get(JsonKey.ORGANISATION),
+        JsonKey.CREATE,
+        actorMessage);
   }
-
-
 
   /** Updates the status of the Organisation */
   @SuppressWarnings("unchecked")
@@ -177,7 +179,8 @@ public class OrganisationManagementActor extends BaseActor {
       updateOrgDao.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
       updateOrgDao.put(JsonKey.ID, orgDao.get(JsonKey.ID));
       updateOrgDao.put(JsonKey.STATUS, nextStatus);
-      Response response = orgService.updateOrganisation(updateOrgDao, actorMessage.getRequestContext());
+      Response response =
+          orgService.updateOrganisation(updateOrgDao, actorMessage.getRequestContext());
       response.getResult().put(JsonKey.ORGANISATION_ID, orgDao.get(JsonKey.ID));
 
       saveDataToES(updateOrgDao, JsonKey.UPDATE, actorMessage.getRequestContext());
@@ -191,22 +194,19 @@ public class OrganisationManagementActor extends BaseActor {
     }
   }
 
-  private void generateTelemetry(String orgId, Map<String, Object> orgMap, String operation, Request actorMessage){
+  private void generateTelemetry(
+      String orgId, Map<String, Object> orgMap, String operation, Request actorMessage) {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
 
     Map<String, Object> targetObject =
-            TelemetryUtil.generateTargetObject(orgId, JsonKey.ORGANISATION, operation, null);
+        TelemetryUtil.generateTargetObject(orgId, JsonKey.ORGANISATION, operation, null);
     if (JsonKey.CREATE.equals(operation)) {
-      TelemetryUtil.generateCorrelatedObject(
-              orgId, JsonKey.ORGANISATION, null, correlatedObject);
-    } else if (JsonKey.UPDATE_ORG_STATUS.equals(operation)){
+      TelemetryUtil.generateCorrelatedObject(orgId, JsonKey.ORGANISATION, null, correlatedObject);
+    } else if (JsonKey.UPDATE_ORG_STATUS.equals(operation)) {
       orgMap.put("updateOrgStatus", "org status updated.");
     }
     TelemetryUtil.telemetryProcessingCall(
-            orgMap,
-            targetObject,
-            correlatedObject,
-            actorMessage.getContext());
+        orgMap, targetObject, correlatedObject, actorMessage.getContext());
   }
 
   /** Update the Organisation data */
@@ -317,7 +317,8 @@ public class OrganisationManagementActor extends BaseActor {
               Slug.makeSlug((String) updateOrgDao.getOrDefault(JsonKey.CHANNEL, ""), true);
           if (dbOrgDetails.containsKey(JsonKey.IS_TENANT)
               && (boolean) dbOrgDetails.get(JsonKey.IS_TENANT)) {
-            String orgIdBySlug = orgService.getOrgIdFromSlug(slug, actorMessage.getRequestContext());
+            String orgIdBySlug =
+                orgService.getOrgIdFromSlug(slug, actorMessage.getRequestContext());
             if (StringUtils.isBlank(orgIdBySlug)
                 || (StringUtils.isNotBlank(orgIdBySlug)
                     && orgIdBySlug.equalsIgnoreCase((String) dbOrgDetails.get(JsonKey.ID)))) {
@@ -357,7 +358,8 @@ public class OrganisationManagementActor extends BaseActor {
       // This will remove all extra unnecessary parameter from request
       Organisation org = mapper.convertValue(updateOrgDao, Organisation.class);
       updateOrgDao = mapper.convertValue(org, Map.class);
-      Response response = orgService.updateOrganisation(updateOrgDao, actorMessage.getRequestContext());
+      Response response =
+          orgService.updateOrganisation(updateOrgDao, actorMessage.getRequestContext());
       response.getResult().put(JsonKey.ORGANISATION_ID, dbOrgDetails.get(JsonKey.ID));
 
       if (StringUtils.isNotBlank(passedExternalId)) {
@@ -380,7 +382,8 @@ public class OrganisationManagementActor extends BaseActor {
       saveDataToES(updateOrgDao, JsonKey.UPDATE, actorMessage.getRequestContext());
 
       sender().tell(response, self());
-      generateTelemetry((String) dbOrgDetails.get(JsonKey.ID), updateOrgDao, JsonKey.UPDATE, actorMessage);
+      generateTelemetry(
+          (String) dbOrgDetails.get(JsonKey.ID), updateOrgDao, JsonKey.UPDATE, actorMessage);
     } catch (ProjectCommonException e) {
       sender().tell(e, self());
     }
@@ -393,7 +396,7 @@ public class OrganisationManagementActor extends BaseActor {
     request.getRequest().put(JsonKey.ORGANISATION, locData);
     request.getRequest().put(JsonKey.OPERATION_TYPE, opType);
     try {
-      tellToAnother(request);
+      organisationBackgroundActor.tell(request, self());
     } catch (Exception ex) {
       logger.error(context, "LocationActor:saveDataToES: Exception occurred", ex);
     }
@@ -414,7 +417,7 @@ public class OrganisationManagementActor extends BaseActor {
             (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
         result.put(JsonKey.IS_SCHOOL, isSchool);
       }
-    }else {
+    } else {
       throw new ProjectCommonException(
           ResponseCode.orgDoesNotExist.getErrorCode(),
           ResponseCode.orgDoesNotExist.getErrorMessage(),
@@ -431,9 +434,10 @@ public class OrganisationManagementActor extends BaseActor {
     addKeysToRequestMap(request);
     removeUnusedField(request);
     orgValidator.isTenantIdValid((String) request.get(JsonKey.ID), request.getRequestContext());
-    Response response = orgService.updateOrganisation(request.getRequest(), request.getRequestContext());
+    Response response =
+        orgService.updateOrganisation(request.getRequest(), request.getRequestContext());
     sender().tell(response, self());
-    saveDataToES(request.getRequest(),JsonKey.UPDATE,request.getRequestContext());
+    saveDataToES(request.getRequest(), JsonKey.UPDATE, request.getRequestContext());
   }
 
   private void removeUnusedField(Request request) {
@@ -450,5 +454,4 @@ public class OrganisationManagementActor extends BaseActor {
     keys.put(JsonKey.SIGN_KEYS, signKeys);
     request.getRequest().put(JsonKey.KEYS, keys);
   }
-
 }

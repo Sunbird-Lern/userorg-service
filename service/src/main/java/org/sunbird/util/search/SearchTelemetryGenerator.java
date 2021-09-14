@@ -1,13 +1,14 @@
 package org.sunbird.util.search;
 
+import akka.util.Timeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
@@ -17,10 +18,6 @@ import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"generateSearchTelemetry"}
-)
 public class SearchTelemetryGenerator extends BaseActor {
 
   @Override
@@ -28,7 +25,7 @@ public class SearchTelemetryGenerator extends BaseActor {
     if (request.getOperation().equalsIgnoreCase("generateSearchTelemetry")) {
       generateTelemetry(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -40,7 +37,8 @@ public class SearchTelemetryGenerator extends BaseActor {
         (Map<String, Object>) request.getRequest().get("context");
     Response orgSearchResponse = null;
     try {
-      orgSearchResponse = Await.result(response, BaseActor.timeout.duration());
+      Timeout timeout = new Timeout(30, TimeUnit.SECONDS);
+      orgSearchResponse = Await.result(response, timeout.duration());
       String[] types = new String[] {indexType};
       Map<String, Object> contentMap = new HashMap<>();
       List<Object> contentList = new ArrayList<>();

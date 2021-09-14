@@ -6,10 +6,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -27,6 +24,7 @@ import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 import util.RequestInterceptor;
 
 /** Created by arvind on 4/12/17. */
@@ -40,7 +38,9 @@ public class EmailServiceControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(
+        Arrays.asList(ACTORS.EMAIL_SERVICE_ACTOR, ACTORS.SEND_NOTIFICATION_ACTOR),
+        DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});

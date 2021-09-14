@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.keys.JsonKey;
@@ -17,11 +16,6 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {"checkUserExistence", "checkUserExistenceV2"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class CheckUserExistActor extends BaseActor {
 
   private final UserService userService = UserServiceImpl.getInstance();
@@ -38,7 +32,7 @@ public class CheckUserExistActor extends BaseActor {
         checkUserExistenceV2(request);
         break;
       default:
-        onReceiveUnsupportedOperation(request.getOperation());
+        onReceiveUnsupportedOperation();
     }
   }
 

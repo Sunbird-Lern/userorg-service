@@ -9,12 +9,13 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -55,22 +56,11 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
-/**
- * This class contains method and business logic to migrate user from custodian org to some other
- * root org.
- *
- * @author Amit Kumar
- */
-@ActorConfig(
-  tasks = {"userTenantMigrate", "migrateUser"},
-  asyncTasks = {"userSelfDeclaredTenantMigrate"}
-)
 public class TenantMigrationActor extends BaseActor {
 
   private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private Util.DbInfo usrOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   private Util.DbInfo usrDecDbInfo = Util.dbInfoMap.get(JsonKey.USR_DECLARATION_TABLE);
-  private ActorRef systemSettingActorRef = null;
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
   private static final String MASK_IDENTIFIER = "maskIdentifier";
@@ -82,14 +72,27 @@ public class TenantMigrationActor extends BaseActor {
   private DataMaskingService maskingService =
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
 
+  @Inject
+  @Named("system_settings_actor")
+  private ActorRef systemSettingsActor;
+
+  @Inject
+  @Named("user_external_identity_management_actor")
+  private ActorRef userExternalIdManagementActor;
+
+  @Inject
+  @Named("background_job_manager_actor")
+  private ActorRef backgroundJobManager;
+
+  @Inject
+  @Named("email_service_actor")
+  private ActorRef emailServiceActor;
+
   @Override
   public void onReceive(Request request) throws Throwable {
     logger.info(request.getRequestContext(), "TenantMigrationActor:onReceive called.");
     Util.initializeContext(request, StringUtils.capitalize(JsonKey.CONSUMER));
     String operation = request.getOperation();
-    if (systemSettingActorRef == null) {
-      systemSettingActorRef = getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue());
-    }
     switch (operation) {
       case "userTenantMigrate":
         migrateUser(request, true);
@@ -101,7 +104,7 @@ public class TenantMigrationActor extends BaseActor {
         processShadowUserMigrate(request);
         break;
       default:
-        onReceiveUnsupportedOperation("TenantMigrationActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -251,7 +254,7 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> userData = createUserData(userDetail);
     Request notificationRequest = createNotificationData(userData);
     notificationRequest.setRequestContext(context);
-    tellToAnother(notificationRequest);
+    emailServiceActor.tell(notificationRequest, self());
   }
 
   private Request createNotificationData(Map<String, Object> userData) {
@@ -384,7 +387,7 @@ public class TenantMigrationActor extends BaseActor {
 
   private void validateUserCustodianOrgId(String rootOrgId, RequestContext context) {
     String custodianOrgId =
-        UserServiceImpl.getInstance().getCustodianOrgId(systemSettingActorRef, context);
+        UserServiceImpl.getInstance().getCustodianOrgId(systemSettingsActor, context);
     if (!rootOrgId.equalsIgnoreCase(custodianOrgId)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.parameterMismatch,
@@ -401,7 +404,7 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.getRequest().put(JsonKey.ID, userId);
     logger.info(
         context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    tellToAnother(userRequest);
+    backgroundJobManager.tell(userRequest, self());
   }
 
   private Response updateUserExternalIds(Request request) {
@@ -425,9 +428,7 @@ public class TenantMigrationActor extends BaseActor {
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
 
-      ActorRef actorRef =
-          getActorRef(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
-      Future<Object> future = Patterns.ask(actorRef, userRequest, t);
+      Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
       response = (Response) Await.result(future, t.duration());
       UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
       userLookUpService.insertExternalIdIntoUserLookup(

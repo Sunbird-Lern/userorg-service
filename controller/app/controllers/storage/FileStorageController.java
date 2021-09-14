@@ -1,5 +1,6 @@
 package controllers.storage;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.io.ByteArrayInputStream;
@@ -13,6 +14,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.io.IOUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -29,6 +32,10 @@ import util.Common;
 
 /** Created by arvind on 28/8/17. */
 public class FileStorageController extends BaseController {
+
+  @Inject
+  @Named("file_upload_service_actor")
+  private ActorRef fileUploadServiceActor;
 
   /**
    * This method to upload the files on cloud storage .
@@ -93,7 +100,7 @@ public class FileStorageController extends BaseController {
       reqObj.setRequest(innerMap);
       map.put(JsonKey.FILE, byteArray);
       setContextAndPrintEntryLog(httpRequest, reqObj);
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+      return actorResponseHandler(fileUploadServiceActor, reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }

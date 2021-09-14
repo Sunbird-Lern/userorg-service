@@ -3,7 +3,6 @@ package org.sunbird.actor.notes;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -15,10 +14,6 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {"createNote", "getNote", "searchNote", "updateNote", "deleteNote"},
-  asyncTasks = {}
-)
 public class NotesManagementActor extends BaseActor {
 
   private NotesService notesService = new NotesService();
@@ -43,7 +38,7 @@ public class NotesManagementActor extends BaseActor {
         deleteNote(request);
         break;
       default:
-        onReceiveUnsupportedOperation(request.getOperation());
+        onReceiveUnsupportedOperation();
     }
   }
 

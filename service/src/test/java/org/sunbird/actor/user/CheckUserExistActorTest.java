@@ -23,7 +23,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -44,7 +43,6 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  SunbirdMWService.class,
   UserService.class,
   UserServiceImpl.class
 })

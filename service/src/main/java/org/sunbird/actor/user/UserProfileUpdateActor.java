@@ -10,10 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserDeclareEntity;
@@ -25,12 +26,19 @@ import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
-@ActorConfig(
-  tasks = {"saveUserAttributes"},
-  asyncTasks = {"saveUserAttributes"},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class UserProfileUpdateActor extends BaseActor {
+
+  @Inject
+  @Named("user_org_management_actor")
+  private ActorRef userOrgManagementActor;
+
+  @Inject
+  @Named("user_external_identity_management_actor")
+  private ActorRef userExternalIdManagementActor;
+
+  @Inject
+  @Named("user_self_declaration_management_actor")
+  private ActorRef userSelfDeclarationManagementActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -39,7 +47,7 @@ public class UserProfileUpdateActor extends BaseActor {
         .equalsIgnoreCase(request.getOperation())) {
       saveUserAttributes(request);
     } else {
-      onReceiveUnsupportedOperation("UserAttributesProcessingActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -133,14 +141,20 @@ public class UserProfileUpdateActor extends BaseActor {
         UserUtil.transformExternalIdsToSelfDeclaredRequest(externalIds, userMap);
     userMap.put(JsonKey.DECLARATIONS, selfDeclaredFields);
     return saveUserAttributes(
-        userMap, UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue(), context);
+        userMap,
+        userSelfDeclarationManagementActor,
+        UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue(),
+        context);
   }
 
   private Future<Object> saveUserExternalIds(
       Map<String, Object> userMap, List<Map<String, String>> externalIds, RequestContext context) {
     userMap.put(JsonKey.EXTERNAL_IDS, externalIds);
     return saveUserAttributes(
-        userMap, UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue(), context);
+        userMap,
+        userExternalIdManagementActor,
+        UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue(),
+        context);
   }
 
   private Future<Object> saveUserOrgDetails(
@@ -152,18 +166,20 @@ public class UserProfileUpdateActor extends BaseActor {
     }
     Map<String, Object> reqMap = new HashMap<>(userMap);
     reqMap.put(JsonKey.CALLER_ID, callerId);
-    return saveUserAttributes(reqMap, actorOperation, context);
+    return saveUserAttributes(reqMap, userOrgManagementActor, actorOperation, context);
   }
 
   private Future<Object> saveUserAttributes(
-      Map<String, Object> userMap, String actorOperation, RequestContext context) {
+      Map<String, Object> userMap,
+      ActorRef actorRef,
+      String actorOperation,
+      RequestContext context) {
     try {
       Request request = new Request();
       request.setRequestContext(context);
       request.getRequest().putAll(userMap);
       request.setOperation(actorOperation);
       Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      ActorRef actorRef = getActorRef(actorOperation);
       return Patterns.ask(actorRef, request, t);
     } catch (Exception ex) {
       logger.error(

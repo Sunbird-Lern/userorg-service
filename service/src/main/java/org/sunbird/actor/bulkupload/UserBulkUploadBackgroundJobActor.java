@@ -1,15 +1,17 @@
 package org.sunbird.actor.bulkupload;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
@@ -31,16 +33,28 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"userBulkUploadBackground"}
-)
 public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private UserClient userClient = UserClientImpl.getInstance();
   private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
+
+  @Inject
+  @Named("system_settings_actor")
+  private ActorRef systemSettingsActor;
+
+  @Inject
+  @Named("user_role_actor")
+  private ActorRef userRoleActor;
+
+  @Inject
+  @Named("sso_user_create_actor")
+  private ActorRef ssoUserCreateActor;
+
+  @Inject
+  @Named("user_update_actor")
+  private ActorRef userUpdateActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -63,7 +77,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
             return null;
           });
     } else {
-      onReceiveUnsupportedOperation("UserBulkUploadBackgroundJobActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -104,7 +118,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       Map<String, Object> userMap = mapper.readValue(data, Map.class);
       String[] mandatoryColumnsObject =
           systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+              systemSettingsActor,
               "userProfileConfig",
               "csv.mandatoryColumns",
               new TypeReference<String[]>() {},
@@ -231,8 +245,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     logger.info(context, "UserBulkUploadBackgroundJobActor: callCreateUser called");
     String userId;
     try {
-      userId =
-          userClient.createUser(getActorRef(ActorOperations.CREATE_USER.getValue()), user, context);
+      userId = userClient.createUser(ssoUserCreateActor, user, context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -266,7 +279,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     logger.info(context, "UserBulkUploadBackgroundJobActor: callUpdateUser called");
     try {
       user.put(JsonKey.ORG_NAME, orgName);
-      userClient.updateUser(getActorRef(ActorOperations.UPDATE_USER.getValue()), user, context);
+      userClient.updateUser(userUpdateActor, user, context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -289,8 +302,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       throws JsonProcessingException {
     logger.info(context, "UserBulkUploadBackgroundJobActor: callAssignRole called");
     try {
-      userClient.assignRolesToUser(
-          getActorRef(ActorOperations.ASSIGN_ROLES.getValue()), user, context);
+      userClient.assignRolesToUser(userRoleActor, user, context);
     } catch (Exception ex) {
       logger.error(
           context,
