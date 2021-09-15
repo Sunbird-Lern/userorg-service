@@ -131,7 +131,7 @@ public class FeedServiceImpl implements IFeedService {
   @Override
   public Response delete(Request request, RequestContext context) {
     String notification_service_base_url = System.getenv("notification_service_base_url");
-    String NOTIFICATION_SERVICE_URL = notification_service_base_url + "/private/v1/notification/delete";
+    String NOTIFICATION_SERVICE_URL = notification_service_base_url + "/private/v1/notification/feed/delete";
     Response response = new Response();
     request.getRequest().put(JsonKey.IDS,Arrays.asList(request.getRequest().get(JsonKey.FEED_ID)));
     try {

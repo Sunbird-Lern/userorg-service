@@ -42,7 +42,7 @@ public interface IFeedService {
   /**
    * this method will be holding responsibility to delete the feed from DB and ES.
    *
-   * @param id
+   * @param request
    * @param context
    */
   Response delete(Request request, RequestContext context);
