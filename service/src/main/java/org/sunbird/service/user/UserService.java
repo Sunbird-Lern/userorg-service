@@ -66,4 +66,8 @@ public interface UserService {
   Map<String, Object> searchUser(SearchDTO searchDTO, RequestContext context);
 
   boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
+
+  String saveUserToES(String identifier, Map<String, Object> data, RequestContext context);
+
+  Map<String, Object> getUserDetailsForES(String userId, RequestContext context);
 }

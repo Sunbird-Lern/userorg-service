@@ -199,4 +199,9 @@ public class LocationServiceImpl implements LocationService {
     Response response = locationDao.getLocationsByIds(locationIds, locationFields, context);
     return (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
   }
+
+  @Override
+  public String saveLocationToEs(String id, Map<String, Object> data, RequestContext context) {
+    return locationDao.saveLocationToEs(id, data, context);
+  }
 }

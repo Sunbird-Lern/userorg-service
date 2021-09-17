@@ -23,4 +23,6 @@ public interface OrgDao {
 
   List<Map<String, Object>> getOrgByIds(
       List<String> orgIds, List<String> fields, RequestContext context);
+
+  String saveOrgToEs(String id, Map<String, Object> data, RequestContext context);
 }

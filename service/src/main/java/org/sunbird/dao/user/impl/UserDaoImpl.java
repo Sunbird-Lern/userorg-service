@@ -16,11 +16,11 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 /**
@@ -92,35 +92,44 @@ public class UserDaoImpl implements UserDao {
   @Override
   public Map<String, Object> search(SearchDTO searchDTO, RequestContext context) {
     Future<Map<String, Object>> esResultF =
-      esUtil.search(
-        searchDTO,
-        ProjectUtil.EsType.user.getTypeName(),
-        context);
-    return  (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+        esUtil.search(searchDTO, ProjectUtil.EsType.user.getTypeName(), context);
+    return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
   }
 
   @Override
   public Map<String, Object> getEsUserById(String userId, RequestContext context) {
     Future<Map<String, Object>> esResultF =
-      esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
     Map<String, Object> esResult =
-      (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (esResult == null || esResult.size() == 0) {
       throw new ProjectCommonException(
-        ResponseCode.userNotFound.getErrorCode(),
-        ResponseCode.userNotFound.getErrorMessage(),
-        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+          ResponseCode.userNotFound.getErrorCode(),
+          ResponseCode.userNotFound.getErrorMessage(),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return esResult;
   }
 
   @Override
-  public boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context) {
-    Future<Boolean> responseF = esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
+  public boolean updateUserDataToES(
+      String identifier, Map<String, Object> data, RequestContext context) {
+    Future<Boolean> responseF =
+        esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
     if ((boolean) ElasticSearchHelper.getResponseFromFuture(responseF)) {
       return true;
     }
-    logger.info(context, "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier " + identifier);
+    logger.info(
+        context,
+        "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier "
+            + identifier);
     return false;
+  }
+
+  @Override
+  public String saveUserToES(String identifier, Map<String, Object> data, RequestContext context) {
+    String type = ProjectUtil.EsType.user.getTypeName();
+    Future<String> responseF = esService.save(type, identifier, data, context);
+    return (String) ElasticSearchHelper.getResponseFromFuture(responseF);
   }
 }

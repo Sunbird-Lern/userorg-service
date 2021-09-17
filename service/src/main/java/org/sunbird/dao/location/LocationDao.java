@@ -52,4 +52,6 @@ public interface LocationDao {
    * @return response Response
    */
   Response getRecordByProperty(Map<String, Object> queryMap, RequestContext context);
+
+  String saveLocationToEs(String id, Map<String, Object> data, RequestContext context);
 }

@@ -3,12 +3,8 @@ package org.sunbird.service.user.impl;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
@@ -35,7 +31,12 @@ import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.user.UserOrgService;
+import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.UserTncService;
 import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
@@ -51,7 +52,12 @@ public class UserServiceImpl implements UserService {
   private UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
   private UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private OrgService orgService = OrgServiceImpl.getInstance();
+  private UserTncService tncService = new UserTncService();
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private static final int GENERATE_USERNAME_COUNT = 10;
+  private static ObjectMapper mapper = new ObjectMapper();
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -526,5 +532,113 @@ public class UserServiceImpl implements UserService {
   public boolean updateUserDataToES(
       String identifier, Map<String, Object> data, RequestContext context) {
     return userDao.updateUserDataToES(identifier, data, context);
+  }
+
+  @Override
+  public String saveUserToES(String identifier, Map<String, Object> data, RequestContext context) {
+    return userDao.saveUserToES(identifier, data, context);
+  }
+
+  @Override
+  public Map<String, Object> getUserDetailsForES(String userId, RequestContext context) {
+    logger.info(context, "get user profile method call started user Id : " + userId);
+    Map<String, Object> userDetails = getUserDetailsById(userId, context);
+    if (MapUtils.isNotEmpty(userDetails)) {
+      logger.info(context, "Util:getUserDetails: userId = " + userId);
+      userDetails.put(JsonKey.ORGANISATIONS, getUserOrgDetails(userId, context));
+      Map<String, Object> orgMap =
+          orgService.getOrgById((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
+      if (!MapUtils.isEmpty(orgMap)) {
+        userDetails.put(JsonKey.ROOT_ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
+      } else {
+        userDetails.put(JsonKey.ROOT_ORG_NAME, "");
+      }
+      // store alltncaccepted as Map Object in ES
+      Map<String, String> allTncAccepted =
+          (Map<String, String>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
+      if (MapUtils.isNotEmpty(allTncAccepted)) {
+        userDetails.put(
+            JsonKey.ALL_TNC_ACCEPTED, tncService.convertTncStringToJsonMap(allTncAccepted));
+      }
+      userDetails.remove(JsonKey.PASSWORD);
+      checkEmailAndPhoneVerified(userDetails);
+      List<Map<String, String>> userLocList = new ArrayList<>();
+      String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
+      if (StringUtils.isNotBlank(profLocation)) {
+        try {
+          userLocList = mapper.readValue(profLocation, List.class);
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting profileLocation to List<Map<String,String>>.");
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
+      Map<String, Object> userTypeDetail = new HashMap<>();
+      String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
+      if (StringUtils.isNotBlank(profUserType)) {
+        try {
+          userTypeDetail = mapper.readValue(profUserType, Map.class);
+        } catch (Exception e) {
+          logger.info(
+              context,
+              "Exception occurred while converting profileUserType to Map<String,String>.");
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+      List<Map<String, Object>> userRoleList = userRoleService.getUserRoles(userId, context);
+      userDetails.put(JsonKey.ROLES, userRoleList);
+    } else {
+      logger.info(
+          context,
+          "Util:getUserProfile: User data not available to save in ES for userId : " + userId);
+    }
+    return userDetails;
+  }
+
+  private List<Map<String, Object>> getUserOrgDetails(String userId, RequestContext context) {
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
+    List<Map<String, Object>> userOrgDataList;
+    try {
+      userOrgDataList = userOrgService.getUserOrgListByUserId(userId, context);
+      userOrgDataList
+          .stream()
+          .forEach(
+              (dataMap) -> {
+                if (null != dataMap.get(JsonKey.IS_DELETED)
+                    && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                  userOrgList.add(dataMap);
+                }
+              });
+      if (CollectionUtils.isNotEmpty(userOrgList)) {
+        List<String> organisationIds =
+            userOrgList
+                .stream()
+                .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
+                .distinct()
+                .collect(Collectors.toList());
+        List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.ID);
+        List<Map<String, Object>> orgDataList =
+            orgService.getOrgByIds(organisationIds, fields, context);
+        Map<String, Map<String, Object>> orgInfoMap = new HashMap<>();
+        orgDataList.stream().forEach(org -> orgInfoMap.put((String) org.get(JsonKey.ID), org));
+        for (Map<String, Object> userOrg : userOrgList) {
+          Map<String, Object> orgMap = orgInfoMap.get(userOrg.get(JsonKey.ORGANISATION_ID));
+          userOrg.put(JsonKey.ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
+          userOrg.remove(JsonKey.ROLES);
+        }
+      }
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+    }
+    return userOrgList;
+  }
+
+  private void checkEmailAndPhoneVerified(Map<String, Object> userDetails) {
+    if (null != userDetails.get(JsonKey.FLAGS_VALUE)) {
+      int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
+      Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
+      userDetails.putAll(userFlagMap);
+    }
   }
 }

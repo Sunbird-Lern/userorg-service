@@ -79,6 +79,13 @@ public class OrgDaoImpl implements OrgDao {
     return Collections.emptyList();
   }
 
+  @Override
+  public String saveOrgToEs(String id, Map<String, Object> data, RequestContext context) {
+    String type = ProjectUtil.EsType.organisation.getTypeName();
+    Future<String> responseF = esService.save(type, id, data, context);
+    return (String) ElasticSearchHelper.getResponseFromFuture(responseF);
+  }
+
   private void enrichOrgDetails(Map<String, Object> orgMap, RequestContext context) {
     String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
     List orgLocationList = new ArrayList<>();

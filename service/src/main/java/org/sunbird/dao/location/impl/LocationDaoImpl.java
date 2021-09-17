@@ -94,6 +94,13 @@ public class LocationDaoImpl implements LocationDao {
     return search(searchQueryMap, context);
   }
 
+  @Override
+  public String saveLocationToEs(String id, Map<String, Object> data, RequestContext context) {
+    String type = ProjectUtil.EsType.location.getTypeName();
+    Future<String> responseF = esUtil.save(type, id, data, context);
+    return (String) ElasticSearchHelper.getResponseFromFuture(responseF);
+  }
+
   public SearchDTO addSortBy(SearchDTO searchDtO) {
     if (MapUtils.isNotEmpty(searchDtO.getAdditionalProperties())
         && searchDtO.getAdditionalProperties().containsKey(JsonKey.FILTERS)
@@ -101,7 +108,6 @@ public class LocationDaoImpl implements LocationDao {
         && ((Map<String, Object>) searchDtO.getAdditionalProperties().get(JsonKey.FILTERS))
             .containsKey(JsonKey.TYPE)) {
       if (MapUtils.isEmpty(searchDtO.getSortBy())) {
-        logger.info("search:addSortBy added sort type name attribute.");
         searchDtO.getSortBy().put(JsonKey.NAME, DEFAULT_SORT_BY);
       }
     }

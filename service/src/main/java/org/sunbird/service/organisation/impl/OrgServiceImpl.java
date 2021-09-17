@@ -253,4 +253,9 @@ public class OrgServiceImpl implements OrgService {
     }
     return regStatus.contains("OK");
   }
+
+  @Override
+  public String saveOrgToEs(String id, Map<String, Object> data, RequestContext context) {
+    return orgDao.saveOrgToEs(id, data, context);
+  }
 }

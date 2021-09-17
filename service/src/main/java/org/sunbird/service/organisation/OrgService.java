@@ -39,4 +39,6 @@ public interface OrgService {
   boolean registerChannel(Map<String, Object> req, RequestContext context);
 
   boolean updateChannel(Map<String, Object> req, RequestContext context);
+
+  String saveOrgToEs(String id, Map<String, Object> data, RequestContext context);
 }

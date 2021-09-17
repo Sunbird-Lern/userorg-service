@@ -2,7 +2,6 @@ package org.sunbird.dao.user;
 
 import java.util.List;
 import java.util.Map;
-
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
@@ -79,4 +78,6 @@ public interface UserDao {
   Map<String, Object> getEsUserById(String userId, RequestContext context);
 
   boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
+
+  String saveUserToES(String identifier, Map<String, Object> data, RequestContext context);
 }
