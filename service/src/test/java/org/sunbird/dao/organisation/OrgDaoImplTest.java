@@ -1,7 +1,9 @@
 package org.sunbird.dao.organisation;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.CassandraUtil;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.common.ElasticSearchRestHighImpl;
+import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
@@ -25,6 +30,7 @@ import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.Util;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -32,7 +38,10 @@ import org.sunbird.util.Util;
   ServiceFactory.class,
   CassandraOperation.class,
   CassandraUtil.class,
-  Util.class
+  Util.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class,
+  ElasticSearchHelper.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -51,6 +60,15 @@ public class OrgDaoImplTest {
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+
+    PowerMockito.mockStatic(EsClientFactory.class);
+    ElasticSearchRestHighImpl esSearch = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
+
+    Promise<String> promiseL = Futures.promise();
+    promiseL.success("4654546-879-54656");
+    when(esSearch.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promiseL.future());
   }
 
   @Test
@@ -132,62 +150,14 @@ public class OrgDaoImplTest {
       Assert.assertNotNull(e);
     }
   }
-  /*
+
   @Test
-  public void testGetOrgByExternalId() {
-    try {
-      Response response = new Response();
-      List<Map<String, Object>> orgList = new ArrayList<>();
-      Map<String, Object> map = new HashMap<>();
-      map.put(JsonKey.CONTACT_DETAILS, "contact");
-      map.put(JsonKey.ID, "contact");
-      orgList.add(map);
-      response.put(JsonKey.RESPONSE, orgList);
-      when(cassandraOperation.getRecordById(
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.any(RequestContext.class)))
-          .thenReturn(response);
-
-      when(
-              orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-                  Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
-          .thenReturn("");
-      OrgDao orgDao = OrgDaoImpl.getInstance();
-      Map<String, Object> resp = orgDao.getOrgByExternalId("1234567890", "provider", null);
-      Assert.assertNotNull(resp);
-
-    } catch (Exception e) {
-      Assert.assertNotNull(e);
-    }
-  }*/
-  /*
-  @Test
-  public void testGetOrgByExternalIdWithEmptyResponse() {
-    try {
-      cassandraOperation = PowerMockito.mock(CassandraOperation.class);
-      PowerMockito.mockStatic(ServiceFactory.class);
-      when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-      Response response = new Response();
-      List<Map<String, Object>> orgList = new ArrayList<>();
-      response.put(JsonKey.RESPONSE, orgList);
-      when(cassandraOperation.getRecordById(
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.any(RequestContext.class)))
-          .thenReturn(response);
-      when(
-              orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-                  Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
-          .thenReturn("");
-      OrgDao orgDao = OrgDaoImpl.getInstance();
-      Map<String, Object> resp = orgDao.getOrgByExternalId("1234567890", "provider", null);
-      Assert.assertNotNull(resp);
-
-    } catch (Exception e) {
-      Assert.assertNotNull(e);
-    }
-  }*/
+  public void saveToEs() {
+    Map<String, Object> data = new HashMap<>();
+    data.put(JsonKey.ID, "546546-6787-5476");
+    data.put(JsonKey.ORG_NAME, "name");
+    OrgDao orgDao = OrgDaoImpl.getInstance();
+    String response = orgDao.saveOrgToEs("546546-6787-5476", data, new RequestContext());
+    Assert.assertNotNull(response);
+  }
 }
