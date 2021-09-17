@@ -548,7 +548,7 @@ public class UserServiceImpl implements UserService {
       userDetails.put(JsonKey.ORGANISATIONS, getUserOrgDetails(userId, context));
       Map<String, Object> orgMap =
           orgService.getOrgById((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
-      if (!MapUtils.isEmpty(orgMap)) {
+      if (MapUtils.isNotEmpty(orgMap)) {
         userDetails.put(JsonKey.ROOT_ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
       } else {
         userDetails.put(JsonKey.ROOT_ORG_NAME, "");

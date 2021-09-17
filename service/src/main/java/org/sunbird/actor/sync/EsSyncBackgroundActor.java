@@ -160,8 +160,7 @@ public class EsSyncBackgroundActor extends BaseActor {
           logger.info(
               context,
               "EsSyncBackgroundActor:handleUserSyncRequest: Trigger sync of user details to ES");
-          Map<String, Object> userDetails =
-              userService.getUserDetailsForES((String) userId, context);
+          Map<String, Object> userDetails = userService.getUserDetailsForES(userId, context);
           if (MapUtils.isNotEmpty(userDetails)) {
             logger.info(
                 context,
@@ -170,10 +169,9 @@ public class EsSyncBackgroundActor extends BaseActor {
                     + ", userId : "
                     + userDetails.get(JsonKey.ID));
             String response =
-                saveDataToEs(
-                    ProjectUtil.EsType.user.getTypeName(), (String) userId, userDetails, context);
-            if (StringUtils.isNotBlank(response) && ((String) userId).equalsIgnoreCase(response)) {
-              esResponse.put((String) userId, (((String) userId).equalsIgnoreCase(response)));
+                saveDataToEs(ProjectUtil.EsType.user.getTypeName(), userId, userDetails, context);
+            if (StringUtils.isNotBlank(response) && userId.equalsIgnoreCase(response)) {
+              esResponse.put(userId, userId.equalsIgnoreCase(response));
             }
           } else {
             logger.info(
@@ -184,7 +182,7 @@ public class EsSyncBackgroundActor extends BaseActor {
               context,
               "Exception occurred while making sync call for user with id : " + userId,
               ex);
-          finalResponse.put((String) userId, false);
+          finalResponse.put(userId, false);
         }
       }
       finalResponse.getResult().put(JsonKey.ES_SYNC_RESPONSE, esResponse);
