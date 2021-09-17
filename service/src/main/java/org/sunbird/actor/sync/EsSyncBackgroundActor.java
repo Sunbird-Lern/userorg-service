@@ -155,7 +155,7 @@ public class EsSyncBackgroundActor extends BaseActor {
       List<String> objectIds, Response finalResponse, RequestContext context) {
     if (CollectionUtils.isNotEmpty(objectIds)) {
       Map<String, Object> esResponse = new HashMap<>();
-      for (Object userId : objectIds) {
+      for (String userId : objectIds) {
         try {
           logger.info(
               context,

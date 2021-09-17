@@ -14,7 +14,6 @@ import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -24,13 +23,11 @@ import scala.concurrent.Future;
 /** @author Amit Kumar */
 public class LocationDaoImpl implements LocationDao {
 
-  private static LoggerUtil logger = new LoggerUtil(LocationDaoImpl.class);
-
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String LOCATION_TABLE_NAME = "location";
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final String DEFAULT_SORT_BY = "ASC";
 
   @Override

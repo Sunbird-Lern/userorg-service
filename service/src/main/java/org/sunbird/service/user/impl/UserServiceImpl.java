@@ -606,7 +606,7 @@ public class UserServiceImpl implements UserService {
       userOrgDataList
           .stream()
           .forEach(
-              (dataMap) -> {
+              dataMap -> {
                 if (null != dataMap.get(JsonKey.IS_DELETED)
                     && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
                   userOrgList.add(dataMap);

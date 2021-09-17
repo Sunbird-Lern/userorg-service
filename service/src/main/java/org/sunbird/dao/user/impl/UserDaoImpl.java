@@ -102,7 +102,7 @@ public class UserDaoImpl implements UserDao {
         esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
-    if (esResult == null || esResult.size() == 0) {
+    if (MapUtils.isEmpty(esResult)) {
       throw new ProjectCommonException(
           ResponseCode.userNotFound.getErrorCode(),
           ResponseCode.userNotFound.getErrorMessage(),
