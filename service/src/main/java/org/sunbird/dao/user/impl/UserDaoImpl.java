@@ -20,7 +20,6 @@ import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 /**
@@ -31,7 +30,8 @@ import scala.concurrent.Future;
 public class UserDaoImpl implements UserDao {
 
   private LoggerUtil logger = new LoggerUtil(UserDaoImpl.class);
-  private static final String TABLE_NAME = "user";
+  private static final String TABLE_NAME = JsonKey.USER;
+  private static final String KEY_SPACE_NAME = JsonKey.SUNBIRD;
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
@@ -47,18 +47,18 @@ public class UserDaoImpl implements UserDao {
 
   @Override
   public Response createUser(Map<String, Object> user, RequestContext context) {
-    return cassandraOperation.insertRecord(Util.KEY_SPACE_NAME, TABLE_NAME, user, context);
+    return cassandraOperation.insertRecord(KEY_SPACE_NAME, TABLE_NAME, user, context);
   }
 
   @Override
   public Response updateUser(User user, RequestContext context) {
     Map<String, Object> map = mapper.convertValue(user, Map.class);
-    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, map, context);
+    return cassandraOperation.updateRecord(KEY_SPACE_NAME, TABLE_NAME, map, context);
   }
 
   @Override
   public Response updateUser(Map<String, Object> userMap, RequestContext context) {
-    return cassandraOperation.updateRecord(Util.KEY_SPACE_NAME, TABLE_NAME, userMap, context);
+    return cassandraOperation.updateRecord(KEY_SPACE_NAME, TABLE_NAME, userMap, context);
   }
 
   @Override
@@ -73,7 +73,7 @@ public class UserDaoImpl implements UserDao {
   @Override
   public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
     Response response =
-        cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, userId, context);
+        cassandraOperation.getRecordById(KEY_SPACE_NAME, TABLE_NAME, userId, context);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (CollectionUtils.isNotEmpty(responseList)) {
@@ -86,7 +86,7 @@ public class UserDaoImpl implements UserDao {
   public Response getUserPropertiesById(
       List<String> userIds, List<String> properties, RequestContext context) {
     return cassandraOperation.getPropertiesValueById(
-        Util.KEY_SPACE_NAME, TABLE_NAME, userIds, properties, context);
+        KEY_SPACE_NAME, TABLE_NAME, userIds, properties, context);
   }
 
   @Override

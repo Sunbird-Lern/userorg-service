@@ -544,7 +544,7 @@ public class UserServiceImpl implements UserService {
     logger.info(context, "get user profile method call started user Id : " + userId);
     Map<String, Object> userDetails = getUserDetailsById(userId, context);
     if (MapUtils.isNotEmpty(userDetails)) {
-      logger.info(context, "Util:getUserDetails: userId = " + userId);
+      logger.debug(context, "getUserDetails: userId = " + userId);
       userDetails.put(JsonKey.ORGANISATIONS, getUserOrgDetails(userId, context));
       Map<String, Object> orgMap =
           orgService.getOrgById((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
@@ -568,9 +568,10 @@ public class UserServiceImpl implements UserService {
         try {
           userLocList = mapper.readValue(profLocation, List.class);
         } catch (Exception e) {
-          logger.info(
+          logger.error(
               context,
-              "Exception occurred while converting profileLocation to List<Map<String,String>>.");
+              "Exception occurred while converting profileLocation to List<Map<String,String>>.",
+              e);
         }
       }
       userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
@@ -580,9 +581,10 @@ public class UserServiceImpl implements UserService {
         try {
           userTypeDetail = mapper.readValue(profUserType, Map.class);
         } catch (Exception e) {
-          logger.info(
+          logger.error(
               context,
-              "Exception occurred while converting profileUserType to Map<String,String>.");
+              "Exception occurred while converting profileUserType to Map<String,String>.",
+              e);
         }
       }
       userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
@@ -629,7 +631,7 @@ public class UserServiceImpl implements UserService {
         }
       }
     } catch (Exception e) {
-      logger.error(e.getMessage(), e);
+      logger.error(context, e.getMessage(), e);
     }
     return userOrgList;
   }
