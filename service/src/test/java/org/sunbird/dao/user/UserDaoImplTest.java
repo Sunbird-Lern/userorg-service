@@ -3,12 +3,11 @@ package org.sunbird.dao.user;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import akka.dispatch.Futures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +71,11 @@ public class UserDaoImplTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+
+    Promise<String> promiseL = Futures.promise();
+    promiseL.success("4654546-879-54656");
+    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promiseL.future());
   }
 
   @Test
@@ -97,7 +101,7 @@ public class UserDaoImplTest {
     promise.success(esResponse);
 
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-      .thenReturn(promise.future());
+        .thenReturn(promise.future());
     UserDao userDao = new UserDaoImpl();
     Map<String, Object> user = userDao.getEsUserById("123-456-789", new RequestContext());
     Assert.assertNotNull(user);
@@ -109,10 +113,10 @@ public class UserDaoImplTest {
     Promise<Boolean> promise = Futures.promise();
     promise.success(false);
     when(esService.update(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-      .thenReturn(promise.future());
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promise.future());
     UserDao userDao = new UserDaoImpl();
-    Boolean bool = userDao.updateUserDataToES("123-456-789", esRequest ,new RequestContext());
+    Boolean bool = userDao.updateUserDataToES("123-456-789", esRequest, new RequestContext());
     Assert.assertFalse(bool);
   }
 
@@ -122,10 +126,10 @@ public class UserDaoImplTest {
     Promise<Boolean> promise = Futures.promise();
     promise.success(true);
     when(esService.update(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-      .thenReturn(promise.future());
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promise.future());
     UserDao userDao = new UserDaoImpl();
-    Boolean bool = userDao.updateUserDataToES("123-456-789", esRequest ,new RequestContext());
+    Boolean bool = userDao.updateUserDataToES("123-456-789", esRequest, new RequestContext());
     Assert.assertTrue(bool);
   }
 
@@ -136,8 +140,18 @@ public class UserDaoImplTest {
     promise.success(esResponse);
 
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-      .thenReturn(promise.future());
+        .thenReturn(promise.future());
     UserDao userDao = new UserDaoImpl();
     userDao.getEsUserById("123-456-789", new RequestContext());
+  }
+
+  @Test
+  public void saveToEs() {
+    Map<String, Object> data = new HashMap<>();
+    data.put(JsonKey.ID, "546546-6787-5476");
+    data.put(JsonKey.FIRST_NAME, "name");
+    UserDao userDao = UserDaoImpl.getInstance();
+    String response = userDao.saveUserToES("546546-6787-5476", data, new RequestContext());
+    Assert.assertNotNull(response);
   }
 }
