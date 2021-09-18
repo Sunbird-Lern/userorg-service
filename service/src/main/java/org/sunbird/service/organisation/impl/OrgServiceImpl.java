@@ -184,11 +184,9 @@ public class OrgServiceImpl implements OrgService {
   public String getChannel(String rootOrgId, RequestContext context) {
     String channel = "";
     Map<String, Object> resultFrRootOrg = getOrgById(rootOrgId, context);
-    if (CollectionUtils.isNotEmpty(
-        (List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE))) {
-      Map<String, Object> rootOrg =
-          ((List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE)).get(0);
-      channel = (String) rootOrg.get(JsonKey.CHANNEL);
+    if (MapUtils.isNotEmpty(resultFrRootOrg)
+        && StringUtils.isNotBlank((String) resultFrRootOrg.get(JsonKey.CHANNEL))) {
+      channel = (String) resultFrRootOrg.get(JsonKey.CHANNEL);
     }
     return channel;
   }
