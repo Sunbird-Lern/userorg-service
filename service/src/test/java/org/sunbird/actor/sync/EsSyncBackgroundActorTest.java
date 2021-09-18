@@ -222,7 +222,6 @@ public class EsSyncBackgroundActorTest {
         .thenReturn(cassandraGetOrgRecord());
     Map<String, Object> org = new HashMap<>();
     org.put(JsonKey.FIRST_NAME, "firstName");
-    when(Util.getOrgDetails(Mockito.anyString(), Mockito.any())).thenReturn(org);
     Promise<String> esPromise = Futures.promise();
     esPromise.failure(new Exception());
     when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))

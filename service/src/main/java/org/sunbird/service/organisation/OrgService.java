@@ -38,6 +38,8 @@ public interface OrgService {
 
   String getRootOrgIdFromChannel(String channel, RequestContext context);
 
+  String getChannel(String rootOrgId, RequestContext context);
+
   boolean registerChannel(Map<String, Object> req, RequestContext context);
 
   boolean updateChannel(Map<String, Object> req, RequestContext context);

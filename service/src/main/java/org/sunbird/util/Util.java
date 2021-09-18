@@ -1,6 +1,5 @@
 package org.sunbird.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
 import java.util.*;
@@ -17,8 +16,6 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.helper.CassandraConnectionManager;
-import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -143,24 +140,6 @@ public final class Util {
     return list.contains(nextState);
   }
 
-  /**
-   * This method will check the cassandra data base connection. first it will try to established the
-   * data base connection from provided environment variable , if environment variable values are
-   * not set then connection will be established from property file.
-   */
-  public static void checkCassandraDbConnections() {
-    CassandraConnectionManager cassandraConnectionManager =
-        CassandraConnectionMngrFactory.getInstance();
-    String nodes = System.getenv(JsonKey.SUNBIRD_CASSANDRA_IP);
-    String[] hosts = null;
-    if (StringUtils.isNotBlank(nodes)) {
-      hosts = nodes.split(",");
-    } else {
-      hosts = new String[] {"localhost"};
-    }
-    cassandraConnectionManager.createConnection(hosts);
-  }
-
   public static String getProperty(String key) {
     return prop.getProperty(key);
   }
@@ -265,16 +244,6 @@ public final class Util {
           (Map<String, Integer>) searchQueryMap.get(JsonKey.SOFT_CONSTRAINTS));
     }
     return search;
-  }
-
-  /**
-   * if Object is not null then it will return true else false.
-   *
-   * @param obj Object
-   * @return boolean
-   */
-  public static boolean isNotNull(Object obj) {
-    return null != obj ? true : false;
   }
 
   /**
@@ -388,17 +357,6 @@ public final class Util {
     return searchResult;
   }
 
-  public static String getLoginId(Map<String, Object> userMap) {
-    String loginId;
-    if (StringUtils.isNotBlank((String) userMap.get(JsonKey.CHANNEL))) {
-      loginId =
-          (String) userMap.get(JsonKey.USERNAME) + "@" + (String) userMap.get(JsonKey.CHANNEL);
-    } else {
-      loginId = (String) userMap.get(JsonKey.USERNAME);
-    }
-    return loginId;
-  }
-
   public static void registerUserToOrg(Map<String, Object> userMap, RequestContext context) {
     Map<String, Object> reqMap = new WeakHashMap<>();
     reqMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
@@ -417,21 +375,6 @@ public final class Util {
     } catch (Exception e) {
       logger.error(context, e.getMessage(), e);
     }
-  }
-
-  public static String getChannel(String rootOrgId, RequestContext context) {
-    Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    String channel = null;
-    Response resultFrRootOrg =
-        cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId, context);
-    if (CollectionUtils.isNotEmpty(
-        (List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE))) {
-      Map<String, Object> rootOrg =
-          ((List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE)).get(0);
-      channel = (String) rootOrg.get(JsonKey.CHANNEL);
-    }
-    return channel;
   }
 
   @SuppressWarnings("unchecked")
@@ -469,82 +412,6 @@ public final class Util {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public static Map<String, Object> getUserDetails(String userId, RequestContext context) {
-    logger.info(context, "get user profile method call started user Id : " + userId);
-    DbInfo userDbInfo = dbInfoMap.get(JsonKey.USER_DB);
-    Response response = null;
-    List<Map<String, Object>> userList = null;
-    Map<String, Object> userDetails = null;
-    try {
-      response =
-          cassandraOperation.getRecordById(
-              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId, context);
-      userList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-      logger.info(
-          context, "Util:getUserProfile: collecting user data to save for userId : " + userId);
-    } catch (Exception e) {
-      logger.error(context, e.getMessage(), e);
-    }
-    String username = "";
-    if (CollectionUtils.isNotEmpty(userList)) {
-      userDetails = userList.get(0);
-      username = (String) userDetails.get(JsonKey.USERNAME);
-      logger.info(context, "Util:getUserDetails: userId = " + userId);
-      userDetails.put(JsonKey.ORGANISATIONS, getUserOrgDetails(userId, context));
-      Map<String, Object> orgMap =
-          getOrgDetails((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
-      if (!MapUtils.isEmpty(orgMap)) {
-        userDetails.put(JsonKey.ROOT_ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
-      } else {
-        userDetails.put(JsonKey.ROOT_ORG_NAME, "");
-      }
-      // store alltncaccepted as Map Object in ES
-      Map<String, Object> allTncAccepted =
-          (Map<String, Object>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
-      if (MapUtils.isNotEmpty(allTncAccepted)) {
-        convertTncJsonStringToMapObject(allTncAccepted);
-      }
-      // save masked email and phone number
-      addMaskEmailAndPhone(userDetails);
-      userDetails.remove(JsonKey.PASSWORD);
-      addEmailAndPhone(userDetails);
-      checkEmailAndPhoneVerified(userDetails);
-      List<Map<String, String>> userLocList = new ArrayList<>();
-      String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
-      if (StringUtils.isNotBlank(profLocation)) {
-        try {
-          userLocList = mapper.readValue(profLocation, List.class);
-        } catch (Exception e) {
-          logger.info(
-              context,
-              "Exception occurred while converting profileLocation to List<Map<String,String>>.");
-        }
-      }
-      userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
-      Map<String, Object> userTypeDetail = new HashMap<>();
-      String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
-      if (StringUtils.isNotBlank(profUserType)) {
-        try {
-          userTypeDetail = mapper.readValue(profUserType, Map.class);
-        } catch (Exception e) {
-          logger.info(
-              context,
-              "Exception occurred while converting profileUserType to Map<String,String>.");
-        }
-      }
-      userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
-      List<Map<String, Object>> userRoleList = getUserRoles(userId, context);
-      userDetails.put(JsonKey.ROLES, userRoleList);
-    } else {
-      logger.info(
-          context,
-          "Util:getUserProfile: User data not available to save in ES for userId : " + userId);
-    }
-    userDetails.put(JsonKey.USERNAME, username);
-    return userDetails;
-  }
-
   public static List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
     DbInfo userRoleDbInfo = dbInfoMap.get(JsonKey.USER_ROLES);
     List<String> userIds = new ArrayList<>();
@@ -576,20 +443,6 @@ public final class Util {
               }
             });
     return userRoleList;
-  }
-
-  // Convert Json String tnc format to object to store in Elastic
-  private static void convertTncJsonStringToMapObject(Map<String, Object> allTncAccepted) {
-    for (Map.Entry<String, Object> tncAccepted : allTncAccepted.entrySet()) {
-      String tncType = tncAccepted.getKey();
-      Map<String, String> tncAcceptedDetailMap = new HashMap<>();
-      try {
-        tncAcceptedDetailMap = mapper.readValue((String) tncAccepted.getValue(), Map.class);
-        allTncAccepted.put(tncType, tncAcceptedDetailMap);
-      } catch (JsonProcessingException e) {
-        logger.error("Json Parsing Exception", e);
-      }
-    }
   }
 
   public static Map<String, Object> getUserDetails(

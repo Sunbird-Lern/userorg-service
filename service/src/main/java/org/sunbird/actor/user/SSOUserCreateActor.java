@@ -220,7 +220,8 @@ public class SSOUserCreateActor extends UserBaseActor {
     syncResponse.putAll(response.getResult());
 
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
-      Map<String, Object> userDetails = Util.getUserDetails(userId, request.getRequestContext());
+      Map<String, Object> userDetails =
+          userService.getUserDetailsForES(userId, request.getRequestContext());
       Future<Response> future =
           esUtil
               .save(

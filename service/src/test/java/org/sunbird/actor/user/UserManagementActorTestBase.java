@@ -225,7 +225,7 @@ public abstract class UserManagementActorTestBase {
     externalIds.add(externalId);
     requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
     PowerMockito.mockStatic(Util.class);
-    when(Util.getUserDetails(Mockito.any(), Mockito.any())).thenReturn(getMapObject());
+    when(userService.getUserDetailsForES(Mockito.any(), Mockito.any())).thenReturn(getMapObject());
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));

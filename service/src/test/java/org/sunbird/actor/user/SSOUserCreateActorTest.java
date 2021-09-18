@@ -382,12 +382,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     PowerMockito.mockStatic(Util.class);
     Map<String, Object> user = getEsResponseMap();
     user.put(JsonKey.USER_ID, "123456789");
-    when(Util.getUserDetails(Mockito.anyString(), Mockito.any())).thenReturn(user);
-    /*PipeToSupport.PipeableFuture pipe = PowerMockito.mock(PipeToSupport.PipeableFuture.class);
-    Future<Map<String,Object>> future1 =
-      Futures.future(() -> reqMap, system.dispatcher());
-    when(pipe.to(Mockito.any(ActorRef.class))).thenReturn(future1);
-    when(Patterns.pipe(Mockito.any(Future.class), Mockito.any())).thenReturn(pipe);*/
+    when(userService.getUserDetailsForES(Mockito.anyString(), Mockito.any())).thenReturn(user);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(
