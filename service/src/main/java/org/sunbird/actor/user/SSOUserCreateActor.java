@@ -132,7 +132,6 @@ public class SSOUserCreateActor extends UserBaseActor {
 
       // Fetch locationids of the suborg and update the location of sso user
       if (!isCustodianOrg) {
-        OrgService orgService = OrgServiceImpl.getInstance();
         Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
         if (MapUtils.isNotEmpty(orgMap)) {
           userMap.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));

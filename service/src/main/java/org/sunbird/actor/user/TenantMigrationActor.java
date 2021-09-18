@@ -169,8 +169,7 @@ public class TenantMigrationActor extends BaseActor {
         UserServiceImpl.getInstance()
             .esGetPublicUserProfileById(
                 (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
-    validateUserCustodianOrgId(
-        (String) userDetails.get(JsonKey.ROOT_ORG_ID), request.getRequestContext());
+    validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
     validateChannelAndGetRootOrgId(request);
     Map<String, String> rollup = new HashMap<>();
     rollup.put("l1", (String) request.getRequest().get(JsonKey.ROOT_ORG_ID));
@@ -382,7 +381,7 @@ public class TenantMigrationActor extends BaseActor {
     }
   }
 
-  private void validateUserCustodianOrgId(String rootOrgId, RequestContext context) {
+  private void validateUserCustodianOrgId(String rootOrgId) {
     String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     if (!rootOrgId.equalsIgnoreCase(custodianOrgId)) {
       ProjectCommonException.throwClientErrorException(
