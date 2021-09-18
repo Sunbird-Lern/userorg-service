@@ -19,7 +19,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -33,7 +32,6 @@ import scala.concurrent.Promise;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
   EsClientFactory.class,
   CassandraOperationImpl.class,
   ServiceFactory.class
@@ -50,6 +48,8 @@ import scala.concurrent.Promise;
   "org.xml.*"
 })
 public class OrgServiceImplTest {
+  private ElasticSearchService esService = null;
+
   @Before
   public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
@@ -87,16 +87,19 @@ public class OrgServiceImplTest {
         .thenReturn(getRecordsByProperty(false));
 
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(ElasticSearchHelper.class);
-    ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+    esService = mock(ElasticSearchRestHighImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
-    Map<String, Object> esRespone = new HashMap<>();
-    esRespone.put(JsonKey.CONTENT, new ArrayList<>());
-    esRespone.put(JsonKey.ID, "orgId");
+    Map<String, Object> esResponse = new HashMap<>();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+    Map<String, Object> org = new HashMap<>();
+    org.put(JsonKey.ID, "orgId");
+    org.put(JsonKey.STATUS, 1);
+    orgList.add(org);
+    esResponse.put(JsonKey.CONTENT, orgList);
     Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(esRespone);
+    promise.success(esResponse);
 
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
@@ -140,6 +143,13 @@ public class OrgServiceImplTest {
     OrgService orgService = OrgServiceImpl.getInstance();
     Response res = orgService.updateOrganisation(orgMap, new RequestContext());
     Assert.assertEquals(res.get(JsonKey.RESPONSE), JsonKey.SUCCESS);
+  }
+
+  @Test
+  public void testGetOrgIdByChannel() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    String rootOrgId = orgService.getRootOrgIdFromChannel("channel", new RequestContext());
+    Assert.assertNotNull(rootOrgId);
   }
 
   private Response getRecordsByProperty(boolean empty) {
