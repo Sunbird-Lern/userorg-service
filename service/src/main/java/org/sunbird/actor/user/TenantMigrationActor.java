@@ -45,10 +45,7 @@ import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.StringFormatter;
-import org.sunbird.util.UserFlagEnum;
-import org.sunbird.util.Util;
+import org.sunbird.util.*;
 import org.sunbird.util.user.MigrationUtils;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
@@ -386,8 +383,7 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void validateUserCustodianOrgId(String rootOrgId, RequestContext context) {
-    String custodianOrgId =
-        UserServiceImpl.getInstance().getCustodianOrgId(systemSettingsActor, context);
+    String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     if (!rootOrgId.equalsIgnoreCase(custodianOrgId)) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.parameterMismatch,
@@ -517,7 +513,7 @@ public class TenantMigrationActor extends BaseActor {
     String channel = (String) request.getRequest().get(JsonKey.CHANNEL);
     if (StringUtils.isNotBlank(channel)) {
       rootOrgId =
-          UserServiceImpl.getInstance()
+          OrgServiceImpl.getInstance()
               .getRootOrgIdFromChannel(channel, request.getRequestContext());
       request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
     }
@@ -741,10 +737,10 @@ public class TenantMigrationActor extends BaseActor {
       logger.info(
           context, "TenantMigrationActor:deleteUserFeed method called for feedId : " + feedId);
       Request request = new Request();
-      Map<String,Object> reqObj = new HashMap<>();
-      reqObj.put(JsonKey.IDS,Arrays.asList(feedId));
-      reqObj.put(JsonKey.USER_ID,userId);
-      reqObj.put(JsonKey.CATEGORY,action);
+      Map<String, Object> reqObj = new HashMap<>();
+      reqObj.put(JsonKey.IDS, Arrays.asList(feedId));
+      reqObj.put(JsonKey.USER_ID, userId);
+      reqObj.put(JsonKey.CATEGORY, action);
       request.setRequest(reqObj);
       feedService.delete(request, context);
     }

@@ -2,11 +2,15 @@ package org.sunbird.service.organisation.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -135,6 +139,45 @@ public class OrgServiceImpl implements OrgService {
       }
     }
     return new HashMap();
+  }
+
+  @Override
+  public String getRootOrgIdFromChannel(String channel, RequestContext context) {
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.IS_TENANT, true);
+    filters.put(JsonKey.CHANNEL, channel);
+
+    SearchDTO searchDTO = new SearchDTO();
+    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+    Future<Map<String, Object>> esResultF = orgDao.search(searchDTO, context);
+    Map<String, Object> esResult =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+    if (MapUtils.isNotEmpty(esResult)
+        && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
+      Map<String, Object> esContent =
+          ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
+      if (null != esContent.get(JsonKey.STATUS)) {
+        int status = (int) esContent.get(JsonKey.STATUS);
+        if (1 != status) {
+          ProjectCommonException.throwClientErrorException(
+              ResponseCode.errorInactiveOrg,
+              ProjectUtil.formatMessage(
+                  ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
+        }
+      } else {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorInactiveOrg,
+            ProjectUtil.formatMessage(
+                ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
+      }
+      return (String) esContent.get(JsonKey.ID);
+    } else {
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
   }
 
   /** @param req Map<String,Object> */

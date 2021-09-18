@@ -348,8 +348,6 @@ public class TenantMigrationActorTest {
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
     when(userService.esGetPublicUserProfileById(Mockito.anyString(), Mockito.anyObject()))
         .thenReturn(userDetails);
-    when(userService.getCustodianOrgId(Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn("anyRootOrgId");
 
     try {
       OrgExternalServiceImpl orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);

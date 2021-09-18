@@ -90,7 +90,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     organisation.setTenant(true);
     when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
         .thenReturn(organisation);
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any())).thenReturn("");
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any())).thenReturn("");
     boolean result =
         testScenario(
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),

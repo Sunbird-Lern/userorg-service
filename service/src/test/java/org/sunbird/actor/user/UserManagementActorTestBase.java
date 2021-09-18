@@ -51,7 +51,9 @@ import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
@@ -71,6 +73,8 @@ import scala.concurrent.Promise;
   SystemSettingClientImpl.class,
   UserService.class,
   UserServiceImpl.class,
+  OrgServiceImpl.class,
+  OrgService.class,
   UserUtil.class,
   Patterns.class,
   LocationClientImpl.class,
@@ -104,6 +108,7 @@ public abstract class UserManagementActorTestBase {
   public final Props props = Props.create(SSOUserCreateActor.class);
   public static Map<String, Object> reqMap;
   public static UserServiceImpl userService;
+  public static OrgServiceImpl orgService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
   // public static UserClientImpl userClient;
@@ -174,6 +179,13 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.when(
             locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationIdType());
+    PowerMockito.mockStatic(OrgServiceImpl.class);
+    orgService = mock(OrgServiceImpl.class);
+    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("anyId");
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("rootOrgId");
 
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
@@ -181,13 +193,6 @@ public abstract class UserManagementActorTestBase {
     when(userService.getUserById(Mockito.any(), Mockito.any())).thenReturn(getUser(false));
     when(userService.saveUserAttributes(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(getSaveResponse());
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("anyId");
-    when(userService.getCustodianChannel(
-            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any()))
-        .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId");
     when(userService.createUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     PowerMockito.mockStatic(UserLookUpServiceImpl.class);
     userLookupService = mock(UserLookUpServiceImpl.class);

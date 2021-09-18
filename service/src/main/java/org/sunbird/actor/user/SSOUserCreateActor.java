@@ -53,6 +53,7 @@ public class SSOUserCreateActor extends UserBaseActor {
 
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private UserService userService = UserServiceImpl.getInstance();
+  private OrgService orgService = OrgServiceImpl.getInstance();
   private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private OrgExternalService orgExternalService = new OrgExternalServiceImpl();
   private ObjectMapper mapper = new ObjectMapper();
@@ -256,7 +257,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
     if (StringUtils.isNotBlank(requestedChannel)) {
-      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
+      fetchedRootOrgIdByChannel = orgService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidParameterValue.getErrorCode(),
@@ -292,7 +293,7 @@ public class SSOUserCreateActor extends UserBaseActor {
         } else {
           // fetch rootorgid by requested orgid channel
           String rootOrgId =
-              userService.getRootOrgIdFromChannel(fetchedOrgById.getChannel(), context);
+              orgService.getRootOrgIdFromChannel(fetchedOrgById.getChannel(), context);
           userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
           userMap.put(JsonKey.CHANNEL, fetchedOrgById.getChannel());
         }

@@ -11,8 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.UserLookupDao;
@@ -26,7 +24,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.adminutil.AdminUtilRequestData;
-import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -136,92 +133,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public String getRootOrgIdFromChannel(String channel, RequestContext context) {
-
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.IS_TENANT, true);
-    filters.put(JsonKey.CHANNEL, channel);
-
-    SearchDTO searchDTO = new SearchDTO();
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Map<String, Object> esResult = userDao.search(searchDTO, context);
-    if (MapUtils.isNotEmpty(esResult)
-        && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
-      Map<String, Object> esContent =
-          ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
-      if (null != esContent.get(JsonKey.STATUS)) {
-        int status = (int) esContent.get(JsonKey.STATUS);
-        if (1 != status) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorInactiveOrg,
-              ProjectUtil.formatMessage(
-                  ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
-        }
-      } else {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorInactiveOrg,
-            ProjectUtil.formatMessage(
-                ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
-      }
-      return (String) esContent.get(JsonKey.ID);
-    } else {
-      if (StringUtils.isNotBlank(channel)) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      } else {
-        throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-    }
-  }
-
-  @Override
-  public String getCustodianChannel(
-      Map<String, Object> userMap, ActorRef actorRef, RequestContext context) {
-    String channel = (String) userMap.get(JsonKey.CHANNEL);
-    if (StringUtils.isBlank(channel)) {
-      try {
-        Map<String, String> configSettingMap = DataCacheHandler.getConfigSettings();
-        channel = configSettingMap.get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-        if (StringUtils.isBlank(channel)) {
-          SystemSettingClient client = SystemSettingClientImpl.getInstance();
-          SystemSetting custodianOrgChannelSetting =
-              client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL, context);
-          if (custodianOrgChannelSetting != null
-              && StringUtils.isNotBlank(custodianOrgChannelSetting.getValue())) {
-            configSettingMap.put(
-                custodianOrgChannelSetting.getId(), custodianOrgChannelSetting.getValue());
-            channel = custodianOrgChannelSetting.getValue();
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(
-            context,
-            "getCustodianChannel: Exception occurred while fetching custodian channel from system setting.",
-            ex);
-      }
-    }
-    if (StringUtils.isBlank(channel)) {
-      channel = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_CHANNEL);
-      userMap.put(JsonKey.CHANNEL, channel);
-    }
-    if (StringUtils.isBlank(channel)) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    return channel;
-  }
-
-  @Override
   public void validateUploader(Request request, RequestContext context) {
     // uploader and user should belong to same root org,
     // then only will allow to update user profile details.
@@ -328,29 +239,6 @@ public class UserServiceImpl implements UserService {
       return (String) records.get(0).get(JsonKey.USER_ID);
     }
     return "";
-  }
-
-  @Override
-  public String getCustodianOrgId(ActorRef actorRef, RequestContext context) {
-    String custodianOrgId = "";
-    try {
-      SystemSettingClient client = SystemSettingClientImpl.getInstance();
-      SystemSetting systemSetting =
-          client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID, context);
-      if (null != systemSetting && StringUtils.isNotBlank(systemSetting.getValue())) {
-        custodianOrgId = systemSetting.getValue();
-      }
-    } catch (Exception ex) {
-      logger.error(
-          context,
-          "getCustodianOrgId: Exception occurred with error message = " + ex.getMessage(),
-          ex);
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.errorSystemSettingNotFound,
-          ProjectUtil.formatMessage(
-              ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
-    }
-    return custodianOrgId;
   }
 
   /**
