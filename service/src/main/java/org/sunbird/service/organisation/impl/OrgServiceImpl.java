@@ -319,7 +319,7 @@ public class OrgServiceImpl implements OrgService {
    * @return boolean
    */
   public boolean checkOrgStatusTransition(Integer currentState, Integer nextState) {
-    List list = orgStatusTransition.get(currentState);
+    List<Integer> list = orgStatusTransition.get(currentState);
     if (null == list) {
       return false;
     }

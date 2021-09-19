@@ -72,10 +72,10 @@ public class FileUploadServiceActor extends BaseActor {
       throw e;
     } finally {
       try {
-        if (ProjectUtil.isNotNull(fos)) {
+        if (null != (fos)) {
           fos.close();
         }
-        if (ProjectUtil.isNotNull(file)) {
+        if (null != (file)) {
           file.delete();
         }
       } catch (IOException e) {
