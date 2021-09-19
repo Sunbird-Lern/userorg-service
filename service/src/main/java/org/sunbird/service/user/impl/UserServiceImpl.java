@@ -121,10 +121,7 @@ public class UserServiceImpl implements UserService {
             && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
         || (StringUtils.isNotEmpty(managedById)
             && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
-    throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
-          ResponseCode.unAuthorized.getErrorMessage(),
-          ResponseCode.UNAUTHORIZED.getResponseCode());
+    ProjectCommonException.throwUnauthorizedErrorException();
   }
 
   @Override
@@ -196,11 +193,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<Map<String, Object>> searchUserNameInUserLookup(
       List<String> encUserNameList, RequestContext context) {
-
     Map<String, Object> reqMap = new LinkedHashMap<>();
     reqMap.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
     reqMap.put(JsonKey.VALUE, encUserNameList);
-
     return userLookupDao.getUsersByUserNames(reqMap, context);
   }
 
@@ -438,8 +433,6 @@ public class UserServiceImpl implements UserService {
           orgService.getOrgById((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
       if (MapUtils.isNotEmpty(orgMap)) {
         userDetails.put(JsonKey.ROOT_ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
-      } else {
-        userDetails.put(JsonKey.ROOT_ORG_NAME, "");
       }
       // store alltncaccepted as Map Object in ES
       Map<String, String> allTncAccepted =
@@ -458,7 +451,7 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
           logger.error(
               context,
-              "Exception occurred while converting profileLocation to List<Map<String,String>>.",
+              "Exception while converting profileLocation to List<Map<String,String>>.",
               e);
         }
       }
@@ -470,9 +463,7 @@ public class UserServiceImpl implements UserService {
           userTypeDetail = mapper.readValue(profUserType, Map.class);
         } catch (Exception e) {
           logger.error(
-              context,
-              "Exception occurred while converting profileUserType to Map<String,String>.",
-              e);
+              context, "Exception while converting profileUserType to Map<String,String>.", e);
         }
       }
       userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
@@ -480,8 +471,7 @@ public class UserServiceImpl implements UserService {
       userDetails.put(JsonKey.ROLES, userRoleList);
     } else {
       logger.info(
-          context,
-          "Util:getUserProfile: User data not available to save in ES for userId : " + userId);
+          context, "getUserProfile: User data not available to save in ES for userId : " + userId);
     }
     return userDetails;
   }

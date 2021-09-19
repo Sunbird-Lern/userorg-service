@@ -138,7 +138,7 @@ public class OrgServiceImpl implements OrgService {
         return list.get(0);
       }
     }
-    return new HashMap();
+    return Collections.emptyMap();
   }
 
   @Override
@@ -156,15 +156,7 @@ public class OrgServiceImpl implements OrgService {
         && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
       Map<String, Object> esContent =
           ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
-      if (null != esContent.get(JsonKey.STATUS)) {
-        int status = (int) esContent.get(JsonKey.STATUS);
-        if (1 != status) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorInactiveOrg,
-              ProjectUtil.formatMessage(
-                  ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
-        }
-      } else {
+      if (null == esContent.get(JsonKey.STATUS) || (1 != (int) esContent.get(JsonKey.STATUS))) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.errorInactiveOrg,
             ProjectUtil.formatMessage(
