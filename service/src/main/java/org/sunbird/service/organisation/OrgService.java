@@ -45,4 +45,6 @@ public interface OrgService {
   boolean updateChannel(Map<String, Object> req, RequestContext context);
 
   String saveOrgToEs(String id, Map<String, Object> data, RequestContext context);
+
+  boolean checkOrgStatusTransition(Integer currentState, Integer nextState);
 }

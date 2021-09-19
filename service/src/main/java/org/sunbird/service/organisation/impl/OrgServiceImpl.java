@@ -24,7 +24,8 @@ import scala.concurrent.Future;
 
 public class OrgServiceImpl implements OrgService {
 
-  public LoggerUtil logger = new LoggerUtil(this.getClass());
+  private LoggerUtil logger = new LoggerUtil(this.getClass());
+  private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private ObjectMapper mapper = new ObjectMapper();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgService orgService;
@@ -36,6 +37,10 @@ public class OrgServiceImpl implements OrgService {
       orgService = new OrgServiceImpl();
     }
     return orgService;
+  }
+
+  static {
+    initializeOrgStatusTransition();
   }
 
   @Override
@@ -303,5 +308,55 @@ public class OrgServiceImpl implements OrgService {
   @Override
   public String saveOrgToEs(String id, Map<String, Object> data, RequestContext context) {
     return orgDao.saveOrgToEs(id, data, context);
+  }
+
+  /**
+   * This method will take org current state and next state and check is it possible to move
+   * organization from current state to next state if possible to move then return true else false.
+   *
+   * @param currentState String
+   * @param nextState String
+   * @return boolean
+   */
+  public boolean checkOrgStatusTransition(Integer currentState, Integer nextState) {
+    List list = orgStatusTransition.get(currentState);
+    if (null == list) {
+      return false;
+    }
+    return list.contains(nextState);
+  }
+
+  /**
+   * This method will a map of organization state transaction. which will help us to move the
+   * organization status from one Valid state to another state.
+   */
+  private static void initializeOrgStatusTransition() {
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.ACTIVE.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.INACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.INACTIVE.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.BLOCKED.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.RETIRED.getValue(),
+        Arrays.asList(ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        null,
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.INACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
   }
 }

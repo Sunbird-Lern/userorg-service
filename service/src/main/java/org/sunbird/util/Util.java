@@ -38,8 +38,6 @@ public final class Util {
   private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
   public static final int DEFAULT_ELASTIC_DATA_LIMIT = 10000;
   public static final String KEY_SPACE_NAME = "sunbird";
-  private static Properties prop = new Properties();
-  private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
@@ -51,45 +49,10 @@ public final class Util {
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   static {
-    initializeOrgStatusTransition();
     initializeDBProperty();
   }
 
   private Util() {}
-
-  /**
-   * This method will a map of organization state transaction. which will help us to move the
-   * organization status from one Valid state to another state.
-   */
-  private static void initializeOrgStatusTransition() {
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.ACTIVE.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(),
-            ProjectUtil.OrgStatus.INACTIVE.getValue(),
-            ProjectUtil.OrgStatus.BLOCKED.getValue(),
-            ProjectUtil.OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.INACTIVE.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.BLOCKED.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(),
-            ProjectUtil.OrgStatus.BLOCKED.getValue(),
-            ProjectUtil.OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.RETIRED.getValue(),
-        Arrays.asList(ProjectUtil.OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
-        null,
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(),
-            ProjectUtil.OrgStatus.INACTIVE.getValue(),
-            ProjectUtil.OrgStatus.BLOCKED.getValue(),
-            ProjectUtil.OrgStatus.RETIRED.getValue()));
-  }
 
   /** This method will initialize the cassandra data base property */
   private static void initializeDBProperty() {
@@ -121,27 +84,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_LOOKUP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
     dbInfoMap.put(JsonKey.LOCATION, getDbInfoObject(KEY_SPACE_NAME, JsonKey.LOCATION));
     dbInfoMap.put(JsonKey.USER_ROLES, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_ROLES));
-  }
-
-  /**
-   * This method will take org current state and next state and check is it possible to move
-   * organization from current state to next state if possible to move then return true else false.
-   *
-   * @param currentState String
-   * @param nextState String
-   * @return boolean
-   */
-  @SuppressWarnings("rawtypes")
-  public static boolean checkOrgStatusTransition(Integer currentState, Integer nextState) {
-    List list = orgStatusTransition.get(currentState);
-    if (null == list) {
-      return false;
-    }
-    return list.contains(nextState);
-  }
-
-  public static String getProperty(String key) {
-    return prop.getProperty(key);
   }
 
   private static DbInfo getDbInfoObject(String keySpace, String table) {
@@ -244,27 +186,6 @@ public final class Util {
           (Map<String, Integer>) searchQueryMap.get(JsonKey.SOFT_CONSTRAINTS));
     }
     return search;
-  }
-
-  /**
-   * This method will provide user details map based on user id if user not found then it will
-   * return null.
-   *
-   * @param userId userId of the user
-   * @return userDbRecord of the user from cassandra
-   */
-  @SuppressWarnings("unchecked")
-  public static Map<String, Object> getUserbyUserId(String userId, RequestContext context) {
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Response result =
-        cassandraOperation.getRecordById(
-            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId, context);
-    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (!(list.isEmpty())) {
-      return list.get(0);
-    }
-    return null;
   }
 
   public static void initializeContext(Request request, String env) {

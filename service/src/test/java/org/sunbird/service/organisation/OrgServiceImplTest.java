@@ -27,6 +27,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -150,6 +151,15 @@ public class OrgServiceImplTest {
     OrgService orgService = OrgServiceImpl.getInstance();
     String rootOrgId = orgService.getRootOrgIdFromChannel("channel", new RequestContext());
     Assert.assertNotNull(rootOrgId);
+  }
+
+  @Test
+  public void checkOrgStatusTransition() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    boolean bool =
+        orgService.checkOrgStatusTransition(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue());
+    Assert.assertTrue(bool);
   }
 
   private Response getRecordsByProperty(boolean empty) {

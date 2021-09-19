@@ -167,7 +167,7 @@ public class OrganisationManagementActor extends BaseActor {
 
       Integer currentStatus = (Integer) orgDao.get(JsonKey.STATUS);
       Integer nextStatus = (Integer) request.get(JsonKey.STATUS);
-      if (!(Util.checkOrgStatusTransition(currentStatus, nextStatus))) {
+      if (!(orgService.checkOrgStatusTransition(currentStatus, nextStatus))) {
         logger.info(actorMessage.getRequestContext(), "Invalid Org State transation");
         sender().tell(ProjectUtil.createClientException(ResponseCode.invalidRequestData), self());
         return;
