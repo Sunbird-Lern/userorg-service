@@ -17,7 +17,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.dao.user.UserOrgDao;
@@ -26,7 +25,6 @@ import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.dao.user.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.Organisation;
@@ -52,11 +50,9 @@ import org.sunbird.util.user.UserUtil;
 
 public class UserUpdateActor extends UserBaseActor {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private ObjectMapper mapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private UserSelfDeclarationDao userSelfDeclarationDao = UserSelfDeclarationDaoImpl.getInstance();
 
   @Inject
@@ -162,12 +158,7 @@ public class UserUpdateActor extends UserBaseActor {
       resetPasswordLink = true;
     }
 
-    Response response =
-        cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(),
-            usrDbInfo.getTableName(),
-            requestMap,
-            actorMessage.getRequestContext());
+    Response response = userService.updateUser(requestMap, actorMessage.getRequestContext());
     insertIntoUserLookUp(userLookUpData, actorMessage.getRequestContext());
     removeUserLookupEntry(userLookUpData, userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {

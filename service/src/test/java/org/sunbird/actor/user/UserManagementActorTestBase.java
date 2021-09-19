@@ -194,6 +194,7 @@ public abstract class UserManagementActorTestBase {
     when(userService.saveUserAttributes(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(getSaveResponse());
     when(userService.createUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
+    when(userService.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     PowerMockito.mockStatic(UserLookUpServiceImpl.class);
     userLookupService = mock(UserLookUpServiceImpl.class);
     when(UserLookUpServiceImpl.getInstance()).thenReturn(userLookupService);
