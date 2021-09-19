@@ -149,9 +149,7 @@ public class KeyCloakServiceImpl implements SSOManager {
           keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
       UserRepresentation ur = resource.toRepresentation();
       ur.setEnabled(status);
-      if (null != (resource)) {
-        resource.update(ur);
-      }
+      resource.update(ur);
     } catch (Exception e) {
       logger.error(
           context,

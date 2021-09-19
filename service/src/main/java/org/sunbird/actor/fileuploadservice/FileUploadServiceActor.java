@@ -75,9 +75,7 @@ public class FileUploadServiceActor extends BaseActor {
         if (null != (fos)) {
           fos.close();
         }
-        if (null != (file)) {
-          file.delete();
-        }
+        file.delete();
       } catch (IOException e) {
         logger.error(
             context,
