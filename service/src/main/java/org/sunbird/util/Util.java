@@ -2,6 +2,9 @@ package org.sunbird.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,11 +29,9 @@ import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserOrgService;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import scala.concurrent.Future;
-
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for actors
@@ -55,6 +56,7 @@ public final class Util {
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private static UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   static {
     initializeOrgStatusTransition();
@@ -475,7 +477,7 @@ public final class Util {
         logger.error(context, "Util:upsertUserOrgData exception : " + e.getMessage(), e);
       }
     } else {
-      registerUserToOrg(userMap, context);
+      userOrgService.registerUserToOrg(userMap, context);
     }
   }
 
@@ -801,7 +803,8 @@ public final class Util {
       }
       ISmsProvider smsProvider = SMSFactory.getInstance();
       logger.debug(context, "SMS text : " + sms + " with phone " + userMap.get(JsonKey.PHONE));
-      boolean response = smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
+      boolean response =
+          smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
       logger.info(context, "Response from smsProvider : " + response);
     }
   }

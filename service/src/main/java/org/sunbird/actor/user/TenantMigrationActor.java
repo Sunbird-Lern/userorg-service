@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
-import org.sunbird.model.ClaimStatus;
-import org.sunbird.model.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -24,21 +22,25 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.ClaimStatus;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
@@ -77,6 +79,7 @@ public class TenantMigrationActor extends BaseActor {
   private static final int MAX_MIGRATION_ATTEMPT = 2;
   public static final int USER_EXTERNAL_ID_MISMATCH = -1;
   private IFeedService feedService = FeedFactory.getInstance();
+  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
   private DecryptionService decryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance("");
   private DataMaskingService maskingService =
@@ -493,7 +496,7 @@ public class TenantMigrationActor extends BaseActor {
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
     userOrgRequest.put(JsonKey.ROLES, roles);
-    Util.registerUserToOrg(userOrgRequest, context);
+    userOrgService.registerUserToOrg(userOrgRequest, context);
   }
 
   private void deleteOldUserOrgMapping(

@@ -9,10 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.AssociationMechanism;
+import org.sunbird.service.user.UserOrgService;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import org.sunbird.util.Util;
-import org.sunbird.request.Request;
 import org.sunbird.util.user.UserUtil;
 
 @ActorConfig(
@@ -20,6 +22,8 @@ import org.sunbird.util.user.UserUtil;
   asyncTasks = {"insertUserOrgDetails", "updateUserOrgDetails"}
 )
 public class UserOrgManagementActor extends BaseActor {
+
+  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -47,7 +51,7 @@ public class UserOrgManagementActor extends BaseActor {
     }
     if (StringUtils.isNotBlank(organisationId)) {
       requestMap.put(JsonKey.HASHTAGID, organisationId);
-      Util.registerUserToOrg(requestMap, request.getRequestContext());
+      userOrgService.registerUserToOrg(requestMap, request.getRequestContext());
     }
     if ((StringUtils.isNotBlank(organisationId)
             && StringUtils.isNotBlank((String) requestMap.get(JsonKey.ROOT_ORG_ID))
@@ -56,7 +60,7 @@ public class UserOrgManagementActor extends BaseActor {
       // Add user to root org
       requestMap.put(JsonKey.ORGANISATION_ID, requestMap.get(JsonKey.ROOT_ORG_ID));
       requestMap.put(JsonKey.HASHTAGID, requestMap.get(JsonKey.ORGANISATION_ID));
-      Util.registerUserToOrg(requestMap, request.getRequestContext());
+      userOrgService.registerUserToOrg(requestMap, request.getRequestContext());
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
