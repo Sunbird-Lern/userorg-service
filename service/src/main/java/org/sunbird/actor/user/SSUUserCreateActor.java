@@ -13,20 +13,16 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserLookupService;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserLookUpServiceImpl;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
 import scala.Tuple2;
 import scala.concurrent.Future;
@@ -67,6 +63,8 @@ public class SSUUserCreateActor extends UserBaseActor {
    * @param actorMessage
    */
   private void createSSUUser(Request actorMessage) {
+    logger.debug(
+        actorMessage.getRequestContext(), "SSUUserCreateActor:createSSUUser: User creation starts");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     userMap.put(
@@ -104,7 +102,7 @@ public class SSUUserCreateActor extends UserBaseActor {
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
     Response response = userService.createUser(userMap, actorMessage.getRequestContext());
-    insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
+    userLookupService.insertRecords(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {

@@ -11,8 +11,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.keys.JsonKey;
@@ -21,8 +19,6 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.SSOUserService;
 import org.sunbird.service.user.UserRoleService;
@@ -48,8 +44,6 @@ public class SSOUserCreateActor extends UserBaseActor {
 
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private UserService userService = UserServiceImpl.getInstance();
-  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
-  private OrgExternalService orgExternalService = new OrgExternalServiceImpl();
   private ObjectMapper mapper = new ObjectMapper();
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);

@@ -2,9 +2,7 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -15,11 +13,7 @@ import akka.pattern.Patterns;
 import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -183,7 +177,8 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(LocationServiceImpl.class);
     locationService = mock(LocationServiceImpl.class);
     PowerMockito.when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    PowerMockito.when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationIdType());
 
     PowerMockito.mockStatic(UserServiceImpl.class);
@@ -203,7 +198,7 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(UserLookUpServiceImpl.class);
     userLookupService = mock(UserLookUpServiceImpl.class);
     when(UserLookUpServiceImpl.getInstance()).thenReturn(userLookupService);
-    when(userLookupService.insertRecords(Mockito.anyList(), Mockito.any()))
+    when(userLookupService.insertRecords(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());

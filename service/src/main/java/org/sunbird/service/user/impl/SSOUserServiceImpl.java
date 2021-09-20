@@ -2,11 +2,8 @@ package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
@@ -97,7 +94,7 @@ public class SSOUserServiceImpl implements SSOUserService {
     Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     try {
       response = userService.createUser(requestMap, request.getRequestContext());
-      insertIntoUserLookUp(userLookUpData, request.getRequestContext());
+      userLookupService.insertRecords(userLookUpData, request.getRequestContext());
       isPasswordUpdated = UserUtil.updatePassword(userMap, request.getRequestContext());
 
     } finally {
@@ -228,52 +225,5 @@ public class SSOUserServiceImpl implements SSOUserService {
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
     }
-  }
-
-  protected Response insertIntoUserLookUp(Map<String, Object> userMap, RequestContext context) {
-    List<Map<String, Object>> list = new ArrayList<>();
-    Map<String, Object> lookUp = new HashMap<>();
-    if (userMap.get(JsonKey.PHONE) != null) {
-      lookUp.put(JsonKey.TYPE, JsonKey.PHONE);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.PHONE));
-      list.add(lookUp);
-    }
-    if (userMap.get(JsonKey.EMAIL) != null) {
-      lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.EMAIL));
-      list.add(lookUp);
-    }
-    if (CollectionUtils.isNotEmpty((List) userMap.get(JsonKey.EXTERNAL_IDS))) {
-      Map<String, Object> externalId =
-          ((List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS))
-              .stream()
-              .filter(x -> x.get(JsonKey.ID_TYPE).equals(x.get(JsonKey.PROVIDER)))
-              .findFirst()
-              .orElse(null);
-      if (MapUtils.isNotEmpty(externalId)) {
-        lookUp = new HashMap<>();
-        lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
-        lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-        // provider is the orgId, not the channel
-        lookUp.put(
-            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
-        list.add(lookUp);
-      }
-    }
-    if (userMap.get(JsonKey.USERNAME) != null) {
-      lookUp = new HashMap<>();
-      lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
-      lookUp.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
-      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
-      list.add(lookUp);
-    }
-    Response response = null;
-    if (CollectionUtils.isNotEmpty(list)) {
-      response = userLookupService.insertRecords(list, context);
-    }
-    return response;
   }
 }

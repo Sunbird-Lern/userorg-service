@@ -1,19 +1,18 @@
 package org.sunbird.service.user.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.dao.user.UserLookupDao;
 import org.sunbird.dao.user.impl.UserLookupDaoImpl;
-import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
@@ -23,10 +22,6 @@ import org.sunbird.util.ProjectUtil;
 
 public class UserLookUpServiceImpl implements UserLookupService {
   private static LoggerUtil logger = new LoggerUtil(UserLookUpServiceImpl.class);
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
-  private static Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
   private static UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
   private static UserLookupService userLookupService = null;
 
@@ -60,6 +55,7 @@ public class UserLookUpServiceImpl implements UserLookupService {
   }
 
   public void checkEmailUniqueness(User user, String opType, RequestContext context) {
+    logger.debug(context, "UserLookUpServiceImpl:checkEmailUniqueness started");
     String email = user.getEmail();
     if (StringUtils.isNotBlank(email)) {
       List<Map<String, Object>> userMapList = userLookupDao.getEmailByType(email, context);
@@ -88,6 +84,7 @@ public class UserLookUpServiceImpl implements UserLookupService {
   }
 
   public void checkPhoneUniqueness(User user, String opType, RequestContext context) {
+    logger.debug(context, "UserLookUpServiceImpl:checkPhoneUniqueness started");
     // Get Phone configuration if not found , by default phone will be unique across
     // the application
     String phone = user.getPhone();
@@ -107,6 +104,7 @@ public class UserLookUpServiceImpl implements UserLookupService {
   }
 
   public void checkExternalIdUniqueness(User user, String operation, RequestContext context) {
+    logger.debug(context, "UserLookUpServiceImpl:checkExternalIdUniqueness started");
     if (CollectionUtils.isNotEmpty(user.getExternalIds())) {
       for (Map<String, String> externalId : user.getExternalIds()) {
         if (StringUtils.isNotBlank(externalId.get(JsonKey.ID))
@@ -161,8 +159,53 @@ public class UserLookUpServiceImpl implements UserLookupService {
   }
 
   @Override
-  public Response insertRecords(List<Map<String, Object>> list, RequestContext context) {
-    return userLookupDao.insertRecords(list, context);
+  public Response insertRecords(Map<String, Object> userMap, RequestContext context) {
+    String userId = (String) userMap.get(JsonKey.ID);
+    logger.debug(context, "UserLookUpServiceImpl:insertRecords called for userId: " + userId);
+    Response response = null;
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> lookUp = new HashMap<>();
+    if (userMap.get(JsonKey.PHONE) != null) {
+      lookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      lookUp.put(JsonKey.USER_ID, userId);
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.PHONE));
+      list.add(lookUp);
+    }
+    if (userMap.get(JsonKey.EMAIL) != null) {
+      lookUp = new HashMap<>();
+      lookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      lookUp.put(JsonKey.USER_ID, userId);
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.EMAIL));
+      list.add(lookUp);
+    }
+    if (CollectionUtils.isNotEmpty((List) userMap.get(JsonKey.EXTERNAL_IDS))) {
+      Map<String, Object> externalId =
+          ((List<Map<String, Object>>) userMap.get(JsonKey.EXTERNAL_IDS))
+              .stream()
+              .filter(x -> x.get(JsonKey.ID_TYPE).equals(x.get(JsonKey.PROVIDER)))
+              .findFirst()
+              .orElse(null);
+      if (MapUtils.isNotEmpty(externalId)) {
+        lookUp = new HashMap<>();
+        lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
+        lookUp.put(JsonKey.USER_ID, userId);
+        // provider is the orgId, not the channel
+        lookUp.put(
+            JsonKey.VALUE, externalId.get(JsonKey.ID) + "@" + externalId.get(JsonKey.PROVIDER));
+        list.add(lookUp);
+      }
+    }
+    if (userMap.get(JsonKey.USERNAME) != null) {
+      lookUp = new HashMap<>();
+      lookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
+      lookUp.put(JsonKey.USER_ID, userId);
+      lookUp.put(JsonKey.VALUE, userMap.get(JsonKey.USERNAME));
+      list.add(lookUp);
+    }
+    if (CollectionUtils.isNotEmpty(list)) {
+      response = userLookupDao.insertRecords(list, context);
+    }
+    return response;
   }
 
   @Override

@@ -71,6 +71,22 @@ public class UserCreateRequestValidator {
     }
   }
 
+  public static void validatePrimaryEmailOrPhone(
+      Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
+    String userPrimaryPhone = (String) userReqMap.get(JsonKey.PHONE);
+    String userPrimaryEmail = (String) userReqMap.get(JsonKey.EMAIL);
+    String recoveryEmail = (String) userDbRecord.get(JsonKey.RECOVERY_EMAIL);
+    String recoveryPhone = (String) userDbRecord.get(JsonKey.RECOVERY_PHONE);
+    if (StringUtils.isNotBlank(userPrimaryEmail)
+        && Matcher.matchIdentifiers(userPrimaryEmail, recoveryEmail)) {
+      throwRecoveryParamsMatchException(JsonKey.EMAIL, JsonKey.RECOVERY_EMAIL);
+    }
+    if (StringUtils.isNotBlank(userPrimaryPhone)
+        && Matcher.matchIdentifiers(userPrimaryPhone, recoveryPhone)) {
+      throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
+    }
+  }
+
   private static void throwRecoveryParamsMatchException(String type, String recoveryType) {
     ProjectCommonException.throwClientErrorException(
         ResponseCode.recoveryParamsMatchException,

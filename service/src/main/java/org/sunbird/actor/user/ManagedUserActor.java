@@ -24,7 +24,9 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserLookupService;
 import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.*;
@@ -40,6 +42,7 @@ public class ManagedUserActor extends UserBaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserClient userClient = UserClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
+  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   protected UserCreateRequestValidator userCreateRequestValidator =
@@ -139,7 +142,7 @@ public class ManagedUserActor extends UserBaseActor {
     userMap.remove(JsonKey.PASSWORD);
     userMap.remove(JsonKey.DOB_VALIDATION_DONE);
     Response response = userService.createUser(userMap, actorMessage.getRequestContext());
-    insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
+    userLookupService.insertRecords(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
