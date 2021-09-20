@@ -43,6 +43,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserExternalIdentityService;
 import org.sunbird.service.user.UserProfileReadService;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
@@ -66,6 +67,7 @@ import scala.concurrent.Promise;
   Util.class,
   SystemSettingClientImpl.class,
   UserServiceImpl.class,
+  OrgServiceImpl.class,
   UserUtil.class,
   LocationClientImpl.class,
   DataCacheHandler.class,
@@ -89,6 +91,7 @@ public class UserProfileReadActorTest {
   private static final Props props = Props.create(UserProfileReadActor.class);
   private static Map<String, Object> reqMap;
   private static UserServiceImpl userService;
+  private static OrgServiceImpl orgService;
   private static CassandraOperationImpl cassandraOperation;
   private static DefaultEncryptionServiceImpl encService;
   private static DefaultDecryptionServiceImpl decService;
@@ -128,16 +131,18 @@ public class UserProfileReadActorTest {
             Mockito.any()))
         .thenReturn(new HashMap<>());
 
+    PowerMockito.mockStatic(OrgServiceImpl.class);
+    orgService = mock(OrgServiceImpl.class);
+    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("anyId");
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("rootOrgId");
+
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
     when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("anyId");
-    when(userService.getCustodianChannel(
-            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any()))
-        .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId");
+
     PowerMockito.mockStatic(EsClientFactory.class);
     PowerMockito.mockStatic(Util.class);
 

@@ -53,6 +53,7 @@ public class SSOUserCreateActor extends UserBaseActor {
 
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private UserService userService = UserServiceImpl.getInstance();
+  private OrgService orgService = OrgServiceImpl.getInstance();
   private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private OrgExternalService orgExternalService = new OrgExternalServiceImpl();
   private ObjectMapper mapper = new ObjectMapper();
@@ -131,7 +132,6 @@ public class SSOUserCreateActor extends UserBaseActor {
 
       // Fetch locationids of the suborg and update the location of sso user
       if (!isCustodianOrg) {
-        OrgService orgService = OrgServiceImpl.getInstance();
         Map<String, Object> orgMap = orgService.getOrgById(orgId, actorMessage.getRequestContext());
         if (MapUtils.isNotEmpty(orgMap)) {
           userMap.put(JsonKey.PROFILE_LOCATION, orgMap.get(JsonKey.ORG_LOCATION));
@@ -220,7 +220,8 @@ public class SSOUserCreateActor extends UserBaseActor {
     syncResponse.putAll(response.getResult());
 
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
-      Map<String, Object> userDetails = Util.getUserDetails(userId, request.getRequestContext());
+      Map<String, Object> userDetails =
+          userService.getUserDetailsForES(userId, request.getRequestContext());
       Future<Response> future =
           esUtil
               .save(
@@ -256,7 +257,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
     if (StringUtils.isNotBlank(requestedChannel)) {
-      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
+      fetchedRootOrgIdByChannel = orgService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidParameterValue.getErrorCode(),
@@ -292,7 +293,7 @@ public class SSOUserCreateActor extends UserBaseActor {
         } else {
           // fetch rootorgid by requested orgid channel
           String rootOrgId =
-              userService.getRootOrgIdFromChannel(fetchedOrgById.getChannel(), context);
+              orgService.getRootOrgIdFromChannel(fetchedOrgById.getChannel(), context);
           userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
           userMap.put(JsonKey.CHANNEL, fetchedOrgById.getChannel());
         }

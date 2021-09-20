@@ -27,6 +27,8 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
@@ -39,6 +41,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
   private BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -379,7 +382,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         String channel = null;
         // channel is required only in case of the user type bulk upload.
         if (StringUtils.isNotBlank(objectType) && objectType.equalsIgnoreCase(JsonKey.USER)) {
-          channel = Util.getChannel(rootOrgId, context);
+          channel = orgService.getChannel(rootOrgId, context);
         }
         for (int i = 1; i < dataList.size(); i++) {
           dataMap = new HashMap<>();

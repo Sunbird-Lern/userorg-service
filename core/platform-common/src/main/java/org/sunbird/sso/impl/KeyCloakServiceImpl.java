@@ -1,7 +1,6 @@
 package org.sunbird.sso.impl;
 
 import static java.util.Arrays.asList;
-import static org.sunbird.util.ProjectUtil.isNotNull;
 
 import java.security.KeyFactory;
 import java.security.PublicKey;
@@ -95,12 +94,12 @@ public class KeyCloakServiceImpl implements SSOManager {
       String fedUserId = getFederatedUserId(userId);
       UserResource resource =
           keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      if (isNotNull(resource)) {
+      if (null != (resource)) {
         resource.remove();
       }
     } catch (Exception ex) {
       logger.error(context, "Error occurred : ", ex);
-      ProjectUtil.createAndThrowInvalidUserDataException();
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrData);
     }
     return JsonKey.SUCCESS;
   }
@@ -150,15 +149,13 @@ public class KeyCloakServiceImpl implements SSOManager {
           keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
       UserRepresentation ur = resource.toRepresentation();
       ur.setEnabled(status);
-      if (isNotNull(resource)) {
-        resource.update(ur);
-      }
+      resource.update(ur);
     } catch (Exception e) {
       logger.error(
           context,
           "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ",
           e);
-      ProjectUtil.createAndThrowInvalidUserDataException();
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrData);
     }
   }
 
@@ -171,7 +168,7 @@ public class KeyCloakServiceImpl implements SSOManager {
    */
   private void validateUserId(String userId) {
     if (StringUtils.isBlank(userId)) {
-      ProjectUtil.createAndThrowInvalidUserDataException();
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrData);
     }
   }
 

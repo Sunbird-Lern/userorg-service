@@ -1,10 +1,12 @@
 package org.sunbird.dao.location.impl;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
+import akka.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import akka.dispatch.Futures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,22 +28,19 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import scala.concurrent.Promise;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        ServiceFactory.class,
-        ElasticSearchRestHighImpl.class,
-        EsClientFactory.class,
-        ElasticSearchHelper.class
+  ServiceFactory.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class,
+  ElasticSearchHelper.class
 })
 @PowerMockIgnore({
-        "javax.management.*",
-        "javax.net.ssl.*",
-        "javax.security.*",
-        "jdk.internal.reflect.*",
-        "javax.crypto.*"
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class LocationDaoImplTest {
   @Before
@@ -55,23 +54,28 @@ public class LocationDaoImplTest {
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(esRespone);
     when(esSearch.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
-            .thenReturn(promise.future());
+        .thenReturn(promise.future());
+
+    Promise<String> promiseL = Futures.promise();
+    promiseL.success("4654546-879-54656");
+    when(esSearch.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promiseL.future());
 
     PowerMockito.mockStatic(ServiceFactory.class);
     CassandraOperationImpl cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.updateRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getSuccessResponse());
+        .thenReturn(getSuccessResponse());
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(getSuccessResponse());
+        .thenReturn(getSuccessResponse());
     when(cassandraOperation.deleteRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(getSuccessResponse());
+        .thenReturn(getSuccessResponse());
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(getSuccessResponse());
+        .thenReturn(getSuccessResponse());
   }
 
   @Test
@@ -166,6 +170,16 @@ public class LocationDaoImplTest {
     searchRequestMap.put(JsonKey.FILTERS, filter);
     LocationDaoImpl dao = new LocationDaoImpl();
     Response response = dao.search(searchRequestMap, new RequestContext());
+    Assert.assertNotNull(response);
+  }
+
+  @Test
+  public void saveToEs() {
+    Map<String, Object> data = new HashMap<>();
+    data.put(JsonKey.ID, "546546-6787-5476");
+    data.put(JsonKey.LOCATION_CODES, "code");
+    LocationDaoImpl dao = new LocationDaoImpl();
+    String response = dao.saveLocationToEs("546546-6787-5476", data, new RequestContext());
     Assert.assertNotNull(response);
   }
 

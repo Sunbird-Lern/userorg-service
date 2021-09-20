@@ -282,14 +282,6 @@ public class ProjectUtil {
     }
   }
 
-  public static boolean isNull(Object obj) {
-    return null == obj ? true : false;
-  }
-
-  public static boolean isNotNull(Object obj) {
-    return null != obj ? true : false;
-  }
-
   public static String formatMessage(String exceptionMsg, Object... fieldValue) {
     return MessageFormat.format(exceptionMsg, fieldValue);
   }
@@ -432,34 +424,6 @@ public class ProjectUtil {
     }
   }
 
-  /**
-   * This method will do the phone number validation check
-   *
-   * @param phone String
-   * @return boolean
-   */
-  public static boolean validatePhoneNumber(String phone) {
-    String phoneNo = "";
-    phoneNo = phone.replace("+", "");
-    if (phoneNo.matches("\\d{10}")) return true;
-    else if (phoneNo.matches("\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
-    else if (phoneNo.matches("\\d{3}-\\d{3}-\\d{4}\\s(x|(ext))\\d{3,5}")) return true;
-    else return (phoneNo.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}"));
-  }
-
-  public static Map<String, String> getEkstepHeader() {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    return headerMap;
-  }
-
   public static boolean validatePhone(String phNumber, String countryCode) {
     PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
     String contryCode = countryCode;
@@ -559,37 +523,6 @@ public class ProjectUtil {
       logger.error("isDateValidFormat: " + ex.getMessage(), ex);
     }
     return date != null;
-  }
-
-  /** This method will create a new ProjectCommonException of type server Error and throws it. */
-  public static void createAndThrowServerError() {
-    throw new ProjectCommonException(
-        ResponseCode.SERVER_ERROR.getErrorCode(),
-        ResponseCode.SERVER_ERROR.getErrorMessage(),
-        ResponseCode.SERVER_ERROR.getResponseCode());
-  }
-
-  /**
-   * This method will create and return server exception to caller.
-   *
-   * @param responseCode ResponseCode
-   * @return ProjectCommonException
-   */
-  public static ProjectCommonException createServerError(ResponseCode responseCode) {
-    return new ProjectCommonException(
-        responseCode.getErrorCode(),
-        responseCode.getErrorMessage(),
-        ResponseCode.SERVER_ERROR.getResponseCode());
-  }
-
-  /**
-   * This method will create ProjectCommonException of type invalidUserDate exception and throws it.
-   */
-  public static void createAndThrowInvalidUserDataException() {
-    throw new ProjectCommonException(
-        ResponseCode.invalidUsrData.getErrorCode(),
-        ResponseCode.invalidUsrData.getErrorMessage(),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   public static String getConfigValue(String key) {

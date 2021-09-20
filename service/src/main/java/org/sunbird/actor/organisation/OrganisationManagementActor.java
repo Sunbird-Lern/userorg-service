@@ -115,7 +115,7 @@ public class OrganisationManagementActor extends BaseActor {
               ? request.get(JsonKey.IS_SSO_ROOTORG_ENABLED)
               : false);
       if (!bool) {
-        sender().tell(ProjectUtil.createServerError(ResponseCode.channelRegFailed), self());
+        ProjectCommonException.throwServerErrorException(ResponseCode.channelRegFailed);
         return;
       }
     } else {
@@ -167,9 +167,9 @@ public class OrganisationManagementActor extends BaseActor {
 
       Integer currentStatus = (Integer) orgDao.get(JsonKey.STATUS);
       Integer nextStatus = (Integer) request.get(JsonKey.STATUS);
-      if (!(Util.checkOrgStatusTransition(currentStatus, nextStatus))) {
+      if (!(orgService.checkOrgStatusTransition(currentStatus, nextStatus))) {
         logger.info(actorMessage.getRequestContext(), "Invalid Org State transation");
-        sender().tell(ProjectUtil.createClientException(ResponseCode.invalidRequestData), self());
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
         return;
       }
       Map<String, Object> updateOrgDao = new HashMap<>();
@@ -349,7 +349,7 @@ public class OrganisationManagementActor extends BaseActor {
           tempMap.put(JsonKey.LICENSE, license);
           boolean bool = orgService.updateChannel(tempMap, actorMessage.getRequestContext());
           if (!bool) {
-            sender().tell(ProjectUtil.createServerError(ResponseCode.channelRegFailed), self());
+            ProjectCommonException.throwClientErrorException(ResponseCode.channelRegFailed);
             return;
           }
         }
