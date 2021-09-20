@@ -121,8 +121,7 @@ public class UserDaoImpl implements UserDao {
     }
     logger.info(
         context,
-        "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier "
-            + identifier);
+        "updateUserDataToES:unable to save the user data to ES with identifier " + identifier);
     return false;
   }
 
