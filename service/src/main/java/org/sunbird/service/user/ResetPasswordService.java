@@ -1,5 +1,6 @@
 package org.sunbird.service.user;
 
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -9,41 +10,39 @@ import org.sunbird.url.URLShortner;
 import org.sunbird.url.URLShortnerImpl;
 import org.sunbird.util.ProjectUtil;
 
-import java.util.Map;
-
 public class ResetPasswordService {
 
   private LoggerUtil logger = new LoggerUtil(ResetPasswordService.class);
 
   public String getUserRequiredActionLink(
-    Map<String, Object> templateMap, boolean isUrlShortRequired, RequestContext context) {
+      Map<String, Object> templateMap, boolean isUrlShortRequired, RequestContext context) {
     URLShortner urlShortner = new URLShortnerImpl();
     String redirectUri =
-      StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
-        ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
-        : null;
-    logger.info(context, "Util:getUserRequiredActionLink redirectURI = " + redirectUri);
+        StringUtils.isNotBlank((String) templateMap.get(JsonKey.REDIRECT_URI))
+            ? ((String) templateMap.get(JsonKey.REDIRECT_URI))
+            : null;
+    logger.debug(context, "Util:getUserRequiredActionLink redirectURI = " + redirectUri);
     if (StringUtils.isBlank((String) templateMap.get(JsonKey.PASSWORD))) {
       String url =
-        KeycloakRequiredActionLinkUtil.getLink(
-          (String) templateMap.get(JsonKey.USERNAME),
-          redirectUri,
-          KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD,
-          context);
+          KeycloakRequiredActionLinkUtil.getLink(
+              (String) templateMap.get(JsonKey.USERNAME),
+              redirectUri,
+              KeycloakRequiredActionLinkUtil.UPDATE_PASSWORD,
+              context);
 
       templateMap.put(
-        JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url,context) : url);
+          JsonKey.SET_PASSWORD_LINK, isUrlShortRequired ? urlShortner.shortUrl(url, context) : url);
       return isUrlShortRequired ? urlShortner.shortUrl(url, context) : url;
 
     } else {
       String url =
-        KeycloakRequiredActionLinkUtil.getLink(
-          (String) templateMap.get(JsonKey.USERNAME),
-          redirectUri,
-          KeycloakRequiredActionLinkUtil.VERIFY_EMAIL,
-          context);
+          KeycloakRequiredActionLinkUtil.getLink(
+              (String) templateMap.get(JsonKey.USERNAME),
+              redirectUri,
+              KeycloakRequiredActionLinkUtil.VERIFY_EMAIL,
+              context);
       templateMap.put(
-        JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url, context) : url);
+          JsonKey.VERIFY_EMAIL_LINK, isUrlShortRequired ? urlShortner.shortUrl(url, context) : url);
       return isUrlShortRequired ? urlShortner.shortUrl(url, context) : url;
     }
   }
@@ -60,5 +59,4 @@ public class ResetPasswordService {
     webUrl.append(slug);
     return webUrl.toString();
   }
-
 }
