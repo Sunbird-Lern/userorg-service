@@ -24,6 +24,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
@@ -33,7 +34,7 @@ public class UserStatusControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() throws Exception {
-    setup(DummyActor.class);
+    setup(ACTORS.USER_STATUS_ACTOR, DummyActor.class);
   }
 
   @Test

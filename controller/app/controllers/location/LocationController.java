@@ -1,11 +1,13 @@
 package controllers.location;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.actor.location.validator.BaseLocationRequestValidator;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.LocationActorOperation;
@@ -20,6 +22,10 @@ import play.mvc.Result;
  */
 public class LocationController extends BaseController {
 
+  @Inject
+  @Named("location_actor")
+  private ActorRef locationActor;
+
   BaseLocationRequestValidator validator = new BaseLocationRequestValidator();
   /**
    * Method to create new location.
@@ -33,7 +39,6 @@ public class LocationController extends BaseController {
    * @return Return a promise for create location API result
    */
   public CompletionStage<Result> createLocation(Http.Request httpRequest) {
-
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
@@ -41,7 +46,7 @@ public class LocationController extends BaseController {
               LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode, httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateCreateLocationRequest(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -59,7 +64,6 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result
    */
   public CompletionStage<Result> updateLocation(Http.Request httpRequest) {
-
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       Request request =
@@ -67,7 +71,7 @@ public class LocationController extends BaseController {
               LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode, httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateUpdateLocationRequest(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -89,7 +93,7 @@ public class LocationController extends BaseController {
       requestMap.put(JsonKey.LOCATION_ID, locationId);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateDeleteLocationRequest(locationId);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -112,7 +116,7 @@ public class LocationController extends BaseController {
               LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode, httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateSearchLocationRequest(request);
-      return actorResponseHandler(getActorRef(), request, timeout, null, httpRequest);
+      return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }

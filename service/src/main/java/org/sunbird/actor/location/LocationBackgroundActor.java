@@ -1,22 +1,12 @@
 package org.sunbird.actor.location;
 
 import java.util.Map;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 
-/**
- * This class will handle all background service for locationActor.
- *
- * @author Amit Kumar
- */
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"upsertLocationDataToES", "deleteLocationDataFromES"}
-)
 public class LocationBackgroundActor extends BaseLocationActor {
 
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
@@ -33,7 +23,7 @@ public class LocationBackgroundActor extends BaseLocationActor {
         deleteLocationDataFromES(request);
         break;
       default:
-        onReceiveUnsupportedOperation("LocationBackgroundActor");
+        onReceiveUnsupportedOperation();
     }
   }
 

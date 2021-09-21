@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,9 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -35,11 +37,6 @@ import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {"createUser", "createSSOUser"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class SSOUserCreateActor extends UserBaseActor {
 
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
@@ -48,6 +45,18 @@ public class SSOUserCreateActor extends UserBaseActor {
   private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private SSOUserService ssoUserService = SSOUserServiceImpl.getInstance();
+
+  @Inject
+  @Named("user_profile_update_actor")
+  private ActorRef userProfileUpdateActor;
+
+  @Inject
+  @Named("background_job_manager_actor")
+  private ActorRef backgroundJobManager;
+
+  @Inject
+  @Named("user_on_boarding_notification_actor")
+  private ActorRef userOnBoardingNotificationActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -59,7 +68,7 @@ public class SSOUserCreateActor extends UserBaseActor {
         createSSOUser(request);
         break;
       default:
-        onReceiveUnsupportedOperation("SSOUserCreateActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -103,6 +112,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
     requestMap = UserUtil.encryptUserData(userMap);
+    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     // removing roles from requestMap, so it won't get save in user table
     List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
     removeUnwanted(requestMap);
@@ -133,9 +143,7 @@ public class SSOUserCreateActor extends UserBaseActor {
       }
       resp =
           userService.saveUserAttributes(
-              userRequest,
-              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
-              request.getRequestContext());
+              userRequest, userProfileUpdateActor, request.getRequestContext());
     } else {
       logger.info(
           request.getRequestContext(), "SSOUserCreateActor:processSSOUser: User creation failure");
@@ -152,7 +160,8 @@ public class SSOUserCreateActor extends UserBaseActor {
     syncResponse.putAll(response.getResult());
 
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
-      Map<String, Object> userDetails = Util.getUserDetails(userId, request.getRequestContext());
+      Map<String, Object> userDetails =
+          userService.getUserDetailsForES(userId, request.getRequestContext());
       Future<Response> future =
           esUtil
               .save(
@@ -208,7 +217,11 @@ public class SSOUserCreateActor extends UserBaseActor {
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.info(
         context, "SSOUserCreateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    tellToAnother(userRequest);
+    try {
+      backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while saving user data to ES", ex);
+    }
   }
 
   private void sendEmailAndSms(Map<String, Object> userMap, RequestContext context) {
@@ -217,6 +230,10 @@ public class SSOUserCreateActor extends UserBaseActor {
     EmailAndSmsRequest.getRequest().putAll(userMap);
     EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
-    tellToAnother(EmailAndSmsRequest);
+    try {
+      userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending notification", ex);
+    }
   }
 }

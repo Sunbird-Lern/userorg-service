@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -26,6 +23,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
@@ -37,7 +35,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() throws Exception {
-    setup(DummyActor.class);
+    setup(Arrays.asList(ACTORS.USER_ROLE_ACTOR, ACTORS.FETCH_USER_ROLE_ACTOR), DummyActor.class);
   }
 
   @Test

@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
@@ -28,6 +27,8 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
@@ -36,15 +37,11 @@ import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-/** This actor will handle bulk upload operation . */
-@ActorConfig(
-  tasks = {"bulkUpload", "getBulkOpStatus"},
-  asyncTasks = {}
-)
 public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
   private BulkUploadProcessTaskDao bulkUploadProcessTaskDao = new BulkUploadProcessTaskDaoImpl();
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -56,7 +53,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         .equalsIgnoreCase(ActorOperations.GET_BULK_OP_STATUS.getValue())) {
       getUploadStatus(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -65,7 +62,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
     ObjectMapper mapper = new ObjectMapper();
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     DecryptionService decryptionService =
-        org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+        org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
     Response response = null;
     List<String> fields =
         Arrays.asList(
@@ -385,7 +382,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         String channel = null;
         // channel is required only in case of the user type bulk upload.
         if (StringUtils.isNotBlank(objectType) && objectType.equalsIgnoreCase(JsonKey.USER)) {
-          channel = Util.getChannel(rootOrgId, context);
+          channel = orgService.getChannel(rootOrgId, context);
         }
         for (int i = 1; i < dataList.size(); i++) {
           dataMap = new HashMap<>();
@@ -453,7 +450,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
       request.setRequestContext(context);
       request.put(JsonKey.PROCESS_ID, processId);
       request.setOperation(ActorOperations.PROCESS_BULK_UPLOAD.getValue());
-      tellToAnother(request);
+      // tellToAnother(request);
     }
     logger.info(
         context,

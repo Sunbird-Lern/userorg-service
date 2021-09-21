@@ -1,17 +1,14 @@
 package controllers;
 
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import modules.OnRequestHandler;
 import modules.StartModule;
@@ -22,19 +19,19 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import play.Application;
 import play.Mode;
+import play.inject.Bindings;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 import util.RequestInterceptor;
 
 @RunWith(PowerMockRunner.class)
@@ -49,24 +46,11 @@ import util.RequestInterceptor;
   "com.sun.org.apache.xerces.*",
   "org.xml.*"
 })
-@PrepareForTest({
-  RequestInterceptor.class,
-  TelemetryWriter.class,
-  SunbirdMWService.class,
-  ActorSelection.class,
-  BaseMWService.class
-})
+@PrepareForTest({RequestInterceptor.class, TelemetryWriter.class, ActorSelection.class})
 public abstract class BaseApplicationTest {
   protected Application application;
-  private ActorSystem system;
-  private Props props;
 
-  public <T> void setup(Class<T> actorClass) {
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
+  public <T> void setup(ACTORS actor, Class<T> actorClass) {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "userId");
     try {
@@ -75,12 +59,34 @@ public abstract class BaseApplicationTest {
               .in(new File("path/to/app"))
               .in(Mode.TEST)
               .disable(StartModule.class)
+              .overrides(Bindings.bind(actor.getActorClass()).to(actorClass))
               .build();
       Helpers.start(application);
-      system = ActorSystem.create("system");
-      props = Props.create(actorClass);
-      ActorRef subject = system.actorOf(props);
-      BaseController.setActorRef(subject);
+      mockStatic(RequestInterceptor.class);
+      mockStatic(TelemetryWriter.class);
+      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+          .thenReturn(userAuthentication);
+      mockStatic(OnRequestHandler.class);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public <T> void setup(List<ACTORS> actors, Class<T> actorClass) {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "userId");
+    try {
+      GuiceApplicationBuilder applicationBuilder =
+          new GuiceApplicationBuilder()
+              .in(new File("path/to/app"))
+              .in(Mode.TEST)
+              .disable(StartModule.class);
+      for (ACTORS actor : actors) {
+        applicationBuilder =
+            applicationBuilder.overrides(Bindings.bind(actor.getActorClass()).to(actorClass));
+      }
+      application = applicationBuilder.build();
+      Helpers.start(application);
       mockStatic(RequestInterceptor.class);
       mockStatic(TelemetryWriter.class);
       PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))

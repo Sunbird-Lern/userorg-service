@@ -502,6 +502,7 @@ public final class JsonKey {
   public static final String USER_FEED_DB = "user_feed";
   public static final String USER_FEED = "userFeed";
   public static final String FEED_DATA = "data";
+  public static final String FEEDS = "feeds";
   public static final String REJECT = "reject";
   public static final String FEED_ID = "feedId";
   public static final String LICENSE = "license";
@@ -640,6 +641,8 @@ public final class JsonKey {
   public static final String TENANT_PREFERENCE_V2_DB = "tenant_preference_v2";
   public static final String UPDATE_ORG_STATUS = "updateOrgStatus";
   public static final String SUNBIRD_WEB_URL = "sunbird_web_url";
+  public static final String IDS = "ids";
+  public static final String NOTIFICATIONS = "notifications";
 
   private JsonKey() {}
 }

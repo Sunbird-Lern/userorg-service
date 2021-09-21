@@ -1,7 +1,10 @@
 package controllers.organisationmanagement;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
@@ -13,8 +16,17 @@ import play.mvc.Result;
 
 public class OrgController extends BaseController {
 
+  @Inject
+  @Named("org_management_actor")
+  private ActorRef organisationManagementActor;
+
+  @Inject
+  @Named("search_handler_actor")
+  private ActorRef searchHandlerActor;
+
   public CompletionStage<Result> createOrg(Http.Request httpRequest) {
     return handleRequest(
+        organisationManagementActor,
         OrganisationActorOperation.CREATE_ORG.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
@@ -27,6 +39,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> updateOrg(Http.Request httpRequest) {
     return handleRequest(
+        organisationManagementActor,
         OrganisationActorOperation.UPDATE_ORG.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
@@ -39,6 +52,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> updateOrgStatus(Http.Request httpRequest) {
     return handleRequest(
+        organisationManagementActor,
         OrganisationActorOperation.UPDATE_ORG_STATUS.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
@@ -51,6 +65,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> getOrgDetails(Http.Request httpRequest) {
     return handleRequest(
+        organisationManagementActor,
         OrganisationActorOperation.GET_ORG_DETAILS.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
@@ -63,6 +78,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> search(Http.Request httpRequest) {
     return handleSearchRequest(
+        searchHandlerActor,
         ActorOperations.ORG_SEARCH.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
@@ -78,6 +94,7 @@ public class OrgController extends BaseController {
 
   public CompletionStage<Result> searchV2(Http.Request httpRequest) {
     return handleSearchRequest(
+        searchHandlerActor,
         ActorOperations.ORG_SEARCH_V2.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {

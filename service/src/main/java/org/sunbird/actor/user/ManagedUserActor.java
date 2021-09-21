@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import java.util.ArrayList;
@@ -7,9 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.client.user.UserClient;
@@ -20,7 +22,6 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
-import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -33,11 +34,6 @@ import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {"createUserV4", "createManagedUser", "getManagedUsers"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class ManagedUserActor extends UserBaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserClient userClient = UserClientImpl.getInstance();
@@ -47,6 +43,10 @@ public class ManagedUserActor extends UserBaseActor {
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
   protected UserCreateRequestValidator userCreateRequestValidator =
       new UserCreateRequestValidator();
+
+  @Inject
+  @Named("search_handler_actor")
+  private ActorRef searchHandlerActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -61,7 +61,7 @@ public class ManagedUserActor extends UserBaseActor {
         getManagedUsers(request);
         break;
       default:
-        onReceiveUnsupportedOperation("ManagedUserActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -210,10 +210,7 @@ public class ManagedUserActor extends UserBaseActor {
     boolean withTokens = Boolean.valueOf((String) request.get(JsonKey.WITH_TOKENS));
 
     Map<String, Object> searchResult =
-        userClient.searchManagedUser(
-            getActorRef(ActorOperations.USER_SEARCH.getValue()),
-            request,
-            request.getRequestContext());
+        userClient.searchManagedUser(searchHandlerActor, request, request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;

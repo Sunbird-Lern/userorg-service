@@ -47,7 +47,7 @@ public enum ActorOperations {
   INSERT_USER_NOTES_ES("insertUserNotesToElastic"),
   UPDATE_USER_NOTES_ES("updateUserNotesToElastic"),
   USER_CURRENT_LOGIN("userCurrentLogin"),
-  CREATE_TENANT_PREFERENCE("createTanentPreference"),
+  CREATE_TENANT_PREFERENCE("createTenantPreference"),
   UPDATE_TENANT_PREFERENCE("updateTenantPreference"),
   GET_TENANT_PREFERENCE("getTenantPreference"),
   UPDATE_SYSTEM_SETTINGS("updateSystemSettings"),
@@ -81,6 +81,7 @@ public enum ActorOperations {
   CREATE_MANAGED_USER("createManagedUser"),
   V2_NOTIFICATION("v2Notification"),
   GET_MANAGED_USERS("getManagedUsers"),
+  CHECK_USER_EXISTENCE("checkUserExistence"),
   CHECK_USER_EXISTENCEV2("checkUserExistenceV2"),
   UPDATE_USER_DECLARATIONS("updateUserDeclarations"),
   UPDATE_USER_CONSENT("updateUserConsent"),
@@ -90,7 +91,8 @@ public enum ActorOperations {
   ORG_SEARCH("orgSearch"),
   ORG_SEARCH_V2("orgSearchV2"),
   USER_LOOKUP("userLookup"),
-  GET_USER_CONSENT("getUserConsent");
+  GET_USER_CONSENT("getUserConsent"),
+  GET_USER_ROLES_BY_ID("getUserRolesById");
 
   private String value;
 

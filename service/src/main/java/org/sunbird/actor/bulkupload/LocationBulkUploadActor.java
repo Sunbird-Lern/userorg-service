@@ -1,9 +1,11 @@
 package org.sunbird.actor.bulkupload;
 
+import akka.actor.ActorRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.sunbird.actor.router.ActorConfig;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.operations.BulkUploadActorOperation;
@@ -12,16 +14,10 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.Util;
 
-/**
- * Class to provide the location bulk upload functionality.
- *
- * @author arvind.
- */
-@ActorConfig(
-  tasks = {"locationBulkUpload"},
-  asyncTasks = {}
-)
 public class LocationBulkUploadActor extends BaseBulkUploadActor {
+  @Inject
+  @Named("location_bulk_upload_background_job_actor")
+  private ActorRef locationBulkUploadBackGroundJobActor;
 
   String[] bulkLocationAllowedFields = {
     JsonKey.CODE, JsonKey.NAME, JsonKey.PARENT_CODE, JsonKey.PARENT_ID
@@ -37,7 +33,7 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
         upload(request);
         break;
       default:
-        onReceiveUnsupportedOperation("LocationBulkUploadActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -72,6 +68,7 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
     Integer recordCount =
         validateAndParseRecords(fileByteArray, processId, additionalRowFields, context);
     processBulkUpload(
+        locationBulkUploadBackGroundJobActor,
         recordCount,
         processId,
         bulkUploadProcess,

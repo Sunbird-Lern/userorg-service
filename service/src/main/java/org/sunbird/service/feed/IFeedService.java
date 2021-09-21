@@ -3,6 +3,7 @@ package org.sunbird.service.feed;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.model.user.Feed;
+import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
@@ -13,21 +14,21 @@ public interface IFeedService {
    * this method will be responsible to insert the feed in the user_feed table and sync the data
    * with the ES
    *
-   * @param feed
+   * @param request
    * @param context
    * @return response
    */
-  Response insert(Feed feed, RequestContext context);
+  Response insert(Request request, RequestContext context);
 
   /**
    * this method will be responsible to update the feed in the user_feed table and sync the data
    * with the ES
    *
-   * @param feed
+   * @param request
    * @param context
    * @return response
    */
-  Response update(Feed feed, RequestContext context);
+  Response update(Request request, RequestContext context);
 
   /**
    * this method will be responsible to get the records by userId from the user_feed table
@@ -41,8 +42,8 @@ public interface IFeedService {
   /**
    * this method will be holding responsibility to delete the feed from DB and ES.
    *
-   * @param id
+   * @param request
    * @param context
    */
-  void delete(String id, String userId, String action, RequestContext context);
+  Response delete(Request request, RequestContext context);
 }

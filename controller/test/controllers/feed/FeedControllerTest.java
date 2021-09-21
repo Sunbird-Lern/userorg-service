@@ -23,6 +23,7 @@ import org.sunbird.keys.JsonKey;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
@@ -35,7 +36,7 @@ public class FeedControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.USER_FEED_ACTOR, DummyActor.class);
   }
 
   @Test

@@ -1,7 +1,10 @@
 package controllers.usermanagement;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.validator.UserFreeUpRequestValidator;
@@ -15,6 +18,10 @@ import play.mvc.Result;
  */
 public class IdentifierFreeUpController extends BaseController {
 
+  @Inject
+  @Named("identifier_free_up_actor")
+  private ActorRef identifierFreeUpActor;
+
   /**
    * this action method will be used to free Up user Identifier from user DB
    *
@@ -22,6 +29,7 @@ public class IdentifierFreeUpController extends BaseController {
    */
   public CompletionStage<Result> freeUpIdentifier(Http.Request httpRequest) {
     return handleRequest(
+        identifierFreeUpActor,
         ActorOperations.FREEUP_USER_IDENTITY.getValue(),
         httpRequest.body().asJson(),
         req -> {

@@ -25,7 +25,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
@@ -47,12 +46,12 @@ import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.feed.impl.FeedServiceImpl;
-import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.feed.FeedUtil;
 import org.sunbird.util.user.MigrationUtils;
@@ -76,8 +75,8 @@ import org.sunbird.util.user.MigrationUtils;
   UserService.class,
   OrgServiceImpl.class,
   ActorSelection.class,
-  BaseMWService.class,
-  OrgService.class
+  OrgService.class,
+  DataCacheHandler.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -105,8 +104,6 @@ public class TenantMigrationActorTest {
     PowerMockito.mockStatic(OrgService.class);
 
     ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
 
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);
@@ -203,7 +200,6 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
-    System.out.println(reqMap);
     return reqObj;
   }
 
@@ -262,7 +258,6 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
-    System.out.println(reqMap);
     return reqObj;
   }
 
@@ -327,6 +322,10 @@ public class TenantMigrationActorTest {
 
   @Test
   public void testUserSelfDeclarationMigrationWithValidatedStatus() {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    Map<String, String> dataCache = new HashMap<>();
+    dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
     CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
@@ -347,7 +346,7 @@ public class TenantMigrationActorTest {
         .thenReturn(getOrgFromCassandra());
 
     List<Map<String, Object>> listMap = new ArrayList<>();
-    listMap.add(new HashMap<String, Object>());
+    listMap.add(new HashMap<>());
     Map<String, Object> userDetails = new HashMap<>();
     userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
     userDetails.put(JsonKey.ORGANISATIONS, listMap);
@@ -355,8 +354,6 @@ public class TenantMigrationActorTest {
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
     when(userService.esGetPublicUserProfileById(Mockito.anyString(), Mockito.anyObject()))
         .thenReturn(userDetails);
-    when(userService.getCustodianOrgId(Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn("anyRootOrgId");
 
     try {
       OrgExternalServiceImpl orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);
@@ -373,16 +370,6 @@ public class TenantMigrationActorTest {
     PowerMockito.when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
         .thenReturn(getOrgandLocation());
-
-    /* when(userService.getRootOrgIdFromChannel( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
-
-    PowerMockito.when(
-            cassandraOperation.updateRecord(
-                    Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
-            .thenReturn(getSuccessUpdateResponse());
-    doNothing()
-            .when(cassandraOperation)
-            .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());*/
 
     boolean result =
         testScenario(

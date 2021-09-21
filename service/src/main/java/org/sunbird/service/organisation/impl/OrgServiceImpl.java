@@ -1,16 +1,16 @@
 package org.sunbird.service.organisation.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
+import org.sunbird.dto.SearchDTO;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -20,10 +20,12 @@ import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
+import scala.concurrent.Future;
 
 public class OrgServiceImpl implements OrgService {
 
-  public LoggerUtil logger = new LoggerUtil(this.getClass());
+  private LoggerUtil logger = new LoggerUtil(this.getClass());
+  private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private ObjectMapper mapper = new ObjectMapper();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgService orgService;
@@ -37,16 +39,31 @@ public class OrgServiceImpl implements OrgService {
     return orgService;
   }
 
+  static {
+    initializeOrgStatusTransition();
+  }
+
   @Override
   public Map<String, Object> getOrgById(String orgId, RequestContext context) {
     return orgDao.getOrgById(orgId, context);
   }
 
   @Override
+  public List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context) {
+    return getOrgByIds(orgIds, Collections.emptyList(), context);
+  }
+
+  @Override
+  public List<Map<String, Object>> getOrgByIds(
+      List<String> orgIds, List<String> fields, RequestContext context) {
+    return orgDao.getOrgByIds(orgIds, fields, context);
+  }
+
+  @Override
   public Map<String, Object> getOrgByExternalIdAndProvider(
       String externalId, String provider, RequestContext context) {
     String orgId =
-            orgExternalService.getOrgIdFromOrgExternalIdAndProvider(externalId, provider, context);
+        orgExternalService.getOrgIdFromOrgExternalIdAndProvider(externalId, provider, context);
     return getOrgById(orgId, context);
   }
 
@@ -61,7 +78,8 @@ public class OrgServiceImpl implements OrgService {
   }
 
   @Override
-  public List<Map<String, Object>> organisationSearch(Map<String, Object> filters, RequestContext context) {
+  public List<Map<String, Object>> organisationSearch(
+      Map<String, Object> filters, RequestContext context) {
     Map<String, Object> searchRequestMap = new HashMap<>();
     searchRequestMap.put(JsonKey.FILTERS, filters);
     Response response = orgDao.search(searchRequestMap, context);
@@ -73,8 +91,13 @@ public class OrgServiceImpl implements OrgService {
     return orgResponseList;
   }
 
+  @Override
+  public Future<Map<String, Object>> searchOrg(SearchDTO searchDTO, RequestContext context) {
+    return orgDao.search(searchDTO, context);
+  }
+
   public void createOrgExternalIdRecord(
-          String channel, String externalId, String orgId, RequestContext context) {
+      String channel, String externalId, String orgId, RequestContext context) {
     if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
       Map<String, Object> orgExtIdRequest = new WeakHashMap<>(3);
       orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
@@ -84,8 +107,7 @@ public class OrgServiceImpl implements OrgService {
     }
   }
 
-  public void deleteOrgExternalIdRecord(
-          String channel, String externalId, RequestContext context) {
+  public void deleteOrgExternalIdRecord(String channel, String externalId, RequestContext context) {
     if (StringUtils.isNotBlank(channel) && StringUtils.isNotBlank(externalId)) {
       Map<String, String> orgExtIdRequest = new WeakHashMap<>(3);
       orgExtIdRequest.put(JsonKey.PROVIDER, StringUtils.lowerCase(channel));
@@ -100,7 +122,7 @@ public class OrgServiceImpl implements OrgService {
       filters.put(JsonKey.SLUG, slug);
       filters.put(JsonKey.IS_TENANT, true);
       List<Map<String, Object>> list = orgService.organisationSearch(filters, context);
-      if (CollectionUtils.isNotEmpty(list)){
+      if (CollectionUtils.isNotEmpty(list)) {
         Map<String, Object> esContent = list.get(0);
         return (String) esContent.getOrDefault(JsonKey.ID, "");
       }
@@ -121,7 +143,49 @@ public class OrgServiceImpl implements OrgService {
         return list.get(0);
       }
     }
-    return new HashMap();
+    return Collections.emptyMap();
+  }
+
+  @Override
+  public String getRootOrgIdFromChannel(String channel, RequestContext context) {
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.IS_TENANT, true);
+    filters.put(JsonKey.CHANNEL, channel);
+
+    SearchDTO searchDTO = new SearchDTO();
+    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
+    Future<Map<String, Object>> esResultF = orgDao.search(searchDTO, context);
+    Map<String, Object> esResult =
+        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
+    if (MapUtils.isNotEmpty(esResult)
+        && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
+      Map<String, Object> esContent =
+          ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
+      if (null == esContent.get(JsonKey.STATUS) || (1 != (int) esContent.get(JsonKey.STATUS))) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorInactiveOrg,
+            ProjectUtil.formatMessage(
+                ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
+      }
+      return (String) esContent.get(JsonKey.ID);
+    } else {
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+  }
+
+  @Override
+  public String getChannel(String rootOrgId, RequestContext context) {
+    String channel = "";
+    Map<String, Object> resultFrRootOrg = getOrgById(rootOrgId, context);
+    if (MapUtils.isNotEmpty(resultFrRootOrg)
+        && StringUtils.isNotBlank((String) resultFrRootOrg.get(JsonKey.CHANNEL))) {
+      channel = (String) resultFrRootOrg.get(JsonKey.CHANNEL);
+    }
+    return channel;
   }
 
   /** @param req Map<String,Object> */
@@ -141,7 +205,7 @@ public class OrgServiceImpl implements OrgService {
     String regStatus = "";
     try {
       logger.info(
-              context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
+          context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -153,7 +217,7 @@ public class OrgServiceImpl implements OrgService {
       channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
       channelMap.put(JsonKey.CODE, req.get(JsonKey.ID));
       if (req.containsKey(JsonKey.LICENSE)
-              && StringUtils.isNotBlank((String) req.get(JsonKey.LICENSE))) {
+          && StringUtils.isNotBlank((String) req.get(JsonKey.LICENSE))) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, req.get(JsonKey.LICENSE));
       }
 
@@ -165,18 +229,18 @@ public class OrgServiceImpl implements OrgService {
 
       reqString = mapper.writeValueAsString(map);
       logger.info(
-              context, "Util:registerChannel: Channel registration request data = " + reqString);
+          context, "Util:registerChannel: Channel registration request data = " + reqString);
       regStatus =
-              HttpClientUtil.post(
-                      (ekStepBaseUrl
-                              + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
-                      reqString,
-                      headerMap,
-                      context);
+          HttpClientUtil.post(
+              (ekStepBaseUrl
+                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
+              reqString,
+              headerMap,
+              context);
       logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
     } catch (Exception e) {
       logger.error(
-              context, "Exception occurred while registering channel in ekstep." + e.getMessage(), e);
+          context, "Exception occurred while registering channel in ekstep." + e.getMessage(), e);
     }
 
     return regStatus.contains("OK");
@@ -202,7 +266,7 @@ public class OrgServiceImpl implements OrgService {
     String regStatus = "";
     try {
       logger.info(
-              context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
+          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
       String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
       if (StringUtils.isBlank(ekStepBaseUrl)) {
         ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
@@ -223,21 +287,76 @@ public class OrgServiceImpl implements OrgService {
       reqString = mapper.writeValueAsString(map);
 
       regStatus =
-              HttpClientUtil.patch(
-                      (ekStepBaseUrl
-                              + PropertiesCache.getInstance()
-                              .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
-                              + "/"
-                              + req.get(JsonKey.ID),
-                      reqString,
-                      headerMap,
-                      context);
+          HttpClientUtil.patch(
+              (ekStepBaseUrl
+                      + PropertiesCache.getInstance()
+                          .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
+                  + "/"
+                  + req.get(JsonKey.ID),
+              reqString,
+              headerMap,
+              context);
       logger.info(
-              context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
+          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       logger.error(
-              context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
+          context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
     }
     return regStatus.contains("OK");
+  }
+
+  @Override
+  public String saveOrgToEs(String id, Map<String, Object> data, RequestContext context) {
+    return orgDao.saveOrgToEs(id, data, context);
+  }
+
+  /**
+   * This method will take org current state and next state and check is it possible to move
+   * organization from current state to next state if possible to move then return true else false.
+   *
+   * @param currentState String
+   * @param nextState String
+   * @return boolean
+   */
+  public boolean checkOrgStatusTransition(Integer currentState, Integer nextState) {
+    List<Integer> list = orgStatusTransition.get(currentState);
+    if (null == list) {
+      return false;
+    }
+    return list.contains(nextState);
+  }
+
+  /**
+   * This method will a map of organization state transaction. which will help us to move the
+   * organization status from one Valid state to another state.
+   */
+  private static void initializeOrgStatusTransition() {
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.ACTIVE.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.INACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.INACTIVE.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.BLOCKED.getValue(),
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        ProjectUtil.OrgStatus.RETIRED.getValue(),
+        Arrays.asList(ProjectUtil.OrgStatus.RETIRED.getValue()));
+    orgStatusTransition.put(
+        null,
+        Arrays.asList(
+            ProjectUtil.OrgStatus.ACTIVE.getValue(),
+            ProjectUtil.OrgStatus.INACTIVE.getValue(),
+            ProjectUtil.OrgStatus.BLOCKED.getValue(),
+            ProjectUtil.OrgStatus.RETIRED.getValue()));
   }
 }

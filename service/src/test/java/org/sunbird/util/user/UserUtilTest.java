@@ -24,19 +24,19 @@ import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServiceImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.User;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
@@ -47,7 +47,7 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  DefaultEncryptionServivceImpl.class,
+  DefaultEncryptionServiceImpl.class,
   Util.class,
   EncryptionService.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class
@@ -99,8 +99,9 @@ public class UserUtilTest {
             cassandraOperationImpl.deleteRecord(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
-    doNothing().when(cassandraOperationImpl).deleteRecord(
-        Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
+    doNothing()
+        .when(cassandraOperationImpl)
+        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
     PowerMockito.mockStatic(Util.class);
   }
 

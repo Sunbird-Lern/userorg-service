@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
@@ -24,6 +25,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
@@ -36,7 +38,8 @@ public class OrganisationControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(
+        Arrays.asList(ACTORS.ORG_MANAGEMENT_ACTOR, ACTORS.SEARCH_HANDLER_ACTOR), DummyActor.class);
   }
 
   @Test

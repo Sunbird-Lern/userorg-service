@@ -14,7 +14,7 @@ public class ActorOperationTest {
         "updateTenantPreference", ActorOperations.UPDATE_TENANT_PREFERENCE.getValue());
     Assert.assertEquals("getTenantPreference", ActorOperations.GET_TENANT_PREFERENCE.getValue());
     Assert.assertEquals(
-        "createTanentPreference", ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
+        "createTenantPreference", ActorOperations.CREATE_TENANT_PREFERENCE.getValue());
     Assert.assertEquals("createUser", ActorOperations.CREATE_USER.getValue());
     Assert.assertEquals("updateUser", ActorOperations.UPDATE_USER.getValue());
     Assert.assertEquals(

@@ -1,6 +1,5 @@
 package org.sunbird.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigInteger;
 import java.util.*;
@@ -17,10 +16,6 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.CassandraConnectionManager;
-import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -45,59 +40,22 @@ public final class Util {
   private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
   public static final int DEFAULT_ELASTIC_DATA_LIMIT = 10000;
   public static final String KEY_SPACE_NAME = "sunbird";
-  private static Properties prop = new Properties();
-  private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static DecryptionService decService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static DataMaskingService maskingService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private static UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   static {
-    initializeOrgStatusTransition();
     initializeDBProperty();
   }
 
   private Util() {}
-
-  /**
-   * This method will a map of organization state transaction. which will help us to move the
-   * organization status from one Valid state to another state.
-   */
-  private static void initializeOrgStatusTransition() {
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.ACTIVE.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(),
-            ProjectUtil.OrgStatus.INACTIVE.getValue(),
-            ProjectUtil.OrgStatus.BLOCKED.getValue(),
-            ProjectUtil.OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.INACTIVE.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.BLOCKED.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(),
-            ProjectUtil.OrgStatus.BLOCKED.getValue(),
-            ProjectUtil.OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
-        ProjectUtil.OrgStatus.RETIRED.getValue(),
-        Arrays.asList(ProjectUtil.OrgStatus.RETIRED.getValue()));
-    orgStatusTransition.put(
-        null,
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(),
-            ProjectUtil.OrgStatus.INACTIVE.getValue(),
-            ProjectUtil.OrgStatus.BLOCKED.getValue(),
-            ProjectUtil.OrgStatus.RETIRED.getValue()));
-  }
 
   /** This method will initialize the cassandra data base property */
   private static void initializeDBProperty() {
@@ -129,45 +87,6 @@ public final class Util {
     dbInfoMap.put(JsonKey.USER_LOOKUP, getDbInfoObject(KEY_SPACE_NAME, "user_lookup"));
     dbInfoMap.put(JsonKey.LOCATION, getDbInfoObject(KEY_SPACE_NAME, JsonKey.LOCATION));
     dbInfoMap.put(JsonKey.USER_ROLES, getDbInfoObject(KEY_SPACE_NAME, JsonKey.USER_ROLES));
-  }
-
-  /**
-   * This method will take org current state and next state and check is it possible to move
-   * organization from current state to next state if possible to move then return true else false.
-   *
-   * @param currentState String
-   * @param nextState String
-   * @return boolean
-   */
-  @SuppressWarnings("rawtypes")
-  public static boolean checkOrgStatusTransition(Integer currentState, Integer nextState) {
-    List list = orgStatusTransition.get(currentState);
-    if (null == list) {
-      return false;
-    }
-    return list.contains(nextState);
-  }
-
-  /**
-   * This method will check the cassandra data base connection. first it will try to established the
-   * data base connection from provided environment variable , if environment variable values are
-   * not set then connection will be established from property file.
-   */
-  public static void checkCassandraDbConnections() {
-    CassandraConnectionManager cassandraConnectionManager =
-        CassandraConnectionMngrFactory.getInstance();
-    String nodes = System.getenv(JsonKey.SUNBIRD_CASSANDRA_IP);
-    String[] hosts = null;
-    if (StringUtils.isNotBlank(nodes)) {
-      hosts = nodes.split(",");
-    } else {
-      hosts = new String[] {"localhost"};
-    }
-    cassandraConnectionManager.createConnection(hosts);
-  }
-
-  public static String getProperty(String key) {
-    return prop.getProperty(key);
   }
 
   private static DbInfo getDbInfoObject(String keySpace, String table) {
@@ -282,27 +201,6 @@ public final class Util {
     return null != obj ? true : false;
   }
 
-  /**
-   * This method will provide user details map based on user id if user not found then it will
-   * return null.
-   *
-   * @param userId userId of the user
-   * @return userDbRecord of the user from cassandra
-   */
-  @SuppressWarnings("unchecked")
-  public static Map<String, Object> getUserbyUserId(String userId, RequestContext context) {
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    Util.DbInfo userdbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Response result =
-        cassandraOperation.getRecordById(
-            userdbInfo.getKeySpace(), userdbInfo.getTableName(), userId, context);
-    List<Map<String, Object>> list = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
-    if (!(list.isEmpty())) {
-      return list.get(0);
-    }
-    return null;
-  }
-
   public static void initializeContext(Request request, String env) {
     Map<String, Object> requestContext = request.getContext();
     env = StringUtils.isNotBlank(env) ? env : "";
@@ -367,14 +265,7 @@ public final class Util {
   }
 
   public static String encryptData(String value) {
-    try {
-      return encryptionService.encryptData(value, null);
-    } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
-    }
+    return encryptionService.encryptData(value, null);
   }
 
   /**
@@ -400,17 +291,6 @@ public final class Util {
     return searchResult;
   }
 
-  public static String getLoginId(Map<String, Object> userMap) {
-    String loginId;
-    if (StringUtils.isNotBlank((String) userMap.get(JsonKey.CHANNEL))) {
-      loginId =
-          (String) userMap.get(JsonKey.USERNAME) + "@" + (String) userMap.get(JsonKey.CHANNEL);
-    } else {
-      loginId = (String) userMap.get(JsonKey.USERNAME);
-    }
-    return loginId;
-  }
-
   public static void registerUserToOrg(Map<String, Object> userMap, RequestContext context) {
     Map<String, Object> reqMap = new WeakHashMap<>();
     reqMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
@@ -429,21 +309,6 @@ public final class Util {
     } catch (Exception e) {
       logger.error(context, e.getMessage(), e);
     }
-  }
-
-  public static String getChannel(String rootOrgId, RequestContext context) {
-    Util.DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
-    String channel = null;
-    Response resultFrRootOrg =
-        cassandraOperation.getRecordById(
-            orgDbInfo.getKeySpace(), orgDbInfo.getTableName(), rootOrgId, context);
-    if (CollectionUtils.isNotEmpty(
-        (List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE))) {
-      Map<String, Object> rootOrg =
-          ((List<Map<String, Object>>) resultFrRootOrg.get(JsonKey.RESPONSE)).get(0);
-      channel = (String) rootOrg.get(JsonKey.CHANNEL);
-    }
-    return channel;
   }
 
   @SuppressWarnings("unchecked")
@@ -481,82 +346,6 @@ public final class Util {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public static Map<String, Object> getUserDetails(String userId, RequestContext context) {
-    logger.info(context, "get user profile method call started user Id : " + userId);
-    DbInfo userDbInfo = dbInfoMap.get(JsonKey.USER_DB);
-    Response response = null;
-    List<Map<String, Object>> userList = null;
-    Map<String, Object> userDetails = null;
-    try {
-      response =
-          cassandraOperation.getRecordById(
-              userDbInfo.getKeySpace(), userDbInfo.getTableName(), userId, context);
-      userList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-      logger.info(
-          context, "Util:getUserProfile: collecting user data to save for userId : " + userId);
-    } catch (Exception e) {
-      logger.error(context, e.getMessage(), e);
-    }
-    String username = "";
-    if (CollectionUtils.isNotEmpty(userList)) {
-      userDetails = userList.get(0);
-      username = (String) userDetails.get(JsonKey.USERNAME);
-      logger.info(context, "Util:getUserDetails: userId = " + userId);
-      userDetails.put(JsonKey.ORGANISATIONS, getUserOrgDetails(userId, context));
-      Map<String, Object> orgMap =
-          getOrgDetails((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
-      if (!MapUtils.isEmpty(orgMap)) {
-        userDetails.put(JsonKey.ROOT_ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
-      } else {
-        userDetails.put(JsonKey.ROOT_ORG_NAME, "");
-      }
-      // store alltncaccepted as Map Object in ES
-      Map<String, Object> allTncAccepted =
-          (Map<String, Object>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
-      if (MapUtils.isNotEmpty(allTncAccepted)) {
-        convertTncJsonStringToMapObject(allTncAccepted);
-      }
-      // save masked email and phone number
-      addMaskEmailAndPhone(userDetails);
-      userDetails.remove(JsonKey.PASSWORD);
-      addEmailAndPhone(userDetails);
-      checkEmailAndPhoneVerified(userDetails);
-      List<Map<String, String>> userLocList = new ArrayList<>();
-      String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
-      if (StringUtils.isNotBlank(profLocation)) {
-        try {
-          userLocList = mapper.readValue(profLocation, List.class);
-        } catch (Exception e) {
-          logger.info(
-              context,
-              "Exception occurred while converting profileLocation to List<Map<String,String>>.");
-        }
-      }
-      userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
-      Map<String, Object> userTypeDetail = new HashMap<>();
-      String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
-      if (StringUtils.isNotBlank(profUserType)) {
-        try {
-          userTypeDetail = mapper.readValue(profUserType, Map.class);
-        } catch (Exception e) {
-          logger.info(
-              context,
-              "Exception occurred while converting profileUserType to Map<String,String>.");
-        }
-      }
-      userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
-      List<Map<String, Object>> userRoleList = getUserRoles(userId, context);
-      userDetails.put(JsonKey.ROLES, userRoleList);
-    } else {
-      logger.info(
-          context,
-          "Util:getUserProfile: User data not available to save in ES for userId : " + userId);
-    }
-    userDetails.put(JsonKey.USERNAME, username);
-    return userDetails;
-  }
-
   public static List<Map<String, Object>> getUserRoles(String userId, RequestContext context) {
     DbInfo userRoleDbInfo = dbInfoMap.get(JsonKey.USER_ROLES);
     List<String> userIds = new ArrayList<>();
@@ -588,20 +377,6 @@ public final class Util {
               }
             });
     return userRoleList;
-  }
-
-  // Convert Json String tnc format to object to store in Elastic
-  private static void convertTncJsonStringToMapObject(Map<String, Object> allTncAccepted) {
-    for (Map.Entry<String, Object> tncAccepted : allTncAccepted.entrySet()) {
-      String tncType = tncAccepted.getKey();
-      Map<String, String> tncAcceptedDetailMap = new HashMap<>();
-      try {
-        tncAcceptedDetailMap = mapper.readValue((String) tncAccepted.getValue(), Map.class);
-        allTncAccepted.put(tncType, tncAcceptedDetailMap);
-      } catch (JsonProcessingException e) {
-        logger.error("Json Parsing Exception", e);
-      }
-    }
   }
 
   public static Map<String, Object> getUserDetails(

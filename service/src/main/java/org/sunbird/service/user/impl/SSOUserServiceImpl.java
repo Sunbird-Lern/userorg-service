@@ -39,6 +39,7 @@ public class SSOUserServiceImpl implements SSOUserService {
   private OrgExternalService orgExternalService = new OrgExternalServiceImpl();
   private UserService userService = UserServiceImpl.getInstance();
   UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private OrgService orgService = OrgServiceImpl.getInstance();
 
   public static SSOUserService getInstance() {
     if (ssoUserService == null) {
@@ -115,7 +116,7 @@ public class SSOUserServiceImpl implements SSOUserService {
     String requestedChannel = (String) userMap.get(JsonKey.CHANNEL);
     String fetchedRootOrgIdByChannel = "";
     if (StringUtils.isNotBlank(requestedChannel)) {
-      fetchedRootOrgIdByChannel = userService.getRootOrgIdFromChannel(requestedChannel, context);
+      fetchedRootOrgIdByChannel = orgService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidParameterValue.getErrorCode(),
@@ -151,7 +152,7 @@ public class SSOUserServiceImpl implements SSOUserService {
         } else {
           // fetch rootorgid by requested orgid channel
           String rootOrgId =
-              userService.getRootOrgIdFromChannel(fetchedOrgById.getChannel(), context);
+              orgService.getRootOrgIdFromChannel(fetchedOrgById.getChannel(), context);
           userMap.put(JsonKey.ROOT_ORG_ID, rootOrgId);
           userMap.put(JsonKey.CHANNEL, fetchedOrgById.getChannel());
         }

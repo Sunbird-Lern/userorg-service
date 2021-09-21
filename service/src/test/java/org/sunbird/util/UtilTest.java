@@ -117,6 +117,23 @@ public class UtilTest {
   }
 
   @Test
+  public void testupsertUserOrgData() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "123456");
+    map.put(JsonKey.USER_ID, "123456");
+    map.put(JsonKey.ORGANISATION_ID, "123456");
+    map.put(JsonKey.IS_DELETED, false);
+    map.put(JsonKey.ASSOCIATION_TYPE, "1");
+    Util.registerUserToOrg(map, new RequestContext());
+    Response response = new Response();
+    when(cassandraOperationImpl.insertRecord(JsonKey.SUNBIRD, "user_organisation", map, null))
+        .thenReturn(response);
+    Assert.assertNotNull(response);
+  }
+
+  @Test
   public void testRegisterUserToOrg() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ID, "123456");

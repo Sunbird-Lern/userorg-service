@@ -1,17 +1,18 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.dao.user.UserOrgDao;
@@ -20,7 +21,6 @@ import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.dao.user.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.Organisation;
@@ -28,34 +28,39 @@ import org.sunbird.model.user.User;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.model.user.UserOrg;
 import org.sunbird.operations.ActorOperations;
-import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.AssociationMechanism;
-import org.sunbird.service.user.UserLookupService;
 import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 
-@ActorConfig(
-  tasks = {"updateUser", "updateUserV2"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class UserUpdateActor extends UserBaseActor {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private ObjectMapper mapper = new ObjectMapper();
   private UserService userService = UserServiceImpl.getInstance();
-  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
   private UserSelfDeclarationDao userSelfDeclarationDao = UserSelfDeclarationDaoImpl.getInstance();
+
+  @Inject
+  @Named("user_profile_update_actor")
+  private ActorRef userProfileUpdateActor;
+
+  @Inject
+  @Named("location_actor")
+  private ActorRef locationActor;
+
+  @Inject
+  @Named("background_job_manager_actor")
+  private ActorRef backgroundJobManager;
+
+  @Inject
+  @Named("user_on_boarding_notification_actor")
+  private ActorRef userOnBoardingNotificationActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -67,7 +72,7 @@ public class UserUpdateActor extends UserBaseActor {
         updateUser(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserUpdateActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -144,12 +149,7 @@ public class UserUpdateActor extends UserBaseActor {
       resetPasswordLink = true;
     }
 
-    Response response =
-        cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(),
-            usrDbInfo.getTableName(),
-            requestMap,
-            actorMessage.getRequestContext());
+    Response response = userService.updateUser(requestMap, actorMessage.getRequestContext());
     userLookupService.insertRecords(userLookUpData, actorMessage.getRequestContext());
     removeUserLookupEntry(userLookUpData, userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
@@ -214,9 +214,7 @@ public class UserUpdateActor extends UserBaseActor {
 
       resp =
           userService.saveUserAttributes(
-              userRequest,
-              getActorRef(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue()),
-              actorMessage.getRequestContext());
+              userRequest, userProfileUpdateActor, actorMessage.getRequestContext());
     } else {
       logger.info(
           actorMessage.getRequestContext(), "UserUpdateActor:updateUser: User update failure");
@@ -260,18 +258,10 @@ public class UserUpdateActor extends UserBaseActor {
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
-          locations =
-              locationClient.getLocationByIds(
-                  getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                  locationIds,
-                  context);
+          locations = locationClient.getLocationByIds(locationActor, locationIds, context);
         }
       } else {
-        locations =
-            locationClient.getLocationsByCodes(
-                getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()),
-                locationCodes,
-                context);
+        locations = locationClient.getLocationsByCodes(locationActor, locationCodes, context);
       }
       if (CollectionUtils.isNotEmpty(locations)) {
         String stateCode = null;
@@ -364,10 +354,7 @@ public class UserUpdateActor extends UserBaseActor {
             }
           });
       List<Location> locationIdList =
-          locationClient.getLocationByCodes(
-              getActorRef(LocationActorOperation.GET_RELATED_LOCATION_IDS.getValue()),
-              locCodeLst,
-              context);
+          locationClient.getLocationByCodes(locationActor, locCodeLst, context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
             location ->
@@ -590,7 +577,7 @@ public class UserUpdateActor extends UserBaseActor {
     EmailAndSmsRequest.setRequestContext(context);
     EmailAndSmsRequest.setOperation(
         UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
-    tellToAnother(EmailAndSmsRequest);
+    userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
   }
 
   private void saveUserDetailsToEs(Map<String, Object> completeUserMap, RequestContext context) {
@@ -599,6 +586,6 @@ public class UserUpdateActor extends UserBaseActor {
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    tellToAnother(userRequest);
+    backgroundJobManager.tell(userRequest, self());
   }
 }

@@ -1,11 +1,13 @@
 package org.sunbird.actor.otp;
 
+import akka.actor.ActorRef;
 import java.text.MessageFormat;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -19,17 +21,12 @@ import org.sunbird.service.otp.OTPService;
 import org.sunbird.service.ratelimit.RateLimitService;
 import org.sunbird.service.ratelimit.RateLimitServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.otp.OTPUtil;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
+import org.sunbird.util.otp.OTPUtil;
 import org.sunbird.util.ratelimit.OtpRateLimiter;
 import org.sunbird.util.ratelimit.RateLimiter;
 
-@ActorConfig(
-  tasks = {"generateOTP", "verifyOTP"},
-  asyncTasks = {},
-  dispatcher = "notification-dispatcher"
-)
 public class OTPActor extends BaseActor {
 
   private OTPService otpService = new OTPService();
@@ -39,6 +36,10 @@ public class OTPActor extends BaseActor {
   private RateLimitService rateLimitService = new RateLimitServiceImpl();
   private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
 
+  @Inject
+  @Named("send_otp_actor")
+  private ActorRef sendOTPActor;
+
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.USER);
@@ -47,7 +48,7 @@ public class OTPActor extends BaseActor {
     } else if (ActorOperations.VERIFY_OTP.getValue().equals(request.getOperation())) {
       verifyOTP(request);
     } else {
-      onReceiveUnsupportedOperation("OTPActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -114,11 +115,11 @@ public class OTPActor extends BaseActor {
       key = otpService.getEmailPhoneByUserId(userId, type, request.getRequestContext());
       type = getType(type);
       logger.info(
-        request.getRequestContext(),
-        "OTPActor:verifyOTP:getEmailPhoneByUserId: called for userId = "
-          + userId
-          + " ,key = "
-          + maskId(key, type));
+          request.getRequestContext(),
+          "OTPActor:verifyOTP:getEmailPhoneByUserId: called for userId = "
+              + userId
+              + " ,key = "
+              + maskId(key, type));
     }
     Map<String, Object> otpDetails =
         otpService.getOTPDetails(type, key, request.getRequestContext());
@@ -214,7 +215,11 @@ public class OTPActor extends BaseActor {
     sendOtpRequest.getRequest().put(JsonKey.KEY, key);
     sendOtpRequest.getRequest().put(JsonKey.OTP, otp);
     sendOtpRequest.setOperation(ActorOperations.SEND_OTP.getValue());
-    tellToAnother(sendOtpRequest);
+    try {
+      sendOTPActor.tell(sendOtpRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending OTP", ex);
+    }
   }
 
   private String getType(String type) {

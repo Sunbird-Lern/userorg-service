@@ -1,14 +1,9 @@
 package org.sunbird.actor.user;
 
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 
-@ActorConfig(
-  tasks = {"userCurrentLogin"},
-  asyncTasks = {}
-)
 public class UserLoginActor extends UserBaseActor {
 
   @Override

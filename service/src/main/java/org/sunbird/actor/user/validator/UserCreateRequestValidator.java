@@ -14,7 +14,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class UserCreateRequestValidator {
 
-  public void validateLocationCodesDataType(Object locationCodes) {
+  public static void validateLocationCodesDataType(Object locationCodes) {
     if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
           ResponseCode.dataTypeError.getErrorCode(),

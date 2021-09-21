@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -16,11 +15,6 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {"upsertUserDetailsToES", "upsertUserOrgDetailsToES"},
-  asyncTasks = {"upsertUserDetailsToES", "upsertUserOrgDetailsToES"},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class UserBackgroundJobActor extends BaseActor {
 
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
@@ -36,7 +30,7 @@ public class UserBackgroundJobActor extends BaseActor {
         saveUserOrgDetailsToES(request);
         break;
       default:
-        onReceiveUnsupportedOperation("UserBackgroundJobActor");
+        onReceiveUnsupportedOperation();
         break;
     }
   }

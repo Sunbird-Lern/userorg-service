@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -7,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +22,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
-import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.location.LocationService;
@@ -39,6 +41,14 @@ public abstract class UserBaseActor extends BaseActor {
   protected UserCreateRequestValidator userCreateRequestValidator =
       new UserCreateRequestValidator();
 
+  @Inject
+  @Named("user_telemetry_actor")
+  private ActorRef userTelemetryActor;
+
+  @Inject
+  @Named("location_actor")
+  private ActorRef locationActor;
+
   protected void generateUserTelemetry(
       Map<String, Object> userMap, Request request, String userId, String operationType) {
     Request telemetryReq = new Request();
@@ -47,7 +57,7 @@ public abstract class UserBaseActor extends BaseActor {
     telemetryReq.getRequest().put(JsonKey.OPERATION_TYPE, operationType);
     telemetryReq.setContext(request.getContext());
     telemetryReq.setOperation("generateUserTelemetry");
-    tellToAnother(telemetryReq);
+    userTelemetryActor.tell(telemetryReq, self());
   }
 
   protected void generateTelemetryEvent(
@@ -112,7 +122,7 @@ public abstract class UserBaseActor extends BaseActor {
 
   protected void validateAndGetLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    userCreateRequestValidator.validateLocationCodesDataType(locationCodes);
+    UserCreateRequestValidator.validateLocationCodesDataType(locationCodes);
     if (CollectionUtils.isNotEmpty((List) locationCodes)) {
       List<Location> locationList = getLocationList(locationCodes, userRequest.getRequestContext());
       String stateCode = UserCreateRequestValidator.validateAndGetStateLocationCode(locationList);
@@ -172,9 +182,7 @@ public abstract class UserBaseActor extends BaseActor {
     List<Location> locationList = new ArrayList<>();
     if (((List) locationCodes).get(0) instanceof String) {
       List<String> locations = (List<String>) locationCodes;
-      locationList =
-          locationClient.getLocationsByCodes(
-              getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue()), locations, context);
+      locationList = locationClient.getLocationsByCodes(locationActor, locations, context);
     }
 
     if (((List) locationCodes).get(0) instanceof Map) {
