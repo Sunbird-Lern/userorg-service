@@ -24,7 +24,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -34,6 +33,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.Util;
 import scala.concurrent.Promise;
@@ -43,7 +43,6 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   Util.class,
   ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
   EsClientFactory.class,
 })
 @PowerMockIgnore({
@@ -66,7 +65,6 @@ public class EsSyncBackgroundActorTest {
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(ElasticSearchHelper.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -77,6 +75,10 @@ public class EsSyncBackgroundActorTest {
 
     when(esService.bulkInsert(Mockito.anyString(), Mockito.anyList(), Mockito.any()))
         .thenReturn(promise.future());
+    Promise<String> promise2 = Futures.promise();
+    promise2.success("anyId");
+    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promise2.future());
   }
 
   @Test
@@ -97,10 +99,16 @@ public class EsSyncBackgroundActorTest {
     ids.add("1544646556");
     reqMap.put(JsonKey.OBJECT_IDS, ids);
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    reqObj.setRequestContext(new RequestContext());
     subject.tell(reqObj, probe.getRef());
-    probe.expectNoMessage();
-    assertTrue(true);
+    try {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
@@ -121,10 +129,16 @@ public class EsSyncBackgroundActorTest {
     ids.add("1544646556");
     reqMap.put(JsonKey.OBJECT_IDS, ids);
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    reqObj.setRequestContext(new RequestContext());
     subject.tell(reqObj, probe.getRef());
-    probe.expectNoMessage();
-    assertTrue(true);
+    try {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
@@ -162,6 +176,7 @@ public class EsSyncBackgroundActorTest {
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
     reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    reqObj.setRequestContext(new RequestContext());
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
@@ -206,6 +221,7 @@ public class EsSyncBackgroundActorTest {
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
     reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
+    reqObj.setRequestContext(new RequestContext());
     subject.tell(reqObj, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
