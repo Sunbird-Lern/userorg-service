@@ -99,7 +99,6 @@ public class EsSyncBackgroundActor extends BaseActor {
                       objectId,
                       getOrgDetails(map, requestContext),
                       requestContext);
-              throw new NullPointerException();
             } else if (JsonKey.LOCATION.equalsIgnoreCase(objectType)) {
               esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
             }
