@@ -90,16 +90,16 @@ public class EsSyncBackgroundActor extends BaseActor {
                 "EsSyncBackgroundActor:handleOrgAndLocationSync for objectType :"
                     + objectType
                     + " for id : "
-                    + map.get(JsonKey.ID));
+                    + objectId);
             String esResponse = "";
-            if (objectType.equals(JsonKey.ORGANISATION)) {
+            if (JsonKey.ORGANISATION.equals(objectType)) {
               esResponse =
                   saveDataToEs(
                       getType(objectType),
                       objectId,
                       getOrgDetails(map, requestContext),
                       requestContext);
-            } else if (objectType.equalsIgnoreCase(JsonKey.LOCATION)) {
+            } else if (JsonKey.LOCATION.equalsIgnoreCase(objectType)) {
               esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
             }
             if (StringUtils.isNotBlank(esResponse) && (esResponse).equalsIgnoreCase(objectId)) {

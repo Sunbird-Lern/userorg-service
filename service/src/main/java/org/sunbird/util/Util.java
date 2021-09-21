@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
@@ -19,8 +18,6 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.notification.sms.provider.ISmsProvider;
-import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -37,7 +34,6 @@ public final class Util {
   private static LoggerUtil logger = new LoggerUtil(Util.class);
 
   public static final Map<String, DbInfo> dbInfoMap = new HashMap<>();
-  private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
   public static final int DEFAULT_ELASTIC_DATA_LIMIT = 10000;
   public static final String KEY_SPACE_NAME = "sunbird";
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -127,7 +123,6 @@ public final class Util {
    * @param searchQueryMap Map<String , Object>
    * @return SearchDTO
    */
-  @SuppressWarnings("unchecked")
   public static SearchDTO createSearchDto(Map<String, Object> searchQueryMap) {
     SearchDTO search = new SearchDTO();
     if (searchQueryMap.containsKey(JsonKey.QUERY)) {
@@ -234,20 +229,6 @@ public final class Util {
     }
   }
 
-  public static String getSunbirdWebUrlPerTenent(Map<String, Object> userMap) {
-    StringBuilder webUrl = new StringBuilder();
-    String slug = "";
-    webUrl.append(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_WEB_URL));
-    if (!StringUtils.isBlank((String) userMap.get(JsonKey.ROOT_ORG_ID))) {
-      Map<String, Object> orgMap = getOrgDetails((String) userMap.get(JsonKey.ROOT_ORG_ID), null);
-      slug = (String) orgMap.get(JsonKey.SLUG);
-    }
-    if (!StringUtils.isBlank(slug)) {
-      webUrl.append("/" + slug);
-    }
-    return webUrl.toString();
-  }
-
   public static Map<String, Object> getOrgDetails(String identifier, RequestContext context) {
     if (StringUtils.isNotBlank(identifier)) {
       DbInfo orgDbInfo = Util.dbInfoMap.get(JsonKey.ORG_DB);
@@ -311,7 +292,6 @@ public final class Util {
     }
   }
 
-  @SuppressWarnings("unchecked")
   public static void upsertUserOrgData(Map<String, Object> userMap, RequestContext context) {
     Util.DbInfo usrOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
     Map<String, Object> map = new LinkedHashMap<>();
@@ -505,118 +485,6 @@ public final class Util {
       logger.error(e.getMessage(), e);
     }
     return userOrgList;
-  }
-
-  public static Request sendOnboardingMail(Map<String, Object> emailTemplateMap) {
-    Request request = null;
-    if ((StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
-      String welcomeSubject = propertiesCache.getProperty(JsonKey.ONBOARDING_MAIL_SUBJECT);
-      emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(welcomeSubject, envName));
-      List<String> reciptientsMail = new ArrayList<>();
-      reciptientsMail.add((String) emailTemplateMap.get(JsonKey.EMAIL));
-      emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
-      emailTemplateMap.put(
-          JsonKey.BODY, propertiesCache.getProperty(JsonKey.ONBOARDING_WELCOME_MAIL_BODY));
-      emailTemplateMap.put(JsonKey.NOTE, propertiesCache.getProperty(JsonKey.MAIL_NOTE));
-      emailTemplateMap.put(JsonKey.ORG_NAME, envName);
-      String welcomeMessage = propertiesCache.getProperty(JsonKey.ONBOARDING_MAIL_MESSAGE);
-      emailTemplateMap.put(
-          JsonKey.WELCOME_MESSAGE, ProjectUtil.formatMessage(welcomeMessage, envName));
-
-      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "welcome");
-      setRequiredActionLink(emailTemplateMap);
-      if (StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.SET_PASSWORD_LINK))
-          && StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
-        logger.info("Util:sendOnboardingMail: Email not sent as generated link is empty");
-        return null;
-      }
-
-      request = new Request();
-      request.setOperation(BackgroundOperations.emailService.name());
-      request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
-    }
-    return request;
-  }
-
-  private static void setRequiredActionLink(Map<String, Object> templateMap) {
-    String setPasswordLink = (String) templateMap.get(JsonKey.SET_PASSWORD_LINK);
-    String verifyEmailLink = (String) templateMap.get(JsonKey.VERIFY_EMAIL_LINK);
-    if (StringUtils.isNotBlank(setPasswordLink)) {
-      templateMap.put(JsonKey.LINK, setPasswordLink);
-      templateMap.put(JsonKey.SET_PW_LINK, "true");
-    } else if (StringUtils.isNotBlank(verifyEmailLink)) {
-      templateMap.put(JsonKey.LINK, verifyEmailLink);
-      templateMap.put(JsonKey.SET_PW_LINK, null);
-    }
-  }
-
-  public static void sendSMS(Map<String, Object> userMap, RequestContext context) {
-    if (StringUtils.isNotBlank((String) userMap.get(JsonKey.PHONE))) {
-      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
-      setRequiredActionLink(userMap);
-      if (StringUtils.isBlank((String) userMap.get(JsonKey.SET_PASSWORD_LINK))
-          && StringUtils.isBlank((String) userMap.get(JsonKey.VERIFY_EMAIL_LINK))) {
-        logger.info(context, "Util:sendSMS: SMS not sent as generated link is empty");
-        return;
-      }
-      Map<String, String> smsTemplate = new HashMap<>();
-      smsTemplate.put("instanceName", envName);
-      smsTemplate.put(JsonKey.LINK, (String) userMap.get(JsonKey.LINK));
-      smsTemplate.put(JsonKey.SET_PW_LINK, (String) userMap.get(JsonKey.SET_PW_LINK));
-      String sms = ProjectUtil.getSMSBody(smsTemplate);
-      if (StringUtils.isBlank(sms)) {
-        sms = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_WELCOME_MSG);
-      }
-      logger.debug(context, "SMS text : " + sms);
-      String countryCode;
-      if (StringUtils.isBlank((String) userMap.get(JsonKey.COUNTRY_CODE))) {
-        countryCode =
-            PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_DEFAULT_COUNTRY_CODE);
-      } else {
-        countryCode = (String) userMap.get(JsonKey.COUNTRY_CODE);
-      }
-      ISmsProvider smsProvider = SMSFactory.getInstance();
-      logger.debug(context, "SMS text : " + sms + " with phone " + userMap.get(JsonKey.PHONE));
-      boolean response =
-          smsProvider.send((String) userMap.get(JsonKey.PHONE), countryCode, sms, context);
-      logger.info(context, "Response from smsProvider : " + response);
-    }
-  }
-
-  public static Request sendResetPassMail(Map<String, Object> emailTemplateMap) {
-    Request request = null;
-    if (StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.SET_PASSWORD_LINK))) {
-      logger.info("Util:sendResetPassMail: Email not sent as generated link is empty");
-      return null;
-    } else if ((StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
-      String welcomeSubject = propertiesCache.getProperty(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
-      emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(welcomeSubject, envName));
-      List<String> reciptientsMail = new ArrayList<>();
-      reciptientsMail.add((String) emailTemplateMap.get(JsonKey.EMAIL));
-      emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
-      emailTemplateMap.put(JsonKey.ORG_NAME, envName);
-      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, "resetPassword");
-      setRequiredActionLink(emailTemplateMap);
-    } else if (StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.PHONE))) {
-      emailTemplateMap.put(
-          JsonKey.BODY,
-          ProjectUtil.formatMessage(
-              propertiesCache.getProperty("sunbird_reset_pass_msg"),
-              (String) emailTemplateMap.get(JsonKey.SET_PASSWORD_LINK)));
-      emailTemplateMap.put(JsonKey.MODE, "SMS");
-      List<String> phoneList = new ArrayList<String>();
-      phoneList.add((String) emailTemplateMap.get(JsonKey.PHONE));
-      emailTemplateMap.put(JsonKey.RECIPIENT_PHONES, phoneList);
-    } else {
-      logger.info("Util:sendResetPassMail: requested data is neither having email nor phone ");
-      return null;
-    }
-    request = new Request();
-    request.setOperation(BackgroundOperations.emailService.name());
-    request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
-    return request;
   }
 
   public static Map<String, Object> getUserDefaultValue() {
