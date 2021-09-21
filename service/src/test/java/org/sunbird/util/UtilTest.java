@@ -130,42 +130,6 @@ public class UtilTest {
     Assert.assertNotNull(response);
   }
 
-  @Test
-  public void sendSMSTest() {
-    PowerMockito.mockStatic(SMSFactory.class);
-    ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
-    when(SMSFactory.getInstance()).thenReturn(smsProvider);
-    when(smsProvider.send(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class)))
-        .thenReturn(true);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.PHONE, "9999999999");
-    map.put(JsonKey.SET_PASSWORD_LINK, "resetPasswordLink");
-    map.put(JsonKey.VERIFY_EMAIL_LINK, "emailVerifyLink");
-    Util.sendSMS(map, new RequestContext());
-    Assert.assertNotNull(map);
-  }
-
-  @Test
-  public void sendSMSTest2() {
-    PowerMockito.mockStatic(SMSFactory.class);
-    ISmsProvider smsProvider = PowerMockito.mock(ISmsProvider.class);
-    when(SMSFactory.getInstance()).thenReturn(smsProvider);
-    when(smsProvider.send(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class)))
-        .thenReturn(true);
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.PHONE, "9999999999");
-    Util.sendSMS(map, new RequestContext());
-    Assert.assertNotNull(map);
-  }
-
   public static Map<String, Object> getEsResponseMap() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.IS_TENANT, true);
