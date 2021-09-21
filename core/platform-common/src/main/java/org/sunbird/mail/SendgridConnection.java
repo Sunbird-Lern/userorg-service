@@ -26,7 +26,8 @@ public class SendgridConnection {
       host = System.getenv(JsonKey.EMAIL_SERVER_HOST);
       port = System.getenv(JsonKey.EMAIL_SERVER_PORT);
       userName = System.getenv(JsonKey.EMAIL_SERVER_USERNAME);
-      password = System.getenv(JsonKey.EMAIL_SERVER_PASSWORD);
+      password = "$un8!rdSt@g!"; // System.getenv(JsonKey.EMAIL_SERVER_PASSWORD);
+      fromEmail = System.getenv(JsonKey.EMAIL_SERVER_FROM);
 
       if (StringUtils.isBlank(host)
           || StringUtils.isBlank(port)
