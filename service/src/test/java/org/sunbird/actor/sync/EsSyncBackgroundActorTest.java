@@ -24,7 +24,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -44,7 +43,6 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   Util.class,
   ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
   EsClientFactory.class,
 })
 @PowerMockIgnore({
@@ -67,7 +65,6 @@ public class EsSyncBackgroundActorTest {
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(ElasticSearchHelper.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -78,9 +75,13 @@ public class EsSyncBackgroundActorTest {
 
     when(esService.bulkInsert(Mockito.anyString(), Mockito.anyList(), Mockito.any()))
         .thenReturn(promise.future());
+    Promise<String> promise2 = Futures.promise();
+    promise2.success("anyId");
+    when(esService.save(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(promise2.future());
   }
 
-  // @Test
+  @Test
   public void testSync() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),
@@ -110,7 +111,7 @@ public class EsSyncBackgroundActorTest {
     }
   }
 
-  // @Test
+  @Test
   public void testSyncOrg() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),
