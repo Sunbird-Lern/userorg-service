@@ -1,10 +1,11 @@
 package org.sunbird.actor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -12,28 +13,14 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-/**
- * This class will handle all the background job.
- *
- * @author Manzarul
- * @author Amit Kumar
- */
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {
-    "mergeUserToElastic",
-    "updateUserInfoToElastic",
-    "updateUserOrgES",
-    "insertUserNotesToElastic",
-    "updateUserNotesToElastic",
-  }
-)
 public class BackgroundJobManager extends BaseActor {
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -42,14 +29,10 @@ public class BackgroundJobManager extends BaseActor {
       updateUserInfoToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_ORG_ES.getValue())) {
       updateUserOrgInfoToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.INSERT_USER_NOTES_ES.getValue())) {
-      insertUserNotesToEs(request);
-    } else if (operation.equalsIgnoreCase(ActorOperations.UPDATE_USER_NOTES_ES.getValue())) {
-      updateUserNotesToEs(request);
     } else if (operation.equalsIgnoreCase(ActorOperations.MERGE_USER_TO_ELASTIC.getValue())) {
       mergeUserDetailsToEs(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -97,7 +80,8 @@ public class BackgroundJobManager extends BaseActor {
 
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
-    Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
+    Map<String, Object> userDetails =
+        userService.getUserDetailsForES(userId, actorMessage.getRequestContext());
     if (MapUtils.isNotEmpty(userDetails)) {
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),
@@ -141,34 +125,6 @@ public class BackgroundJobManager extends BaseActor {
     }
     logger.info(context, "unable to save the data inside ES with identifier " + identifier);
     return false;
-  }
-
-
-  @SuppressWarnings("unchecked")
-  private void insertUserNotesToEs(Request actorMessage) {
-    Map<String, Object> noteMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.NOTE);
-    if (ProjectUtil.isNotNull(noteMap) && noteMap.size() > 0) {
-      String id = (String) noteMap.get(JsonKey.ID);
-      insertDataToElastic(
-          ProjectUtil.EsIndex.sunbird.getIndexName(),
-          ProjectUtil.EsType.usernotes.getTypeName(),
-          id,
-          noteMap,
-          actorMessage.getRequestContext());
-    } else {
-      logger.info(actorMessage.getRequestContext(), "No data found to save inside Es for Notes--");
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private void updateUserNotesToEs(Request actorMessage) {
-    Map<String, Object> noteMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.NOTE);
-    updateDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
-        ProjectUtil.EsType.usernotes.getTypeName(),
-        (String) noteMap.get(JsonKey.ID),
-        noteMap,
-        actorMessage.getRequestContext());
   }
 
   private void mergeUserDetailsToEs(Request mergeRequest) {
