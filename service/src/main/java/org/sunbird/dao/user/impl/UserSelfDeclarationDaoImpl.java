@@ -94,4 +94,10 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
     cassandraOperation.deleteRecord(
         JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, context);
   }
+
+  public Response updateUserSelfDeclaredFields( Map<String, Object> updateFieldsMap,
+                                                         Map<String, Object> compositeKey, RequestContext context) {
+    return cassandraOperation.updateRecord(
+            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
+  }
 }

@@ -2,6 +2,7 @@ package org.sunbird.dao.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
@@ -70,5 +71,15 @@ public final class UserOrgDaoImpl implements UserOrgDao {
         cassandraOperation.getRecordsByCompositeKey(
             JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
     return res;
+  }
+  public void deleteUserOrgMapping(
+          List<Map<String, Object>> userOrgList, RequestContext context){
+    for (Map<String, Object> userOrg : userOrgList) {
+      Map<String, String> compositeKey = new LinkedHashMap<>(2);
+      compositeKey.put(JsonKey.USER_ID, (String) userOrg.get(JsonKey.USER_ID));
+      compositeKey.put(JsonKey.ORGANISATION_ID, (String) userOrg.get(JsonKey.ORGANISATION_ID));
+      cassandraOperation.deleteRecord(
+              JsonKey.SUNBIRD, JsonKey.USER_ORG, compositeKey, context);
+    }
   }
 }
