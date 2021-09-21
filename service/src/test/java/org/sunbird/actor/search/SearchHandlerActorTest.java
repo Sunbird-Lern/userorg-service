@@ -123,8 +123,12 @@ public class SearchHandlerActorTest {
     reqObj.setContext(contextMap);
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    try {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
@@ -163,8 +167,12 @@ public class SearchHandlerActorTest {
     reqObj.setContext(contextMap);
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    try {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
@@ -205,8 +213,12 @@ public class SearchHandlerActorTest {
     reqObj.setContext(contextMap);
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    try {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
@@ -238,8 +250,12 @@ public class SearchHandlerActorTest {
     reqObj.setContext(contextMap);
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-    Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    try {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
