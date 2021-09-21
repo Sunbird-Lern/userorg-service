@@ -98,11 +98,16 @@ public class EsSyncBackgroundActorTest {
     ids.add("1544646556");
     reqMap.put(JsonKey.OBJECT_IDS, ids);
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
     reqObj.setRequestContext(new RequestContext());
     subject.tell(reqObj, probe.getRef());
-    probe.expectNoMessage();
-    assertTrue(true);
+    try {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
@@ -123,11 +128,16 @@ public class EsSyncBackgroundActorTest {
     ids.add("1544646556");
     reqMap.put(JsonKey.OBJECT_IDS, ids);
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
+    reqMap.put(JsonKey.OPERATION_TYPE, JsonKey.SYNC);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
     reqObj.setRequestContext(new RequestContext());
     subject.tell(reqObj, probe.getRef());
-    probe.expectNoMessage();
-    assertTrue(true);
+    try {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 
   @Test
