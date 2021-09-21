@@ -26,6 +26,7 @@ import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.TenantMigrationService;
 import org.sunbird.service.user.UserService;
+import org.sunbird.util.DataCacheHandler;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -35,7 +36,8 @@ import org.sunbird.service.user.UserService;
         UserService.class,
         OrgServiceImpl.class,
         OrgService.class,
-        OrgExternalService.class
+        OrgExternalService.class,
+        DataCacheHandler.class
 })
 @PowerMockIgnore({
         "javax.management.*",
@@ -78,6 +80,11 @@ public class TenantMigrationServiceImplTest {
                 cassandraOperation.getRecordsByCompositeKey(
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                 .thenReturn(getRecordsByProperty(true));
+
+        PowerMockito.mockStatic(DataCacheHandler.class);
+        Map<String, String> dataCache = new HashMap<>();
+        dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
+        PowerMockito.when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
     }
 
     @Test
@@ -90,7 +97,53 @@ public class TenantMigrationServiceImplTest {
         TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
         tenantMigrationService.migrateUser( userDetails, new RequestContext());
     }
+    @Test
+    public void validateChannelAndGetRootOrgId() {
+        List<Map<String, Object>> listMap = new ArrayList<>();
+        listMap.add(new HashMap<String, Object>());
+        Map<String, Object> userDetails = new HashMap<>();
+        userDetails.put(JsonKey.ROOT_ORG_ID, "");
+        userDetails.put(JsonKey.ORGANISATIONS, listMap);
+        TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+        tenantMigrationService.validateChannelAndGetRootOrgId( getSelfDeclaredMigrateReq());
+    }
+    @Test
+    public void validateUserCustodianOrgId() {
+        TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+        tenantMigrationService.validateUserCustodianOrgId( "anyRootOrgId");
+    }
 
+    @Test
+    public void validateOrgExternalIdOrOrgIdAndGetOrgId() {
+        List<Map<String, Object>> listMap = new ArrayList<>();
+        listMap.add(new HashMap<String, Object>());
+        Map<String, Object> userDetails = new HashMap<>();
+        userDetails.put(JsonKey.ROOT_ORG_ID, "");
+        userDetails.put(JsonKey.ORGANISATIONS, listMap);
+        TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+        tenantMigrationService.validateOrgExternalIdOrOrgIdAndGetOrgId( getSelfDeclaredMigrateReq().getRequest(),new RequestContext());
+    }
+    @Test
+    public void deactivateUserFromKC() {
+        List<Map<String, Object>> listMap = new ArrayList<>();
+        listMap.add(new HashMap<String, Object>());
+        Map<String, Object> userDetails = new HashMap<>();
+        userDetails.put(JsonKey.ROOT_ORG_ID, "");
+        userDetails.put(JsonKey.ORGANISATIONS, listMap);
+        TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+        tenantMigrationService.deactivateUserFromKC( "anyUserID",new RequestContext());
+    }
+    @Test
+    public void updateUserOrg() {
+
+        List<Map<String, Object>> listMap = new ArrayList<>();
+        listMap.add(new HashMap<String, Object>());
+        Map<String, Object> userDetails = new HashMap<>();
+        userDetails.put(JsonKey.ROOT_ORG_ID, "");
+        userDetails.put(JsonKey.ORGANISATIONS, listMap);
+        TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+        tenantMigrationService.updateUserOrg( getSelfDeclaredMigrateReq(), listMap);
+    }
     public Request getSelfDeclaredMigrateReq() {
         Request reqObj = new Request();
         Map<String, Object> requestMap = new HashMap();
