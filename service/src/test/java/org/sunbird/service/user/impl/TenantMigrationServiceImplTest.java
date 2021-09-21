@@ -61,8 +61,6 @@ public class TenantMigrationServiceImplTest {
         updateResponse.getResult().put(JsonKey.RESPONSE, "SUCCESS");
         UserService userService = mock(UserServiceImpl.class);
         PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-        when(userService.getRootOrgIdFromChannel(Mockito.anyObject(), Mockito.anyObject()))
-                .thenReturn("anyRootOrgId");
         OrgService orgService = mock(OrgServiceImpl.class);
         PowerMockito.when(OrgServiceImpl.getInstance()).thenReturn(orgService);
         when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
@@ -90,7 +88,7 @@ public class TenantMigrationServiceImplTest {
         userDetails.put(JsonKey.ROOT_ORG_ID, "");
         userDetails.put(JsonKey.ORGANISATIONS, listMap);
         TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
-        tenantMigrationService.migrateUser(getSelfDeclaredMigrateReq(), userDetails);
+        tenantMigrationService.migrateUser( userDetails, new RequestContext());
     }
 
     public Request getSelfDeclaredMigrateReq() {
