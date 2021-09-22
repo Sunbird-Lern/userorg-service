@@ -1,4 +1,4 @@
-package org.sunbird.util.user;
+package org.sunbird.service.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -12,8 +12,8 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
-public class MigrationUtils {
-  private static LoggerUtil logger = new LoggerUtil(MigrationUtils.class);
+public class ShadowUserMigrationService {
+  private static LoggerUtil logger = new LoggerUtil(ShadowUserMigrationService.class);
 
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static ObjectMapper mapper = new ObjectMapper();
