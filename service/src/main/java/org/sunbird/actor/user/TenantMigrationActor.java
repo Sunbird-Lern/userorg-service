@@ -26,6 +26,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.TenantMigrationService;
 import org.sunbird.service.user.UserSelfDeclarationService;
+import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.TenantMigrationServiceImpl;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
@@ -50,6 +51,8 @@ public class TenantMigrationActor extends BaseActor {
   private TenantMigrationService tenantServiceImpl = TenantMigrationServiceImpl.getInstance();
   private UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
+  private UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Inject
   @Named("user_external_identity_management_actor")
@@ -128,9 +131,8 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> userDetails =
-        UserServiceImpl.getInstance()
-            .esGetPublicUserProfileById(
-                (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
+        userService.getUserDetailsById(
+            (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
     tenantServiceImpl.validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
     tenantServiceImpl.validateChannelAndGetRootOrgId(request);
     Map<String, String> rollup = new HashMap<>();
@@ -150,8 +152,8 @@ public class TenantMigrationActor extends BaseActor {
     Response response =
         tenantServiceImpl.migrateUser(userUpdateRequest, request.getRequestContext());
     if (null == response
-        || null == (String) response.get(JsonKey.RESPONSE)
-        || (null != (String) response.get(JsonKey.RESPONSE)
+        || null == response.get(JsonKey.RESPONSE)
+        || (null != response.get(JsonKey.RESPONSE)
             && !((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS))) {
       // throw exception for migration failed
       ProjectCommonException.throwServerErrorException(ResponseCode.errorUserMigrationFailed);
@@ -204,13 +206,17 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void notify(Map<String, Object> userDetail, RequestContext context) {
-    logger.info(
+    logger.debug(
         context,
         "notify starts sending migrate notification to user " + userDetail.get(JsonKey.USER_ID));
-    Map<String, Object> userData = createUserData(userDetail);
-    Request notificationRequest = createNotificationData(userData);
-    notificationRequest.setRequestContext(context);
-    emailServiceActor.tell(notificationRequest, self());
+    try {
+      Map<String, Object> userData = createUserData(userDetail);
+      Request notificationRequest = createNotificationData(userData);
+      notificationRequest.setRequestContext(context);
+      emailServiceActor.tell(notificationRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
   }
 
   private Request createNotificationData(Map<String, Object> userData) {
@@ -258,7 +264,9 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.getRequest().put(JsonKey.ID, userId);
     logger.info(
         context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    if (null != backgroundJobManager) {
+      backgroundJobManager.tell(userRequest, self());
+    }
   }
 
   private Response updateUserExternalIds(Request request) {
@@ -270,7 +278,6 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
       ObjectMapper mapper = new ObjectMapper();
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       // Update channel to orgId  for provider field in usr_external_identiy table
       UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq, request.getRequestContext());
       User user = mapper.convertValue(userExtIdsReq, User.class);
@@ -281,10 +288,11 @@ public class TenantMigrationActor extends BaseActor {
           UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
-
-      Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
-      response = (Response) Await.result(future, t.duration());
-      UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+      if (null != userExternalIdManagementActor) {
+        Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+        Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
+        response = (Response) Await.result(future, t.duration());
+      }
       userLookUpService.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
           (String) request.getRequest().get(JsonKey.USER_ID),
