@@ -166,7 +166,7 @@ public class EsSyncBackgroundActorTest {
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
   }
 
-  //@Test
+  @Test
   public void testSync() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),
@@ -196,7 +196,7 @@ public class EsSyncBackgroundActorTest {
     }
   }
 
-  //@Test
+  @Test
   public void testSyncOrg() {
     when(cassandraOperation.getPropertiesValueById(
             Mockito.anyString(),
