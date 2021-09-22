@@ -12,4 +12,7 @@ public interface UserSelfDeclarationService {
   void updateSelfDeclaration(UserDeclareEntity userDeclareEntity, RequestContext context);
 
   List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context);
+
+  Response updateSelfDeclaration(Map<String, Object> updateFieldsMap,
+                                 Map<String, Object> compositeKey, RequestContext context);
 }
