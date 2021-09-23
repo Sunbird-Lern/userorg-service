@@ -740,13 +740,7 @@ public class TenantMigrationActor extends BaseActor {
     if (StringUtils.isNotBlank(feedId)) {
       logger.info(
           context, "TenantMigrationActor:deleteUserFeed method called for feedId : " + feedId);
-      Request request = new Request();
-      Map<String,Object> reqObj = new HashMap<>();
-      reqObj.put(JsonKey.IDS,Arrays.asList(feedId));
-      reqObj.put(JsonKey.USER_ID,userId);
-      reqObj.put(JsonKey.CATEGORY,action);
-      request.setRequest(reqObj);
-      feedService.delete(request, context);
+      feedService.delete(feedId, userId, action, context);
     }
   }
 
