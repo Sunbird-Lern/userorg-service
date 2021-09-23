@@ -68,7 +68,6 @@ public enum ActorOperations {
   MERGE_USER_TO_ELASTIC("mergeUserToElastic"),
 
   MERGE_USER_CERTIFICATE("mergeUserCertificate"),
-  MIGRATE_USER("migrateUser"),
   USER_SELF_DECLARED_TENANT_MIGRATE("userSelfDeclaredTenantMigrate"),
   REJECT_MIGRATION("rejectMigration"),
   GET_USER_FEED_BY_ID("getUserFeedById"),
