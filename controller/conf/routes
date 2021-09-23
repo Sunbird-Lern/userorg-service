@@ -66,7 +66,6 @@ POST    /v1/otp/generate                        @controllers.otp.OtpController.g
 POST    /v1/otp/verify                          @controllers.otp.OtpController.verifyOTP(request: play.mvc.Http.Request)
 
 #Tenant Migration
-POST    /v1/user/migrate                        @controllers.tenantmigration.TenantMigrationController.shadowUserMigrate(request: play.mvc.Http.Request)
 PATCH   /private/user/v1/migrate  	            @controllers.tenantmigration.TenantMigrationController.userTenantMigrate(request: play.mvc.Http.Request)
 
 #User Feed API

@@ -1,6 +1,5 @@
 package org.sunbird.actor.sync;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -92,14 +91,8 @@ public class EsSyncBackgroundActor extends BaseActor {
                     + " for id : "
                     + objectId);
             String esResponse = "";
-            if (JsonKey.ORGANISATION.equals(objectType)) {
-              esResponse =
-                  saveDataToEs(
-                      getType(objectType),
-                      objectId,
-                      getOrgDetails(map, requestContext),
-                      requestContext);
-            } else if (JsonKey.LOCATION.equalsIgnoreCase(objectType)) {
+            if (JsonKey.ORGANISATION.equals(objectType)
+                || (JsonKey.LOCATION.equalsIgnoreCase(objectType))) {
               esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
             }
             if (StringUtils.isNotBlank(esResponse) && (esResponse).equalsIgnoreCase(objectId)) {
@@ -199,23 +192,6 @@ public class EsSyncBackgroundActor extends BaseActor {
       return userService.saveUserToES(id, data, context);
     }
     return "";
-  }
-
-  private Map<String, Object> getOrgDetails(Map<String, Object> orgMap, RequestContext context) {
-    logger.debug(context, "EsSyncBackgroundActor: getOrgDetails called");
-    String orgLocation = (String) orgMap.get(JsonKey.ORG_LOCATION);
-    List<Map<String, String>> orgLoc = new ArrayList<>();
-    if (StringUtils.isNotBlank(orgLocation)) {
-      try {
-        ObjectMapper mapper = new ObjectMapper();
-        orgLoc = mapper.readValue(orgLocation, List.class);
-      } catch (Exception ex) {
-        logger.error(context, "Exception occurred while parsing orgLocation", ex);
-      }
-    }
-    orgMap.put(JsonKey.ORG_LOCATION, orgLoc);
-    logger.debug(context, "EsSyncBackgroundActor: getOrgDetails returned");
-    return orgMap;
   }
 
   private String getType(String objectType) {

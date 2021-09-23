@@ -4,11 +4,9 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
@@ -16,18 +14,11 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.ClaimStatus;
-import org.sunbird.model.ShadowUser;
-import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -42,13 +33,15 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserOrgServiceImpl;
+import org.sunbird.service.user.TenantMigrationService;
+import org.sunbird.service.user.UserSelfDeclarationService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.TenantMigrationServiceImpl;
+import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.*;
-import org.sunbird.util.user.MigrationUtils;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
@@ -57,24 +50,23 @@ import scala.concurrent.duration.Duration;
 
 public class TenantMigrationActor extends BaseActor {
 
-  private Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-  private Util.DbInfo usrOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
-  private Util.DbInfo usrDecDbInfo = Util.dbInfoMap.get(JsonKey.USR_DECLARATION_TABLE);
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
   private static final String MASK_IDENTIFIER = "maskIdentifier";
+
   private static final int MAX_MIGRATION_ATTEMPT = 2;
   public static final int USER_EXTERNAL_ID_MISMATCH = -1;
   private IFeedService feedService = FeedFactory.getInstance();
   private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+
   private DecryptionService decryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private DataMaskingService maskingService =
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
-
-  @Inject
-  @Named("system_settings_actor")
-  private ActorRef systemSettingsActor;
+  private TenantMigrationService tenantServiceImpl = TenantMigrationServiceImpl.getInstance();
+  private UserSelfDeclarationService userSelfDeclarationService =
+      UserSelfDeclarationServiceImpl.getInstance();
+  private UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Inject
   @Named("user_external_identity_management_actor")
@@ -100,33 +92,20 @@ public class TenantMigrationActor extends BaseActor {
       case "userSelfDeclaredTenantMigrate":
         migrateSelfDeclaredUser(request);
         break;
-      case "migrateUser":
-        processShadowUserMigrate(request);
-        break;
       default:
         onReceiveUnsupportedOperation();
     }
   }
 
   private void migrateSelfDeclaredUser(Request request) {
-    Response response = null;
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateSelfDeclaredUser called.");
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     // update user declaration table status
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-    Map compositeKeyMap = new HashMap<String, Object>();
-    compositeKeyMap.put(JsonKey.USER_ID, userId);
-    Response existingRecord =
-        cassandraOperation.getRecordById(
-            usrDecDbInfo.getKeySpace(),
-            usrDecDbInfo.getTableName(),
-            compositeKeyMap,
-            request.getRequestContext());
     List<Map<String, Object>> responseList =
-        (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
+        userSelfDeclarationService.fetchUserDeclarations(userId, request.getRequestContext());
     if (CollectionUtils.isEmpty(responseList)) {
-      logger.info(
+      logger.debug(
           request.getRequestContext(),
           "TenantMigrationActor:migrateSelfDeclaredUser record not found for user: " + userId);
       ProjectCommonException.throwServerErrorException(
@@ -146,39 +125,36 @@ public class TenantMigrationActor extends BaseActor {
       }
       // Update the status to VALIDATED in user_self_declaration table
       Map<String, Object> responseMap = responseList.get(0);
-      Map attrMap = new HashMap<String, Object>();
       responseMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+      Map attrMap = new HashMap<String, Object>();
       attrMap.put(JsonKey.STATUS, JsonKey.VALIDATED);
+      Map compositeKeyMap = new HashMap<String, Object>();
+      compositeKeyMap.put(JsonKey.USER_ID, userId);
       compositeKeyMap.put(JsonKey.ORG_ID, responseMap.get(JsonKey.ORG_ID));
       compositeKeyMap.put(JsonKey.PERSONA, responseMap.get(JsonKey.PERSONA));
-      response =
-          cassandraOperation.updateRecord(
-              usrDecDbInfo.getKeySpace(),
-              usrDecDbInfo.getTableName(),
-              attrMap,
-              compositeKeyMap,
-              null);
+      Response response =
+          userSelfDeclarationService.updateSelfDeclaration(
+              attrMap, compositeKeyMap, request.getRequestContext());
       sender().tell(response, self());
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void migrateUser(Request request, boolean notify) {
     logger.info(request.getRequestContext(), "TenantMigrationActor:migrateUser called.");
     Map<String, Object> reqMap = new HashMap<>(request.getRequest());
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> userDetails =
-        UserServiceImpl.getInstance()
-            .esGetPublicUserProfileById(
-                (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
-    validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
-    validateChannelAndGetRootOrgId(request);
+        userService.getUserDetailsById(
+            (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
+    tenantServiceImpl.validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
+    tenantServiceImpl.validateChannelAndGetRootOrgId(request);
     Map<String, String> rollup = new HashMap<>();
     rollup.put("l1", (String) request.getRequest().get(JsonKey.ROOT_ORG_ID));
     request.getContext().put(JsonKey.ROLLUP, rollup);
     String orgId =
-        validateOrgExternalIdOrOrgIdAndGetOrgId(request.getRequest(), request.getRequestContext());
+        tenantServiceImpl.validateOrgExternalIdOrOrgIdAndGetOrgId(
+            request.getRequest(), request.getRequestContext());
     request.getRequest().put(JsonKey.ORG_ID, orgId);
     int userFlagValue = UserFlagEnum.STATE_VALIDATED.getUserFlagValue();
     if (userDetails.containsKey(JsonKey.FLAGS_VALUE)) {
@@ -187,29 +163,26 @@ public class TenantMigrationActor extends BaseActor {
     request.getRequest().put(JsonKey.FLAGS_VALUE, userFlagValue);
     Map<String, Object> userUpdateRequest = createUserUpdateRequest(request);
     // Update user channel and rootOrgId
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     Response response =
-        cassandraOperation.updateRecord(
-            usrDbInfo.getKeySpace(),
-            usrDbInfo.getTableName(),
-            userUpdateRequest,
-            request.getRequestContext());
+        tenantServiceImpl.migrateUser(userUpdateRequest, request.getRequestContext());
     if (null == response
-        || null == (String) response.get(JsonKey.RESPONSE)
-        || (null != (String) response.get(JsonKey.RESPONSE)
+        || null == response.get(JsonKey.RESPONSE)
+        || (null != response.get(JsonKey.RESPONSE)
             && !((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS))) {
       // throw exception for migration failed
       ProjectCommonException.throwServerErrorException(ResponseCode.errorUserMigrationFailed);
     }
     if (null != userUpdateRequest.get(JsonKey.IS_DELETED)
         && (Boolean) userUpdateRequest.get(JsonKey.IS_DELETED)) {
-      deactivateUserFromKC((String) userUpdateRequest.get(JsonKey.ID), request.getRequestContext());
+      tenantServiceImpl.deactivateUserFromKC(
+          (String) userUpdateRequest.get(JsonKey.ID), request.getRequestContext());
     }
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateUser user record got updated.");
     // Update user org details
     Response userOrgResponse =
-        updateUserOrg(request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
+        tenantServiceImpl.updateUserOrg(
+            request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
 
     // Update user externalIds
     Response userExternalIdsResponse = updateUserExternalIds(request);
@@ -247,13 +220,17 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void notify(Map<String, Object> userDetail, RequestContext context) {
-    logger.info(
+    logger.debug(
         context,
         "notify starts sending migrate notification to user " + userDetail.get(JsonKey.USER_ID));
-    Map<String, Object> userData = createUserData(userDetail);
-    Request notificationRequest = createNotificationData(userData);
-    notificationRequest.setRequestContext(context);
-    emailServiceActor.tell(notificationRequest, self());
+    try {
+      Map<String, Object> userData = createUserData(userDetail);
+      Request notificationRequest = createNotificationData(userData);
+      notificationRequest.setRequestContext(context);
+      emailServiceActor.tell(notificationRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
   }
 
   private Request createNotificationData(Map<String, Object> userData) {
@@ -294,119 +271,22 @@ public class TenantMigrationActor extends BaseActor {
     return userData;
   }
 
-  private void deactivateUserFromKC(String userId, RequestContext context) {
-    try {
-      Map<String, Object> userDbMap = new HashMap<>();
-      userDbMap.put(JsonKey.USER_ID, userId);
-      String status = getSSOManager().deactivateUser(userDbMap, context);
-      logger.info(
-          context,
-          "TenantMigrationActor:deactivateUserFromKC:user status in deactivating Keycloak"
-              + status);
-    } catch (Exception e) {
-      logger.error(
-          context,
-          "TenantMigrationActor:deactivateUserFromKC:Error occurred while deactivating user from  Keycloak",
-          e);
-    }
-  }
-
-  private String validateOrgExternalIdOrOrgIdAndGetOrgId(
-      Map<String, Object> migrateReq, RequestContext context) {
-    logger.info(context, "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called.");
-    String orgId = "";
-    if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_ID))
-        || StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
-      if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_ID))) {
-        orgId = (String) migrateReq.get(JsonKey.ORG_ID);
-        OrgService orgService = OrgServiceImpl.getInstance();
-        Map<String, Object> result = orgService.getOrgById(orgId, context);
-        if (MapUtils.isEmpty(result)) {
-          logger.info(
-              context,
-              "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called. OrgId is Invalid");
-          ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
-        } else {
-          String reqOrgRootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
-          if (StringUtils.isNotBlank(reqOrgRootOrgId)
-              && !reqOrgRootOrgId.equalsIgnoreCase((String) migrateReq.get(JsonKey.ROOT_ORG_ID))) {
-            ProjectCommonException.throwClientErrorException(
-                ResponseCode.parameterMismatch,
-                MessageFormat.format(
-                    ResponseCode.parameterMismatch.getErrorMessage(),
-                    StringFormatter.joinByComma(JsonKey.CHANNEL, JsonKey.ORG_ID)));
-          } else {
-            if (MapUtils.isNotEmpty(result)) {
-              fetchLocationIds(context, migrateReq, result);
-            }
-          }
-        }
-      } else if (StringUtils.isNotBlank((String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID))) {
-        OrgExternalService orgExternalService = new OrgExternalServiceImpl();
-        orgId =
-            orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-                (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
-                (String) migrateReq.get(JsonKey.CHANNEL),
-                context);
-        if (StringUtils.isBlank(orgId)) {
-          logger.info(
-              context,
-              "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called. OrgExternalId is Invalid");
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.invalidParameterValue,
-              MessageFormat.format(
-                  ResponseCode.invalidParameterValue.getErrorMessage(),
-                  (String) migrateReq.get(JsonKey.ORG_EXTERNAL_ID),
-                  JsonKey.ORG_EXTERNAL_ID));
-        } else {
-          // Fetch locationids of the suborg and update the location of sso user
-          OrgService orgService = OrgServiceImpl.getInstance();
-          Map<String, Object> orgMap = orgService.getOrgById(orgId, context);
-          if (MapUtils.isNotEmpty(orgMap)) {
-            fetchLocationIds(context, migrateReq, orgMap);
-          }
-        }
-      }
-    }
-    return orgId;
-  }
-
-  private void fetchLocationIds(
-      RequestContext context, Map<String, Object> migrateReq, Map<String, Object> orgMap) {
-    List orgLocation = (List) orgMap.get(JsonKey.ORG_LOCATION);
-    if (CollectionUtils.isNotEmpty(orgLocation)) {
-      try {
-        ObjectMapper mapper = new ObjectMapper();
-        migrateReq.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(orgLocation));
-      } catch (Exception e) {
-        logger.info(context, "Exception occurred while converting orgLocation to String.");
-      }
-    }
-  }
-
-  private void validateUserCustodianOrgId(String rootOrgId) {
-    String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
-    if (!rootOrgId.equalsIgnoreCase(custodianOrgId)) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.parameterMismatch,
-          MessageFormat.format(
-              ResponseCode.parameterMismatch.getErrorMessage(),
-              "user rootOrgId and custodianOrgId"));
-    }
-  }
-
   private void saveUserDetailsToEs(String userId, RequestContext context) {
-    Request userRequest = new Request();
-    userRequest.setRequestContext(context);
-    userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-    userRequest.getRequest().put(JsonKey.ID, userId);
-    logger.info(
-        context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    try {
+      Request userRequest = new Request();
+      userRequest.setRequestContext(context);
+      userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
+      userRequest.getRequest().put(JsonKey.ID, userId);
+      logger.debug(
+          context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
+      backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
+    }
   }
 
   private Response updateUserExternalIds(Request request) {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:updateUserExternalIds called.");
+    logger.debug(request.getRequestContext(), "TenantMigrationActor:updateUserExternalIds called.");
     Response response = new Response();
     Map<String, Object> userExtIdsReq = new HashMap<>();
     userExtIdsReq.put(JsonKey.ID, request.getRequest().get(JsonKey.USER_ID));
@@ -414,7 +294,6 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
       ObjectMapper mapper = new ObjectMapper();
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       // Update channel to orgId  for provider field in usr_external_identiy table
       UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq, request.getRequestContext());
       User user = mapper.convertValue(userExtIdsReq, User.class);
@@ -425,10 +304,11 @@ public class TenantMigrationActor extends BaseActor {
           UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
-
-      Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
-      response = (Response) Await.result(future, t.duration());
-      UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+      if (null != userExternalIdManagementActor) {
+        Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+        Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
+        response = (Response) Await.result(future, t.duration());
+      }
       userLookUpService.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
           (String) request.getRequest().get(JsonKey.USER_ID),
@@ -541,286 +421,5 @@ public class TenantMigrationActor extends BaseActor {
               : true);
     }
     return userRequest;
-  }
-
-  /**
-   * this method will be used when user reject the migration
-   *
-   * @param userId
-   */
-  private boolean rejectMigration(String userId, RequestContext context) {
-    logger.info(
-        context,
-        "TenantMigrationActor:rejectMigration: started rejecting Migration with userId:" + userId);
-    List<ShadowUser> shadowUserList = MigrationUtils.getEligibleUsersById(userId, context);
-    if (shadowUserList.isEmpty()) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUserId);
-    }
-    shadowUserList.forEach(
-        shadowUser -> {
-          MigrationUtils.markUserAsRejected(shadowUser, context);
-        });
-    return true;
-  }
-
-  private void processShadowUserMigrate(Request request) throws Exception {
-    logger.info(
-        request.getRequestContext(), "TenantMigrationActor:processShadowUserMigrate called.");
-    String userId = (String) request.getRequest().get(JsonKey.USER_ID);
-    String extUserId = (String) request.getRequest().get(JsonKey.USER_EXT_ID);
-    String channel = (String) request.getRequest().get(JsonKey.CHANNEL);
-    String action = (String) request.getRequest().get(JsonKey.ACTION);
-    String feedId =
-        (String) request.getRequest().get(JsonKey.FEED_ID); // will be used with user_feed table
-    Response response = new Response();
-    response.put(JsonKey.SUCCESS, true);
-    response.put(JsonKey.USER_ID, userId);
-    if (StringUtils.equalsIgnoreCase(action, JsonKey.REJECT)) {
-      rejectMigration(userId, request.getRequestContext());
-      deleteUserFeed(
-          feedId,
-          userId,
-          FeedAction.ORG_MIGRATION_ACTION.getfeedAction(),
-          request.getRequestContext());
-    } else if (StringUtils.equalsIgnoreCase(action, JsonKey.ACCEPT)) {
-      logger.info(
-          request.getRequestContext(),
-          "TenantMigrationActor: processShadowUserMigrate: shadow-user accepted and the extUserId : "
-              + extUserId);
-      List<ShadowUser> shadowUserList =
-          getShadowUsers(channel, userId, request.getRequestContext());
-      checkUserId(shadowUserList);
-      int index = getIndexOfShadowUser(shadowUserList, extUserId);
-      if (!isIndexValid(index)) {
-        logger.info(
-            request.getRequestContext(),
-            "TenantMigrationActor: processShadowUserMigrate: user entered invalid externalId ");
-        if (getRemainingAttempt(shadowUserList) <= 0) {
-          deleteUserFeed(
-              feedId,
-              userId,
-              FeedAction.ORG_MIGRATION_ACTION.getfeedAction(),
-              request.getRequestContext());
-        }
-        response =
-            modifyAttemptCount(response, shadowUserList, extUserId, request.getRequestContext());
-      } else {
-        logger.info(
-            request.getRequestContext(),
-            "TenantMigrationActor: processShadowUserMigrate: user entered valid externalId ");
-        selfMigrate(request, userId, extUserId, shadowUserList.get(index));
-        increaseAttemptCount(shadowUserList.get(index), false, request.getRequestContext());
-        shadowUserList.remove(index);
-        rejectRemainingUser(shadowUserList, request.getRequestContext());
-      }
-    } else {
-      unSupportedMessage();
-    }
-    sender().tell(response, self());
-  }
-
-  private int getRemainingAttempt(List<ShadowUser> shadowUserList) {
-    return MAX_MIGRATION_ATTEMPT - shadowUserList.get(0).getAttemptedCount() - 1;
-  }
-
-  private Response modifyAttemptCount(
-      Response response,
-      List<ShadowUser> shadowUserList,
-      String extUserId,
-      RequestContext context) {
-    int remainingAttempt = getRemainingAttempt(shadowUserList);
-    if (remainingAttempt <= 0) {
-      increaseBulkAttemptCount(shadowUserList, true, context);
-      ProjectCommonException.throwClientErrorException(ResponseCode.userMigrationFiled);
-    }
-    response = prepareFailureResponse(extUserId, remainingAttempt);
-    increaseBulkAttemptCount(shadowUserList, false, context);
-    return response;
-  }
-
-  /**
-   * this method will throw exception if no record found with provided userId and channel.
-   *
-   * @param shadowUserList
-   */
-  private void checkUserId(List<ShadowUser> shadowUserList) {
-    if (CollectionUtils.isEmpty(shadowUserList)) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUserId);
-    }
-  }
-
-  private boolean isIndexValid(int index) {
-    return (index != USER_EXTERNAL_ID_MISMATCH);
-  }
-
-  /**
-   * this method will reject the remaining user found with the same channel in shadow_user table
-   *
-   * @param shadowUserList
-   */
-  private void rejectRemainingUser(List<ShadowUser> shadowUserList, RequestContext context) {
-    shadowUserList
-        .stream()
-        .forEach(
-            shadowUser -> {
-              MigrationUtils.markUserAsRejected(shadowUser, context);
-            });
-  }
-  /**
-   * this method will return the index from the shadowUserList whose user ext id is matching with
-   * provided one
-   *
-   * @param shadowUserList
-   * @param extUserId
-   * @return
-   */
-  private int getIndexOfShadowUser(List<ShadowUser> shadowUserList, String extUserId) {
-    int index =
-        IntStream.range(0, shadowUserList.size())
-            .filter(i -> Objects.nonNull(shadowUserList.get(i)))
-            .filter(
-                i -> StringUtils.equalsIgnoreCase(extUserId, shadowUserList.get(i).getUserExtId()))
-            .findFirst()
-            .orElse(USER_EXTERNAL_ID_MISMATCH);
-    return index;
-  }
-
-  /**
-   * this method will return the shadow user based on channel and userId
-   *
-   * @param channel
-   * @param userId
-   * @return
-   */
-  private List<ShadowUser> getShadowUsers(String channel, String userId, RequestContext context) {
-    Map<String, Object> propsMap = new HashMap<>();
-    propsMap.put(JsonKey.CHANNEL, channel);
-    List<ShadowUser> shadowUserList =
-        MigrationUtils.getEligibleUsersById(userId, propsMap, context);
-    return shadowUserList;
-  }
-
-  /**
-   * this method will migrate the user from custodian channel to non-custodian channel.
-   *
-   * @param request
-   * @param userId
-   * @param extUserId
-   * @param shadowUser
-   */
-  private void selfMigrate(
-      Request request, String userId, String extUserId, ShadowUser shadowUser) {
-    String feedId = (String) request.getRequest().get(JsonKey.FEED_ID);
-    request.setRequest(prepareMigrationRequest(shadowUser, userId, extUserId));
-    logger.info(
-        request.getRequestContext(),
-        "TenantMigrationActor:selfMigrate:request prepared for user migration:"
-            + request.getRequest());
-    migrateUser(request, false);
-    Map<String, Object> propertiesMap = new HashMap<>();
-    propertiesMap.put(JsonKey.CLAIM_STATUS, ClaimStatus.CLAIMED.getValue());
-    propertiesMap.put(JsonKey.UPDATED_ON, new Timestamp(System.currentTimeMillis()));
-    propertiesMap.put(JsonKey.CLAIMED_ON, new Timestamp(System.currentTimeMillis()));
-    propertiesMap.put(JsonKey.USER_ID, userId);
-    MigrationUtils.updateRecord(
-        propertiesMap,
-        shadowUser.getChannel(),
-        shadowUser.getUserExtId(),
-        request.getRequestContext());
-    deleteUserFeed(
-        feedId,
-        userId,
-        FeedAction.ORG_MIGRATION_ACTION.getfeedAction(),
-        request.getRequestContext());
-  }
-
-  private void deleteUserFeed(String feedId, String userId, String action, RequestContext context) {
-    if (StringUtils.isNotBlank(feedId)) {
-      logger.info(
-          context, "TenantMigrationActor:deleteUserFeed method called for feedId : " + feedId);
-      Request request = new Request();
-      Map<String, Object> reqObj = new HashMap<>();
-      reqObj.put(JsonKey.IDS, Arrays.asList(feedId));
-      reqObj.put(JsonKey.USER_ID, userId);
-      reqObj.put(JsonKey.CATEGORY, action);
-      request.setRequest(reqObj);
-      feedService.delete(request, context);
-    }
-  }
-
-  /**
-   * this method will prepare the failure response will return the remainingCount if provided user
-   * ext id in incorrect
-   *
-   * @param extUserId
-   * @param remainingAttempt
-   * @return
-   */
-  private Response prepareFailureResponse(String extUserId, int remainingAttempt) {
-    Response response = new Response();
-    response.setResponseCode(ResponseCode.invalidUserExternalId);
-    response.put(JsonKey.ERROR, true);
-    response.put(JsonKey.MAX_ATTEMPT, MAX_MIGRATION_ATTEMPT);
-    response.put(JsonKey.REMAINING_ATTEMPT, remainingAttempt);
-    response.put(
-        JsonKey.MESSAGE,
-        MessageFormat.format(ResponseCode.invalidUserExternalId.getErrorMessage(), extUserId));
-    return response;
-  }
-
-  /**
-   * this method will prepare the migration request.
-   *
-   * @param shadowUser
-   * @param userId
-   * @param extUserId
-   */
-  private static Map<String, Object> prepareMigrationRequest(
-      ShadowUser shadowUser, String userId, String extUserId) {
-    Map<String, Object> reqMap = new WeakHashMap<>();
-    reqMap.put(JsonKey.USER_ID, userId);
-    reqMap.put(JsonKey.CHANNEL, shadowUser.getChannel());
-    reqMap.put(JsonKey.ORG_EXTERNAL_ID, shadowUser.getOrgExtId());
-    reqMap.put(JsonKey.STATUS, shadowUser.getUserStatus());
-    List<Map<String, String>> extUserIds = new ArrayList<>();
-    Map<String, String> externalIdMap = new WeakHashMap<>();
-    externalIdMap.put(JsonKey.ID, extUserId);
-    externalIdMap.put(JsonKey.ID_TYPE, shadowUser.getChannel());
-    externalIdMap.put(JsonKey.PROVIDER, shadowUser.getChannel());
-    extUserIds.add(externalIdMap);
-    reqMap.put(JsonKey.EXTERNAL_IDS, extUserIds);
-    return reqMap;
-  }
-
-  private void increaseAttemptCount(
-      ShadowUser shadowUser, boolean isFailed, RequestContext context) {
-    Map<String, Object> propertiesMap = new WeakHashMap<>();
-    propertiesMap.put(JsonKey.ATTEMPTED_COUNT, shadowUser.getAttemptedCount() + 1);
-    propertiesMap.put(JsonKey.UPDATED_ON, new Timestamp(System.currentTimeMillis()));
-    if (isFailed) {
-      propertiesMap.put(JsonKey.CLAIM_STATUS, ClaimStatus.FAILED.getValue());
-    }
-    MigrationUtils.updateRecord(
-        propertiesMap, shadowUser.getChannel(), shadowUser.getUserExtId(), context);
-  }
-
-  /**
-   * this method will increase the attemptCount of the remaining user found with same channel
-   *
-   * @param shadowUserList
-   * @param isFailed
-   */
-  private void increaseBulkAttemptCount(
-      List<ShadowUser> shadowUserList, boolean isFailed, RequestContext context) {
-    shadowUserList
-        .stream()
-        .forEach(
-            shadowUser -> {
-              increaseAttemptCount(shadowUser, isFailed, context);
-            });
-  }
-
-  private SSOManager getSSOManager() {
-    return SSOServiceFactory.getInstance();
   }
 }

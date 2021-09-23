@@ -27,15 +27,6 @@ public abstract class BaseActor extends UntypedAbstractActor {
     }
   }
 
-  protected void unSupportedMessage() {
-    ProjectCommonException exception =
-        new ProjectCommonException(
-            ResponseCode.invalidRequestData.getErrorCode(),
-            ResponseCode.invalidRequestData.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-    sender().tell(exception, self());
-  }
-
   protected void onReceiveUnsupportedOperation() {
     ProjectCommonException exception =
         new ProjectCommonException(

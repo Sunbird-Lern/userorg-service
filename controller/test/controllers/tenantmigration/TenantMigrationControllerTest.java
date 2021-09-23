@@ -45,23 +45,6 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testMigrationUserSuccess() {
-    Result result =
-        TestUtil.performTest("/v1/user/migrate", "POST", getSuccessMigrationReq(), application);
-    assertEquals(
-        ResponseCode.success.getErrorCode().toLowerCase(), TestUtil.getResponseCode(result));
-  }
-
-  @Test
-  public void testMigrationUserFailure() {
-    Result result =
-        TestUtil.performTest(
-            "/v1/user/migrate", "POST", getFailureMigrationReq(JsonKey.CHANNEL), application);
-    assertEquals(
-        ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
-  }
-
-  @Test
   public void tesPrivatetMigrationUserSuccess() {
     Result result =
         TestUtil.performTest(
@@ -77,18 +60,6 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
     reqMap.put(JsonKey.USER_ID, "userId");
     reqMap.put(JsonKey.USER_EXT_ID, "abc_ext_id");
     reqMap.put(JsonKey.CHANNEL, "TN");
-    request.put(JsonKey.REQUEST, reqMap);
-    return request;
-  }
-
-  private Map<String, Object> getFailureMigrationReq(String param) {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, String> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ACTION, "accept");
-    reqMap.put(JsonKey.USER_ID, "userId");
-    reqMap.put(JsonKey.USER_EXT_ID, "abc_ext_id");
-    reqMap.put(JsonKey.CHANNEL, "TN");
-    reqMap.remove(param);
     request.put(JsonKey.REQUEST, reqMap);
     return request;
   }
