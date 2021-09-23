@@ -140,7 +140,6 @@ public class UserFeedActorTest {
   }
 
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
