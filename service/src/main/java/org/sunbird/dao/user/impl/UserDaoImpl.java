@@ -36,7 +36,6 @@ public class UserDaoImpl implements UserDao {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private ObjectMapper mapper = new ObjectMapper();
   private static UserDao userDao = null;
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   public static UserDao getInstance() {
     if (userDao == null) {
@@ -92,14 +91,14 @@ public class UserDaoImpl implements UserDao {
   @Override
   public Map<String, Object> search(SearchDTO searchDTO, RequestContext context) {
     Future<Map<String, Object>> esResultF =
-        esUtil.search(searchDTO, ProjectUtil.EsType.user.getTypeName(), context);
+        esService.search(searchDTO, ProjectUtil.EsType.user.getTypeName(), context);
     return (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
   }
 
   @Override
   public Map<String, Object> getEsUserById(String userId, RequestContext context) {
     Future<Map<String, Object>> esResultF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
+        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
     Map<String, Object> esResult =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isEmpty(esResult)) {
