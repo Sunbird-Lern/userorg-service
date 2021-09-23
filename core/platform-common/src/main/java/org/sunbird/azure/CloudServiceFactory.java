@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.sunbird.util.ProjectUtil;
 
 /**
  * Factory class to store the various upload download services like Azure , Amazon S3 etc... Created
@@ -23,7 +22,7 @@ public class CloudServiceFactory {
    */
   public static Object get(String serviceName) {
 
-    if (ProjectUtil.isNotNull(factory.get(serviceName))) {
+    if (null != (factory.get(serviceName))) {
       return factory.get(serviceName);
     } else {
       // create the service with the given name
@@ -42,7 +41,7 @@ public class CloudServiceFactory {
     }
 
     synchronized (CloudServiceFactory.class) {
-      if (ProjectUtil.isNull(factory.get(serviceName)) && "Azure".equalsIgnoreCase(serviceName)) {
+      if (null == (factory.get(serviceName)) && "Azure".equalsIgnoreCase(serviceName)) {
         CloudService service = new AzureCloudService();
         factory.put("Azure", service);
       }

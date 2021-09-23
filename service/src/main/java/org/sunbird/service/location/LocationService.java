@@ -26,4 +26,6 @@ public interface LocationService {
 
   List<Map<String, Object>> getLocationsByIds(
       List<String> locationIds, List<String> locationFields, RequestContext context);
+
+  String saveLocationToEs(String id, Map<String, Object> data, RequestContext context);
 }

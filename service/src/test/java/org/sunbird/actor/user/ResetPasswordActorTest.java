@@ -127,12 +127,12 @@ public class ResetPasswordActorTest {
         .thenReturn(true);
   }
 
-  @Test
+  /*@Test
   public void testResetPasswordWithInvalidUserIdFailure() {
     getRecordByIdEmptyResponse();
     boolean result = testScenario(getInvalidRequest(), ResponseCode.userNotFound);
     Assert.assertTrue(result);
-  }
+  }*/
 
   @Test
   public void testResetPasswordWithKeyPhoneSuccess() throws Exception {

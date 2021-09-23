@@ -12,7 +12,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -123,16 +122,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testValidatePhoneNumberFailureWithInvalidPhoneNumber() {
-    assertFalse(ProjectUtil.validatePhoneNumber("312"));
-  }
-
-  @Test
-  public void testValidatePhoneNumberSuccess() {
-    assertTrue(ProjectUtil.validatePhoneNumber("9844016699"));
-  }
-
-  @Test
   public void testCreateCheckResponseSuccess() {
     Map<String, Object> responseMap =
         ProjectUtil.createCheckResponse("LearnerService", false, null);
@@ -236,13 +225,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testGetEkstepHeaderSuccess() {
-    Map<String, String> map = ProjectUtil.getEkstepHeader();
-    assertEquals(map.get("Content-Type"), "application/json");
-    assertNotNull(map.get(JsonKey.AUTHORIZATION));
-  }
-
-  @Test
   public void testReportTrackingStatusSuccess() {
     assertEquals(0, ProjectUtil.ReportTrackingStatus.NEW.getValue());
     assertEquals(1, ProjectUtil.ReportTrackingStatus.GENERATING_DATA.getValue());
@@ -329,12 +311,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testIsNull() {
-    Assert.assertTrue(ProjectUtil.isNull(null));
-    Assert.assertTrue(ProjectUtil.isNotNull("null"));
-  }
-
-  @Test
   public void testGetDateFormatter() {
     Assert.assertNotNull(ProjectUtil.getDateFormatter());
   }
@@ -344,26 +320,6 @@ public class ProjectUtilTest extends BaseHttpTest {
     Assert.assertTrue(ProjectUtil.isEmailvalid("xyz@xyz.com"));
     Assert.assertFalse(ProjectUtil.isEmailvalid("xy@z@xyz.com"));
     Assert.assertFalse(ProjectUtil.isEmailvalid(""));
-  }
-
-  @Test
-  public void testCreateAndThrowServerErrorSuccess() {
-    try {
-      ProjectUtil.createAndThrowServerError();
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.SERVER_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.SERVER_ERROR.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testCreateAndThrowInvalidUserDataExceptionSuccess() {
-    try {
-      ProjectUtil.createAndThrowInvalidUserDataException();
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidUsrData.getErrorCode(), e.getCode());
-    }
   }
 
   @Test

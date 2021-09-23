@@ -3,20 +3,14 @@ package org.sunbird.service.user.impl;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.UserLookupDao;
@@ -30,12 +24,16 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.adminutil.AdminUtilRequestData;
-import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.user.UserOrgService;
+import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.UserTncService;
 import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
@@ -51,7 +49,12 @@ public class UserServiceImpl implements UserService {
   private UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
   private UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private OrgService orgService = OrgServiceImpl.getInstance();
+  private UserTncService tncService = new UserTncService();
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private static final int GENERATE_USERNAME_COUNT = 10;
+  private static ObjectMapper mapper = new ObjectMapper();
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -118,101 +121,12 @@ public class UserServiceImpl implements UserService {
             && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
         || (StringUtils.isNotEmpty(managedById)
             && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
-    throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
-          ResponseCode.unAuthorized.getErrorMessage(),
-          ResponseCode.UNAUTHORIZED.getResponseCode());
+    ProjectCommonException.throwUnauthorizedErrorException();
   }
 
   @Override
   public Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context) {
     return userDao.getEsUserById(userId, context);
-  }
-
-  @Override
-  public String getRootOrgIdFromChannel(String channel, RequestContext context) {
-
-    Map<String, Object> filters = new HashMap<>();
-    filters.put(JsonKey.IS_TENANT, true);
-    filters.put(JsonKey.CHANNEL, channel);
-
-    SearchDTO searchDTO = new SearchDTO();
-    searchDTO.getAdditionalProperties().put(JsonKey.FILTERS, filters);
-    Map<String, Object> esResult = userDao.search(searchDTO, context);
-    if (MapUtils.isNotEmpty(esResult)
-        && CollectionUtils.isNotEmpty((List) esResult.get(JsonKey.CONTENT))) {
-      Map<String, Object> esContent =
-          ((List<Map<String, Object>>) esResult.get(JsonKey.CONTENT)).get(0);
-      if (null != esContent.get(JsonKey.STATUS)) {
-        int status = (int) esContent.get(JsonKey.STATUS);
-        if (1 != status) {
-          ProjectCommonException.throwClientErrorException(
-              ResponseCode.errorInactiveOrg,
-              ProjectUtil.formatMessage(
-                  ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
-        }
-      } else {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorInactiveOrg,
-            ProjectUtil.formatMessage(
-                ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
-      }
-      return (String) esContent.get(JsonKey.ID);
-    } else {
-      if (StringUtils.isNotBlank(channel)) {
-        throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      } else {
-        throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
-            ProjectUtil.formatMessage(
-                ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
-    }
-  }
-
-  @Override
-  public String getCustodianChannel(
-      Map<String, Object> userMap, ActorRef actorRef, RequestContext context) {
-    String channel = (String) userMap.get(JsonKey.CHANNEL);
-    if (StringUtils.isBlank(channel)) {
-      try {
-        Map<String, String> configSettingMap = DataCacheHandler.getConfigSettings();
-        channel = configSettingMap.get(JsonKey.CUSTODIAN_ORG_CHANNEL);
-        if (StringUtils.isBlank(channel)) {
-          SystemSettingClient client = SystemSettingClientImpl.getInstance();
-          SystemSetting custodianOrgChannelSetting =
-              client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_CHANNEL, context);
-          if (custodianOrgChannelSetting != null
-              && StringUtils.isNotBlank(custodianOrgChannelSetting.getValue())) {
-            configSettingMap.put(
-                custodianOrgChannelSetting.getId(), custodianOrgChannelSetting.getValue());
-            channel = custodianOrgChannelSetting.getValue();
-          }
-        }
-      } catch (Exception ex) {
-        logger.error(
-            context,
-            "getCustodianChannel: Exception occurred while fetching custodian channel from system setting.",
-            ex);
-      }
-    }
-    if (StringUtils.isBlank(channel)) {
-      channel = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_CHANNEL);
-      userMap.put(JsonKey.CHANNEL, channel);
-    }
-    if (StringUtils.isBlank(channel)) {
-      throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
-          ProjectUtil.formatMessage(
-              ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    return channel;
   }
 
   @Override
@@ -279,11 +193,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<Map<String, Object>> searchUserNameInUserLookup(
       List<String> encUserNameList, RequestContext context) {
-
     Map<String, Object> reqMap = new LinkedHashMap<>();
     reqMap.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_USER_NAME);
     reqMap.put(JsonKey.VALUE, encUserNameList);
-
     return userLookupDao.getUsersByUserNames(reqMap, context);
   }
 
@@ -322,29 +234,6 @@ public class UserServiceImpl implements UserService {
       return (String) records.get(0).get(JsonKey.USER_ID);
     }
     return "";
-  }
-
-  @Override
-  public String getCustodianOrgId(ActorRef actorRef, RequestContext context) {
-    String custodianOrgId = "";
-    try {
-      SystemSettingClient client = SystemSettingClientImpl.getInstance();
-      SystemSetting systemSetting =
-          client.getSystemSettingByField(actorRef, JsonKey.CUSTODIAN_ORG_ID, context);
-      if (null != systemSetting && StringUtils.isNotBlank(systemSetting.getValue())) {
-        custodianOrgId = systemSetting.getValue();
-      }
-    } catch (Exception ex) {
-      logger.error(
-          context,
-          "getCustodianOrgId: Exception occurred with error message = " + ex.getMessage(),
-          ex);
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.errorSystemSettingNotFound,
-          ProjectUtil.formatMessage(
-              ResponseCode.errorSystemSettingNotFound.getErrorMessage(), JsonKey.CUSTODIAN_ORG_ID));
-    }
-    return custodianOrgId;
   }
 
   /**
@@ -526,5 +415,110 @@ public class UserServiceImpl implements UserService {
   public boolean updateUserDataToES(
       String identifier, Map<String, Object> data, RequestContext context) {
     return userDao.updateUserDataToES(identifier, data, context);
+  }
+
+  @Override
+  public String saveUserToES(String identifier, Map<String, Object> data, RequestContext context) {
+    return userDao.saveUserToES(identifier, data, context);
+  }
+
+  @Override
+  public Map<String, Object> getUserDetailsForES(String userId, RequestContext context) {
+    logger.info(context, "get user profile method call started user Id : " + userId);
+    Map<String, Object> userDetails = getUserDetailsById(userId, context);
+    if (MapUtils.isNotEmpty(userDetails)) {
+      logger.debug(context, "getUserDetails: userId = " + userId);
+      userDetails.put(JsonKey.ORGANISATIONS, getUserOrgDetails(userId, context));
+      Map<String, Object> orgMap =
+          orgService.getOrgById((String) userDetails.get(JsonKey.ROOT_ORG_ID), context);
+      if (MapUtils.isNotEmpty(orgMap)) {
+        userDetails.put(JsonKey.ROOT_ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
+      }
+      // store alltncaccepted as Map Object in ES
+      Map<String, String> allTncAccepted =
+          (Map<String, String>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
+      if (MapUtils.isNotEmpty(allTncAccepted)) {
+        userDetails.put(
+            JsonKey.ALL_TNC_ACCEPTED, tncService.convertTncStringToJsonMap(allTncAccepted));
+      }
+      userDetails.remove(JsonKey.PASSWORD);
+      checkEmailAndPhoneVerified(userDetails);
+      List<Map<String, String>> userLocList = new ArrayList<>();
+      String profLocation = (String) userDetails.get(JsonKey.PROFILE_LOCATION);
+      if (StringUtils.isNotBlank(profLocation)) {
+        try {
+          userLocList = mapper.readValue(profLocation, List.class);
+        } catch (Exception e) {
+          logger.error(
+              context,
+              "Exception while converting profileLocation to List<Map<String,String>>.",
+              e);
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_LOCATION, userLocList);
+      Map<String, Object> userTypeDetail = new HashMap<>();
+      String profUserType = (String) userDetails.get(JsonKey.PROFILE_USERTYPE);
+      if (StringUtils.isNotBlank(profUserType)) {
+        try {
+          userTypeDetail = mapper.readValue(profUserType, Map.class);
+        } catch (Exception e) {
+          logger.error(
+              context, "Exception while converting profileUserType to Map<String,String>.", e);
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+      List<Map<String, Object>> userRoleList = userRoleService.getUserRoles(userId, context);
+      userDetails.put(JsonKey.ROLES, userRoleList);
+    } else {
+      logger.info(
+          context, "getUserProfile: User data not available to save in ES for userId : " + userId);
+    }
+    return userDetails;
+  }
+
+  private List<Map<String, Object>> getUserOrgDetails(String userId, RequestContext context) {
+    List<Map<String, Object>> userOrgList = new ArrayList<>();
+    List<Map<String, Object>> userOrgDataList;
+    try {
+      userOrgDataList = userOrgService.getUserOrgListByUserId(userId, context);
+      userOrgDataList
+          .stream()
+          .forEach(
+              dataMap -> {
+                if (null != dataMap.get(JsonKey.IS_DELETED)
+                    && !((boolean) dataMap.get(JsonKey.IS_DELETED))) {
+                  userOrgList.add(dataMap);
+                }
+              });
+      if (CollectionUtils.isNotEmpty(userOrgList)) {
+        List<String> organisationIds =
+            userOrgList
+                .stream()
+                .map(m -> (String) m.get(JsonKey.ORGANISATION_ID))
+                .distinct()
+                .collect(Collectors.toList());
+        List<String> fields = Arrays.asList(JsonKey.ORG_NAME, JsonKey.ID);
+        List<Map<String, Object>> orgDataList =
+            orgService.getOrgByIds(organisationIds, fields, context);
+        Map<String, Map<String, Object>> orgInfoMap = new HashMap<>();
+        orgDataList.stream().forEach(org -> orgInfoMap.put((String) org.get(JsonKey.ID), org));
+        for (Map<String, Object> userOrg : userOrgList) {
+          Map<String, Object> orgMap = orgInfoMap.get(userOrg.get(JsonKey.ORGANISATION_ID));
+          userOrg.put(JsonKey.ORG_NAME, orgMap.get(JsonKey.ORG_NAME));
+          userOrg.remove(JsonKey.ROLES);
+        }
+      }
+    } catch (Exception e) {
+      logger.error(context, e.getMessage(), e);
+    }
+    return userOrgList;
+  }
+
+  private void checkEmailAndPhoneVerified(Map<String, Object> userDetails) {
+    if (null != userDetails.get(JsonKey.FLAGS_VALUE)) {
+      int flagsValue = Integer.parseInt(userDetails.get(JsonKey.FLAGS_VALUE).toString());
+      Map<String, Boolean> userFlagMap = UserFlagUtil.assignUserFlagValues(flagsValue);
+      userDetails.putAll(userFlagMap);
+    }
   }
 }

@@ -116,7 +116,10 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
   public void updateSelfDeclaration(UserDeclareEntity userDeclareEntity, RequestContext context) {
     userSelfDeclarationDao.upsertUserSelfDeclaredFields(userDeclareEntity, context);
   }
-
+  public Response updateSelfDeclaration(Map<String, Object> updateFieldsMap,
+                                    Map<String, Object> compositeKey, RequestContext context) {
+    return userSelfDeclarationDao.updateUserSelfDeclaredFields(updateFieldsMap, compositeKey, context);
+  }
   @Override
   public List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
     List<Map<String, Object>> finalRes = new ArrayList<>();

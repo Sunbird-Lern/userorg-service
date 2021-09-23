@@ -604,7 +604,7 @@ public class UserUtil {
   public static Map<String, Object> validateManagedByUser(
       String managedBy, RequestContext context) {
     Map<String, Object> managedByInfo = userDao.getUserDetailsById(managedBy, context);
-    if (ProjectUtil.isNull(managedByInfo)
+    if (MapUtils.isEmpty(managedByInfo)
         || StringUtils.isBlank((String) managedByInfo.get(JsonKey.FIRST_NAME))
         || StringUtils.isNotBlank((String) managedByInfo.get(JsonKey.MANAGED_BY))
         || (null != managedByInfo.get(JsonKey.IS_DELETED)

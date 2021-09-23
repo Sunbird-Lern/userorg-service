@@ -25,17 +25,10 @@ public interface UserService {
 
   Map<String, Object> esGetPublicUserProfileById(String userId, RequestContext context);
 
-  String getRootOrgIdFromChannel(String channel, RequestContext context);
-
-  String getCustodianChannel(
-      Map<String, Object> userMap, ActorRef actorRef, RequestContext context);
-
   List<String> generateUsernames(
       String name, List<String> excludedUsernames, RequestContext context);
 
   List<String> getEncryptedList(List<String> dataList, RequestContext context);
-
-  String getCustodianOrgId(ActorRef actorRef, RequestContext context);
 
   Map<String, Object> fetchEncryptedToken(
       String parentId, List<Map<String, Object>> respList, RequestContext context);
@@ -66,4 +59,8 @@ public interface UserService {
   Map<String, Object> searchUser(SearchDTO searchDTO, RequestContext context);
 
   boolean updateUserDataToES(String identifier, Map<String, Object> data, RequestContext context);
+
+  String saveUserToES(String identifier, Map<String, Object> data, RequestContext context);
+
+  Map<String, Object> getUserDetailsForES(String userId, RequestContext context);
 }

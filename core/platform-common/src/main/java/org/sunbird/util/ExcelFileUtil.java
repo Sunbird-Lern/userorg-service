@@ -38,7 +38,7 @@ public class ExcelFileUtil extends FileUtil {
         } else if (obj instanceof Double) {
           cell.setCellValue((Double) obj);
         } else {
-          if (ProjectUtil.isNotNull(obj)) {
+          if (null != (obj)) {
             cell.setCellValue(obj.toString());
           }
         }

@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -26,8 +27,9 @@ import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 
 /**
  * Actor contains the common functionality for bulk upload.
@@ -35,6 +37,8 @@ import org.sunbird.util.Util;
  * @author arvind.
  */
 public abstract class BaseBulkUploadActor extends BaseActor {
+
+  private UserService userService = UserServiceImpl.getInstance();
 
   public void validateBulkUploadFields(
       String[] csvHeaderLine, String[] allowedFields, Boolean allFieldsMandatory) {
@@ -495,9 +499,13 @@ public abstract class BaseBulkUploadActor extends BaseActor {
     bulkUploadProcess.setStatus(ProjectUtil.BulkProcessStatus.NEW.getValue());
     bulkUploadProcess.setTaskCount(taskCount);
 
-    Map<String, Object> user = Util.getUserbyUserId(requestedBy, context);
-    if (user != null) {
-      bulkUploadProcess.setOrganisationId((String) user.get(JsonKey.ROOT_ORG_ID));
+    try {
+      Map<String, Object> user = userService.getUserDetailsById(requestedBy, context);
+      if (MapUtils.isNotEmpty(user)) {
+        bulkUploadProcess.setOrganisationId((String) user.get(JsonKey.ROOT_ORG_ID));
+      }
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
     }
 
     return bulkUploadProcess;

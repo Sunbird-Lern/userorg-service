@@ -11,12 +11,14 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class BackgroundJobManager extends BaseActor {
   private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -76,7 +78,8 @@ public class BackgroundJobManager extends BaseActor {
 
   private void updateUserInfoToEs(Request actorMessage) {
     String userId = (String) actorMessage.getRequest().get(JsonKey.ID);
-    Map<String, Object> userDetails = Util.getUserDetails(userId, actorMessage.getRequestContext());
+    Map<String, Object> userDetails =
+        userService.getUserDetailsForES(userId, actorMessage.getRequestContext());
     if (MapUtils.isNotEmpty(userDetails)) {
       insertDataToElastic(
           ProjectUtil.EsIndex.sunbird.getIndexName(),

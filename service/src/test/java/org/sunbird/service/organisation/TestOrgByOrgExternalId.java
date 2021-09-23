@@ -90,6 +90,13 @@ public class TestOrgByOrgExternalId {
     Assert.assertNotNull(map);
   }
 
+  @Test
+  public void getChannelTest() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    String channel = orgService.getChannel("rootOrgId", new RequestContext());
+    Assert.assertNotNull(channel);
+  }
+
   private Response getRecordsByProperty(boolean empty) {
     Response res = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
