@@ -8,26 +8,25 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
-import org.sunbird.model.ShadowUser;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.model.organisation.Organisation;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.FeedStatus;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.feed.FeedFactory;
+import org.sunbird.service.feed.IFeedService;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {
   private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
 
   private static IFeedService feedService = FeedFactory.getInstance();
-  private static OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+  private static OrgService orgService = OrgServiceImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
   public static Response saveFeed(
@@ -65,7 +64,7 @@ public class FeedUtil {
     return response;
   }
 
-  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context){
+  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
     Feed feed = new Feed();
     feed.setPriority(1);
     feed.setCreatedBy(shadowUser.getAddedBy());
@@ -83,17 +82,14 @@ public class FeedUtil {
   }
 
   private static List<Map<String, String>> getOrgDetails(String channel, RequestContext context) {
-    Map<String, Object> filters = new HashMap<>();
     List<Map<String, String>> orgList = new CopyOnWriteArrayList<>();
     Map<String, String> orgMap = new HashMap<>();
-    filters.put(JsonKey.CHANNEL, channel);
-    filters.put(JsonKey.IS_TENANT, true);
     if (!orgIdMap.isEmpty() && orgIdMap.containsKey(channel)) {
       orgMap = (Map<String, String>) orgIdMap.get(channel);
     } else {
-      Organisation org = organisationClient.esSearchOrgByFilter(filters, context).get(0);
-      orgMap.put("id", org.getRootOrgId());
-      orgMap.put("name", org.getChannel());
+      Map<String, Object> org = orgService.getRootOrgFromChannel(channel, context);
+      orgMap.put("id", (String) org.get(JsonKey.ID));
+      orgMap.put("name", channel);
       orgIdMap.put(channel, orgMap);
     }
     orgList.add(orgMap);
