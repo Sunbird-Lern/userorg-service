@@ -258,19 +258,21 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void saveUserDetailsToEs(String userId, RequestContext context) {
-    Request userRequest = new Request();
-    userRequest.setRequestContext(context);
-    userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-    userRequest.getRequest().put(JsonKey.ID, userId);
-    logger.info(
-        context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    if (null != backgroundJobManager) {
+    try {
+      Request userRequest = new Request();
+      userRequest.setRequestContext(context);
+      userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
+      userRequest.getRequest().put(JsonKey.ID, userId);
+      logger.debug(
+          context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
       backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, ex.getMessage(), ex);
     }
   }
 
   private Response updateUserExternalIds(Request request) {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:updateUserExternalIds called.");
+    logger.debug(request.getRequestContext(), "TenantMigrationActor:updateUserExternalIds called.");
     Response response = new Response();
     Map<String, Object> userExtIdsReq = new HashMap<>();
     userExtIdsReq.put(JsonKey.ID, request.getRequest().get(JsonKey.USER_ID));
