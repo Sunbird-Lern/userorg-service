@@ -14,31 +14,30 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.feed.FeedFactory;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.TenantMigrationService;
-import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserSelfDeclarationService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.TenantMigrationServiceImpl;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
-import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.util.*;
+import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.UserFlagEnum;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
@@ -49,11 +48,6 @@ public class TenantMigrationActor extends BaseActor {
 
   private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
   private static final String MASK_IDENTIFIER = "maskIdentifier";
-
-  private static final int MAX_MIGRATION_ATTEMPT = 2;
-  public static final int USER_EXTERNAL_ID_MISMATCH = -1;
-  private IFeedService feedService = FeedFactory.getInstance();
-  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   private DecryptionService decryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
@@ -97,6 +91,7 @@ public class TenantMigrationActor extends BaseActor {
   private void migrateSelfDeclaredUser(Request request) {
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateSelfDeclaredUser called.");
+    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     // update user declaration table status
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     List<Map<String, Object>> responseList =
@@ -136,6 +131,7 @@ public class TenantMigrationActor extends BaseActor {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void migrateUser(Request request, boolean notify) {
     logger.info(request.getRequestContext(), "TenantMigrationActor:migrateUser called.");
     Map<String, Object> reqMap = new HashMap<>(request.getRequest());
@@ -220,14 +216,10 @@ public class TenantMigrationActor extends BaseActor {
     logger.debug(
         context,
         "notify starts sending migrate notification to user " + userDetail.get(JsonKey.USER_ID));
-    try {
-      Map<String, Object> userData = createUserData(userDetail);
-      Request notificationRequest = createNotificationData(userData);
-      notificationRequest.setRequestContext(context);
-      emailServiceActor.tell(notificationRequest, self());
-    } catch (Exception ex) {
-      logger.error(context, ex.getMessage(), ex);
-    }
+    Map<String, Object> userData = createUserData(userDetail);
+    Request notificationRequest = createNotificationData(userData);
+    notificationRequest.setRequestContext(context);
+    emailServiceActor.tell(notificationRequest, self());
   }
 
   private Request createNotificationData(Map<String, Object> userData) {
@@ -269,17 +261,13 @@ public class TenantMigrationActor extends BaseActor {
   }
 
   private void saveUserDetailsToEs(String userId, RequestContext context) {
-    try {
-      Request userRequest = new Request();
-      userRequest.setRequestContext(context);
-      userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
-      userRequest.getRequest().put(JsonKey.ID, userId);
-      logger.debug(
-          context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-      backgroundJobManager.tell(userRequest, self());
-    } catch (Exception ex) {
-      logger.error(context, ex.getMessage(), ex);
-    }
+    Request userRequest = new Request();
+    userRequest.setRequestContext(context);
+    userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
+    userRequest.getRequest().put(JsonKey.ID, userId);
+    logger.debug(
+        context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
+    backgroundJobManager.tell(userRequest, self());
   }
 
   private Response updateUserExternalIds(Request request) {
@@ -291,6 +279,7 @@ public class TenantMigrationActor extends BaseActor {
     userExtIdsReq.put(JsonKey.EXTERNAL_IDS, request.getRequest().get(JsonKey.EXTERNAL_IDS));
     try {
       ObjectMapper mapper = new ObjectMapper();
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
       // Update channel to orgId  for provider field in usr_external_identiy table
       UserUtil.updateExternalIdsProviderWithOrgId(userExtIdsReq, request.getRequestContext());
       User user = mapper.convertValue(userExtIdsReq, User.class);
@@ -301,11 +290,9 @@ public class TenantMigrationActor extends BaseActor {
           UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
-      if (null != userExternalIdManagementActor) {
-        Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-        Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
-        response = (Response) Await.result(future, t.duration());
-      }
+
+      Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
+      response = (Response) Await.result(future, t.duration());
       userLookUpService.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
           (String) request.getRequest().get(JsonKey.USER_ID),
@@ -325,77 +312,6 @@ public class TenantMigrationActor extends BaseActor {
       response.getResult().put(JsonKey.ERRORS, errMsgList);
     }
     return response;
-  }
-
-  private Response updateUserOrg(Request request, List<Map<String, Object>> userOrgList) {
-    logger.info(request.getRequestContext(), "TenantMigrationActor:updateUserOrg called.");
-    Response response = new Response();
-    deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
-    Map<String, Object> userDetails = request.getRequest();
-    // add mapping root org
-    createUserOrgRequestAndUpdate(
-        (String) userDetails.get(JsonKey.USER_ID),
-        (String) userDetails.get(JsonKey.ROOT_ORG_ID),
-        request.getRequestContext());
-    String orgId = (String) userDetails.get(JsonKey.ORG_ID);
-    if (StringUtils.isNotBlank(orgId)
-        && !((String) userDetails.get(JsonKey.ROOT_ORG_ID)).equalsIgnoreCase(orgId)) {
-      try {
-        createUserOrgRequestAndUpdate(
-            (String) userDetails.get(JsonKey.USER_ID), orgId, request.getRequestContext());
-        logger.info(
-            request.getRequestContext(),
-            "TenantMigrationActor:updateUserOrg user org data got updated.");
-      } catch (Exception ex) {
-        logger.error(
-            request.getRequestContext(),
-            "TenantMigrationActor:updateUserOrg:Exception occurred while updating user Org.",
-            ex);
-        List<Map<String, Object>> errMsgList = new ArrayList<>();
-        Map<String, Object> map = new HashMap<>();
-        map.put(JsonKey.ERROR_MSG, ex.getMessage());
-        errMsgList.add(map);
-        response.getResult().put(JsonKey.ERRORS, errMsgList);
-      }
-    }
-    return response;
-  }
-
-  private void createUserOrgRequestAndUpdate(String userId, String orgId, RequestContext context) {
-    Map<String, Object> userOrgRequest = new HashMap<>();
-    userOrgRequest.put(JsonKey.ID, userId);
-    userOrgRequest.put(JsonKey.HASHTAGID, orgId);
-    userOrgRequest.put(JsonKey.ORGANISATION_ID, orgId);
-    List<String> roles = new ArrayList<>();
-    roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
-    userOrgRequest.put(JsonKey.ROLES, roles);
-    userOrgService.registerUserToOrg(userOrgRequest, context);
-  }
-
-  private void deleteOldUserOrgMapping(
-      List<Map<String, Object>> userOrgList, RequestContext context) {
-    logger.info(
-        context,
-        "TenantMigrationActor:deleteOldUserOrgMapping: delete old user org association started.");
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-    for (Map<String, Object> userOrg : userOrgList) {
-      Map<String, String> compositeKey = new LinkedHashMap<>(2);
-      compositeKey.put(JsonKey.USER_ID, (String) userOrg.get(JsonKey.USER_ID));
-      compositeKey.put(JsonKey.ORGANISATION_ID, (String) userOrg.get(JsonKey.ORGANISATION_ID));
-      cassandraOperation.deleteRecord(
-          usrOrgDbInfo.getKeySpace(), usrOrgDbInfo.getTableName(), compositeKey, context);
-    }
-  }
-
-  private void validateChannelAndGetRootOrgId(Request request) {
-    String rootOrgId = "";
-    String channel = (String) request.getRequest().get(JsonKey.CHANNEL);
-    if (StringUtils.isNotBlank(channel)) {
-      rootOrgId =
-          OrgServiceImpl.getInstance()
-              .getRootOrgIdFromChannel(channel, request.getRequestContext());
-      request.getRequest().put(JsonKey.ROOT_ORG_ID, rootOrgId);
-    }
   }
 
   private Map<String, Object> createUserUpdateRequest(Request request) {
