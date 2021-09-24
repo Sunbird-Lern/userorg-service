@@ -6,7 +6,7 @@ import org.sunbird.response.Response;
 
 public interface SSOUserService {
 
-  public Map validateOrgIdAndPrimaryRecoveryKeys(Map<String, Object> userMap, Request actorMessage);
+  Map validateOrgIdAndPrimaryRecoveryKeys(Map<String, Object> userMap, Request actorMessage);
 
   Response createUserAndPassword(
       Map<String, Object> requestMap, Map<String, Object> userMap, Request request);

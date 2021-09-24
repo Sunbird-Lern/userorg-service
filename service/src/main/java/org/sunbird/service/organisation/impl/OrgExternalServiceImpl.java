@@ -1,11 +1,7 @@
 package org.sunbird.service.organisation.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +21,14 @@ public class OrgExternalServiceImpl implements OrgExternalService {
   private final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private final String ORG_EXTERNAL_IDENTITY = JsonKey.ORG_EXT_ID_DB;
   private OrgExternalDao orgExtDao = new OrgExternalDaoImpl();
+  private static OrgExternalService orgExternalService;
+
+  public static OrgExternalService getInstance() {
+    if (orgExternalService == null) {
+      orgExternalService = new OrgExternalServiceImpl();
+    }
+    return orgExternalService;
+  }
 
   @Override
   public String getOrgIdFromOrgExternalIdAndProvider(
@@ -82,8 +86,8 @@ public class OrgExternalServiceImpl implements OrgExternalService {
   }
 
   @Override
-  public Response addOrgExtId(Map<String, Object> orgExtMap, RequestContext context){
-      return orgExtDao.addOrgExtId(orgExtMap, context);
+  public Response addOrgExtId(Map<String, Object> orgExtMap, RequestContext context) {
+    return orgExtDao.addOrgExtId(orgExtMap, context);
   }
 
   @Override

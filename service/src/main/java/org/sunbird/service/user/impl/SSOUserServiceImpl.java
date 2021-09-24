@@ -36,9 +36,9 @@ public class SSOUserServiceImpl implements SSOUserService {
 
   private static SSOUserService ssoUserService = null;
   private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
-  private OrgExternalService orgExternalService = new OrgExternalServiceImpl();
+  private OrgExternalService orgExternalService = OrgExternalServiceImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
-  UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private OrgService orgService = OrgServiceImpl.getInstance();
 
   public static SSOUserService getInstance() {
