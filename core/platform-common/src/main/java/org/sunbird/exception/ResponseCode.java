@@ -22,9 +22,6 @@ public enum ResponseCode {
   emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
   firstNameRequired(
       ResponseMessage.Key.FIRST_NAME_MISSING, ResponseMessage.Message.FIRST_NAME_MISSING),
-  sourceAndExternalIdValidationError(
-      ResponseMessage.Key.REQUIRED_DATA_ORG_MISSING,
-      ResponseMessage.Message.REQUIRED_DATA_ORG_MISSING),
   channelUniquenessInvalid(
       ResponseMessage.Key.CHANNEL_SHOULD_BE_UNIQUE,
       ResponseMessage.Message.CHANNEL_SHOULD_BE_UNIQUE),
@@ -37,9 +34,6 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_ROOT_ORGANIZATION,
       ResponseMessage.Message.INVALID_ROOT_ORGANIZATION),
   invalidUsrData(ResponseMessage.Key.INVALID_USR_DATA, ResponseMessage.Message.INVALID_USR_DATA),
-  usrValidationError(
-      ResponseMessage.Key.USR_DATA_VALIDATION_ERROR,
-      ResponseMessage.Message.USR_DATA_VALIDATION_ERROR),
   errorInvalidOTP(ResponseMessage.Key.ERROR_INVALID_OTP, ResponseMessage.Message.ERROR_INVALID_OTP),
   emailAlreadyExistError(ResponseMessage.Key.EMAIL_IN_USE, ResponseMessage.Message.EMAIL_IN_USE),
   userNameRequired(ResponseMessage.Key.USERNAME_MISSING, ResponseMessage.Message.USERNAME_MISSING),
@@ -54,13 +48,7 @@ public enum ResponseCode {
       ResponseMessage.Key.KEY_CLOAK_DEFAULT_ERROR, ResponseMessage.Message.KEY_CLOAK_DEFAULT_ERROR),
   invalidOrgId(ResponseMessage.Key.INVALID_ORG_ID, ResponseMessage.Key.INVALID_ORG_ID),
   invalidOrgStatus(ResponseMessage.Key.INVALID_ORG_STATUS, ResponseMessage.Key.INVALID_ORG_STATUS),
-  invalidOrgStatusTransition(
-      ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION,
-      ResponseMessage.Key.INVALID_ORG_STATUS_TRANSITION),
-  phoneNoRequired(
-      ResponseMessage.Key.PHONE_NO_REQUIRED_ERROR, ResponseMessage.Message.PHONE_NO_REQUIRED_ERROR),
   invalidData(ResponseMessage.Key.INVALID_DATA, ResponseMessage.Message.INVALID_DATA),
-  orgIdRequired(ResponseMessage.Key.ORG_ID_MISSING, ResponseMessage.Message.ORG_ID_MISSING),
   actorConnectionError(
       ResponseMessage.Key.ACTOR_CONNECTION_ERROR, ResponseMessage.Message.ACTOR_CONNECTION_ERROR),
   userAlreadyExists(
@@ -68,14 +56,10 @@ public enum ResponseCode {
   invalidUserId(ResponseMessage.Key.INVALID_USER_ID, ResponseMessage.Message.INVALID_USER_ID),
   loginIdRequired(ResponseMessage.Key.LOGIN_ID_MISSING, ResponseMessage.Message.LOGIN_ID_MISSING),
   userNotFound(ResponseMessage.Key.USER_NOT_FOUND, ResponseMessage.Message.USER_NOT_FOUND),
-  idRequired(ResponseMessage.Key.ID_REQUIRED_ERROR, ResponseMessage.Message.ID_REQUIRED_ERROR),
   dataTypeError(ResponseMessage.Key.DATA_TYPE_ERROR, ResponseMessage.Message.DATA_TYPE_ERROR),
   errorAttributeConflict(
       ResponseMessage.Key.ERROR_ATTRIBUTE_CONFLICT,
       ResponseMessage.Message.ERROR_ATTRIBUTE_CONFLICT),
-  organisationNameError(
-      ResponseMessage.Key.NAME_OF_ORGANISATION_ERROR,
-      ResponseMessage.Message.NAME_OF_ORGANISATION_ERROR),
   rolesRequired(ResponseMessage.Key.ROLES_MISSING, ResponseMessage.Message.ROLES_MISSING),
   emptyRolesProvided(
       ResponseMessage.Key.EMPTY_ROLES_PROVIDED, ResponseMessage.Message.EMPTY_ROLES_PROVIDED),
@@ -96,7 +80,6 @@ public enum ResponseCode {
   invalidObjectType(
       ResponseMessage.Key.INVALID_OBJECT_TYPE, ResponseMessage.Message.INVALID_OBJECT_TYPE),
   csvFileEmpty(ResponseMessage.Key.EMPTY_CSV_FILE, ResponseMessage.Message.EMPTY_CSV_FILE),
-  noDataForConsumption(ResponseMessage.Key.NO_DATA, ResponseMessage.Message.NO_DATA),
   invalidChannel(ResponseMessage.Key.INVALID_CHANNEL, ResponseMessage.Message.INVALID_CHANNEL),
   emailSubjectError(
       ResponseMessage.Key.EMAIL_SUBJECT_ERROR, ResponseMessage.Message.EMAIL_SUBJECT_ERROR),
@@ -126,19 +109,6 @@ public enum ResponseCode {
       ResponseMessage.Message.ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED),
   PhoneNumberInUse(
       ResponseMessage.Key.PHONE_ALREADY_IN_USE, ResponseMessage.Message.PHONE_ALREADY_IN_USE),
-  updateFailed(ResponseMessage.Key.UPDATE_FAILED, ResponseMessage.Message.UPDATE_FAILED),
-  invalidLocationId(
-      ResponseMessage.Key.INVALID_LOCATION_ID, ResponseMessage.Message.INVALID_LOCATION_ID),
-  invalidHashTagId(
-      ResponseMessage.Key.INVALID_HASHTAG_ID, ResponseMessage.Message.INVALID_HASHTAG_ID),
-  invalidUsrOrgData(
-      ResponseMessage.Key.INVALID_USR_ORG_DATA, ResponseMessage.Message.INVALID_USR_ORG_DATA),
-  invalidNotificationType(
-      ResponseMessage.Key.INVALID_NOTIFICATION_TYPE,
-      ResponseMessage.Message.INVALID_NOTIFICATION_TYPE),
-  notificationTypeSupport(
-      ResponseMessage.Key.INVALID_NOTIFICATION_TYPE_SUPPORT,
-      ResponseMessage.Message.INVALID_NOTIFICATION_TYPE_SUPPORT),
   emailInUse(ResponseMessage.Key.EMAIL_IN_USE, ResponseMessage.Message.EMAIL_IN_USE),
   invalidPhoneNumber(
       ResponseMessage.Key.INVALID_PHONE_NUMBER, ResponseMessage.Message.INVALID_PHONE_NUMBER),
@@ -164,8 +134,6 @@ public enum ResponseCode {
   invalidLocationDeleteRequest(
       ResponseMessage.Key.INVALID_LOCATION_DELETE_REQUEST,
       ResponseMessage.Message.INVALID_LOCATION_DELETE_REQUEST),
-  locationTypeConflicts(
-      ResponseMessage.Key.LOCATION_TYPE_CONFLICTS, ResponseMessage.Message.LOCATION_TYPE_CONFLICTS),
   mandatoryParamsMissing(
       ResponseMessage.Key.MANDATORY_PARAMETER_MISSING,
       ResponseMessage.Message.MANDATORY_PARAMETER_MISSING),
@@ -217,8 +185,6 @@ public enum ResponseCode {
   emailNotSentRecipientsExceededMaxLimit(
       ResponseMessage.Key.EMAIL_RECIPIENTS_EXCEEDS_MAX_LIMIT,
       ResponseMessage.Message.EMAIL_RECIPIENTS_EXCEEDS_MAX_LIMIT),
-  emailNotSentRecipientsZero(
-      ResponseMessage.Key.NO_EMAIL_RECIPIENTS, ResponseMessage.Message.NO_EMAIL_RECIPIENTS),
   parameterMismatch(
       ResponseMessage.Key.PARAMETER_MISMATCH, ResponseMessage.Message.PARAMETER_MISMATCH),
   errorForbidden(ResponseMessage.Key.FORBIDDEN, ResponseMessage.Message.FORBIDDEN),
@@ -231,12 +197,6 @@ public enum ResponseCode {
   errorConfigLoadEmptyConfig(
       ResponseMessage.Key.ERROR_CONFIG_LOAD_EMPTY_CONFIG,
       ResponseMessage.Message.ERROR_CONFIG_LOAD_EMPTY_CONFIG),
-  errorConflictingFieldConfiguration(
-      ResponseMessage.Key.ERROR_CONFLICTING_FIELD_CONFIGURATION,
-      ResponseMessage.Message.ERROR_CONFLICTING_FIELD_CONFIGURATION),
-  errorSystemSettingNotFound(
-      ResponseMessage.Key.ERROR_SYSTEM_SETTING_NOT_FOUND,
-      ResponseMessage.Message.ERROR_SYSTEM_SETTING_NOT_FOUND),
   errorNoRootOrgAssociated(
       ResponseMessage.Key.ERROR_NO_ROOT_ORG_ASSOCIATED,
       ResponseMessage.Message.ERROR_NO_ROOT_ORG_ASSOCIATED),
@@ -257,12 +217,6 @@ public enum ResponseCode {
   errorConflictingRootOrgId(
       ResponseMessage.Key.ERROR_CONFLICTING_ROOT_ORG_ID,
       ResponseMessage.Message.ERROR_CONFLICTING_ROOT_ORG_ID),
-  errorUpdateSettingNotAllowed(
-      ResponseMessage.Key.ERROR_UPDATE_SETTING_NOT_ALLOWED,
-      ResponseMessage.Message.ERROR_UPDATE_SETTING_NOT_ALLOWED),
-  csvRowsExceeds(ResponseMessage.Key.CSV_ROWS_EXCEEDS, ResponseMessage.Message.CSV_ROWS_EXCEEDS),
-  blankCsvData(ResponseMessage.Key.BLANK_CSV_DATA, ResponseMessage.Message.BLANK_CSV_DATA),
-  fileNotFound(ResponseMessage.Key.ERR_FILE_NOT_FOUND, ResponseMessage.Message.ERR_FILE_NOT_FOUND),
   errorInvalidParameterSize(
       ResponseMessage.Key.ERROR_INVALID_PARAMETER_SIZE,
       ResponseMessage.Message.ERROR_INVALID_PARAMETER_SIZE),
@@ -287,12 +241,7 @@ public enum ResponseCode {
   recoveryParamsMatchException(
       ResponseMessage.Key.RECOVERY_PARAM_MATCH_EXCEPTION,
       ResponseMessage.Message.RECOVERY_PARAM_MATCH_EXCEPTION),
-  PARAM_NOT_MATCH(ResponseMessage.Key.PARAM_NOT_MATCH, ResponseMessage.Message.PARAM_NOT_MATCH),
   accountNotFound(ResponseMessage.Key.ACCOUNT_NOT_FOUND, ResponseMessage.Message.ACCOUNT_NOT_FOUND),
-  userMigrationFiled(
-      ResponseMessage.Key.USER_MIGRATION_FAILED, ResponseMessage.Message.USER_MIGRATION_FAILED),
-  invalidUserExternalId(
-      ResponseMessage.Key.INVALID_EXT_USER_ID, ResponseMessage.Message.INVALID_EXT_USER_ID),
   invalidElementInList(
       ResponseMessage.Key.INVALID_ELEMENT_IN_LIST, ResponseMessage.Message.INVALID_ELEMENT_IN_LIST),
   passwordValidation(
@@ -311,9 +260,6 @@ public enum ResponseCode {
       ResponseMessage.Message.UNABLE_TO_CONNECT_TO_ADMINUTIL),
   dataEncryptionError(
       ResponseMessage.Key.DATA_ENCRYPTION_ERROR, ResponseMessage.Message.DATA_ENCRYPTION_ERROR),
-  notificationNotSent(
-      ResponseMessage.Key.NO_EMAIL_PHONE_ASSOCIATED,
-      ResponseMessage.Message.NO_EMAIL_PHONE_ASSOCIATED),
   invalidCaptcha(ResponseMessage.Key.INVALID_CAPTCHA, ResponseMessage.Message.INVALID_CAPTCHA),
   preferenceAlreadyExists(
       ResponseMessage.Key.PREFERENCE_ALREADY_EXIST,
