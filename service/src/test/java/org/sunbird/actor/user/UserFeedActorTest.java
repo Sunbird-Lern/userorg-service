@@ -1,7 +1,6 @@
 package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
@@ -9,9 +8,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +28,6 @@ import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -43,8 +41,7 @@ import org.sunbird.service.feed.impl.FeedServiceImpl;
   CassandraOperationImpl.class,
   IFeedService.class,
   FeedServiceImpl.class,
-  org.sunbird.datasecurity.impl.ServiceFactory.class,
-  HttpClientUtil.class
+  org.sunbird.datasecurity.impl.ServiceFactory.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 @PowerMockIgnore({
@@ -62,7 +59,7 @@ public class UserFeedActorTest {
   private static CassandraOperation cassandraOperation = null;
 
   @Before
-  public void setUp() throws JsonProcessingException {
+  public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
     userFeed.put(JsonKey.ID, "123-456-789");
     response = new Response();
@@ -76,23 +73,18 @@ public class UserFeedActorTest {
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
     upsertResponse.getResult().putAll(responseMap2);
-    ObjectMapper Obj = new ObjectMapper();
-    String jsonStr = Obj.writeValueAsString(upsertResponse);
-    PowerMockito.mockStatic(HttpClientUtil.class);
     PowerMockito.when(
-            HttpClientUtil.post(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(jsonStr);
+            cassandraOperation.insertRecord(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(upsertResponse);
     PowerMockito.when(
-            HttpClientUtil.patch(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(jsonStr);
-    PowerMockito.when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getUserFeedData());
+            cassandraOperation.updateRecord(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(upsertResponse);
   }
 
   @Test
-  public void getUserFeedTest() throws JsonProcessingException {
+  public void getUserFeedTest() {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -100,7 +92,7 @@ public class UserFeedActorTest {
     reqObj.setOperation(ActorOperations.GET_USER_FEED_BY_ID.getValue());
     reqObj.put(JsonKey.USER_ID, "123-456-789");
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res && res.getResponseCode() == ResponseCode.OK);
   }
 
@@ -146,7 +138,6 @@ public class UserFeedActorTest {
   }
 
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
@@ -160,24 +151,5 @@ public class UserFeedActorTest {
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
-  }
-
-  public String getUserFeedData() {
-    Response response = new Response();
-    Map<String, Object> result = new HashMap<>();
-    List<Map<String, Object>> feeds = new ArrayList<>();
-    Map<String, Object> feed = new HashMap<>();
-    feed.put(JsonKey.ID, "12312312");
-    feeds.add(feed);
-    result.put(JsonKey.FEEDS, feeds);
-    response.putAll(result);
-    ObjectMapper Obj = new ObjectMapper();
-    String jsonStr = null;
-    try {
-      jsonStr = Obj.writeValueAsString(response);
-    } catch (Exception e) {
-      assertFalse(false);
-    }
-    return jsonStr;
   }
 }
