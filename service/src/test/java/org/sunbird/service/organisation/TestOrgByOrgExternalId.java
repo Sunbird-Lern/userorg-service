@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -46,12 +46,17 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
   "org.xml.*"
 })
 public class TestOrgByOrgExternalId {
+  private CassandraOperation cassandraOperation;
 
-  @BeforeClass
-  public static void setUp() {
+  @Before
+  public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
+    cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+  }
+
+  @Test
+  public void testGetOrgByExternalIdAndProvider() {
     PowerMockito.when(
             cassandraOperation.getRecordsByCompositeKey(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -78,6 +83,11 @@ public class TestOrgByOrgExternalId {
                 Mockito.anyList(),
                 Mockito.any(RequestContext.class)))
         .thenReturn(getRecordsByProperty(false));
+
+    OrgService orgService = OrgServiceImpl.getInstance();
+    Map<String, Object> map =
+        orgService.getOrgByExternalIdAndProvider("extId", "provider", new RequestContext());
+    Assert.assertNotNull(map);
   }
 
   @Test
@@ -87,15 +97,7 @@ public class TestOrgByOrgExternalId {
     Assert.assertNotNull(channel);
   }
 
-  @Test
-  public void testGetOrgByExternalIdAndProvider() {
-    OrgService orgService = OrgServiceImpl.getInstance();
-    Map<String, Object> map =
-        orgService.getOrgByExternalIdAndProvider("extId", "provider", new RequestContext());
-    Assert.assertNotNull(map);
-  }
-
-  private static Response getRecordsByProperty(boolean empty) {
+  private Response getRecordsByProperty(boolean empty) {
     Response res = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     if (!empty) {
