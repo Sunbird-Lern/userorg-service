@@ -186,16 +186,6 @@ public final class Util {
     return search;
   }
 
-  /**
-   * if Object is not null then it will return true else false.
-   *
-   * @param obj Object
-   * @return boolean
-   */
-  public static boolean isNotNull(Object obj) {
-    return null != obj ? true : false;
-  }
-
   public static void initializeContext(Request request, String env) {
     Map<String, Object> requestContext = request.getContext();
     env = StringUtils.isNotBlank(env) ? env : "";

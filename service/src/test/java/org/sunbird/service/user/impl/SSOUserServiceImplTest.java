@@ -2,7 +2,8 @@ package org.sunbird.service.user.impl;
 
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,9 +98,11 @@ public class SSOUserServiceImplTest {
         .thenReturn("anyOrgId");
     PowerMockito.mockStatic(UserLookUpServiceImpl.class);
     UserLookupService userLookupService = mock(UserLookupService.class);
+    PowerMockito.when(UserLookUpServiceImpl.getInstance()).thenReturn(userLookupService);
     when(userService.createUser(Mockito.anyMap(), nullable(RequestContext.class)))
         .thenReturn(new Response());
-    PowerMockito.when(userLookupService.insertRecords(Mockito.anyMap(), Mockito.any()))
+    PowerMockito.when(
+            userLookupService.insertRecords(Mockito.anyMap(), nullable(RequestContext.class)))
         .thenReturn(getSuccessResponse());
   }
 
@@ -120,9 +123,10 @@ public class SSOUserServiceImplTest {
     Map<String, Object> userMap = new HashMap();
     userMap.put(JsonKey.ID, "someId");
     PowerMockito.mockStatic(UserUtil.class);
-    PowerMockito.when(UserUtil.updatePassword(Mockito.anyMap(), Mockito.any(RequestContext.class)))
+    PowerMockito.when(UserUtil.updatePassword(Mockito.anyMap(), nullable(RequestContext.class)))
         .thenReturn(true);
-    ssoUserService.createUserAndPassword(new HashMap(), userMap, new Request());
+    Assert.assertNotNull(
+        ssoUserService.createUserAndPassword(new HashMap(), userMap, new Request()));
   }
 
   public static Response getSuccessResponse() {

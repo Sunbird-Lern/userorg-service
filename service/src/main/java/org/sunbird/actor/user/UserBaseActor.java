@@ -38,8 +38,6 @@ public abstract class UserBaseActor extends BaseActor {
 
   protected UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   protected LocationClient locationClient = LocationClientImpl.getInstance();
-  protected UserCreateRequestValidator userCreateRequestValidator =
-      new UserCreateRequestValidator();
 
   @Inject
   @Named("user_telemetry_actor")
