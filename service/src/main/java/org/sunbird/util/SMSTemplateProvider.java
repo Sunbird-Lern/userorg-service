@@ -16,14 +16,15 @@ import org.sunbird.request.RequestContext;
 
 public class SMSTemplateProvider {
   private static LoggerUtil logger = new LoggerUtil(SMSTemplateProvider.class);
-  public static final String smsProvider = ProjectUtil.getConfigValue(JsonKey.SMS_GATEWAY_PROVIDER);
+  public static final String SMS_PROVIDER =
+      ProjectUtil.getConfigValue(JsonKey.SMS_GATEWAY_PROVIDER);
   private static EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
 
   private SMSTemplateProvider() {}
 
   private static String getTemplate(String templateId, RequestContext context) {
     String defaultTemplate = templateId;
-    if (StringUtils.isNotBlank(templateId) && JsonKey.NIC.equalsIgnoreCase(smsProvider)) {
+    if (StringUtils.isNotBlank(templateId) && JsonKey.NIC.equalsIgnoreCase(SMS_PROVIDER)) {
       defaultTemplate = templateId + "_nic";
     }
     return emailTemplateDao.getTemplate(defaultTemplate, context);
