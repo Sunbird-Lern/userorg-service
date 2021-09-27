@@ -13,12 +13,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
@@ -91,7 +89,6 @@ public class TenantMigrationActor extends BaseActor {
   private void migrateSelfDeclaredUser(Request request) {
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateSelfDeclaredUser called.");
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     // update user declaration table status
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     List<Map<String, Object>> responseList =

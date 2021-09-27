@@ -15,8 +15,7 @@ import org.sunbird.util.ProjectUtil;
  */
 public class SMSFactory {
 
-  public static final String defaultProvider =
-      ProjectUtil.getConfigValue(JsonKey.SMS_GATEWAY_PROVIDER);
+  public static final String smsProvider = ProjectUtil.getConfigValue(JsonKey.SMS_GATEWAY_PROVIDER);
 
   /**
    * This method will provide SMS Provide object to trigger the SMS it will by default return
@@ -25,10 +24,10 @@ public class SMSFactory {
    * @return ISmsProvider
    */
   public static ISmsProvider getInstance() {
-    if (JsonKey.MSG_91.equalsIgnoreCase(defaultProvider)) {
+    if (JsonKey.MSG_91.equalsIgnoreCase(smsProvider)) {
       ISmsProviderFactory factory = new Msg91SmsProviderFactory();
       return factory.create();
-    } else if (JsonKey.NIC.equalsIgnoreCase(defaultProvider)) {
+    } else if (JsonKey.NIC.equalsIgnoreCase(smsProvider)) {
       ISmsProviderFactory factory = new NICGatewaySmsProviderFactory();
       return factory.create();
     } else {

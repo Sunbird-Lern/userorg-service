@@ -1,21 +1,16 @@
 package org.sunbird.service.otp;
 
 import java.util.Map;
-import org.sunbird.dao.notification.EmailTemplateDao;
-import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.dao.otp.OTPDao;
 import org.sunbird.dao.otp.impl.OTPDaoImpl;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.SMSTemplateProvider;
 
 public class OTPService {
-  private static LoggerUtil logger = new LoggerUtil(OTPService.class);
 
   private OTPDao otpDao = OTPDaoImpl.getInstance();
-  private EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
 
   public Map<String, Object> getOTPDetails(String type, String key, RequestContext context) {
