@@ -2,17 +2,22 @@ package org.sunbird.notification.sms.provider;
 
 import java.util.List;
 import java.util.Map;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.utils.SmsTemplateUtil;
 import org.sunbird.request.RequestContext;
 
 public interface ISmsProvider {
 
-  default String getTemplateId(String sms) {
-    Map<String, String> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
-    for (String key : smsTemplateConfig.keySet()) {
+  String MSG_91_PROVIDER = JsonKey.MSG_91;
+  String NIC_PROVIDER = JsonKey.NIC;
+
+  default String getTemplateId(String sms, String provider) {
+    Map<String, Map<String, String>> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
+    Map<String, String> providerTemplateConfig = smsTemplateConfig.get(provider);
+    for (String key : providerTemplateConfig.keySet()) {
       String pattern = key.replaceAll("\\$[^ .]+", ".*?");
       if (sms.matches(pattern)) {
-        return smsTemplateConfig.get(key);
+        return providerTemplateConfig.get(key);
       }
     }
     return "";

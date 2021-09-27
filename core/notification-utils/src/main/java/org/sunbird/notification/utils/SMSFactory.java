@@ -1,6 +1,7 @@
 /** */
 package org.sunbird.notification.utils;
 
+import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.provider.ISmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
@@ -23,10 +24,10 @@ public class SMSFactory {
    * @return ISmsProvider
    */
   public static ISmsProvider getInstance() {
-    if ("91SMS".equalsIgnoreCase(defaultProvider)) {
+    if (JsonKey.MSG_91.equalsIgnoreCase(defaultProvider)) {
       ISmsProviderFactory factory = new Msg91SmsProviderFactory();
       return factory.create();
-    } else if ("NIC".equalsIgnoreCase(defaultProvider)) {
+    } else if (JsonKey.NIC.equalsIgnoreCase(defaultProvider)) {
       ISmsProviderFactory factory = new NICGatewaySmsProviderFactory();
       return factory.create();
     } else {

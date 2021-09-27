@@ -15,12 +15,10 @@ public class SmsTemplateUtil {
   private static LoggerUtil logger = new LoggerUtil(SmsTemplateUtil.class);
   private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
-  public static Map<String, String> getSmsTemplateConfigMap() {
+  public static Map<String, Map<String, String>> getSmsTemplateConfigMap() {
     Response response =
         cassandraOperation.getRecordById(
             JsonKey.SUNBIRD, JsonKey.SYSTEM_SETTINGS_DB, JsonKey.SMS_TEMPLATE_CONFIG, null);
-    logger.debug(
-        "DataCacheHandler:cacheSystemConfig: Cache system setting fields" + response.getResult());
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {

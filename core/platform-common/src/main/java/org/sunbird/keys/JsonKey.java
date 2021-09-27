@@ -589,6 +589,8 @@ public final class JsonKey {
   public static final String TENANT_PREFERENCE_V2_DB = "tenant_preference_v2";
   public static final String UPDATE_ORG_STATUS = "updateOrgStatus";
   public static final String SUNBIRD_WEB_URL = "sunbird_web_url";
+  public static final String MSG_91 = "91SMS";
+  public static final String NIC = "NIC";
 
   private JsonKey() {}
 }

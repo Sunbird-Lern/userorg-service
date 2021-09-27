@@ -34,7 +34,8 @@ public class NICGatewaySmsProvider implements ISmsProvider {
   }
 
   @Override
-  public boolean send(String phoneNumber, String countryCode, String smsText, RequestContext context) {
+  public boolean send(
+      String phoneNumber, String countryCode, String smsText, RequestContext context) {
     return sendSms(phoneNumber, smsText, context);
   }
 
@@ -58,9 +59,7 @@ public class NICGatewaySmsProvider implements ISmsProvider {
       }
       String messageBody = smsText;
       // add dlt template
-      String dltTemplateId = getTemplateId(smsText);
-      // URL encode message body
-      messageBody = URLEncoder.encode(messageBody, Consts.UTF_8);
+      String dltTemplateId = getTemplateId(smsText, NIC_PROVIDER);
       // Construct URL
       StringBuffer URI = new StringBuffer(baseUrl);
       URI.append("?username=" + URLEncoder.encode(userName, Consts.UTF_8));
@@ -80,13 +79,13 @@ public class NICGatewaySmsProvider implements ISmsProvider {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> resultMap;
         resultMap = mapper.readValue(response, Map.class);
-        logger.info(context,"NICGatewaySmsProvider:Result:" + resultMap);
+        logger.info(context, "NICGatewaySmsProvider:Result:" + resultMap);
         return true;
       } else {
         return false;
       }
     } catch (Exception ex) {
-      logger.error(context,"Exception occurred while sending sms.", ex);
+      logger.error(context, "Exception occurred while sending sms.", ex);
       return false;
     }
   }

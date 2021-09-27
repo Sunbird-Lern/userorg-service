@@ -23,6 +23,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.sms.providerimpl.NICGatewaySmsProvider;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
@@ -81,7 +82,7 @@ public class NICGatewaySmsProviderTest {
   public void testSendSms() {
     initMockRulesFor200();
     PowerMockito.mockStatic(SmsTemplateUtil.class);
-
+    Map<String, Map<String, String>> template = new HashMap<>();
     Map<String, String> template1 = new HashMap<>();
     template1.put(
         "OTP to verify your phone number on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.",
@@ -92,8 +93,8 @@ public class NICGatewaySmsProviderTest {
     template1.put(
         "Your ward has requested for registration on $installationName using this phone number. Use OTP $otp to agree and create the account. This is valid for $otpExpiryInMinutes minutes only.",
         "3");
-
-    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template1);
+    template.put(JsonKey.NIC, template1);
+    when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
     NICGatewaySmsProvider megObj = new NICGatewaySmsProvider();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
