@@ -15,7 +15,8 @@ import org.sunbird.util.ProjectUtil;
  */
 public class SMSFactory {
 
-  public static final String defaultProvider = ProjectUtil.getConfigValue("sms_gateway_provider");
+  public static final String defaultProvider =
+      ProjectUtil.getConfigValue(JsonKey.SMS_GATEWAY_PROVIDER);
 
   /**
    * This method will provide SMS Provide object to trigger the SMS it will by default return
