@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -42,12 +42,10 @@ import org.sunbird.service.user.UserOrgService;
 })
 public class UserOrgServiceImplTest {
 
-  private static CassandraOperation cassandraOperationImpl = null;
-
-  @Before
-  public void setUp() {
+  @BeforeClass
+  public static void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
-    cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    CassandraOperation cassandraOperationImpl = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     response.getResult().put(JsonKey.RESPONSE, new ArrayList<>());
