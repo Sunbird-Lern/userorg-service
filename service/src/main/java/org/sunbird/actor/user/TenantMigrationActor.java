@@ -169,13 +169,12 @@ public class TenantMigrationActor extends BaseActor {
     }
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateUser user record got updated.");
+    // Update user externalIds
+    Response userExternalIdsResponse = updateUserExternalIds(request);
     // Update user org details
     Response userOrgResponse =
         tenantServiceImpl.updateUserOrg(
             request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
-
-    // Update user externalIds
-    Response userExternalIdsResponse = updateUserExternalIds(request);
     // Collect all the error message
     List<Map<String, Object>> userOrgErrMsgList = new ArrayList<>();
     if (MapUtils.isNotEmpty(userOrgResponse.getResult())
@@ -289,8 +288,10 @@ public class TenantMigrationActor extends BaseActor {
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
 
-      Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
-      response = (Response) Await.result(future, t.duration());
+      if (null != userExternalIdManagementActor) {
+        Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
+        response = (Response) Await.result(future, t.duration());
+      }
       userLookUpService.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
           (String) request.getRequest().get(JsonKey.USER_ID),
