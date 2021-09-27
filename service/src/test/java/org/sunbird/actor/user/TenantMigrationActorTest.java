@@ -12,7 +12,7 @@ import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.util.*;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -71,8 +71,8 @@ public class TenantMigrationActorTest {
   private static ElasticSearchService esService;
   private static Response response;
 
-  @BeforeClass
-  public static void beforeEachTest() throws Exception {
+  @Before
+  public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(UserLookupDaoImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
