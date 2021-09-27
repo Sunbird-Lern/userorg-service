@@ -21,6 +21,8 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserOrgService;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import scala.concurrent.Future;
 
 /**
@@ -43,6 +45,7 @@ public final class Util {
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
   private static ObjectMapper mapper = new ObjectMapper();
   private static ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private static UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   static {
     initializeDBProperty();
@@ -309,7 +312,7 @@ public final class Util {
         logger.error(context, "Util:upsertUserOrgData exception : " + e.getMessage(), e);
       }
     } else {
-      registerUserToOrg(userMap, context);
+      userOrgService.registerUserToOrg(userMap, context);
     }
   }
 

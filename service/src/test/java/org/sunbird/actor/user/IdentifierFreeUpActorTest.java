@@ -82,7 +82,7 @@ public class IdentifierFreeUpActorTest {
     Request reqObj = new Request();
     Map reqMap = new HashMap<>();
     reqMap.put(JsonKey.ID, "anyUserId");
-    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>(Arrays.asList("email","phone")));
+    reqMap.put(JsonKey.IDENTIFIER, new ArrayList<>(Arrays.asList("email", "phone")));
     reqObj.setRequest(reqMap);
     reqObj.setOperation(ActorOperations.FREEUP_USER_IDENTITY.getValue());
     Response response = new Response();
@@ -132,5 +132,4 @@ public class IdentifierFreeUpActorTest {
           || res.getResponseCode() == errorCode.getResponseCode();
     }
   }
-
 }

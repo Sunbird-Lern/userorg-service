@@ -21,7 +21,7 @@ public interface UserLookupService {
 
   public void checkExternalIdUniqueness(User user, String operation, RequestContext context);
 
-  Response insertRecords(List<Map<String, Object>> list, RequestContext context);
+  Response insertRecords(Map<String, Object> userMap, RequestContext context);
 
   void deleteRecords(List<Map<String, String>> reqList, RequestContext requestContext);
 

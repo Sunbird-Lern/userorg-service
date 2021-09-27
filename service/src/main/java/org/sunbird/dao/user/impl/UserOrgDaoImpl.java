@@ -9,10 +9,10 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.Util;
 
 public final class UserOrgDaoImpl implements UserOrgDao {
 
@@ -71,6 +71,11 @@ public final class UserOrgDaoImpl implements UserOrgDao {
         cassandraOperation.getRecordsByCompositeKey(
             JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
     return res;
+  }
+
+  @Override
+  public Response insertRecord(Map reqMap, RequestContext context) {
+    return cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, reqMap, context);
   }
   public void deleteUserOrgMapping(
           List<Map<String, Object>> userOrgList, RequestContext context){

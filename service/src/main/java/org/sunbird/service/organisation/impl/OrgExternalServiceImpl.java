@@ -14,6 +14,14 @@ import org.sunbird.service.organisation.OrgExternalService;
 public class OrgExternalServiceImpl implements OrgExternalService {
   private OrgExternalDao orgExtDao = new OrgExternalDaoImpl();
   private OrgDao orgDao = OrgDaoImpl.getInstance();
+  private static OrgExternalService orgExternalService;
+
+  public static OrgExternalService getInstance() {
+    if (orgExternalService == null) {
+      orgExternalService = new OrgExternalServiceImpl();
+    }
+    return orgExternalService;
+  }
 
   @Override
   public String getOrgIdFromOrgExternalIdAndProvider(

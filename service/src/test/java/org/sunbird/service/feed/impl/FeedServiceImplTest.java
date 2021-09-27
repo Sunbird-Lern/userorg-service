@@ -25,7 +25,6 @@ import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
 
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
@@ -44,7 +43,7 @@ public class FeedServiceImplTest {
   private static IFeedService feedService;
 
   @Before
-  public void setUp(){
+  public void setUp() {
     PowerMockito.mockStatic(FeedDaoImpl.class);
     IFeedDao iFeedDao = PowerMockito.mock(FeedDaoImpl.class);
     PowerMockito.when(FeedDaoImpl.getInstance()).thenReturn(iFeedDao);
@@ -59,10 +58,10 @@ public class FeedServiceImplTest {
     PowerMockito.when(iFeedDao.insert(Mockito.anyMap(), Mockito.any())).thenReturn(upsertResponse);
     PowerMockito.when(iFeedDao.update(Mockito.anyMap(), Mockito.any())).thenReturn(upsertResponse);
     PowerMockito.doNothing()
-            .when(iFeedDao)
-            .delete(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any());
+        .when(iFeedDao)
+        .delete(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any());
     PowerMockito.when(iFeedDao.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
-            .thenReturn(response);
+        .thenReturn(response);
     feedService = FeedFactory.getInstance();
   }
 
@@ -122,5 +121,4 @@ public class FeedServiceImplTest {
     feed.setData(map);
     return feed;
   }
-
 }

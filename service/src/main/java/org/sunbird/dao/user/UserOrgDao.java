@@ -1,5 +1,6 @@
 package org.sunbird.dao.user;
 
+import java.util.Map;
 import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -16,6 +17,8 @@ public interface UserOrgDao {
 
   Response getUserOrgDetails(String userId, String organisationId, RequestContext context);
 
+  Response insertRecord(Map reqMap, RequestContext context);
+  
   void deleteUserOrgMapping(
           List<Map<String, Object>> userOrgList, RequestContext context);
 }

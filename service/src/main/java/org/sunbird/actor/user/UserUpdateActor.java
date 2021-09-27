@@ -4,18 +4,14 @@ import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
@@ -39,12 +35,7 @@ import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Matcher;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 
@@ -159,7 +150,7 @@ public class UserUpdateActor extends UserBaseActor {
     }
 
     Response response = userService.updateUser(requestMap, actorMessage.getRequestContext());
-    insertIntoUserLookUp(userLookUpData, actorMessage.getRequestContext());
+    userLookupService.insertRecords(userLookUpData, actorMessage.getRequestContext());
     removeUserLookupEntry(userLookUpData, userDbRecord, actorMessage.getRequestContext());
     if (StringUtils.isNotBlank(callerId)) {
       userMap.put(JsonKey.ROOT_ORG_ID, actorMessage.getContext().get(JsonKey.ROOT_ORG_ID));
@@ -409,39 +400,8 @@ public class UserUpdateActor extends UserBaseActor {
         && Matcher.matchIdentifiers(userPrimaryPhone, recoveryPhone)) {
       throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
     }
-    validatePrimaryEmailOrPhone(userDbRecord, userReqMap);
-    validatePrimaryAndRecoveryKeys(userReqMap);
-  }
-
-  private void validatePrimaryEmailOrPhone(
-      Map<String, Object> userDbRecord, Map<String, Object> userReqMap) {
-    String userPrimaryPhone = (String) userReqMap.get(JsonKey.PHONE);
-    String userPrimaryEmail = (String) userReqMap.get(JsonKey.EMAIL);
-    String recoveryEmail = (String) userDbRecord.get(JsonKey.RECOVERY_EMAIL);
-    String recoveryPhone = (String) userDbRecord.get(JsonKey.RECOVERY_PHONE);
-    if (StringUtils.isNotBlank(userPrimaryEmail)
-        && Matcher.matchIdentifiers(userPrimaryEmail, recoveryEmail)) {
-      throwRecoveryParamsMatchException(JsonKey.EMAIL, JsonKey.RECOVERY_EMAIL);
-    }
-    if (StringUtils.isNotBlank(userPrimaryPhone)
-        && Matcher.matchIdentifiers(userPrimaryPhone, recoveryPhone)) {
-      throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
-    }
-  }
-
-  private void validatePrimaryAndRecoveryKeys(Map<String, Object> userReqMap) {
-    String userPhone = (String) userReqMap.get(JsonKey.PHONE);
-    String userEmail = (String) userReqMap.get(JsonKey.EMAIL);
-    String userRecoveryEmail = (String) userReqMap.get(JsonKey.RECOVERY_EMAIL);
-    String userRecoveryPhone = (String) userReqMap.get(JsonKey.RECOVERY_PHONE);
-    if (StringUtils.isNotBlank(userEmail)
-        && Matcher.matchIdentifiers(userEmail, userRecoveryEmail)) {
-      throwRecoveryParamsMatchException(JsonKey.EMAIL, JsonKey.RECOVERY_EMAIL);
-    }
-    if (StringUtils.isNotBlank(userPhone)
-        && Matcher.matchIdentifiers(userPhone, userRecoveryPhone)) {
-      throwRecoveryParamsMatchException(JsonKey.PHONE, JsonKey.RECOVERY_PHONE);
-    }
+    UserCreateRequestValidator.validatePrimaryEmailOrPhone(userDbRecord, userReqMap);
+    UserCreateRequestValidator.validatePrimaryAndRecoveryKeys(userReqMap);
   }
 
   private void throwRecoveryParamsMatchException(String type, String recoveryType) {
