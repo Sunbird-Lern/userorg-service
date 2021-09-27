@@ -14,10 +14,10 @@ public interface ISmsProvider {
   default String getTemplateId(String sms, String provider) {
     Map<String, Map<String, String>> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
     Map<String, String> providerTemplateConfig = smsTemplateConfig.get(provider);
-    for (String key : providerTemplateConfig.keySet()) {
-      String pattern = key.replaceAll("\\$[^ .]+", ".*?");
+    for (Map.Entry<String, String> entry : providerTemplateConfig.entrySet()) {
+      String pattern = entry.getKey().replaceAll("\\$[^ .]+", ".*?");
       if (sms.matches(pattern)) {
-        return providerTemplateConfig.get(key);
+        return entry.getValue();
       }
     }
     return "";
