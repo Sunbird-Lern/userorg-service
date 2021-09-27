@@ -8,7 +8,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +39,7 @@ public class FeedServiceImpl implements IFeedService {
       if (MapUtils.isNotEmpty(feed.getData())) {
         dbMap.put(JsonKey.FEED_DATA, mapper.writeValueAsString(feed.getData()));
       }
-    } catch (Exception ex){
+    } catch (Exception ex) {
       logger.error(context, "FeedServiceImpl:insert Exception occurred while mapping.", ex);
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
@@ -52,7 +51,8 @@ public class FeedServiceImpl implements IFeedService {
     logger.debug(context, "FeedServiceImpl:update method called : ");
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
     String notification_service_base_url = System.getenv("notification_service_base_url");
-    String NOTIFICATION_SERVICE_URL = notification_service_base_url + "/private/v1/notification/feed/update";
+    String NOTIFICATION_SERVICE_URL =
+        notification_service_base_url + "/private/v1/notification/feed/update";
     Response response = new Response();
     try {
       if (MapUtils.isNotEmpty(feed.getData())) {
@@ -77,23 +77,24 @@ public class FeedServiceImpl implements IFeedService {
       responseList = (List<Map<String, Object>>) dbResponse.getResult().get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
         responseList.forEach(
-                s -> {
-                  try {
-                    String data = (String) s.get(JsonKey.FEED_DATA);
-                    if (StringUtils.isNotBlank(data)) {
-                      s.put(
-                              JsonKey.FEED_DATA,
-                              mapper.readValue(data, new TypeReference<Map<String, Object>>() {}));
-                    } else {
-                      s.put(JsonKey.FEED_DATA, Collections.emptyMap());
-                    }
-                    feedList.add(mapper.convertValue(s, Feed.class));
-                  } catch (Exception ex) {
-                    logger.error(
-                            context,
-                            "FeedServiceImpl:getRecordsByUserId :Exception occurred while mapping feed data.",
-                            ex);
-                  } });
+            s -> {
+              try {
+                String data = (String) s.get(JsonKey.FEED_DATA);
+                if (StringUtils.isNotBlank(data)) {
+                  s.put(
+                      JsonKey.FEED_DATA,
+                      mapper.readValue(data, new TypeReference<Map<String, Object>>() {}));
+                } else {
+                  s.put(JsonKey.FEED_DATA, Collections.emptyMap());
+                }
+                feedList.add(mapper.convertValue(s, Feed.class));
+              } catch (Exception ex) {
+                logger.error(
+                    context,
+                    "FeedServiceImpl:getRecordsByUserId :Exception occurred while mapping feed data.",
+                    ex);
+              }
+            });
       }
     }
     return feedList;
@@ -102,7 +103,7 @@ public class FeedServiceImpl implements IFeedService {
   @Override
   public void delete(String id, String userId, String category, RequestContext context) {
     logger.debug(
-            context, "FeedServiceImpl:delete method called for feedId : " + id + "user-id:" + userId);
+        context, "FeedServiceImpl:delete method called for feedId : " + id + "user-id:" + userId);
     iFeedDao.delete(id, userId, category, context);
   }
 }

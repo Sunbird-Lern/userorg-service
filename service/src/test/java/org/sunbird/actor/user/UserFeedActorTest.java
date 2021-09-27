@@ -3,6 +3,7 @@ package org.sunbird.actor.user;
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -33,9 +34,6 @@ import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.IFeedService;
 import org.sunbird.service.feed.impl.FeedServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -61,7 +59,7 @@ public class UserFeedActorTest {
   private static CassandraOperation cassandraOperation = null;
 
   @Before
-  public void setUp(){
+  public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
     userFeed.put(JsonKey.ID, "123-456-789");
     response = new Response();
@@ -77,12 +75,12 @@ public class UserFeedActorTest {
     upsertResponse.getResult().putAll(responseMap2);
     PowerMockito.when(
             cassandraOperation.insertRecord(
-                    Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(upsertResponse);
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(upsertResponse);
     PowerMockito.when(
             cassandraOperation.updateRecord(
-                    Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(upsertResponse);
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(upsertResponse);
   }
 
   @Test
@@ -154,5 +152,4 @@ public class UserFeedActorTest {
           || res.getResponseCode() == errorCode.getResponseCode();
     }
   }
-
 }

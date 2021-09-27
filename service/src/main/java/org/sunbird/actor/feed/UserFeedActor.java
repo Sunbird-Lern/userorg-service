@@ -1,9 +1,7 @@
 package org.sunbird.actor.feed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.*;
-
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
@@ -16,7 +14,6 @@ import org.sunbird.service.feed.IFeedService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
-
 
 public class UserFeedActor extends BaseActor {
 
@@ -73,7 +70,7 @@ public class UserFeedActor extends BaseActor {
       feedList.sort(Comparator.comparing(Feed::getCreatedOn));
       Feed delRecord = feedList.get(0);
       feedService.delete(
-              delRecord.getId(), delRecord.getUserId(), delRecord.getCategory(), context);
+          delRecord.getId(), delRecord.getUserId(), delRecord.getCategory(), context);
     }
   }
 
@@ -81,10 +78,10 @@ public class UserFeedActor extends BaseActor {
     Response feedDeleteResponse = new Response();
     Map<String, Object> deleteRequest = request.getRequest();
     feedService.delete(
-            (String) deleteRequest.get(JsonKey.FEED_ID),
-            (String) deleteRequest.get(JsonKey.USER_ID),
-            (String) deleteRequest.get(JsonKey.CATEGORY),
-            context);
+        (String) deleteRequest.get(JsonKey.FEED_ID),
+        (String) deleteRequest.get(JsonKey.USER_ID),
+        (String) deleteRequest.get(JsonKey.CATEGORY),
+        context);
     feedDeleteResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(feedDeleteResponse, self());
   }

@@ -2,10 +2,9 @@ package org.sunbird.notification.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
-
-import java.io.IOException;
 
 public class JsonUtil {
   private static LoggerUtil logger = new LoggerUtil(JsonUtil.class);
@@ -15,7 +14,7 @@ public class JsonUtil {
     try {
       return mapper.writeValueAsString(object);
     } catch (Exception e) {
-      logger.error(context,"Exception occurred while converting object to string", e);
+      logger.error(context, "Exception occurred while converting object to string", e);
     }
     return null;
   }
@@ -35,7 +34,7 @@ public class JsonUtil {
       JsonNode node = mapper.readTree(res);
       result = mapper.convertValue(node, clazz);
     } catch (IOException e) {
-      logger.error(context,"Exception occurred while converting String to Object", e);
+      logger.error(context, "Exception occurred while converting String to Object", e);
     }
     return result;
   }

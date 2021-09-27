@@ -11,7 +11,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,14 +35,13 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.organisation.OrgTypeEnum;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
@@ -361,8 +359,8 @@ public class UserSelfDeclarationManagementActorTest {
     orgList.add(map);
     response.put(JsonKey.RESPONSE, orgList);
     when(cassandraOperation.getRecordById(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-      .thenReturn(response);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
     Map<String, Object> reqMap = createUpdateUserDeclrationRequests();
 
     doNothing()
@@ -386,7 +384,8 @@ public class UserSelfDeclarationManagementActorTest {
     Request request = new Request();
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
-    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 

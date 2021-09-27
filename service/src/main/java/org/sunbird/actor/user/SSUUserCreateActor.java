@@ -58,6 +58,8 @@ public class SSUUserCreateActor extends UserBaseActor {
    * @param actorMessage
    */
   private void createSSUUser(Request actorMessage) {
+    logger.debug(
+        actorMessage.getRequestContext(), "SSUUserCreateActor:createSSUUser: User creation starts");
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     userMap.put(
@@ -95,7 +97,7 @@ public class SSUUserCreateActor extends UserBaseActor {
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
     Response response = userService.createUser(userMap, actorMessage.getRequestContext());
-    insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
+    userLookupService.insertRecords(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
