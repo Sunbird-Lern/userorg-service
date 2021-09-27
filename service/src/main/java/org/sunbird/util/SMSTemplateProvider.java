@@ -39,12 +39,6 @@ public class SMSTemplateProvider {
       t.setRuntimeServices(rs);
       t.setData(sn);
       t.initDocument();
-      templateConfig.put("newline", " ");
-      templateConfig.put(
-          "instanceName",
-          StringUtils.isBlank(templateConfig.get("instanceName"))
-              ? ""
-              : templateConfig.get("instanceName"));
       VelocityContext context = new VelocityContext(templateConfig);
       StringWriter writer = new StringWriter();
       t.merge(context, writer);

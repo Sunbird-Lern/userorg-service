@@ -139,6 +139,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       }
       Map<String, String> smsTemplate = new HashMap<>();
       smsTemplate.put("instanceName", envName);
+      smsTemplate.put("newline", " ");
       smsTemplate.put(JsonKey.LINK, (String) userMap.get(JsonKey.LINK));
       smsTemplate.put(JsonKey.SET_PW_LINK, (String) userMap.get(JsonKey.SET_PW_LINK));
       String sms =
