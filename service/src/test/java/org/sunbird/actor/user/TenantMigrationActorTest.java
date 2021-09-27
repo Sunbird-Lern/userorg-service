@@ -39,7 +39,6 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgExternalService;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
@@ -157,15 +156,6 @@ public class TenantMigrationActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getOrgFromCassandra());
-    PowerMockito.doNothing()
-        .when(cassandraOperation)
-        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
-    PowerMockito.mockStatic(UserOrgDaoImpl.class);
-    UserOrgDao userOrgDao = Mockito.mock(UserOrgDaoImpl.class);
-    when(UserOrgDaoImpl.getInstance()).thenReturn(userOrgDao);
-    PowerMockito.doNothing()
-        .when(userOrgDao)
-        .deleteUserOrgMapping(Mockito.anyList(), Mockito.any());
   }
 
   public static Map<String, Object> getListOrgResponse() {
@@ -237,19 +227,6 @@ public class TenantMigrationActorTest {
     Map<String, String> dataCache = new HashMap<>();
     dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
-
-    try {
-      OrgExternalService orgExternalService = PowerMockito.mock(OrgExternalService.class);
-      PowerMockito.whenNew(OrgExternalService.class)
-          .withAnyArguments()
-          .thenReturn(orgExternalService);
-      when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-              Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-          .thenReturn("anyRootOrgId");
-    } catch (Exception e) {
-
-    }
-
     boolean result =
         testScenario(
             getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
@@ -281,7 +258,7 @@ public class TenantMigrationActorTest {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ORG_ID, "anyOrgId");
+    map.put(JsonKey.ORG_ID, "anyRootOrgId");
     map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
     list.add(map);
     response.put(Constants.RESPONSE, list);

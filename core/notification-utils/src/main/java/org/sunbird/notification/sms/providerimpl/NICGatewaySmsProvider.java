@@ -60,6 +60,9 @@ public class NICGatewaySmsProvider implements ISmsProvider {
       String messageBody = smsText;
       // add dlt template
       String dltTemplateId = getTemplateId(smsText, NIC_PROVIDER);
+      if (StringUtils.isBlank(dltTemplateId)) {
+        logger.info(context, "dlt template id is empty for sms : " + smsText);
+      }
       // Construct URL
       StringBuffer URI = new StringBuffer(baseUrl);
       URI.append("?username=" + URLEncoder.encode(userName, Consts.UTF_8));

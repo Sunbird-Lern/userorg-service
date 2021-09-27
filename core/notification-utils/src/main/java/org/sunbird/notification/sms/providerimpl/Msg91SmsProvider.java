@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -121,6 +122,9 @@ public class Msg91SmsProvider implements ISmsProvider {
             context, "Msg91SmsProvider - after removePlusFromMobileNumber " + tempMobileNumber);
         // add dlt template id header
         String templateId = getTemplateId(smsText, MSG_91_PROVIDER);
+        if (StringUtils.isBlank(templateId)) {
+          logger.info(context, "dlt template id is empty for sms : " + smsText);
+        }
         path = baseUrl + postUrl;
         logger.debug(context, "Msg91SmsProvider -Executing request - " + path);
 
@@ -373,6 +377,9 @@ public class Msg91SmsProvider implements ISmsProvider {
       String path = null;
       // add dlt template id header
       String templateId = getTemplateId(smsText, MSG_91_PROVIDER);
+      if (StringUtils.isBlank(templateId)) {
+        logger.info(context, "dlt template id is empty for sms : " + smsText);
+      }
       path = baseUrl + postUrl;
       logger.debug(context, "Msg91SmsProvider -Executing request - " + path);
       HttpPost httpPost = new HttpPost(path);
