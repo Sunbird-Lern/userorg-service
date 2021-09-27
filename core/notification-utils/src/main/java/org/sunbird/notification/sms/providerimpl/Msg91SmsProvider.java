@@ -35,8 +35,8 @@ public class Msg91SmsProvider implements ISmsProvider {
   private static String country = null;
 
   static {
-    boolean resposne = init();
-    logger.info("SMS configuration values are set ==" + resposne);
+    boolean response = init();
+    logger.info("SMS configuration values are set ==" + response);
   }
 
   /** this method will do the SMS properties initialization. */

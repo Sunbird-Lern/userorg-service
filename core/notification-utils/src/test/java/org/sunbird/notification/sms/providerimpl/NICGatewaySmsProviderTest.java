@@ -40,8 +40,7 @@ import org.sunbird.util.ProjectUtil;
   SMSFactory.class,
   SmsTemplateUtil.class,
   ProjectUtil.class,
-  URLEncoder.class,
-  System.class
+  URLEncoder.class
 })
 public class NICGatewaySmsProviderTest {
 
@@ -51,8 +50,6 @@ public class NICGatewaySmsProviderTest {
     when(ProjectUtil.getConfigValue("sms_gateway_provider")).thenReturn("NIC");
     PowerMockito.mockStatic(URLEncoder.class);
     when(URLEncoder.encode(Mockito.anyString(), Mockito.anyString())).thenReturn("dfgdgfg");
-    PowerMockito.mockStatic(System.class);
-    when(System.getenv(Mockito.anyString())).thenReturn("someString");
   }
 
   private void initMockRulesFor200() {
