@@ -19,8 +19,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.utils.PropertiesCache;
-import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.util.ProjectUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -30,7 +30,6 @@ import org.sunbird.util.ProjectUtil;
   HttpClients.class,
   CloseableHttpClient.class,
   PropertiesCache.class,
-  SMSFactory.class,
   ProjectUtil.class
 })
 public abstract class BaseMessageTest {
@@ -38,6 +37,7 @@ public abstract class BaseMessageTest {
   @Before
   public void initMockRules() throws Exception {
     PowerMockito.mockStatic(ProjectUtil.class);
+    when(ProjectUtil.getConfigValue("sms_gateway_provider")).thenReturn(JsonKey.MSG_91);
     CloseableHttpClient httpClient = mock(CloseableHttpClient.class);
     CloseableHttpResponse httpResp = mock(CloseableHttpResponse.class);
     PropertiesCache propertiesCache = mock(PropertiesCache.class);

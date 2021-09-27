@@ -24,6 +24,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.notification.utils.SmsTemplateUtil;
@@ -36,7 +37,6 @@ import org.sunbird.request.RequestContext;
   HttpClients.class,
   CloseableHttpClient.class,
   PropertiesCache.class,
-  SMSFactory.class,
   SmsTemplateUtil.class
 })
 public class Msg91PostMethodTest {
@@ -102,7 +102,7 @@ public class Msg91PostMethodTest {
         "3");
     template.put(JsonKey.MSG_91, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    Msg91SmsProvider megObj = new Msg91SmsProvider();
+    ISmsProvider megObj = SMSFactory.getInstance();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
     boolean response = megObj.send("4321111111", sms, new RequestContext());
@@ -126,7 +126,7 @@ public class Msg91PostMethodTest {
         "3");
     template.put(JsonKey.MSG_91, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    Msg91SmsProvider megObj = new Msg91SmsProvider();
+    ISmsProvider megObj = SMSFactory.getInstance();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
     boolean response = megObj.send("4321111111", sms, new RequestContext());
@@ -150,7 +150,7 @@ public class Msg91PostMethodTest {
         "3");
     template.put(JsonKey.MSG_91, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    Msg91SmsProvider megObj = new Msg91SmsProvider();
+    ISmsProvider megObj = SMSFactory.getInstance();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
     List<String> phoneList = new ArrayList<>();
@@ -177,7 +177,7 @@ public class Msg91PostMethodTest {
         "3");
     template.put(JsonKey.MSG_91, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    Msg91SmsProvider megObj = new Msg91SmsProvider();
+    ISmsProvider megObj = SMSFactory.getInstance();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
     List<String> phoneList = new ArrayList<>();
@@ -204,7 +204,7 @@ public class Msg91PostMethodTest {
         "3");
     template.put(JsonKey.MSG_91, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    Msg91SmsProvider megObj = new Msg91SmsProvider();
+    ISmsProvider megObj = SMSFactory.getInstance();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
     boolean response = megObj.send("4321111111", "+91", sms, new RequestContext());
@@ -228,7 +228,7 @@ public class Msg91PostMethodTest {
         "3");
     template.put(JsonKey.MSG_91, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    Msg91SmsProvider megObj = new Msg91SmsProvider();
+    ISmsProvider megObj = SMSFactory.getInstance();
     String sms =
         "OTP to verify your phone number on instance is 456123. This is valid for 30 minutes only.";
     boolean response = megObj.send("4321111111", "+91", sms, new RequestContext());

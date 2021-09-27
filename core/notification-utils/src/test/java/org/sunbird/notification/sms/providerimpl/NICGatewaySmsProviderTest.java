@@ -24,6 +24,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SMSFactory;
 import org.sunbird.notification.utils.SmsTemplateUtil;
@@ -37,7 +38,6 @@ import org.sunbird.util.ProjectUtil;
   HttpClients.class,
   CloseableHttpClient.class,
   PropertiesCache.class,
-  SMSFactory.class,
   SmsTemplateUtil.class,
   ProjectUtil.class,
   URLEncoder.class
@@ -91,10 +91,10 @@ public class NICGatewaySmsProviderTest {
         "3");
     template.put(JsonKey.NIC, template1);
     when(SmsTemplateUtil.getSmsTemplateConfigMap()).thenReturn(template);
-    NICGatewaySmsProvider megObj = new NICGatewaySmsProvider();
+    ISmsProvider iSmsProvider = SMSFactory.getInstance();
     String sms =
         "OTP to reset your password on instance is 456123. This is valid for 30 minutes only.";
-    boolean response = megObj.send("4321111111", sms, new RequestContext());
+    boolean response = iSmsProvider.send("4321111111", sms, new RequestContext());
     Assert.assertFalse(response);
   }
 }
