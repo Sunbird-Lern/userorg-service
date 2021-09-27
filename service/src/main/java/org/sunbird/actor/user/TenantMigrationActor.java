@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -36,6 +35,7 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.SMSTemplateProvider;
 import org.sunbird.util.UserFlagEnum;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
@@ -217,12 +217,12 @@ public class TenantMigrationActor extends BaseActor {
         context,
         "notify starts sending migrate notification to user " + userDetail.get(JsonKey.USER_ID));
     Map<String, Object> userData = createUserData(userDetail);
-    Request notificationRequest = createNotificationData(userData);
+    Request notificationRequest = createNotificationData(userData, context);
     notificationRequest.setRequestContext(context);
     emailServiceActor.tell(notificationRequest, self());
   }
 
-  private Request createNotificationData(Map<String, Object> userData) {
+  private Request createNotificationData(Map<String, Object> userData, RequestContext context) {
     Request request = new Request();
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.NAME, userData.get(JsonKey.FIRST_NAME));
@@ -234,11 +234,12 @@ public class TenantMigrationActor extends BaseActor {
       requestMap.put(JsonKey.MODE, JsonKey.SMS);
     }
     requestMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, ACCOUNT_MERGE_EMAIL_TEMPLATE);
+    Map<String, String> templateConfig = new HashMap<>();
+    templateConfig.put(
+        JsonKey.INSTALLATION_NAME, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION));
+    templateConfig.put(JsonKey.PHONE, (String) userData.get(MASK_IDENTIFIER));
     String body =
-        MessageFormat.format(
-            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_MIGRATE_USER_BODY),
-            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION),
-            userData.get(MASK_IDENTIFIER));
+        SMSTemplateProvider.getSMSBody(JsonKey.SUNBIRD_MIGRATE_USER_BODY, templateConfig, context);
     requestMap.put(JsonKey.BODY, body);
     requestMap.put(
         JsonKey.SUBJECT, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_ACCOUNT_MERGE_SUBJECT));

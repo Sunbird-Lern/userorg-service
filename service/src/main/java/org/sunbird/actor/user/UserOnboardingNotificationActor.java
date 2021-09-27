@@ -21,6 +21,7 @@ import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.SMSTemplateProvider;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.user.UserActorOperations;
 
@@ -140,7 +141,8 @@ public class UserOnboardingNotificationActor extends BaseActor {
       smsTemplate.put("instanceName", envName);
       smsTemplate.put(JsonKey.LINK, (String) userMap.get(JsonKey.LINK));
       smsTemplate.put(JsonKey.SET_PW_LINK, (String) userMap.get(JsonKey.SET_PW_LINK));
-      String sms = ProjectUtil.getSMSBody(smsTemplate);
+      String sms =
+          SMSTemplateProvider.getSMSBody(JsonKey.WELCOME_SMS_TEMPLATE, smsTemplate, context);
       if (StringUtils.isBlank(sms)) {
         sms = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_DEFAULT_WELCOME_MSG);
       }
