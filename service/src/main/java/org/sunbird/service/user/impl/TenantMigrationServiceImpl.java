@@ -2,7 +2,10 @@ package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -151,7 +154,9 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
   public Response updateUserOrg(Request request, List<Map<String, Object>> userOrgList) {
     logger.debug(request.getRequestContext(), "TenantMigrationActor:updateUserOrg called.");
     Response response = new Response();
-    deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
+    if (CollectionUtils.isNotEmpty(userOrgList)) {
+      deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
+    }
     Map<String, Object> userDetails = request.getRequest();
     // add mapping root org
     createUserOrgRequestAndUpdate(
