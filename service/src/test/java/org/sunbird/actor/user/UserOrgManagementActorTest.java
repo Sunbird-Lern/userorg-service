@@ -29,10 +29,9 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.util.user.UserUtil;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class, UserUtil.class})
+@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -58,18 +57,22 @@ public class UserOrgManagementActorTest {
             Mockito.anyMap(),
             Mockito.any()))
         .thenReturn(response);
+
+    List<Map<String, Object>> userOrgMapList = new ArrayList<>();
+    Map<String, Object> userOrgMap = new HashMap<String, Object>();
+    userOrgMap.put(JsonKey.USER_ID, "userId");
+    userOrgMap.put(JsonKey.ORGANISATION_ID, "orgId");
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMapList.add(userOrgMap);
+    Response userOrgResponse = new Response();
+    userOrgResponse.put(JsonKey.RESPONSE, userOrgMapList);
+
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userOrgResponse);
     when(cassandraOperationImpl.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
-
-    PowerMockito.mockStatic(UserUtil.class);
-    Map<String, Object> userOrg = new HashMap<>();
-    userOrg.put(JsonKey.USER_ID, "userId");
-    userOrg.put(JsonKey.ORGANISATION_ID, "id");
-    List<Map<String, Object>> userOrgListDb = new ArrayList<>();
-    userOrgListDb.add(userOrg);
-    when(UserUtil.getUserOrgDetails(Mockito.anyBoolean(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(userOrgListDb);
+        .thenReturn(userOrgResponse);
   }
 
   @Test
@@ -92,7 +95,7 @@ public class UserOrgManagementActorTest {
     Assert.assertTrue(result);
   }
 
-  // @Test
+  @Test
   public void testUpdateUserOrgDetailsSuccess() throws Exception {
     boolean result = testScenario(getUserOrgUpdateRequest(), null);
     Assert.assertTrue(result);
