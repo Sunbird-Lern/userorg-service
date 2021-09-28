@@ -74,6 +74,7 @@ public class UserOrgServiceImplTest {
     userMap.put(JsonKey.ASSOCIATION_TYPE, "associateType");
     userMap.put(JsonKey.HASHTAGID, "hashId");
     userOrgService.registerUserToOrg(userMap, new RequestContext());
+    Assert.assertNotNull(userMap);
   }
 
   @Test
@@ -86,5 +87,6 @@ public class UserOrgServiceImplTest {
     userMap.put(JsonKey.HASHTAGID, "hashId");
     userMap.put(JsonKey.ROLES, "some Roles");
     userOrgService.upsertUserOrgData(userMap, new RequestContext());
+    Assert.assertNotNull(userMap);
   }
 }

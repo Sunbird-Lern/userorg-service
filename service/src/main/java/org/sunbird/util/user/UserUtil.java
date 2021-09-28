@@ -17,7 +17,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -29,7 +28,6 @@ import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
@@ -57,7 +55,6 @@ import scala.concurrent.Future;
 
 public class UserUtil {
   private static LoggerUtil logger = new LoggerUtil(UserUtil.class);
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static ObjectMapper mapper = new ObjectMapper();
