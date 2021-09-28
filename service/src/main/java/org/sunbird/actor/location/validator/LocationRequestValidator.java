@@ -22,7 +22,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 /** @author Amit Kumar */
@@ -304,7 +303,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
 
   public static List<Map<String, Object>> getESSearchResult(
       Map<String, Object> searchQueryMap, String esIndex, String esType) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
     Future<Map<String, Object>> resultF = esUtil.search(searchDto, esType, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);

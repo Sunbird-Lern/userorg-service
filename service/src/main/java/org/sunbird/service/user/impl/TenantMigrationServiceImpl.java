@@ -28,7 +28,6 @@ import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
-import org.sunbird.util.Util;
 
 public class TenantMigrationServiceImpl implements TenantMigrationService {
 
@@ -200,7 +199,7 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
     List<String> roles = new ArrayList<>();
     roles.add(ProjectUtil.UserRole.PUBLIC.getValue());
     userOrgRequest.put(JsonKey.ROLES, roles);
-    Util.registerUserToOrg(userOrgRequest, context);
+    userOrgService.registerUserToOrg(userOrgRequest, context);
   }
 
   private void fetchLocationIds(

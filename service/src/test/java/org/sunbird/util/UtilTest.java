@@ -3,10 +3,7 @@ package org.sunbird.util;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.dispatch.Futures;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,7 +27,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -61,39 +57,6 @@ public class UtilTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-  }
-
-  @Test
-  public void testGetUserOrgDetails() {
-    Response response = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, false);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    result.put(JsonKey.ORGANISATION_ID, "1234567890");
-    responseList.add(result);
-    response.getResult().put(JsonKey.RESPONSE, responseList);
-    List<String> ids = new ArrayList<>();
-    ids.add("123-456-789");
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
-        .thenReturn(response);
-
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(getEsResponseMap());
-    when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
-    Promise<String> esPromise = Futures.promise();
-    esPromise.success("success");
-
-    Promise<Map<String, Map<String, Object>>> promise2 = Futures.promise();
-    promise2.success(getEs2ResponseMap());
-    when(esService.getEsResultByListOfIds(
-            Mockito.anyList(), Mockito.anyList(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise2.future());
-    List<Map<String, Object>> res = Util.getUserOrgDetails("123-456-789", null);
-    Assert.assertNotNull(res);
   }
 
   @Test

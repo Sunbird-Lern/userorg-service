@@ -36,12 +36,16 @@ import org.sunbird.model.user.User;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserExternalIdentityService;
 import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
@@ -70,6 +74,8 @@ public class UserUtil {
   private static UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
   private static UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private static UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private static OrgService orgService = OrgServiceImpl.getInstance();
   private static UserDao userDao = UserDaoImpl.getInstance();
 
   private UserUtil() {}
@@ -564,7 +570,7 @@ public class UserUtil {
               JsonKey.USER_ID,
               context);
       List<Map<String, Object>> responseList =
-          (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
+          userOrgService.getUserOrgListByUserId(userId, context);
       if (CollectionUtils.isNotEmpty(responseList)) {
         if (!isDeleted) {
           responseList
@@ -621,7 +627,10 @@ public class UserUtil {
     if (Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
       Map<String, Object> searchQueryMap = new HashMap<>();
       searchQueryMap.put(JsonKey.MANAGED_BY, managedBy);
-      List<Map<String, Object>> managedUserList = Util.searchUser(searchQueryMap, context);
+      SearchDTO searchDTO = ElasticSearchHelper.createSearchDTO(searchQueryMap);
+      Map<String, Object> searchResult = userService.searchUser(searchDTO, context);
+      List<Map<String, Object>> managedUserList =
+          (List<Map<String, Object>>) searchResult.get(JsonKey.CONTENT);
       if (CollectionUtils.isNotEmpty(managedUserList)
           && managedUserList.size()
               >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {
@@ -735,7 +744,7 @@ public class UserUtil {
         filters.put(JsonKey.IS_TENANT, true);
         filters.put(JsonKey.CHANNEL, providers);
         searchQueryMap.put(JsonKey.FILTERS, filters);
-        SearchDTO searchDTO = Util.createSearchDto(searchQueryMap);
+        SearchDTO searchDTO = ElasticSearchHelper.createSearchDTO(searchQueryMap);
         Future<Map<String, Object>> esOrgResF =
             esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), context);
         Map<String, Object> esResOrg =
@@ -871,7 +880,7 @@ public class UserUtil {
       userRequestValidator.validateMandatoryFrameworkFields(
           userRequestMap, frameworkFields, frameworkMandatoryFields);
       Map<String, Object> rootOrgMap =
-          Util.getOrgDetails((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
+          orgService.getOrgById((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
       String hashTagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
 
       verifyFrameworkId(hashTagId, frameworkIdList, context);

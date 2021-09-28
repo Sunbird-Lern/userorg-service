@@ -111,8 +111,6 @@ public class UserRoleActorTest {
     ActorSelection actorSelection = Mockito.mock(ActorSelection.class);
     when(actorSelection.resolveOneCS(Duration.create(Mockito.anyLong(), "seconds")))
         .thenReturn(completionStage);
-    SearchDTO searchDTO = Mockito.mock(SearchDTO.class);
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
 
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString(), Mockito.any()))

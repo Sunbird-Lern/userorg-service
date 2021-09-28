@@ -15,11 +15,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.contentstore.ContentStoreUtil;
 
 @PowerMockIgnore({
@@ -75,7 +74,7 @@ public class UserFrameworkTest extends UserManagementActorTestBase {
     Map<String, Object> rootOrgMap = new HashMap<>();
     String hashTagId = "someHashTagId";
     rootOrgMap.put(JsonKey.HASHTAGID, hashTagId);
-    when(Util.getOrgDetails(Mockito.anyString(), Mockito.any())).thenReturn(rootOrgMap);
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(rootOrgMap);
   }
 
   private void mockContentStoreUtil() {

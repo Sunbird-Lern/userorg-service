@@ -67,24 +67,21 @@ public final class UserOrgDaoImpl implements UserOrgDao {
     if (StringUtils.isNotEmpty(organisationId)) {
       searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
     }
-    Response res =
-        cassandraOperation.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
-    return res;
+    return cassandraOperation.getRecordsByCompositeKey(
+        JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
   }
 
   @Override
   public Response insertRecord(Map reqMap, RequestContext context) {
     return cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, reqMap, context);
   }
-  public void deleteUserOrgMapping(
-          List<Map<String, Object>> userOrgList, RequestContext context){
+
+  public void deleteUserOrgMapping(List<Map<String, Object>> userOrgList, RequestContext context) {
     for (Map<String, Object> userOrg : userOrgList) {
       Map<String, String> compositeKey = new LinkedHashMap<>(2);
       compositeKey.put(JsonKey.USER_ID, (String) userOrg.get(JsonKey.USER_ID));
       compositeKey.put(JsonKey.ORGANISATION_ID, (String) userOrg.get(JsonKey.ORGANISATION_ID));
-      cassandraOperation.deleteRecord(
-              JsonKey.SUNBIRD, JsonKey.USER_ORG, compositeKey, context);
+      cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, compositeKey, context);
     }
   }
 }

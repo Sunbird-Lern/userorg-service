@@ -255,7 +255,7 @@ public class SearchHandlerActor extends BaseActor {
         && BooleanUtils.isTrue((Boolean) filterMap.remove(JsonKey.IS_ROOT_ORG))) {
       filterMap.put(JsonKey.IS_TENANT, true);
     }
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
     Future<Map<String, Object>> futureResponse =
         orgService.searchOrg(searchDto, request.getRequestContext());
     Future<Response> response =
