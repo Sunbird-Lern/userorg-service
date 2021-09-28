@@ -35,9 +35,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
 
   @Override
   public Response assignUserRole(List<Map<String, Object>> userRoleMap, RequestContext context) {
-    Response result =
-        cassandraOperation.batchInsert(JsonKey.SUNBIRD, TABLE_NAME, userRoleMap, context);
-    return result;
+    return cassandraOperation.batchInsert(JsonKey.SUNBIRD, TABLE_NAME, userRoleMap, context);
   }
 
   @Override

@@ -35,7 +35,6 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
-import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.AssociationMechanism;
@@ -53,7 +52,6 @@ import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.util.contentstore.ContentStoreUtil;
 import scala.concurrent.Future;
 
@@ -553,22 +551,11 @@ public class UserUtil {
     return getUserOrgDetails(false, userId, context);
   }
 
-  @SuppressWarnings("unchecked")
   public static List<Map<String, Object>> getUserOrgDetails(
       boolean isDeleted, String userId, RequestContext context) {
     List<Map<String, Object>> userOrgList = new ArrayList<>();
     List<Map<String, Object>> organisations = new ArrayList<>();
     try {
-      Util.DbInfo userOrgDbInfo = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
-      List<String> ids = new ArrayList<>();
-      ids.add(userId);
-      Response result =
-          cassandraOperation.getRecordsByPrimaryKeys(
-              userOrgDbInfo.getKeySpace(),
-              userOrgDbInfo.getTableName(),
-              ids,
-              JsonKey.USER_ID,
-              context);
       List<Map<String, Object>> responseList =
           userOrgService.getUserOrgListByUserId(userId, context);
       if (CollectionUtils.isNotEmpty(responseList)) {

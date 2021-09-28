@@ -112,6 +112,18 @@ public class UserUtilTest {
     promise.success(contentMap);
     when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+
+    List<Map<String, Object>> userOrgMapList = new ArrayList<>();
+    Map<String, Object> userOrgMap = new HashMap<String, Object>();
+    userOrgMap.put(JsonKey.USER_ID, "userId");
+    userOrgMap.put(JsonKey.ORGANISATION_ID, "orgId");
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMapList.add(userOrgMap);
+    Response userOrgResponse = new Response();
+    userOrgResponse.put(JsonKey.RESPONSE, userOrgMapList);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userOrgResponse);
   }
 
   @Test
@@ -249,19 +261,6 @@ public class UserUtilTest {
   @Test
   public void testgetUserOrgDetailsDeActive() {
     beforeEachTest();
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, true);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    List<String> ids = new ArrayList<>();
-    ids.add("123-456-789");
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
-        .thenReturn(response1);
     List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
