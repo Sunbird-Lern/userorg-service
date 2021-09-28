@@ -1,6 +1,5 @@
 package org.sunbird.notification.sms.providerimpl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -79,10 +78,7 @@ public class NICGatewaySmsProvider implements ISmsProvider {
       headers.put("Accept", "application/json");
       String response = HttpClientUtil.get(URI.toString(), headers, context);
       if (StringUtils.isNotBlank(response)) {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> resultMap;
-        resultMap = mapper.readValue(response, Map.class);
-        logger.info(context, "NICGatewaySmsProvider:Result:" + resultMap);
+        logger.info(context, "NICGatewaySmsProvider:Result:" + response);
         return true;
       } else {
         return false;
