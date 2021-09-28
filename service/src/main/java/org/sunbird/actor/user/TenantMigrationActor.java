@@ -135,7 +135,7 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> targetObject = null;
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> userDetails =
-        userService.getUserDetailsById(
+        userService.getUserDetailsForES(
             (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
     tenantServiceImpl.validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
     tenantServiceImpl.validateChannelAndGetRootOrgId(request);
