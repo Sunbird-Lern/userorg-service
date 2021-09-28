@@ -64,22 +64,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testGetSMSBody() {
-    Map<String, String> templateMap = new HashMap<>();
-    templateMap.put(JsonKey.NAME, "userName");
-    templateMap.put(JsonKey.ORG_NAME, "orgName");
-    templateMap.put(JsonKey.COURSE_NAME, "courseName");
-    templateMap.put(JsonKey.BATCH_START_DATE, "2020");
-    templateMap.put(JsonKey.BATCH_END_DATE, "2019");
-    templateMap.put(JsonKey.BATCH_NAME, "name");
-    templateMap.put(JsonKey.NAME, "firstName");
-    templateMap.put(JsonKey.SIGNATURE, "signature");
-    templateMap.put(JsonKey.COURSE_BATCH_URL, "url");
-    String sms = ProjectUtil.getSMSBody(templateMap);
-    assertNotNull(sms);
-  }
-
-  @Test
   public void testGetContextSuccessWithFromMail() {
 
     Map<String, Object> templateMap = new HashMap<>();

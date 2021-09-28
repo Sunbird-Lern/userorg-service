@@ -5,7 +5,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,16 +13,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -482,33 +478,6 @@ public class ProjectUtil {
     public int getValue() {
       return this.value;
     }
-  }
-
-  public static String getSMSBody(Map<String, String> smsTemplate) {
-    try {
-      Properties props = new Properties();
-      props.put("resource.loader", "class");
-      props.put(
-          "class.resource.loader.class",
-          "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-
-      VelocityEngine ve = new VelocityEngine();
-      ve.init(props);
-      smsTemplate.put("newline", " ");
-      smsTemplate.put(
-          "instanceName",
-          StringUtils.isBlank(smsTemplate.get("instanceName"))
-              ? ""
-              : smsTemplate.get("instanceName"));
-      Template t = ve.getTemplate("/welcomeSmsTemplate.vm");
-      VelocityContext context = new VelocityContext(smsTemplate);
-      StringWriter writer = new StringWriter();
-      t.merge(context, writer);
-      return writer.toString();
-    } catch (Exception ex) {
-      logger.error("Exception occurred while formating and sending SMS ", ex);
-    }
-    return "";
   }
 
   public static boolean isDateValidFormat(String format, String value) {

@@ -13,7 +13,6 @@ import org.sunbird.response.Response;
 import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.impl.UserOrgServiceImpl;
-import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 
 public class UserOrgManagementActor extends BaseActor {
@@ -77,7 +76,7 @@ public class UserOrgManagementActor extends BaseActor {
     if (StringUtils.isNotBlank(organisationId)) {
       Map<String, Object> userOrg = (Map<String, Object>) userOrgDbMap.get(organisationId);
       requestMap.put(JsonKey.ASSOCIATION_TYPE, getAssociationType(userOrg, callerId, requestMap));
-      Util.upsertUserOrgData(requestMap, request.getRequestContext());
+      userOrgService.upsertUserOrgData(requestMap, request.getRequestContext());
     }
     if ((StringUtils.isNotBlank(organisationId)
             && !organisationId.equalsIgnoreCase((String) requestMap.get(JsonKey.ROOT_ORG_ID)))
@@ -85,7 +84,7 @@ public class UserOrgManagementActor extends BaseActor {
       Map<String, Object> userOrg =
           (Map<String, Object>) userOrgDbMap.get(requestMap.get(JsonKey.ROOT_ORG_ID));
       requestMap.put(JsonKey.ASSOCIATION_TYPE, getAssociationType(userOrg, callerId, requestMap));
-      Util.upsertUserOrgData(requestMap, request.getRequestContext());
+      userOrgService.upsertUserOrgData(requestMap, request.getRequestContext());
     }
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);

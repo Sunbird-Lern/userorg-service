@@ -11,7 +11,6 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.PropertiesCache;
-import org.sunbird.util.Util;
 
 public class OTPDaoImpl implements OTPDao {
   private static LoggerUtil logger = new LoggerUtil(OTPDaoImpl.class);
@@ -47,7 +46,7 @@ public class OTPDaoImpl implements OTPDao {
     ttlFields.add(JsonKey.OTP);
     Response result =
         cassandraOperation.getRecordWithTTLById(
-            Util.KEY_SPACE_NAME, TABLE_NAME, request, ttlFields, fields, context);
+            JsonKey.SUNBIRD, TABLE_NAME, request, ttlFields, fields, context);
     List<Map<String, Object>> otpMapList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(otpMapList)) {
       return null;
@@ -66,7 +65,7 @@ public class OTPDaoImpl implements OTPDao {
     String expirationInSeconds =
         PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_OTP_EXPIRATION);
     int ttl = Integer.valueOf(expirationInSeconds);
-    cassandraOperation.insertRecordWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, request, ttl, context);
+    cassandraOperation.insertRecordWithTTL(JsonKey.SUNBIRD, TABLE_NAME, request, ttl, context);
   }
 
   @Override
@@ -90,6 +89,6 @@ public class OTPDaoImpl implements OTPDao {
     compositeKey.put(JsonKey.TYPE, otpDetails.get(JsonKey.TYPE));
     compositeKey.put(JsonKey.KEY, otpDetails.get(JsonKey.KEY));
     cassandraOperation.updateRecordWithTTL(
-        Util.KEY_SPACE_NAME, TABLE_NAME, request, compositeKey, ttl, context);
+        JsonKey.SUNBIRD, TABLE_NAME, request, compositeKey, ttl, context);
   }
 }

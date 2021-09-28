@@ -146,8 +146,10 @@ public class ManagedUserActor extends UserBaseActor {
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
-      Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
-      esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
+      saveUserOrgInfo(userMap, actorMessage.getRequestContext());
+      esResponse =
+          userService.getUserDetailsForES(
+              (String) userMap.get(JsonKey.ID), actorMessage.getRequestContext());
     } else {
       logger.info(
           actorMessage.getRequestContext(),

@@ -453,7 +453,7 @@ public final class JsonKey {
   public static final String STATE_VALIDATED = "stateValidated";
   public static final String FLAGS_VALUE = "flagsValue";
   public static final String CLAIM_STATUS = "claimStatus";
-  public static final String SUNBIRD_MIGRATE_USER_BODY = "sunbird_migrate_user_body";
+  public static final String SUNBIRD_MIGRATE_USER_BODY = "migrate_user_template";
   public static final String SMS = "sms";
   public static final String SUNBIRD_ACCOUNT_MERGE_SUBJECT = "sunbird_account_merge_subject";
   public static final String IS_SSO_ROOTORG_ENABLED = "isSSOEnabled";
@@ -589,6 +589,10 @@ public final class JsonKey {
   public static final String TENANT_PREFERENCE_V2_DB = "tenant_preference_v2";
   public static final String UPDATE_ORG_STATUS = "updateOrgStatus";
   public static final String SUNBIRD_WEB_URL = "sunbird_web_url";
+  public static final String MSG_91 = "91SMS";
+  public static final String NIC = "NIC";
+  public static final String SMS_GATEWAY_PROVIDER = "sms_gateway_provider";
+  public static final String WELCOME_SMS_TEMPLATE = "welcomeSmsTemplate";
 
   private JsonKey() {}
 }

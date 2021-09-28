@@ -4,7 +4,6 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -14,12 +13,10 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
@@ -36,6 +33,7 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.SMSTemplateProvider;
 import org.sunbird.util.UserFlagEnum;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
@@ -91,7 +89,6 @@ public class TenantMigrationActor extends BaseActor {
   private void migrateSelfDeclaredUser(Request request) {
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateSelfDeclaredUser called.");
-    CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     // update user declaration table status
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     List<Map<String, Object>> responseList =
@@ -172,13 +169,12 @@ public class TenantMigrationActor extends BaseActor {
     }
     logger.info(
         request.getRequestContext(), "TenantMigrationActor:migrateUser user record got updated.");
+    // Update user externalIds
+    Response userExternalIdsResponse = updateUserExternalIds(request);
     // Update user org details
     Response userOrgResponse =
         tenantServiceImpl.updateUserOrg(
             request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
-
-    // Update user externalIds
-    Response userExternalIdsResponse = updateUserExternalIds(request);
     // Collect all the error message
     List<Map<String, Object>> userOrgErrMsgList = new ArrayList<>();
     if (MapUtils.isNotEmpty(userOrgResponse.getResult())
@@ -217,12 +213,12 @@ public class TenantMigrationActor extends BaseActor {
         context,
         "notify starts sending migrate notification to user " + userDetail.get(JsonKey.USER_ID));
     Map<String, Object> userData = createUserData(userDetail);
-    Request notificationRequest = createNotificationData(userData);
+    Request notificationRequest = createNotificationData(userData, context);
     notificationRequest.setRequestContext(context);
     emailServiceActor.tell(notificationRequest, self());
   }
 
-  private Request createNotificationData(Map<String, Object> userData) {
+  private Request createNotificationData(Map<String, Object> userData, RequestContext context) {
     Request request = new Request();
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.NAME, userData.get(JsonKey.FIRST_NAME));
@@ -234,11 +230,12 @@ public class TenantMigrationActor extends BaseActor {
       requestMap.put(JsonKey.MODE, JsonKey.SMS);
     }
     requestMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, ACCOUNT_MERGE_EMAIL_TEMPLATE);
+    Map<String, String> templateConfig = new HashMap<>();
+    templateConfig.put(
+        JsonKey.INSTALLATION_NAME, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION));
+    templateConfig.put(JsonKey.PHONE, (String) userData.get(MASK_IDENTIFIER));
     String body =
-        MessageFormat.format(
-            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_MIGRATE_USER_BODY),
-            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION),
-            userData.get(MASK_IDENTIFIER));
+        SMSTemplateProvider.getSMSBody(JsonKey.SUNBIRD_MIGRATE_USER_BODY, templateConfig, context);
     requestMap.put(JsonKey.BODY, body);
     requestMap.put(
         JsonKey.SUBJECT, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_ACCOUNT_MERGE_SUBJECT));
@@ -291,8 +288,10 @@ public class TenantMigrationActor extends BaseActor {
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
 
-      Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
-      response = (Response) Await.result(future, t.duration());
+      if (null != userExternalIdManagementActor) {
+        Future<Object> future = Patterns.ask(userExternalIdManagementActor, userRequest, t);
+        response = (Response) Await.result(future, t.duration());
+      }
       userLookUpService.insertExternalIdIntoUserLookup(
           (List) userExtIdsReq.get(JsonKey.EXTERNAL_IDS),
           (String) request.getRequest().get(JsonKey.USER_ID),

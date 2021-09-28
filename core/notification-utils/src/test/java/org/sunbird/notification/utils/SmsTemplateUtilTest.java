@@ -56,7 +56,7 @@ public class SmsTemplateUtilTest {
   @Test
   public void testDataSettings() {
     before();
-    Map<String, String> settings = SmsTemplateUtil.getSmsTemplateConfigMap();
+    Map<String, Map<String, String>> settings = SmsTemplateUtil.getSmsTemplateConfigMap();
     Assert.assertNotNull(settings);
     Assert.assertTrue(MapUtils.isNotEmpty(settings));
   }

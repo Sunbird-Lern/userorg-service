@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
+import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
@@ -114,7 +115,7 @@ public class LocationActor extends BaseLocationActor {
       Response response =
           locationService.searchLocation(request.getRequest(), request.getRequestContext());
       sender().tell(response, self());
-      SearchDTO searchDto = Util.createSearchDto(request.getRequest());
+      SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(request.getRequest());
       String[] types = {ProjectUtil.EsType.location.getTypeName()};
       generateSearchTelemetryEvent(searchDto, types, response.getResult(), request.getContext());
     } catch (Exception ex) {

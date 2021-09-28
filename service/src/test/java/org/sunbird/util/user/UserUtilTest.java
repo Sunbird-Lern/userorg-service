@@ -36,8 +36,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
-import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -48,7 +46,6 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   DefaultEncryptionServiceImpl.class,
-  Util.class,
   EncryptionService.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class
 })
@@ -102,7 +99,31 @@ public class UserUtilTest {
     doNothing()
         .when(cassandraOperationImpl)
         .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
-    PowerMockito.mockStatic(Util.class);
+    Map<String, Object> req = new HashMap<>();
+    req.put(JsonKey.MANAGED_BY, "ManagedBy");
+    List managedUserList = new ArrayList<Map<String, Object>>();
+    while (managedUserList.size() <= 31) {
+      managedUserList.add(new User());
+    }
+    Map<String, Object> contentMap = new HashMap<>();
+    contentMap.put(JsonKey.CONTENT, managedUserList);
+
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(contentMap);
+    when(esService.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+
+    List<Map<String, Object>> userOrgMapList = new ArrayList<>();
+    Map<String, Object> userOrgMap = new HashMap<String, Object>();
+    userOrgMap.put(JsonKey.USER_ID, "userId");
+    userOrgMap.put(JsonKey.ORGANISATION_ID, "orgId");
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMapList.add(userOrgMap);
+    Response userOrgResponse = new Response();
+    userOrgResponse.put(JsonKey.RESPONSE, userOrgMapList);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userOrgResponse);
   }
 
   @Test
@@ -123,13 +144,6 @@ public class UserUtilTest {
   @Test
   public void testValidateManagedUserLimit() {
     beforeEachTest();
-    Map<String, Object> req = new HashMap<>();
-    req.put(JsonKey.MANAGED_BY, "ManagedBy");
-    List managedUserList = new ArrayList<Map<String, Object>>();
-    while (managedUserList.size() <= 31) {
-      managedUserList.add(new User());
-    }
-    when(Util.searchUser(req, null)).thenReturn(managedUserList);
     try {
       UserUtil.validateManagedUserLimit("ManagedBy", null);
     } catch (ProjectCommonException e) {
@@ -167,12 +181,9 @@ public class UserUtilTest {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(contentMap);
-    Future<Map<String, Object>> test = promise.future();
-    SearchDTO searchDTO = new SearchDTO();
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
+    when(esService.search(new SearchDTO(), ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
-    Map<String, String> providerMap = UserUtil.fetchOrgIdByProvider(providers, null);
+    UserUtil.fetchOrgIdByProvider(providers, null);
     Assert.assertTrue(true);
   }
 
@@ -192,7 +203,19 @@ public class UserUtilTest {
     try {
       UserUtil.encryptDeclarationFields(declarations, dbRecords, context);
     } catch (Exception ex) {
+      Map<String, Object> orgMap = new HashMap<>();
+      List<Map<String, Object>> orgList = new ArrayList<>();
 
+      orgMap.put("id", "1234");
+      orgMap.put("channel", "channel004");
+      orgList.add(orgMap);
+      Map<String, Object> contentMap = new HashMap<>();
+      contentMap.put(JsonKey.CONTENT, orgList);
+
+      Promise<Map<String, Object>> promise = Futures.promise();
+      promise.success(contentMap);
+      when(esService.search(new SearchDTO(), ProjectUtil.EsType.organisation.getTypeName(), null))
+          .thenReturn(promise.future());
     }
     Assert.assertTrue(true);
   }
@@ -238,19 +261,6 @@ public class UserUtilTest {
   @Test
   public void testgetUserOrgDetailsDeActive() {
     beforeEachTest();
-    Response response1 = new Response();
-    List<Map<String, Object>> responseList = new ArrayList<>();
-    Map<String, Object> result = new HashMap<>();
-    result.put(JsonKey.IS_DELETED, true);
-    result.put(JsonKey.USER_ID, "123-456-789");
-    responseList.add(result);
-    response1.getResult().put(JsonKey.RESPONSE, responseList);
-    List<String> ids = new ArrayList<>();
-    ids.add("123-456-789");
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
-        .thenReturn(response1);
     List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);
   }
@@ -272,10 +282,7 @@ public class UserUtilTest {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(contentMap);
-    Future<Map<String, Object>> test = promise.future();
-    SearchDTO searchDTO = new SearchDTO();
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
+    when(esService.search(new SearchDTO(), ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
     Map<String, String> externalIds = new HashMap<>();
     externalIds.put(JsonKey.PROVIDER, "1234");
@@ -303,10 +310,7 @@ public class UserUtilTest {
 
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(contentMap);
-    Future<Map<String, Object>> test = promise.future();
-    SearchDTO searchDTO = new SearchDTO();
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
-    when(esService.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), null))
+    when(esService.search(new SearchDTO(), ProjectUtil.EsType.organisation.getTypeName(), null))
         .thenReturn(promise.future());
     Map<String, String> externalIds = new HashMap<>();
     externalIds.put(JsonKey.PROVIDER, "channel1004");
