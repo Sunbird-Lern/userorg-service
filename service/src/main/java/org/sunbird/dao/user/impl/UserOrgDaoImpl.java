@@ -12,7 +12,6 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.Util;
 
 public final class UserOrgDaoImpl implements UserOrgDao {
 
@@ -44,20 +43,20 @@ public final class UserOrgDaoImpl implements UserOrgDao {
     compositeKey.put(JsonKey.USER_ID, request.remove(JsonKey.USER_ID));
     compositeKey.put(JsonKey.ORGANISATION_ID, request.remove(JsonKey.ORGANISATION_ID));
     return cassandraOperation.updateRecord(
-        Util.KEY_SPACE_NAME, TABLE_NAME, request, compositeKey, context);
+        JsonKey.SUNBIRD, TABLE_NAME, request, compositeKey, context);
   }
 
   @Override
   public Response createUserOrg(UserOrg userOrg, RequestContext context) {
     return cassandraOperation.insertRecord(
-        Util.KEY_SPACE_NAME, TABLE_NAME, mapper.convertValue(userOrg, Map.class), context);
+        JsonKey.SUNBIRD, TABLE_NAME, mapper.convertValue(userOrg, Map.class), context);
   }
 
   @Override
   public Response getUserOrgListByUserId(String userId, RequestContext context) {
     Map<String, Object> compositeKey = new LinkedHashMap<>(2);
     compositeKey.put(JsonKey.USER_ID, userId);
-    return cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, compositeKey, context);
+    return cassandraOperation.getRecordById(JsonKey.SUNBIRD, TABLE_NAME, compositeKey, context);
   }
 
   @Override

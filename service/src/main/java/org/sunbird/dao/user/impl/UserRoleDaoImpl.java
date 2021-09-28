@@ -10,10 +10,9 @@ import org.sunbird.dao.user.UserRoleDao;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 public final class UserRoleDaoImpl implements UserRoleDao {
@@ -37,7 +36,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   @Override
   public Response assignUserRole(List<Map<String, Object>> userRoleMap, RequestContext context) {
     Response result =
-        cassandraOperation.batchInsert(Util.KEY_SPACE_NAME, TABLE_NAME, userRoleMap, context);
+        cassandraOperation.batchInsert(JsonKey.SUNBIRD, TABLE_NAME, userRoleMap, context);
     return result;
   }
 
@@ -50,7 +49,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
       compositeKey.put(JsonKey.ROLE, dataMap.remove(JsonKey.ROLE));
       result =
           cassandraOperation.updateRecord(
-              Util.KEY_SPACE_NAME, TABLE_NAME, dataMap, compositeKey, context);
+              JsonKey.SUNBIRD, TABLE_NAME, dataMap, compositeKey, context);
     }
     return result;
   }
@@ -58,7 +57,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   @Override
   public void deleteUserRole(List<Map<String, String>> userRoleMap, RequestContext context) {
     for (Map<String, String> dataMap : userRoleMap) {
-      cassandraOperation.deleteRecord(Util.KEY_SPACE_NAME, TABLE_NAME, dataMap, context);
+      cassandraOperation.deleteRecord(JsonKey.SUNBIRD, TABLE_NAME, dataMap, context);
     }
   }
 
@@ -71,7 +70,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
       compositeKeyMap.put(JsonKey.ROLE, role);
     }
     Response existingRecord =
-        cassandraOperation.getRecordById(Util.KEY_SPACE_NAME, TABLE_NAME, compositeKeyMap, context);
+        cassandraOperation.getRecordById(JsonKey.SUNBIRD, TABLE_NAME, compositeKeyMap, context);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
 
@@ -79,12 +78,17 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   }
 
   @Override
-  public boolean updateUserRoleToES(String identifier, Map<String, Object> data, RequestContext context) {
-    Future<Boolean> responseF = esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
+  public boolean updateUserRoleToES(
+      String identifier, Map<String, Object> data, RequestContext context) {
+    Future<Boolean> responseF =
+        esService.update(ProjectUtil.EsType.user.getTypeName(), identifier, data, context);
     if ((boolean) ElasticSearchHelper.getResponseFromFuture(responseF)) {
       return true;
     }
-    logger.info(context, "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier " + identifier);
+    logger.info(
+        context,
+        "UserRoleDaoImpl:updateUserRoleToES:unable to save the user role data to ES with identifier "
+            + identifier);
     return false;
   }
 }
