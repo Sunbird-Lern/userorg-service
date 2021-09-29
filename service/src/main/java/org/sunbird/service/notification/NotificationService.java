@@ -69,16 +69,18 @@ public class NotificationService {
   }
 
   private void validateRecipientsLimit(Set<String> recipients) {
-    int maxLimit;
+    int maxLimit = 100;
     try {
-      maxLimit =
-          Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT));
+      if (StringUtils.isNotBlank(
+          ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT))) {
+        maxLimit =
+            Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT));
+      }
     } catch (Exception exception) {
       logger.error(
           "NotificationService:validateEmailRecipientsLimit: Exception occurred with error message = "
               + exception.getMessage(),
           exception);
-      maxLimit = 100;
     }
     if (recipients.size() > maxLimit) {
       ProjectCommonException.throwClientErrorException(
