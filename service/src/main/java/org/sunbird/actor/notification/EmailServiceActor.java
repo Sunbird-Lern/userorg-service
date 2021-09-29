@@ -29,7 +29,7 @@ public class EmailServiceActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     if (null == connection.getTransport()) {
-      connection.createConnection();
+      connection.createConnection(request.getRequestContext());
       // set timer value
       timer = System.currentTimeMillis();
     }
@@ -110,7 +110,7 @@ public class EmailServiceActor extends BaseActor {
       if (null == connection.getTransport()
           || ((System.currentTimeMillis()) - timer >= interval)
           || (!connection.getTransport().isConnected())) {
-        resetConnection();
+        resetConnection(requestContext);
       }
       sendEmail.send(
           emails.toArray(new String[emails.size()]),
@@ -127,10 +127,11 @@ public class EmailServiceActor extends BaseActor {
     }
   }
 
-  private void resetConnection() {
+  private void resetConnection(RequestContext context) {
     logger.info(
+        context,
         "EmailServiceActor:resetConnection : SMTP Transport client connection is closed or timed out. Create new connection.");
-    connection.createConnection();
+    connection.createConnection(context);
     // set timer value
     timer = System.currentTimeMillis();
   }

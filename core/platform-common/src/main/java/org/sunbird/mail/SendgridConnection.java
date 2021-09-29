@@ -6,6 +6,7 @@ import javax.mail.Transport;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.request.RequestContext;
 import org.sunbird.util.PropertiesCache;
 
 public class SendgridConnection {
@@ -21,7 +22,7 @@ public class SendgridConnection {
   private Session session;
   private Transport transport;
 
-  public Transport createConnection() {
+  public Transport createConnection(RequestContext context) {
     try {
       host = System.getenv(JsonKey.EMAIL_SERVER_HOST);
       port = System.getenv(JsonKey.EMAIL_SERVER_PORT);
@@ -35,6 +36,7 @@ public class SendgridConnection {
           || StringUtils.isBlank(password)
           || StringUtils.isBlank(fromEmail)) {
         logger.info(
+            context,
             "Email setting value is not provided by Env variable=="
                 + host
                 + " "
@@ -56,7 +58,8 @@ public class SendgridConnection {
       transport.connect(host, userName, password);
       return transport;
     } catch (Exception e) {
-      logger.error("Exception occurred while smtp session and creating transport connection", e);
+      logger.error(
+          context, "Exception occurred while smtp session and creating transport connection", e);
     }
     return null;
   }
