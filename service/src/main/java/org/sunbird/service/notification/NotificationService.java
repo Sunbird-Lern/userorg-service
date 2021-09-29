@@ -81,6 +81,7 @@ public class NotificationService {
           "NotificationService:validateEmailRecipientsLimit: Exception occurred with error message = "
               + exception.getMessage(),
           exception);
+      maxLimit = 100;
     }
     if (recipients.size() > maxLimit) {
       ProjectCommonException.throwClientErrorException(
