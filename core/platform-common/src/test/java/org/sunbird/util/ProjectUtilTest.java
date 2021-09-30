@@ -12,7 +12,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -65,22 +64,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testGetSMSBody() {
-    Map<String, String> templateMap = new HashMap<>();
-    templateMap.put(JsonKey.NAME, "userName");
-    templateMap.put(JsonKey.ORG_NAME, "orgName");
-    templateMap.put(JsonKey.COURSE_NAME, "courseName");
-    templateMap.put(JsonKey.BATCH_START_DATE, "2020");
-    templateMap.put(JsonKey.BATCH_END_DATE, "2019");
-    templateMap.put(JsonKey.BATCH_NAME, "name");
-    templateMap.put(JsonKey.NAME, "firstName");
-    templateMap.put(JsonKey.SIGNATURE, "signature");
-    templateMap.put(JsonKey.COURSE_BATCH_URL, "url");
-    String sms = ProjectUtil.getSMSBody(templateMap);
-    assertNotNull(sms);
-  }
-
-  @Test
   public void testGetContextSuccessWithFromMail() {
 
     Map<String, Object> templateMap = new HashMap<>();
@@ -120,16 +103,6 @@ public class ProjectUtilTest extends BaseHttpTest {
           propertiesCache.getProperty(JsonKey.SUNBIRD_ENV_LOGO_URL),
           context.internalGet(JsonKey.ORG_IMAGE_URL));
     }
-  }
-
-  @Test
-  public void testValidatePhoneNumberFailureWithInvalidPhoneNumber() {
-    assertFalse(ProjectUtil.validatePhoneNumber("312"));
-  }
-
-  @Test
-  public void testValidatePhoneNumberSuccess() {
-    assertTrue(ProjectUtil.validatePhoneNumber("9844016699"));
   }
 
   @Test
@@ -236,13 +209,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testGetEkstepHeaderSuccess() {
-    Map<String, String> map = ProjectUtil.getEkstepHeader();
-    assertEquals(map.get("Content-Type"), "application/json");
-    assertNotNull(map.get(JsonKey.AUTHORIZATION));
-  }
-
-  @Test
   public void testReportTrackingStatusSuccess() {
     assertEquals(0, ProjectUtil.ReportTrackingStatus.NEW.getValue());
     assertEquals(1, ProjectUtil.ReportTrackingStatus.GENERATING_DATA.getValue());
@@ -329,12 +295,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testIsNull() {
-    Assert.assertTrue(ProjectUtil.isNull(null));
-    Assert.assertTrue(ProjectUtil.isNotNull("null"));
-  }
-
-  @Test
   public void testGetDateFormatter() {
     Assert.assertNotNull(ProjectUtil.getDateFormatter());
   }
@@ -344,26 +304,6 @@ public class ProjectUtilTest extends BaseHttpTest {
     Assert.assertTrue(ProjectUtil.isEmailvalid("xyz@xyz.com"));
     Assert.assertFalse(ProjectUtil.isEmailvalid("xy@z@xyz.com"));
     Assert.assertFalse(ProjectUtil.isEmailvalid(""));
-  }
-
-  @Test
-  public void testCreateAndThrowServerErrorSuccess() {
-    try {
-      ProjectUtil.createAndThrowServerError();
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.SERVER_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.SERVER_ERROR.getErrorCode(), e.getCode());
-    }
-  }
-
-  @Test
-  public void testCreateAndThrowInvalidUserDataExceptionSuccess() {
-    try {
-      ProjectUtil.createAndThrowInvalidUserDataException();
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidUsrData.getErrorCode(), e.getCode());
-    }
   }
 
   @Test

@@ -27,8 +27,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.role.UserRoleActor;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -41,12 +39,12 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.organisation.OrgService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.util.Util;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.util.Util;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 import scala.concurrent.duration.Duration;
@@ -55,7 +53,6 @@ import scala.concurrent.duration.Duration;
 @PrepareForTest({
   ServiceFactory.class,
   RoleDaoImpl.class,
-  BaseMWService.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   Util.class,
@@ -97,7 +94,6 @@ public class UserRoleActorTest {
   public void beforeEachTest() {
 
     PowerMockito.mockStatic(ServiceFactory.class);
-    PowerMockito.mockStatic(BaseMWService.class);
     PowerMockito.mockStatic(RoleDaoImpl.class);
     PowerMockito.mockStatic(Util.class);
     PowerMockito.mockStatic(UserOrgDaoImpl.class);
@@ -113,11 +109,8 @@ public class UserRoleActorTest {
         .thenReturn(getSuccessResponse());
     CompletionStage completionStage = Mockito.mock(CompletionStage.class);
     ActorSelection actorSelection = Mockito.mock(ActorSelection.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(actorSelection);
     when(actorSelection.resolveOneCS(Duration.create(Mockito.anyLong(), "seconds")))
         .thenReturn(completionStage);
-    SearchDTO searchDTO = Mockito.mock(SearchDTO.class);
-    when(Util.createSearchDto(Mockito.anyMap())).thenReturn(searchDTO);
 
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.getAllRecords(Mockito.anyString(), Mockito.anyString(), Mockito.any()))

@@ -1,5 +1,13 @@
 package org.sunbird.service.notification;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -20,25 +28,17 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class NotificationService {
 
   private static LoggerUtil logger = new LoggerUtil(NotificationService.class);
   private UserService userService = UserServiceImpl.getInstance();
   private OrgService orgService = OrgServiceImpl.getInstance();
 
-  public boolean processSMS(List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {
+  public boolean processSMS(
+      List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {
     validatePhoneOrEmail(phones, JsonKey.PHONE);
     Set<String> phoneList = getEmailOrPhoneListByUserIds(userIds, JsonKey.PHONE, requestContext);
-    //Merge All Phone
+    // Merge All Phone
     if (CollectionUtils.isNotEmpty(phones)) {
       phoneList.addAll(phones);
     }
@@ -48,73 +48,79 @@ public class NotificationService {
   }
 
   private void findMissingUserIds(
-    List<String> requestedUserIds, List<Map<String, Object>> userListInDB) {
+      List<String> requestedUserIds, List<Map<String, Object>> userListInDB) {
     // if requested userId list and cassandra user list size not same , means
     // requested userId
     // list
     // contains some invalid userId
     List<String> userIdFromDBList = new ArrayList<>();
-    userListInDB.forEach(
-      user -> userIdFromDBList.add((String) user.get(JsonKey.ID)));
+    userListInDB.forEach(user -> userIdFromDBList.add((String) user.get(JsonKey.ID)));
     requestedUserIds.forEach(
-      userId -> {
-        if (!userIdFromDBList.contains(userId)) {
-          ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-              ResponseCode.invalidParameterValue.getErrorMessage(),
-              userId,
-              JsonKey.RECIPIENT_USERIDS));
-        }
-      });
+        userId -> {
+          if (!userIdFromDBList.contains(userId)) {
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.invalidParameterValue,
+                MessageFormat.format(
+                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                    userId,
+                    JsonKey.RECIPIENT_USERIDS));
+          }
+        });
   }
 
   private void validateRecipientsLimit(Set<String> recipients) {
-    int maxLimit;
+    int maxLimit = 100;
     try {
-      maxLimit =
-        Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT));
+      if (StringUtils.isNotBlank(
+          ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT))) {
+        maxLimit =
+            Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_EMAIL_MAX_RECEPIENT_LIMIT));
+      }
     } catch (Exception exception) {
       logger.error(
-        "EmailServiceActor:validateEmailRecipientsLimit: Exception occurred with error message = "
-          + exception.getMessage(),
-        exception);
+          "NotificationService:validateEmailRecipientsLimit: Exception occurred with error message = "
+              + exception.getMessage(),
+          exception);
       maxLimit = 100;
     }
     if (recipients.size() > maxLimit) {
       ProjectCommonException.throwClientErrorException(
-        ResponseCode.emailNotSentRecipientsExceededMaxLimit,
-        MessageFormat.format(
-          ResponseCode.emailNotSentRecipientsExceededMaxLimit.getErrorMessage(), maxLimit));
+          ResponseCode.emailNotSentRecipientsExceededMaxLimit,
+          MessageFormat.format(
+              ResponseCode.emailNotSentRecipientsExceededMaxLimit.getErrorMessage(), maxLimit));
     }
   }
 
-  private boolean sendSMS(
-    List<String> phones, String smsText, RequestContext context) {
+  private boolean sendSMS(List<String> phones, String smsText, RequestContext context) {
     logger.info(
-      context, "NotificationService:sendSMS: Sending sendSMS to = " + phones.size() + " phones");
+        context, "NotificationService:sendSMS: Sending sendSMS to = " + phones.size() + " phones");
     try {
       ISmsProvider smsProvider = SMSFactory.getInstance();
       return smsProvider.send(phones, smsText, context);
     } catch (Exception e) {
       logger.error(
-        context,
-        "NotificationService:sendSMS: Exception occurred with message = " + e.getMessage(),
-        e);
+          context,
+          "NotificationService:sendSMS: Exception occurred with message = " + e.getMessage(),
+          e);
       return false;
     }
   }
 
-  public List<String> validateAndGetEmailList(List<String> userIds, List<String> emails, Map<String, Object> recipientSearchQuery, RequestContext requestContext) {
+  public List<String> validateAndGetEmailList(
+      List<String> userIds,
+      List<String> emails,
+      Map<String, Object> recipientSearchQuery,
+      RequestContext requestContext) {
     validatePhoneOrEmail(emails, JsonKey.EMAIL);
-    List<Map<String, Object>> searchQueryResult = getUserEmailsFromSearchQuery(recipientSearchQuery, requestContext);
+    List<Map<String, Object>> searchQueryResult =
+        getUserEmailsFromSearchQuery(recipientSearchQuery, requestContext);
     for (Map<String, Object> result : searchQueryResult) {
       if (StringUtils.isNotBlank((String) result.get(JsonKey.EMAIL))) {
         emails.add((String) result.get(JsonKey.EMAIL));
       }
     }
     Set<String> emailList = getEmailOrPhoneListByUserIds(userIds, JsonKey.EMAIL, requestContext);
-    //Merge All Phone
+    // Merge All Phone
     if (CollectionUtils.isNotEmpty(emails)) {
       emailList.addAll(emails);
     }
@@ -122,27 +128,32 @@ public class NotificationService {
     return new ArrayList<>(emailList);
   }
 
-  public void updateFirstNameAndOrgNameInEmailContext(List<String> userIds, List<String> emails, Map<String, Object> request, RequestContext requestContext) {
+  public void updateFirstNameAndOrgNameInEmailContext(
+      List<String> userIds,
+      List<String> emails,
+      Map<String, Object> request,
+      RequestContext requestContext) {
     if ((userIds.size() == 1) && (emails.size() == 1)) {
       User user = userService.getUserById(userIds.get(0), requestContext);
       if (StringUtils.isNotBlank((String) request.get(JsonKey.FIRST_NAME))) {
-        request.put(
-          JsonKey.NAME, StringUtils.capitalize((String) request.get(JsonKey.FIRST_NAME)));
+        request.put(JsonKey.NAME, StringUtils.capitalize((String) request.get(JsonKey.FIRST_NAME)));
       }
       // fetch orgName inorder to set in the Template context
-      String orgName =
-        getOrgName(
-          request, user.getRootOrgId(), requestContext);
+      String orgName = getOrgName(request, user.getRootOrgId(), requestContext);
       if (StringUtils.isNotBlank(orgName)) {
         request.put(JsonKey.ORG_NAME, orgName);
       }
       logger.info(
-        requestContext,
-        "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = " + emails + " emails");
+          requestContext,
+          "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = "
+              + emails
+              + " emails");
     } else {
       logger.info(
-        requestContext,
-        "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = " + emails.size() + " emails");
+          requestContext,
+          "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = "
+              + emails.size()
+              + " emails");
     }
   }
 
@@ -151,11 +162,11 @@ public class NotificationService {
     String template = emailTemplateDao.getTemplate(templateName, context);
     if (StringUtils.isBlank(template)) {
       ProjectCommonException.throwClientErrorException(
-        ResponseCode.invalidParameterValue,
-        MessageFormat.format(
-          ResponseCode.invalidParameterValue.getErrorMessage(),
-          templateName,
-          JsonKey.EMAIL_TEMPLATE_TYPE));
+          ResponseCode.invalidParameterValue,
+          MessageFormat.format(
+              ResponseCode.invalidParameterValue.getErrorMessage(),
+              templateName,
+              JsonKey.EMAIL_TEMPLATE_TYPE));
     }
     return template;
   }
@@ -169,16 +180,18 @@ public class NotificationService {
       Map<String, Object> org = orgService.getOrgById(rootOrgId, context);
       if (MapUtils.isNotEmpty(org)) {
         orgName =
-          (org.get(JsonKey.ORG_NAME) != null ? (String) org.get(JsonKey.ORGANISATION_NAME) : "");
+            (org.get(JsonKey.ORG_NAME) != null ? (String) org.get(JsonKey.ORGANISATION_NAME) : "");
       }
     }
     return orgName;
   }
 
-  public Set<String> getEmailOrPhoneListByUserIds(List<String> userIds, String type, RequestContext requestContext) {
+  public Set<String> getEmailOrPhoneListByUserIds(
+      List<String> userIds, String type, RequestContext requestContext) {
     Set<String> emailOrPhoneList = new HashSet<>();
     if (CollectionUtils.isNotEmpty(userIds)) {
-      List<Map<String, Object>> dbUserPhoneEmailList = userService.getDecryptedEmailPhoneByUserIds(userIds, type, requestContext);
+      List<Map<String, Object>> dbUserPhoneEmailList =
+          userService.getDecryptedEmailPhoneByUserIds(userIds, type, requestContext);
       if (userIds.size() != dbUserPhoneEmailList.size()) {
         findMissingUserIds(userIds, dbUserPhoneEmailList);
       }
@@ -192,15 +205,16 @@ public class NotificationService {
     return emailOrPhoneList;
   }
 
-  private List<Map<String, Object>> getUserEmailsFromSearchQuery(Map<String, Object> recipientSearchQuery, RequestContext context) {
+  private List<Map<String, Object>> getUserEmailsFromSearchQuery(
+      Map<String, Object> recipientSearchQuery, RequestContext context) {
     if (MapUtils.isNotEmpty(recipientSearchQuery)) {
       if (MapUtils.isEmpty((Map<String, Object>) recipientSearchQuery.get(JsonKey.FILTERS))) {
         ProjectCommonException.throwClientErrorException(
-          ResponseCode.invalidParameterValue,
-          MessageFormat.format(
-            ResponseCode.invalidParameterValue.getErrorMessage(),
-            recipientSearchQuery,
-            JsonKey.RECIPIENT_SEARCH_QUERY));
+            ResponseCode.invalidParameterValue,
+            MessageFormat.format(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                recipientSearchQuery,
+                JsonKey.RECIPIENT_SEARCH_QUERY));
       }
       List<String> fields = new ArrayList<>();
       fields.add(JsonKey.USER_ID);
@@ -216,27 +230,27 @@ public class NotificationService {
       for (String emailOrPhone : emailOrPhones) {
         if (JsonKey.EMAIL.equalsIgnoreCase(type) && !ProjectUtil.isEmailvalid(emailOrPhone)) {
           ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-              ResponseCode.invalidParameterValue.getErrorMessage(),
-              emailOrPhone,
-              JsonKey.RECIPIENT_EMAILS));
+              ResponseCode.invalidParameterValue,
+              MessageFormat.format(
+                  ResponseCode.invalidParameterValue.getErrorMessage(),
+                  emailOrPhone,
+                  JsonKey.RECIPIENT_EMAILS));
         }
 
         if (JsonKey.PHONE.equalsIgnoreCase(type) && !ProjectUtil.validatePhone(emailOrPhone, "")) {
           ProjectCommonException.throwClientErrorException(
-            ResponseCode.invalidParameterValue,
-            MessageFormat.format(
-              ResponseCode.invalidParameterValue.getErrorMessage(),
-              emailOrPhone,
-              JsonKey.RECIPIENT_PHONES));
+              ResponseCode.invalidParameterValue,
+              MessageFormat.format(
+                  ResponseCode.invalidParameterValue.getErrorMessage(),
+                  emailOrPhone,
+                  JsonKey.RECIPIENT_PHONES));
         }
       }
     }
   }
 
   public Map<String, Object> getV2NotificationRequest(
-    Set<String> phoneOrEmailList, Map<String, Object> requestMap, String mode, String template) {
+      Set<String> phoneOrEmailList, Map<String, Object> requestMap, String mode, String template) {
     Map<String, Object> notiReq = new HashMap<>();
     notiReq.put("deliveryType", "message");
     Map<String, Object> config = new HashMap<>(2);

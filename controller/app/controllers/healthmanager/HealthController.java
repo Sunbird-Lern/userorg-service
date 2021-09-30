@@ -1,6 +1,7 @@
 /** */
 package controllers.healthmanager;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
+import javax.inject.Named;
 import modules.SignalHandler;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -26,6 +28,10 @@ import util.Common;
 public class HealthController extends BaseController {
   private static List<String> list = new ArrayList<>();
   @Inject SignalHandler signalHandler;
+
+  @Inject
+  @Named("health_actor")
+  private ActorRef healthActor;
 
   static {
     list.add("service");
@@ -49,7 +55,7 @@ public class HealthController extends BaseController {
           .getRequest()
           .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
       reqObj.setEnv(getEnvironment());
-      return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+      return actorResponseHandler(healthActor, reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
       return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
     }
@@ -73,7 +79,7 @@ public class HealthController extends BaseController {
             .getRequest()
             .put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
         reqObj.setEnv(getEnvironment());
-        return actorResponseHandler(getActorRef(), reqObj, timeout, null, httpRequest);
+        return actorResponseHandler(healthActor, reqObj, timeout, null, httpRequest);
       } catch (Exception e) {
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }

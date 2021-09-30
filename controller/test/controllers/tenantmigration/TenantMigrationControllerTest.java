@@ -19,6 +19,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.HeaderParam;
 import play.mvc.Result;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
@@ -28,7 +29,7 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.TENANT_MIGRATION_ACTOR, DummyActor.class);
     headerMap = new HashMap<>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), Arrays.asList("Some consumer ID"));
     headerMap.put(HeaderParam.X_Device_ID.getName(), Arrays.asList("Some device ID"));
@@ -41,23 +42,6 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
   @After
   public void tearDown() throws Exception {
     headerMap.clear();
-  }
-
-  @Test
-  public void testMigrationUserSuccess() {
-    Result result =
-        TestUtil.performTest("/v1/user/migrate", "POST", getSuccessMigrationReq(), application);
-    assertEquals(
-        ResponseCode.success.getErrorCode().toLowerCase(), TestUtil.getResponseCode(result));
-  }
-
-  @Test
-  public void testMigrationUserFailure() {
-    Result result =
-        TestUtil.performTest(
-            "/v1/user/migrate", "POST", getFailureMigrationReq(JsonKey.CHANNEL), application);
-    assertEquals(
-        ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
   }
 
   @Test
@@ -76,18 +60,6 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
     reqMap.put(JsonKey.USER_ID, "userId");
     reqMap.put(JsonKey.USER_EXT_ID, "abc_ext_id");
     reqMap.put(JsonKey.CHANNEL, "TN");
-    request.put(JsonKey.REQUEST, reqMap);
-    return request;
-  }
-
-  private Map<String, Object> getFailureMigrationReq(String param) {
-    Map<String, Object> request = new HashMap<>();
-    Map<String, String> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ACTION, "accept");
-    reqMap.put(JsonKey.USER_ID, "userId");
-    reqMap.put(JsonKey.USER_EXT_ID, "abc_ext_id");
-    reqMap.put(JsonKey.CHANNEL, "TN");
-    reqMap.remove(param);
     request.put(JsonKey.REQUEST, reqMap);
     return request;
   }

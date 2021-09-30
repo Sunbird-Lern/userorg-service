@@ -23,8 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.RequestRouter;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
@@ -54,11 +52,9 @@ import org.sunbird.util.ProjectUtil;
   BulkUploadProcessDaoImpl.class,
   BulkUploadProcess.class,
   BulkUploadProcessTaskDaoImpl.class,
-  RequestRouter.class,
   BaseActor.class,
   ActorRef.class,
-  ActorSelection.class,
-  BaseMWService.class
+  ActorSelection.class
 })
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
@@ -86,7 +82,7 @@ public class UserBulkUploadBackgroundJobActorTest {
 
     encryptionService = PowerMockito.mock(EncryptionService.class);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance())
         .thenReturn(encryptionService);
     system = ActorSystem.create("system");
     PowerMockito.mockStatic(UserClientImpl.class);
@@ -100,8 +96,6 @@ public class UserBulkUploadBackgroundJobActorTest {
     when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
     userRequestValidator = new UserRequestValidator();
     ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
     when(systemSettingClient.getSystemSettingByFieldAndKey(
             Mockito.any(ActorRef.class),
             Mockito.anyString(),
@@ -138,8 +132,7 @@ public class UserBulkUploadBackgroundJobActorTest {
     bulkUploadProcess.setOrganisationId("someOrgId");
     when(bulkUploadProcessDao.read(nullable(String.class), Mockito.any()))
         .thenReturn(bulkUploadProcess);
-    when(bulkUploadProcessDao.update(Mockito.any(), Mockito.any()))
-        .thenReturn(new Response());
+    when(bulkUploadProcessDao.update(Mockito.any(), Mockito.any())).thenReturn(new Response());
     when(bulkUploadProcessTaskDao.readByPrimaryKeys(Mockito.anyMap(), Mockito.any()))
         .thenReturn(createBulkUploadProcessTasks());
     when(bulkUploadProcessTaskDao.updateBatchRecord(Mockito.anyList(), Mockito.any()))

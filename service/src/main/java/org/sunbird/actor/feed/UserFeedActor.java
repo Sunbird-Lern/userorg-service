@@ -1,13 +1,8 @@
 package org.sunbird.actor.feed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedStatus;
@@ -20,12 +15,6 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 
-/** This class contains API related to user feed. */
-@ActorConfig(
-  tasks = {"getUserFeedById", "createUserFeed", "updateUserFeed", "deleteUserFeed"},
-  asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class UserFeedActor extends BaseActor {
 
   IFeedService feedService = FeedFactory.getInstance();
@@ -52,7 +41,7 @@ public class UserFeedActor extends BaseActor {
         updateUserFeed(request, context);
         break;
       default:
-        onReceiveUnsupportedOperation("UserFeedActor");
+        onReceiveUnsupportedOperation();
     }
   }
 

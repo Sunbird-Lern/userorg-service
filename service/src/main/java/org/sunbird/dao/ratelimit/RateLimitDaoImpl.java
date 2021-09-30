@@ -9,10 +9,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.Util;
-import org.sunbird.util.ratelimit.RateLimit;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ratelimit.RateLimit;
 
 public class RateLimitDaoImpl implements RateLimitDao {
 
@@ -41,7 +40,7 @@ public class RateLimitDaoImpl implements RateLimitDao {
     List<Map<String, Object>> records =
         rateLimits.stream().map(rateLimit -> rateLimit.getRecord()).collect(Collectors.toList());
 
-    cassandraOperation.batchInsertWithTTL(Util.KEY_SPACE_NAME, TABLE_NAME, records, ttl, context);
+    cassandraOperation.batchInsertWithTTL(JsonKey.SUNBIRD, TABLE_NAME, records, ttl, context);
   }
 
   @Override
@@ -57,7 +56,7 @@ public class RateLimitDaoImpl implements RateLimitDao {
 
     Response response =
         cassandraOperation.getRecordsByIdsWithSpecifiedColumnsAndTTL(
-            Util.KEY_SPACE_NAME, TABLE_NAME, partitionKey, properties, ttlPropsWithAlias, context);
+            JsonKey.SUNBIRD, TABLE_NAME, partitionKey, properties, ttlPropsWithAlias, context);
 
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }

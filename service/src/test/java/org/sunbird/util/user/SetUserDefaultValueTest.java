@@ -20,15 +20,15 @@ import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.datasecurity.impl.DefaultEncryptionServivceImpl;
+import org.sunbird.datasecurity.impl.DefaultEncryptionServiceImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
-import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -37,7 +37,7 @@ import org.sunbird.response.Response;
   DataCacheHandler.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
-  DefaultEncryptionServivceImpl.class,
+  DefaultEncryptionServiceImpl.class,
   Util.class,
   EncryptionService.class,
   UserService.class,

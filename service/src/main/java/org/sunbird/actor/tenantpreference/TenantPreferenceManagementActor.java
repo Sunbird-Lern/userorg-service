@@ -1,7 +1,7 @@
 package org.sunbird.actor.tenantpreference;
 
+import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -9,16 +9,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.tenantpreference.TenantPreferenceService;
 
-import java.util.Map;
-
-@ActorConfig(
-  tasks = {
-    "createTanentPreference",
-    "updateTenantPreference",
-    "getTenantPreference",
-  },
-  asyncTasks = {}
-)
 public class TenantPreferenceManagementActor extends BaseActor {
 
   private TenantPreferenceService preferenceService = new TenantPreferenceService();
@@ -38,7 +28,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
         .equalsIgnoreCase(ActorOperations.GET_TENANT_PREFERENCE.getValue())) {
       getTenantPreference(request);
     } else {
-      onReceiveUnsupportedOperation(request.getOperation());
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -53,7 +43,8 @@ public class TenantPreferenceManagementActor extends BaseActor {
     logger.debug(
         context, "TenantPreferenceManagementActor:getTenantPreference called for org: " + orgId);
     String key = (String) actorMessage.getRequest().get(JsonKey.KEY);
-    Map<String, Object> orgPref = preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.GET, context);
+    Map<String, Object> orgPref =
+        preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.GET, context);
     Response finalResponse = new Response();
     finalResponse.getResult().put(JsonKey.RESPONSE, orgPref);
     sender().tell(finalResponse, self());
@@ -76,7 +67,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
             + key);
     Response finalResponse = new Response();
     preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.UPDATE, context);
-    Map<String,Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
+    Map<String, Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
     String updatedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
     preferenceService.updatePreference(orgId, key, data, updatedBy, context);
 
@@ -97,7 +88,7 @@ public class TenantPreferenceManagementActor extends BaseActor {
     logger.debug(
         context, "TenantPreferenceManagementActor:createTenantPreference called for org: " + orgId);
     preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.CREATE, context);
-    Map<String,Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
+    Map<String, Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
     String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
     preferenceService.createPreference(orgId, key, data, requestedBy, context);
 

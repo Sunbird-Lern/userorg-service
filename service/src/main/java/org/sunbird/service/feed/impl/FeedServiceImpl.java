@@ -50,6 +50,10 @@ public class FeedServiceImpl implements IFeedService {
   public Response update(Feed feed, RequestContext context) {
     logger.debug(context, "FeedServiceImpl:update method called : ");
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
+    String notification_service_base_url = System.getenv("notification_service_base_url");
+    String NOTIFICATION_SERVICE_URL =
+        notification_service_base_url + "/private/v1/notification/feed/update";
+    Response response = new Response();
     try {
       if (MapUtils.isNotEmpty(feed.getData())) {
         dbMap.put(JsonKey.FEED_DATA, mapper.writeValueAsString(feed.getData()));

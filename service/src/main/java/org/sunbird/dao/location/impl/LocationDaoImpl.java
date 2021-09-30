@@ -1,37 +1,33 @@
 package org.sunbird.dao.location.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.dao.location.LocationDao;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /** @author Amit Kumar */
 public class LocationDaoImpl implements LocationDao {
 
-  private static LoggerUtil logger = new LoggerUtil(LocationDaoImpl.class);
-
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String LOCATION_TABLE_NAME = "location";
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final String DEFAULT_SORT_BY = "ASC";
 
   @Override
@@ -82,10 +78,24 @@ public class LocationDaoImpl implements LocationDao {
   }
 
   @Override
+  public Response getLocationsByIds(
+      List<String> locationIds, List<String> locationFields, RequestContext context) {
+    return cassandraOperation.getPropertiesValueById(
+        KEYSPACE_NAME, LOCATION_TABLE_NAME, locationIds, locationFields, context);
+  }
+
+  @Override
   public Response getRecordByProperty(Map<String, Object> queryMap, RequestContext context) {
     Map<String, Object> searchQueryMap = new HashMap<>();
     searchQueryMap.put(JsonKey.FILTERS, queryMap);
     return search(searchQueryMap, context);
+  }
+
+  @Override
+  public String saveLocationToEs(String id, Map<String, Object> data, RequestContext context) {
+    String type = ProjectUtil.EsType.location.getTypeName();
+    Future<String> responseF = esUtil.save(type, id, data, context);
+    return (String) ElasticSearchHelper.getResponseFromFuture(responseF);
   }
 
   public SearchDTO addSortBy(SearchDTO searchDtO) {
@@ -95,7 +105,6 @@ public class LocationDaoImpl implements LocationDao {
         && ((Map<String, Object>) searchDtO.getAdditionalProperties().get(JsonKey.FILTERS))
             .containsKey(JsonKey.TYPE)) {
       if (MapUtils.isEmpty(searchDtO.getSortBy())) {
-        logger.info("search:addSortBy added sort type name attribute.");
         searchDtO.getSortBy().put(JsonKey.NAME, DEFAULT_SORT_BY);
       }
     }

@@ -24,10 +24,10 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.impl.UserLookUpServiceImpl;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.model.user.User;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.util.DataCacheHandler;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -57,7 +57,7 @@ public class UserLookupTest {
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
     encryptionService = PowerMockito.mock(EncryptionService.class);
     PowerMockito.mockStatic(org.sunbird.datasecurity.impl.ServiceFactory.class);
-    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance(null))
+    when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance())
         .thenReturn(encryptionService);
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);

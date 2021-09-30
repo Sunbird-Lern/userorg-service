@@ -25,6 +25,7 @@ import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 import util.RequestInterceptor;
 
 /** Created by arvind on 6/12/17. */
@@ -38,7 +39,7 @@ public class FileStorageControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.FILE_UPLOAD_SERVICE_ACTOR, DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(HeaderParam.X_Consumer_ID.getName(), new String[] {"Service test consumer"});
     headerMap.put(HeaderParam.X_Device_ID.getName(), new String[] {"Some Device Id"});

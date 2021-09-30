@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.helper.ServiceFactory;
@@ -25,7 +24,7 @@ public class UserUploadUtil {
   public static Util.DbInfo bulkUploadDbInfo = Util.dbInfoMap.get(JsonKey.BULK_OP_DB);
   public static ObjectMapper mapper = new ObjectMapper();
   public static DecryptionService decryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance(null);
+      org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
 
   public static Map<String, Object> getFullRecordFromProcessId(
       String processId, RequestContext context) {

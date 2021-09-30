@@ -1,12 +1,16 @@
 package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,16 +21,17 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Util.class, UserUtility.class})
+@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -37,13 +42,37 @@ import org.sunbird.response.Response;
 public class UserOrgManagementActorTest {
   Props props = Props.create(UserOrgManagementActor.class);
   ActorSystem system = ActorSystem.create("UserOrgManagementActor");
+  private static CassandraOperation cassandraOperationImpl = null;
 
   @Before
   public void beforeEachTest() throws Exception {
-    PowerMockito.mockStatic(UserUtility.class);
-    PowerMockito.mockStatic(Util.class);
-    PowerMockito.doNothing().when(Util.class, "registerUserToOrg", Mockito.anyMap(), Mockito.any());
-    PowerMockito.doNothing().when(Util.class, "upsertUserOrgData", Mockito.anyMap(), Mockito.any());
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Response response = new Response();
+    when(cassandraOperationImpl.updateRecord(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.anyMap(),
+            Mockito.any()))
+        .thenReturn(response);
+
+    List<Map<String, Object>> userOrgMapList = new ArrayList<>();
+    Map<String, Object> userOrgMap = new HashMap<String, Object>();
+    userOrgMap.put(JsonKey.USER_ID, "userId");
+    userOrgMap.put(JsonKey.ORGANISATION_ID, "orgId");
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMapList.add(userOrgMap);
+    Response userOrgResponse = new Response();
+    userOrgResponse.put(JsonKey.RESPONSE, userOrgMapList);
+
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userOrgResponse);
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(userOrgResponse);
   }
 
   @Test

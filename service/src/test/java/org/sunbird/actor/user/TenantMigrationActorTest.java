@@ -6,78 +6,55 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+import java.util.*;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.service.BaseMWService;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.Constants;
-import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.user.UserLookupDao;
+import org.sunbird.dao.user.UserOrgDao;
+import org.sunbird.dao.user.impl.UserLookupDaoImpl;
+import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.ShadowUser;
-import org.sunbird.model.user.Feed;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.feed.FeedFactory;
-import org.sunbird.service.feed.IFeedService;
-import org.sunbird.service.feed.impl.FeedServiceImpl;
-import org.sunbird.service.organisation.OrgExternalService;
-import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
-import org.sunbird.service.organisation.OrgService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.feed.FeedUtil;
-import org.sunbird.util.user.MigrationUtils;
+import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
-  EsClientFactory.class,
   CassandraOperationImpl.class,
-  ElasticSearchService.class,
-  MigrationUtils.class,
   SystemSettingClientImpl.class,
-  IFeedService.class,
-  FeedServiceImpl.class,
-  FeedFactory.class,
-  ShadowUser.class,
-  FeedUtil.class,
-  UserServiceImpl.class,
-  UserService.class,
-  OrgServiceImpl.class,
-  ActorSelection.class,
-  BaseMWService.class,
-  OrgService.class
+  DataCacheHandler.class,
+  UserLookupDao.class,
+  UserLookupDaoImpl.class,
+  EsClientFactory.class,
+  ElasticSearchRestHighImpl.class,
+  UserOrgDao.class,
+  UserOrgDaoImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -90,39 +67,23 @@ public class TenantMigrationActorTest {
   Props props = Props.create(TenantMigrationActor.class);
   ActorSystem system = ActorSystem.create("system");
 
-  private ElasticSearchService esUtil;
-  private CassandraOperation cassandraOperation = null;
+  private static CassandraOperation cassandraOperation = null;
+  private static ElasticSearchService esService;
   private static Response response;
-  private static IFeedService feedService;
-  @Mock private OrgExternalServiceImpl externalClass;
 
   @Before
-  public void beforeEachTest() {
-    PowerMockito.mockStatic(FeedUtil.class);
-    PowerMockito.mockStatic(UserService.class);
-    PowerMockito.mockStatic(UserServiceImpl.class);
-    PowerMockito.mockStatic(OrgServiceImpl.class);
-    PowerMockito.mockStatic(OrgService.class);
-
-    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
-
-    PowerMockito.mockStatic(FeedServiceImpl.class);
-    PowerMockito.mockStatic(FeedFactory.class);
-    feedService = mock(FeedServiceImpl.class);
-    when(FeedFactory.getInstance()).thenReturn(feedService);
-    when(feedService.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getFeedList(true))
-        .thenReturn(getFeedList(false));
-
+  public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(ServiceFactory.class);
+    PowerMockito.mockStatic(UserLookupDaoImpl.class);
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(ElasticSearchHelper.class);
-    esUtil = mock(ElasticSearchService.class);
-    esUtil = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
-
+    esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(getListOrgResponse());
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(promise.future());
+    UserLookupDao userLookupDao = PowerMockito.mock(UserLookupDao.class);
+    PowerMockito.when(UserLookupDaoImpl.getInstance()).thenReturn(userLookupDao);
     cassandraOperation = mock(CassandraOperationImpl.class);
     response = new Response();
     Map<String, Object> responseMap = new HashMap<>();
@@ -153,44 +114,61 @@ public class TenantMigrationActorTest {
             Mockito.anyObject(),
             Mockito.any()))
         .thenReturn(new HashMap<>());
-    PowerMockito.mockStatic(MigrationUtils.class);
-    when(MigrationUtils.markUserAsRejected(
-            Mockito.any(ShadowUser.class), Mockito.any(RequestContext.class)))
-        .thenReturn(true);
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    when(cassandraOperation.insertRecord(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    PowerMockito.when(
+            userLookupDao.insertExternalIdIntoUserLookup(
+                Mockito.anyList(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
+    List<Map<String, Object>> listMap = new ArrayList<>();
+    Map<String, Object> orgs = new HashMap<>();
+    orgs.put(JsonKey.USER_ID, "anyUserId");
+    orgs.put(JsonKey.ORGANISATION_ID, "anyRootOrgId");
+    listMap.add(orgs);
+    Map<String, Object> userDetails = new HashMap<>();
+    userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
+    userDetails.put(JsonKey.ORGANISATIONS, listMap);
+    Response response1 = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    list.add(userDetails);
+    response1.getResult().put(JsonKey.RESPONSE, list);
+    PowerMockito.when(
+            cassandraOperation.getRecordById(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response1);
+    PowerMockito.when(
+            cassandraOperation.getRecordById(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getSelfDeclarationResponse());
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    Response updateResponse = new Response();
+    updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
+    PowerMockito.when(
+            cassandraOperation.updateRecord(
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(updateResponse);
+    when(cassandraOperation.getRecordsByCompositeKey(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getOrgFromCassandra());
   }
 
-  @Test
-  public void testUserMigrateRejectWhenUserFound() {
-    when(MigrationUtils.getEligibleUsersById("anyUserId", null))
-        .thenReturn(getShadowUserAsList(StringUtils.EMPTY, 1));
-    boolean result =
-        testScenario(
-            getMigrateReq(ActorOperations.MIGRATE_USER, JsonKey.REJECT), null, ResponseCode.OK);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUserMigrateRejectWhenUserNotFound() {
-    List<ShadowUser> shadowUserList = new ArrayList<>();
-    when(MigrationUtils.getEligibleUsersById("WrongUserId", null)).thenReturn(shadowUserList);
-    boolean result =
-        testScenario(
-            getFailureMigrateReq(ActorOperations.MIGRATE_USER, JsonKey.REJECT),
-            ResponseCode.invalidUserId,
-            null);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testUserMigrationAcceptWhenUserNotFound() {
-    List<ShadowUser> shadowUserList = new ArrayList<>();
-    when(MigrationUtils.getEligibleUsersById("WrongUserId", null)).thenReturn(shadowUserList);
-    boolean result =
-        testScenario(
-            getFailureMigrateReq(ActorOperations.MIGRATE_USER, JsonKey.ACCEPT),
-            ResponseCode.invalidUserId,
-            null);
-    assertTrue(result);
+  public static Map<String, Object> getListOrgResponse() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.ID, "anyRootOrgId");
+    map.put(JsonKey.HASHTAGID, "anyRootOrgId");
+    map.put(JsonKey.STATUS, 1);
+    map.put(JsonKey.CHANNEL, "anyProvider");
+    Map<String, Object> response = new HashMap<>();
+    List<Map<String, Object>> content = new ArrayList<>();
+    content.add(map);
+    response.put(JsonKey.CONTENT, content);
+    return response;
   }
 
   public Request getFailureMigrateReq(ActorOperations actorOperation, String action) {
@@ -203,53 +181,23 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
-    System.out.println(reqMap);
     return reqObj;
   }
 
-  /** AC->ATTEMPT COUNT, e.g AC1-> Attempt Count 1 */
-  @Test
-  public void testUserMigrationAcceptWhenUserFoundWithInCorrectExtIdAC1() {
-    Map<String, Object> propsMap = new HashMap<>();
-    propsMap.put(JsonKey.CHANNEL, "anyChannel");
-    when(MigrationUtils.getEligibleUsersById("anyUserId", propsMap, null))
-        .thenReturn(getShadowUserAsList("wrongUserExtId", 1));
-    boolean result =
-        testScenario(
-            getMigrateReq(ActorOperations.MIGRATE_USER, JsonKey.ACCEPT),
-            null,
-            ResponseCode.invalidUserExternalId);
-    assertTrue(result);
-  }
+  public boolean testScenario(Request reqObj, ResponseCode errorCode, Props props) {
 
-  @Test
-  public void testUserMigrationAcceptWhenUserFoundWithInCorrectExtIdAC2() {
-    when(MigrationUtils.getEligibleUsersById(Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getShadowUserAsList("wrongUserExtId", 2));
-    boolean result =
-        testScenario(
-            getMigrateReq(ActorOperations.MIGRATE_USER, JsonKey.ACCEPT),
-            ResponseCode.userMigrationFiled,
-            null);
-    assertTrue(result);
-  }
-
-  public boolean testScenario(Request reqObj, ResponseCode errorCode, ResponseCode responseCode) {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
-
-    if (responseCode != null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
-      return null != res && res.getResponseCode() == responseCode;
-    }
-    if (errorCode != null) {
+    if (errorCode == null) {
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      return null != res && res.getResponseCode() == ResponseCode.OK;
+    } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
-    return true;
   }
 
   public Request getMigrateReq(ActorOperations actorOperation, String action) {
@@ -262,29 +210,10 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
-    System.out.println(reqMap);
     return reqObj;
   }
 
-  private List<ShadowUser> getShadowUserAsList(String userExtId, int attemptCount) {
-    List<ShadowUser> shadowUserList = new ArrayList<>();
-    shadowUserList.add(getShadowUser(userExtId, attemptCount));
-    return shadowUserList;
-  }
-
-  private ShadowUser getShadowUser(String userExtId, int attemptCount) {
-    ShadowUser shadowUser =
-        new ShadowUser.ShadowUserBuilder()
-            .setChannel("anyChannel")
-            .setUserExtId(StringUtils.isNotEmpty(userExtId) ? userExtId : "anyUserExtId")
-            .setUserId("anyUserId")
-            .setAttemptedCount(attemptCount - 1)
-            .setUserStatus(ProjectUtil.Status.ACTIVE.getValue())
-            .build();
-    return shadowUser;
-  }
-
-  private Map<String, Object> getFeedMap() {
+  private static Map<String, Object> getFeedMap() {
     Map<String, Object> fMap = new HashMap<>();
     fMap.put(JsonKey.ID, "123-456-7890");
     fMap.put(JsonKey.USER_ID, "123-456-789");
@@ -292,104 +221,30 @@ public class TenantMigrationActorTest {
     return fMap;
   }
 
-  private List<Feed> getFeedList(boolean needId) {
-    Feed feed = new Feed();
-    feed.setUserId("123-456-7890");
-    feed.setCategory("category");
-    if (needId) {
-      feed.setId("123-456-789");
-    }
-    Map<String, Object> map = new HashMap<>();
-    List<String> channelList = new ArrayList<>();
-    channelList.add("SI");
-    map.put(JsonKey.PROSPECT_CHANNELS, channelList);
-    feed.setData(map);
-    List<Feed> feedList = new ArrayList<>();
-    feedList.add(feed);
-    return feedList;
-  }
-
-  @Test
-  public void testUserSelfDeclarationMigrationWhenRecordNotFoundInUserDeclarations() {
-    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
-    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.when(
-            cassandraOperation.getRecordById(
-                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(new Response());
-    boolean result =
-        testScenario(
-            getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
-            ResponseCode.declaredUserValidatedStatusNotUpdated,
-            null);
-    assertTrue(result);
-  }
-
   @Test
   public void testUserSelfDeclarationMigrationWithValidatedStatus() {
-    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
-    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.when(
-            cassandraOperation.getRecordById(
-                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSelfDeclarationResponse());
-    Response updateResponse = new Response();
-    updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
-    PowerMockito.when(
-            cassandraOperation.updateRecord(
-                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(updateResponse);
-    when(cassandraOperation.getRecordsByCompositeKey(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyMap(),
-            Mockito.any(RequestContext.class)))
-        .thenReturn(getOrgFromCassandra());
-
-    List<Map<String, Object>> listMap = new ArrayList<>();
-    listMap.add(new HashMap<String, Object>());
-    Map<String, Object> userDetails = new HashMap<>();
-    userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
-    userDetails.put(JsonKey.ORGANISATIONS, listMap);
-    UserService userService = mock(UserServiceImpl.class);
-    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.esGetPublicUserProfileById(Mockito.anyString(), Mockito.anyObject()))
-        .thenReturn(userDetails);
-    when(userService.getCustodianOrgId(Mockito.anyObject(), Mockito.anyObject()))
-        .thenReturn("anyRootOrgId");
-
-    try {
-      OrgExternalServiceImpl orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);
-      PowerMockito.whenNew(OrgExternalServiceImpl.class)
-          .withAnyArguments()
-          .thenReturn(orgExternalService);
-      when(orgExternalService.getOrgIdFromOrgExternalIdAndProvider(
-              Mockito.anyString(), Mockito.anyString(), Mockito.anyObject()))
-          .thenReturn("anyRootOrgId");
-    } catch (Exception e) {
-
-    }
-    OrgService orgService = mock(OrgServiceImpl.class);
-    PowerMockito.when(OrgServiceImpl.getInstance()).thenReturn(orgService);
-    when(orgService.getOrgById(Mockito.anyString(), Mockito.any(RequestContext.class)))
-        .thenReturn(getOrgandLocation());
-
-    /* when(userService.getRootOrgIdFromChannel( Mockito.anyObject(), Mockito.anyObject())).thenReturn("anyRootOrgId");
-
-    PowerMockito.when(
-            cassandraOperation.updateRecord(
-                    Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
-            .thenReturn(getSuccessUpdateResponse());
-    doNothing()
-            .when(cassandraOperation)
-            .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());*/
-
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    Map<String, String> dataCache = new HashMap<>();
+    dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
     boolean result =
         testScenario(
             getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
             ResponseCode.errorUserMigrationFailed,
-            null);
+            props);
     assertTrue(result);
+  }
+
+  @Test
+  public void testWithInvalidRequest() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request request = new Request();
+    request.setOperation("invalidOperation");
+    subject.tell(request, probe.getRef());
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertNotNull(exception);
   }
 
   public Map<String, Object> getOrgandLocation() {
@@ -399,25 +254,19 @@ public class TenantMigrationActorTest {
     return map;
   }
 
-  public Response getOrgFromCassandra() {
+  public static Response getOrgFromCassandra() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ORG_ID, "anyOrgId");
+    map.put(JsonKey.ORG_ID, "anyRootOrgId");
     map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
     list.add(map);
     response.put(Constants.RESPONSE, list);
     return response;
   }
 
-  @Test
+  // @Test
   public void testUserSelfDeclarationMigrationWithValidatedStatuswithError() {
-    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
-    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-    PowerMockito.when(
-            cassandraOperation.getRecordById(
-                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSelfDeclarationResponse());
     Response updateResponse = new Response();
     updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
     PowerMockito.when(
@@ -425,21 +274,17 @@ public class TenantMigrationActorTest {
                 Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(updateResponse);
     List<Map<String, Object>> listMap = new ArrayList<>();
-    listMap.add(new HashMap<String, Object>());
+    listMap.add(new HashMap<>());
     Map<String, Object> userDetails = new HashMap<>();
     userDetails.put(JsonKey.ROOT_ORG_ID, "");
     userDetails.put(JsonKey.ORGANISATIONS, listMap);
-    UserService userService = mock(UserServiceImpl.class);
-    PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
-    when(userService.esGetPublicUserProfileById(Mockito.anyString(), Mockito.anyObject()))
-        .thenReturn(userDetails);
 
     boolean result =
         testScenario(
             getSelfDeclaredMigrateReq(ActorOperations.USER_SELF_DECLARED_TENANT_MIGRATE),
             ResponseCode.parameterMismatch,
-            null);
-    assertTrue(result);
+            props);
+    assert (result);
   }
 
   public Request getSelfDeclaredMigrateReq(ActorOperations actorOperation) {
@@ -456,14 +301,14 @@ public class TenantMigrationActorTest {
     externalIdLst.add(externalIdMap);
     requestMap.put(JsonKey.EXTERNAL_IDS, externalIdLst);
     requestMap.put(JsonKey.ORG_EXTERNAL_ID, "anyOrgId");
+    requestMap.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
     reqObj.setRequest(requestMap);
     reqObj.setOperation(actorOperation.getValue());
     return reqObj;
   }
 
-  private Response getSelfDeclarationResponse() {
+  private static Response getSelfDeclarationResponse() {
     Response response = new Response();
-    Map<String, Object> fMap = new HashMap<>();
 
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(JsonKey.ORG_ID, "anyOrgID");
@@ -471,14 +316,5 @@ public class TenantMigrationActorTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(responseMap));
     response.getResult().putAll(responseMap);
     return response;
-  }
-
-  private Response getSuccessUpdateResponse() {
-    Response upsertResponse = new Response();
-    Map<String, Object> responseMap2 = new HashMap<>();
-    responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
-    upsertResponse.getResult().putAll(responseMap2);
-
-    return upsertResponse;
   }
 }

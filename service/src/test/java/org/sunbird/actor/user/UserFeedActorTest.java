@@ -88,6 +88,7 @@ public class UserFeedActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
+
     reqObj.setOperation(ActorOperations.GET_USER_FEED_BY_ID.getValue());
     reqObj.put(JsonKey.USER_ID, "123-456-789");
     subject.tell(reqObj, probe.getRef());
@@ -137,7 +138,6 @@ public class UserFeedActorTest {
   }
 
   public boolean testScenario(Request reqObj, ResponseCode errorCode) {
-
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());

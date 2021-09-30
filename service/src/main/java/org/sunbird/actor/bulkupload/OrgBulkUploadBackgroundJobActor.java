@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.client.location.LocationClient;
 import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.client.org.OrganisationClient;
@@ -25,23 +26,28 @@ import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.ActorOperations;
-import org.sunbird.operations.LocationActorOperation;
-import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 
-@ActorConfig(
-  tasks = {},
-  asyncTasks = {"orgBulkUploadBackground"}
-)
 public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private OrganisationClient orgClient = new OrganisationClientImpl();
   private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
+
+  @Inject
+  @Named("system_settings_actor")
+  private ActorRef systemSettingsActor;
+
+  @Inject
+  @Named("location_actor")
+  private ActorRef locationActor;
+
+  @Inject
+  @Named("org_management_actor")
+  private ActorRef organisationManagementActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -61,7 +67,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
             return null;
           });
     } else {
-      onReceiveUnsupportedOperation("OrgBulkUploadBackgroundJobActor");
+      onReceiveUnsupportedOperation();
     }
   }
 
@@ -69,7 +75,6 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       List<BulkUploadProcessTask> bulkUploadProcessTasks, RequestContext context) {
     Map<String, Location> locationCache = new HashMap<>();
     LocationClient locationClient = new LocationClientImpl();
-    ActorRef locationActor = getActorRef(LocationActorOperation.SEARCH_LOCATION.getValue());
     for (BulkUploadProcessTask task : bulkUploadProcessTasks) {
       if (task.getStatus() != null
           && task.getStatus() != ProjectUtil.BulkProcessStatus.COMPLETED.getValue()) {
@@ -93,7 +98,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       Map<String, Object> orgMap = mapper.readValue(data, Map.class);
       Object mandatoryColumnsObject =
           systemSettingClient.getSystemSettingByFieldAndKey(
-              getActorRef(ActorOperations.GET_SYSTEM_SETTING.getValue()),
+              systemSettingsActor,
               "orgProfileConfig",
               "csv.mandatoryColumns",
               new TypeReference<String[]>() {},
@@ -199,7 +204,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     String orgId;
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
-      orgId = orgClient.createOrg(getActorRef(OrganisationActorOperation.CREATE_ORG.getValue()), row, context);
+      orgId = orgClient.createOrg(organisationManagementActor, row, context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -237,7 +242,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
-      orgClient.updateOrg(getActorRef(OrganisationActorOperation.UPDATE_ORG.getValue()), row, context);
+      orgClient.updateOrg(organisationManagementActor, row, context);
     } catch (Exception ex) {
       logger.error(
           context,

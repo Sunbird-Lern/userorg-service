@@ -1,6 +1,5 @@
 package org.sunbird.notification.sms.providerimpl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +33,8 @@ public class NICGatewaySmsProvider implements ISmsProvider {
   }
 
   @Override
-  public boolean send(String phoneNumber, String countryCode, String smsText, RequestContext context) {
+  public boolean send(
+      String phoneNumber, String countryCode, String smsText, RequestContext context) {
     return sendSms(phoneNumber, smsText, context);
   }
 
@@ -58,9 +58,10 @@ public class NICGatewaySmsProvider implements ISmsProvider {
       }
       String messageBody = smsText;
       // add dlt template
-      String dltTemplateId = getTemplateId(smsText);
-      // URL encode message body
-      messageBody = URLEncoder.encode(messageBody, Consts.UTF_8);
+      String dltTemplateId = getTemplateId(smsText, NIC_PROVIDER);
+      if (StringUtils.isBlank(dltTemplateId)) {
+        logger.info(context, "dlt template id is empty for sms : " + smsText);
+      }
       // Construct URL
       StringBuffer URI = new StringBuffer(baseUrl);
       URI.append("?username=" + URLEncoder.encode(userName, Consts.UTF_8));
@@ -77,16 +78,13 @@ public class NICGatewaySmsProvider implements ISmsProvider {
       headers.put("Accept", "application/json");
       String response = HttpClientUtil.get(URI.toString(), headers, context);
       if (StringUtils.isNotBlank(response)) {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> resultMap;
-        resultMap = mapper.readValue(response, Map.class);
-        logger.info(context,"NICGatewaySmsProvider:Result:" + resultMap);
+        logger.info(context, "NICGatewaySmsProvider:Result:" + response);
         return true;
       } else {
         return false;
       }
     } catch (Exception ex) {
-      logger.error(context,"Exception occurred while sending sms.", ex);
+      logger.error(context, "Exception occurred while sending sms.", ex);
       return false;
     }
   }

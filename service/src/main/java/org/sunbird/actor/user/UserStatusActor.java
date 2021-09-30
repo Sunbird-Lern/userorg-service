@@ -1,6 +1,7 @@
 package org.sunbird.actor.user;
 
-import org.sunbird.actor.router.ActorConfig;
+import java.text.MessageFormat;
+import java.util.Map;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
@@ -10,13 +11,6 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.Util;
 
-import java.text.MessageFormat;
-import java.util.Map;
-
-@ActorConfig(
-  tasks = {"unblockUser", "blockUser"},
-  asyncTasks = {}
-)
 public class UserStatusActor extends UserBaseActor {
 
   private UserStatusService userStatusService = new UserStatusService();
@@ -36,7 +30,7 @@ public class UserStatusActor extends UserBaseActor {
         break;
 
       default:
-        onReceiveUnsupportedOperation("UserStatusActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -45,17 +39,16 @@ public class UserStatusActor extends UserBaseActor {
     String operation = request.getOperation();
     String requestedBy = (String) request.getContext().get(JsonKey.REQUESTED_BY);
     Map<String, Object> userMap = userStatusService.getUserMap(userId, requestedBy, blockUser);
-    Response response = userStatusService.updateUserStatus(userMap, operation, request.getRequestContext());
+    Response response =
+        userStatusService.updateUserStatus(userMap, operation, request.getRequestContext());
     sender().tell(response, self());
 
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       String logMsgPrefix =
-        MessageFormat.format("UserStatusActor:updateUserStatus:{0}:{1}: ", operation, userId);
+          MessageFormat.format("UserStatusActor:updateUserStatus:{0}:{1}: ", operation, userId);
       logger.info(request.getRequestContext(), logMsgPrefix + "Update user data to ES.");
       userService.updateUserDataToES(userId, userMap, request.getRequestContext());
     }
     generateTelemetryEvent(request.getRequest(), userId, operation, request.getContext());
   }
-
-
 }

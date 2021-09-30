@@ -25,6 +25,7 @@ import play.libs.Json;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 import util.RequestInterceptor;
 
 /** @author arvind on 19/4/18. */
@@ -46,7 +47,7 @@ public class LocationControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.LOCATION_ACTOR, DummyActor.class);
     headerMap = new HashMap<String, String[]>();
     headerMap.put(
         HeaderParam.X_Authenticated_User_Token.getName(),

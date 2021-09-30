@@ -1,11 +1,14 @@
 package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.common.Constants;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
@@ -15,17 +18,6 @@ import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@ActorConfig(
-  tasks = {"freeUpUserIdentity"},
-  asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
-)
 
 /**
  * this Actor class is being used to free Up used User Identifier for now it only free Up user

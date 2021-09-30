@@ -28,7 +28,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
 
   static {
     try {
-      sunbird_encryption = DefaultEncryptionServivceImpl.getSalt();
+      sunbird_encryption = DefaultEncryptionServiceImpl.getSalt();
       Key key = generateKey();
       c = Cipher.getInstance(ALGORITHM);
       c.init(Cipher.DECRYPT_MODE, key);

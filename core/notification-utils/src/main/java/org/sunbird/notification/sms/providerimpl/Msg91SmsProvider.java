@@ -1,5 +1,12 @@
 package org.sunbird.notification.sms.providerimpl;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -15,13 +22,6 @@ import org.sunbird.notification.utils.JsonUtil;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.request.RequestContext;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 public class Msg91SmsProvider implements ISmsProvider {
   private static LoggerUtil logger = new LoggerUtil(Msg91SmsProvider.class);
 
@@ -35,8 +35,8 @@ public class Msg91SmsProvider implements ISmsProvider {
   private static String country = null;
 
   static {
-    boolean resposne = init();
-    logger.info("SMS configuration values are set ==" + resposne);
+    boolean response = init();
+    logger.info("SMS configuration values are set ==" + response);
   }
 
   /** this method will do the SMS properties initialization. */
@@ -69,7 +69,8 @@ public class Msg91SmsProvider implements ISmsProvider {
   }
 
   @Override
-  public boolean send(String phoneNumber, String countryCode, String smsText, RequestContext context) {
+  public boolean send(
+      String phoneNumber, String countryCode, String smsText, RequestContext context) {
     if ("POST".equalsIgnoreCase(smsMethodType)) {
       return sendSmsUsingPost(phoneNumber, smsText, context);
     }
@@ -84,8 +85,10 @@ public class Msg91SmsProvider implements ISmsProvider {
    * @return boolean
    */
   private boolean sendSmsUsingPost(String mobileNumber, String smsText, RequestContext context) {
-    logger.debug(context,"Msg91SmsProvider@Sending " + smsText + "  to mobileNumber " + mobileNumber);
-    logger.debug(context,
+    logger.debug(
+        context, "Msg91SmsProvider@Sending " + smsText + "  to mobileNumber " + mobileNumber);
+    logger.debug(
+        context,
         "Msg91SmsProvider@SMS Provider parameters \n"
             + "Gateway - "
             + baseUrl
@@ -115,9 +118,13 @@ public class Msg91SmsProvider implements ISmsProvider {
       if (validateSettings(mobileNumber, smsText)) {
         String tempMobileNumber = removePlusFromMobileNumber(mobileNumber);
 
-        logger.debug(context, "Msg91SmsProvider - after removePlusFromMobileNumber " + tempMobileNumber);
+        logger.debug(
+            context, "Msg91SmsProvider - after removePlusFromMobileNumber " + tempMobileNumber);
         // add dlt template id header
-        String templateId = getTemplateId(smsText);
+        String templateId = getTemplateId(smsText, MSG_91_PROVIDER);
+        if (StringUtils.isBlank(templateId)) {
+          logger.info(context, "dlt template id is empty for sms : " + smsText);
+        }
         path = baseUrl + postUrl;
         logger.debug(context, "Msg91SmsProvider -Executing request - " + path);
 
@@ -142,8 +149,8 @@ public class Msg91SmsProvider implements ISmsProvider {
         // create body
         ProviderDetails providerDetails =
             new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
-        String providerDetailsString = JsonUtil.toJson(providerDetails);
-        providerDetailsString = providerDetailsString.replaceAll("dlt_TE_ID","DLT_TE_ID");
+        String providerDetailsString = JsonUtil.toJson(providerDetails, context);
+        providerDetailsString = providerDetailsString.replaceAll("dlt_TE_ID", "DLT_TE_ID");
 
         if (!JsonUtil.isStringNullOREmpty(providerDetailsString)) {
           logger.debug(context, "Msg91SmsProvider - Body - " + providerDetailsString);
@@ -156,7 +163,8 @@ public class Msg91SmsProvider implements ISmsProvider {
           StatusLine sl = response.getStatusLine();
           response.close();
           if (sl.getStatusCode() != 200) {
-            logger.info(context,
+            logger.info(
+                context,
                 "SMS code for "
                     + tempMobileNumber
                     + " could not be sent: "
@@ -164,7 +172,7 @@ public class Msg91SmsProvider implements ISmsProvider {
                     + " - "
                     + sl.getReasonPhrase());
           }
-          logger.info(context, "Status code for Msg91SmsProvider : "+sl.getStatusCode());
+          logger.info(context, "Status code for Msg91SmsProvider : " + sl.getStatusCode());
           return sl.getStatusCode() == 200;
         } else {
           return false;
@@ -200,7 +208,8 @@ public class Msg91SmsProvider implements ISmsProvider {
 
         String tempMobileNumber = removePlusFromMobileNumber(mobileNumber);
 
-        logger.debug(context, "Msg91SmsProvider - after removePlusFromMobileNumber " + tempMobileNumber);
+        logger.debug(
+            context, "Msg91SmsProvider - after removePlusFromMobileNumber " + tempMobileNumber);
 
         path =
             getCompletePath(
@@ -227,7 +236,7 @@ public class Msg91SmsProvider implements ISmsProvider {
                   + " - "
                   + sl.getReasonPhrase());
         }
-        logger.info(context, "Status code for Msg91SmsProvider : "+sl.getStatusCode());
+        logger.info(context, "Status code for Msg91SmsProvider : " + sl.getStatusCode());
         return sl.getStatusCode() == 200;
 
       } else {
@@ -331,7 +340,8 @@ public class Msg91SmsProvider implements ISmsProvider {
   public boolean send(List<String> phoneNumber, String smsText, RequestContext context) {
     List<String> phoneNumberList = null;
     logger.debug(context, "Msg91SmsProvider@Sending " + smsText + "  to mobileNumber ");
-    logger.debug(context,
+    logger.debug(
+        context,
         "Msg91SmsProvider@SMS Provider parameters \n"
             + "Gateway - "
             + baseUrl
@@ -366,7 +376,10 @@ public class Msg91SmsProvider implements ISmsProvider {
 
       String path = null;
       // add dlt template id header
-      String templateId = getTemplateId(smsText);
+      String templateId = getTemplateId(smsText, MSG_91_PROVIDER);
+      if (StringUtils.isBlank(templateId)) {
+        logger.info(context, "dlt template id is empty for sms : " + smsText);
+      }
       path = baseUrl + postUrl;
       logger.debug(context, "Msg91SmsProvider -Executing request - " + path);
       HttpPost httpPost = new HttpPost(path);
@@ -384,9 +397,10 @@ public class Msg91SmsProvider implements ISmsProvider {
       smsList.add(sms);
 
       // create body
-      ProviderDetails providerDetails = new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
-      String providerDetailsString = JsonUtil.toJson(providerDetails);
-      providerDetailsString = providerDetailsString.replaceAll("dlt_TE_ID","DLT_TE_ID");
+      ProviderDetails providerDetails =
+          new ProviderDetails(sender, smsRoute, country, 1, smsList, templateId);
+      String providerDetailsString = JsonUtil.toJson(providerDetails, context);
+      providerDetailsString = providerDetailsString.replaceAll("dlt_TE_ID", "DLT_TE_ID");
 
       if (!JsonUtil.isStringNullOREmpty(providerDetailsString)) {
         logger.debug(context, "Msg91SmsProvider - Body - " + providerDetailsString);
@@ -398,7 +412,8 @@ public class Msg91SmsProvider implements ISmsProvider {
         StatusLine sl = response.getStatusLine();
         response.close();
         if (sl.getStatusCode() != 200) {
-          logger.info(context,
+          logger.info(
+              context,
               "SMS code for "
                   + phoneNumberList
                   + " could not be sent: "
@@ -406,17 +421,18 @@ public class Msg91SmsProvider implements ISmsProvider {
                   + " - "
                   + sl.getReasonPhrase());
         }
-        logger.info(context, "Status code for Msg91SmsProvider : "+sl.getStatusCode());
+        logger.info(context, "Status code for Msg91SmsProvider : " + sl.getStatusCode());
         return sl.getStatusCode() == 200;
       } else {
         return false;
       }
 
     } catch (IOException e) {
-      logger.error(context,"error in converting providerDetails to String", e);
+      logger.error(context, "error in converting providerDetails to String", e);
       return false;
     } catch (Exception e) {
-      logger.error(context, "Msg91SmsProvider : send : error in converting providerDetails to String", e);
+      logger.error(
+          context, "Msg91SmsProvider : send : error in converting providerDetails to String", e);
       return false;
     } finally {
       closeHttpResource(httpClient);

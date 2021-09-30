@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
@@ -21,12 +20,6 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
-/** @author Manzarul */
-@ActorConfig(
-  tasks = {"healthCheck", "actor", "es", "cassandra"},
-  asyncTasks = {},
-  dispatcher = "health-check-dispatcher"
-)
 public class HealthActor extends BaseActor {
 
   @Override
@@ -45,7 +38,7 @@ public class HealthActor extends BaseActor {
           .equalsIgnoreCase(ActorOperations.CASSANDRA.getValue())) {
         cassandraHealthCheck();
       } else {
-        onReceiveUnsupportedOperation("HealthActor");
+        onReceiveUnsupportedOperation();
       }
     }
   }

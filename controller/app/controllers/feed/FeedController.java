@@ -1,8 +1,11 @@
 package controllers.feed;
 
+import akka.actor.ActorRef;
 import controllers.BaseController;
 import controllers.feed.validator.FeedRequestValidator;
 import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -13,10 +16,15 @@ import util.Common;
 
 public class FeedController extends BaseController {
 
+  @Inject
+  @Named("user_feed_actor")
+  private ActorRef userFeedActor;
+
   public CompletionStage<Result> getUserFeed(String userId, Http.Request httpRequest) {
     String callerId1 = Common.getFromRequest(httpRequest, Attrs.USER_ID);
     String callerId2 = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
     return handleRequest(
+        userFeedActor,
         ActorOperations.GET_USER_FEED_BY_ID.getValue(),
         null,
         req -> {
@@ -31,6 +39,7 @@ public class FeedController extends BaseController {
 
   public CompletionStage<Result> createUserFeed(Http.Request httpRequest) {
     return handleRequest(
+        userFeedActor,
         ActorOperations.CREATE_USER_FEED.getValue(),
         httpRequest.body().asJson(),
         req -> {
@@ -48,6 +57,7 @@ public class FeedController extends BaseController {
     String callerId1 = Common.getFromRequest(httpRequest, Attrs.USER_ID);
     String callerId2 = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
     return handleRequest(
+        userFeedActor,
         ActorOperations.DELETE_USER_FEED.getValue(),
         httpRequest.body().asJson(),
         req -> {
@@ -65,6 +75,7 @@ public class FeedController extends BaseController {
     String callerId1 = Common.getFromRequest(httpRequest, Attrs.USER_ID);
     String callerId2 = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
     return handleRequest(
+        userFeedActor,
         ActorOperations.UPDATE_USER_FEED.getValue(),
         httpRequest.body().asJson(),
         req -> {

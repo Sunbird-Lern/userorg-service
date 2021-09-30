@@ -1,7 +1,5 @@
 package org.sunbird.common;
 
-import static org.sunbird.util.ProjectUtil.isNotNull;
-
 import akka.util.Timeout;
 import com.typesafe.config.Config;
 import java.math.BigInteger;
@@ -459,7 +457,7 @@ public class ElasticSearchHelper {
    * @return MatchQueryBuilder
    */
   public static MatchQueryBuilder createMatchQuery(String name, Object value, Float boost) {
-    if (isNotNull(boost)) {
+    if (null != (boost)) {
       return QueryBuilders.matchQuery(name, value).boost(boost);
     } else {
       return QueryBuilders.matchQuery(name, value);
@@ -475,7 +473,7 @@ public class ElasticSearchHelper {
    * @return TermsQueryBuilder
    */
   private static TermsQueryBuilder createTermsQuery(String key, List values, Float boost) {
-    if (isNotNull(boost)) {
+    if (null != (boost)) {
       return QueryBuilders.termsQuery(key, (values).stream().toArray(Object[]::new)).boost(boost);
     } else {
       return QueryBuilders.termsQuery(key, (values).stream().toArray(Object[]::new));
@@ -510,7 +508,7 @@ public class ElasticSearchHelper {
           break;
       }
     }
-    if (isNotNull(boost)) {
+    if (null != (boost)) {
       return rangeQueryBuilder.boost(boost);
     }
     return rangeQueryBuilder;
@@ -525,7 +523,7 @@ public class ElasticSearchHelper {
    * @return TermQueryBuilder
    */
   private static TermQueryBuilder createTermQuery(String name, Object value, Float boost) {
-    if (isNotNull(boost)) {
+    if (null != (boost)) {
       return QueryBuilders.termQuery(name, value).boost(boost);
     } else {
       return QueryBuilders.termQuery(name, value);
@@ -540,7 +538,7 @@ public class ElasticSearchHelper {
    * @return ExistsQueryBuilder
    */
   private static ExistsQueryBuilder createExistQuery(String name, Float boost) {
-    if (isNotNull(boost)) {
+    if (null != (boost)) {
       return QueryBuilders.existsQuery(name).boost(boost);
     } else {
       return QueryBuilders.existsQuery(name);
@@ -566,7 +564,7 @@ public class ElasticSearchHelper {
             if (StringUtils.isNotBlank(startsWithVal)) {
               startsWithVal = startsWithVal.toLowerCase();
             }
-            if (isNotNull(boost)) {
+            if (null != (boost)) {
               queryBuilder =
                   QueryBuilders.prefixQuery(key + RAW_APPEND, startsWithVal).boost(boost);
             }
@@ -576,7 +574,7 @@ public class ElasticSearchHelper {
         case ENDS_WITH:
           {
             String endsWithRegex = "~" + it.getValue();
-            if (isNotNull(boost)) {
+            if (null != (boost)) {
               queryBuilder =
                   QueryBuilders.regexpQuery(key + RAW_APPEND, endsWithRegex).boost(boost);
             }

@@ -1,7 +1,6 @@
 package org.sunbird.actor.location.validator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
@@ -10,25 +9,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dao.location.LocationDao;
+import org.sunbird.dao.location.impl.LocationDaoImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.GeoLocationJsonKey;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
+import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
-import org.sunbird.util.Util;
-import org.sunbird.dao.location.LocationDao;
-import org.sunbird.dao.location.impl.LocationDaoImpl;
-import org.sunbird.model.location.UpsertLocationRequest;
-import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 /** @author Amit Kumar */
-public class LocationRequestValidator  extends BaseLocationRequestValidator{
+public class LocationRequestValidator extends BaseLocationRequestValidator {
 
   private static LocationDao locationDao = new LocationDaoImpl();
   protected static List<List<String>> locationTypeGroupList = new ArrayList<>();
@@ -40,11 +37,11 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
 
   static {
     List<String> subTypeList =
-            Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
+        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_VALID_LOCATION_TYPES).split(";"));
     for (String str : subTypeList) {
       List<String> typeList =
-              (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
-                      .collect(Collectors.toList()));
+          (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
+              .collect(Collectors.toList()));
       for (int i = 0; i < typeList.size(); i++) {
         orderMap.put(typeList.get(i), i);
       }
@@ -306,7 +303,7 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
 
   public static List<Map<String, Object>> getESSearchResult(
       Map<String, Object> searchQueryMap, String esIndex, String esType) {
-    SearchDTO searchDto = Util.createSearchDto(searchQueryMap);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
     Future<Map<String, Object>> resultF = esUtil.search(searchDto, esType, null);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
@@ -362,9 +359,9 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
         List<String> resCodeList =
-                locationList.stream().map(Location::getCode).collect(Collectors.toList());
+            locationList.stream().map(Location::getCode).collect(Collectors.toList());
         List<String> invalidCodeList =
-                codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
+            codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
         throwInvalidParameterValueException(invalidCodeList, JsonKey.LOCATION_CODE);
       } else {
         locationIds = getValidatedLocationSet(locationList, context);
@@ -382,17 +379,19 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
    *
    * @return List of locationIds.
    */
-  public List<String> getHierarchyLocationIds(List<String> locationIdsList, RequestContext context) {
+  public List<String> getHierarchyLocationIds(
+      List<String> locationIdsList, RequestContext context) {
     Set<String> locationIds = null;
     List<String> codes = new ArrayList<>(locationIdsList);
-    List<Location> locationList = locationService.locationSearch(JsonKey.ID, locationIdsList, context);
+    List<Location> locationList =
+        locationService.locationSearch(JsonKey.ID, locationIdsList, context);
     List<String> locationIdList = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(locationList)) {
       if (locationList.size() != codes.size()) {
         List<String> resCodeList =
-                locationList.stream().map(Location::getId).collect(Collectors.toList());
+            locationList.stream().map(Location::getId).collect(Collectors.toList());
         List<String> invalidIdsList =
-                codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
+            codes.stream().filter(s -> !resCodeList.contains(s)).collect(Collectors.toList());
         throwInvalidParameterValueException(invalidIdsList, JsonKey.LOCATION_IDS);
       } else {
         locationIds = getValidatedLocationSet(locationList, context);
@@ -407,10 +406,10 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
 
   private void throwInvalidParameterValueException(List<String> invalidList, String attributeName) {
     throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
-            ProjectUtil.formatMessage(
-                    ResponseCode.invalidParameterValue.getErrorMessage(), invalidList, attributeName),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
+        ResponseCode.invalidParameterValue.getErrorCode(),
+        ProjectUtil.formatMessage(
+            ResponseCode.invalidParameterValue.getErrorMessage(), invalidList, attributeName),
+        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   /**
@@ -429,21 +428,21 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
         for (Location currentLocation : parentLocnSet) {
           String type = currentLocation.getType();
           locationSet
-                  .stream()
-                  .forEach(
-                          location -> {
-                            if (type.equalsIgnoreCase(location.getType())
-                                    && !(currentLocation.getId().equals(location.getId()))) {
-                              throw new ProjectCommonException(
-                                      ResponseCode.conflictingOrgLocations.getErrorCode(),
-                                      ProjectUtil.formatMessage(
-                                              ResponseCode.conflictingOrgLocations.getErrorMessage(),
-                                              requestedLocation.getCode(),
-                                              location.getCode(),
-                                              type),
-                                      ResponseCode.CLIENT_ERROR.getResponseCode());
-                            }
-                          });
+              .stream()
+              .forEach(
+                  location -> {
+                    if (type.equalsIgnoreCase(location.getType())
+                        && !(currentLocation.getId().equals(location.getId()))) {
+                      throw new ProjectCommonException(
+                          ResponseCode.conflictingOrgLocations.getErrorCode(),
+                          ProjectUtil.formatMessage(
+                              ResponseCode.conflictingOrgLocations.getErrorMessage(),
+                              requestedLocation.getCode(),
+                              location.getCode(),
+                              type),
+                          ResponseCode.CLIENT_ERROR.getResponseCode());
+                    }
+                  });
           locationSet.add(currentLocation);
         }
       }
@@ -459,9 +458,9 @@ public class LocationRequestValidator  extends BaseLocationRequestValidator{
     while (count > 0) {
       Location parent = null;
       if (getOrder(location.getType()) == 0 && StringUtils.isNotEmpty(location.getId())) {
-        parent = locationService.getLocationById(JsonKey.ID,location.getId(), context);
+        parent = locationService.getLocationById(location.getId(), context);
       } else if (StringUtils.isNotEmpty(location.getParentId())) {
-        parent = locationService.getLocationById(JsonKey.ID,location.getParentId(), context);
+        parent = locationService.getLocationById(location.getParentId(), context);
       }
       if (null != parent) {
         locationSet.add(parent);

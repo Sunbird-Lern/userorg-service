@@ -34,13 +34,13 @@ import org.sunbird.dao.user.impl.UserRoleDaoImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserUtility;
+import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
 

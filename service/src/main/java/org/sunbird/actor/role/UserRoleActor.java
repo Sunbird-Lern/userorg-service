@@ -1,6 +1,10 @@
 package org.sunbird.actor.role;
 
-import org.sunbird.actor.router.ActorConfig;
+import akka.actor.ActorRef;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.actor.user.UserBaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
@@ -14,15 +18,13 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 
-import java.util.List;
-import java.util.Map;
-
-@ActorConfig(
-  tasks = {"getRoles", "assignRoles", "assignRolesV2"},
-  asyncTasks = {},
-  dispatcher = "most-used-two-dispatcher"
-)
 public class UserRoleActor extends UserBaseActor {
+
+  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+
+  @Inject
+  @Named("user_role_background_actor")
+  private ActorRef userRoleBackgroundActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -35,13 +37,12 @@ public class UserRoleActor extends UserBaseActor {
         break;
 
       case "assignRoles":
-
       case "assignRolesV2":
         assignRoles(request);
         break;
 
       default:
-        onReceiveUnsupportedOperation("UserRoleActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -56,7 +57,6 @@ public class UserRoleActor extends UserBaseActor {
 
   @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
-    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     List<Map<String, Object>> userRolesList;
 
     Map<String, Object> requestMap = actorMessage.getRequest();
@@ -100,7 +100,7 @@ public class UserRoleActor extends UserBaseActor {
     request.getRequest().put(JsonKey.ROLES, userRolesList);
     logger.debug(context, "UserRoleActor:syncUserRoles: Syncing to ES");
     try {
-      tellToAnother(request);
+      userRoleBackgroundActor.tell(request, self());
     } catch (Exception ex) {
       logger.error(
           context,

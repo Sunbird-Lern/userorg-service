@@ -3,18 +3,12 @@ package org.sunbird.actor.user;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 
-@ActorConfig(
-  tasks = {"userLookup"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class UserLookupActor extends BaseActor {
 
   @Override

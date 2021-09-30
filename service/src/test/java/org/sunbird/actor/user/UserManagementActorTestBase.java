@@ -2,9 +2,7 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -15,11 +13,7 @@ import akka.pattern.Patterns;
 import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -27,9 +21,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.router.RequestRouter;
-import org.sunbird.actor.service.BaseMWService;
-import org.sunbird.actor.service.SunbirdMWService;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.client.location.LocationClient;
 import org.sunbird.client.location.impl.LocationClientImpl;
@@ -54,7 +45,9 @@ import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
@@ -74,6 +67,8 @@ import scala.concurrent.Promise;
   SystemSettingClientImpl.class,
   UserService.class,
   UserServiceImpl.class,
+  OrgServiceImpl.class,
+  OrgService.class,
   UserUtil.class,
   Patterns.class,
   LocationClientImpl.class,
@@ -85,9 +80,6 @@ import scala.concurrent.Promise;
   OrganisationClientImpl.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
-  RequestRouter.class,
-  BaseMWService.class,
-  SunbirdMWService.class,
   ActorSelection.class,
   OrgExternalServiceImpl.class,
   LocationServiceImpl.class,
@@ -110,6 +102,7 @@ public abstract class UserManagementActorTestBase {
   public final Props props = Props.create(SSOUserCreateActor.class);
   public static Map<String, Object> reqMap;
   public static UserServiceImpl userService;
+  public static OrgServiceImpl orgService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
   // public static UserClientImpl userClient;
@@ -123,12 +116,6 @@ public abstract class UserManagementActorTestBase {
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);
-    PowerMockito.mockStatic(BaseMWService.class);
-    PowerMockito.mockStatic(SunbirdMWService.class);
-    SunbirdMWService.tellToBGRouter(Mockito.any(), Mockito.any());
-    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    when(BaseMWService.getRemoteRouter(Mockito.anyString())).thenReturn(selection);
-
     cassandraOperation = mock(CassandraOperationImpl.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -183,8 +170,16 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.mockStatic(LocationServiceImpl.class);
     locationService = mock(LocationServiceImpl.class);
     PowerMockito.when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    PowerMockito.when(locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
+    PowerMockito.when(
+            locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
         .thenReturn(getLocationIdType());
+    PowerMockito.mockStatic(OrgServiceImpl.class);
+    orgService = mock(OrgServiceImpl.class);
+    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("anyId");
+    when(orgService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
+        .thenReturn("rootOrgId");
 
     PowerMockito.mockStatic(UserServiceImpl.class);
     userService = mock(UserServiceImpl.class);
@@ -192,18 +187,12 @@ public abstract class UserManagementActorTestBase {
     when(userService.getUserById(Mockito.any(), Mockito.any())).thenReturn(getUser(false));
     when(userService.saveUserAttributes(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(getSaveResponse());
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("anyId");
-    when(userService.getCustodianChannel(
-            Mockito.anyMap(), Mockito.any(ActorRef.class), Mockito.any()))
-        .thenReturn("anyChannel");
-    when(userService.getRootOrgIdFromChannel(Mockito.anyString(), Mockito.any()))
-        .thenReturn("rootOrgId");
     when(userService.createUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
+    when(userService.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
     PowerMockito.mockStatic(UserLookUpServiceImpl.class);
     userLookupService = mock(UserLookUpServiceImpl.class);
     when(UserLookUpServiceImpl.getInstance()).thenReturn(userLookupService);
-    when(userLookupService.insertRecords(Mockito.anyList(), Mockito.any()))
+    when(userLookupService.insertRecords(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSuccessResponse());
     Promise<Map<String, Object>> promise = Futures.promise();
     promise.success(getEsResponseMap());
@@ -231,7 +220,7 @@ public abstract class UserManagementActorTestBase {
     externalIds.add(externalId);
     requestMap.put(JsonKey.EXTERNAL_IDS, externalIds);
     PowerMockito.mockStatic(Util.class);
-    when(Util.getUserDetails(Mockito.any(), Mockito.any())).thenReturn(getMapObject());
+    when(userService.getUserDetailsForES(Mockito.any(), Mockito.any())).thenReturn(getMapObject());
     when(UserUtil.encryptUserData(Mockito.anyMap())).thenReturn(requestMap);
     PowerMockito.mockStatic(DataCacheHandler.class);
     when(DataCacheHandler.getRoleMap()).thenReturn(roleMap(true));

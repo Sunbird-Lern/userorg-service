@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
@@ -27,6 +28,7 @@ import play.mvc.Http;
 import play.mvc.Http.RequestBuilder;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 import util.RequestInterceptor;
 
 /** Created by arvind on 4/12/17. */
@@ -38,7 +40,13 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(
+        Arrays.asList(
+            ACTORS.USER_BULK_UPLOAD_ACTOR,
+            ACTORS.ORG_BULK_UPLOAD_ACTOR,
+            ACTORS.LOCATION_BULK_UPLOAD_ACTOR,
+            ACTORS.BULK_UPLOAD_MANAGEMENT_ACTOR),
+        DummyActor.class);
   }
 
   @Test

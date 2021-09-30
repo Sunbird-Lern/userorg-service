@@ -41,10 +41,11 @@ POST    /v1/user/block                          @controllers.usermanagement.User
 POST    /v1/user/unblock			            @controllers.usermanagement.UserStatusController.unblockUser(request: play.mvc.Http.Request)
 
 GET     /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles(request: play.mvc.Http.Request)
+GET     /v1/user/role/read/:uid             @controllers.usermanagement.UserRoleController.getUserRolesById(uid:String, request: play.mvc.Http.Request)
 POST    /v1/user/assign/role			        @controllers.usermanagement.UserRoleController.assignRoles(request: play.mvc.Http.Request)
 POST    /private/user/v1/assign/role	        @controllers.usermanagement.UserRoleController.assignRoles(request: play.mvc.Http.Request)
 POST    /v2/user/assign/role			        @controllers.usermanagement.UserRoleController.assignRolesV2(request: play.mvc.Http.Request)
-POST    /private/user/v2/assign/role			        @controllers.usermanagement.UserRoleController.assignRolesV2(request: play.mvc.Http.Request)
+POST    /private/user/v2/assign/role			@controllers.usermanagement.UserRoleController.assignRolesV2(request: play.mvc.Http.Request)
 
 POST    /v1/user/tnc/accept                     @controllers.tac.UserTnCController.acceptTnC(request: play.mvc.Http.Request)
 PATCH   /private/user/v1/account/merge          @controllers.usermanagement.UserMergeController.mergeUser(request: play.mvc.Http.Request)
@@ -65,7 +66,6 @@ POST    /v1/otp/generate                        @controllers.otp.OtpController.g
 POST    /v1/otp/verify                          @controllers.otp.OtpController.verifyOTP(request: play.mvc.Http.Request)
 
 #Tenant Migration
-POST    /v1/user/migrate                        @controllers.tenantmigration.TenantMigrationController.shadowUserMigrate(request: play.mvc.Http.Request)
 PATCH   /private/user/v1/migrate  	            @controllers.tenantmigration.TenantMigrationController.userTenantMigrate(request: play.mvc.Http.Request)
 
 #User Feed API

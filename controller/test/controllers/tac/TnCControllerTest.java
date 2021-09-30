@@ -24,6 +24,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
+import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({
@@ -45,7 +46,7 @@ public class TnCControllerTest extends BaseApplicationTest {
 
   @Before
   public void before() {
-    setup(DummyActor.class);
+    setup(ACTORS.USER_TNC_ACTOR, DummyActor.class);
   }
 
   @Test

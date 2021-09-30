@@ -5,7 +5,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,16 +13,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -282,14 +278,6 @@ public class ProjectUtil {
     }
   }
 
-  public static boolean isNull(Object obj) {
-    return null == obj ? true : false;
-  }
-
-  public static boolean isNotNull(Object obj) {
-    return null != obj ? true : false;
-  }
-
   public static String formatMessage(String exceptionMsg, Object... fieldValue) {
     return MessageFormat.format(exceptionMsg, fieldValue);
   }
@@ -432,34 +420,6 @@ public class ProjectUtil {
     }
   }
 
-  /**
-   * This method will do the phone number validation check
-   *
-   * @param phone String
-   * @return boolean
-   */
-  public static boolean validatePhoneNumber(String phone) {
-    String phoneNo = "";
-    phoneNo = phone.replace("+", "");
-    if (phoneNo.matches("\\d{10}")) return true;
-    else if (phoneNo.matches("\\d{3}[-\\.\\s]\\d{3}[-\\.\\s]\\d{4}")) return true;
-    else if (phoneNo.matches("\\d{3}-\\d{3}-\\d{4}\\s(x|(ext))\\d{3,5}")) return true;
-    else return (phoneNo.matches("\\(\\d{3}\\)-\\d{3}-\\d{4}"));
-  }
-
-  public static Map<String, String> getEkstepHeader() {
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", "application/json");
-    return headerMap;
-  }
-
   public static boolean validatePhone(String phNumber, String countryCode) {
     PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
     String contryCode = countryCode;
@@ -520,33 +480,6 @@ public class ProjectUtil {
     }
   }
 
-  public static String getSMSBody(Map<String, String> smsTemplate) {
-    try {
-      Properties props = new Properties();
-      props.put("resource.loader", "class");
-      props.put(
-          "class.resource.loader.class",
-          "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-
-      VelocityEngine ve = new VelocityEngine();
-      ve.init(props);
-      smsTemplate.put("newline", " ");
-      smsTemplate.put(
-          "instanceName",
-          StringUtils.isBlank(smsTemplate.get("instanceName"))
-              ? ""
-              : smsTemplate.get("instanceName"));
-      Template t = ve.getTemplate("/welcomeSmsTemplate.vm");
-      VelocityContext context = new VelocityContext(smsTemplate);
-      StringWriter writer = new StringWriter();
-      t.merge(context, writer);
-      return writer.toString();
-    } catch (Exception ex) {
-      logger.error("Exception occurred while formating and sending SMS ", ex);
-    }
-    return "";
-  }
-
   public static boolean isDateValidFormat(String format, String value) {
     Date date = null;
     try {
@@ -559,37 +492,6 @@ public class ProjectUtil {
       logger.error("isDateValidFormat: " + ex.getMessage(), ex);
     }
     return date != null;
-  }
-
-  /** This method will create a new ProjectCommonException of type server Error and throws it. */
-  public static void createAndThrowServerError() {
-    throw new ProjectCommonException(
-        ResponseCode.SERVER_ERROR.getErrorCode(),
-        ResponseCode.SERVER_ERROR.getErrorMessage(),
-        ResponseCode.SERVER_ERROR.getResponseCode());
-  }
-
-  /**
-   * This method will create and return server exception to caller.
-   *
-   * @param responseCode ResponseCode
-   * @return ProjectCommonException
-   */
-  public static ProjectCommonException createServerError(ResponseCode responseCode) {
-    return new ProjectCommonException(
-        responseCode.getErrorCode(),
-        responseCode.getErrorMessage(),
-        ResponseCode.SERVER_ERROR.getResponseCode());
-  }
-
-  /**
-   * This method will create ProjectCommonException of type invalidUserDate exception and throws it.
-   */
-  public static void createAndThrowInvalidUserDataException() {
-    throw new ProjectCommonException(
-        ResponseCode.invalidUsrData.getErrorCode(),
-        ResponseCode.invalidUsrData.getErrorMessage(),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   public static String getConfigValue(String key) {

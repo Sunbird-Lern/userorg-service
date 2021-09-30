@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import akka.actor.ActorRef;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import java.util.ArrayList;
@@ -7,9 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.sunbird.actor.router.ActorConfig;
+import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.client.user.UserClient;
 import org.sunbird.client.user.impl.UserClientImpl;
@@ -18,33 +21,32 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.model.location.Location;
-import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
-@ActorConfig(
-  tasks = {"createUserV4", "createManagedUser", "getManagedUsers"},
-  asyncTasks = {},
-  dispatcher = "most-used-one-dispatcher"
-)
 public class ManagedUserActor extends UserBaseActor {
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private UserClient userClient = UserClientImpl.getInstance();
   private UserService userService = UserServiceImpl.getInstance();
+  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
+  protected UserCreateRequestValidator userCreateRequestValidator =
+      new UserCreateRequestValidator();
+
+  @Inject
+  @Named("search_handler_actor")
+  private ActorRef searchHandlerActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -59,7 +61,7 @@ public class ManagedUserActor extends UserBaseActor {
         getManagedUsers(request);
         break;
       default:
-        onReceiveUnsupportedOperation("ManagedUserActor");
+        onReceiveUnsupportedOperation();
     }
   }
 
@@ -93,10 +95,10 @@ public class ManagedUserActor extends UserBaseActor {
 
   private void validateLocationCodes(Request userRequest) {
     Object locationCodes = userRequest.getRequest().get(JsonKey.LOCATION_CODES);
-    validateLocationCodesDataType(locationCodes);
+    userCreateRequestValidator.validateLocationCodesDataType(locationCodes);
     if (CollectionUtils.isNotEmpty((List) locationCodes)) {
       List<Location> locationList = getLocationList(locationCodes, userRequest.getRequestContext());
-      String stateCode = validateAndGetStateLocationCode(locationList);
+      String stateCode = UserCreateRequestValidator.validateAndGetStateLocationCode(locationList);
       List<String> allowedLocationTypeList =
           getStateLocationTypeConfig(stateCode, userRequest.getRequestContext());
       List<String> set = new ArrayList<>();
@@ -104,7 +106,8 @@ public class ManagedUserActor extends UserBaseActor {
         // for create-MUA we allow locations upto district
         if ((location.getType().equals(JsonKey.STATE))
             || (location.getType().equals(JsonKey.DISTRICT))) {
-          isValidLocationType(location.getType(), allowedLocationTypeList);
+          UserCreateRequestValidator.isValidLocationType(
+              location.getType(), allowedLocationTypeList);
           set.add(location.getCode());
         }
       }
@@ -139,12 +142,14 @@ public class ManagedUserActor extends UserBaseActor {
     userMap.remove(JsonKey.PASSWORD);
     userMap.remove(JsonKey.DOB_VALIDATION_DONE);
     Response response = userService.createUser(userMap, actorMessage.getRequestContext());
-    insertIntoUserLookUp(userMap, actorMessage.getRequestContext());
+    userLookupService.insertRecords(userMap, actorMessage.getRequestContext());
     response.put(JsonKey.USER_ID, userMap.get(JsonKey.ID));
     Map<String, Object> esResponse = new HashMap<>();
     if (JsonKey.SUCCESS.equalsIgnoreCase((String) response.get(JsonKey.RESPONSE))) {
-      Map<String, Object> orgMap = saveUserOrgInfo(userMap, actorMessage.getRequestContext());
-      esResponse = Util.getUserDetails(userMap, orgMap, actorMessage.getRequestContext());
+      saveUserOrgInfo(userMap, actorMessage.getRequestContext());
+      esResponse =
+          userService.getUserDetailsForES(
+              (String) userMap.get(JsonKey.ID), actorMessage.getRequestContext());
     } else {
       logger.info(
           actorMessage.getRequestContext(),
@@ -207,10 +212,7 @@ public class ManagedUserActor extends UserBaseActor {
     boolean withTokens = Boolean.valueOf((String) request.get(JsonKey.WITH_TOKENS));
 
     Map<String, Object> searchResult =
-        userClient.searchManagedUser(
-            getActorRef(ActorOperations.USER_SEARCH.getValue()),
-            request,
-            request.getRequestContext());
+        userClient.searchManagedUser(searchHandlerActor, request, request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;
