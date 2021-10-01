@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -14,6 +16,7 @@ import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.FeedStatus;
+import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
@@ -59,12 +62,17 @@ public class FeedUtil {
             (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
         orgList.addAll(getOrgDetails(shadowUser.getChannel(), context));
       }
-      response = feedService.update(feedList.get(index), context);
+      Request request = new Request();
+      ObjectMapper mapper = new ObjectMapper();
+      request.setRequest(mapper.convertValue(feedList.get(index),Map.class));
+      response = feedService.update(request, context);
     }
     return response;
   }
 
-  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
+  private static Request createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
+    Request request = new Request();
+    ObjectMapper mapper = new ObjectMapper();
     Feed feed = new Feed();
     feed.setPriority(1);
     feed.setCreatedBy(shadowUser.getAddedBy());
@@ -78,7 +86,8 @@ public class FeedUtil {
         JsonKey.PROSPECT_CHANNELS_IDS, getOrgDetails(shadowUser.getChannel(), context));
     feed.setData(prospectsChannel);
     feed.setUserId(userId);
-    return feed;
+    request.setRequest(mapper.convertValue(feed,Map.class));
+    return request;
   }
 
   private static List<Map<String, String>> getOrgDetails(String channel, RequestContext context) {
