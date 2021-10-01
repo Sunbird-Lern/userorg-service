@@ -4,14 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -30,11 +23,7 @@ import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.impl.*;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
 
 public class UserProfileReadService {
@@ -69,13 +58,13 @@ public class UserProfileReadService {
     Map<String, Object> result =
         validateUserIdAndGetUserDetails(userId, actorMessage.getRequestContext());
     appendUserTypeAndLocation(result, actorMessage);
+    result.putAll(Util.getUserDefaultValue());
     Map<String, Object> rootOrg =
         orgService.getOrgById(
             (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
     if (MapUtils.isNotEmpty(rootOrg)
-        && actorMessage
-            .getOperation()
-            .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
+        && (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())
+            || readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue()))) {
       Util.getOrgDefaultValue().keySet().stream().forEach(key -> rootOrg.remove(key));
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
@@ -147,9 +136,8 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    if (actorMessage
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
+    if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())
+        || readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
       Util.getUserDefaultValue().keySet().stream().forEach(key -> result.remove(key));
     }
 
