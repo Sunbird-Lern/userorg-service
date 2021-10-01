@@ -46,9 +46,6 @@ public class FeedServiceImplTest {
 
   @Before
   public void setUp() throws JsonProcessingException {
-    PowerMockito.mockStatic(FeedDaoImpl.class);
-    IFeedDao iFeedDao = PowerMockito.mock(FeedDaoImpl.class);
-    PowerMockito.when(FeedDaoImpl.getInstance()).thenReturn(iFeedDao);
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
