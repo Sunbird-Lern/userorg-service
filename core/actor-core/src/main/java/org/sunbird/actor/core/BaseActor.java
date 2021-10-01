@@ -21,7 +21,9 @@ public abstract class BaseActor extends UntypedAbstractActor {
             request.getRequestContext(),
             "Actor Info: Dispatcher : "
                 + context().dispatcher().toString()
-                + " , Actor : "
+                + " , Parent Actor : "
+                + context().parent().toString()
+                + " , Self Actor : "
                 + context().self().toString()
                 + " , called for operation: "
                 + operation);
