@@ -92,7 +92,7 @@ public class SSOUserServiceImpl implements SSOUserService {
       Map<String, Object> requestMap, Map<String, Object> userMap, Request request) {
     Response response = null;
     boolean isPasswordUpdated = false;
-    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
+    Map<String, Object> userLookUpData = new HashMap<>(userMap);
     try {
       response = userService.createUser(requestMap, request.getRequestContext());
       userLookupService.insertRecords(userLookUpData, request.getRequestContext());
