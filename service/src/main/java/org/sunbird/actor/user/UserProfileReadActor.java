@@ -22,10 +22,10 @@ import org.sunbird.util.Util;
 
 public class UserProfileReadActor extends BaseActor {
 
-  private EncryptionService encryptionService =
+  private final EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserProfileReadService profileReadService = new UserProfileReadService();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserProfileReadService profileReadService = new UserProfileReadService();
 
   @Override
   public void onReceive(Request request) throws Throwable {
