@@ -91,10 +91,7 @@ public class UserProfileReadService {
     result.put(
         JsonKey.ORGANISATIONS,
         fetchUserOrgList(
-            (String) result.get(JsonKey.ID),
-            userOrgRoles,
-            actorMessage.getRequestContext(),
-            readVersion));
+            (String) result.get(JsonKey.ID), userOrgRoles, actorMessage.getRequestContext()));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -254,7 +251,7 @@ public class UserProfileReadService {
       if (StringUtils.isEmpty(managedToken)) {
         logger.debug(
             actorMessage.getRequestContext(),
-            "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId);
+            "UserProfileReadService: getUserProfileData: calling token generation for: " + userId);
         List<Map<String, Object>> userList = new ArrayList<>();
         userList.add(result);
         // Fetch encrypted token from admin utils
@@ -272,24 +269,19 @@ public class UserProfileReadService {
   }
 
   private List<Map<String, Object>> fetchUserOrgList(
-      String userId,
-      Map<String, List<String>> userOrgRoles,
-      RequestContext requestContext,
-      String readVersion) {
+      String userId, Map<String, List<String>> userOrgRoles, RequestContext requestContext) {
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     List<Map<String, Object>> userOrgList =
         userOrgService.getUserOrgListByUserId(userId, requestContext);
     for (Map<String, Object> userOrg : userOrgList) {
-      if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
-        userOrg.remove(JsonKey.ROLES);
-      }
-      String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
-      if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
-        userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
-      }
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
       if (null == isDeleted || (!isDeleted.booleanValue())) {
         updateAssociationMechanism(userOrg);
+        userOrg.remove(JsonKey.ROLES);
+        String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
+        if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
+          userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
+        }
         usrOrgList.add(userOrg);
       }
     }
@@ -361,7 +353,7 @@ public class UserProfileReadService {
 
     } catch (Exception e) {
       logger.error(
-          "UserProfileReadActor:updateTncInfo: Exception occurred while getting system setting for"
+          "UserProfileReadService:updateTncInfo: Exception occurred while getting system setting for"
               + JsonKey.TNC_CONFIG
               + e.getMessage(),
           e);
@@ -375,7 +367,7 @@ public class UserProfileReadService {
         Object tncUserAcceptedOn = userMap.get(JsonKey.TNC_ACCEPTED_ON);
         userMap.put(JsonKey.PROMPT_TNC, false);
         String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
-        logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
+        logger.debug("UserProfileReadService:updateTncInfo: url = " + url);
         userMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
         if ((StringUtils.isEmpty(tncUserAcceptedVersion)
                 || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
@@ -385,7 +377,7 @@ public class UserProfileReadService {
         }
       } catch (Exception e) {
         logger.error(
-            "UserProfileReadActor:updateTncInfo: Exception occurred with error message = "
+            "UserProfileReadService:updateTncInfo: Exception occurred with error message = "
                 + e.getMessage(),
             e);
       }
@@ -439,11 +431,11 @@ public class UserProfileReadService {
       if (fields.contains(JsonKey.TOPIC)) {
         result.put(JsonKey.TOPICS, new HashSet<>());
       }
-      if (fields.contains(JsonKey.ORGANISATIONS)) {
-        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
-      }
       if (fields.contains(JsonKey.ROLES)) {
         result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
+      }
+      if (fields.contains(JsonKey.ORGANISATIONS)) {
+        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
         List<Map<String, String>> userLocList =
