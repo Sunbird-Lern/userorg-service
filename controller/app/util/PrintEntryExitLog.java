@@ -7,15 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.datasecurity.DataMaskingService;
-import org.sunbird.datasecurity.impl.DefaultDataMaskServiceImpl;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -26,7 +21,6 @@ import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
 import org.sunbird.util.EntryExitLogEvent;
-import org.sunbird.util.ProjectUtil;
 
 public class PrintEntryExitLog {
 
@@ -156,7 +150,7 @@ public class PrintEntryExitLog {
   }
 
   private static String maskPIIData(String logString) {
-    try {
+    /*try {
       DataMaskingService service = new DefaultDataMaskServiceImpl();
       StringBuilder builder = new StringBuilder(logString);
       //Mask Email
@@ -183,7 +177,7 @@ public class PrintEntryExitLog {
       return builder.toString();
     } catch (Exception ex) {
       logger.error("Exception occurred while masking PII data", ex);
-    }
+    }*/
     return logString;
   }
 
