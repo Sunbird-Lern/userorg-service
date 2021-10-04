@@ -132,7 +132,7 @@ public class AccessTokenValidator {
   }
 
   private static boolean checkSourceIss(String iss, String url) {
-    String ssoUrl = (url != null ? url : KeyCloakConnectionProvider.SSO_URL);
+    String ssoUrl = (url != null ? url : sso_url);
     String realmUrl = ssoUrl + "realms/" + realm;
     return (realmUrl.equalsIgnoreCase(iss));
   }
