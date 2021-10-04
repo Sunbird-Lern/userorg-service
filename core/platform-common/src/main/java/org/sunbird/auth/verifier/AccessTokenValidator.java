@@ -77,7 +77,7 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyManagedUserToken: Token : "+managedEncToken, ex);
+      logger.error("Exception in verifyManagedUserToken: Token : " + managedEncToken, ex);
     }
     return managedFor;
   }
@@ -96,16 +96,44 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyUserAccessToken: Token : "+token, ex);
+      logger.error("Exception in verifyUserAccessToken: Token : " + token, ex);
     }
     if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
-      logger.info("verifyUserAccessToken: Invalid User Token: "+token);
+      logger.info("verifyUserAccessToken: Invalid User Token: " + token);
+    }
+    return userId;
+  }
+
+  public static String verifySourceUserToken(String token, String url) {
+    String userId = JsonKey.UNAUTHORIZED;
+    try {
+      Map<String, Object> payload = validateToken(token);
+
+      logger.info("learner source access token validateToken() :" + payload.toString());
+      if (MapUtils.isNotEmpty(payload) && checkSourceIss((String) payload.get("iss"), url)) {
+        userId = (String) payload.get(JsonKey.SUB);
+        if (StringUtils.isNotBlank(userId)) {
+          int pos = userId.lastIndexOf(":");
+          userId = userId.substring(pos + 1);
+        }
+      }
+    } catch (Exception ex) {
+      logger.error("Exception in verifySourceUserToken: Token : " + token, ex);
+    }
+    if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
+      logger.info("verifySourceUserToken: Invalid source user Token: " + token);
     }
     return userId;
   }
 
   private static boolean checkIss(String iss) {
     String realmUrl = sso_url + "realms/" + realm;
+    return (realmUrl.equalsIgnoreCase(iss));
+  }
+
+  private static boolean checkSourceIss(String iss, String url) {
+    String ssoUrl = (url != null ? url : KeyCloakConnectionProvider.SSO_URL);
+    String realmUrl = ssoUrl + "realms/" + realm;
     return (realmUrl.equalsIgnoreCase(iss));
   }
 

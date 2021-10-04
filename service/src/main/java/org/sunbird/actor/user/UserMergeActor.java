@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.sunbird.auth.verifier.AccessTokenValidator;
 import org.sunbird.client.systemsettings.SystemSettingClient;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.dao.user.UserDao;
@@ -268,10 +269,11 @@ public class UserMergeActor extends UserBaseActor {
     String sourceUserAuthToken = (String) headers.get(JsonKey.X_SOURCE_USER_TOKEN);
     String subDomainUrl = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SUBDOMAIN_KEYCLOAK_BASE_URL);
     logger.info(context, "UserMergeActor:checkTokenDetails sub domain url value " + subDomainUrl);
-    String userId = keyCloakService.verifyToken(userAuthToken, context);
+    String userId = AccessTokenValidator.verifyUserToken(userAuthToken);
     // Since source token is generated from subdomain , so verification also need with
     // same subdomain.
-    String sourceUserId = keyCloakService.verifyToken(sourceUserAuthToken, subDomainUrl, context);
+    String sourceUserId =
+        AccessTokenValidator.verifySourceUserToken(sourceUserAuthToken, subDomainUrl);
     if (!(mergeeId.equals(sourceUserId) && mergerId.equals(userId))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),
