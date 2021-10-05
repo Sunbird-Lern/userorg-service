@@ -77,7 +77,7 @@ public class EmailServiceActor extends BaseActor {
           notificationService.validateAndGetEmailList(
               userIds, emails, recipientSearchQuery, requestContext);
       notificationService.updateFirstNameAndOrgNameInEmailContext(
-          userIds, emails, request, requestContext);
+          userIds, emailList, request, requestContext);
 
       if (CollectionUtils.isNotEmpty(emailList)) {
         String template =
