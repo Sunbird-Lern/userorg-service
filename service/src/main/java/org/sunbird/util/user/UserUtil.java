@@ -611,7 +611,9 @@ public class UserUtil {
     if (Boolean.valueOf(ProjectUtil.getConfigValue(JsonKey.LIMIT_MANAGED_USER_CREATION))) {
       Map<String, Object> searchQueryMap = new HashMap<>();
       searchQueryMap.put(JsonKey.MANAGED_BY, managedBy);
-      SearchDTO searchDTO = ElasticSearchHelper.createSearchDTO(searchQueryMap);
+      Map<String, Object> searchRequestMap = new HashMap<>();
+      searchRequestMap.put(JsonKey.FILTERS, searchQueryMap);
+      SearchDTO searchDTO = ElasticSearchHelper.createSearchDTO(searchRequestMap);
       Map<String, Object> searchResult = userService.searchUser(searchDTO, context);
       List<Map<String, Object>> managedUserList =
           (List<Map<String, Object>>) searchResult.get(JsonKey.CONTENT);
