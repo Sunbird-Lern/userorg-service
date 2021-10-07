@@ -27,7 +27,6 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -66,18 +65,10 @@ public class NotesManagementActorTest {
     PowerMockito.mockStatic(EsClientFactory.class);
     esUtil = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esUtil);
-    Map<String, Object> esResponse = new HashMap<>();
-    esResponse.put(JsonKey.CONTENT, new ArrayList<>());
-    Promise<Map<String, Object>> promise = Futures.promise();
-    promise.success(esResponse);
-    when(esUtil.search(Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
     Promise<Boolean> booleanPromise = Futures.promise();
     booleanPromise.success(true);
     when(esUtil.update(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(booleanPromise.future());
-    when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(promise.future());
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperation = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
@@ -212,11 +203,11 @@ public class NotesManagementActorTest {
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
       return res.getCode().equals(errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
