@@ -19,6 +19,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.response.Response;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
@@ -324,6 +325,6 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     subject.tell(
         getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
         probe.getRef());
-    probe.expectMsgClass(duration("1000 second"), NullPointerException.class);
+    probe.expectMsgClass(duration("10 second"), Response.class);
   }
 }

@@ -19,8 +19,8 @@ import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 public class BackgroundJobManager extends BaseActor {
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private UserService userService = UserServiceImpl.getInstance();
+  private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private final UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -36,7 +36,6 @@ public class BackgroundJobManager extends BaseActor {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void updateUserOrgInfoToEs(Request actorMessage) {
     Map<String, Object> orgMap = (Map<String, Object>) actorMessage.getRequest().get(JsonKey.USER);
     Future<Map<String, Object>> resultF =

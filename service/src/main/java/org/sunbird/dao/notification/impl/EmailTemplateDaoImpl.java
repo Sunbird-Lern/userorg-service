@@ -15,7 +15,7 @@ import org.sunbird.response.Response;
 
 public class EmailTemplateDaoImpl implements EmailTemplateDao {
 
-  static EmailTemplateDao emailTemplateDao;
+  private static EmailTemplateDao emailTemplateDao;
   private static final String EMAIL_TEMPLATE = "email_template";
   private static final String DEFAULT_EMAIL_TEMPLATE_NAME = "default";
   private static final String TEMPLATE = "template";

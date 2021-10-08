@@ -20,8 +20,8 @@ import org.sunbird.service.otp.OTPService;
 import org.sunbird.util.ProjectUtil;
 
 public final class OTPUtil {
-  private static LoggerUtil logger = new LoggerUtil(OTPUtil.class);
-  private static OTPService otpService = new OTPService();
+  private static final LoggerUtil logger = new LoggerUtil(OTPUtil.class);
+  private static final OTPService otpService = new OTPService();
   private static final int MAXIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
   private static final int RETRY_COUNT = 2;

@@ -24,9 +24,9 @@ import org.sunbird.util.user.DateUtil;
 
 public class UserConsentServiceImpl implements UserConsentService {
 
-  private static LoggerUtil logger = new LoggerUtil(UserConsentServiceImpl.class);
-  private static UserConsentDao userConsentDao = UserConsentDaoImpl.getInstance();
-  private static OrgDao orgDao = OrgDaoImpl.getInstance();
+  private static final LoggerUtil logger = new LoggerUtil(UserConsentServiceImpl.class);
+  private static final UserConsentDao userConsentDao = UserConsentDaoImpl.getInstance();
+  private static final OrgDao orgDao = OrgDaoImpl.getInstance();
 
   private static UserConsentService consentService = null;
 

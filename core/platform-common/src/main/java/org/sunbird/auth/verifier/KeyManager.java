@@ -18,8 +18,8 @@ import org.sunbird.util.PropertiesCache;
 
 public class KeyManager {
 
-  private static LoggerUtil logger = new LoggerUtil(KeyManager.class);
-  private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
+  private static final LoggerUtil logger = new LoggerUtil(KeyManager.class);
+  private static final PropertiesCache propertiesCache = PropertiesCache.getInstance();
 
   private static Map<String, KeyData> keyMap = new HashMap<>();
 

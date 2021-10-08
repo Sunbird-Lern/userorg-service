@@ -13,8 +13,8 @@ import org.sunbird.response.Response;
 
 public class UrlActionDaoImpl implements UrlActionDao {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
   private static UrlActionDao urlActionDao;
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String TABLE_NAME = "url_action";

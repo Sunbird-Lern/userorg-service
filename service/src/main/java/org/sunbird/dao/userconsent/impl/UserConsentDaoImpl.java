@@ -11,7 +11,7 @@ import org.sunbird.response.Response;
 
 public class UserConsentDaoImpl implements UserConsentDao {
   private static final String TABLE_NAME = "user_consent";
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   private static UserConsentDao consentDao = null;
 

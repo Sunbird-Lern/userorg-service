@@ -13,15 +13,15 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.ratelimit.RateLimit;
-import org.sunbird.util.ratelimit.RateLimiter;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.ratelimit.RateLimit;
+import org.sunbird.util.ratelimit.RateLimiter;
 
 public class RateLimitServiceImpl implements RateLimitService {
-  private static LoggerUtil logger = new LoggerUtil(RateLimitServiceImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(RateLimitServiceImpl.class);
 
-  private RateLimitDao rateLimitDao = RateLimitDaoImpl.getInstance();
+  private final RateLimitDao rateLimitDao = RateLimitDaoImpl.getInstance();
 
   public boolean isRateLimitOn() {
     return Boolean.TRUE

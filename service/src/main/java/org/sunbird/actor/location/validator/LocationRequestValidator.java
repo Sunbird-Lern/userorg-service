@@ -9,8 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.location.LocationDao;
-import org.sunbird.dao.location.impl.LocationDaoImpl;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -27,13 +25,13 @@ import scala.concurrent.Future;
 /** @author Amit Kumar */
 public class LocationRequestValidator extends BaseLocationRequestValidator {
 
-  private static LocationDao locationDao = new LocationDaoImpl();
+  private static final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private final LocationService locationService = new LocationServiceImpl();
+  private static final ObjectMapper mapper = new ObjectMapper();
+
+  private static Map<String, Integer> orderMap = new HashMap<>();
   protected static List<List<String>> locationTypeGroupList = new ArrayList<>();
   protected static List<String> typeList = new ArrayList<>();
-  private static ObjectMapper mapper = new ObjectMapper();
-  private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private static Map<String, Integer> orderMap = new HashMap<>();
-  private LocationService locationService = new LocationServiceImpl();
 
   static {
     List<String> subTypeList =

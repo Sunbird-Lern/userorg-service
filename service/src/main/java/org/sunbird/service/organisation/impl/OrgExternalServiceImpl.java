@@ -12,8 +12,8 @@ import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgExternalService;
 
 public class OrgExternalServiceImpl implements OrgExternalService {
-  private OrgExternalDao orgExtDao = new OrgExternalDaoImpl();
-  private OrgDao orgDao = OrgDaoImpl.getInstance();
+  private final OrgExternalDao orgExtDao = new OrgExternalDaoImpl();
+  private final OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgExternalService orgExternalService;
 
   public static OrgExternalService getInstance() {

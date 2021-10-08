@@ -16,7 +16,7 @@ import org.sunbird.util.ratelimit.RateLimit;
 public class RateLimitDaoImpl implements RateLimitDao {
 
   private static final String TABLE_NAME = JsonKey.RATE_LIMIT;
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static volatile RateLimitDao rateLimitDao;
 
   public static RateLimitDao getInstance() {

@@ -30,9 +30,9 @@ import org.sunbird.util.ProjectUtil;
 
 public class NotificationService {
 
-  private static LoggerUtil logger = new LoggerUtil(NotificationService.class);
-  private UserService userService = UserServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
+  private static final LoggerUtil logger = new LoggerUtil(NotificationService.class);
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
 
   public boolean processSMS(
       List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {

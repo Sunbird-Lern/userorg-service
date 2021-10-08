@@ -17,7 +17,7 @@ import org.sunbird.request.RequestContext;
 
 public class FormApiUtilHandler {
 
-  private static LoggerUtil logger = new LoggerUtil(FormApiUtilHandler.class);
+  private static final LoggerUtil logger = new LoggerUtil(FormApiUtilHandler.class);
 
   /**
    * Prepare payload for Form Api Config utils

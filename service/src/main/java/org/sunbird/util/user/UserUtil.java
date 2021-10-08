@@ -54,24 +54,24 @@ import org.sunbird.util.contentstore.ContentStoreUtil;
 import scala.concurrent.Future;
 
 public class UserUtil {
-  private static LoggerUtil logger = new LoggerUtil(UserUtil.class);
-  private static EncryptionService encryptionService =
+  private static final LoggerUtil logger = new LoggerUtil(UserUtil.class);
+  private static final EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
-  private static ObjectMapper mapper = new ObjectMapper();
-  private static SSOManager ssoManager = SSOServiceFactory.getInstance();
-  private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
-  private static DataMaskingService maskingService =
+  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final SSOManager ssoManager = SSOServiceFactory.getInstance();
+  private static final PropertiesCache propertiesCache = PropertiesCache.getInstance();
+  private static final DataMaskingService maskingService =
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
-  private static DecryptionService decService =
+  private static final DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
-  private static UserService userService = UserServiceImpl.getInstance();
-  private static ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private static UserExternalIdentityService userExternalIdentityService =
+  private static final UserService userService = UserServiceImpl.getInstance();
+  private static final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private static final UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  private static UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private static UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
-  private static OrgService orgService = OrgServiceImpl.getInstance();
-  private static UserDao userDao = UserDaoImpl.getInstance();
+  private static final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private static final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private static final OrgService orgService = OrgServiceImpl.getInstance();
+  private static final UserDao userDao = UserDaoImpl.getInstance();
 
   private UserUtil() {}
 

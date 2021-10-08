@@ -13,8 +13,8 @@ import org.sunbird.util.Util;
 
 public class UserStatusActor extends UserBaseActor {
 
-  private UserStatusService userStatusService = new UserStatusService();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final UserStatusService userStatusService = new UserStatusService();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

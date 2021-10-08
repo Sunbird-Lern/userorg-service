@@ -15,7 +15,7 @@ import org.sunbird.service.notification.NotificationService;
 
 public class SendNotificationActor extends BaseActor {
 
-  private NotificationService notificationService = new NotificationService();
+  private final NotificationService notificationService = new NotificationService();
 
   @Inject
   @Named("background_notification_actor")

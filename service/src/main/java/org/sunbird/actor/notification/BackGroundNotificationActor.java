@@ -10,6 +10,13 @@ import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 
 public class BackGroundNotificationActor extends BaseActor {
+
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final String notification_service_base_url =
+      System.getenv("notification_service_base_url");
+  private final String NOTIFICATION_SERVICE_URL =
+      notification_service_base_url + "/v1/notification/send";
+
   @Override
   public void onReceive(Request request) throws Throwable {
     callNotificationService(request);
@@ -21,9 +28,6 @@ public class BackGroundNotificationActor extends BaseActor {
         reqObj.getRequestContext(),
         "BackGroundNotificationActor:callNotificationService :: Method called.");
     try {
-      ObjectMapper mapper = new ObjectMapper();
-      String notification_service_base_url = System.getenv("notification_service_base_url");
-      String NOTIFICATION_SERVICE_URL = notification_service_base_url + "/v1/notification/send";
       logger.debug(
           reqObj.getRequestContext(),
           "BackGroundNotificationActor:callNotificationService :: calling notification service URL :"
@@ -39,7 +43,7 @@ public class BackGroundNotificationActor extends BaseActor {
       ProjectUtil.setTraceIdInHeader(headers, reqObj.getRequestContext());
       String response =
           HttpClientUtil.post(NOTIFICATION_SERVICE_URL, json, headers, reqObj.getRequestContext());
-      logger.info(
+      logger.debug(
           reqObj.getRequestContext(),
           "BackGroundNotificationActor:callNotificationService :: Response =" + response);
     } catch (Exception ex) {

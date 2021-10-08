@@ -18,7 +18,8 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 
 public class OrganisationBackgroundActor extends BaseActor {
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -49,7 +50,6 @@ public class OrganisationBackgroundActor extends BaseActor {
     List<Map<String, Object>> orgLocationList = new ArrayList<>();
     if (StringUtils.isNotBlank(orgLocation)) {
       try {
-        ObjectMapper mapper = new ObjectMapper();
         orgLocationList = mapper.readValue(orgLocation, List.class);
       } catch (Exception e) {
         logger.info(

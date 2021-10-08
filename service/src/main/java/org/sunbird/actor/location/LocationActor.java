@@ -24,7 +24,7 @@ import org.sunbird.util.Util;
 
 public class LocationActor extends BaseLocationActor {
 
-  private LocationService locationService = LocationServiceImpl.getInstance();
+  private final LocationService locationService = LocationServiceImpl.getInstance();
 
   @Inject
   @Named("location_background_actor")
@@ -76,7 +76,7 @@ public class LocationActor extends BaseLocationActor {
       Location location = mapper.convertValue(locationRequest, Location.class);
       Response response = locationService.createLocation(location, request.getRequestContext());
       sender().tell(response, self());
-      logger.info(request.getRequestContext(), "Insert location data to ES");
+      logger.debug(request.getRequestContext(), "Insert location data to ES");
       saveDataToES(
           mapper.convertValue(location, Map.class), JsonKey.INSERT, request.getRequestContext());
       generateTelemetryForLocation(
@@ -96,7 +96,7 @@ public class LocationActor extends BaseLocationActor {
       Location location = mapper.convertValue(locationRequest, Location.class);
       Response response = locationService.updateLocation(location, request.getRequestContext());
       sender().tell(response, self());
-      logger.info(request.getRequestContext(), "Update location data to ES");
+      logger.debug(request.getRequestContext(), "Update location data to ES");
       saveDataToES(
           mapper.convertValue(location, Map.class), JsonKey.UPDATE, request.getRequestContext());
       generateTelemetryForLocation(
@@ -130,7 +130,7 @@ public class LocationActor extends BaseLocationActor {
       LocationRequestValidator.isLocationHasChild(locationId);
       Response response = locationService.deleteLocation(locationId, request.getRequestContext());
       sender().tell(response, self());
-      logger.info(request.getRequestContext(), "Delete location data from ES");
+      logger.debug(request.getRequestContext(), "Delete location data from ES");
       deleteDataFromES(locationId, request.getRequestContext());
       generateTelemetryForLocation(
           locationId, new HashMap<>(), JsonKey.DELETE, request.getContext());

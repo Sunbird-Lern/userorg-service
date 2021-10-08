@@ -1,35 +1,30 @@
 package org.sunbird.service.ratelimit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.dao.ratelimit.RateLimitDao;
+import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.util.ratelimit.OtpRateLimiter;
-import org.sunbird.util.ratelimit.RateLimit;
 import org.sunbird.util.ratelimit.RateLimiter;
 
 @RunWith(PowerMockRunner.class)
@@ -39,59 +34,117 @@ import org.sunbird.util.ratelimit.RateLimiter;
   "javax.security.*",
   "jdk.internal.reflect.*"
 })
+@PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 public class RateLimitServiceTest {
 
   private static final String KEY = "9999888898";
   private static final int HOUR_LIMIT = 10;
-
-  @InjectMocks private RateLimitService rateLimitService = new RateLimitServiceImpl();
-
-  @Mock private RateLimitDao rateLimitdDao;
-
   private RateLimiter hourRateLimiter = OtpRateLimiter.HOUR;
-
   private RateLimiter dayRateLimiter = OtpRateLimiter.DAY;
+  private static CassandraOperation cassandraOperationImpl = null;
 
-  @Before
-  public void beforeEachTest() {
-    MockitoAnnotations.initMocks(this);
-    doNothing().when(rateLimitdDao).insertRateLimits(anyList(), Mockito.any());
+  @BeforeClass
+  public static void beforeEachTest() {
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    /*PowerMockito.when(cassandraOperationImpl.batchInsertWithTTL(
+                        Mockito.anyString(),
+                        Mockito.anyString(),
+                        Mockito.any(),
+                        Mockito.anyList(),
+                        Mockito.any()))
+                .thenReturn(getSuccessResponse());
+
+        doAnswer(
+                (Answer)
+                        invocation -> {
+                          List<Map<String, Object>> rateLimits = invocation.getArgument(2);
+                          assertTrue(CollectionUtils.isNotEmpty(rateLimits));
+                          assertSame(1, rateLimits.size());
+                          assertSame(1, rateLimits.get(0).get(JsonKey.COUNT));
+                          return null;
+                        })
+                .when(cassandraOperationImpl)
+                .batchInsertWithTTL(
+                        Mockito.anyString(),
+                        Mockito.anyString(),
+                        Mockito.any(),
+                        Mockito.anyList(),
+                        Mockito.any());
+
+    */
+  }
+
+  private Response getSuccessResponse() {
+    Response response = new Response();
+    return response;
   }
 
   @Test
   public void testThrottleByKeyOnGoingSuccess() {
-    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any()))
-        .thenReturn(getRateLimitRecords(5));
+    RateLimitService rateLimitService = new RateLimitServiceImpl();
+    PowerMockito.when(
+            cassandraOperationImpl.getRecordsByIdsWithSpecifiedColumnsAndTTL(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyList(),
+                Mockito.any(),
+                Mockito.any()))
+        .then((Answer) invocation -> getRateLimitRecords(5));
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
-    assertRateLimitsOnInsert(countsByRateLimiter);
     rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
   }
 
   @Test
   public void testThrottleByKeyNew() {
-    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any())).thenReturn(null);
+    RateLimitService rateLimitService = new RateLimitServiceImpl();
+    PowerMockito.when(
+            cassandraOperationImpl.getRecordsByIdsWithSpecifiedColumnsAndTTL(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyList(),
+                Mockito.any(),
+                Mockito.any()))
+        .then((Answer) invocation -> new Response());
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 1);
-    assertRateLimitsOnInsert(countsByRateLimiter);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
+    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, new RequestContext());
   }
 
   @Test
   public void testThrottleByKeyMultipleLimit() {
-    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any()))
-        .thenReturn(getRateLimitRecords(5));
+    RateLimitService rateLimitService = new RateLimitServiceImpl();
+    PowerMockito.when(
+            cassandraOperationImpl.getRecordsByIdsWithSpecifiedColumnsAndTTL(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyList(),
+                Mockito.any(),
+                Mockito.any()))
+        .then((Answer) invocation -> getRateLimitRecords(5));
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
     countsByRateLimiter.put(dayRateLimiter.name(), 1);
-    assertRateLimitsOnInsert(countsByRateLimiter);
     rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter, dayRateLimiter}, null);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void testThrottleByKeyFailure() {
-    when(rateLimitdDao.getRateLimits(anyString(), Mockito.any()))
-        .thenReturn(getRateLimitRecords(HOUR_LIMIT));
+    RateLimitService rateLimitService = new RateLimitServiceImpl();
+    PowerMockito.when(
+            cassandraOperationImpl.getRecordsByIdsWithSpecifiedColumnsAndTTL(
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.any(),
+                Mockito.anyList(),
+                Mockito.any(),
+                Mockito.any()))
+        .then((Answer) invocation -> getRateLimitRecords(HOUR_LIMIT));
     try {
       rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
     } catch (ProjectCommonException e) {
@@ -100,7 +153,7 @@ public class RateLimitServiceTest {
     }
   }
 
-  private List<Map<String, Object>> getRateLimitRecords(int count) {
+  private Response getRateLimitRecords(int count) {
     List<Map<String, Object>> results = new ArrayList<>();
     Map<String, Object> record = new HashMap<>();
     record.put(JsonKey.KEY, KEY);
@@ -109,24 +162,8 @@ public class RateLimitServiceTest {
     record.put(JsonKey.TTL, 3500);
     record.put(JsonKey.COUNT, count);
     results.add(record);
-    return results;
-  }
-
-  private void assertRateLimitsOnInsert(Map<String, Integer> countsByRateLimiter) {
-    doAnswer(
-            (Answer)
-                invocation -> {
-                  List<RateLimit> rateLimits = invocation.getArgument(0);
-                  assertTrue(CollectionUtils.isNotEmpty(rateLimits));
-                  assertSame(countsByRateLimiter.size(), rateLimits.size());
-                  rateLimits.forEach(
-                      rateLimit -> {
-                        assertSame(
-                            countsByRateLimiter.get(rateLimit.getUnit()), rateLimit.getCount());
-                      });
-                  return null;
-                })
-        .when(rateLimitdDao)
-        .insertRateLimits(anyList(), Mockito.any());
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, results);
+    return response;
   }
 }

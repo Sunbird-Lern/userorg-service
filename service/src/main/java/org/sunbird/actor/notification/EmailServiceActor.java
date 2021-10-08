@@ -21,9 +21,10 @@ import org.sunbird.util.ProjectUtil;
 
 public class EmailServiceActor extends BaseActor {
 
-  private NotificationService notificationService = new NotificationService();
-  private SendgridConnection connection = new SendgridConnection();
-  private String resetInterval = ProjectUtil.getConfigValue("sendgrid_connection_reset_interval");
+  private final NotificationService notificationService = new NotificationService();
+  private final SendgridConnection connection = new SendgridConnection();
+  private final String resetInterval =
+      ProjectUtil.getConfigValue("sendgrid_connection_reset_interval");
   private volatile long timer;
 
   @Override

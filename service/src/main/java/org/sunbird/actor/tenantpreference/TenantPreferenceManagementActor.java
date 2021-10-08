@@ -11,7 +11,7 @@ import org.sunbird.service.tenantpreference.TenantPreferenceService;
 
 public class TenantPreferenceManagementActor extends BaseActor {
 
-  private TenantPreferenceService preferenceService = new TenantPreferenceService();
+  private final TenantPreferenceService preferenceService = new TenantPreferenceService();
 
   @Override
   public void onReceive(Request request) throws Throwable {

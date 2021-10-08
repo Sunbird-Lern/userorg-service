@@ -11,7 +11,8 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.common.CassandraUtil;
 import org.sunbird.dao.bulkupload.BulkUploadProcessTaskDao;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.keys.JsonKey;import org.sunbird.logging.LoggerUtil;
+import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -22,10 +23,10 @@ import org.sunbird.response.Response;
  * @author arvind
  */
 public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
-  private static LoggerUtil logger = new LoggerUtil(BulkUploadProcessTaskDaoImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(BulkUploadProcessTaskDaoImpl.class);
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String TABLE_NAME = "bulk_upload_process_task";
 

@@ -23,9 +23,9 @@ import scala.concurrent.Future;
 /** @author Amit Kumar */
 public class LocationDaoImpl implements LocationDao {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private ObjectMapper mapper = new ObjectMapper();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private final ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String LOCATION_TABLE_NAME = "location";
   private static final String DEFAULT_SORT_BY = "ASC";

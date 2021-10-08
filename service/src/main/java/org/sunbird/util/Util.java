@@ -21,12 +21,12 @@ public final class Util {
 
   public static final Map<String, DbInfo> dbInfoMap = new HashMap<>();
   private static final String KEY_SPACE_NAME = "sunbird";
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static EncryptionService encryptionService =
+  private static final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private static final EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
-  private static DecryptionService decService =
+  private static final DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
-  private static DataMaskingService maskingService =
+  private static final DataMaskingService maskingService =
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
 
   static {

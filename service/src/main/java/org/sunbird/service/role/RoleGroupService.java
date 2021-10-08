@@ -13,7 +13,7 @@ import org.sunbird.request.RequestContext;
 
 public class RoleGroupService {
 
-  private static RoleGroupDao roleGroupDao = RoleGroupDaoImpl.getInstance();
+  private static final RoleGroupDao roleGroupDao = RoleGroupDaoImpl.getInstance();
 
   public Map<String, Object> getRoleGroupMap(String roleName, RequestContext context) {
     Map<String, Object> response = new HashMap<>();

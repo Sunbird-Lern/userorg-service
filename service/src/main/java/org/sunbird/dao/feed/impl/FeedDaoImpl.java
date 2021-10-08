@@ -14,9 +14,9 @@ import org.sunbird.util.Util;
 
 public class FeedDaoImpl implements IFeedDao {
 
-  private static LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
 
-  private Util.DbInfo usrFeedDbInfo = Util.dbInfoMap.get(JsonKey.USER_FEED_DB);
+  private final Util.DbInfo usrFeedDbInfo = Util.dbInfoMap.get(JsonKey.USER_FEED_DB);
 
   private static IFeedDao iFeedDao = null;
 

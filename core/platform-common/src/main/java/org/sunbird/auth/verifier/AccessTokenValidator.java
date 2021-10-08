@@ -11,10 +11,10 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 
 public class AccessTokenValidator {
-  private static LoggerUtil logger = new LoggerUtil(AccessTokenValidator.class);
-  private static ObjectMapper mapper = new ObjectMapper();
-  private static String sso_url = System.getenv(JsonKey.SUNBIRD_SSO_URL);
-  private static String realm = System.getenv(JsonKey.SUNBIRD_SSO_RELAM);
+  private static final LoggerUtil logger = new LoggerUtil(AccessTokenValidator.class);
+  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final String sso_url = System.getenv(JsonKey.SUNBIRD_SSO_URL);
+  private static final String realm = System.getenv(JsonKey.SUNBIRD_SSO_RELAM);
 
   private static Map<String, Object> validateToken(String token) throws JsonProcessingException {
     String[] tokenElements = token.split("\\.");

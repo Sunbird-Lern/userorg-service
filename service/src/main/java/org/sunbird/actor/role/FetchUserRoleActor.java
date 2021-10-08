@@ -12,12 +12,11 @@ import org.sunbird.service.user.impl.UserRoleServiceImpl;
 
 public class FetchUserRoleActor extends BaseActor {
 
-  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
     String operation = request.getOperation();
-
     switch (operation) {
       case "getUserRolesById":
         getUserRolesById(request);

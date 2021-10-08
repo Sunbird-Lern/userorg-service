@@ -47,15 +47,15 @@ public class TenantMigrationActor extends BaseActor {
   private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
   private static final String MASK_IDENTIFIER = "maskIdentifier";
 
-  private DecryptionService decryptionService =
+  private final DecryptionService decryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
-  private DataMaskingService maskingService =
+  private final DataMaskingService maskingService =
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
-  private TenantMigrationService tenantServiceImpl = TenantMigrationServiceImpl.getInstance();
-  private UserSelfDeclarationService userSelfDeclarationService =
+  private final TenantMigrationService tenantServiceImpl = TenantMigrationServiceImpl.getInstance();
+  private final UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   @Inject
   @Named("user_external_identity_management_actor")

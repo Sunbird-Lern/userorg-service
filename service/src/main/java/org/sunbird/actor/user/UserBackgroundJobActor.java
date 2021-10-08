@@ -17,7 +17,7 @@ import scala.concurrent.Future;
 
 public class UserBackgroundJobActor extends BaseActor {
 
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -45,7 +45,6 @@ public class UserBackgroundJobActor extends BaseActor {
             (String) userDetails.get(JsonKey.ID), request.getRequestContext()));
     logger.info(request.getRequestContext(), "Updating saveUserOrgDetailsToES");
     upsertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
         (String) userDetails.get(JsonKey.ID),
         userOrgMap,
@@ -60,7 +59,6 @@ public class UserBackgroundJobActor extends BaseActor {
     User user = mapper.convertValue(userDetails, User.class);
     userDetails = mapper.convertValue(user, Map.class);
     upsertDataToElastic(
-        ProjectUtil.EsIndex.sunbird.getIndexName(),
         ProjectUtil.EsType.user.getTypeName(),
         (String) userDetails.get(JsonKey.ID),
         userDetails,
@@ -68,11 +66,7 @@ public class UserBackgroundJobActor extends BaseActor {
   }
 
   private void upsertDataToElastic(
-      String indexName,
-      String typeName,
-      String id,
-      Map<String, Object> userDetails,
-      RequestContext context) {
+      String typeName, String id, Map<String, Object> userDetails, RequestContext context) {
 
     Future<Boolean> bool = esUtil.upsert(typeName, id, userDetails, context);
 
