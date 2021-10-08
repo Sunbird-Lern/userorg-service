@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,37 +49,6 @@ public class RateLimitServiceTest {
     PowerMockito.mockStatic(ServiceFactory.class);
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
-    /*PowerMockito.when(cassandraOperationImpl.batchInsertWithTTL(
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.any(),
-                        Mockito.anyList(),
-                        Mockito.any()))
-                .thenReturn(getSuccessResponse());
-
-        doAnswer(
-                (Answer)
-                        invocation -> {
-                          List<Map<String, Object>> rateLimits = invocation.getArgument(2);
-                          assertTrue(CollectionUtils.isNotEmpty(rateLimits));
-                          assertSame(1, rateLimits.size());
-                          assertSame(1, rateLimits.get(0).get(JsonKey.COUNT));
-                          return null;
-                        })
-                .when(cassandraOperationImpl)
-                .batchInsertWithTTL(
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.any(),
-                        Mockito.anyList(),
-                        Mockito.any());
-
-    */
-  }
-
-  private Response getSuccessResponse() {
-    Response response = new Response();
-    return response;
   }
 
   @Test
@@ -96,6 +66,7 @@ public class RateLimitServiceTest {
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
     rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
+    Assert.assertNotNull(rateLimitService);
   }
 
   @Test
@@ -113,6 +84,7 @@ public class RateLimitServiceTest {
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 1);
     rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, new RequestContext());
+    Assert.assertNotNull(rateLimitService);
   }
 
   @Test
@@ -131,6 +103,7 @@ public class RateLimitServiceTest {
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
     countsByRateLimiter.put(dayRateLimiter.name(), 1);
     rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter, dayRateLimiter}, null);
+    Assert.assertNotNull(rateLimitService);
   }
 
   @Test(expected = ProjectCommonException.class)

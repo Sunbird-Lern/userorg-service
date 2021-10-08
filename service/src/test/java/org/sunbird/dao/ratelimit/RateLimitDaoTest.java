@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,6 +89,7 @@ public class RateLimitDaoTest {
   public void testInsertRateLimitsSuccess() {
     RateLimitDao rateLimitDao = RateLimitDaoImpl.getInstance();
     rateLimitDao.insertRateLimits(getRateLimits(), null);
+    Assert.assertNotNull(rateLimitDao);
   }
 
   @Test(expected = ProjectCommonException.class)
