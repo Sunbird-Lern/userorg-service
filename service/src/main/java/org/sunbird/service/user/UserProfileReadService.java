@@ -39,18 +39,18 @@ import org.sunbird.util.user.UserUtil;
 
 public class UserProfileReadService {
 
-  private LoggerUtil logger = new LoggerUtil(UserProfileReadService.class);
-  private UserService userService = UserServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
-  private UserTncService tncService = new UserTncService();
-  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
-  private LocationService locationService = LocationServiceImpl.getInstance();
-  private UserSelfDeclarationService userSelfDeclarationService =
+  private final LoggerUtil logger = new LoggerUtil(UserProfileReadService.class);
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final UserTncService tncService = new UserTncService();
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private final LocationService locationService = LocationServiceImpl.getInstance();
+  private final UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private UserExternalIdentityService userExternalIdentityService =
+  private final UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   public Response getUserProfileData(Request actorMessage) {
     String id = (String) actorMessage.getRequest().get(JsonKey.USER_ID);
@@ -73,31 +73,25 @@ public class UserProfileReadService {
         orgService.getOrgById(
             (String) result.get(JsonKey.ROOT_ORG_ID), actorMessage.getRequestContext());
     if (MapUtils.isNotEmpty(rootOrg)
-        && actorMessage
-            .getOperation()
-            .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-      Util.getOrgDefaultValue().keySet().stream().forEach(key -> rootOrg.remove(key));
+        && (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())
+            || readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue()))) {
+      Util.getOrgDefaultValue().keySet().forEach(rootOrg::remove);
+      Util.getUserDefaultValue().keySet().forEach(result::remove);
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
-
+    Map<String, List<String>> userOrgRoles = null;
     List<Map<String, Object>> userRolesList =
         userRoleService.getUserRoles(userId, actorMessage.getRequestContext());
     if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
       result.put(JsonKey.ROLES, userRolesList);
     } else {
       result.remove(JsonKey.ROLES);
-    }
-    Map<String, List<String>> userOrgRoles = null;
-    if (!readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
       userOrgRoles = getUserOrgRoles(userRolesList);
     }
     result.put(
         JsonKey.ORGANISATIONS,
         fetchUserOrgList(
-            (String) result.get(JsonKey.ID),
-            userOrgRoles,
-            actorMessage.getRequestContext(),
-            readVersion));
+            (String) result.get(JsonKey.ID), userOrgRoles, actorMessage.getRequestContext()));
     String requestedById =
         (String) actorMessage.getContext().getOrDefault(JsonKey.REQUESTED_BY, "");
     String managedForId = (String) actorMessage.getContext().getOrDefault(JsonKey.MANAGED_FOR, "");
@@ -147,11 +141,6 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
-    if (actorMessage
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V4.getValue())) {
-      Util.getUserDefaultValue().keySet().stream().forEach(key -> result.remove(key));
-    }
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
@@ -236,12 +225,12 @@ public class UserProfileReadService {
     String dob = (String) result.get(JsonKey.DOB);
     if (StringUtils.isNotEmpty(dob)) {
       int year = Integer.parseInt(dob.split("-")[0]);
-      LocalDate currentdate = LocalDate.now();
-      int currentYear = currentdate.getYear();
+      LocalDate currentDate = LocalDate.now();
+      int currentYear = currentDate.getYear();
       // reason for keeping 19 instead of 18 is, all dob's will be saving with 12-31 appending to
       // the year so 18 will be completed in the jan 1st
       // for eg: 2004-12-31 will become major after 2023 jan 1st.
-      boolean isMinor = (currentYear - year <= 19) ? true : false;
+      boolean isMinor = currentYear - year <= 19;
       result.put(JsonKey.IS_MINOR, isMinor);
     }
   }
@@ -262,7 +251,7 @@ public class UserProfileReadService {
       if (StringUtils.isEmpty(managedToken)) {
         logger.debug(
             actorMessage.getRequestContext(),
-            "UserProfileReadActor: getUserProfileData: calling token generation for: " + userId);
+            "UserProfileReadService: getUserProfileData: calling token generation for: " + userId);
         List<Map<String, Object>> userList = new ArrayList<>();
         userList.add(result);
         // Fetch encrypted token from admin utils
@@ -280,24 +269,19 @@ public class UserProfileReadService {
   }
 
   private List<Map<String, Object>> fetchUserOrgList(
-      String userId,
-      Map<String, List<String>> userOrgRoles,
-      RequestContext requestContext,
-      String readVersion) {
+      String userId, Map<String, List<String>> userOrgRoles, RequestContext requestContext) {
     List<Map<String, Object>> usrOrgList = new ArrayList<>();
     List<Map<String, Object>> userOrgList =
         userOrgService.getUserOrgListByUserId(userId, requestContext);
     for (Map<String, Object> userOrg : userOrgList) {
-      if (readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue())) {
-        userOrg.remove(JsonKey.ROLES);
-      }
-      String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
-      if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
-        userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
-      }
       Boolean isDeleted = (Boolean) userOrg.get(JsonKey.IS_DELETED);
-      if (null == isDeleted || (null != isDeleted && !isDeleted.booleanValue())) {
+      if (null == isDeleted || (!isDeleted.booleanValue())) {
         updateAssociationMechanism(userOrg);
+        userOrg.remove(JsonKey.ROLES);
+        String organisationId = (String) userOrg.get(JsonKey.ORGANISATION_ID);
+        if (MapUtils.isNotEmpty(userOrgRoles) && userOrgRoles.containsKey(organisationId)) {
+          userOrg.put(JsonKey.ROLES, userOrgRoles.get(organisationId));
+        }
         usrOrgList.add(userOrg);
       }
     }
@@ -324,7 +308,7 @@ public class UserProfileReadService {
     Map<String, Object> user = userService.getUserDetailsById(userId, context);
     // check whether user active or not
     Boolean isDeleted = (Boolean) user.get(JsonKey.IS_DELETED);
-    if (null != isDeleted && isDeleted.booleanValue()) {
+    if (null != isDeleted && isDeleted) {
       ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
     removeUserPrivateField(user);
@@ -354,12 +338,11 @@ public class UserProfileReadService {
     }
   }
 
-  private Map<String, Object> removeUserPrivateField(Map<String, Object> responseMap) {
+  private void removeUserPrivateField(Map<String, Object> responseMap) {
     for (int i = 0; i < ProjectUtil.excludes.length; i++) {
       responseMap.remove(ProjectUtil.excludes[i]);
     }
     responseMap.remove(JsonKey.ADDRESS);
-    return responseMap;
   }
 
   public void updateTnc(Map<String, Object> userMap) {
@@ -370,7 +353,7 @@ public class UserProfileReadService {
 
     } catch (Exception e) {
       logger.error(
-          "UserProfileReadActor:updateTncInfo: Exception occurred while getting system setting for"
+          "UserProfileReadService:updateTncInfo: Exception occurred while getting system setting for"
               + JsonKey.TNC_CONFIG
               + e.getMessage(),
           e);
@@ -384,7 +367,7 @@ public class UserProfileReadService {
         Object tncUserAcceptedOn = userMap.get(JsonKey.TNC_ACCEPTED_ON);
         userMap.put(JsonKey.PROMPT_TNC, false);
         String url = (String) ((Map) tncConfigMap.get(tncLatestVersion)).get(JsonKey.URL);
-        logger.info("UserProfileReadActor:updateTncInfo: url = " + url);
+        logger.debug("UserProfileReadService:updateTncInfo: url = " + url);
         userMap.put(JsonKey.TNC_LATEST_VERSION_URL, url);
         if ((StringUtils.isEmpty(tncUserAcceptedVersion)
                 || !tncUserAcceptedVersion.equalsIgnoreCase(tncLatestVersion)
@@ -394,7 +377,7 @@ public class UserProfileReadService {
         }
       } catch (Exception e) {
         logger.error(
-            "UserProfileReadActor:updateTncInfo: Exception occurred with error message = "
+            "UserProfileReadService:updateTncInfo: Exception occurred with error message = "
                 + e.getMessage(),
             e);
       }
@@ -427,16 +410,14 @@ public class UserProfileReadService {
         && StringUtils.isNotBlank(rootOrgId)
         && StringUtils.isNotBlank(dbResExternalIds.get(0).get(JsonKey.PROVIDER))
         && ((dbResExternalIds.get(0).get(JsonKey.PROVIDER)).equalsIgnoreCase(rootOrgId))) {
-      dbResExternalIds
-          .stream()
-          .forEach(
-              s -> {
-                if (s.get(JsonKey.PROVIDER) != null
-                    && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
-                  s.put(JsonKey.ID_TYPE, provider);
-                }
-                s.put(JsonKey.PROVIDER, provider);
-              });
+      dbResExternalIds.forEach(
+          s -> {
+            if (s.get(JsonKey.PROVIDER) != null
+                && s.get(JsonKey.PROVIDER).equals(s.get(JsonKey.ID_TYPE))) {
+              s.put(JsonKey.ID_TYPE, provider);
+            }
+            s.put(JsonKey.PROVIDER, provider);
+          });
 
     } else {
       UserUtil.updateExternalIdsWithProvider(dbResExternalIds, context);
@@ -450,11 +431,11 @@ public class UserProfileReadService {
       if (fields.contains(JsonKey.TOPIC)) {
         result.put(JsonKey.TOPICS, new HashSet<>());
       }
-      if (fields.contains(JsonKey.ORGANISATIONS)) {
-        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
-      }
       if (fields.contains(JsonKey.ROLES)) {
         result.put(JsonKey.ROLE_LIST, DataCacheHandler.getUserReadRoleList());
+      }
+      if (fields.contains(JsonKey.ORGANISATIONS)) {
+        updateUserOrgInfo((List) result.get(JsonKey.ORGANISATIONS), context);
       }
       if (fields.contains(JsonKey.LOCATIONS)) {
         List<Map<String, String>> userLocList =
