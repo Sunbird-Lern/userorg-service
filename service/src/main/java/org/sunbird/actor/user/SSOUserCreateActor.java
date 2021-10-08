@@ -112,7 +112,6 @@ public class SSOUserCreateActor extends UserBaseActor {
     userMap.put(JsonKey.ID, userId);
     userMap.put(JsonKey.USER_ID, userId);
     requestMap = UserUtil.encryptUserData(userMap);
-    Map<String, Object> userLookUpData = new HashMap<>(requestMap);
     // removing roles from requestMap, so it won't get save in user table
     List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
     removeUnwanted(requestMap);

@@ -73,6 +73,9 @@ public class EmailServiceActorTest {
             Mockito.anyList(),
             Mockito.any()))
         .thenReturn(cassandraGetRecordById());
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(cassandraGetRecordById());
   }
 
   private static Response cassandraGetRecordById() {

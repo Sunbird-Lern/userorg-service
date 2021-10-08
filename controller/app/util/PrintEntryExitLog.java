@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.SerializationUtils;
@@ -30,9 +29,10 @@ import org.sunbird.util.ProjectUtil;
 
 public class PrintEntryExitLog {
 
-  private static LoggerUtil logger = new LoggerUtil(PrintEntryExitLog.class);
-  private static LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final LoggerUtil logger = new LoggerUtil(PrintEntryExitLog.class);
+  private static final LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
+  private static final DataMaskingService service = new DefaultDataMaskServiceImpl();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   public static void printEntryLog(Request request) {
     try {
@@ -157,9 +157,8 @@ public class PrintEntryExitLog {
 
   private static String maskPIIData(String logString) {
     try {
-      DataMaskingService service = new DefaultDataMaskServiceImpl();
       StringBuilder builder = new StringBuilder(logString);
-      //Mask Email
+      // Mask Email
       StringBuilder emailRegex = new StringBuilder(ProjectUtil.EMAIL_PATTERN);
       emailRegex.deleteCharAt(emailRegex.length() - 1);
       emailRegex.deleteCharAt(0);
@@ -170,7 +169,7 @@ public class PrintEntryExitLog {
         String tempStr = emailMatcher.group();
         builder.replace(emailMatcher.start(), emailMatcher.end(), service.maskEmail(tempStr));
       }
-      //Mask Phone
+      // Mask Phone
       String PHONE_PATTERN = "[0-9]{10}";
       Pattern phonePattern = Pattern.compile(PHONE_PATTERN);
       Matcher phoneMatcher = phonePattern.matcher(logString);
