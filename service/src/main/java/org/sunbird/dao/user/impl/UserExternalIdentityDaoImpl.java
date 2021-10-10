@@ -17,7 +17,7 @@ import org.sunbird.response.Response;
 
 public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 
-  private static final LoggerUtil logger = new LoggerUtil(UserExternalIdentityDaoImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(UserExternalIdentityDaoImpl.class);
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override

@@ -30,8 +30,8 @@ import scala.concurrent.Future;
 public class UserDaoImpl implements UserDao {
 
   private final LoggerUtil logger = new LoggerUtil(UserDaoImpl.class);
-  private static final String TABLE_NAME = JsonKey.USER;
-  private static final String KEY_SPACE_NAME = JsonKey.SUNBIRD;
+  private final String TABLE_NAME = JsonKey.USER;
+  private final String KEY_SPACE_NAME = JsonKey.SUNBIRD;
   private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();

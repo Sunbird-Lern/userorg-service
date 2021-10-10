@@ -53,8 +53,7 @@ public class UserServiceImpl implements UserService {
   private final OrgService orgService = OrgServiceImpl.getInstance();
   private final UserTncService tncService = new UserTncService();
   private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-  private static final int GENERATE_USERNAME_COUNT = 10;
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -173,6 +172,7 @@ public class UserServiceImpl implements UserService {
     HashSet<String> userNameSet = new HashSet<>();
     int totalUserNameGenerated = 0;
     String nameLowercase = name.toLowerCase().replaceAll("\\-+", "");
+    int GENERATE_USERNAME_COUNT = 10;
     while (totalUserNameGenerated < GENERATE_USERNAME_COUNT) {
       String userNameSuffix =
           RandomStringUtils.randomAlphanumeric(numOfCharsToAppend).toLowerCase();

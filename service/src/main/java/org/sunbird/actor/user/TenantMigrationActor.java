@@ -44,9 +44,7 @@ import scala.concurrent.duration.Duration;
 
 public class TenantMigrationActor extends BaseActor {
 
-  private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
-  private static final String MASK_IDENTIFIER = "maskIdentifier";
-
+  private final String MASK_IDENTIFIER = "maskIdentifier";
   private final DecryptionService decryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private final DataMaskingService maskingService =
@@ -229,6 +227,7 @@ public class TenantMigrationActor extends BaseActor {
       requestMap.put(JsonKey.RECIPIENT_PHONES, Arrays.asList(userData.get(JsonKey.PHONE)));
       requestMap.put(JsonKey.MODE, JsonKey.SMS);
     }
+    String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
     requestMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, ACCOUNT_MERGE_EMAIL_TEMPLATE);
     Map<String, String> templateConfig = new HashMap<>();
     templateConfig.put(

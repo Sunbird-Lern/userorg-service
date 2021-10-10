@@ -16,8 +16,6 @@ public class UrlActionDaoImpl implements UrlActionDao {
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();
   private static UrlActionDao urlActionDao;
-  private static final String KEYSPACE_NAME = "sunbird";
-  private static final String TABLE_NAME = "url_action";
 
   public static UrlActionDao getInstance() {
     if (urlActionDao == null) {
@@ -26,11 +24,12 @@ public class UrlActionDaoImpl implements UrlActionDao {
     return urlActionDao;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<UrlAction> getUrlActions() {
+    String KEYSPACE_NAME = "sunbird";
+    String TABLE_NAME = "url_action";
     Response urlActionResults = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
-    TypeReference<List<UrlAction>> urlActionType = new TypeReference<List<UrlAction>>() {};
+    TypeReference<List<UrlAction>> urlActionType = new TypeReference<>() {};
     List<Map<String, Object>> urlActionMapList =
         (List<Map<String, Object>>) urlActionResults.get(JsonKey.RESPONSE);
     List<UrlAction> urlActionList = mapper.convertValue(urlActionMapList, urlActionType);

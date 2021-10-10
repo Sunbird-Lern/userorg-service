@@ -17,7 +17,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class UserOrgServiceImpl implements UserOrgService {
   private static UserOrgServiceImpl userOrgService = null;
-  private static final LoggerUtil logger = new LoggerUtil(UserOrgServiceImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(UserOrgServiceImpl.class);
   private final UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
 
   public static UserOrgService getInstance() {

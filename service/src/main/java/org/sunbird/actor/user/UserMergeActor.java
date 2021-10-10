@@ -49,8 +49,8 @@ import org.sunbird.util.user.KafkaConfigConstants;
 import org.sunbird.util.user.UserUtil;
 
 public class UserMergeActor extends UserBaseActor {
-  String topic = null;
-  Producer<String, String> producer = null;
+  private String topic = null;
+  private Producer<String, String> producer = null;
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final UserService userService = UserServiceImpl.getInstance();
   private final SSOManager keyCloakService = SSOServiceFactory.getInstance();

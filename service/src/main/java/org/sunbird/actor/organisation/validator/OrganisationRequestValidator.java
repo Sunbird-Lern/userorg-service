@@ -26,7 +26,7 @@ import org.sunbird.util.Slug;
 
 public class OrganisationRequestValidator {
 
-  private static final LoggerUtil logger = new LoggerUtil(OrganisationRequestValidator.class);
+  private final LoggerUtil logger = new LoggerUtil(OrganisationRequestValidator.class);
   private final OrgService orgService = OrgServiceImpl.getInstance();
   private final LocationService locationService = new LocationServiceImpl();
   private final LocationRequestValidator validator = new LocationRequestValidator();

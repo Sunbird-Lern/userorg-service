@@ -13,7 +13,6 @@ import org.sunbird.response.Response;
 public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
 
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-
   private static TenantPreferenceDao preferenceDao;
 
   public static TenantPreferenceDao getInstance() {

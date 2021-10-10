@@ -1,6 +1,5 @@
 package org.sunbird.dao.user.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -18,8 +17,6 @@ import org.sunbird.response.Response;
 
 public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private final ObjectMapper mapper = new ObjectMapper();
-
   private static UserSelfDeclarationDao userSelfDeclarationDao = null;
 
   public static UserSelfDeclarationDao getInstance() {

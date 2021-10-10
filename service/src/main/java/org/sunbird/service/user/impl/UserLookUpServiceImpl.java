@@ -22,8 +22,8 @@ import org.sunbird.util.ProjectUtil;
 
 public class UserLookUpServiceImpl implements UserLookupService {
 
-  private static final LoggerUtil logger = new LoggerUtil(UserLookUpServiceImpl.class);
-  private static final UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+  private final LoggerUtil logger = new LoggerUtil(UserLookUpServiceImpl.class);
+  private final UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
   private static UserLookupService userLookupService = null;
 
   public static UserLookupService getInstance() {

@@ -15,9 +15,8 @@ import org.sunbird.response.Response;
 
 public final class UserOrgDaoImpl implements UserOrgDao {
 
-  private static final String TABLE_NAME = JsonKey.USER_ORG;
+  private final String TABLE_NAME = JsonKey.USER_ORG;
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-
   private final ObjectMapper mapper = new ObjectMapper();
 
   private static UserOrgDaoImpl instance;

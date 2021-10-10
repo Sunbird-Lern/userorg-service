@@ -32,7 +32,7 @@ import org.sunbird.util.user.UserUtil;
 
 public class SSOUserServiceImpl implements SSOUserService {
 
-  private static final LoggerUtil logger = new LoggerUtil(SSOUserServiceImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(SSOUserServiceImpl.class);
 
   private static SSOUserService ssoUserService = null;
   private final OrganisationClient organisationClient = OrganisationClientImpl.getInstance();

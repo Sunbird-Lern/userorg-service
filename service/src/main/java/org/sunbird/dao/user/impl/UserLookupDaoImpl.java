@@ -17,11 +17,10 @@ import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 
 public class UserLookupDaoImpl implements UserLookupDao {
-  private static final LoggerUtil logger = new LoggerUtil(UserLookupDaoImpl.class);
-
-  private static final Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
+  private final LoggerUtil logger = new LoggerUtil(UserLookupDaoImpl.class);
+  private final Util.DbInfo userLookUp = Util.dbInfoMap.get(JsonKey.USER_LOOKUP);
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static final EncryptionService encryptionService =
+  private final EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static UserLookupDao userLookUpDao = null;
 

@@ -23,7 +23,7 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
   private final LoggerUtil logger = new LoggerUtil(UserSelfDeclarationServiceImpl.class);
   private static UserSelfDeclarationService selfDeclarationService = null;
   private final ObjectMapper mapper = new ObjectMapper();
-  private static final UserSelfDeclarationDao userSelfDeclarationDao =
+  private final UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
 
   public static UserSelfDeclarationService getInstance() {

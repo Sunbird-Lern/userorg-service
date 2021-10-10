@@ -18,8 +18,7 @@ import org.sunbird.util.user.UserExternalIdentityAdapter;
 import org.sunbird.util.user.UserUtil;
 
 public class UserExternalIdentityServiceImpl implements UserExternalIdentityService {
-  private static final UserExternalIdentityDao userExternalIdentityDao =
-      new UserExternalIdentityDaoImpl();
+  private final UserExternalIdentityDao userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private final LocationService locationService = LocationServiceImpl.getInstance();
 
   @Override

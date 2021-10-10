@@ -22,8 +22,8 @@ import org.sunbird.service.feed.IFeedService;
 import org.sunbird.util.ProjectUtil;
 
 public class FeedServiceImpl implements IFeedService {
-  private static final LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
-  private static final String notification_service_base_url =
+  private final LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
+  private final String notification_service_base_url =
       System.getenv("notification_service_base_url");
   private final ObjectMapper mapper = new ObjectMapper();
 

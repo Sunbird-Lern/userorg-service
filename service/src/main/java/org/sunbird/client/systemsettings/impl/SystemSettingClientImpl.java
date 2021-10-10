@@ -23,7 +23,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 public class SystemSettingClientImpl implements SystemSettingClient {
-  private static final LoggerUtil logger = new LoggerUtil(SystemSettingClientImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(SystemSettingClientImpl.class);
   private static SystemSettingClient systemSettingClient = null;
 
   public static SystemSettingClient getInstance() {

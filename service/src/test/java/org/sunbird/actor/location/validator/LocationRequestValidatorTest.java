@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -53,25 +52,22 @@ import scala.concurrent.Promise;
 })
 public class LocationRequestValidatorTest {
 
-  private static ElasticSearchService esService;
-  private static LocationDaoImpl locationDao;
+  private LocationRequestValidator validator;
+  private ElasticSearchService esService;
+  private LocationDaoImpl locationDao;
 
-  @BeforeClass
-  public static void before() {
+  @Before
+  public void beforeTest() {
     PowerMockito.mockStatic(ProjectUtil.class);
     PowerMockito.when(ProjectUtil.getConfigValue(Mockito.anyString()))
         .thenReturn("state,district,block,cluster,school;");
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
-  }
-
-  @Before
-  public void beforeTest() {
-
     PowerMockito.mockStatic(LocationDaoFactory.class);
     locationDao = mock(LocationDaoImpl.class);
     when(LocationDaoFactory.getInstance()).thenReturn(locationDao);
+    validator = new LocationRequestValidator();
   }
 
   @Test
@@ -97,7 +93,7 @@ public class LocationRequestValidatorTest {
     request.setName("name");
     request.setType("district");
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "create");
+      validator.isValidParentIdAndCode(request, "create", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       String msg =
@@ -118,7 +114,7 @@ public class LocationRequestValidatorTest {
     request.setParentId("parentId");
     request.setParentCode("parentCode");
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "create");
+      validator.isValidParentIdAndCode(request, "create", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       String msg =
@@ -154,7 +150,7 @@ public class LocationRequestValidatorTest {
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "create");
+      validator.isValidParentIdAndCode(request, "create", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       String msg =
@@ -189,7 +185,7 @@ public class LocationRequestValidatorTest {
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "update");
+      validator.isValidParentIdAndCode(request, "update", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       String msg =
@@ -230,7 +226,7 @@ public class LocationRequestValidatorTest {
         .thenReturn(promise.future())
         .thenReturn(promise2.future());
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "create");
+      validator.isValidParentIdAndCode(request, "create", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       String msg =
@@ -280,7 +276,7 @@ public class LocationRequestValidatorTest {
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(locPromise.future());
     try {
-      LocationRequestValidator.isValidParentIdAndCode(request, "create");
+      validator.isValidParentIdAndCode(request, "create", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       String msg =
@@ -332,8 +328,7 @@ public class LocationRequestValidatorTest {
 
     when(esService.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(locPromise.future());
-
-    boolean isValid = LocationRequestValidator.isValidParentIdAndCode(request, "update");
+    boolean isValid = validator.isValidParentIdAndCode(request, "update", new RequestContext());
     Assert.assertTrue(isValid);
   }
 
@@ -375,7 +370,7 @@ public class LocationRequestValidatorTest {
         .thenReturn(locPromise.future());
 
     try {
-      LocationRequestValidator.isLocationHasChild("stateid");
+      validator.isLocationHasChild("stateid", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       Assert.assertEquals(
@@ -443,7 +438,6 @@ public class LocationRequestValidatorTest {
 
   @Test
   public void validateSearchLocationRequestTest() {
-    LocationRequestValidator validator = new LocationRequestValidator();
     List<String> filters = new ArrayList<>();
     Map<String, Object> reqMap = new HashMap<>();
     reqMap.put(JsonKey.FILTERS, filters);
@@ -459,7 +453,6 @@ public class LocationRequestValidatorTest {
 
   @Test
   public void validateSearchLocationEmptyRequestTest() {
-    LocationRequestValidator validator = new LocationRequestValidator();
     Map<String, Object> reqMap = new HashMap<>();
     Request req = new Request();
     req.setRequest(reqMap);
@@ -473,7 +466,6 @@ public class LocationRequestValidatorTest {
 
   @Test
   public void validateDeleteLocationRequestTest() {
-    LocationRequestValidator validator = new LocationRequestValidator();
     try {
       validator.validateDeleteLocationRequest("");
     } catch (ProjectCommonException ex) {

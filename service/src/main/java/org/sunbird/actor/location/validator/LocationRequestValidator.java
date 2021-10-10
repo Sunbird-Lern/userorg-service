@@ -25,13 +25,13 @@ import scala.concurrent.Future;
 /** @author Amit Kumar */
 public class LocationRequestValidator extends BaseLocationRequestValidator {
 
-  private static final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private final LocationService locationService = new LocationServiceImpl();
-  private static final ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
-  private static Map<String, Integer> orderMap = new HashMap<>();
-  protected static List<List<String>> locationTypeGroupList = new ArrayList<>();
-  protected static List<String> typeList = new ArrayList<>();
+  private static final Map<String, Integer> orderMap = new HashMap<>();
+  private static final List<List<String>> locationTypeGroupList = new ArrayList<>();
+  private static final List<String> typeList = new ArrayList<>();
 
   static {
     List<String> subTypeList =
@@ -97,8 +97,8 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * @param opType type of location.
    * @return boolean If parent id and code are valid return true else false.
    */
-  public static boolean isValidParentIdAndCode(
-      UpsertLocationRequest locationRequest, String opType) {
+  public boolean isValidParentIdAndCode(
+      UpsertLocationRequest locationRequest, String opType, RequestContext context) {
     String type = locationRequest.getType();
     if (StringUtils.isNotEmpty(type)) {
       List<String> locationTypeList = getLocationSubTypeListForType(type);
@@ -131,9 +131,9 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
       }
     }
     if (StringUtils.isNotEmpty(locationRequest.getCode())) {
-      isValidLocationCode(locationRequest, opType);
+      isValidLocationCode(locationRequest, opType, context);
     }
-    validateParentIDAndParentCode(locationRequest, opType);
+    validateParentIDAndParentCode(locationRequest, opType, context);
     return true;
   }
 
@@ -146,12 +146,12 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     return (new ArrayList<>());
   }
 
-  private static void validateParentIDAndParentCode(
-      UpsertLocationRequest locationRequest, String opType) {
+  private void validateParentIDAndParentCode(
+      UpsertLocationRequest locationRequest, String opType, RequestContext context) {
     String parentCode = locationRequest.getParentCode();
     String parentId = locationRequest.getParentId();
     if (StringUtils.isNotEmpty(parentCode)) {
-      Map<String, Object> map = getLocation(parentCode);
+      Map<String, Object> map = getLocation(parentCode, context);
       parentId = (String) map.get(JsonKey.ID);
       locationRequest.setParentId((String) map.get(JsonKey.ID));
     }
@@ -160,11 +160,12 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
       if (StringUtils.isNotEmpty(parentCode)) {
         operation = GeoLocationJsonKey.PARENT_CODE;
       }
-      Map<String, Object> parentLocation = getLocationById(parentId, operation);
+      Map<String, Object> parentLocation = getLocationById(parentId, operation, context);
       validateParentLocationType(
           mapper.convertValue(parentLocation, UpsertLocationRequest.class),
           locationRequest,
-          opType);
+          opType,
+          context);
     }
   }
 
@@ -176,14 +177,17 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * @param location represents child location request object.
    * @return boolean If child location has valid hierarchy with parent return true otherwise false.
    */
-  private static boolean validateParentLocationType(
-      UpsertLocationRequest parentLocation, UpsertLocationRequest location, String opType) {
+  private boolean validateParentLocationType(
+      UpsertLocationRequest parentLocation,
+      UpsertLocationRequest location,
+      String opType,
+      RequestContext context) {
     int levelLimit = 1;
     String parentType = parentLocation.getType();
     String currentLocType = location.getType();
     Map<String, Object> locn = null;
     if (opType.equalsIgnoreCase(JsonKey.UPDATE)) {
-      locn = getLocationById(location.getId(), JsonKey.LOCATION_ID);
+      locn = getLocationById(location.getId(), JsonKey.LOCATION_ID, context);
       currentLocType = (String) locn.get(GeoLocationJsonKey.LOCATION_TYPE);
     }
     Map<String, Integer> currentLocTypeoOrdermap =
@@ -221,9 +225,9 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * @param id
    * @return Map<String, Object> location details
    */
-  private static Map<String, Object> getLocationById(String id, String parameter) {
+  private Map<String, Object> getLocationById(String id, String parameter, RequestContext context) {
     Future<Map<String, Object>> locationF =
-        esUtil.getDataByIdentifier(ProjectUtil.EsType.location.getTypeName(), id, null);
+        esUtil.getDataByIdentifier(ProjectUtil.EsType.location.getTypeName(), id, context);
     Map<String, Object> location =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(locationF);
     if (MapUtils.isEmpty(location)) {
@@ -241,16 +245,13 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * @param code Value of location code we are looking for.
    * @return location details Map<String, Object>
    */
-  private static Map<String, Object> getLocation(String code) {
+  private Map<String, Object> getLocation(String code, RequestContext context) {
     Map<String, Object> filters = new HashMap<>();
     filters.put(GeoLocationJsonKey.CODE, code);
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.FILTERS, filters);
     List<Map<String, Object>> locationMapList =
-        getESSearchResult(
-            map,
-            ProjectUtil.EsIndex.sunbird.getIndexName(),
-            ProjectUtil.EsType.location.getTypeName());
+        getESSearchResult(map, ProjectUtil.EsType.location.getTypeName(), context);
     if (CollectionUtils.isNotEmpty(locationMapList)) {
       return locationMapList.get(0);
     } else {
@@ -268,8 +269,8 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
    * @param locationId
    * @return boolean
    */
-  public static boolean isLocationHasChild(String locationId) {
-    Map<String, Object> location = getLocationById(locationId, JsonKey.LOCATION_ID);
+  public boolean isLocationHasChild(String locationId, RequestContext context) {
+    Map<String, Object> location = getLocationById(locationId, JsonKey.LOCATION_ID, context);
     Map<String, Integer> locTypeoOrdermap =
         getLocationTypeOrderMap(
             ((String) location.get(GeoLocationJsonKey.LOCATION_TYPE)).toLowerCase());
@@ -285,10 +286,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.FILTERS, filters);
       List<Map<String, Object>> locationMapList =
-          getESSearchResult(
-              map,
-              ProjectUtil.EsIndex.sunbird.getIndexName(),
-              ProjectUtil.EsType.location.getTypeName());
+          getESSearchResult(map, ProjectUtil.EsType.location.getTypeName(), context);
       if (CollectionUtils.isNotEmpty(locationMapList)) {
         throw new ProjectCommonException(
             ResponseCode.invalidLocationDeleteRequest.getErrorCode(),
@@ -299,25 +297,23 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     return true;
   }
 
-  public static List<Map<String, Object>> getESSearchResult(
-      Map<String, Object> searchQueryMap, String esIndex, String esType) {
+  public List<Map<String, Object>> getESSearchResult(
+      Map<String, Object> searchQueryMap, String esType, RequestContext context) {
     SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
-    Future<Map<String, Object>> resultF = esUtil.search(searchDto, esType, null);
+    Future<Map<String, Object>> resultF = esUtil.search(searchDto, esType, context);
     Map<String, Object> result =
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
     return (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
   }
 
-  public static boolean isValidLocationCode(UpsertLocationRequest locationRequest, String opType) {
+  public boolean isValidLocationCode(
+      UpsertLocationRequest locationRequest, String opType, RequestContext context) {
     Map<String, Object> filters = new HashMap<>();
     filters.put(GeoLocationJsonKey.CODE, locationRequest.getCode());
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.FILTERS, filters);
     List<Map<String, Object>> locationMapList =
-        getESSearchResult(
-            map,
-            ProjectUtil.EsIndex.sunbird.getIndexName(),
-            ProjectUtil.EsType.location.getTypeName());
+        getESSearchResult(map, ProjectUtil.EsType.location.getTypeName(), context);
     if (!locationMapList.isEmpty()) {
       if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
         throw new ProjectCommonException(

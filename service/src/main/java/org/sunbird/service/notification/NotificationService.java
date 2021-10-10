@@ -30,7 +30,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class NotificationService {
 
-  private static final LoggerUtil logger = new LoggerUtil(NotificationService.class);
+  private final LoggerUtil logger = new LoggerUtil(NotificationService.class);
   private final UserService userService = UserServiceImpl.getInstance();
   private final OrgService orgService = OrgServiceImpl.getInstance();
 

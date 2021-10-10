@@ -22,7 +22,7 @@ import org.sunbird.validator.BaseRequestValidator;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
-  private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+  private final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
   private static final LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
 
@@ -63,7 +63,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     return password.matches(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_PASS_REGEX));
   }
 
-  private static void validatePassword(String password) {
+  private void validatePassword(String password) {
     if (StringUtils.isNotBlank(password)) {
       boolean response = isGoodPassword(password);
       if (!response) {

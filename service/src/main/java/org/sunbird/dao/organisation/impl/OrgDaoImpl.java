@@ -31,8 +31,8 @@ public class OrgDaoImpl implements OrgDao {
   private final ObjectMapper mapper = new ObjectMapper();
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static OrgDao orgDao;
-  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
-  private static final String ORG_TABLE_NAME = JsonKey.ORGANISATION;
+  private final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private final String ORG_TABLE_NAME = JsonKey.ORGANISATION;
 
   public static OrgDao getInstance() {
     if (orgDao == null) {

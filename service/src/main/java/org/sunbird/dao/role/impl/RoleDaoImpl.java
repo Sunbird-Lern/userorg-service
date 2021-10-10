@@ -14,7 +14,7 @@ import org.sunbird.response.Response;
 
 public class RoleDaoImpl implements RoleDao {
 
-  private static final String TABLE_NAME = "role";
+  private final String TABLE_NAME = "role";
   private final ObjectMapper mapper = new ObjectMapper();
   private static RoleDao roleDao;
 

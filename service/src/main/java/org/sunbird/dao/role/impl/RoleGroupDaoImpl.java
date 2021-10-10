@@ -16,8 +16,6 @@ public class RoleGroupDaoImpl implements RoleGroupDao {
 
   private final ObjectMapper mapper = new ObjectMapper();
   private static RoleGroupDao roleGroupDao;
-  private static final String KEYSPACE_NAME = "sunbird";
-  private static final String TABLE_NAME = "role_group";
 
   public static RoleGroupDao getInstance() {
     if (roleGroupDao == null) {
@@ -29,6 +27,8 @@ public class RoleGroupDaoImpl implements RoleGroupDao {
   @SuppressWarnings("unchecked")
   @Override
   public List<RoleGroup> getRoleGroups(RequestContext context) {
+    String KEYSPACE_NAME = "sunbird";
+    String TABLE_NAME = "role_group";
     Response roleGroupResults =
         getCassandraOperation().getAllRecords(KEYSPACE_NAME, TABLE_NAME, context);
     TypeReference<List<RoleGroup>> roleGroupType = new TypeReference<List<RoleGroup>>() {};

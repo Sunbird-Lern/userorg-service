@@ -31,8 +31,7 @@ import scala.concurrent.duration.Duration;
 
 public class UserClientImpl implements UserClient {
 
-  private static final LoggerUtil logger = new LoggerUtil(UserClientImpl.class);
-
+  private final LoggerUtil logger = new LoggerUtil(UserClientImpl.class);
   private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   public static UserClient userClient = null;
 

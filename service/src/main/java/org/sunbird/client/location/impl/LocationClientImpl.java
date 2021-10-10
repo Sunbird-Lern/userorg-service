@@ -27,7 +27,7 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 public class LocationClientImpl implements LocationClient {
-  private static final LoggerUtil logger = new LoggerUtil(LocationClientImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(LocationClientImpl.class);
   private final ObjectMapper mapper = new ObjectMapper();
   public static LocationClient locationClient = null;
 
