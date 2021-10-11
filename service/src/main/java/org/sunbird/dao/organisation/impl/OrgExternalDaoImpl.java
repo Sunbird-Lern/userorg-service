@@ -15,8 +15,8 @@ import org.sunbird.response.Response;
 public class OrgExternalDaoImpl implements OrgExternalDao {
 
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private final String KEYSPACE_NAME = JsonKey.SUNBIRD;
-  private final String ORG_EXT_TABLE_NAME = JsonKey.ORG_EXT_ID_DB;
+  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String ORG_EXT_TABLE_NAME = JsonKey.ORG_EXT_ID_DB;
 
   @Override
   public Response addOrgExtId(Map<String, Object> orgExtMap, RequestContext context) {

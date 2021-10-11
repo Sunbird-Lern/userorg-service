@@ -26,8 +26,8 @@ public class LocationDaoImpl implements LocationDao {
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private final ObjectMapper mapper = new ObjectMapper();
-  private final String KEYSPACE_NAME = "sunbird";
-  private final String LOCATION_TABLE_NAME = "location";
+  private static final String KEYSPACE_NAME = "sunbird";
+  private static final String LOCATION_TABLE_NAME = "location";
 
   @Override
   public Response create(Location location, RequestContext context) {

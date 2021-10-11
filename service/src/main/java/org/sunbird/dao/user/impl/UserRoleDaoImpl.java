@@ -18,7 +18,7 @@ import scala.concurrent.Future;
 public final class UserRoleDaoImpl implements UserRoleDao {
 
   private final LoggerUtil logger = new LoggerUtil(UserRoleDaoImpl.class);
-  private final String TABLE_NAME = JsonKey.USER_ROLES;
+  private static final String TABLE_NAME = JsonKey.USER_ROLES;
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 

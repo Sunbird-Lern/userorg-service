@@ -14,8 +14,8 @@ import org.sunbird.util.PropertiesCache;
 
 public class OTPDaoImpl implements OTPDao {
   private final LoggerUtil logger = new LoggerUtil(OTPDaoImpl.class);
-  private final String TABLE_NAME = JsonKey.OTP;
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private static final String TABLE_NAME = JsonKey.OTP;
   private static volatile OTPDao otpDao;
 
   public static OTPDao getInstance() {

@@ -166,7 +166,7 @@ public class ManagedUserActor extends UserBaseActor {
   }
 
   private void saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap = new HashMap<String, Object>();
+    Map<String, Object> userOrgMap = new HashMap<>();
     userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
     userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
     userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
