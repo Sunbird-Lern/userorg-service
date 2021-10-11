@@ -1,52 +1,40 @@
 package org.sunbird.actor.user;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Mapper;
-import akka.pattern.Patterns;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.client.user.UserClient;
-import org.sunbird.client.user.impl.UserClientImpl;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.common.ElasticSearchHelper;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
-import scala.concurrent.Future;
 
 public class ManagedUserActor extends UserBaseActor {
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private UserClient userClient = UserClientImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
-  protected UserCreateRequestValidator userCreateRequestValidator =
-      new UserCreateRequestValidator();
 
-  @Inject
-  @Named("search_handler_actor")
-  private ActorRef searchHandlerActor;
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private final UserCreateRequestValidator userCreateRequestValidator =
+      new UserCreateRequestValidator();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -157,25 +145,11 @@ public class ManagedUserActor extends UserBaseActor {
     }
     if ("kafka".equalsIgnoreCase(ProjectUtil.getConfigValue("sunbird_user_create_sync_type"))) {
       writeDataToKafka(esResponse);
-      sender().tell(response, self());
     } else {
-      Future<Response> future =
-          esUtil
-              .save(
-                  ProjectUtil.EsType.user.getTypeName(),
-                  (String) esResponse.get(JsonKey.USER_ID),
-                  esResponse,
-                  actorMessage.getRequestContext())
-              .map(
-                  new Mapper<>() {
-                    @Override
-                    public Response apply(String parameter) {
-                      return response;
-                    }
-                  },
-                  context().dispatcher());
-      Patterns.pipe(future, getContext().dispatcher()).to(sender());
+      userService.saveUserToES(
+          (String) esResponse.get(JsonKey.USER_ID), esResponse, actorMessage.getRequestContext());
     }
+    sender().tell(response, sender());
     generateUserTelemetry(userMap, actorMessage, userId, JsonKey.CREATE);
   }
 
@@ -191,12 +165,16 @@ public class ManagedUserActor extends UserBaseActor {
     }
   }
 
-  private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap = UserUtil.createUserOrgRequestData(userMap);
-    cassandraOperation.insertRecord(
-        userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
-
-    return userOrgMap;
+  private void saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
+    Map<String, Object> userOrgMap = new HashMap<>();
+    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
+    userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
+    userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+    userOrgService.registerUserToOrg(userOrgMap, context);
   }
 
   /**
@@ -210,9 +188,21 @@ public class ManagedUserActor extends UserBaseActor {
     String uuid = (String) request.get(JsonKey.ID);
 
     boolean withTokens = Boolean.valueOf((String) request.get(JsonKey.WITH_TOKENS));
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.MANAGED_BY, request.get(JsonKey.ID));
+    searchRequestMap.put(JsonKey.FILTERS, filters);
 
+    String sortByField = (String) request.get(JsonKey.SORTBY);
+    if (StringUtils.isNotEmpty(sortByField)) {
+      String order = (String) request.get(JsonKey.ORDER);
+      Map<String, Object> sortBy = new HashMap<>();
+      sortBy.put(sortByField, StringUtils.isEmpty(order) ? "asc" : order);
+      searchRequestMap.put(JsonKey.SORT_BY, sortBy);
+    }
+    SearchDTO searchDTO = ElasticSearchHelper.createSearchDTO(searchRequestMap);
     Map<String, Object> searchResult =
-        userClient.searchManagedUser(searchHandlerActor, request, request.getRequestContext());
+        userService.searchUser(searchDTO, request.getRequestContext());
     List<Map<String, Object>> userList = (List) searchResult.get(JsonKey.CONTENT);
 
     List<Map<String, Object>> activeUserList = null;

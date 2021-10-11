@@ -19,7 +19,7 @@ import org.sunbird.util.Util;
 
 public class NotesManagementActor extends BaseActor {
 
-  private NotesService notesService = new NotesService();
+  private final NotesService notesService = new NotesService();
 
   @Override
   public void onReceive(Request request) throws Throwable {

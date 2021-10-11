@@ -41,10 +41,11 @@ import org.sunbird.util.user.UserUtil;
 
 public class UserUpdateActor extends UserBaseActor {
 
-  private UserRequestValidator userRequestValidator = new UserRequestValidator();
-  private ObjectMapper mapper = new ObjectMapper();
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserSelfDeclarationDao userSelfDeclarationDao = UserSelfDeclarationDaoImpl.getInstance();
+  private final UserRequestValidator userRequestValidator = new UserRequestValidator();
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserSelfDeclarationDao userSelfDeclarationDao =
+      UserSelfDeclarationDaoImpl.getInstance();
 
   @Inject
   @Named("user_profile_update_actor")

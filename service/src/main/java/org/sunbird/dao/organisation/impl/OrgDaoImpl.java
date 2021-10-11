@@ -26,10 +26,10 @@ import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class OrgDaoImpl implements OrgDao {
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
-  private LoggerUtil logger = new LoggerUtil(OrgDaoImpl.class);
-  private ObjectMapper mapper = new ObjectMapper();
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private final LoggerUtil logger = new LoggerUtil(OrgDaoImpl.class);
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static OrgDao orgDao;
   private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private static final String ORG_TABLE_NAME = JsonKey.ORGANISATION;

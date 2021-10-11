@@ -36,8 +36,8 @@ import org.sunbird.util.Util;
 
 public abstract class UserBaseActor extends BaseActor {
 
-  protected UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  protected LocationClient locationClient = LocationClientImpl.getInstance();
+  protected final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  protected final LocationClient locationClient = LocationClientImpl.getInstance();
 
   @Inject
   @Named("user_telemetry_actor")

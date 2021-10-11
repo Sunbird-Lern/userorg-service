@@ -49,12 +49,12 @@ import org.sunbird.util.user.KafkaConfigConstants;
 import org.sunbird.util.user.UserUtil;
 
 public class UserMergeActor extends UserBaseActor {
-  String topic = null;
-  Producer<String, String> producer = null;
-  ObjectMapper objectMapper = new ObjectMapper();
-  private UserService userService = UserServiceImpl.getInstance();
-  private SSOManager keyCloakService = SSOServiceFactory.getInstance();
-  private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
+  private String topic = null;
+  private Producer<String, String> producer = null;
+  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final SSOManager keyCloakService = SSOServiceFactory.getInstance();
+  private final SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
 
   @Inject
   @Named("system_settings_actor")

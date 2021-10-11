@@ -27,6 +27,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
@@ -94,7 +95,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("1000 second"), NullPointerException.class);
+      probe.expectMsgClass(duration("10 second"), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -111,10 +112,6 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
     PowerMockito.mockStatic(Util.class);
     Map<String, Object> userMap = new HashMap<>(getMapObject());
     userMap.put(JsonKey.USER_ID, "3dc4e0bc-43a6-4ba0-84f9-6606a9c17320");
-    // when(Util.getUserDetails(Mockito.anyMap(), Mockito.anyMap(),
-    // Mockito.any(RequestContext.class)))
-    //    .thenReturn(userMap);
-
     PowerMockito.mockStatic(EsClientFactory.class);
     ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -150,7 +147,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("1000 second"), NullPointerException.class);
+      probe.expectMsgClass(duration("10 second"), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -203,10 +200,6 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
     PowerMockito.mockStatic(Util.class);
     Map<String, Object> userMap = new HashMap<>(getMapObject());
     userMap.put(JsonKey.USER_ID, "3dc4e0bc-43a6-4ba0-84f9-6606a9c17320");
-    // when(Util.getUserDetails(Mockito.anyMap(), Mockito.anyMap(),
-    // Mockito.any(RequestContext.class)))
-    //    .thenReturn(userMap);
-
     PowerMockito.mockStatic(EsClientFactory.class);
     ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
@@ -227,7 +220,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("1000 second"), NullPointerException.class);
+      probe.expectMsgClass(duration("10 second"), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }

@@ -19,8 +19,8 @@ import org.sunbird.util.DataCacheHandler;
 
 public class RoleService {
 
-  private RoleDao roleDao = RoleDaoImpl.getInstance();
-  private RoleGroupService roleGroupService = new RoleGroupService();
+  private final RoleDao roleDao = RoleDaoImpl.getInstance();
+  private final RoleGroupService roleGroupService = new RoleGroupService();
 
   public Response getUserRoles(RequestContext context) {
     Response response = new Response();
@@ -40,7 +40,7 @@ public class RoleService {
 
         Map<String, Object> actionGroupMap;
         for (String roleGroupId : roleGroupIdList) {
-          Map<String, Object> roleGroupMap = roleGroupService.getRoleGroupMap(roleGroupId,context);
+          Map<String, Object> roleGroupMap = roleGroupService.getRoleGroupMap(roleGroupId, context);
 
           actionGroupMap = new HashMap<>();
           actionGroupMap.put(JsonKey.ID, roleGroupMap.get(JsonKey.ID));

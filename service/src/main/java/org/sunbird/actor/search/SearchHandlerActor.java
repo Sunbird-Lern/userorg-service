@@ -38,8 +38,8 @@ import scala.concurrent.Future;
 
 public class SearchHandlerActor extends BaseActor {
 
-  private OrgService orgService = OrgServiceImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   @Inject
   @Named("search_telemetry_actor")

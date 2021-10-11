@@ -16,7 +16,7 @@ import org.sunbird.response.Response;
 import org.sunbird.util.otp.OTPUtil;
 
 public class SendOTPActor extends BaseActor {
-  private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
+  private final LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
 
   @Inject
   @Named("email_service_actor")

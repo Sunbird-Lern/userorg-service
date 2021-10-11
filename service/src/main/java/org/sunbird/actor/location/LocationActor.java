@@ -24,7 +24,9 @@ import org.sunbird.util.Util;
 
 public class LocationActor extends BaseLocationActor {
 
-  private LocationService locationService = LocationServiceImpl.getInstance();
+  private final LocationService locationService = LocationServiceImpl.getInstance();
+  private final LocationRequestValidator locationRequestValidator = new LocationRequestValidator();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Inject
   @Named("location_background_actor")
@@ -66,17 +68,16 @@ public class LocationActor extends BaseLocationActor {
 
   private void createLocation(Request request) {
     try {
-      ObjectMapper mapper = new ObjectMapper();
       UpsertLocationRequest locationRequest =
           ProjectUtil.convertToRequestPojo(request, UpsertLocationRequest.class);
-      validateUpsertLocnReq(locationRequest, JsonKey.CREATE);
+      validateUpsertLocnReq(locationRequest, JsonKey.CREATE, request.getRequestContext());
       // put unique identifier in request for Id
       String id = ProjectUtil.generateUniqueId();
       locationRequest.setId(id);
       Location location = mapper.convertValue(locationRequest, Location.class);
       Response response = locationService.createLocation(location, request.getRequestContext());
       sender().tell(response, self());
-      logger.info(request.getRequestContext(), "Insert location data to ES");
+      logger.debug(request.getRequestContext(), "Insert location data to ES");
       saveDataToES(
           mapper.convertValue(location, Map.class), JsonKey.INSERT, request.getRequestContext());
       generateTelemetryForLocation(
@@ -89,14 +90,13 @@ public class LocationActor extends BaseLocationActor {
 
   private void updateLocation(Request request) {
     try {
-      ObjectMapper mapper = new ObjectMapper();
       UpsertLocationRequest locationRequest =
           ProjectUtil.convertToRequestPojo(request, UpsertLocationRequest.class);
-      validateUpsertLocnReq(locationRequest, JsonKey.UPDATE);
+      validateUpsertLocnReq(locationRequest, JsonKey.UPDATE, request.getRequestContext());
       Location location = mapper.convertValue(locationRequest, Location.class);
       Response response = locationService.updateLocation(location, request.getRequestContext());
       sender().tell(response, self());
-      logger.info(request.getRequestContext(), "Update location data to ES");
+      logger.debug(request.getRequestContext(), "Update location data to ES");
       saveDataToES(
           mapper.convertValue(location, Map.class), JsonKey.UPDATE, request.getRequestContext());
       generateTelemetryForLocation(
@@ -127,10 +127,10 @@ public class LocationActor extends BaseLocationActor {
   private void deleteLocation(Request request) {
     try {
       String locationId = (String) request.getRequest().get(JsonKey.LOCATION_ID);
-      LocationRequestValidator.isLocationHasChild(locationId);
+      locationRequestValidator.isLocationHasChild(locationId, request.getRequestContext());
       Response response = locationService.deleteLocation(locationId, request.getRequestContext());
       sender().tell(response, self());
-      logger.info(request.getRequestContext(), "Delete location data from ES");
+      logger.debug(request.getRequestContext(), "Delete location data from ES");
       deleteDataFromES(locationId, request.getRequestContext());
       generateTelemetryForLocation(
           locationId, new HashMap<>(), JsonKey.DELETE, request.getContext());
@@ -165,10 +165,11 @@ public class LocationActor extends BaseLocationActor {
     }
   }
 
-  private void validateUpsertLocnReq(UpsertLocationRequest locationRequest, String operation) {
+  private void validateUpsertLocnReq(
+      UpsertLocationRequest locationRequest, String operation, RequestContext context) {
     if (StringUtils.isNotEmpty(locationRequest.getType())) {
       LocationRequestValidator.isValidLocationType(locationRequest.getType());
     }
-    LocationRequestValidator.isValidParentIdAndCode(locationRequest, operation);
+    locationRequestValidator.isValidParentIdAndCode(locationRequest, operation, context);
   }
 }

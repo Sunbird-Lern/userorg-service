@@ -11,20 +11,20 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.FormApiUtil;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.FormApiUtil;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
 import org.sunbird.validator.BaseRequestValidator;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
-  private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+  private final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
-  private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
+  private static final LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
 
   static {
     List<String> subTypeList =
@@ -63,7 +63,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     return password.matches(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_PASS_REGEX));
   }
 
-  private static void validatePassword(String password) {
+  private void validatePassword(String password) {
     if (StringUtils.isNotBlank(password)) {
       boolean response = isGoodPassword(password);
       if (!response) {

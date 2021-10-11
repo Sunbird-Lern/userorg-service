@@ -1,5 +1,6 @@
 package org.sunbird.util.feed;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,8 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
@@ -26,10 +25,10 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {
-  private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(FeedUtil.class);
 
-  private static IFeedService feedService = FeedFactory.getInstance();
-  private static OrgService orgService = OrgServiceImpl.getInstance();
+  private static final IFeedService feedService = FeedFactory.getInstance();
+  private static final OrgService orgService = OrgServiceImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
   public static Response saveFeed(
@@ -64,13 +63,14 @@ public class FeedUtil {
       }
       Request request = new Request();
       ObjectMapper mapper = new ObjectMapper();
-      request.setRequest(mapper.convertValue(feedList.get(index),Map.class));
+      request.setRequest(mapper.convertValue(feedList.get(index), Map.class));
       response = feedService.update(request, context);
     }
     return response;
   }
 
-  private static Request createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
+  private static Request createFeedObj(
+      ShadowUser shadowUser, String userId, RequestContext context) {
     Request request = new Request();
     ObjectMapper mapper = new ObjectMapper();
     Feed feed = new Feed();
@@ -86,7 +86,7 @@ public class FeedUtil {
         JsonKey.PROSPECT_CHANNELS_IDS, getOrgDetails(shadowUser.getChannel(), context));
     feed.setData(prospectsChannel);
     feed.setUserId(userId);
-    request.setRequest(mapper.convertValue(feed,Map.class));
+    request.setRequest(mapper.convertValue(feed, Map.class));
     return request;
   }
 

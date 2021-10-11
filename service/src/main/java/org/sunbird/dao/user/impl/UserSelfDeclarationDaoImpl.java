@@ -1,6 +1,5 @@
 package org.sunbird.dao.user.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -17,9 +16,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
-
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static UserSelfDeclarationDao userSelfDeclarationDao = null;
 
   public static UserSelfDeclarationDao getInstance() {
@@ -95,9 +92,11 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
         JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, context);
   }
 
-  public Response updateUserSelfDeclaredFields( Map<String, Object> updateFieldsMap,
-                                                         Map<String, Object> compositeKey, RequestContext context) {
+  public Response updateUserSelfDeclaredFields(
+      Map<String, Object> updateFieldsMap,
+      Map<String, Object> compositeKey,
+      RequestContext context) {
     return cassandraOperation.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
+        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
   }
 }

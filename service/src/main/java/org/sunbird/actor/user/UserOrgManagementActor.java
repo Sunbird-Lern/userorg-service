@@ -17,7 +17,7 @@ import org.sunbird.util.user.UserUtil;
 
 public class UserOrgManagementActor extends BaseActor {
 
-  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

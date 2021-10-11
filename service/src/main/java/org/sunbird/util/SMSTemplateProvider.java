@@ -15,10 +15,10 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 
 public class SMSTemplateProvider {
-  private static LoggerUtil logger = new LoggerUtil(SMSTemplateProvider.class);
+  private static final LoggerUtil logger = new LoggerUtil(SMSTemplateProvider.class);
   public static final String SMS_PROVIDER =
       ProjectUtil.getConfigValue(JsonKey.SMS_GATEWAY_PROVIDER);
-  private static EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
+  private static final EmailTemplateDao emailTemplateDao = EmailTemplateDaoImpl.getInstance();
 
   private SMSTemplateProvider() {}
 

@@ -18,7 +18,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class LocationServiceImpl implements LocationService {
   public static LocationService locationService = null;
-  private LocationDao locationDao = LocationDaoFactory.getInstance();
+  private final LocationDao locationDao = LocationDaoFactory.getInstance();
 
   public static synchronized LocationService getInstance() {
     if (locationService == null) locationService = new LocationServiceImpl();

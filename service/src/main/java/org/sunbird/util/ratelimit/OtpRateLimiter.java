@@ -12,7 +12,7 @@ public enum OtpRateLimiter implements RateLimiter {
   private String limitKey;
   private int ttl;
 
-  private OtpRateLimiter(String limitKey, int ttl) {
+  OtpRateLimiter(String limitKey, int ttl) {
     this.limitKey = limitKey;
     this.ttl = ttl;
   }

@@ -23,8 +23,8 @@ import org.sunbird.util.Util;
 
 public class UserConsentActor extends BaseActor {
 
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

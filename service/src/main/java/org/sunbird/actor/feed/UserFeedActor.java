@@ -1,6 +1,5 @@
 package org.sunbird.actor.feed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
@@ -15,8 +14,7 @@ import org.sunbird.util.Util;
 
 public class UserFeedActor extends BaseActor {
 
-  IFeedService feedService = FeedFactory.getInstance();
-  ObjectMapper mapper = new ObjectMapper();
+  private final IFeedService feedService = FeedFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

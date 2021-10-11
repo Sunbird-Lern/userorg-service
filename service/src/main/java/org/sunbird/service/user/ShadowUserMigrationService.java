@@ -3,20 +3,20 @@ package org.sunbird.service.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.util.*;
-import org.sunbird.model.ClaimStatus;
-import org.sunbird.model.ShadowUser;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.model.ClaimStatus;
+import org.sunbird.model.ShadowUser;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 public class ShadowUserMigrationService {
-  private static LoggerUtil logger = new LoggerUtil(ShadowUserMigrationService.class);
+  private static final LoggerUtil logger = new LoggerUtil(ShadowUserMigrationService.class);
 
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static ObjectMapper mapper = new ObjectMapper();
+  private static final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   /**
    * this method will search user in userids attribute in shadow_user table

@@ -29,12 +29,10 @@ import org.sunbird.util.ratelimit.RateLimiter;
 
 public class OTPActor extends BaseActor {
 
-  private OTPService otpService = new OTPService();
+  private final OTPService otpService = new OTPService();
+  private final RateLimitService rateLimitService = new RateLimitServiceImpl();
+  private final LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
   private static final String SUNBIRD_OTP_ALLOWED_ATTEMPT = "sunbird_otp_allowed_attempt";
-  private static final String REMAINING_ATTEMPT = "remainingAttempt";
-  private static final String MAX_ALLOWED_ATTEMPT = "maxAllowedAttempt";
-  private RateLimitService rateLimitService = new RateLimitServiceImpl();
-  private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
 
   @Inject
   @Named("send_otp_actor")
@@ -193,11 +191,13 @@ public class OTPActor extends BaseActor {
 
     ClientErrorResponse response = new ClientErrorResponse();
     response.setException(ex);
+    String MAX_ALLOWED_ATTEMPT = "maxAllowedAttempt";
     response
         .getResult()
         .put(
             MAX_ALLOWED_ATTEMPT,
             Integer.parseInt(ProjectUtil.getConfigValue(SUNBIRD_OTP_ALLOWED_ATTEMPT)));
+    String REMAINING_ATTEMPT = "remainingAttempt";
     response.getResult().put(REMAINING_ATTEMPT, remainingCount);
     sender().tell(response, self());
   }
