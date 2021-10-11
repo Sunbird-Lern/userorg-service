@@ -15,6 +15,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.otp.OTPUtil;
 import org.sunbird.util.ratelimit.RateLimit;
 import org.sunbird.util.ratelimit.RateLimiter;
 
@@ -29,7 +30,8 @@ public class RateLimitServiceImpl implements RateLimitService {
   }
 
   @Override
-  public void throttleByKey(String key, RateLimiter[] rateLimiters, RequestContext context) {
+  public void throttleByKey(
+      String key, String type, RateLimiter[] rateLimiters, RequestContext context) {
     if (!isRateLimitOn()) {
       logger.info(context, "RateLimitServiceImpl:throttleByKey: Rate limiter is disabled");
       return;
@@ -38,31 +40,32 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     List<Map<String, Object>> ratesByKey = getRatesByKey(key, context);
     if (CollectionUtils.isNotEmpty(ratesByKey)) {
-      ratesByKey
-          .stream()
-          .forEach(
-              rate -> {
-                if (MapUtils.isNotEmpty(rate)) {
-                  logger.info(
-                      context,
-                      "RateLimitServiceImpl:throttleByKey: key = " + key + " rate =" + rate);
-                  RateLimit rateLimit = new RateLimit(key, rate);
+      ratesByKey.forEach(
+          rate -> {
+            if (MapUtils.isNotEmpty(rate)) {
+              logger.info(
+                  context,
+                  "RateLimitServiceImpl:throttleByKey: key = "
+                      + OTPUtil.maskId(key, type)
+                      + " rate ="
+                      + rate);
+              RateLimit rateLimit = new RateLimit(key, rate);
 
-                  if (rateLimit.getCount() >= rateLimit.getLimit()) {
-                    logger.info(
-                        context,
-                        "RateLimitServiceImpl:throttleByKey: Rate limit threshold crossed for key = "
-                            + key);
-                    throw new ProjectCommonException(
-                        ResponseCode.errorRateLimitExceeded.getErrorCode(),
-                        ResponseCode.errorRateLimitExceeded.getErrorMessage(),
-                        ResponseCode.TOO_MANY_REQUESTS.getResponseCode(),
-                        rateLimit.getUnit().toLowerCase());
-                  }
-                  rateLimit.incrementCount();
-                  entryByRate.put(rateLimit.getUnit(), rateLimit);
-                }
-              });
+              if (rateLimit.getCount() >= rateLimit.getLimit()) {
+                logger.info(
+                    context,
+                    "RateLimitServiceImpl:throttleByKey: Rate limit threshold crossed for key = "
+                        + OTPUtil.maskId(key, type));
+                throw new ProjectCommonException(
+                    ResponseCode.errorRateLimitExceeded.getErrorCode(),
+                    ResponseCode.errorRateLimitExceeded.getErrorMessage(),
+                    ResponseCode.TOO_MANY_REQUESTS.getResponseCode(),
+                    rateLimit.getUnit().toLowerCase());
+              }
+              rateLimit.incrementCount();
+              entryByRate.put(rateLimit.getUnit(), rateLimit);
+            }
+          });
     }
 
     Arrays.stream(rateLimiters)
@@ -76,8 +79,8 @@ public class RateLimitServiceImpl implements RateLimitService {
                 logger.info(
                     context,
                     "RateLimitServiceImpl:throttleByKey: Initialise rate limit for key = "
-                        + key
-                        + " rate ="
+                        + OTPUtil.maskId(key, type)
+                        + ", rate ="
                         + rateLimit.getLimit());
                 entryByRate.put(rateLimiter.name(), rateLimit);
               }

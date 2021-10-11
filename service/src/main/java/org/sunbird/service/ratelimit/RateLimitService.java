@@ -1,7 +1,7 @@
 package org.sunbird.service.ratelimit;
 
-import org.sunbird.util.ratelimit.RateLimiter;
 import org.sunbird.request.RequestContext;
+import org.sunbird.util.ratelimit.RateLimiter;
 
 public interface RateLimitService {
 
@@ -12,5 +12,5 @@ public interface RateLimitService {
    * @param rateLimiters List of rate limiters
    * @param context
    */
-  void throttleByKey(String key, RateLimiter[] rateLimiters, RequestContext context);
+  void throttleByKey(String key, String type, RateLimiter[] rateLimiters, RequestContext context);
 }

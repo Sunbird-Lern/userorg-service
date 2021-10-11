@@ -8,7 +8,6 @@ import javax.inject.Named;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -31,7 +30,6 @@ public class OTPActor extends BaseActor {
 
   private final OTPService otpService = new OTPService();
   private final RateLimitService rateLimitService = new RateLimitServiceImpl();
-  private final LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
   private static final String SUNBIRD_OTP_ALLOWED_ATTEMPT = "sunbird_otp_allowed_attempt";
 
   @Inject
@@ -64,11 +62,12 @@ public class OTPActor extends BaseActor {
           "OTPActor:generateOTP:getEmailPhoneByUserId: called for userId = "
               + userId
               + " ,key = "
-              + maskId(key, type));
+              + OTPUtil.maskId(key, type));
     }
 
     rateLimitService.throttleByKey(
         key,
+        type,
         new RateLimiter[] {OtpRateLimiter.HOUR, OtpRateLimiter.DAY},
         request.getRequestContext());
 
@@ -80,22 +79,22 @@ public class OTPActor extends BaseActor {
       logger.info(
           request.getRequestContext(),
           "OTPActor:generateOTP: new otp generated for Key = "
-              + maskId(key, type)
+              + OTPUtil.maskId(key, type)
               + " & OTP = "
-              + maskOTP(otp));
+              + OTPUtil.maskOTP(otp));
       otpService.insertOTPDetails(type, key, otp, request.getRequestContext());
     } else {
       otp = (String) details.get(JsonKey.OTP);
       logger.info(
           request.getRequestContext(),
           "OTPActor:generateOTP: Re-issuing otp for Key = "
-              + maskId(key, type)
+              + OTPUtil.maskId(key, type)
               + " & OTP = "
-              + maskOTP(otp));
+              + OTPUtil.maskOTP(otp));
     }
     logger.info(
         request.getRequestContext(),
-        "OTPActor:sendOTP : Calling SendOTPActor for Key = " + maskId(key, type));
+        "OTPActor:sendOTP : Calling SendOTPActor for Key = " + OTPUtil.maskId(key, type));
     sendOTP(request, otp, key, request.getRequestContext());
 
     Response response = new Response();
@@ -117,7 +116,7 @@ public class OTPActor extends BaseActor {
           "OTPActor:verifyOTP:getEmailPhoneByUserId: called for userId = "
               + userId
               + " ,key = "
-              + maskId(key, type));
+              + OTPUtil.maskId(key, type));
     }
     Map<String, Object> otpDetails =
         otpService.getOTPDetails(type, key, request.getRequestContext());
@@ -126,7 +125,7 @@ public class OTPActor extends BaseActor {
       logger.info(
           request.getRequestContext(),
           "OTP_VALIDATION_FAILED:OTPActor:verifyOTP: Details not found for Key = "
-              + maskId(key, type)
+              + OTPUtil.maskId(key, type)
               + " type = "
               + type);
       ProjectCommonException.throwClientErrorException(ResponseCode.errorInvalidOTP);
@@ -136,11 +135,11 @@ public class OTPActor extends BaseActor {
       logger.info(
           request.getRequestContext(),
           "OTP_VALIDATION_FAILED : OTPActor:verifyOTP: Mismatch for Key = "
-              + maskId(key, type)
+              + OTPUtil.maskId(key, type)
               + " otpInRequest = "
-              + maskOTP(otpInRequest)
+              + OTPUtil.maskOTP(otpInRequest)
               + " otpInDB = "
-              + maskOTP(otpInDB));
+              + OTPUtil.maskOTP(otpInDB));
       ProjectCommonException.throwClientErrorException(ResponseCode.errorInvalidOTP);
     }
 
@@ -148,7 +147,7 @@ public class OTPActor extends BaseActor {
       logger.info(
           request.getRequestContext(),
           "OTP_VALIDATION_SUCCESS:OTPActor:verifyOTP: Verified successfully Key = "
-              + maskId(key, type));
+              + OTPUtil.maskId(key, type));
       otpService.deleteOtp(type, key, request.getRequestContext());
       Response response = new Response();
       response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -157,11 +156,11 @@ public class OTPActor extends BaseActor {
       logger.info(
           request.getRequestContext(),
           "OTP_VALIDATION_FAILED: OTPActor:verifyOTP: Incorrect OTP Key = "
-              + maskId(key, type)
+              + OTPUtil.maskId(key, type)
               + " otpInRequest = "
-              + maskOTP(otpInRequest)
+              + OTPUtil.maskOTP(otpInRequest)
               + " otpInDB = "
-              + maskOTP(otpInDB));
+              + OTPUtil.maskOTP(otpInDB));
       handleMismatchOtp(type, key, otpDetails, request.getRequestContext());
     }
   }
@@ -172,7 +171,7 @@ public class OTPActor extends BaseActor {
     logger.info(
         context,
         "OTPActor:handleMismatchOtp: Key = "
-            + maskId(key, type)
+            + OTPUtil.maskId(key, type)
             + ",remaining attempt is "
             + remainingCount);
     int attemptedCount = (int) otpDetails.get(JsonKey.ATTEMPTED_COUNT);
@@ -235,18 +234,5 @@ public class OTPActor extends BaseActor {
       default:
         return null;
     }
-  }
-
-  private String maskOTP(String otp) {
-    return logMaskService.maskOTP(otp);
-  }
-
-  private String maskId(String id, String type) {
-    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
-      return logMaskService.maskEmail(id);
-    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
-      return logMaskService.maskPhone(id);
-    }
-    return "";
   }
 }

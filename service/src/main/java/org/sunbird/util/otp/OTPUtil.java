@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.BackgroundOperations;
+import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
@@ -22,6 +23,7 @@ import org.sunbird.util.ProjectUtil;
 public final class OTPUtil {
   private static final LoggerUtil logger = new LoggerUtil(OTPUtil.class);
   private static final OTPService otpService = new OTPService();
+  private static final LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
   private static final int MAXIMUM_OTP_LENGTH = 6;
   private static final int SECONDS_IN_MINUTES = 60;
   private static final int RETRY_COUNT = 2;
@@ -172,5 +174,18 @@ public final class OTPUtil {
     int otpExpiration = Integer.parseInt(expirationInSeconds);
     int otpExpirationInMinutes = Math.floorDiv(otpExpiration, SECONDS_IN_MINUTES);
     return String.valueOf(otpExpirationInMinutes);
+  }
+
+  public static String maskOTP(String otp) {
+    return logMaskService.maskOTP(otp);
+  }
+
+  public static String maskId(String id, String type) {
+    if (JsonKey.EMAIL.equalsIgnoreCase(type)) {
+      return logMaskService.maskEmail(id);
+    } else if (JsonKey.PHONE.equalsIgnoreCase(type)) {
+      return logMaskService.maskPhone(id);
+    }
+    return "";
   }
 }

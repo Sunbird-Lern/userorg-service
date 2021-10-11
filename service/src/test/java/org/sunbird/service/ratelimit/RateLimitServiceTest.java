@@ -33,7 +33,8 @@ import org.sunbird.util.ratelimit.RateLimiter;
   "javax.management.*",
   "javax.net.ssl.*",
   "javax.security.*",
-  "jdk.internal.reflect.*"
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 @PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 public class RateLimitServiceTest {
@@ -65,7 +66,7 @@ public class RateLimitServiceTest {
         .then((Answer) invocation -> getRateLimitRecords(5));
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
+    rateLimitService.throttleByKey(KEY, JsonKey.PHONE, new RateLimiter[] {hourRateLimiter}, null);
     Assert.assertNotNull(rateLimitService);
   }
 
@@ -83,7 +84,8 @@ public class RateLimitServiceTest {
         .then((Answer) invocation -> new Response());
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 1);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, new RequestContext());
+    rateLimitService.throttleByKey(
+        KEY, JsonKey.PHONE, new RateLimiter[] {hourRateLimiter}, new RequestContext());
     Assert.assertNotNull(rateLimitService);
   }
 
@@ -102,7 +104,8 @@ public class RateLimitServiceTest {
     Map<String, Integer> countsByRateLimiter = new HashMap<>();
     countsByRateLimiter.put(hourRateLimiter.name(), 6);
     countsByRateLimiter.put(dayRateLimiter.name(), 1);
-    rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter, dayRateLimiter}, null);
+    rateLimitService.throttleByKey(
+        KEY, JsonKey.PHONE, new RateLimiter[] {hourRateLimiter, dayRateLimiter}, null);
     Assert.assertNotNull(rateLimitService);
   }
 
@@ -119,7 +122,7 @@ public class RateLimitServiceTest {
                 Mockito.any()))
         .then((Answer) invocation -> getRateLimitRecords(HOUR_LIMIT));
     try {
-      rateLimitService.throttleByKey(KEY, new RateLimiter[] {hourRateLimiter}, null);
+      rateLimitService.throttleByKey(KEY, JsonKey.PHONE, new RateLimiter[] {hourRateLimiter}, null);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.TOO_MANY_REQUESTS.getResponseCode(), e.getResponseCode());
       throw e;
