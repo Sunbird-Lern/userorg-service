@@ -117,6 +117,7 @@ public class UserConsentActor extends BaseActor {
     List<Map<String, Object>> consentResponseList =
         consentDBList
             .stream()
+            .filter(consents->((String)consents.get(JsonKey.STATUS)).equalsIgnoreCase(JsonKey.ACTIVE))
             .map(
                 consent -> {
                   Map<String, Object> consentRes = new HashMap<String, Object>();
