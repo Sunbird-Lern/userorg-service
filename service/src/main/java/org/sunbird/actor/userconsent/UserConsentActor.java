@@ -70,6 +70,9 @@ public class UserConsentActor extends BaseActor {
     request.getRequest().put(JsonKey.USER_ID, userId); // Important for userid validation
     userService.validateUserId(request, null, context);
 
+    String consumerId = (String) consent.get(JsonKey.CONSENT_CONSUMERID);
+    userConsentService.validateConsumerId(consumerId, context);
+
     Response consentRes = userConsentService.updateConsent(consent, context);
 
     Response response = new Response();

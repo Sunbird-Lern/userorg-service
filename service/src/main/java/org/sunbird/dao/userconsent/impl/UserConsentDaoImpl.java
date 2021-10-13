@@ -31,7 +31,7 @@ public class UserConsentDaoImpl implements UserConsentDao {
   public List<Map<String, Object>> getConsent(
       Map<String, Object> consentReq, RequestContext context) {
     Response response =
-        cassandraOperation.getRecordsByProperties(JsonKey.SUNBIRD, TABLE_NAME, consentReq, context);
+        cassandraOperation.getRecordsByCompositeKey(JsonKey.SUNBIRD, TABLE_NAME, consentReq, context);
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }
 }

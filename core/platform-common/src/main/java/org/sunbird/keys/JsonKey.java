@@ -536,6 +536,8 @@ public final class JsonKey {
   public static final String CONSENT_OBJECTID = "objectId";
   public static final String CONSENT_CONSUMERTYPE = "consumerType";
   public static final String CONSENT_OBJECTTYPE = "objectType";
+  public static final String CONSENT_OBJECTTYPE_ORG = "Organisation";
+  public static final String CONSENT_STATUS_REVOKED = "REVOKED";
   // user consent req-response attributes listing - ended
   // user consent table columns listing - started
   public static final String CONSENT_CONSUMER_ID = "consumer_id";
