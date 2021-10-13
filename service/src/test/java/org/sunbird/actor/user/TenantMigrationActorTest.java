@@ -1,6 +1,7 @@
 package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -89,10 +90,11 @@ public class TenantMigrationActorTest {
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
+    response.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
             cassandraOperation.getRecordsByProperties(
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     Response upsertResponse = new Response();
@@ -147,6 +149,10 @@ public class TenantMigrationActorTest {
             cassandraOperation.updateRecord(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
+    PowerMockito.when(
+            cassandraOperation.upsertRecord(
+                    Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+            .thenReturn(response);
     Response updateResponse = new Response();
     updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
     PowerMockito.when(
@@ -156,6 +162,23 @@ public class TenantMigrationActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getOrgFromCassandra());
+  }
+
+  public static Response getEsResponse() {
+
+    Response response = new Response();
+    Map<String, Object> map = new HashMap<>();
+    map.put("anyString", new Object());
+    response.put(JsonKey.RESPONSE, map);
+    return response;
+  }
+
+  public static Map<String, Object> getEsResponseMap() {
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.IS_TENANT, true);
+    map.put(JsonKey.ID, "rootOrgId");
+    map.put(JsonKey.CHANNEL, "anyChannel");
+    return map;
   }
 
   public static Map<String, Object> getListOrgResponse() {
@@ -200,13 +223,12 @@ public class TenantMigrationActorTest {
     }
   }
 
-  public Request getMigrateReq(ActorOperations actorOperation, String action) {
+  public Request getMigrateReq(ActorOperations actorOperation) {
     Request reqObj = new Request();
     Map reqMap = new HashMap<>();
     reqMap.put(JsonKey.USER_ID, "anyUserId");
     reqMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     reqMap.put(JsonKey.CHANNEL, "anyChannel");
-    reqMap.put(JsonKey.ACTION, action);
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
@@ -220,7 +242,22 @@ public class TenantMigrationActorTest {
     fMap.put(JsonKey.CATEGORY, "category");
     return fMap;
   }
-
+  @Test
+  public void testUserMigration() {
+    try {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    Map<String, String> dataCache = new HashMap<>();
+    dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
+    boolean result =
+            testScenario(
+                    getMigrateReq(ActorOperations.USER_TENANT_MIGRATE),
+                    null,
+                    props);
+  } catch (ProjectCommonException e) {
+    assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+  }
+  }
   @Test
   public void testUserSelfDeclarationMigrationWithValidatedStatus() {
     PowerMockito.mockStatic(DataCacheHandler.class);
@@ -260,6 +297,7 @@ public class TenantMigrationActorTest {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ORG_ID, "anyRootOrgId");
     map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+    map.put("template", "anyTemplate");
     list.add(map);
     response.put(Constants.RESPONSE, list);
     return response;

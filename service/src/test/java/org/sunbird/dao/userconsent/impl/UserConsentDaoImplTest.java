@@ -55,7 +55,7 @@ public class UserConsentDaoImplTest {
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(Constants.RESPONSE, Arrays.asList(getConsentMap()));
     response.getResult().putAll(responseMap);
-    when(cassandraOperation.getRecordsByProperties(
+    when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(response);
 

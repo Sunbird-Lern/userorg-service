@@ -225,7 +225,11 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> userData = createUserData(userDetail);
     Request notificationRequest = createNotificationData(userData, context);
     notificationRequest.setRequestContext(context);
+    try {
     emailServiceActor.tell(notificationRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending user migrate notification", ex);
+    }
   }
 
   private Request createNotificationData(Map<String, Object> userData, RequestContext context) {
@@ -275,7 +279,11 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.getRequest().put(JsonKey.ID, userId);
     logger.debug(
         context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    try {
+      backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while saving user data to ES", ex);
+    }
   }
 
   private Response updateUserExternalIds(Request request) {
