@@ -34,6 +34,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOServiceFactory;
@@ -105,8 +106,10 @@ public class UserMergeActorTest {
         .thenReturn(getUserDetails(true))
         .thenReturn(getUserDetails(true));
     when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
-    when(tokenValidator.verifyUserToken(Mockito.anyString())).thenReturn("anyUserId");
-    when(tokenValidator.verifySourceUserToken(Mockito.anyString(), Mockito.anyString()))
+    when(tokenValidator.verifyUserToken(Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("anyUserId");
+    when(tokenValidator.verifySourceUserToken(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
@@ -121,8 +124,10 @@ public class UserMergeActorTest {
         .thenReturn(getUserDetails(false))
         .thenReturn(getUserDetails(false));
     when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
-    when(tokenValidator.verifyUserToken(Mockito.anyString())).thenReturn("anyUserId");
-    when(tokenValidator.verifySourceUserToken(Mockito.anyString(), Mockito.anyString()))
+    when(tokenValidator.verifyUserToken(Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("anyUserId");
+    when(tokenValidator.verifySourceUserToken(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), null);
@@ -185,6 +190,7 @@ public class UserMergeActorTest {
     reqObj.setRequest(reqMap);
     reqObj.setContext(contextMap);
     reqObj.setOperation(actorOperation.getValue());
+    reqObj.setRequestContext(new RequestContext());
     return reqObj;
   }
 }

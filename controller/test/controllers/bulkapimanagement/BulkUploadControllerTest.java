@@ -54,7 +54,8 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));
@@ -73,7 +74,8 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));
@@ -99,7 +101,8 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));
@@ -118,7 +121,8 @@ public class BulkUploadControllerTest extends BaseApplicationTest {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.DATA, "sampleStream".getBytes(Charset.defaultCharset()));

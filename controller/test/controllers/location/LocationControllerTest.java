@@ -59,7 +59,8 @@ public class LocationControllerTest extends BaseApplicationTest {
   public void testCreateLocation() {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject())).thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> locationData = new HashMap<>();
     locationData.put(JsonKey.NAME, LOCATION_NAME);
