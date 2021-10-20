@@ -14,7 +14,7 @@ import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.request.RequestContext;
 
 public class NICGatewaySmsProvider implements ISmsProvider {
-  private static LoggerUtil logger = new LoggerUtil(NICGatewaySmsProvider.class);
+  private static final LoggerUtil logger = new LoggerUtil(NICGatewaySmsProvider.class);
 
   private static String baseUrl = null;
   private static String senderId = null;

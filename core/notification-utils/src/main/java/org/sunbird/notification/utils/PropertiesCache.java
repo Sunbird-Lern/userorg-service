@@ -6,7 +6,7 @@ import java.util.Properties;
 import org.sunbird.logging.LoggerUtil;
 
 public class PropertiesCache {
-  private static LoggerUtil logger = new LoggerUtil(PropertiesCache.class);
+  private static final LoggerUtil logger = new LoggerUtil(PropertiesCache.class);
   private final String fileName = "configuration.properties";
   private final Properties configProp = new Properties();
   private static PropertiesCache instance;

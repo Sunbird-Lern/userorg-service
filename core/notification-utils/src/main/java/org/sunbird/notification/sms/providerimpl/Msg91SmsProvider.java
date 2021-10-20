@@ -23,7 +23,7 @@ import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.request.RequestContext;
 
 public class Msg91SmsProvider implements ISmsProvider {
-  private static LoggerUtil logger = new LoggerUtil(Msg91SmsProvider.class);
+  private static final LoggerUtil logger = new LoggerUtil(Msg91SmsProvider.class);
 
   private static String baseUrl = null;
   private static String getUrl = null;

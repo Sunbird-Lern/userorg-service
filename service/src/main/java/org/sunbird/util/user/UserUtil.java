@@ -35,7 +35,6 @@ import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserExternalIdentityService;
 import org.sunbird.service.user.UserLookupService;
 import org.sunbird.service.user.UserOrgService;
@@ -942,18 +941,6 @@ public class UserUtil {
         }
       }
     }
-  }
-
-  public static Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
-    Map<String, Object> userOrgMap = new HashMap<String, Object>();
-    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
-    userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
-    userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
-    userOrgMap.put(JsonKey.IS_DELETED, false);
-    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
-    return userOrgMap;
   }
 }
 

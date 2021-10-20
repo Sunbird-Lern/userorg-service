@@ -7,7 +7,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 
 public class JsonUtil {
-  private static LoggerUtil logger = new LoggerUtil(JsonUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(JsonUtil.class);
 
   public static String toJson(Object object, RequestContext context) {
     ObjectMapper mapper = new ObjectMapper();

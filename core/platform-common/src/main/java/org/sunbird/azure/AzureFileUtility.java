@@ -21,7 +21,7 @@ import org.sunbird.request.RequestContext;
 /** @author Manzarul */
 public class AzureFileUtility {
 
-  private static LoggerUtil logger = new LoggerUtil(AzureFileUtility.class);
+  private static final LoggerUtil logger = new LoggerUtil(AzureFileUtility.class);
 
   private static final String DEFAULT_CONTAINER = "default";
 

@@ -58,9 +58,9 @@ import util.Common;
  */
 public class BaseController extends Controller {
 
-  private static LoggerUtil logger = new LoggerUtil(BaseController.class);
+  private static final LoggerUtil logger = new LoggerUtil(BaseController.class);
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
   public static final int AKKA_WAIT_TIME = 30;
   private static final String version = "v1";
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
