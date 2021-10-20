@@ -32,8 +32,8 @@ import util.RequestInterceptor;
 
 public class OnRequestHandler implements ActionCreator {
 
-  private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
-  private ObjectMapper mapper = new ObjectMapper();
+  private static final LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
+  private final ObjectMapper mapper = new ObjectMapper();
   public static boolean isServiceHealthy = true;
 
   @Override
@@ -96,8 +96,9 @@ public class OnRequestHandler implements ActionCreator {
   private void updateActorIdAndType(
       Map<String, Object> reqContext, Http.Request request, String userId) {
     if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
-      reqContext.put(JsonKey.ACTOR_ID, userId);
-      reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.ACTOR_ID, userId);
+      ((Map) reqContext.get(JsonKey.CONTEXT))
+          .put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
     } else {
       Optional<String> optionalConsumerId = request.header(HeaderParam.X_Consumer_ID.getName());
       String consumerId;
@@ -106,8 +107,9 @@ public class OnRequestHandler implements ActionCreator {
       } else {
         consumerId = JsonKey.DEFAULT_CONSUMER_ID;
       }
-      reqContext.put(JsonKey.ACTOR_ID, consumerId);
-      reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.CONSUMER));
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.ACTOR_ID, consumerId);
+      ((Map) reqContext.get(JsonKey.CONTEXT))
+          .put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.CONSUMER));
     }
   }
 
@@ -115,11 +117,11 @@ public class OnRequestHandler implements ActionCreator {
       Http.Request request, Map<String, Object> reqContext, String requestId) {
     Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
     if (optionalTraceId.isPresent()) {
-      reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
       request = request.addAttr(Attrs.X_REQUEST_ID, optionalTraceId.get());
     } else {
       request = request.addAttr(Attrs.X_REQUEST_ID, requestId);
-      reqContext.put(JsonKey.X_REQUEST_ID, requestId);
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.X_REQUEST_ID, requestId);
     }
     return request;
   }
