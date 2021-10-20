@@ -259,10 +259,32 @@ public class UserUpdateActor extends UserBaseActor {
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
-          locations = locationClient.getLocationByIds(locationActor, locationIds, context);
+          Map<String, Object> filters = new HashMap<>();
+          Map<String, Object> searchRequestMap = new HashMap<>();
+          filters.put(JsonKey.ID, locationIds);
+          searchRequestMap.put(JsonKey.FILTERS, filters);
+          Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+          List<Map<String, Object>> responseList =
+              (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
+          locations =
+              responseList
+                  .stream()
+                  .map(s -> mapper.convertValue(s, Location.class))
+                  .collect(Collectors.toList());
         }
       } else {
-        locations = locationClient.getLocationsByCodes(locationActor, locationCodes, context);
+        Map<String, Object> filters = new HashMap<>();
+        Map<String, Object> searchRequestMap = new HashMap<>();
+        filters.put(JsonKey.CODE, locationCodes);
+        searchRequestMap.put(JsonKey.FILTERS, filters);
+        Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+        List<Map<String, Object>> responseList =
+            (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
+        locations =
+            responseList
+                .stream()
+                .map(s -> mapper.convertValue(s, Location.class))
+                .collect(Collectors.toList());
       }
       if (CollectionUtils.isNotEmpty(locations)) {
         String stateCode = null;
@@ -354,8 +376,18 @@ public class UserUpdateActor extends UserBaseActor {
               locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
+      Map<String, Object> filters = new HashMap<>();
+      Map<String, Object> searchRequestMap = new HashMap<>();
+      filters.put(JsonKey.CODE, locCodeLst);
+      searchRequestMap.put(JsonKey.FILTERS, filters);
+      Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+      List<Map<String, Object>> responseList =
+          (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
       List<Location> locationIdList =
-          locationClient.getLocationByCodes(locationActor, locCodeLst, context);
+          responseList
+              .stream()
+              .map(s -> mapper.convertValue(s, Location.class))
+              .collect(Collectors.toList());
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
             location ->
