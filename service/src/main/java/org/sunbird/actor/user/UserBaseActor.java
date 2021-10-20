@@ -35,7 +35,7 @@ import org.sunbird.util.Util;
 
 public abstract class UserBaseActor extends BaseActor {
 
-  private final ObjectMapper mapper = new ObjectMapper();
+  protected final ObjectMapper mapper = new ObjectMapper();
   protected final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   protected final LocationService locationService = LocationServiceImpl.getInstance();
 
@@ -187,10 +187,11 @@ public abstract class UserBaseActor extends BaseActor {
       Response searchResponse = locationService.searchLocation(searchRequestMap, context);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
-      return responseList
-          .stream()
-          .map(s -> mapper.convertValue(s, Location.class))
-          .collect(Collectors.toList());
+      locationList =
+          responseList
+              .stream()
+              .map(s -> mapper.convertValue(s, Location.class))
+              .collect(Collectors.toList());
     }
 
     if (((List) locationCodes).get(0) instanceof Map) {
@@ -279,8 +280,6 @@ public abstract class UserBaseActor extends BaseActor {
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      LocationService locationService = LocationServiceImpl.getInstance();
-      ObjectMapper mapper = new ObjectMapper();
       List<Map<String, String>> locationIdTypeList =
           locationService.getValidatedRelatedLocationIdAndType(
               (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);

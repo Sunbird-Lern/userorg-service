@@ -619,6 +619,8 @@ public class UserUpdateActor extends UserBaseActor {
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    if (null != backgroundJobManager) {
+      backgroundJobManager.tell(userRequest, self());
+    }
   }
 }
