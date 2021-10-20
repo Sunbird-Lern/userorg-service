@@ -20,8 +20,6 @@ import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
@@ -70,7 +68,7 @@ public class UserUtil {
   private static final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private static final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
   private static final OrgService orgService = OrgServiceImpl.getInstance();
-  private static final UserDao userDao = UserDaoImpl.getInstance();
+  // private static final UserDao userDao = UserDaoImpl.getInstance();
 
   private UserUtil() {}
 
@@ -593,7 +591,7 @@ public class UserUtil {
 
   public static Map<String, Object> validateManagedByUser(
       String managedBy, RequestContext context) {
-    Map<String, Object> managedByInfo = userDao.getUserDetailsById(managedBy, context);
+    Map<String, Object> managedByInfo = userService.getUserDetailsById(managedBy, context);
     if (MapUtils.isEmpty(managedByInfo)
         || StringUtils.isBlank((String) managedByInfo.get(JsonKey.FIRST_NAME))
         || StringUtils.isNotBlank((String) managedByInfo.get(JsonKey.MANAGED_BY))
