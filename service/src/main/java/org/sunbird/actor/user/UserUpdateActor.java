@@ -70,6 +70,7 @@ public class UserUpdateActor extends UserBaseActor {
     switch (operation) {
       case "updateUser":
       case "updateUserV2":
+      case "updateUserV3":
         updateUser(request);
         break;
       default:
@@ -90,9 +91,29 @@ public class UserUpdateActor extends UserBaseActor {
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
       populateUserTypeAndSubType(userMap);
       populateLocationCodesFromProfileLocation(userMap);
-    } else {
+    } else if(actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())){
       userMap.remove(JsonKey.PROFILE_LOCATION);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
+    } else if(actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V3.getValue())){
+      userMap.remove(JsonKey.PROFILE_USERTYPE);
+      userMap.remove(JsonKey.USER_TYPE);
+      userMap.remove(JsonKey.USER_SUB_TYPE);
+      if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
+        List<Map<String, Object>> userTypeAndSubTypes =
+                (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
+        Map<String, Object> userTypeAndSubType = new HashMap<>();
+        userTypeAndSubType = userTypeAndSubTypes.get(0);
+        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+        try {
+          ObjectMapper mapper = new ObjectMapper();
+          userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));
+        } catch (Exception ex) {
+          logger.error(actorMessage.getRequestContext(), "Exception occurred while mapping", ex);
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
+
+      }
     }
     validateAndGetLocationCodes(actorMessage);
     validateUserTypeAndSubType(
