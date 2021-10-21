@@ -25,9 +25,9 @@ import org.sunbird.util.ProjectUtil;
  * @author Arvind
  */
 public class TelemetryGenerator {
-  private static LoggerUtil logger = new LoggerUtil(TelemetryGenerator.class);
+  private static final LoggerUtil logger = new LoggerUtil(TelemetryGenerator.class);
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  private static final ObjectMapper mapper = new ObjectMapper();
 
   private TelemetryGenerator() {}
 

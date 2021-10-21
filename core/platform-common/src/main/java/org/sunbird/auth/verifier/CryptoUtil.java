@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Map;
 import org.sunbird.logging.LoggerUtil;
 
 public class CryptoUtil {
@@ -13,7 +14,11 @@ public class CryptoUtil {
   private static final LoggerUtil logger = new LoggerUtil(CryptoUtil.class);
 
   public static boolean verifyRSASign(
-      String payLoad, byte[] signature, PublicKey key, String algorithm) {
+      String payLoad,
+      byte[] signature,
+      PublicKey key,
+      String algorithm,
+      Map<String, Object> requestContext) {
     Signature sign;
     try {
       sign = Signature.getInstance(algorithm);
@@ -22,7 +27,11 @@ public class CryptoUtil {
       return sign.verify(signature);
     } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
       logger.error(
-          "verifyRSASign: Exception occurred while token verification: " + e.getMessage(), e);
+          "verifyRSASign: Exception occurred while token verification: "
+              + e.getMessage()
+              + ", request context data :"
+              + requestContext,
+          e);
       return false;
     }
   }

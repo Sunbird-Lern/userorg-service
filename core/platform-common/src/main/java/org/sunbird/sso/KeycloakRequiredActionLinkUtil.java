@@ -18,7 +18,7 @@ import org.sunbird.util.ProjectUtil;
  * @author Amit Kumar
  */
 public class KeycloakRequiredActionLinkUtil {
-  private static LoggerUtil logger = new LoggerUtil(KeycloakRequiredActionLinkUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(KeycloakRequiredActionLinkUtil.class);
   public static final String VERIFY_EMAIL = "VERIFY_EMAIL";
   public static final String UPDATE_PASSWORD = "UPDATE_PASSWORD";
   private static final String CLIENT_ID = "clientId";
@@ -94,7 +94,8 @@ public class KeycloakRequiredActionLinkUtil {
             + "realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK;
-    String response = HttpClientUtil.post(url, mapper.writeValueAsString(request), headers, context);
+    String response =
+        HttpClientUtil.post(url, mapper.writeValueAsString(request), headers, context);
 
     logger.info(context, "KeycloakRequiredActionLinkUtil:generateLink: Response = " + response);
 

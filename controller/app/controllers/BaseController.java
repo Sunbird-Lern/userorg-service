@@ -58,9 +58,9 @@ import util.Common;
  */
 public class BaseController extends Controller {
 
-  private static LoggerUtil logger = new LoggerUtil(BaseController.class);
+  private static final LoggerUtil logger = new LoggerUtil(BaseController.class);
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
   public static final int AKKA_WAIT_TIME = 30;
   private static final String version = "v1";
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
@@ -838,7 +838,6 @@ public class BaseController extends Controller {
   public void setContextData(Http.Request httpReq, org.sunbird.request.Request reqObj) {
     try {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
-      logger.info("Request Context Info : " + context);
       Map<String, Object> requestInfo = objectMapper.readValue(context, new TypeReference<>() {});
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));

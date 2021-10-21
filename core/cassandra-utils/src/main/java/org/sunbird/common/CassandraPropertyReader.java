@@ -12,7 +12,7 @@ import org.sunbird.logging.LoggerUtil;
  * @author Amit Kumar
  */
 public class CassandraPropertyReader {
-  private static LoggerUtil logger = new LoggerUtil(CassandraPropertyReader.class);
+  private static final LoggerUtil logger = new LoggerUtil(CassandraPropertyReader.class);
 
   private final Properties properties = new Properties();
   private final String[] fileName = {

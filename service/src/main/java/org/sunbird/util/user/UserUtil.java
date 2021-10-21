@@ -18,10 +18,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserRequestValidator;
 import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
@@ -35,7 +31,6 @@ import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserExternalIdentityService;
 import org.sunbird.service.user.UserLookupService;
 import org.sunbird.service.user.UserOrgService;
@@ -65,13 +60,11 @@ public class UserUtil {
   private static final DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static final UserService userService = UserServiceImpl.getInstance();
-  private static final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
   private static final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private static final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
   private static final OrgService orgService = OrgServiceImpl.getInstance();
-  private static final UserDao userDao = UserDaoImpl.getInstance();
 
   private UserUtil() {}
 
@@ -163,9 +156,7 @@ public class UserUtil {
           (StringUtils.isNotBlank((String) userMap.get(JsonKey.USER_ID)))
               ? ((String) userMap.get(JsonKey.USER_ID))
               : ((String) userMap.get(JsonKey.ID));
-      Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
-      user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
+      user = userService.getUserDetailsForES(userId, context);
       if (MapUtils.isEmpty(user)) {
         ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound, null);
       }
@@ -192,9 +183,7 @@ public class UserUtil {
     Map<String, Object> user = null;
     String userId = getUserIdFromExternalId(userMap, context);
     if (!StringUtils.isEmpty(userId)) {
-      Future<Map<String, Object>> userF =
-          esUtil.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
-      user = (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(userF);
+      user = userService.getUserDetailsForES(userId, context);
     }
     return user;
   }
@@ -594,7 +583,7 @@ public class UserUtil {
 
   public static Map<String, Object> validateManagedByUser(
       String managedBy, RequestContext context) {
-    Map<String, Object> managedByInfo = userDao.getUserDetailsById(managedBy, context);
+    Map<String, Object> managedByInfo = userService.getUserDetailsById(managedBy, context);
     if (MapUtils.isEmpty(managedByInfo)
         || StringUtils.isBlank((String) managedByInfo.get(JsonKey.FIRST_NAME))
         || StringUtils.isNotBlank((String) managedByInfo.get(JsonKey.MANAGED_BY))
@@ -705,12 +694,7 @@ public class UserUtil {
   public static String fetchProviderByOrgId(String orgId, RequestContext context) {
     try {
       if (StringUtils.isNotBlank(orgId)) {
-        Future<Map<String, Object>> esOrgResF =
-            esUtil.getDataByIdentifier(
-                ProjectUtil.EsType.organisation.getTypeName(), orgId, context);
-        Map<String, Object> org =
-            (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
-
+        Map<String, Object> org = orgService.getOrgById(orgId, context);
         if (null != org && !org.isEmpty()) {
           return (String) org.get(JsonKey.CHANNEL);
         }
@@ -732,8 +716,7 @@ public class UserUtil {
         filters.put(JsonKey.CHANNEL, providers);
         searchQueryMap.put(JsonKey.FILTERS, filters);
         SearchDTO searchDTO = ElasticSearchHelper.createSearchDTO(searchQueryMap);
-        Future<Map<String, Object>> esOrgResF =
-            esUtil.search(searchDTO, ProjectUtil.EsType.organisation.getTypeName(), context);
+        Future<Map<String, Object>> esOrgResF = orgService.searchOrg(searchDTO, context);
         Map<String, Object> esResOrg =
             (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esOrgResF);
         if (MapUtils.isNotEmpty(esResOrg)) {
@@ -745,7 +728,6 @@ public class UserUtil {
             }
           }
         }
-
       } catch (Exception ex) {
         logger.error(context, ex.getMessage(), ex);
       }
@@ -942,18 +924,6 @@ public class UserUtil {
         }
       }
     }
-  }
-
-  public static Map<String, Object> createUserOrgRequestData(Map<String, Object> userMap) {
-    Map<String, Object> userOrgMap = new HashMap<String, Object>();
-    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
-    userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
-    userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
-    userOrgMap.put(JsonKey.IS_DELETED, false);
-    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
-    return userOrgMap;
   }
 }
 

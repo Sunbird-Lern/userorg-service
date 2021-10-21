@@ -11,9 +11,12 @@ import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -28,6 +31,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
@@ -36,6 +40,22 @@ import scala.concurrent.Promise;
 public class ManagedUserActorTest extends UserManagementActorTestBase {
 
   public final Props props = Props.create(ManagedUserActor.class);
+
+  @Before
+  public void before() {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    List<String> subTypeList = Arrays.asList("state,district,block,cluster,school;".split(";"));
+    Map<String, Integer> orderMap = new HashMap<>();
+    for (String str : subTypeList) {
+      List<String> typeList =
+          (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
+              .collect(Collectors.toList()));
+      for (int i = 0; i < typeList.size(); i++) {
+        orderMap.put(typeList.get(i), i);
+      }
+    }
+    when(DataCacheHandler.getLocationOrderMap()).thenReturn(orderMap);
+  }
 
   @Test
   public void testGetManagedUsers() throws Exception {
@@ -144,10 +164,11 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       reqObj.getRequest().put(JsonKey.EXTERNAL_IDS, externalIds);
       reqObj.getContext().put(JsonKey.SIGNUP_TYPE, "self");
       reqObj.getContext().put(JsonKey.REQUEST_SOURCE, "source");
+      reqObj.setRequestContext(new RequestContext());
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("10 second"), Response.class);
+      probe.expectMsgClass(duration("100 second"), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }
