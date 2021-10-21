@@ -262,6 +262,10 @@ public class UserUpdateActor extends UserBaseActor {
           locations = searchLocationByCodesOrIds(JsonKey.ID, locationIds, context);
         }
       } else {
+        logger.info(
+            context,
+            String.format(
+                "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationCodes));
         locations = searchLocationByCodesOrIds(JsonKey.CODE, locationCodes, context);
       }
       if (CollectionUtils.isNotEmpty(locations)) {
@@ -369,6 +373,8 @@ public class UserUpdateActor extends UserBaseActor {
               locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
+      logger.info(
+          context, "updateLocationCodeToIds : Searching location for location codes " + locCodeLst);
       List<Location> locationIdList = searchLocationByCodesOrIds(JsonKey.CODE, locCodeLst, context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
