@@ -259,32 +259,10 @@ public class UserUpdateActor extends UserBaseActor {
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
-          Map<String, Object> filters = new HashMap<>();
-          Map<String, Object> searchRequestMap = new HashMap<>();
-          filters.put(JsonKey.ID, locationIds);
-          searchRequestMap.put(JsonKey.FILTERS, filters);
-          Response searchResponse = locationService.searchLocation(searchRequestMap, context);
-          List<Map<String, Object>> responseList =
-              (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
-          locations =
-              responseList
-                  .stream()
-                  .map(s -> mapper.convertValue(s, Location.class))
-                  .collect(Collectors.toList());
+          locations = searchLocationByCodesOrIds(JsonKey.ID, locationIds, context);
         }
       } else {
-        Map<String, Object> filters = new HashMap<>();
-        Map<String, Object> searchRequestMap = new HashMap<>();
-        filters.put(JsonKey.CODE, locationCodes);
-        searchRequestMap.put(JsonKey.FILTERS, filters);
-        Response searchResponse = locationService.searchLocation(searchRequestMap, context);
-        List<Map<String, Object>> responseList =
-            (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
-        locations =
-            responseList
-                .stream()
-                .map(s -> mapper.convertValue(s, Location.class))
-                .collect(Collectors.toList());
+        locations = searchLocationByCodesOrIds(JsonKey.CODE, locationCodes, context);
       }
       if (CollectionUtils.isNotEmpty(locations)) {
         String stateCode = null;
@@ -307,6 +285,21 @@ public class UserUpdateActor extends UserBaseActor {
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
     }
+  }
+
+  private List<Location> searchLocationByCodesOrIds(
+      String codeOrId, List<String> locationCodesOrIds, RequestContext context) {
+    Map<String, Object> filters = new HashMap<>();
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    filters.put(codeOrId, locationCodesOrIds);
+    searchRequestMap.put(JsonKey.FILTERS, filters);
+    Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
+    return responseList
+        .stream()
+        .map(s -> mapper.convertValue(s, Location.class))
+        .collect(Collectors.toList());
   }
 
   private void validateUserTypeAndSubType(
@@ -376,18 +369,7 @@ public class UserUpdateActor extends UserBaseActor {
               locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
-      Map<String, Object> filters = new HashMap<>();
-      Map<String, Object> searchRequestMap = new HashMap<>();
-      filters.put(JsonKey.CODE, locCodeLst);
-      searchRequestMap.put(JsonKey.FILTERS, filters);
-      Response searchResponse = locationService.searchLocation(searchRequestMap, context);
-      List<Map<String, Object>> responseList =
-          (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
-      List<Location> locationIdList =
-          responseList
-              .stream()
-              .map(s -> mapper.convertValue(s, Location.class))
-              .collect(Collectors.toList());
+      List<Location> locationIdList = searchLocationByCodesOrIds(JsonKey.CODE, locCodeLst, context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
             location ->

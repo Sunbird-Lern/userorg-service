@@ -53,9 +53,6 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
 
     Map<String, Map<String, List<String>>> userTypeConfigMap = new HashMap<>();
-    Map<String, List<String>> userTypesConfig = new HashMap<>();
-    List<String> list = new ArrayList<>();
-
     when(DataCacheHandler.getUserTypesConfig()).thenReturn(userTypeConfigMap);
   }
 
@@ -406,6 +403,17 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, "teacher");
     req.put(JsonKey.USER_SUB_TYPE, "crc");
+    List<String> locCodes = new ArrayList<>();
+    locCodes.add("locationCode");
+    req.put(JsonKey.LOCATION_CODES, locCodes);
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> externalId = new HashMap<>();
+    externalId.put(JsonKey.DECLARED_STATE, "state");
+    externalId.put(JsonKey.ID, "locationCode");
+    externalId.put(JsonKey.PROVIDER, "provider");
+    externalId.put(JsonKey.ID_TYPE, "provider");
+    externalIds.add(externalId);
+    req.put(JsonKey.EXTERNAL_IDS, externalIds);
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.PHONE, "4346345377");
     user.put(JsonKey.EMAIL, "username@gmail.com");

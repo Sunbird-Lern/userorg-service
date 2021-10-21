@@ -60,7 +60,6 @@ public class UserUtil {
   private static final DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static final UserService userService = UserServiceImpl.getInstance();
-  // private static final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private static final UserExternalIdentityService userExternalIdentityService =
       new UserExternalIdentityServiceImpl();
   private static final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
