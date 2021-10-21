@@ -18,7 +18,7 @@ import org.sunbird.logging.LoggerUtil;
  * @author Manzarul
  */
 public class ConnectionManager {
-  private static LoggerUtil logger = new LoggerUtil(ConnectionManager.class);
+  private static final LoggerUtil logger = new LoggerUtil(ConnectionManager.class);
 
   private static RestHighLevelClient restClient = null;
   private static List<String> host = new ArrayList<>();

@@ -15,8 +15,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
-import org.sunbird.client.location.LocationClient;
-import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.kafka.KafkaClient;
@@ -24,6 +22,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.user.UserLookupService;
@@ -36,8 +35,9 @@ import org.sunbird.util.Util;
 
 public abstract class UserBaseActor extends BaseActor {
 
+  protected final ObjectMapper mapper = new ObjectMapper();
   protected final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  protected final LocationClient locationClient = LocationClientImpl.getInstance();
+  protected final LocationService locationService = LocationServiceImpl.getInstance();
 
   @Inject
   @Named("user_telemetry_actor")
@@ -180,7 +180,18 @@ public abstract class UserBaseActor extends BaseActor {
     List<Location> locationList = new ArrayList<>();
     if (((List) locationCodes).get(0) instanceof String) {
       List<String> locations = (List<String>) locationCodes;
-      locationList = locationClient.getLocationsByCodes(locationActor, locations, context);
+      Map<String, Object> filters = new HashMap<>();
+      Map<String, Object> searchRequestMap = new HashMap<>();
+      filters.put(JsonKey.CODE, locations);
+      searchRequestMap.put(JsonKey.FILTERS, filters);
+      Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+      List<Map<String, Object>> responseList =
+          (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
+      locationList =
+          responseList
+              .stream()
+              .map(s -> mapper.convertValue(s, Location.class))
+              .collect(Collectors.toList());
     }
 
     if (((List) locationCodes).get(0) instanceof Map) {
@@ -269,8 +280,6 @@ public abstract class UserBaseActor extends BaseActor {
     if (!userMap.containsKey(JsonKey.LOCATION_IDS)
         && userMap.containsKey(JsonKey.LOCATION_CODES)
         && !CollectionUtils.isEmpty((List<String>) userMap.get(JsonKey.LOCATION_CODES))) {
-      LocationService locationService = LocationServiceImpl.getInstance();
-      ObjectMapper mapper = new ObjectMapper();
       List<Map<String, String>> locationIdTypeList =
           locationService.getValidatedRelatedLocationIdAndType(
               (List<String>) userMap.get(JsonKey.LOCATION_CODES), context);

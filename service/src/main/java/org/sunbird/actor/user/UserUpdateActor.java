@@ -259,10 +259,14 @@ public class UserUpdateActor extends UserBaseActor {
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
-          locations = locationClient.getLocationByIds(locationActor, locationIds, context);
+          locations = searchLocationByCodesOrIds(JsonKey.ID, locationIds, context);
         }
       } else {
-        locations = locationClient.getLocationsByCodes(locationActor, locationCodes, context);
+        logger.info(
+            context,
+            String.format(
+                "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationCodes));
+        locations = searchLocationByCodesOrIds(JsonKey.CODE, locationCodes, context);
       }
       if (CollectionUtils.isNotEmpty(locations)) {
         String stateCode = null;
@@ -285,6 +289,21 @@ public class UserUpdateActor extends UserBaseActor {
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
     }
+  }
+
+  private List<Location> searchLocationByCodesOrIds(
+      String codeOrId, List<String> locationCodesOrIds, RequestContext context) {
+    Map<String, Object> filters = new HashMap<>();
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    filters.put(codeOrId, locationCodesOrIds);
+    searchRequestMap.put(JsonKey.FILTERS, filters);
+    Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
+    return responseList
+        .stream()
+        .map(s -> mapper.convertValue(s, Location.class))
+        .collect(Collectors.toList());
   }
 
   private void validateUserTypeAndSubType(
@@ -354,8 +373,9 @@ public class UserUpdateActor extends UserBaseActor {
               locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
-      List<Location> locationIdList =
-          locationClient.getLocationByCodes(locationActor, locCodeLst, context);
+      logger.info(
+          context, "updateLocationCodeToIds : Searching location for location codes " + locCodeLst);
+      List<Location> locationIdList = searchLocationByCodesOrIds(JsonKey.CODE, locCodeLst, context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
             location ->
@@ -587,6 +607,8 @@ public class UserUpdateActor extends UserBaseActor {
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    if (null != backgroundJobManager) {
+      backgroundJobManager.tell(userRequest, self());
+    }
   }
 }

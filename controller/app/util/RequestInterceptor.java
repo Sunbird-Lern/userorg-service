@@ -24,9 +24,10 @@ import play.mvc.Http;
  */
 public class RequestInterceptor {
 
-  private static LoggerUtil logger = new LoggerUtil(RequestInterceptor.class);
+  private static final LoggerUtil logger = new LoggerUtil(RequestInterceptor.class);
   public static List<String> restrictedUriList = null;
-  private static ConcurrentHashMap<String, Short> apiHeaderIgnoreMap = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, Short> apiHeaderIgnoreMap =
+      new ConcurrentHashMap<>();
 
   private RequestInterceptor() {}
 
@@ -120,7 +121,7 @@ public class RequestInterceptor {
    * @return User or Client ID for authenticated request. For unauthenticated requests, UNAUTHORIZED
    *     is returned release-3.0.0 on-wards validating managedBy token.
    */
-  public static Map verifyRequestData(Http.Request request) {
+  public static Map verifyRequestData(Http.Request request, Map<String, Object> requestContext) {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
     userAuthentication.put(JsonKey.MANAGED_FOR, null);
@@ -131,7 +132,7 @@ public class RequestInterceptor {
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
       // The API must be invoked with either access token or client token.
       if (accessToken.isPresent()) {
-        clientId = AccessTokenValidator.verifyUserToken(accessToken.get());
+        clientId = AccessTokenValidator.verifyUserToken(accessToken.get(), requestContext);
         if (!JsonKey.USER_UNAUTH_STATES.contains(clientId)) {
           // Now we have some valid token, next verify if the token is matching the request.
           String requestedForUserID = getUserRequestedFor(request);
@@ -143,7 +144,7 @@ public class RequestInterceptor {
             if (StringUtils.isNotEmpty(managedAccessToken)) {
               String managedFor =
                   AccessTokenValidator.verifyManagedUserToken(
-                      managedAccessToken, clientId, requestedForUserID);
+                      managedAccessToken, clientId, requestedForUserID, requestContext);
               if (!JsonKey.USER_UNAUTH_STATES.contains(managedFor)) {
                 managedForId = managedFor;
               } else {
@@ -163,7 +164,8 @@ public class RequestInterceptor {
       if (accessToken.isPresent()) {
         String clientAccessTokenId = null;
         try {
-          clientAccessTokenId = AccessTokenValidator.verifyUserToken(accessToken.get());
+          clientAccessTokenId =
+              AccessTokenValidator.verifyUserToken(accessToken.get(), requestContext);
           if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(clientAccessTokenId)) {
             clientAccessTokenId = null;
           }

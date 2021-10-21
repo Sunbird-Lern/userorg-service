@@ -10,7 +10,11 @@ import akka.pattern.Patterns;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -20,10 +24,30 @@ import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 import scala.concurrent.Future;
 
 public class SSOUserCreateActorTest extends UserManagementActorTestBase {
+
+  @Before
+  public void before() {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    List<String> subTypeList = Arrays.asList("state,district,block,cluster,school;".split(";"));
+    Map<String, Integer> orderMap = new HashMap<>();
+    for (String str : subTypeList) {
+      List<String> typeList =
+          (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
+              .collect(Collectors.toList()));
+      for (int i = 0; i < typeList.size(); i++) {
+        orderMap.put(typeList.get(i), i);
+      }
+    }
+    when(DataCacheHandler.getLocationOrderMap()).thenReturn(orderMap);
+    Map<String, String> config = new HashMap<>();
+    config.put(JsonKey.CUSTODIAN_ORG_ID, "custOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(config);
+  }
 
   @Test
   public void testCreateUserSuccessWithUserCallerId() {

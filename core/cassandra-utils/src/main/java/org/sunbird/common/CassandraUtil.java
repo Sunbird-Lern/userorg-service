@@ -32,7 +32,7 @@ import org.sunbird.util.ProjectUtil;
  * @author Amit Kumar
  */
 public final class CassandraUtil {
-  private static LoggerUtil logger = new LoggerUtil(CassandraUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(CassandraUtil.class);
 
   private static final CassandraPropertyReader propertiesCache =
       CassandraPropertyReader.getInstance();

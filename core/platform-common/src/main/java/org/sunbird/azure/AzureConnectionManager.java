@@ -22,7 +22,7 @@ import org.sunbird.util.ProjectUtil;
  */
 public class AzureConnectionManager {
 
-  private static LoggerUtil logger = new LoggerUtil(AzureConnectionManager.class);
+  private static final LoggerUtil logger = new LoggerUtil(AzureConnectionManager.class);
   private static String accountName = "";
   private static String accountKey = "";
   private static String storageAccountString;

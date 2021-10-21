@@ -33,6 +33,7 @@ import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
@@ -42,9 +43,8 @@ import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.service.location.LocationService;
-import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
@@ -82,7 +82,6 @@ import scala.concurrent.Promise;
   UserLookUpServiceImpl.class,
   ActorSelection.class,
   OrgExternalServiceImpl.class,
-  LocationServiceImpl.class,
   UserRoleServiceImpl.class
 })
 @PowerMockIgnore({
@@ -105,11 +104,9 @@ public abstract class UserManagementActorTestBase {
   public static OrgServiceImpl orgService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
-  // public static UserClientImpl userClient;
   protected static OrganisationClient organisationClient;
   public LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
-  public static LocationService locationService;
   public static UserRoleServiceImpl userRoleService;
 
   @Before
@@ -150,8 +147,6 @@ public abstract class UserManagementActorTestBase {
             Mockito.any()))
         .thenReturn(new HashMap<>());
 
-    // PowerMockito.mockStatic(UserClientImpl.class);
-    // userClient = mock(UserClientImpl.class);
     PowerMockito.mockStatic(LocationClientImpl.class);
     locationClient = mock(LocationClientImpl.class);
     when(LocationClientImpl.getInstance()).thenReturn(locationClient);
@@ -167,12 +162,19 @@ public abstract class UserManagementActorTestBase {
     PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("default"), Mockito.any()))
         .thenReturn(getFormApiConfig());
 
-    PowerMockito.mockStatic(LocationServiceImpl.class);
-    locationService = mock(LocationServiceImpl.class);
-    PowerMockito.when(LocationServiceImpl.getInstance()).thenReturn(locationService);
-    PowerMockito.when(
-            locationService.getValidatedRelatedLocationIdAndType(Mockito.any(), Mockito.any()))
-        .thenReturn(getLocationIdType());
+    Map<String, Object> locDetails = new HashMap<>();
+    locDetails.put(JsonKey.CODE, "locationCode");
+    locDetails.put(JsonKey.TYPE, JsonKey.STATE);
+    List<Map<String, Object>> locList = new ArrayList<>();
+    locList.add(locDetails);
+    Map<String, Object> esSearchRes = new HashMap<>();
+    esSearchRes.put(JsonKey.CONTENT, locList);
+    Promise<Map<String, Object>> esResF = Futures.promise();
+    esResF.success(esSearchRes);
+    when(esService.search(
+            Mockito.any(SearchDTO.class), Mockito.anyString(), Mockito.any(RequestContext.class)))
+        .thenReturn(esResF.future());
+
     PowerMockito.mockStatic(OrgServiceImpl.class);
     orgService = mock(OrgServiceImpl.class);
     when(OrgServiceImpl.getInstance()).thenReturn(orgService);
@@ -414,7 +416,7 @@ public abstract class UserManagementActorTestBase {
   public Map<String, Map<String, List<String>>> getUserTypes() {
     Map<String, Map<String, List<String>>> userTypeOrSubTypeConfigMap = new HashMap<>();
     Map<String, List<String>> userTypeConfigMap = new HashMap<>();
-
+    userTypeConfigMap.put("default", Arrays.asList());
     userTypeConfigMap.put("STUDENT", Arrays.asList());
     userTypeConfigMap.put("ADMINISTRATOR", Arrays.asList("BRC", "DAO"));
     userTypeConfigMap.put("TEACHER", Arrays.asList());
@@ -465,6 +467,7 @@ public abstract class UserManagementActorTestBase {
     reqObj.setRequest(reqMap);
     reqObj.setContext(innerMap);
     reqObj.setOperation(actorOperation.getValue());
+    reqObj.setRequestContext(new RequestContext());
     return reqObj;
   }
 

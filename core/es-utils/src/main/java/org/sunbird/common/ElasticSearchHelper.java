@@ -51,7 +51,7 @@ import scala.concurrent.Future;
  * @author mayank:github.com/iostream04
  */
 public class ElasticSearchHelper {
-  private static LoggerUtil logger = new LoggerUtil(ElasticSearchHelper.class);
+  private static final LoggerUtil logger = new LoggerUtil(ElasticSearchHelper.class);
   public static final String LTE = "<=";
   public static final String LT = "<";
   public static final String GTE = ">=";
@@ -61,10 +61,8 @@ public class ElasticSearchHelper {
   public static final String ENDS_WITH = "endsWith";
   public static final String SOFT_MODE = "soft";
   public static final String RAW_APPEND = ".raw";
-  protected static Map<String, Boolean> indexMap = new HashMap<>();
-  protected static Map<String, Boolean> typeMap = new HashMap<>();
   protected static final String ES_CONFIG_FILE = "elasticsearch.conf";
-  private static Config config = ConfigUtil.getConfig(ES_CONFIG_FILE);
+  private static final Config config = ConfigUtil.getConfig(ES_CONFIG_FILE);
   public static final int WAIT_TIME = 5;
   public static Timeout timeout = new Timeout(WAIT_TIME, TimeUnit.SECONDS);
   public static final List<String> upsertResults =

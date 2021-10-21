@@ -14,21 +14,47 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
 public class UserUpdateActorTest extends UserManagementActorTestBase {
 
   public final Props props = Props.create(UserUpdateActor.class);
+
+  @Before
+  public void before() {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    List<String> subTypeList = Arrays.asList("state,district,block,cluster,school;".split(";"));
+    Map<String, Integer> orderMap = new HashMap<>();
+    for (String str : subTypeList) {
+      List<String> typeList =
+          (((Arrays.asList(str.split(","))).stream().map(String::toLowerCase))
+              .collect(Collectors.toList()));
+      for (int i = 0; i < typeList.size(); i++) {
+        orderMap.put(typeList.get(i), i);
+      }
+    }
+    when(DataCacheHandler.getLocationOrderMap()).thenReturn(orderMap);
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
+
+    Map<String, Map<String, List<String>>> userTypeConfigMap = new HashMap<>();
+    when(DataCacheHandler.getUserTypesConfig()).thenReturn(userTypeConfigMap);
+  }
 
   @Test
   public void testUpdateUserFailureWithInvalidLocationCodes() {
@@ -275,7 +301,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
         testScenario(
             getRequest(
                 true, true, true, getUpdateRequestWithLocationCodes(), ActorOperations.UPDATE_USER),
-            ResponseCode.mandatoryParamsMissing,
+            null,
             props);
     assertTrue(result);
   }
@@ -377,10 +403,17 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, "teacher");
     req.put(JsonKey.USER_SUB_TYPE, "crc");
-    Map<String, String> configMap = new HashMap<>();
-    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
-    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
-    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
+    List<String> locCodes = new ArrayList<>();
+    locCodes.add("locationCode");
+    req.put(JsonKey.LOCATION_CODES, locCodes);
+    List<Map<String, String>> externalIds = new ArrayList<>();
+    Map<String, String> externalId = new HashMap<>();
+    externalId.put(JsonKey.DECLARED_STATE, "state");
+    externalId.put(JsonKey.ID, "locationCode");
+    externalId.put(JsonKey.PROVIDER, "provider");
+    externalId.put(JsonKey.ID_TYPE, "provider");
+    externalIds.add(externalId);
+    req.put(JsonKey.EXTERNAL_IDS, externalIds);
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.PHONE, "4346345377");
     user.put(JsonKey.EMAIL, "username@gmail.com");

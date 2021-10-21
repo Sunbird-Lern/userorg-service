@@ -15,10 +15,10 @@ import org.sunbird.util.PropertiesCache;
  */
 public class KeyCloakConnectionProvider {
 
-  private static LoggerUtil logger = new LoggerUtil(KeyCloakConnectionProvider.class);
+  private static final LoggerUtil logger = new LoggerUtil(KeyCloakConnectionProvider.class);
 
   private static Keycloak keycloak;
-  private static PropertiesCache cache = PropertiesCache.getInstance();
+  private static final PropertiesCache cache = PropertiesCache.getInstance();
   public static String SSO_URL = null;
   public static String SSO_REALM = null;
   public static String CLIENT_ID = null;

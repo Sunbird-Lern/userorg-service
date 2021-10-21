@@ -14,7 +14,7 @@ import org.sunbird.util.PropertiesCache;
 
 /** @author Amit Kumar */
 public class URLShortnerImpl implements URLShortner {
-  private static LoggerUtil logger = new LoggerUtil(URLShortnerImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(URLShortnerImpl.class);
 
   private static String resUrl = null;
   private static final String SUNBIRD_WEB_URL = "sunbird_web_url";
@@ -25,7 +25,7 @@ public class URLShortnerImpl implements URLShortner {
     try {
       flag = Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_URL_SHORTNER_ENABLE));
     } catch (Exception ex) {
-      logger.error(context,"Exception occurred while parsing sunbird_url_shortner_enable key", ex);
+      logger.error(context, "Exception occurred while parsing sunbird_url_shortner_enable key", ex);
     }
     if (flag) {
       String baseUrl = PropertiesCache.getInstance().getProperty("sunbird_url_shortner_base_url");
@@ -44,7 +44,7 @@ public class URLShortnerImpl implements URLShortner {
           Map<String, String> dataMap = (Map<String, String>) map.get("data");
           return dataMap.get("url");
         } catch (IOException | ClassCastException e) {
-          logger.error(context,"Exception occurred while parsing " + e.getMessage(), e);
+          logger.error(context, "Exception occurred while parsing " + e.getMessage(), e);
         }
       }
     }
