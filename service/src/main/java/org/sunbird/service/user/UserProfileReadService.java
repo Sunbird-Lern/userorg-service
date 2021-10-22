@@ -169,6 +169,19 @@ public class UserProfileReadService {
   }
 
   public void appendUserTypeAndLocation(Map<String, Object> result, Request actorMessage) {
+    List<Map<String, Object>> userTypeDetailsList = new ArrayList<>();
+    try {
+      if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPES))) {
+        userTypeDetailsList =
+                mapper.readValue(
+                        (String) result.get(JsonKey.PROFILE_USERTYPES), new TypeReference<>() {});
+      }
+    } catch (Exception e) {
+      logger.error(
+              actorMessage.getRequestContext(),
+              "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPES),
+              e);
+    }
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {
       if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPE))) {
@@ -218,6 +231,7 @@ public class UserProfileReadService {
       result.remove(JsonKey.LOCATION_IDS);
     }
     result.put(JsonKey.PROFILE_USERTYPE, userTypeDetails);
+    result.put(JsonKey.PROFILE_USERTYPES, userTypeDetailsList);
     result.put(JsonKey.PROFILE_LOCATION, userLocList);
   }
 

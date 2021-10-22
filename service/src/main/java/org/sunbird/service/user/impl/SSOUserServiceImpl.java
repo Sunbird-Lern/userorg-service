@@ -2,7 +2,9 @@ package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -218,6 +220,11 @@ public class SSOUserServiceImpl implements SSOUserService {
       }
       try {
         ObjectMapper mapper = new ObjectMapper();
+        if(!userMap.containsKey(JsonKey.PROFILE_USERTYPES)){
+          List<Map<String, String>> userTypeAndSubTypes = new ArrayList<>();
+          userTypeAndSubTypes.add(userTypeAndSubType);
+          userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));
+        }
         userMap.put(JsonKey.PROFILE_USERTYPE, mapper.writeValueAsString(userTypeAndSubType));
       } catch (Exception ex) {
         logger.error(requestContext, "Exception occurred while mapping", ex);

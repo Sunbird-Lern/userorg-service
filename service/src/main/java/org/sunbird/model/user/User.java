@@ -62,6 +62,7 @@ public class User implements Serializable {
   private Map<String, String> allTncAccepted;
   private String profileUserType;
   private String profileLocation;
+  private String profileUserTypes;
 
   public Map<String, String> getAllTncAccepted() {
     return allTncAccepted;
@@ -399,6 +400,23 @@ public class User implements Serializable {
       }
     } else {
       this.profileUserType = (String) profileUserType;
+    }
+  }
+
+  public String getProfileUserTypes() {
+    return profileUserTypes;
+  }
+
+  public void setProfileUserTypes(Object profileUserTypes) {
+    if (profileUserTypes != null && !(profileUserTypes instanceof String)) {
+      ObjectMapper objMap = new ObjectMapper();
+      try {
+        this.profileUserTypes = objMap.writeValueAsString(profileUserTypes);
+      } catch (Exception e) {
+        this.profileUserTypes = "";
+      }
+    } else {
+      this.profileUserTypes = (String) profileUserTypes;
     }
   }
 

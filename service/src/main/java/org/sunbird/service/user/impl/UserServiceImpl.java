@@ -467,6 +467,17 @@ public class UserServiceImpl implements UserService {
         }
       }
       userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+      List<Map<String, Object>> userTypeDetails = new ArrayList<>();
+      String profUserTypes = (String) userDetails.get(JsonKey.PROFILE_USERTYPES);
+      if (StringUtils.isNotBlank(profUserTypes)) {
+        try {
+          userTypeDetails = mapper.readValue(profUserTypes, List.class);
+        } catch (Exception e) {
+          logger.error(
+                  context, "Exception while converting profileUserTypes to List<Map<String, Object>>.", e);
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_USERTYPES, userTypeDetails);
       List<Map<String, Object>> userRoleList = userRoleService.getUserRoles(userId, context);
       userDetails.put(JsonKey.ROLES, userRoleList);
     } else {

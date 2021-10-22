@@ -72,7 +72,9 @@ public class TenantMigrationActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     logger.info(request.getRequestContext(), "TenantMigrationActor:onReceive called.");
-    Util.initializeContext(request, StringUtils.capitalize(JsonKey.CONSUMER));
+    request.getContext().put(JsonKey.ACTOR_ID, (String) request.getRequest().get(JsonKey.USER_ID));
+    request.getContext().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+    Util.initializeContext(request, StringUtils.capitalize(JsonKey.USER));
     String operation = request.getOperation();
     switch (operation) {
       case "userTenantMigrate":

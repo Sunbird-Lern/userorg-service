@@ -290,6 +290,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateRecoveryEmailOrPhone(userRequest);
   }
 
+  public void validateUpdateUserRequestV3(Request userRequest) {
+    validateUpdateUserRequest(userRequest);
+  }
+
   public void checkEmptyPhoneAndEmail(Request userRequest) {
     String phone = (String) userRequest.getRequest().get(JsonKey.PHONE);
     String email = (String) userRequest.getRequest().get(JsonKey.EMAIL);
