@@ -98,6 +98,7 @@ public class UserUpdateActor extends UserBaseActor {
       userMap.remove(JsonKey.PROFILE_USERTYPE);
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
+      populateLocationCodesFromProfileLocation(userMap);
       if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
         List<Map<String, Object>> userTypeAndSubTypes =
                 (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
