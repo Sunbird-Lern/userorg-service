@@ -146,14 +146,14 @@ public class NotificationService {
       logger.info(
           requestContext,
           "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = "
-              + emails
-              + " emails");
+              + emails.size()
+              + " email(s)");
     } else {
       logger.info(
           requestContext,
           "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = "
               + emails.size()
-              + " emails");
+              + " email(s)");
     }
   }
 
