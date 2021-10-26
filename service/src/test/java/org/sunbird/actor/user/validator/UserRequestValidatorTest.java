@@ -395,6 +395,37 @@ public class UserRequestValidatorTest {
   }
 
   @Test
+  public void testUpdateUserSuccesswithusertypes() {
+    Request request = initailizeRequest();
+    Map<String, Object> requestObj = request.getRequest();
+    requestObj.remove(JsonKey.USERNAME);
+    requestObj.put(JsonKey.USER_ID, "userId");
+
+    List<Map<String, String>> usertypes = new ArrayList();
+    Map<String, String> typemap = new HashMap<>();
+    typemap.put("type","administrator");
+    usertypes.add(typemap);
+    requestObj.put(JsonKey.PROFILE_USERTYPES, usertypes);
+
+    List<String> roles = new ArrayList<String>();
+    roles.add("PUBLIC");
+    roles.add("CONTENT-CREATOR");
+    requestObj.put(JsonKey.ROLE, roles);
+    List<String> language = new ArrayList<>();
+    language.add("English");
+    requestObj.put(JsonKey.LANGUAGE, language);
+    boolean response = false;
+    request.setRequest(requestObj);
+    try {
+      userRequestValidator.validateUpdateUserRequest(request);
+      response = true;
+    } catch (ProjectCommonException e) {
+      Assert.assertNull(e);
+    }
+    assertEquals(true, response);
+  }
+
+  @Test
   public void testValidateUploadUserSuccessWithOrgId() {
     boolean response = false;
     Map<String, Object> requestObj = new HashMap<>();
