@@ -51,7 +51,8 @@ public class UserRequestValidator extends BaseRequestValidator {
             JsonKey.EXTERNAL_ID,
             JsonKey.EXTERNAL_ID_PROVIDER,
             JsonKey.EXTERNAL_ID_TYPE,
-            JsonKey.ID_TYPE),
+            JsonKey.ID_TYPE,
+            JsonKey.PROFILE_USERTYPES),
         userRequest);
     createUserBasicValidation(userRequest);
     validateUserType(userRequest.getRequest(), null, userRequest.getRequestContext());
@@ -427,6 +428,32 @@ public class UserRequestValidator extends BaseRequestValidator {
             ProjectUtil.formatMessage(
                 ResponseCode.dataTypeError.getErrorMessage(), JsonKey.ROLES, JsonKey.LIST),
             ERROR_CODE);
+      }
+    }
+    if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)
+            && null != userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES)) {
+      if (userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List){
+        List profileusertypes = (List) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
+        if (CollectionUtils.isEmpty(profileusertypes)) {
+          ProjectCommonException.throwClientErrorException(ResponseCode.rolesRequired);
+        }else {
+          try {
+            List<Map<String, String>> profUserTypeList =
+                    (List<Map<String, String>>) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
+          }catch (ClassCastException e) {
+            throw new ProjectCommonException(
+                    ResponseCode.dataTypeError.getErrorCode(),
+                    ProjectUtil.formatMessage(
+                            ResponseCode.dataTypeError.getErrorMessage(), JsonKey.PROFILE_USERTYPES, JsonKey.LIST),
+                    ERROR_CODE);
+          }
+        }
+      } else if (!(userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List)) {
+        throw new ProjectCommonException(
+                ResponseCode.dataTypeError.getErrorCode(),
+                ProjectUtil.formatMessage(
+                        ResponseCode.dataTypeError.getErrorMessage(), JsonKey.PROFILE_USERTYPES, JsonKey.LIST),
+                ERROR_CODE);
       }
     }
   }
