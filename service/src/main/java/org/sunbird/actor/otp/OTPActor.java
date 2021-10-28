@@ -52,7 +52,6 @@ public class OTPActor extends BaseActor {
     logger.debug(request.getRequestContext(), "OTPActor:generateOTP method call start.");
     String type = (String) request.getRequest().get(JsonKey.TYPE);
     String key = (String) request.getRequest().get(JsonKey.KEY);
-
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(userId)) {
       key = otpService.getEmailPhoneByUserId(userId, type, request.getRequestContext());
