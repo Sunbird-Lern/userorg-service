@@ -128,33 +128,30 @@ public final class OTPUtil {
   }
 
   public static Request getRequestToSendOTPViaEmail(
-      Map<String, Object> emailTemplateMap, String otpType, RequestContext context) {
-    Request request = null;
+      Map<String, Object> emailTemplateMap, RequestContext context) {
+    Request request;
     if ((StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.EMAIL)))) {
-      return request;
+      return null;
     }
+    String templateId = (String) emailTemplateMap.get(JsonKey.TEMPLATE_ID);
     String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
-    String emailSubject = null;
-    if (JsonKey.RESET_PASSWORD.equalsIgnoreCase(otpType)) {
-      emailSubject = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT);
-    } else {
-      // default fallback for all other otpType
-      emailSubject = ProjectUtil.getConfigValue(JsonKey.ONBOARDING_MAIL_SUBJECT);
-    }
-    emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(emailSubject, envName));
     List<String> reciptientsMail = new ArrayList<>();
     reciptientsMail.add((String) emailTemplateMap.get(JsonKey.EMAIL));
     emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
-    if (StringUtils.isBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID))) {
+    if (StringUtils.isBlank(templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP);
-    } else if (StringUtils.isNotBlank((String) emailTemplateMap.get(JsonKey.TEMPLATE_ID))
-        && StringUtils.equals(
-            (String) emailTemplateMap.get(JsonKey.TEMPLATE_ID),
-            JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
+      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.EMAIL_VERIFICATION);
+    } else if (StringUtils.equalsIgnoreCase(JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID, templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_EMAIL_WARD_LOGIN_TEMPLATE);
-    } else {
-      // send otp to email while reseting password from portal
+      String emailSubject = ProjectUtil.getConfigValue(JsonKey.ONBOARDING_MAIL_SUBJECT);
+      emailTemplateMap.put(JsonKey.SUBJECT, ProjectUtil.formatMessage(emailSubject, envName));
+    } else if (StringUtils.equalsIgnoreCase(JsonKey.RESET_PASSWORD_TEMPLATE_ID, templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_EMAIL_RESET_PASSWORD_TEMPLATE);
+      emailTemplateMap.put(
+          JsonKey.SUBJECT, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT));
+    } else if (StringUtils.equalsIgnoreCase(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
+      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_CONTACT_UPDATE_TEMPLATE);
+      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.CONTACT_DETAILS_UPDATE_VERIFICATION);
     }
     emailTemplateMap.put(JsonKey.INSTALLATION_NAME, envName);
     request = new Request();
@@ -162,11 +159,6 @@ public final class OTPUtil {
     request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
     request.setRequestContext(context);
     return request;
-  }
-
-  public static Request getRequestToSendOTPViaEmail(
-      Map<String, Object> emailTemplateMap, RequestContext context) {
-    return getRequestToSendOTPViaEmail(emailTemplateMap, null, context);
   }
 
   public static String getOTPExpirationInMinutes() {
