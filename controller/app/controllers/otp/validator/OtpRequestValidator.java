@@ -16,6 +16,14 @@ import org.sunbird.validator.BaseRequestValidator;
 
 public class OtpRequestValidator extends BaseRequestValidator {
 
+  private final List<String> allowedTemplate =
+      Arrays.asList(
+          new String[] {
+            JsonKey.RESET_PASSWORD_TEMPLATE_ID,
+            JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID,
+            JsonKey.CONTACT_UPDATE_TEMPLATE_ID
+          });
+
   public void validateGenerateOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, false);
     validateTemplateId(otpRequest);
@@ -23,10 +31,7 @@ public class OtpRequestValidator extends BaseRequestValidator {
 
   private void validateTemplateId(Request otpRequest) {
     String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
-    if (StringUtils.isNotBlank(templateId)
-        && !templateId.equalsIgnoreCase(JsonKey.RESET_PASSWORD_TEMPLATE_ID)
-        && !templateId.equalsIgnoreCase(JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)
-        && !templateId.equalsIgnoreCase(JsonKey.CONTACT_UPDATE_TEMPLATE_ID)) {
+    if (StringUtils.isNotBlank(templateId) && !allowedTemplate.contains(templateId)) {
       throw new ProjectCommonException(
           ResponseCode.invalidIdentifier.getErrorCode(),
           ProjectUtil.formatMessage(
