@@ -82,21 +82,22 @@ public final class OTPUtil {
       return false;
     }
     Map<String, String> smsTemplate = new HashMap<>();
-    String template = (String) otpMap.get(JsonKey.TEMPLATE_ID);
+    String templateId = (String) otpMap.get(JsonKey.TEMPLATE_ID);
     smsTemplate.put(JsonKey.OTP, (String) otpMap.get(JsonKey.OTP));
     smsTemplate.put(
         JsonKey.OTP_EXPIRATION_IN_MINUTES, (String) otpMap.get(JsonKey.OTP_EXPIRATION_IN_MINUTES));
     smsTemplate.put(
         JsonKey.INSTALLATION_NAME,
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME));
-    String sms;
-    if (StringUtils.isBlank(template)) {
+    String sms = "";
+    if (StringUtils.isBlank(templateId)) {
       sms = otpService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate, context);
-    } else if (StringUtils.isNotBlank(template)
-        && StringUtils.equals(template, JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID)) {
+    } else if (StringUtils.equals(JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID, templateId)) {
       sms = otpService.getSmsBody(JsonKey.OTP_PHONE_WARD_LOGIN_TEMPLATE, smsTemplate, context);
-    } else {
+    } else if (StringUtils.equals(JsonKey.RESET_PASSWORD_TEMPLATE_ID, templateId)) {
       sms = otpService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate, context);
+    } else if (StringUtils.equals(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
+      sms = otpService.getSmsBody(JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_SMS, smsTemplate, context);
     }
     logger.debug(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
 
@@ -150,7 +151,7 @@ public final class OTPUtil {
       emailTemplateMap.put(
           JsonKey.SUBJECT, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT));
     } else if (StringUtils.equalsIgnoreCase(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
-      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_CONTACT_UPDATE_TEMPLATE);
+      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_EMAIL);
       emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.CONTACT_DETAILS_UPDATE_VERIFICATION);
     }
     emailTemplateMap.put(JsonKey.INSTALLATION_NAME, envName);
