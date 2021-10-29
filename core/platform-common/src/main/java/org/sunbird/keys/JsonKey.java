@@ -599,12 +599,12 @@ public final class JsonKey {
   public static final String IDS = "ids";
   public static final String NOTIFICATIONS = "notifications";
   public static final String FEEDS = "feeds";
-  public static final String EMAIL_VERIFICATION = "Email Verification";
+  public static final String EMAIL_VERIFICATION_SUBJECT = "OTP to verify Email";
   public static final String CONTACT_UPDATE_TEMPLATE_ID = "otpContactUpdateTemplate";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_EMAIL = "otpContactUpdateTemplateEmail";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_SMS = "otpContactUpdateTemplateSms";
-  public static final String CONTACT_DETAILS_UPDATE_VERIFICATION =
-      "Contact Details Update Verification";
+  public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
+      "OTP to edit Diksha Profile";
 
   private JsonKey() {}
 }

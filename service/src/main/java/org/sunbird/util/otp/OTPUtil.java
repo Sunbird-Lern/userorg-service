@@ -141,7 +141,7 @@ public final class OTPUtil {
     emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
     if (StringUtils.isBlank(templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP);
-      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.EMAIL_VERIFICATION);
+      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.EMAIL_VERIFICATION_SUBJECT);
     } else if (StringUtils.equalsIgnoreCase(JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID, templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_EMAIL_WARD_LOGIN_TEMPLATE);
       String emailSubject = ProjectUtil.getConfigValue(JsonKey.ONBOARDING_MAIL_SUBJECT);
@@ -152,7 +152,7 @@ public final class OTPUtil {
           JsonKey.SUBJECT, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_RESET_PASS_MAIL_SUBJECT));
     } else if (StringUtils.equalsIgnoreCase(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_EMAIL);
-      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.CONTACT_DETAILS_UPDATE_VERIFICATION);
+      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT);
     }
     emailTemplateMap.put(JsonKey.INSTALLATION_NAME, envName);
     request = new Request();
