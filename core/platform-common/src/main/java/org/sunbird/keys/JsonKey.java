@@ -472,7 +472,7 @@ public final class JsonKey {
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
   public static final String TEMPLATE_OPTIONS = "templateOptions";
-  public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
+  public static final String RESET_PASSWORD_TEMPLATE_ID = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
   public static final String VERSION_4 = "v4";
   public static final String WARD_LOGIN_OTP_TEMPLATE_ID = "wardLoginOTP";
@@ -599,6 +599,12 @@ public final class JsonKey {
   public static final String IDS = "ids";
   public static final String NOTIFICATIONS = "notifications";
   public static final String FEEDS = "feeds";
+  public static final String EMAIL_VERIFICATION_SUBJECT = "OTP to verify Email";
+  public static final String CONTACT_UPDATE_TEMPLATE_ID = "otpContactUpdateTemplate";
+  public static final String OTP_CONTACT_UPDATE_TEMPLATE_EMAIL = "otpContactUpdateTemplateEmail";
+  public static final String OTP_CONTACT_UPDATE_TEMPLATE_SMS = "otpContactUpdateTemplateSms";
+  public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
+      "OTP to edit Diksha Profile";
 
   private JsonKey() {}
 }

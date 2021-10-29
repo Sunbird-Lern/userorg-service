@@ -27,7 +27,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import util.Attrs;
-import util.Common;
 import util.RequestInterceptor;
 
 public class OnRequestHandler implements ActionCreator {
@@ -83,8 +82,7 @@ public class OnRequestHandler implements ActionCreator {
           }
           result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
-          result =
-              onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
+          result = onDataValidationError(request, ResponseCode.UNAUTHORIZED.getResponseCode());
         } else {
           result = delegate.call(request);
         }
@@ -144,17 +142,9 @@ public class OnRequestHandler implements ActionCreator {
    * send some key in header.
    *
    * @param request Request
-   * @param errorMessage String
    * @return CompletionStage<Result>
    */
-  public CompletionStage<Result> onDataValidationError(
-      Http.Request request, String errorMessage, int responseCode) {
-    String context = Common.getFromRequest(request, Attrs.CONTEXT);
-    logger.info(
-        "onDataValidationError: Data error found with context info : "
-            + context
-            + " , Error Msg: "
-            + errorMessage);
+  public CompletionStage<Result> onDataValidationError(Http.Request request, int responseCode) {
     Response resp =
         BaseController.createFailureResponse(
             request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
