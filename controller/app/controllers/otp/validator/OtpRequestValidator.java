@@ -18,11 +18,9 @@ public class OtpRequestValidator extends BaseRequestValidator {
 
   private final List<String> allowedTemplate =
       Arrays.asList(
-          new String[] {
-            JsonKey.RESET_PASSWORD_TEMPLATE_ID,
-            JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID,
-            JsonKey.CONTACT_UPDATE_TEMPLATE_ID
-          });
+          JsonKey.RESET_PASSWORD_TEMPLATE_ID,
+          JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID,
+          JsonKey.CONTACT_UPDATE_TEMPLATE_ID);
 
   public void validateGenerateOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, false);
