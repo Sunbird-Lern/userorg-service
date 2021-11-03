@@ -245,12 +245,9 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     user.put(JsonKey.EMAIL, "username@gmail.com");
     user.put(JsonKey.USERNAME, "username");
     user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
-    user.put(JsonKey.USER_TYPE, "teacher");
-    user.put(JsonKey.USER_SUB_TYPE, null);
-    user.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
     Map<String, Object> usertypes = new HashMap<>();
-    usertypes.put("type", "administrator");
-    usertypes.put("subType", "deo");
+    usertypes.put("type", "teacher");
+    usertypes.put("subType", "crc");
     List<Map<String, Object>> userTypeList = new ArrayList<>();
     userTypeList.add(usertypes);
     user.put(JsonKey.PROFILE_USERTYPES, userTypeList);
