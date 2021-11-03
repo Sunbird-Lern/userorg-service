@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -91,29 +94,39 @@ public class UserUpdateActor extends UserBaseActor {
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
       populateUserTypeAndSubType(userMap);
       populateLocationCodesFromProfileLocation(userMap);
-    } else if(actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())){
+    } else if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_LOCATION);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
-    } else if(actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V3.getValue())){
+    } else if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.UPDATE_USER_V3.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPE);
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
       populateLocationCodesFromProfileLocation(userMap);
       if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
         List<Map<String, Object>> userTypeAndSubTypes =
-                (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
-        Map<String, Object> userTypeAndSubType = new HashMap<>();
-        userTypeAndSubType = userTypeAndSubTypes.get(0);
-        userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
-        userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+            (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
+        List<Map<String, Object>> distinctUserTypeAndSubTypes =
+            userTypeAndSubTypes
+                .stream()
+                .filter(s -> filterFunction(s))
+                .filter(
+                    distinctByValue(map -> map.get(JsonKey.TYPE) + "_" + map.get(JsonKey.SUB_TYPE)))
+                .collect(Collectors.toList());
+        Map<String, Object> userTypeAndSubType = distinctUserTypeAndSubTypes.get(0);
+        if (MapUtils.isNotEmpty(userTypeAndSubType)) {
+          userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+          userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+        }
         try {
-          ObjectMapper mapper = new ObjectMapper();
           userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));
         } catch (Exception ex) {
           logger.error(actorMessage.getRequestContext(), "Exception occurred while mapping", ex);
           ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
         }
-
       }
     }
     validateAndGetLocationCodes(actorMessage);
@@ -258,6 +271,15 @@ public class UserUpdateActor extends UserBaseActor {
     }
     generateUserTelemetry(
         userMap, actorMessage, (String) userMap.get(JsonKey.USER_ID), JsonKey.UPDATE);
+  }
+
+  private <T> Predicate<T> distinctByValue(Function<? super T, ?> keyExtractor) {
+    Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+    return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+  }
+
+  private boolean filterFunction(Map<String, Object> map) {
+    return map.get(JsonKey.TYPE) != null;
   }
 
   private void validateUserTypeAndSubType(
