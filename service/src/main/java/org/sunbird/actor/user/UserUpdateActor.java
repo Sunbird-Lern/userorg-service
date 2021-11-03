@@ -98,6 +98,7 @@ public class UserUpdateActor extends UserBaseActor {
     } else if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
       userMap.remove(JsonKey.PROFILE_LOCATION);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
     } else if (actorMessage
