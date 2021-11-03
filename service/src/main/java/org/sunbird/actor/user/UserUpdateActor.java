@@ -109,6 +109,7 @@ public class UserUpdateActor extends UserBaseActor {
       if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
         List<Map<String, Object>> userTypeAndSubTypes =
             (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
+
         List<Map<String, Object>> distinctUserTypeAndSubTypes =
             userTypeAndSubTypes
                 .stream()
@@ -122,7 +123,8 @@ public class UserUpdateActor extends UserBaseActor {
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
         }
         try {
-          userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));
+          userMap.put(
+              JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(distinctUserTypeAndSubTypes));
         } catch (Exception ex) {
           logger.error(actorMessage.getRequestContext(), "Exception while mapping", ex);
           ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
