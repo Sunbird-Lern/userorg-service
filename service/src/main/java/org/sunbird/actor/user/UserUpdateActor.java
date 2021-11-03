@@ -109,6 +109,7 @@ public class UserUpdateActor extends UserBaseActor {
       if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
         List<Map<String, Object>> userTypeAndSubTypes =
             (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
+
         List<Map<String, Object>> distinctUserTypeAndSubTypes =
             userTypeAndSubTypes
                 .stream()
