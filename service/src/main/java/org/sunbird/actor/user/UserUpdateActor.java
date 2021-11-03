@@ -122,7 +122,8 @@ public class UserUpdateActor extends UserBaseActor {
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
         }
         try {
-          userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));
+          userMap.put(
+              JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(distinctUserTypeAndSubTypes));
         } catch (Exception ex) {
           logger.error(actorMessage.getRequestContext(), "Exception while mapping", ex);
           ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
