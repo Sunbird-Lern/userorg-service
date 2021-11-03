@@ -119,6 +119,7 @@ public class UserUpdateActor extends UserBaseActor {
                 .filter(
                     distinctByValue(map -> map.get(JsonKey.TYPE) + "_" + map.get(JsonKey.SUB_TYPE)))
                 .collect(Collectors.toList());
+
         Map<String, Object> userTypeAndSubType = distinctUserTypeAndSubTypes.get(0);
         if (MapUtils.isNotEmpty(userTypeAndSubType)) {
           userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
