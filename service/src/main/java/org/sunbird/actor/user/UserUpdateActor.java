@@ -92,11 +92,13 @@ public class UserUpdateActor extends UserBaseActor {
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
       populateUserTypeAndSubType(userMap);
       populateLocationCodesFromProfileLocation(userMap);
     } else if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
       userMap.remove(JsonKey.PROFILE_LOCATION);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
     } else if (actorMessage
@@ -117,6 +119,7 @@ public class UserUpdateActor extends UserBaseActor {
                 .filter(
                     distinctByValue(map -> map.get(JsonKey.TYPE) + "_" + map.get(JsonKey.SUB_TYPE)))
                 .collect(Collectors.toList());
+
         Map<String, Object> userTypeAndSubType = distinctUserTypeAndSubTypes.get(0);
         if (MapUtils.isNotEmpty(userTypeAndSubType)) {
           userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
