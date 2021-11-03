@@ -92,6 +92,7 @@ public class UserUpdateActor extends UserBaseActor {
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
       populateUserTypeAndSubType(userMap);
       populateLocationCodesFromProfileLocation(userMap);
     } else if (actorMessage
