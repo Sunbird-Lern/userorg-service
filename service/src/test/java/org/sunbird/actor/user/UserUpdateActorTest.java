@@ -249,20 +249,20 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     user.put(JsonKey.USER_SUB_TYPE, null);
     user.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
     Map<String, Object> usertypes = new HashMap<>();
-    usertypes.put("type","administrator");
-    usertypes.put("subType","deo");
+    usertypes.put("type", "administrator");
+    usertypes.put("subType", "deo");
     List<Map<String, Object>> userTypeList = new ArrayList<>();
     userTypeList.add(usertypes);
-    user.put(JsonKey.PROFILE_USERTYPE, userTypeList);
+    user.put(JsonKey.PROFILE_USERTYPES, userTypeList);
     when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
-            .thenReturn(true);
+        .thenReturn(true);
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
-            .thenReturn(user);
+        .thenReturn(user);
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
-    boolean result =
-            testScenario(
-                    getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3), null, props);
+    Request request = getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3);
+    request.getRequest().put(JsonKey.PROFILE_USERTYPES, userTypeList);
+    boolean result = testScenario(request, null, props);
     assertTrue(result);
   }
 
