@@ -775,7 +775,21 @@ public class UserRequestValidator extends BaseRequestValidator {
           context,
           String.format(
               "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
-      if (!userTypeMap.containsKey(userType)) {
+      List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
+      if(CollectionUtils.isNotEmpty(profileUserTypes) && MapUtils.isNotEmpty((Map)profileUserTypes.get(0))){
+        profileUserTypes.forEach(
+                item -> {
+                  String userTypeItem = (String) item.get(JsonKey.TYPE);
+                  if (!userTypeMap.containsKey(userTypeItem)) {
+                    ProjectCommonException.throwClientErrorException(
+                            ResponseCode.invalidParameterValue,
+                            MessageFormat.format(
+                                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                                    new String[] {userType, JsonKey.USER_TYPE}));
+                  }
+                }
+        );
+      }else if (!userTypeMap.containsKey(userType)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
@@ -788,13 +802,29 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   public void validateUserSubType(Map<String, Object> userRequestMap, String stateCode) {
     String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
+    String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
     Map<String, Map<String, List<String>>> userTypeConfigMap =
         DataCacheHandler.getUserTypesConfig();
-    String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
-    Map<String, List<String>> userSubTypeMap = userTypeConfigMap.get(stateCode);
-    if (null != userSubType
-        && (null == userSubTypeMap.get(userType)
-            || !userSubTypeMap.get(userType).contains(userSubType))) {
+    Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
+
+    List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
+    if(CollectionUtils.isNotEmpty(profileUserTypes) && MapUtils.isNotEmpty(profileUserTypes.get(0))){
+      profileUserTypes.forEach(
+              item -> {
+                String userTypeItem = (String) item.get(JsonKey.TYPE);
+                String userSubTypeItem = (String) item.get(JsonKey.SUB_TYPE);
+                if (null == userTypeMap.get(userTypeItem) || !userTypeMap.get(userTypeItem).contains(userSubTypeItem)) {
+                  ProjectCommonException.throwClientErrorException(
+                          ResponseCode.invalidParameterValue,
+                          MessageFormat.format(
+                                  ResponseCode.invalidParameterValue.getErrorMessage(),
+                                  new String[] {userSubType, JsonKey.USER_SUB_TYPE}));
+                }
+              }
+      );
+    } else if (StringUtils.isNotEmpty(userSubType)
+        && (null == userTypeMap.get(userType)
+            || !userTypeMap.get(userType).contains(userSubType))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(

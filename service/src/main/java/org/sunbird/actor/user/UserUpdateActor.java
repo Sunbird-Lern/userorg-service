@@ -91,23 +91,32 @@ public class UserUpdateActor extends UserBaseActor {
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
-      userMap.remove(JsonKey.PROFILE_USERTYPES);
-      populateUserTypeAndSubType(userMap);
+    if (actorMessage
+            .getOperation()
+            .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
+      userMap.remove(JsonKey.PROFILE_LOCATION);
+    } else {
       populateLocationCodesFromProfileLocation(userMap);
-    } else if (actorMessage
+    }
+    validateAndGetLocationCodes(actorMessage);
+    if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPES);
-      userMap.remove(JsonKey.PROFILE_LOCATION);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
+      validateUserTypeAndSubType(
+              actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    } else if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
+      populateUserTypeAndSubType(userMap);
+      validateUserTypeAndSubType(
+              actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     } else if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.UPDATE_USER_V3.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPE);
       userMap.remove(JsonKey.USER_TYPE);
       userMap.remove(JsonKey.USER_SUB_TYPE);
-      populateLocationCodesFromProfileLocation(userMap);
       if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
         List<Map<String, Object>> userTypeAndSubTypes =
             (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
@@ -125,6 +134,8 @@ public class UserUpdateActor extends UserBaseActor {
           userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
         }
+        validateUserTypeAndSubType(
+                actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
         try {
           userMap.put(
               JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(distinctUserTypeAndSubTypes));
@@ -134,9 +145,6 @@ public class UserUpdateActor extends UserBaseActor {
         }
       }
     }
-    validateAndGetLocationCodes(actorMessage);
-    validateUserTypeAndSubType(
-        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
