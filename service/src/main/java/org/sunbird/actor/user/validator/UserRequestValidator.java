@@ -819,7 +819,7 @@ public class UserRequestValidator extends BaseRequestValidator {
                             ResponseCode.invalidParameterValue,
                             MessageFormat.format(
                                     ResponseCode.invalidParameterValue.getErrorMessage(),
-                                    new String[]{userSubTypeItem, JsonKey.USER_SUB_TYPE}));
+                                    new String[] {userSubTypeItem, JsonKey.USER_SUB_TYPE}));
                   }
                 }
               }
