@@ -813,16 +813,18 @@ public class UserRequestValidator extends BaseRequestValidator {
               item -> {
                 String userTypeItem = (String) item.get(JsonKey.TYPE);
                 String userSubTypeItem = (String) item.get(JsonKey.SUB_TYPE);
-                if (null == userTypeMap.get(userTypeItem) || !userTypeMap.get(userTypeItem).contains(userSubTypeItem)) {
-                  ProjectCommonException.throwClientErrorException(
-                          ResponseCode.invalidParameterValue,
-                          MessageFormat.format(
-                                  ResponseCode.invalidParameterValue.getErrorMessage(),
-                                  new String[] {userSubType, JsonKey.USER_SUB_TYPE}));
+                if(StringUtils.isNotEmpty(userSubTypeItem)) {
+                  if (null == userTypeMap.get(userTypeItem) || !userTypeMap.get(userTypeItem).contains(userSubTypeItem)) {
+                    ProjectCommonException.throwClientErrorException(
+                            ResponseCode.invalidParameterValue,
+                            MessageFormat.format(
+                                    ResponseCode.invalidParameterValue.getErrorMessage(),
+                                    new String[]{userSubTypeItem, JsonKey.USER_SUB_TYPE}));
+                  }
                 }
               }
       );
-    } else if (StringUtils.isNotEmpty(userSubType)
+    } else if (null != userSubType
         && (null == userTypeMap.get(userType)
             || !userTypeMap.get(userType).contains(userSubType))) {
       ProjectCommonException.throwClientErrorException(
