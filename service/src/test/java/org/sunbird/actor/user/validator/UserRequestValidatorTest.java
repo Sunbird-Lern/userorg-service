@@ -16,6 +16,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.validator.RequestValidator;
@@ -375,6 +376,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = request.getRequest();
     requestObj.remove(JsonKey.USERNAME);
     requestObj.put(JsonKey.USER_ID, "userId");
+    request.setOperation(ActorOperations.UPDATE_USER.getValue());
 
     List<String> roles = new ArrayList<String>();
     roles.add("PUBLIC");
@@ -400,6 +402,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = request.getRequest();
     requestObj.remove(JsonKey.USERNAME);
     requestObj.put(JsonKey.USER_ID, "userId");
+    request.setOperation(ActorOperations.UPDATE_USER_V3.getValue());
 
     List<Map<String, String>> usertypes = new ArrayList();
     Map<String, String> typemap = new HashMap<>();
@@ -430,6 +433,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = request.getRequest();
     requestObj.remove(JsonKey.USERNAME);
     requestObj.put(JsonKey.USER_ID, "userId");
+    request.setOperation(ActorOperations.UPDATE_USER_V2.getValue());
 
     List<Map<String, String>> usertypes = new ArrayList();
     Map<String, String> typemap = new HashMap<>();
@@ -460,6 +464,7 @@ public class UserRequestValidatorTest {
     Map<String, Object> requestObj = request.getRequest();
     requestObj.remove(JsonKey.USERNAME);
     requestObj.put(JsonKey.USER_ID, "userId");
+    request.setOperation(ActorOperations.UPDATE_USER.getValue());
 
     List usertypes = new ArrayList();
     usertypes.add("teacher");
