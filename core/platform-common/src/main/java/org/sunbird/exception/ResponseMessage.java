@@ -47,6 +47,7 @@ public interface ResponseMessage {
     String DATA_TYPE_ERROR = "Data type of {0} should be {1}.";
     String ERROR_ATTRIBUTE_CONFLICT = "Either pass attribute {0} or {1} but not both.";
     String ROLES_MISSING = "user role is required.";
+    String PROFILE_USER_TYPES_MISSING = "User type is required.";
     String EMPTY_ROLES_PROVIDED = "Roles cannot be empty.";
     String CHANNEL_REG_FAILED = "Channel Registration failed.";
     String SLUG_IS_NOT_UNIQUE =
@@ -215,6 +216,7 @@ public interface ResponseMessage {
     String DATA_TYPE_ERROR = "DATA_TYPE_ERROR";
     String ERROR_ATTRIBUTE_CONFLICT = "ERROR_ATTRIBUTE_CONFLICT";
     String ROLES_MISSING = "ROLES_REQUIRED_ERROR";
+    String PROFILE_USER_TYPES_MISSING = "PROFILE_USER_TYPES_REQUIRED_ERROR";
     String EMPTY_ROLES_PROVIDED = "EMPTY_ROLES_PROVIDED";
     String CONTENT_TYPE_ERROR = "CONTENT_TYPE_ERROR";
     String INVALID_PROPERTY_ERROR = "INVALID_PROPERTY_ERROR";

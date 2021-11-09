@@ -12,6 +12,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.DataCacheHandler;
@@ -430,12 +431,25 @@ public class UserRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
+    if (userRequest
+            .getOperation()
+            .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue()) || userRequest
+            .getOperation()
+            .equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)){
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,JsonKey.PROFILE_USERTYPES);
+      }
+    }else{
+      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPE)){
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,JsonKey.PROFILE_USERTYPE);
+      }
+    }
     if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)
             && null != userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES)) {
       if (userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List){
         List profileusertypes = (List) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
         if (CollectionUtils.isEmpty(profileusertypes)) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.rolesRequired);
+          ProjectCommonException.throwClientErrorException(ResponseCode.profileUserTypesRequired);
         }else {
           try {
             List<Map<String, String>> profUserTypeList =

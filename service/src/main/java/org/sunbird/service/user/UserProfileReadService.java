@@ -77,6 +77,8 @@ public class UserProfileReadService {
             || readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue()))) {
       Util.getOrgDefaultValue().keySet().forEach(rootOrg::remove);
       Util.getUserDefaultValue().keySet().forEach(result::remove);
+    }else{
+      result.putAll(Util.getUserDefaultValue());
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
     Map<String, List<String>> userOrgRoles = null;
