@@ -61,18 +61,12 @@ public class FeedUtil {
             (ArrayList<Map<String, String>>) data.get(JsonKey.PROSPECT_CHANNELS_IDS);
         orgList.addAll(getOrgDetails(shadowUser.getChannel(), context));
       }
-      Request request = new Request();
-      ObjectMapper mapper = new ObjectMapper();
-      request.setRequest(mapper.convertValue(feedList.get(index), Map.class));
-      response = feedService.update(request, context);
+      response = feedService.update(feedList.get(index), context);
     }
     return response;
   }
 
-  private static Request createFeedObj(
-      ShadowUser shadowUser, String userId, RequestContext context) {
-    Request request = new Request();
-    ObjectMapper mapper = new ObjectMapper();
+  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context){
     Feed feed = new Feed();
     feed.setPriority(1);
     feed.setCreatedBy(shadowUser.getAddedBy());
@@ -86,8 +80,7 @@ public class FeedUtil {
         JsonKey.PROSPECT_CHANNELS_IDS, getOrgDetails(shadowUser.getChannel(), context));
     feed.setData(prospectsChannel);
     feed.setUserId(userId);
-    request.setRequest(mapper.convertValue(feed, Map.class));
-    return request;
+    return feed;
   }
 
   private static List<Map<String, String>> getOrgDetails(String channel, RequestContext context) {
