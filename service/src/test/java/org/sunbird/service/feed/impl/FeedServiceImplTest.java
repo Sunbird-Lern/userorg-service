@@ -1,7 +1,5 @@
 package org.sunbird.service.feed.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,19 +14,25 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
+import org.sunbird.dao.feed.IFeedDao;
+import org.sunbird.dao.feed.impl.FeedDaoImpl;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
-import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, HttpClientUtil.class})
+@PrepareForTest({
+        ServiceFactory.class,
+        CassandraOperationImpl.class,
+        FeedDaoImpl.class,
+        IFeedDao.class
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -40,7 +44,10 @@ public class FeedServiceImplTest {
   private static IFeedService feedService;
 
   @Before
-  public void setUp() throws JsonProcessingException {
+  public void setUp() {
+    PowerMockito.mockStatic(FeedDaoImpl.class);
+    IFeedDao iFeedDao = PowerMockito.mock(FeedDaoImpl.class);
+    PowerMockito.when(FeedDaoImpl.getInstance()).thenReturn(iFeedDao);
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
@@ -49,32 +56,37 @@ public class FeedServiceImplTest {
     Map<String, Object> responseMap = new HashMap<>();
     responseMap.put(Constants.RESPONSE, Arrays.asList(getFeedMap()));
     response.getResult().putAll(responseMap);
-    ObjectMapper Obj = new ObjectMapper();
-    String jsonStr = Obj.writeValueAsString(upsertResponse);
-    PowerMockito.mockStatic(HttpClientUtil.class);
-    PowerMockito.when(
-            HttpClientUtil.post(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(jsonStr);
-    PowerMockito.when(
-            HttpClientUtil.patch(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(jsonStr);
-    PowerMockito.when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getUserFeedData());
+    PowerMockito.when(iFeedDao.insert(Mockito.anyMap(), Mockito.any())).thenReturn(upsertResponse);
+    PowerMockito.when(iFeedDao.update(Mockito.anyMap(), Mockito.any())).thenReturn(upsertResponse);
+    PowerMockito.doNothing()
+            .when(iFeedDao)
+            .delete(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any());
+    PowerMockito.when(iFeedDao.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
+            .thenReturn(response);
     feedService = FeedFactory.getInstance();
   }
 
   @Test
   public void testInsert() {
-    Response res = feedService.insert(getFeed(false), new RequestContext());
+    Response res = feedService.update(getFeed(true), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
+  }
+  @Test
+  public void testDelete() {
+    boolean response = false;
+    try {
+      feedService.delete("123-456-789", null, null, null);
+      response = true;
+    } catch (Exception ex) {
+      Assert.assertTrue(response);
+    }
+    Assert.assertTrue(response);
   }
 
   @Test
   public void testUpdate() {
-    Response res = feedService.update(getFeedUpdate(true), new RequestContext());
+    Response res = feedService.update(getFeed(true), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
@@ -95,24 +107,7 @@ public class FeedServiceImplTest {
     return fMap;
   }
 
-  private Request getFeed(boolean needId) {
-    Request request = new Request();
-    Feed feed = new Feed();
-    feed.setUserId("123-456-7890");
-    feed.setCategory("category");
-    if (needId) {
-      feed.setId("123-456-789");
-    }
-    Map<String, Object> map = new HashMap<>();
-    List<String> channelList = new ArrayList<>();
-    channelList.add("SI");
-    map.put(JsonKey.PROSPECT_CHANNELS, channelList);
-    request.setRequest(new ObjectMapper().convertValue(feed, Map.class));
-    return request;
-  }
-
-  private Request getFeedUpdate(boolean needId) {
-    Request request = new Request();
+  private Feed getFeed(boolean needId) {
     Feed feed = new Feed();
     feed.setUserId("123-456-7890");
     feed.setCategory("category");
@@ -124,26 +119,7 @@ public class FeedServiceImplTest {
     channelList.add("SI");
     map.put(JsonKey.PROSPECT_CHANNELS, channelList);
     feed.setData(map);
-    request.setRequest(new ObjectMapper().convertValue(feed, Map.class));
-    return request;
+    return feed;
   }
 
-  public String getUserFeedData() {
-    Response response = new Response();
-    Map<String, Object> result = new HashMap<>();
-    List<Map<String, Object>> feeds = new ArrayList<>();
-    Map<String, Object> feed = new HashMap<>();
-    feed.put(JsonKey.ID, "12312312");
-    feeds.add(feed);
-    result.put(JsonKey.FEEDS, feeds);
-    response.putAll(result);
-    ObjectMapper Obj = new ObjectMapper();
-    String jsonStr = null;
-    try {
-      jsonStr = Obj.writeValueAsString(response);
-    } catch (Exception e) {
-      Assert.assertFalse(false);
-    }
-    return jsonStr;
-  }
 }

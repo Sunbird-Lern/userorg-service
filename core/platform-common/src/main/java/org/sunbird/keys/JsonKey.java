@@ -596,9 +596,6 @@ public final class JsonKey {
   public static final String NIC = "NIC";
   public static final String SMS_GATEWAY_PROVIDER = "sms_gateway_provider";
   public static final String WELCOME_SMS_TEMPLATE = "welcomeSmsTemplate";
-  public static final String IDS = "ids";
-  public static final String NOTIFICATIONS = "notifications";
-  public static final String FEEDS = "feeds";
   public static final String EMAIL_VERIFICATION_SUBJECT = "OTP to verify Email";
   public static final String CONTACT_UPDATE_TEMPLATE_ID = "otpContactUpdateTemplate";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_EMAIL = "otpContactUpdateTemplateEmail";
