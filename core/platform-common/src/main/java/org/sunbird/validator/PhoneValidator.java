@@ -13,7 +13,7 @@ import org.sunbird.util.PropertiesCache;
  * @author Amit Kumar
  */
 public class PhoneValidator {
-  private static LoggerUtil logger = new LoggerUtil(PhoneValidator.class);
+  private static final LoggerUtil logger = new LoggerUtil(PhoneValidator.class);
 
   private PhoneValidator() {}
 

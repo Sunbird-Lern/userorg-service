@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.keys.JsonKey;
@@ -16,7 +15,7 @@ import org.sunbird.response.Response;
 import org.sunbird.util.otp.OTPUtil;
 
 public class SendOTPActor extends BaseActor {
-  private LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
+  private final LogMaskServiceImpl logMaskService = new LogMaskServiceImpl();
 
   @Inject
   @Named("email_service_actor")
@@ -35,7 +34,7 @@ public class SendOTPActor extends BaseActor {
     String type = (String) request.getRequest().get(JsonKey.TYPE);
     String key = (String) request.getRequest().get(JsonKey.KEY);
     String otp = (String) request.getRequest().get(JsonKey.OTP);
-    String template = (String) request.getRequest().get(JsonKey.TEMPLATE_ID);
+    String templateId = (String) request.getRequest().get(JsonKey.TEMPLATE_ID);
     if (JsonKey.EMAIL.equalsIgnoreCase(type)
         || JsonKey.PREV_USED_EMAIL.equalsIgnoreCase(type)
         || JsonKey.RECOVERY_EMAIL.equalsIgnoreCase(type)) {
@@ -46,14 +45,14 @@ public class SendOTPActor extends BaseActor {
               + logMaskService.maskEmail(key)
               + " or userId "
               + userId);
-      sendOTPViaEmail(key, otp, userId, template, request.getRequestContext());
+      sendOTPViaEmail(key, otp, templateId, request.getRequestContext());
     } else if (JsonKey.PHONE.equalsIgnoreCase(type)
         || JsonKey.PREV_USED_PHONE.equalsIgnoreCase(type)
         || JsonKey.RECOVERY_PHONE.equalsIgnoreCase(type)) {
       logger.info(
           request.getRequestContext(),
           "SendOTPActor:sendOTP : Sending OTP via sms for Key = " + logMaskService.maskPhone(key));
-      sendOTPViaSMS(key, otp, template, request.getRequestContext());
+      sendOTPViaSMS(key, otp, templateId, request.getRequestContext());
     } else {
       logger.info(request.getRequestContext(), "SendOTPActor:sendOTP : No Email/Phone provided.");
     }
@@ -62,20 +61,13 @@ public class SendOTPActor extends BaseActor {
     sender().tell(response, self());
   }
 
-  private void sendOTPViaEmail(
-      String key, String otp, String otpType, String template, RequestContext context) {
+  private void sendOTPViaEmail(String key, String otp, String templateId, RequestContext context) {
     Map<String, Object> emailTemplateMap = new HashMap<>();
     emailTemplateMap.put(JsonKey.EMAIL, key);
     emailTemplateMap.put(JsonKey.OTP, otp);
     emailTemplateMap.put(JsonKey.OTP_EXPIRATION_IN_MINUTES, OTPUtil.getOTPExpirationInMinutes());
-    emailTemplateMap.put(JsonKey.TEMPLATE_ID, template);
-    Request emailRequest;
-    if (StringUtils.isBlank(otpType)) {
-      emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, context);
-    } else {
-      emailRequest =
-          OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, JsonKey.RESET_PASSWORD, context);
-    }
+    emailTemplateMap.put(JsonKey.TEMPLATE_ID, templateId);
+    Request emailRequest = OTPUtil.getRequestToSendOTPViaEmail(emailTemplateMap, context);
     emailRequest.setRequestContext(context);
     logger.info(
         context,

@@ -38,8 +38,8 @@ import scala.concurrent.Future;
 
 public class SearchHandlerActor extends BaseActor {
 
-  private OrgService orgService = OrgServiceImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   @Inject
   @Named("search_telemetry_actor")
@@ -80,12 +80,12 @@ public class SearchHandlerActor extends BaseActor {
     if (MapUtils.isNotEmpty(filterMap)) {
       if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.USER_TYPE))) {
         filterMap.put(
-            JsonKey.PROFILE_USERTYPE + "." + JsonKey.TYPE, filterMap.get(JsonKey.USER_TYPE));
+            JsonKey.PROFILE_USERTYPES + "." + JsonKey.TYPE, filterMap.get(JsonKey.USER_TYPE));
         filterMap.remove(JsonKey.USER_TYPE);
       }
       if (StringUtils.isNotBlank((CharSequence) filterMap.get(JsonKey.USER_SUB_TYPE))) {
         filterMap.put(
-            JsonKey.PROFILE_USERTYPE + "." + JsonKey.SUB_TYPE,
+            JsonKey.PROFILE_USERTYPES + "." + JsonKey.SUB_TYPE,
             filterMap.get(JsonKey.USER_SUB_TYPE));
         filterMap.remove(JsonKey.USER_SUB_TYPE);
       }

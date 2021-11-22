@@ -12,7 +12,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 
 public class KeycloakUtil {
-  private static LoggerUtil logger = new LoggerUtil(KeycloakUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(KeycloakUtil.class);
 
   private KeycloakUtil() {}
 

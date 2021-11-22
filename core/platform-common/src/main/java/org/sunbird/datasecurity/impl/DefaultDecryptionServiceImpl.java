@@ -18,7 +18,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 
 public class DefaultDecryptionServiceImpl implements DecryptionService {
-  private static LoggerUtil logger = new LoggerUtil(DefaultDecryptionServiceImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(DefaultDecryptionServiceImpl.class);
 
   private static String sunbird_encryption = "";
 

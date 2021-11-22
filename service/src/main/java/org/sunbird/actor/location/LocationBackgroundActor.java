@@ -9,7 +9,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class LocationBackgroundActor extends BaseLocationActor {
 
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   @Override
   public void onReceive(Request request) throws Throwable {

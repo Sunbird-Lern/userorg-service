@@ -28,9 +28,9 @@ import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
 
 public class UserSelfDeclarationManagementActor extends BaseActor {
-  private UserSelfDeclarationService userSelfDeclarationService =
+  private final UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

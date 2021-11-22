@@ -30,9 +30,9 @@ import org.sunbird.util.ProjectUtil;
 
 public class NotificationService {
 
-  private static LoggerUtil logger = new LoggerUtil(NotificationService.class);
-  private UserService userService = UserServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
+  private final LoggerUtil logger = new LoggerUtil(NotificationService.class);
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
 
   public boolean processSMS(
       List<String> userIds, List<String> phones, String smsText, RequestContext requestContext) {
@@ -146,14 +146,14 @@ public class NotificationService {
       logger.info(
           requestContext,
           "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = "
-              + emails
-              + " emails");
+              + emails.size()
+              + " email(s)");
     } else {
       logger.info(
           requestContext,
           "NotificationService:updateFirstNameAndOrgNameInEmailContext: Sending email to = "
               + emails.size()
-              + " emails");
+              + " email(s)");
     }
   }
 

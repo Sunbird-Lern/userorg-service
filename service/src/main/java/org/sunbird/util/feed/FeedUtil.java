@@ -1,5 +1,6 @@
 package org.sunbird.util.feed;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.FeedStatus;
+import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
@@ -23,10 +25,10 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {
-  private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(FeedUtil.class);
 
-  private static IFeedService feedService = FeedFactory.getInstance();
-  private static OrgService orgService = OrgServiceImpl.getInstance();
+  private static final IFeedService feedService = FeedFactory.getInstance();
+  private static final OrgService orgService = OrgServiceImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
   public static Response saveFeed(
@@ -64,7 +66,7 @@ public class FeedUtil {
     return response;
   }
 
-  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
+  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context){
     Feed feed = new Feed();
     feed.setPriority(1);
     feed.setCreatedBy(shadowUser.getAddedBy());

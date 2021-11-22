@@ -43,18 +43,17 @@ import scala.concurrent.duration.Duration;
 
 public class UserServiceImpl implements UserService {
 
-  private LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
-  private EncryptionService encryptionService =
+  private final LoggerUtil logger = new LoggerUtil(UserServiceImpl.class);
+  private final EncryptionService encryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
-  private UserDao userDao = UserDaoImpl.getInstance();
+  private final UserDao userDao = UserDaoImpl.getInstance();
   private static UserService userService = null;
-  private UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
-  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
-  private UserTncService tncService = new UserTncService();
-  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-  private static final int GENERATE_USERNAME_COUNT = 10;
-  private static ObjectMapper mapper = new ObjectMapper();
+  private final UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
+  private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final UserTncService tncService = new UserTncService();
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   public static UserService getInstance() {
     if (userService == null) {
@@ -173,6 +172,7 @@ public class UserServiceImpl implements UserService {
     HashSet<String> userNameSet = new HashSet<>();
     int totalUserNameGenerated = 0;
     String nameLowercase = name.toLowerCase().replaceAll("\\-+", "");
+    int GENERATE_USERNAME_COUNT = 10;
     while (totalUserNameGenerated < GENERATE_USERNAME_COUNT) {
       String userNameSuffix =
           RandomStringUtils.randomAlphanumeric(numOfCharsToAppend).toLowerCase();
@@ -467,6 +467,17 @@ public class UserServiceImpl implements UserService {
         }
       }
       userDetails.put(JsonKey.PROFILE_USERTYPE, userTypeDetail);
+      List<Map<String, Object>> userTypeDetails = new ArrayList<>();
+      String profUserTypes = (String) userDetails.get(JsonKey.PROFILE_USERTYPES);
+      if (StringUtils.isNotBlank(profUserTypes)) {
+        try {
+          userTypeDetails = mapper.readValue(profUserTypes, List.class);
+        } catch (Exception e) {
+          logger.error(
+                  context, "Exception while converting profileUserTypes to List<Map<String, Object>>.", e);
+        }
+      }
+      userDetails.put(JsonKey.PROFILE_USERTYPES, userTypeDetails);
       List<Map<String, Object>> userRoleList = userRoleService.getUserRoles(userId, context);
       userDetails.put(JsonKey.ROLES, userRoleList);
     } else {

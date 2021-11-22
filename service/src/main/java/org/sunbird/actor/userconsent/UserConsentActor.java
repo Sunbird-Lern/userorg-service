@@ -23,8 +23,8 @@ import org.sunbird.util.Util;
 
 public class UserConsentActor extends BaseActor {
 
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -69,6 +69,9 @@ public class UserConsentActor extends BaseActor {
 
     request.getRequest().put(JsonKey.USER_ID, userId); // Important for userid validation
     userService.validateUserId(request, null, context);
+
+    String consumerId = (String) consent.get(JsonKey.CONSENT_CONSUMERID);
+    userConsentService.validateConsumerId(consumerId, context);
 
     Response consentRes = userConsentService.updateConsent(consent, context);
 
@@ -117,6 +120,7 @@ public class UserConsentActor extends BaseActor {
     List<Map<String, Object>> consentResponseList =
         consentDBList
             .stream()
+            .filter(consents->((String)consents.get(JsonKey.STATUS)).equalsIgnoreCase(JsonKey.ACTIVE))
             .map(
                 consent -> {
                   Map<String, Object> consentRes = new HashMap<String, Object>();

@@ -19,7 +19,7 @@ import org.sunbird.model.adminutil.Params;
 import org.sunbird.request.RequestContext;
 
 public class AdminUtilHandler {
-  private static LoggerUtil logger = new LoggerUtil(AdminUtilHandler.class);
+  private static final LoggerUtil logger = new LoggerUtil(AdminUtilHandler.class);
 
   /**
    * Prepare payload for admin utils

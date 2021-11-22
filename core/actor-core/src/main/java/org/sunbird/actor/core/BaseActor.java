@@ -7,7 +7,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 
 public abstract class BaseActor extends UntypedAbstractActor {
-  public LoggerUtil logger = new LoggerUtil(this.getClass());
+  public final LoggerUtil logger = new LoggerUtil(this.getClass());
 
   public abstract void onReceive(Request request) throws Throwable;
 
@@ -16,7 +16,6 @@ public abstract class BaseActor extends UntypedAbstractActor {
     if (message instanceof Request) {
       Request request = (Request) message;
       String operation = request.getOperation();
-      logger.debug(request.getRequestContext(), "onReceive called for operation: " + operation);
       try {
         onReceive(request);
       } catch (Exception e) {

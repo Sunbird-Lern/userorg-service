@@ -11,7 +11,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 
 public class ContentStoreUtil {
-  private static LoggerUtil logger = new LoggerUtil(ContentStoreUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(ContentStoreUtil.class);
 
   private static Map<String, String> getHeaders() {
     Map<String, String> headers = new HashMap<>();

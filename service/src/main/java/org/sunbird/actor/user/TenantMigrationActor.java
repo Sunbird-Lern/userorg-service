@@ -30,6 +30,8 @@ import org.sunbird.service.user.impl.TenantMigrationServiceImpl;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserSelfDeclarationServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.service.userconsent.UserConsentService;
+import org.sunbird.service.userconsent.impl.UserConsentServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.ProjectUtil;
@@ -44,19 +46,17 @@ import scala.concurrent.duration.Duration;
 
 public class TenantMigrationActor extends BaseActor {
 
-  private static final String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
-  private static final String MASK_IDENTIFIER = "maskIdentifier";
-
-  private DecryptionService decryptionService =
+  private final String MASK_IDENTIFIER = "maskIdentifier";
+  private final DecryptionService decryptionService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
-  private DataMaskingService maskingService =
+  private final DataMaskingService maskingService =
       org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();
-  private TenantMigrationService tenantServiceImpl = TenantMigrationServiceImpl.getInstance();
-  private UserSelfDeclarationService userSelfDeclarationService =
+  private final TenantMigrationService tenantServiceImpl = TenantMigrationServiceImpl.getInstance();
+  private final UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
-  private UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
-  private UserService userService = UserServiceImpl.getInstance();
-
+  private final UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
   @Inject
   @Named("user_external_identity_management_actor")
   private ActorRef userExternalIdManagementActor;
@@ -72,7 +72,9 @@ public class TenantMigrationActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     logger.info(request.getRequestContext(), "TenantMigrationActor:onReceive called.");
-    Util.initializeContext(request, StringUtils.capitalize(JsonKey.CONSUMER));
+    request.getContext().put(JsonKey.ACTOR_ID, (String) request.getRequest().get(JsonKey.USER_ID));
+    request.getContext().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+    Util.initializeContext(request, StringUtils.capitalize(JsonKey.USER));
     String operation = request.getOperation();
     switch (operation) {
       case "userTenantMigrate":
@@ -175,6 +177,16 @@ public class TenantMigrationActor extends BaseActor {
     Response userOrgResponse =
         tenantServiceImpl.updateUserOrg(
             request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
+
+    //Revoke org consent
+    Map<String,Object> consentReqMap = new HashMap<>();
+    consentReqMap.put(JsonKey.USER_ID, (String) request.getRequest().get(JsonKey.USER_ID));
+    consentReqMap.put(JsonKey.CONSENT_CONSUMERID, orgId);
+    consentReqMap.put(JsonKey.CONSENT_OBJECTID, orgId);
+    consentReqMap.put(JsonKey.CONSENT_OBJECTTYPE, JsonKey.CONSENT_OBJECTTYPE_ORG);
+    consentReqMap.put(JsonKey.STATUS, JsonKey.CONSENT_STATUS_REVOKED);
+    Response consentRes = userConsentService.updateConsent(consentReqMap, request.getRequestContext());
+
     // Collect all the error message
     List<Map<String, Object>> userOrgErrMsgList = new ArrayList<>();
     if (MapUtils.isNotEmpty(userOrgResponse.getResult())
@@ -215,7 +227,11 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> userData = createUserData(userDetail);
     Request notificationRequest = createNotificationData(userData, context);
     notificationRequest.setRequestContext(context);
+    try {
     emailServiceActor.tell(notificationRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while sending user migrate notification", ex);
+    }
   }
 
   private Request createNotificationData(Map<String, Object> userData, RequestContext context) {
@@ -229,6 +245,7 @@ public class TenantMigrationActor extends BaseActor {
       requestMap.put(JsonKey.RECIPIENT_PHONES, Arrays.asList(userData.get(JsonKey.PHONE)));
       requestMap.put(JsonKey.MODE, JsonKey.SMS);
     }
+    String ACCOUNT_MERGE_EMAIL_TEMPLATE = "accountMerge";
     requestMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, ACCOUNT_MERGE_EMAIL_TEMPLATE);
     Map<String, String> templateConfig = new HashMap<>();
     templateConfig.put(
@@ -264,7 +281,11 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.getRequest().put(JsonKey.ID, userId);
     logger.debug(
         context, "TenantMigrationActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    try {
+      backgroundJobManager.tell(userRequest, self());
+    } catch (Exception ex) {
+      logger.error(context, "Exception while saving user data to ES", ex);
+    }
   }
 
   private Response updateUserExternalIds(Request request) {

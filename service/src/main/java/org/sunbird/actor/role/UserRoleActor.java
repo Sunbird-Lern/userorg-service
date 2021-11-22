@@ -20,7 +20,7 @@ import org.sunbird.util.Util;
 
 public class UserRoleActor extends UserBaseActor {
 
-  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
 
   @Inject
   @Named("user_role_background_actor")

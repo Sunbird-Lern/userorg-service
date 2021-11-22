@@ -18,10 +18,10 @@ import org.sunbird.util.PropertiesCache;
 
 public class KeyManager {
 
-  private static LoggerUtil logger = new LoggerUtil(KeyManager.class);
-  private static PropertiesCache propertiesCache = PropertiesCache.getInstance();
+  private static final LoggerUtil logger = new LoggerUtil(KeyManager.class);
+  private static final PropertiesCache propertiesCache = PropertiesCache.getInstance();
 
-  private static Map<String, KeyData> keyMap = new HashMap<>();
+  private static final Map<String, KeyData> keyMap = new HashMap<>();
 
   public static void init() {
     String basePath = propertiesCache.getProperty(JsonKey.ACCESS_TOKEN_PUBLICKEY_BASEPATH);

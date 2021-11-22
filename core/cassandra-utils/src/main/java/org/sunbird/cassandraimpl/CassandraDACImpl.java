@@ -22,7 +22,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 public class CassandraDACImpl extends CassandraOperationImpl {
-  private LoggerUtil logger = new LoggerUtil(CassandraDACImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(CassandraDACImpl.class);
 
   public Response getRecords(
       String keySpace,

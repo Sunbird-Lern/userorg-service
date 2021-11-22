@@ -23,8 +23,8 @@ import org.sunbird.util.Util;
 
 public class ResetPasswordActor extends BaseActor {
 
-  private UserService userService = UserServiceImpl.getInstance();
-  private ResetPasswordService resetPasswordService = new ResetPasswordService();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final ResetPasswordService resetPasswordService = new ResetPasswordService();
 
   @Override
   public void onReceive(Request request) throws Throwable {

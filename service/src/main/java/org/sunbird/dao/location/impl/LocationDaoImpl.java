@@ -23,12 +23,11 @@ import scala.concurrent.Future;
 /** @author Amit Kumar */
 public class LocationDaoImpl implements LocationDao {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private ObjectMapper mapper = new ObjectMapper();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private final ObjectMapper mapper = new ObjectMapper();
   private static final String KEYSPACE_NAME = "sunbird";
   private static final String LOCATION_TABLE_NAME = "location";
-  private static final String DEFAULT_SORT_BY = "ASC";
 
   @Override
   public Response create(Location location, RequestContext context) {
@@ -105,6 +104,7 @@ public class LocationDaoImpl implements LocationDao {
         && ((Map<String, Object>) searchDtO.getAdditionalProperties().get(JsonKey.FILTERS))
             .containsKey(JsonKey.TYPE)) {
       if (MapUtils.isEmpty(searchDtO.getSortBy())) {
+        String DEFAULT_SORT_BY = "ASC";
         searchDtO.getSortBy().put(JsonKey.NAME, DEFAULT_SORT_BY);
       }
     }

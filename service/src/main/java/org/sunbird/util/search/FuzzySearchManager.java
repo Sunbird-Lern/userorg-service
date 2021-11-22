@@ -12,7 +12,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 
 public class FuzzySearchManager {
-  private static LoggerUtil logger = new LoggerUtil(FuzzySearchManager.class);
+  private static final LoggerUtil logger = new LoggerUtil(FuzzySearchManager.class);
 
   private Map<String, Object> fuzzySearchMap;
   private List<Map<String, Object>> searchMap;

@@ -17,10 +17,10 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.util.ProjectUtil;
 
 public class CassandraConnectionManagerImpl implements CassandraConnectionManager {
-  private static LoggerUtil logger = new LoggerUtil(CassandraConnectionManagerImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(CassandraConnectionManagerImpl.class);
 
   private static Cluster cluster;
-  private static Map<String, Session> cassandraSessionMap = new ConcurrentHashMap<>(2);
+  private static final Map<String, Session> cassandraSessionMap = new ConcurrentHashMap<>(2);
 
   static {
     registerShutDownHook();

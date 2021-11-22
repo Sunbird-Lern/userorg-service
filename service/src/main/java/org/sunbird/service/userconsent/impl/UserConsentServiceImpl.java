@@ -24,9 +24,9 @@ import org.sunbird.util.user.DateUtil;
 
 public class UserConsentServiceImpl implements UserConsentService {
 
-  private static LoggerUtil logger = new LoggerUtil(UserConsentServiceImpl.class);
-  private static UserConsentDao userConsentDao = UserConsentDaoImpl.getInstance();
-  private static OrgDao orgDao = OrgDaoImpl.getInstance();
+  private final LoggerUtil logger = new LoggerUtil(UserConsentServiceImpl.class);
+  private final UserConsentDao userConsentDao = UserConsentDaoImpl.getInstance();
+  private final OrgDao orgDao = OrgDaoImpl.getInstance();
 
   private static UserConsentService consentService = null;
 
@@ -81,7 +81,6 @@ public class UserConsentServiceImpl implements UserConsentService {
     String objectId = (String) consent.get(JsonKey.CONSENT_OBJECTID);
     String objectType = (String) consent.getOrDefault(JsonKey.CONSENT_OBJECTTYPE, "");
     String status = (String) consent.get(JsonKey.STATUS);
-    validateConsumerId(consumerId, context);
 
     String key = getKey(userId, consumerId, objectId);
     Map<String, Object> consentReq = new HashMap<String, Object>();
@@ -111,7 +110,7 @@ public class UserConsentServiceImpl implements UserConsentService {
     return consentReq;
   }
 
-  private void validateConsumerId(String consumerId, RequestContext context) {
+  public void validateConsumerId(String consumerId, RequestContext context) {
     Map<String, Object> org = null;
     try {
       org = orgDao.getOrgById(consumerId, context);

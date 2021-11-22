@@ -11,6 +11,7 @@ public enum ActorOperations {
   CREATE_SSO_USER("createSSOUser"),
   UPDATE_USER("updateUser"),
   UPDATE_USER_V2("updateUserV2"),
+  UPDATE_USER_V3("updateUserV3"),
   GET_USER_PROFILE_V3("getUserProfileV3"),
   GET_USER_PROFILE_V4("getUserProfileV4"),
   GET_USER_PROFILE_V5("getUserProfileV5"),

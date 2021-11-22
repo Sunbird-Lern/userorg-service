@@ -23,10 +23,10 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.util.ProjectUtil;
 
 public class UserRoleServiceImpl implements UserRoleService {
-  private LoggerUtil logger = new LoggerUtil(UserRoleServiceImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(UserRoleServiceImpl.class);
   private static UserRoleService userRoleService = null;
-  private ObjectMapper mapper = new ObjectMapper();
-  private UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
 
   public static UserRoleService getInstance() {
     if (userRoleService == null) {

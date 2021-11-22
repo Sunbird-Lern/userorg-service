@@ -5,20 +5,18 @@ import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ResponseMessage;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserLookupService;
+import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
+import org.sunbird.service.user.impl.UserOrgServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
@@ -32,11 +30,9 @@ import scala.concurrent.Future;
 
 public class SSUUserCreateActor extends UserBaseActor {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
-  private Util.DbInfo userOrgDb = Util.dbInfoMap.get(JsonKey.USER_ORG_DB);
-  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -52,11 +48,7 @@ public class SSUUserCreateActor extends UserBaseActor {
     }
   }
 
-  /**
-   * This method will create user in user in cassandra and update to ES as well at same time.
-   *
-   * @param actorMessage
-   */
+  /** This method will create user in user in cassandra and update to ES as well at same time. */
   private void createSSUUser(Request actorMessage) {
     logger.debug(
         actorMessage.getRequestContext(), "SSUUserCreateActor:createSSUUser: User creation starts");
@@ -116,30 +108,31 @@ public class SSUUserCreateActor extends UserBaseActor {
     } else {
       Future<Boolean> kcFuture =
           Futures.future(
-              (Callable<Boolean>)
-                  () -> {
-                    try {
-                      Map<String, Object> updatePasswordMap = new HashMap<>();
-                      updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
-                      updatePasswordMap.put(JsonKey.PASSWORD, password);
-                      return UserUtil.updatePassword(
-                          updatePasswordMap, actorMessage.getRequestContext());
-                    } catch (Exception e) {
-                      logger.error(
-                          actorMessage.getRequestContext(),
-                          "Error occurred during update password : " + e.getMessage(),
-                          e);
-                      return false;
-                    }
-                  },
+              () -> {
+                try {
+                  Map<String, Object> updatePasswordMap = new HashMap<>();
+                  updatePasswordMap.put(JsonKey.ID, userMap.get(JsonKey.ID));
+                  updatePasswordMap.put(JsonKey.PASSWORD, password);
+                  return UserUtil.updatePassword(
+                      updatePasswordMap, actorMessage.getRequestContext());
+                } catch (Exception e) {
+                  logger.error(
+                      actorMessage.getRequestContext(),
+                      "Error occurred during update password : " + e.getMessage(),
+                      e);
+                  return false;
+                }
+              },
               getContext().dispatcher());
+      Map<String, Object> finalEsResponse = esResponse;
       Future<Response> future =
-          esUtil
-              .save(
-                  ProjectUtil.EsType.user.getTypeName(),
-                  (String) esResponse.get(JsonKey.USER_ID),
-                  esResponse,
-                  actorMessage.getRequestContext())
+          Futures.future(
+                  () ->
+                      userService.saveUserToES(
+                          (String) finalEsResponse.get(JsonKey.USER_ID),
+                          finalEsResponse,
+                          actorMessage.getRequestContext()),
+                  getContext().dispatcher())
               .zip(kcFuture)
               .map(
                   new Mapper<>() {
@@ -159,11 +152,15 @@ public class SSUUserCreateActor extends UserBaseActor {
     generateUserTelemetry(userMap, actorMessage, userId, JsonKey.CREATE);
   }
 
-  private Map<String, Object> saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
-    Map<String, Object> userOrgMap = UserUtil.createUserOrgRequestData(userMap);
-    cassandraOperation.insertRecord(
-        userOrgDb.getKeySpace(), userOrgDb.getTableName(), userOrgMap, context);
-
-    return userOrgMap;
+  private void saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
+    Map<String, Object> userOrgMap = new HashMap<>();
+    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
+    userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
+    userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
+    userOrgMap.put(JsonKey.IS_DELETED, false);
+    userOrgMap.put(JsonKey.ASSOCIATION_TYPE, AssociationMechanism.SELF_DECLARATION);
+    userOrgService.registerUserToOrg(userOrgMap, context);
   }
 }

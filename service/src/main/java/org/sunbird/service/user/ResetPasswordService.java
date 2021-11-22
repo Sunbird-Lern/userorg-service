@@ -12,7 +12,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class ResetPasswordService {
 
-  private LoggerUtil logger = new LoggerUtil(ResetPasswordService.class);
+  private final LoggerUtil logger = new LoggerUtil(ResetPasswordService.class);
 
   public String getUserRequiredActionLink(
       Map<String, Object> templateMap, boolean isUrlShortRequired, RequestContext context) {

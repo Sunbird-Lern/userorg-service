@@ -10,8 +10,8 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 
 public class UserConsentDaoImpl implements UserConsentDao {
-  private static final String TABLE_NAME = "user_consent";
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final String TABLE_NAME = "user_consent";
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   private static UserConsentDao consentDao = null;
 
@@ -31,7 +31,7 @@ public class UserConsentDaoImpl implements UserConsentDao {
   public List<Map<String, Object>> getConsent(
       Map<String, Object> consentReq, RequestContext context) {
     Response response =
-        cassandraOperation.getRecordsByProperties(JsonKey.SUNBIRD, TABLE_NAME, consentReq, context);
+        cassandraOperation.getRecordsByCompositeKey(JsonKey.SUNBIRD, TABLE_NAME, consentReq, context);
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }
 }

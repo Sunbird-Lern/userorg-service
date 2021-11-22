@@ -15,11 +15,13 @@ import org.sunbird.telemetry.validator.TelemetryObjectValidatorV3;
 
 public class TelemetryWriter {
 
-  private static TelemetryDataAssembler telemetryDataAssembler = TelemetryAssemblerFactory.get();
-  private static TelemetryObjectValidator telemetryObjectValidator =
+  private static final TelemetryDataAssembler telemetryDataAssembler =
+      TelemetryAssemblerFactory.get();
+  private static final TelemetryObjectValidator telemetryObjectValidator =
       new TelemetryObjectValidatorV3();
-  private static LoggerUtil logger = new LoggerUtil(TelemetryWriter.class);
-  private static Logger telemetryEventLogger = LoggerFactory.getLogger("TelemetryEventLogger");
+  private static final LoggerUtil logger = new LoggerUtil(TelemetryWriter.class);
+  private static final Logger telemetryEventLogger =
+      LoggerFactory.getLogger("TelemetryEventLogger");
 
   public static void write(Request request) {
     try {

@@ -23,9 +23,7 @@ public class UserTypeActor extends UserBaseActor {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void getUserTypes(Request request) {
-
     Response response = new Response();
     List<Map<String, String>> userTypeList = getUserTypeList(request);
     response.getResult().put(JsonKey.RESPONSE, userTypeList);
@@ -34,7 +32,6 @@ public class UserTypeActor extends UserBaseActor {
 
   private List<Map<String, String>> getUserTypeList(Request request) {
     List<Map<String, String>> userTypes = new ArrayList<>();
-
     Map<String, Map<String, List<String>>> userTypeConfigList =
         DataCacheHandler.getUserTypesConfig();
     Map<String, List<String>> userTypeLists = userTypeConfigList.get(JsonKey.DEFAULT_PERSONA);

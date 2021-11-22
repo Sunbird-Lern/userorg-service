@@ -31,10 +31,10 @@ import org.sunbird.util.StringFormatter;
 
 public class TenantMigrationServiceImpl implements TenantMigrationService {
 
-  public LoggerUtil logger = new LoggerUtil(this.getClass());
-  private UserService userService = UserServiceImpl.getInstance();
+  public final LoggerUtil logger = new LoggerUtil(this.getClass());
+  private final UserService userService = UserServiceImpl.getInstance();
   private static TenantMigrationService tenantMigrationService = null;
-  private UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
+  private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
 
   public static TenantMigrationService getInstance() {
     if (tenantMigrationService == null) {

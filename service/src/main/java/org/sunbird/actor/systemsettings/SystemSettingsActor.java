@@ -11,7 +11,7 @@ import org.sunbird.service.systemsettings.SystemSettingsService;
 
 public class SystemSettingsActor extends BaseActor {
 
-  private SystemSettingsService service = new SystemSettingsService();
+  private final SystemSettingsService service = new SystemSettingsService();
 
   @Override
   public void onReceive(Request request) throws Throwable {

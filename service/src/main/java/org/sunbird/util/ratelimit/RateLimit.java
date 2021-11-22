@@ -9,7 +9,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 
 public class RateLimit {
-  private LoggerUtil logger = new LoggerUtil(RateLimit.class);
+  private final LoggerUtil logger = new LoggerUtil(RateLimit.class);
 
   private String key;
   private String unit;

@@ -64,7 +64,7 @@ public abstract class BaseApplicationTest {
       Helpers.start(application);
       mockStatic(RequestInterceptor.class);
       mockStatic(TelemetryWriter.class);
-      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
           .thenReturn(userAuthentication);
       mockStatic(OnRequestHandler.class);
     } catch (Exception e) {
@@ -89,7 +89,7 @@ public abstract class BaseApplicationTest {
       Helpers.start(application);
       mockStatic(RequestInterceptor.class);
       mockStatic(TelemetryWriter.class);
-      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject()))
+      PowerMockito.when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
           .thenReturn(userAuthentication);
       mockStatic(OnRequestHandler.class);
     } catch (Exception e) {

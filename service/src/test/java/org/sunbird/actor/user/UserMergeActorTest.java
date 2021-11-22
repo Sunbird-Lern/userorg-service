@@ -23,6 +23,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.auth.verifier.AccessTokenValidator;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -30,15 +31,15 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.util.ConfigUtil;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.user.KafkaConfigConstants;
 
 @RunWith(PowerMockRunner.class)
@@ -52,7 +53,8 @@ import org.sunbird.util.user.KafkaConfigConstants;
   CassandraOperationImpl.class,
   ConfigUtil.class,
   Config.class,
-  KafkaClient.class
+  KafkaClient.class,
+  AccessTokenValidator.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -72,7 +74,7 @@ public class UserMergeActorTest {
   public static Producer producer;
   public static KafkaClient kafkaClient;
   public static CassandraOperationImpl cassandraOperation;
-  private static KeyCloakServiceImpl ssoManager;
+  private static AccessTokenValidator tokenValidator;
 
   @Before
   public void beforeEachTest() {
@@ -87,13 +89,13 @@ public class UserMergeActorTest {
     config = mock(Config.class);
     kafkaClient = mock(KafkaClient.class);
     producer = mock(Producer.class);
-    ssoManager = mock(KeyCloakServiceImpl.class);
+    tokenValidator = mock(AccessTokenValidator.class);
+    PowerMockito.mockStatic(AccessTokenValidator.class);
     when(ConfigUtil.getConfig()).thenReturn(config);
     when(config.getString(KafkaConfigConstants.SUNBIRD_USER_CERT_KAFKA_TOPIC)).thenReturn("topic");
     when(UserServiceImpl.getInstance()).thenReturn(userService);
     when(UserDaoImpl.getInstance()).thenReturn(userDao);
     when(KafkaClient.getProducer()).thenReturn(producer);
-    when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
     cassandraOperation = mock(CassandraOperationImpl.class);
     userCounter = 0;
   }
@@ -104,9 +106,12 @@ public class UserMergeActorTest {
         .thenReturn(getUserDetails(true))
         .thenReturn(getUserDetails(true));
     when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    when(tokenValidator.verifyUserToken(Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("anyUserId");
+    when(tokenValidator.verifySourceUserToken(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("anyUserId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result =
         testScenario(getRequest(ActorOperations.MERGE_USER), ResponseCode.invalidIdentifier);
@@ -119,8 +124,10 @@ public class UserMergeActorTest {
         .thenReturn(getUserDetails(false))
         .thenReturn(getUserDetails(false));
     when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.any())).thenReturn("anyUserId");
-    when(ssoManager.verifyToken(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    when(tokenValidator.verifyUserToken(Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn("anyUserId");
+    when(tokenValidator.verifySourceUserToken(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("anyUserId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configSettingsMap());
     boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), null);
@@ -183,6 +190,7 @@ public class UserMergeActorTest {
     reqObj.setRequest(reqMap);
     reqObj.setContext(contextMap);
     reqObj.setOperation(actorOperation.getValue());
+    reqObj.setRequestContext(new RequestContext());
     return reqObj;
   }
 }
