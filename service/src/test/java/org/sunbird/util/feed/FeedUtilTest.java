@@ -1,7 +1,6 @@
 package org.sunbird.util.feed;
 
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.ArrayList;
@@ -21,8 +20,6 @@ import org.powermock.core.classloader.annotations.SuppressStaticInitializationFo
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -49,9 +46,7 @@ import org.sunbird.service.feed.impl.FeedServiceImpl;
   IFeedService.class,
   FeedServiceImpl.class,
   FeedFactory.class,
-  ShadowUser.class,
-  OrganisationClient.class,
-  OrganisationClientImpl.class
+  ShadowUser.class
 })
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 @PowerMockIgnore({
@@ -66,25 +61,18 @@ public class FeedUtilTest {
   private CassandraOperation cassandraOperation = null;
   private static Response response;
   private static IFeedService feedService;
-  private static OrganisationClient organisationClient;
 
   @Before
   public void setUp() {
     PowerMockito.mockStatic(FeedServiceImpl.class);
     PowerMockito.mockStatic(FeedFactory.class);
     feedService = mock(FeedServiceImpl.class);
-    organisationClient = mock(OrganisationClient.class);
-    mockStatic(OrganisationClientImpl.class);
     when(FeedFactory.getInstance()).thenReturn(feedService);
     when(feedService.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
         .thenReturn(getFeedList(true))
         .thenReturn(getFeedList(false));
     when(feedService.insert(Mockito.any(), Mockito.any())).thenReturn(new Response());
     when(feedService.update(Mockito.any(), Mockito.any())).thenReturn(new Response());
-
-    when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
-    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getFeedOrgs());
 
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(EsClientFactory.class);

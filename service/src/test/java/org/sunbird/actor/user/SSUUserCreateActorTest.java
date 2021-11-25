@@ -23,7 +23,7 @@ public class SSUUserCreateActorTest extends UserManagementActorTestBase {
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(false);
-    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
         .thenReturn(organisation);
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

@@ -38,7 +38,7 @@ import org.sunbird.util.ProjectUtil;
  */
 public abstract class BaseBulkUploadActor extends BaseActor {
 
-  private UserService userService = UserServiceImpl.getInstance();
+  UserService userService = UserServiceImpl.getInstance();
 
   public void validateBulkUploadFields(
       String[] csvHeaderLine, String[] allowedFields, Boolean allFieldsMandatory) {

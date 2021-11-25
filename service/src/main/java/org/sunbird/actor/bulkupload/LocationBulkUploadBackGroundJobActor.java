@@ -79,7 +79,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       if (checkMandatoryFields(row, JsonKey.CODE)) {
         Location location = null;
         try {
-          List<Location> locationList = locationService.locationSearch(JsonKey.CODE, (String) row.get(JsonKey.CODE), context);
+          List<Location> locationList = locationService.locationSearch(JsonKey.CODE, row.get(JsonKey.CODE), context);
           if (CollectionUtils.isNotEmpty(locationList)) {
             location = locationList.get(0);
           }
@@ -177,7 +177,6 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     Request request = new Request();
     request.getRequest().putAll(row);
     request.setRequestContext(context);
-    ObjectMapper mapper = new ObjectMapper();
     String locationId = "";
     try {
       request.setOperation(LocationActorOperation.CREATE_LOCATION.getValue());

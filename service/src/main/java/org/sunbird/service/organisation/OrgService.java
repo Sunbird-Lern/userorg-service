@@ -3,6 +3,7 @@ package org.sunbird.service.organisation;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.dto.SearchDTO;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import scala.concurrent.Future;
@@ -10,6 +11,8 @@ import scala.concurrent.Future;
 public interface OrgService {
 
   Map<String, Object> getOrgById(String orgId, RequestContext context);
+
+  Organisation getOrgObjById(String orgId, RequestContext context);
 
   List<Map<String, Object>> getOrgByIds(List<String> orgIds, RequestContext context);
 
@@ -24,6 +27,8 @@ public interface OrgService {
   Response updateOrganisation(Map<String, Object> orgMap, RequestContext context);
 
   List<Map<String, Object>> organisationSearch(Map<String, Object> filters, RequestContext context);
+
+  List<Organisation> organisationObjSearch(Map<String, Object> filters, RequestContext context);
 
   Future<Map<String, Object>> searchOrg(SearchDTO searchDTO, RequestContext context);
 

@@ -23,7 +23,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -48,7 +47,6 @@ import scala.concurrent.Promise;
 @PrepareForTest({
   ServiceFactory.class,
   CassandraOperationImpl.class,
-  SystemSettingClientImpl.class,
   DataCacheHandler.class,
   UserLookupDao.class,
   UserLookupDaoImpl.class,
@@ -106,16 +104,6 @@ public class TenantMigrationActorTest {
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(RequestContext.class)))
         .thenReturn(upsertResponse);
 
-    PowerMockito.mockStatic(SystemSettingClientImpl.class);
-    SystemSettingClientImpl systemSettingClient = mock(SystemSettingClientImpl.class);
-    when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
-    when(systemSettingClient.getSystemSettingByFieldAndKey(
-            Mockito.any(ActorRef.class),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyObject(),
-            Mockito.any()))
-        .thenReturn(new HashMap<>());
     Response response = new Response();
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     when(cassandraOperation.insertRecord(

@@ -132,7 +132,7 @@ public class SSOUserServiceImpl implements SSOUserService {
     }
     Organisation fetchedOrgById;
     if (StringUtils.isNotBlank(requestedOrgId)) {
-      fetchedOrgById = organisationClient.esGetOrgById(requestedOrgId, context);
+      fetchedOrgById = orgService.getOrgObjById(requestedOrgId, context);
       if (null == fetchedOrgById) {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgData);
       }

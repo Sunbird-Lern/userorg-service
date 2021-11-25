@@ -127,8 +127,6 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     user.putAll(getMapObject());
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(user);
-    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
-        .thenReturn(orgList);
 
     Map<String, Object> userOrg = new HashMap<>();
     userOrg.put(JsonKey.USER_ID, "userId");

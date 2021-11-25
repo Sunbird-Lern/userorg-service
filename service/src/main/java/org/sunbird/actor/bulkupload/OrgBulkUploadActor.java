@@ -10,11 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.bulkupload.BulkUploadProcessDao;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -24,24 +19,22 @@ import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
+import org.sunbird.service.systemsettings.SystemSettingsService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
-import scala.concurrent.Future;
 
 public class OrgBulkUploadActor extends BaseBulkUploadActor {
 
-  private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final SystemSettingsService systemSettingsService = new SystemSettingsService();
 
   @Inject
   @Named("org_bulk_upload_background_job_actor")
   private ActorRef orgBulkUploadBackgroundJobActor;
-
-  @Inject
-  @Named("system_settings_actor")
-  private ActorRef systemSettingsActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -58,8 +51,7 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
   private void upload(Request request) throws IOException {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     Object dataObject =
-        systemSettingClient.getSystemSettingByFieldAndKey(
-            systemSettingsActor,
+            systemSettingsService.getSystemSettingByFieldAndKey(
             "orgProfileConfig",
             "csv",
             new TypeReference<Map>() {},
@@ -125,10 +117,10 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
       fileByteArray = (byte[]) req.get(JsonKey.FILE);
     }
     HashMap<String, Object> additionalInfo = new HashMap<>();
-    Map<String, Object> user = getUser((String) req.get(JsonKey.CREATED_BY), context);
+    Map<String, Object> user = userService.getUserDetailsById((String) req.get(JsonKey.CREATED_BY), context);
     if (user != null) {
       String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
-      Map<String, Object> org = getOrg(rootOrgId, context);
+      Map<String, Object> org = orgService.getOrgById(rootOrgId, context);
       if (org != null) {
         if (org.get(JsonKey.STATUS) == null
             || (int) org.get(JsonKey.STATUS) == ProjectUtil.OrgStatus.ACTIVE.getValue()) {
@@ -158,26 +150,4 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
         context);
   }
 
-  Map<String, Object> getUser(String userId, RequestContext context) {
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(ProjectUtil.EsType.user.getTypeName(), userId, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (result != null || result.size() > 0) {
-      return result;
-    }
-    return null;
-  }
-
-  Map<String, Object> getOrg(String orgId, RequestContext context) {
-    Future<Map<String, Object>> resultF =
-        esService.getDataByIdentifier(
-            ProjectUtil.EsType.organisation.getTypeName(), orgId, context);
-    Map<String, Object> result =
-        (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(resultF);
-    if (result != null && result.size() > 0) {
-      return result;
-    }
-    return null;
-  }
 }
