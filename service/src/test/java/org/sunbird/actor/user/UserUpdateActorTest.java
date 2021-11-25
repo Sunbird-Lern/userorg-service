@@ -320,8 +320,6 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
-    when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationLists2());
     boolean result =
         testScenario(
             getRequest(
