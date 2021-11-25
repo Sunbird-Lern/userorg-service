@@ -23,10 +23,10 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
 
 /** this class will be used as a Util for inserting Feed in table */
 public class FeedUtil {
-  private static LoggerUtil logger = new LoggerUtil(FeedUtil.class);
+  private static final LoggerUtil logger = new LoggerUtil(FeedUtil.class);
 
-  private static IFeedService feedService = FeedFactory.getInstance();
-  private static OrgService orgService = OrgServiceImpl.getInstance();
+  private static final IFeedService feedService = FeedFactory.getInstance();
+  private static final OrgService orgService = OrgServiceImpl.getInstance();
   private static Map<String, Object> orgIdMap = new HashMap<>();
 
   public static Response saveFeed(

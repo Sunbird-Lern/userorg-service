@@ -2,7 +2,9 @@ package org.sunbird.service.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,14 +34,14 @@ import org.sunbird.util.user.UserUtil;
 
 public class SSOUserServiceImpl implements SSOUserService {
 
-  private static LoggerUtil logger = new LoggerUtil(SSOUserServiceImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(SSOUserServiceImpl.class);
 
   private static SSOUserService ssoUserService = null;
-  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
-  private OrgExternalService orgExternalService = OrgExternalServiceImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
-  private OrgService orgService = OrgServiceImpl.getInstance();
+  private final OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
+  private final OrgExternalService orgExternalService = OrgExternalServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
 
   public static SSOUserService getInstance() {
     if (ssoUserService == null) {
@@ -218,6 +220,11 @@ public class SSOUserServiceImpl implements SSOUserService {
       }
       try {
         ObjectMapper mapper = new ObjectMapper();
+        if (!userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
+          List<Map<String, String>> userTypeAndSubTypes = new ArrayList<>();
+          userTypeAndSubTypes.add(userTypeAndSubType);
+          userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));
+        }
         userMap.put(JsonKey.PROFILE_USERTYPE, mapper.writeValueAsString(userTypeAndSubType));
       } catch (Exception ex) {
         logger.error(requestContext, "Exception occurred while mapping", ex);

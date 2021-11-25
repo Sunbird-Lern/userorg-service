@@ -62,7 +62,7 @@ public class UserProfileUpdateActor extends BaseActor {
 
   private Future<Response> getConsolidatedFutureResponse(Future<Iterable<Object>> futuresSequence) {
     return futuresSequence.map(
-        new Mapper<Iterable<Object>, Response>() {
+        new Mapper<>() {
           Map<String, Object> map = new HashMap<>();
           List<Object> errorList = new ArrayList<>();
 
@@ -101,7 +101,6 @@ public class UserProfileUpdateActor extends BaseActor {
         getContext().dispatcher());
   }
 
-  @SuppressWarnings("unchecked")
   private List<Future<Object>> getFutures(
       Map<String, Object> userMap, String operationType, RequestContext context) {
     List<Future<Object>> futures = new ArrayList<>();

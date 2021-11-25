@@ -25,8 +25,8 @@ import org.sunbird.service.user.impl.UserServiceImpl;
  */
 public class IdentifierFreeUpActor extends BaseActor {
 
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserLookUpServiceImpl userLookUp = new UserLookUpServiceImpl();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserLookUpServiceImpl userLookUp = new UserLookUpServiceImpl();
 
   @Override
   public void onReceive(Request request) {

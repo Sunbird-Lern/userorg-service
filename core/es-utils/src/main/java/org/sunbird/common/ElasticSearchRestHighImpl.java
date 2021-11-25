@@ -54,7 +54,7 @@ import scala.concurrent.Promise;
  */
 public class ElasticSearchRestHighImpl implements ElasticSearchService {
   private static final String ERROR = "ERROR";
-  private static LoggerUtil logger = new LoggerUtil(ElasticSearchRestHighImpl.class);
+  private static final LoggerUtil logger = new LoggerUtil(ElasticSearchRestHighImpl.class);
 
   /**
    * This method will put a new data entry inside Elastic search. identifier value becomes _id

@@ -22,10 +22,9 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 
 public class UserTnCActor extends BaseActor {
-  private UserTncService tncService = new UserTncService();
-  private ObjectMapper mapper = new ObjectMapper();
-
-  UserDao userDao = UserDaoImpl.getInstance();
+  private final UserTncService tncService = new UserTncService();
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final UserDao userDao = UserDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

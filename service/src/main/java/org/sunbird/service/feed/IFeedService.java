@@ -41,8 +41,10 @@ public interface IFeedService {
   /**
    * this method will be holding responsibility to delete the feed from DB and ES.
    *
-   * @param request
+   * @param id
+   * @param userId
+   * @param action
    * @param context
    */
-  void delete(String id, String userId, String action, RequestContext context);
+  void delete(String id, String userId, String category, RequestContext context);
 }

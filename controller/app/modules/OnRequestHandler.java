@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,11 +37,10 @@ public class OnRequestHandler implements ActionCreator {
 
   @Override
   public Action createAction(Http.Request request, Method method) {
+    Optional<String> optionalMessageId = request.header(JsonKey.MESSAGE_ID);
     String requestId;
-    if (request.header(HeaderParam.X_REQUEST_ID.getName()).isPresent()) {
-      requestId = request.header(HeaderParam.X_REQUEST_ID.getName()).get();
-    } else if (request.header(JsonKey.MESSAGE_ID).isPresent()) {
-      requestId = request.header(JsonKey.MESSAGE_ID).get();
+    if (optionalMessageId.isPresent()) {
+      requestId = optionalMessageId.get();
     } else {
       UUID uuid = UUID.randomUUID();
       requestId = uuid.toString();
@@ -201,18 +201,9 @@ public class OnRequestHandler implements ActionCreator {
         reqContext.put(JsonKey.X_Session_ID, optionalSessionId.get());
       }
 
-      Optional<String> optionalSource = request.header(HeaderParam.X_SOURCE.getName());
-      if (optionalSource.isPresent()) {
-        reqContext.put(JsonKey.X_Source, optionalSource.get());
-      }
-
-      if (request.header(HeaderParam.X_APP_VERSION.getName()).isPresent()) {
-        reqContext.put(
-            JsonKey.X_APP_VERSION, request.header(HeaderParam.X_APP_VERSION.getName()).get());
-      } else if (request.header(HeaderParam.X_APP_VERSION_PORTAL.getName()).isPresent()) {
-        reqContext.put(
-            JsonKey.X_APP_VERSION,
-            request.header(HeaderParam.X_APP_VERSION_PORTAL.getName()).get());
+      Optional<String> optionalAppVersion = request.header(HeaderParam.X_APP_VERSION.getName());
+      if (optionalAppVersion.isPresent()) {
+        reqContext.put(JsonKey.X_APP_VERSION, optionalAppVersion.get());
       }
 
       Optional<String> optionalTraceEnabled = request.header(HeaderParam.X_TRACE_ENABLED.getName());

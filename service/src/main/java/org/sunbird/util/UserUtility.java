@@ -18,7 +18,7 @@ import org.sunbird.logging.LoggerUtil;
  * @author Amit Kumar
  */
 public final class UserUtility {
-  private static LoggerUtil logger = new LoggerUtil(UserUtility.class);
+  private static final LoggerUtil logger = new LoggerUtil(UserUtility.class);
 
   private static List<String> userKeyToEncrypt;
   private static List<String> userKeyToDecrypt;

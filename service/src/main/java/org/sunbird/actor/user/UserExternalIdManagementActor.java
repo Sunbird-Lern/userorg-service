@@ -24,7 +24,7 @@ import org.sunbird.util.user.UserActorOperations;
 
 public class UserExternalIdManagementActor extends BaseActor {
 
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

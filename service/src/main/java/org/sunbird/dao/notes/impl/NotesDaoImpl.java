@@ -17,9 +17,9 @@ import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Future;
 
 public class NotesDaoImpl implements NotesDao {
-  public LoggerUtil logger = new LoggerUtil(NotesDaoImpl.class);
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  public final LoggerUtil logger = new LoggerUtil(NotesDaoImpl.class);
+  private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
   private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
   private static final String TABLE_NAME = "user_notes";

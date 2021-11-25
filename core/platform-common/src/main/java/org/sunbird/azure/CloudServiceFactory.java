@@ -11,8 +11,8 @@ import java.util.Map;
  */
 public class CloudServiceFactory {
 
-  private static Map<String, CloudService> factory = new HashMap<>();
-  private static List<String> allowedServiceNames = Arrays.asList("Azure", "Amazon S3");
+  private static final Map<String, CloudService> factory = new HashMap<>();
+  private static final List<String> allowedServiceNames = Arrays.asList("Azure", "Amazon S3");
 
   private CloudServiceFactory() {}
 

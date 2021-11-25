@@ -32,8 +32,12 @@ import org.sunbird.util.Util;
 import org.sunbird.validator.EmailValidator;
 
 public class OrganisationManagementActor extends BaseActor {
-  private OrgService orgService = OrgServiceImpl.getInstance();
-  private OrganisationRequestValidator orgValidator = new OrganisationRequestValidator();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final OrganisationRequestValidator orgValidator = new OrganisationRequestValidator();
+
+  @Inject
+  @Named("org_background_actor")
+  private ActorRef organisationBackgroundActor;
 
   @Inject
   @Named("org_background_actor")

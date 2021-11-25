@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -53,14 +52,13 @@ import scala.concurrent.Promise;
 })
 public class LocationActorTest {
 
-  private static final ActorSystem system = ActorSystem.create("system");
-  private static final Props props = Props.create(LocationActor.class);
-  private static Map<String, Object> data;
-  private static ElasticSearchRestHighImpl esSearch;
+  private ActorSystem system;
+  private Props props;
+  private Map<String, Object> data;
+  private ElasticSearchRestHighImpl esSearch;
 
-  @BeforeClass
-  public static void init() {
-
+  @Before
+  public void setUp() {
     PowerMockito.mockStatic(EsClientFactory.class);
     esSearch = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esSearch);
@@ -77,11 +75,6 @@ public class LocationActorTest {
     when(cassandraOperation.deleteRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getSuccessResponse());
-  }
-
-  @Before
-  public void setUp() {
-
     Map<String, Object> esRespone = new HashMap<>();
     esRespone.put(JsonKey.CONTENT, new ArrayList<>());
     esRespone.put(JsonKey.LOCATION_TYPE, "STATE");
@@ -93,6 +86,15 @@ public class LocationActorTest {
     when(esSearch.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     data = getDataMap();
+
+    system = ActorSystem.create("system");
+    props = Props.create(LocationActor.class);
+  }
+
+  @Test
+  public void testDeleteLocationSuccess() {
+    boolean result = testScenario(LocationActorOperation.DELETE_LOCATION, true, data, null);
+    assertTrue(result);
   }
 
   @Test
@@ -209,8 +211,7 @@ public class LocationActorTest {
     }
   }
 
-  private static Map<String, Object> getDataMap() {
-
+  private Map<String, Object> getDataMap() {
     data = new HashMap();
     data.put(JsonKey.LOCATION_TYPE, "STATE");
     data.put(JsonKey.CODE, "S01");

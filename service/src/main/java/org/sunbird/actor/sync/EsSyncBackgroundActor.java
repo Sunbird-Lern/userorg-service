@@ -21,9 +21,9 @@ import org.sunbird.util.ProjectUtil;
 
 public class EsSyncBackgroundActor extends BaseActor {
 
-  private OrgService orgService = OrgServiceImpl.getInstance();
-  private LocationService locationService = LocationServiceImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
+  private final LocationService locationService = LocationServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {

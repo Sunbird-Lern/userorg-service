@@ -10,8 +10,8 @@ import org.sunbird.util.SMSTemplateProvider;
 
 public class OTPService {
 
-  private OTPDao otpDao = OTPDaoImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final OTPDao otpDao = OTPDaoImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   public Map<String, Object> getOTPDetails(String type, String key, RequestContext context) {
     return otpDao.getOTPDetails(type, key, context);

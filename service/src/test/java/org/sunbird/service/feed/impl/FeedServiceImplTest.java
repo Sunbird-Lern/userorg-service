@@ -21,6 +21,7 @@ import org.sunbird.dao.feed.impl.FeedDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
@@ -67,13 +68,6 @@ public class FeedServiceImplTest {
 
   @Test
   public void testInsert() {
-    Response res = feedService.insert(getFeed(false), null);
-    Assert.assertTrue(
-        ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
-  }
-
-  @Test
-  public void testUpdate() {
     Response res = feedService.update(getFeed(true), null);
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
@@ -92,10 +86,17 @@ public class FeedServiceImplTest {
   }
 
   @Test
+  public void testUpdate() {
+    Response res = feedService.update(getFeed(true), null);
+    Assert.assertTrue(
+        ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
+  }
+
+  @Test
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
-    List<Feed> res = feedService.getFeedsByProperties(props, null);
+    List<Feed> res = feedService.getFeedsByProperties(props, new RequestContext());
     Assert.assertTrue(res != null);
   }
 

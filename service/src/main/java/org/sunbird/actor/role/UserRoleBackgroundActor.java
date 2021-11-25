@@ -12,6 +12,8 @@ import org.sunbird.service.user.impl.UserRoleServiceImpl;
 
 public class UserRoleBackgroundActor extends BaseActor {
 
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+
   @Override
   public void onReceive(Request request) throws Throwable {
     String operation = request.getOperation();
@@ -31,7 +33,6 @@ public class UserRoleBackgroundActor extends BaseActor {
     if (type.equals(JsonKey.USER)) {
       result.put(JsonKey.ROLES, roles);
     }
-    UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     userRoleService.updateUserRoleToES(
         (String) result.get(JsonKey.USER_ID), result, actorMessage.getRequestContext());
   }

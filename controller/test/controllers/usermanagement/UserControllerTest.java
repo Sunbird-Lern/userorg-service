@@ -262,6 +262,17 @@ public class UserControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testUpdateUserV3Success() throws Exception {
+    Result result =
+        performTest(
+            "/v3/user/update",
+            "PATCH",
+            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertTrue(getResponseStatus(result) == 200);
+  }
+
+  @Test
   public void testUpdateUserFailureWithInvalidPhoneNumber() {
     Result result =
         performTest(

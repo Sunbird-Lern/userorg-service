@@ -24,13 +24,13 @@ import scala.concurrent.Future;
 
 public class OrgServiceImpl implements OrgService {
 
-  private LoggerUtil logger = new LoggerUtil(this.getClass());
+  private final LoggerUtil logger = new LoggerUtil(this.getClass());
   private static Map<Integer, List<Integer>> orgStatusTransition = new HashMap<>();
-  private ObjectMapper mapper = new ObjectMapper();
-  private OrgDao orgDao = OrgDaoImpl.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgService orgService;
-  private OrgExternalService orgExternalService = new OrgExternalServiceImpl();;
-  private String contentType = "application/json";
+  private final OrgExternalService orgExternalService = new OrgExternalServiceImpl();;
+  private final String contentType = "application/json";
 
   public static OrgService getInstance() {
     if (orgService == null) {

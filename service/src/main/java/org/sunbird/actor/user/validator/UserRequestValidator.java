@@ -11,20 +11,21 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.FormApiUtil;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.FormApiUtil;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
 import org.sunbird.validator.BaseRequestValidator;
 
 public class UserRequestValidator extends BaseRequestValidator {
 
-  private static final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
+  private final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
   protected static List<String> typeList = new ArrayList<>();
-  private static LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
+  private static final LoggerUtil logger = new LoggerUtil(UserRequestValidator.class);
 
   static {
     List<String> subTypeList =
@@ -51,7 +52,8 @@ public class UserRequestValidator extends BaseRequestValidator {
             JsonKey.EXTERNAL_ID,
             JsonKey.EXTERNAL_ID_PROVIDER,
             JsonKey.EXTERNAL_ID_TYPE,
-            JsonKey.ID_TYPE),
+            JsonKey.ID_TYPE,
+            JsonKey.PROFILE_USERTYPES),
         userRequest);
     createUserBasicValidation(userRequest);
     validateUserType(userRequest.getRequest(), null, userRequest.getRequestContext());
@@ -63,7 +65,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     return password.matches(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_PASS_REGEX));
   }
 
-  private static void validatePassword(String password) {
+  private void validatePassword(String password) {
     if (StringUtils.isNotBlank(password)) {
       boolean response = isGoodPassword(password);
       if (!response) {
@@ -290,6 +292,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateRecoveryEmailOrPhone(userRequest);
   }
 
+  public void validateUpdateUserRequestV3(Request userRequest) {
+    validateUpdateUserRequest(userRequest);
+  }
+
   public void checkEmptyPhoneAndEmail(Request userRequest) {
     String phone = (String) userRequest.getRequest().get(JsonKey.PHONE);
     String email = (String) userRequest.getRequest().get(JsonKey.EMAIL);
@@ -422,6 +428,48 @@ public class UserRequestValidator extends BaseRequestValidator {
             ResponseCode.dataTypeError.getErrorCode(),
             ProjectUtil.formatMessage(
                 ResponseCode.dataTypeError.getErrorMessage(), JsonKey.ROLES, JsonKey.LIST),
+            ERROR_CODE);
+      }
+    }
+    if (userRequest.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())
+        || userRequest.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter, JsonKey.PROFILE_USERTYPES);
+      }
+    } else {
+      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPE)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter, JsonKey.PROFILE_USERTYPE);
+      }
+    }
+    if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)
+        && null != userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES)) {
+      if (userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List) {
+        List profileusertypes = (List) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
+        if (CollectionUtils.isEmpty(profileusertypes)) {
+          ProjectCommonException.throwClientErrorException(ResponseCode.profileUserTypesRequired);
+        } else {
+          try {
+            List<Map<String, String>> profUserTypeList =
+                (List<Map<String, String>>) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
+          } catch (ClassCastException e) {
+            throw new ProjectCommonException(
+                ResponseCode.dataTypeError.getErrorCode(),
+                ProjectUtil.formatMessage(
+                    ResponseCode.dataTypeError.getErrorMessage(),
+                    JsonKey.PROFILE_USERTYPES,
+                    JsonKey.LIST),
+                ERROR_CODE);
+          }
+        }
+      } else if (!(userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List)) {
+        throw new ProjectCommonException(
+            ResponseCode.dataTypeError.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.dataTypeError.getErrorMessage(),
+                JsonKey.PROFILE_USERTYPES,
+                JsonKey.LIST),
             ERROR_CODE);
       }
     }
@@ -744,7 +792,21 @@ public class UserRequestValidator extends BaseRequestValidator {
           context,
           String.format(
               "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
-      if (!userTypeMap.containsKey(userType)) {
+      List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
+      if (CollectionUtils.isNotEmpty(profileUserTypes)
+          && MapUtils.isNotEmpty((Map) profileUserTypes.get(0))) {
+        profileUserTypes.forEach(
+            item -> {
+              String userTypeItem = (String) item.get(JsonKey.TYPE);
+              if (!userTypeMap.containsKey(userTypeItem)) {
+                ProjectCommonException.throwClientErrorException(
+                    ResponseCode.invalidParameterValue,
+                    MessageFormat.format(
+                        ResponseCode.invalidParameterValue.getErrorMessage(),
+                        new String[] {userType, JsonKey.USER_TYPE}));
+              }
+            });
+      } else if (!userTypeMap.containsKey(userType)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
@@ -757,13 +819,32 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   public void validateUserSubType(Map<String, Object> userRequestMap, String stateCode) {
     String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
+    String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
     Map<String, Map<String, List<String>>> userTypeConfigMap =
         DataCacheHandler.getUserTypesConfig();
-    String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
-    Map<String, List<String>> userSubTypeMap = userTypeConfigMap.get(stateCode);
-    if (null != userSubType
-        && (null == userSubTypeMap.get(userType)
-            || !userSubTypeMap.get(userType).contains(userSubType))) {
+    Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
+
+    List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
+    if (CollectionUtils.isNotEmpty(profileUserTypes)
+        && MapUtils.isNotEmpty(profileUserTypes.get(0))) {
+      profileUserTypes.forEach(
+          item -> {
+            String userTypeItem = (String) item.get(JsonKey.TYPE);
+            String userSubTypeItem = (String) item.get(JsonKey.SUB_TYPE);
+            if (StringUtils.isNotEmpty(userSubTypeItem)) {
+              if (null == userTypeMap.get(userTypeItem)
+                  || !userTypeMap.get(userTypeItem).contains(userSubTypeItem)) {
+                ProjectCommonException.throwClientErrorException(
+                    ResponseCode.invalidParameterValue,
+                    MessageFormat.format(
+                        ResponseCode.invalidParameterValue.getErrorMessage(),
+                        new String[] {userSubTypeItem, JsonKey.USER_SUB_TYPE}));
+              }
+            }
+          });
+    } else if (null != userSubType
+        && (null == userTypeMap.get(userType)
+            || !userTypeMap.get(userType).contains(userSubType))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(

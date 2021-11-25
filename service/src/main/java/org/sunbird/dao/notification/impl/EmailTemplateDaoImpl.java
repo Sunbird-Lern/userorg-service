@@ -15,10 +15,7 @@ import org.sunbird.response.Response;
 
 public class EmailTemplateDaoImpl implements EmailTemplateDao {
 
-  static EmailTemplateDao emailTemplateDao;
-  private static final String EMAIL_TEMPLATE = "email_template";
-  private static final String DEFAULT_EMAIL_TEMPLATE_NAME = "default";
-  private static final String TEMPLATE = "template";
+  private static EmailTemplateDao emailTemplateDao;
 
   public static EmailTemplateDao getInstance() {
     if (emailTemplateDao == null) {
@@ -32,10 +29,12 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
 
     List<String> idList = new ArrayList<>();
     if (StringUtils.isBlank(templateName)) {
+      String DEFAULT_EMAIL_TEMPLATE_NAME = "default";
       idList.add(DEFAULT_EMAIL_TEMPLATE_NAME);
     } else {
       idList.add(templateName);
     }
+    String EMAIL_TEMPLATE = "email_template";
     Response response =
         getCassandraOperation()
             .getRecordsByPrimaryKeys(
@@ -46,6 +45,7 @@ public class EmailTemplateDaoImpl implements EmailTemplateDao {
     if (CollectionUtils.isNotEmpty(emailTemplateList)) {
       map = emailTemplateList.get(0);
     }
+    String TEMPLATE = "template";
     return (String) map.get(TEMPLATE);
   }
 

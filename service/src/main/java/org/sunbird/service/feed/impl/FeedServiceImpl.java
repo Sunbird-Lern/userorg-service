@@ -3,11 +3,7 @@ package org.sunbird.service.feed.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,12 +20,13 @@ import org.sunbird.service.feed.IFeedService;
 import org.sunbird.util.ProjectUtil;
 
 public class FeedServiceImpl implements IFeedService {
-  private static LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(FeedServiceImpl.class);
   private static IFeedDao iFeedDao = FeedDaoImpl.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Override
   public Response insert(Feed feed, RequestContext context) {
+
     logger.debug(context, "FeedServiceImpl:insert method called : ");
     Map<String, Object> dbMap = mapper.convertValue(feed, Map.class);
     String feedId = ProjectUtil.generateUniqueId();
@@ -105,5 +102,14 @@ public class FeedServiceImpl implements IFeedService {
     logger.debug(
         context, "FeedServiceImpl:delete method called for feedId : " + id + "user-id:" + userId);
     iFeedDao.delete(id, userId, category, context);
+  }
+
+  private Map<String, String> getHeaders(RequestContext context) {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("Accept", "application/json");
+    headers.put("Content-type", "application/json");
+    headers.put("requestId", context.getReqId());
+    ProjectUtil.setTraceIdInHeader(headers, context);
+    return headers;
   }
 }

@@ -1,19 +1,18 @@
 package org.sunbird.service.urlaction;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.dao.urlaction.UrlActionDao;
 import org.sunbird.dao.urlaction.impl.UrlActionDaoImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.urlaction.UrlAction;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class UrlActionService {
 
-  private static UrlActionDao urlActionDao = UrlActionDaoImpl.getInstance();
+  private static final UrlActionDao urlActionDao = UrlActionDaoImpl.getInstance();
 
   public static Map<String, Object> getUrlActionMap(String urlId) {
     Map<String, Object> response = new HashMap<>();

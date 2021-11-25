@@ -1,8 +1,6 @@
 package org.sunbird.actor.user;
 
 import akka.actor.ActorRef;
-import akka.dispatch.Mapper;
-import akka.pattern.Patterns;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +11,6 @@ import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
@@ -35,16 +31,14 @@ import org.sunbird.util.UserFlagUtil;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
-import scala.concurrent.Future;
 
 public class SSOUserCreateActor extends UserBaseActor {
 
-  private UserRequestValidator userRequestValidator = new UserRequestValidator();
-  private UserService userService = UserServiceImpl.getInstance();
-  private ObjectMapper mapper = new ObjectMapper();
-  private UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
-  private ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
-  private SSOUserService ssoUserService = SSOUserServiceImpl.getInstance();
+  private final UserRequestValidator userRequestValidator = new UserRequestValidator();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private final SSOUserService ssoUserService = SSOUserServiceImpl.getInstance();
 
   @Inject
   @Named("user_profile_update_actor")
@@ -161,22 +155,9 @@ public class SSOUserCreateActor extends UserBaseActor {
     if (null != resp && userMap.containsKey("sync") && (boolean) userMap.get("sync")) {
       Map<String, Object> userDetails =
           userService.getUserDetailsForES(userId, request.getRequestContext());
-      Future<Response> future =
-          esUtil
-              .save(
-                  ProjectUtil.EsType.user.getTypeName(),
-                  (String) userDetails.get(JsonKey.USER_ID),
-                  userDetails,
-                  request.getRequestContext())
-              .map(
-                  new Mapper<String, Response>() {
-                    @Override
-                    public Response apply(String parameter) {
-                      return syncResponse;
-                    }
-                  },
-                  context().dispatcher());
-      Patterns.pipe(future, getContext().dispatcher()).to(sender());
+      userService.saveUserToES(
+          (String) userDetails.get(JsonKey.USER_ID), userDetails, request.getRequestContext());
+      sender().tell(syncResponse, sender());
     } else {
       if (null != resp) {
         saveUserDetailsToEs(esResponse, request.getRequestContext());

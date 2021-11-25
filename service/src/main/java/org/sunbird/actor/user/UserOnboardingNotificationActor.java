@@ -27,7 +27,11 @@ import org.sunbird.util.user.UserActorOperations;
 
 public class UserOnboardingNotificationActor extends BaseActor {
 
-  private ResetPasswordService resetPasswordService = new ResetPasswordService();
+  private final ResetPasswordService resetPasswordService = new ResetPasswordService();
+
+  @Inject
+  @Named("email_service_actor")
+  private ActorRef emailServiceActor;
 
   @Inject
   @Named("email_service_actor")

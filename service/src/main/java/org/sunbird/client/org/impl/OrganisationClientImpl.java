@@ -34,7 +34,7 @@ import scala.concurrent.duration.Duration;
 
 public class OrganisationClientImpl implements OrganisationClient {
 
-  private static LoggerUtil logger = new LoggerUtil(OrganisationClientImpl.class);
+  private final LoggerUtil logger = new LoggerUtil(OrganisationClientImpl.class);
   public static OrganisationClient organisationClient = null;
 
   public static OrganisationClient getInstance() {

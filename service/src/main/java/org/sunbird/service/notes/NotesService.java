@@ -18,8 +18,8 @@ import org.sunbird.util.ProjectUtil;
 
 public class NotesService {
 
-  private NotesDao notesDao = NotesDaoImpl.getInstance();
-  private UserService userService = UserServiceImpl.getInstance();
+  private final NotesDao notesDao = NotesDaoImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   public Response createNote(Request request) {
     Map<String, Object> req = request.getRequest();

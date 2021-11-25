@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,10 +44,11 @@ import org.sunbird.util.user.UserUtil;
 
 public class UserUpdateActor extends UserBaseActor {
 
-  private UserRequestValidator userRequestValidator = new UserRequestValidator();
-  private ObjectMapper mapper = new ObjectMapper();
-  private UserService userService = UserServiceImpl.getInstance();
-  private UserSelfDeclarationDao userSelfDeclarationDao = UserSelfDeclarationDaoImpl.getInstance();
+  private final UserRequestValidator userRequestValidator = new UserRequestValidator();
+  private final ObjectMapper mapper = new ObjectMapper();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserSelfDeclarationDao userSelfDeclarationDao =
+      UserSelfDeclarationDaoImpl.getInstance();
 
   @Inject
   @Named("user_profile_update_actor")
@@ -69,6 +73,7 @@ public class UserUpdateActor extends UserBaseActor {
     switch (operation) {
       case "updateUser":
       case "updateUserV2":
+      case "updateUserV3":
         updateUser(request);
         break;
       default:
@@ -86,16 +91,58 @@ public class UserUpdateActor extends UserBaseActor {
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
-      populateUserTypeAndSubType(userMap);
-      populateLocationCodesFromProfileLocation(userMap);
-    } else {
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_LOCATION);
-      userMap.remove(JsonKey.PROFILE_USERTYPE);
+    } else {
+      populateLocationCodesFromProfileLocation(userMap);
     }
     validateAndGetLocationCodes(actorMessage);
-    validateUserTypeAndSubType(
-        actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
+      userMap.remove(JsonKey.PROFILE_USERTYPE);
+      validateUserTypeAndSubType(
+          actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    } else if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPES);
+      populateUserTypeAndSubType(userMap);
+      validateUserTypeAndSubType(
+          actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    } else if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.UPDATE_USER_V3.getValue())) {
+      userMap.remove(JsonKey.PROFILE_USERTYPE);
+      userMap.remove(JsonKey.USER_TYPE);
+      userMap.remove(JsonKey.USER_SUB_TYPE);
+      if (userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
+        List<Map<String, Object>> userTypeAndSubTypes =
+            (List<Map<String, Object>>) userMap.get(JsonKey.PROFILE_USERTYPES);
+
+        List<Map<String, Object>> distinctUserTypeAndSubTypes =
+            userTypeAndSubTypes
+                .stream()
+                .filter(s -> filterFunction(s))
+                .filter(
+                    distinctByValue(map -> map.get(JsonKey.TYPE) + "_" + map.get(JsonKey.SUB_TYPE)))
+                .collect(Collectors.toList());
+
+        Map<String, Object> userTypeAndSubType = distinctUserTypeAndSubTypes.get(0);
+        if (MapUtils.isNotEmpty(userTypeAndSubType)) {
+          userMap.put(JsonKey.USER_TYPE, userTypeAndSubType.get(JsonKey.TYPE));
+          userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
+        }
+        validateUserTypeAndSubType(
+            actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+        try {
+          userMap.put(
+              JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(distinctUserTypeAndSubTypes));
+        } catch (Exception ex) {
+          logger.error(actorMessage.getRequestContext(), "Exception while mapping", ex);
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
+      }
+    }
     String managedById = (String) userDbRecord.get(JsonKey.MANAGED_BY);
     if (StringUtils.isNotBlank(callerId)) {
       userService.validateUploader(actorMessage, actorMessage.getRequestContext());
@@ -237,6 +284,15 @@ public class UserUpdateActor extends UserBaseActor {
         userMap, actorMessage, (String) userMap.get(JsonKey.USER_ID), JsonKey.UPDATE);
   }
 
+  private <T> Predicate<T> distinctByValue(Function<? super T, ?> keyExtractor) {
+    Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+    return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+  }
+
+  private boolean filterFunction(Map<String, Object> map) {
+    return map.get(JsonKey.TYPE) != null;
+  }
+
   private void validateUserTypeAndSubType(
       Map<String, Object> userMap, Map<String, Object> userDbRecord, RequestContext context) {
     if (null != userMap.get(JsonKey.USER_TYPE)) {
@@ -258,10 +314,14 @@ public class UserUpdateActor extends UserBaseActor {
             String.format(
                 "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationIds));
         if (CollectionUtils.isNotEmpty(locationIds)) {
-          locations = locationClient.getLocationByIds(locationActor, locationIds, context);
+          locations = searchLocationByCodesOrIds(JsonKey.ID, locationIds, context);
         }
       } else {
-        locations = locationClient.getLocationsByCodes(locationActor, locationCodes, context);
+        logger.info(
+            context,
+            String.format(
+                "Locations for userId:%s is:%s", userMap.get(JsonKey.USER_ID), locationCodes));
+        locations = searchLocationByCodesOrIds(JsonKey.CODE, locationCodes, context);
       }
       if (CollectionUtils.isNotEmpty(locations)) {
         String stateCode = null;
@@ -284,6 +344,21 @@ public class UserUpdateActor extends UserBaseActor {
         validateUserTypeAndSubType(userMap, context, JsonKey.DEFAULT_PERSONA);
       }
     }
+  }
+
+  private List<Location> searchLocationByCodesOrIds(
+      String codeOrId, List<String> locationCodesOrIds, RequestContext context) {
+    Map<String, Object> filters = new HashMap<>();
+    Map<String, Object> searchRequestMap = new HashMap<>();
+    filters.put(codeOrId, locationCodesOrIds);
+    searchRequestMap.put(JsonKey.FILTERS, filters);
+    Response searchResponse = locationService.searchLocation(searchRequestMap, context);
+    List<Map<String, Object>> responseList =
+        (List<Map<String, Object>>) searchResponse.getResult().get(JsonKey.RESPONSE);
+    return responseList
+        .stream()
+        .map(s -> mapper.convertValue(s, Location.class))
+        .collect(Collectors.toList());
   }
 
   private void validateUserTypeAndSubType(
@@ -353,8 +428,9 @@ public class UserUpdateActor extends UserBaseActor {
               locCodeLst.add(externalIdMap.get(JsonKey.ID));
             }
           });
-      List<Location> locationIdList =
-          locationClient.getLocationByCodes(locationActor, locCodeLst, context);
+      logger.info(
+          context, "updateLocationCodeToIds : Searching location for location codes " + locCodeLst);
+      List<Location> locationIdList = searchLocationByCodesOrIds(JsonKey.CODE, locCodeLst, context);
       if (CollectionUtils.isNotEmpty(locationIdList)) {
         locationIdList.forEach(
             location ->
@@ -586,6 +662,8 @@ public class UserUpdateActor extends UserBaseActor {
     userRequest.setOperation(ActorOperations.UPDATE_USER_INFO_ELASTIC.getValue());
     userRequest.getRequest().put(JsonKey.ID, completeUserMap.get(JsonKey.ID));
     logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
-    backgroundJobManager.tell(userRequest, self());
+    if (null != backgroundJobManager) {
+      backgroundJobManager.tell(userRequest, self());
+    }
   }
 }

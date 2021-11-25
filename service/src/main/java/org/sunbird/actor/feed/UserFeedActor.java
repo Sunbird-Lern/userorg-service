@@ -17,7 +17,7 @@ import org.sunbird.util.Util;
 
 public class UserFeedActor extends BaseActor {
 
-  IFeedService feedService = FeedFactory.getInstance();
+  private final IFeedService feedService = FeedFactory.getInstance();
   ObjectMapper mapper = new ObjectMapper();
 
   @Override

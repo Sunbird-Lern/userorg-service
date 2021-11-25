@@ -61,6 +61,9 @@ public enum ResponseCode {
       ResponseMessage.Key.ERROR_ATTRIBUTE_CONFLICT,
       ResponseMessage.Message.ERROR_ATTRIBUTE_CONFLICT),
   rolesRequired(ResponseMessage.Key.ROLES_MISSING, ResponseMessage.Message.ROLES_MISSING),
+  profileUserTypesRequired(
+      ResponseMessage.Key.PROFILE_USER_TYPES_MISSING,
+      ResponseMessage.Message.PROFILE_USER_TYPES_MISSING),
   emptyRolesProvided(
       ResponseMessage.Key.EMPTY_ROLES_PROVIDED, ResponseMessage.Message.EMPTY_ROLES_PROVIDED),
   contentTypeRequiredError(

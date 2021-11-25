@@ -49,12 +49,12 @@ import org.sunbird.util.user.KafkaConfigConstants;
 import org.sunbird.util.user.UserUtil;
 
 public class UserMergeActor extends UserBaseActor {
-  String topic = null;
-  Producer<String, String> producer = null;
-  ObjectMapper objectMapper = new ObjectMapper();
-  private UserService userService = UserServiceImpl.getInstance();
-  private SSOManager keyCloakService = SSOServiceFactory.getInstance();
-  private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
+  private String topic = null;
+  private Producer<String, String> producer = null;
+  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final SSOManager keyCloakService = SSOServiceFactory.getInstance();
+  private final SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
 
   @Inject
   @Named("system_settings_actor")
@@ -269,11 +269,12 @@ public class UserMergeActor extends UserBaseActor {
     String sourceUserAuthToken = (String) headers.get(JsonKey.X_SOURCE_USER_TOKEN);
     String subDomainUrl = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SUBDOMAIN_KEYCLOAK_BASE_URL);
     logger.info(context, "UserMergeActor:checkTokenDetails sub domain url value " + subDomainUrl);
-    String userId = AccessTokenValidator.verifyUserToken(userAuthToken);
+    String userId = AccessTokenValidator.verifyUserToken(userAuthToken, new HashMap<>());
     // Since source token is generated from subdomain , so verification also need with
     // same subdomain.
     String sourceUserId =
-        AccessTokenValidator.verifySourceUserToken(sourceUserAuthToken, subDomainUrl);
+        AccessTokenValidator.verifySourceUserToken(
+            sourceUserAuthToken, subDomainUrl, context.getContextMap());
     if (!(mergeeId.equals(sourceUserId) && mergerId.equals(userId))) {
       throw new ProjectCommonException(
           ResponseCode.unAuthorized.getErrorCode(),

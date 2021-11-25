@@ -9,7 +9,7 @@ import org.sunbird.util.ProjectUtil;
 
 /** @author Manzarul All the scheduler job will be handle by this class. */
 public class SchedulerManager {
-  private static LoggerUtil logger = new LoggerUtil(SchedulerManager.class);
+  private static final LoggerUtil logger = new LoggerUtil(SchedulerManager.class);
 
   private static final int TTL =
       Integer.parseInt(ProjectUtil.getConfigValue("learner_in_memory_cache_ttl"));

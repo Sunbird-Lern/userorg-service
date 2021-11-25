@@ -12,7 +12,8 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
 
   enum CONSENT_STATUS {
     ACTIVE,
-    REVOKED;
+    REVOKED,
+    DELETED;
   }
   /**
    * This method will validate the mandatory param in the read request.

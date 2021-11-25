@@ -16,7 +16,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.util.PropertiesCache;
 
 public class FuzzyMatcher {
-  private static LoggerUtil logger = new LoggerUtil(FuzzyMatcher.class);
+  private static final LoggerUtil logger = new LoggerUtil(FuzzyMatcher.class);
 
   private static final String nameToBeMatchedId = "0";
   private static final String ENCODING = "UTF-8";

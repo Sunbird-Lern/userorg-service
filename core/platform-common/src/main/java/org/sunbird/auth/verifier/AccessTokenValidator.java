@@ -11,12 +11,13 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 
 public class AccessTokenValidator {
-  private static LoggerUtil logger = new LoggerUtil(AccessTokenValidator.class);
-  private static ObjectMapper mapper = new ObjectMapper();
-  private static String sso_url = System.getenv(JsonKey.SUNBIRD_SSO_URL);
-  private static String realm = System.getenv(JsonKey.SUNBIRD_SSO_RELAM);
+  private static final LoggerUtil logger = new LoggerUtil(AccessTokenValidator.class);
+  private static final ObjectMapper mapper = new ObjectMapper();
+  private static final String sso_url = System.getenv(JsonKey.SUNBIRD_SSO_URL);
+  private static final String realm = System.getenv(JsonKey.SUNBIRD_SSO_RELAM);
 
-  private static Map<String, Object> validateToken(String token) throws JsonProcessingException {
+  private static Map<String, Object> validateToken(String token, Map<String, Object> requestContext)
+      throws JsonProcessingException {
     String[] tokenElements = token.split("\\.");
     String header = tokenElements[0];
     String body = tokenElements[1];
@@ -30,12 +31,14 @@ public class AccessTokenValidator {
             payLoad,
             decodeFromBase64(signature),
             KeyManager.getPublicKey(keyId).getPublicKey(),
-            JsonKey.SHA_256_WITH_RSA);
+            JsonKey.SHA_256_WITH_RSA,
+            requestContext);
     if (isValid) {
       Map<String, Object> tokenBody =
           mapper.readValue(new String(decodeFromBase64(body)), Map.class);
       boolean isExp = isExpired((Integer) tokenBody.get("exp"));
       if (isExp) {
+        logger.info("Token is expired " + token + ", request context data :" + requestContext);
         return Collections.EMPTY_MAP;
       }
       return tokenBody;
@@ -53,10 +56,13 @@ public class AccessTokenValidator {
    * @return
    */
   public static String verifyManagedUserToken(
-      String managedEncToken, String requestedByUserId, String requestedForUserId) {
+      String managedEncToken,
+      String requestedByUserId,
+      String requestedForUserId,
+      Map<String, Object> requestContext) {
     String managedFor = JsonKey.UNAUTHORIZED;
     try {
-      Map<String, Object> payload = validateToken(managedEncToken);
+      Map<String, Object> payload = validateToken(managedEncToken, requestContext);
       if (MapUtils.isNotEmpty(payload)) {
         String parentId = (String) payload.get(JsonKey.PARENT_ID);
         String muaId = (String) payload.get(JsonKey.SUB);
@@ -68,7 +74,9 @@ public class AccessTokenValidator {
                 + " requestedByUserID: "
                 + requestedByUserId
                 + " requestedForUserId: "
-                + requestedForUserId);
+                + requestedForUserId
+                + " request context data : "
+                + requestContext);
         boolean isValid =
             parentId.equalsIgnoreCase(requestedByUserId)
                 && muaId.equalsIgnoreCase(requestedForUserId);
@@ -77,17 +85,25 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyManagedUserToken: Token : " + managedEncToken, ex);
+      logger.error(
+          "Exception in verifyManagedUserToken: Token : "
+              + managedEncToken
+              + ", request context data :"
+              + requestContext,
+          ex);
     }
     return managedFor;
   }
 
-  public static String verifyUserToken(String token) {
+  public static String verifyUserToken(String token, Map<String, Object> requestContext) {
     String userId = JsonKey.UNAUTHORIZED;
     try {
-      Map<String, Object> payload = validateToken(token);
-
-      logger.info("learner access token validateToken() :" + payload.toString());
+      Map<String, Object> payload = validateToken(token, requestContext);
+      logger.debug(
+          "learner access token validateToken() :"
+              + payload.toString()
+              + ", request context data : "
+              + requestContext);
       if (MapUtils.isNotEmpty(payload) && checkIss((String) payload.get("iss"))) {
         userId = (String) payload.get(JsonKey.SUB);
         if (StringUtils.isNotBlank(userId)) {
@@ -96,20 +112,33 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifyUserAccessToken: Token : " + token, ex);
+      logger.error(
+          "Exception in verifyUserAccessToken: Token : "
+              + token
+              + ", request context data : "
+              + requestContext,
+          ex);
     }
     if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
-      logger.info("verifyUserAccessToken: Invalid User Token: " + token);
+      logger.info(
+          "verifyUserAccessToken: Invalid User Token: "
+              + token
+              + ", request context data : "
+              + requestContext);
     }
     return userId;
   }
 
-  public static String verifySourceUserToken(String token, String url) {
+  public static String verifySourceUserToken(
+      String token, String url, Map<String, Object> requestContext) {
     String userId = JsonKey.UNAUTHORIZED;
     try {
-      Map<String, Object> payload = validateToken(token);
-
-      logger.info("learner source access token validateToken() :" + payload.toString());
+      Map<String, Object> payload = validateToken(token, requestContext);
+      logger.debug(
+          "learner source access token validateToken() :"
+              + payload.toString()
+              + ", request context data : "
+              + requestContext);
       if (MapUtils.isNotEmpty(payload) && checkSourceIss((String) payload.get("iss"), url)) {
         userId = (String) payload.get(JsonKey.SUB);
         if (StringUtils.isNotBlank(userId)) {
@@ -118,10 +147,19 @@ public class AccessTokenValidator {
         }
       }
     } catch (Exception ex) {
-      logger.error("Exception in verifySourceUserToken: Token : " + token, ex);
+      logger.error(
+          "Exception in verifySourceUserToken: Token : "
+              + token
+              + ", request context data : "
+              + requestContext,
+          ex);
     }
     if (JsonKey.UNAUTHORIZED.equalsIgnoreCase(userId)) {
-      logger.info("verifySourceUserToken: Invalid source user Token: " + token);
+      logger.info(
+          "verifySourceUserToken: Invalid source user Token: "
+              + token
+              + ", request context data : "
+              + requestContext);
     }
     return userId;
   }

@@ -12,8 +12,8 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.response.Response;
 
 public class SmsTemplateUtil {
-  private static LoggerUtil logger = new LoggerUtil(SmsTemplateUtil.class);
-  private static CassandraOperation cassandraOperation = ServiceFactory.getInstance();
+  private static final LoggerUtil logger = new LoggerUtil(SmsTemplateUtil.class);
+  private static final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
 
   public static Map<String, Map<String, String>> getSmsTemplateConfigMap() {
     Response response =

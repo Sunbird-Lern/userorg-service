@@ -11,7 +11,7 @@ import org.sunbird.util.PropertiesCache;
 
 public class SendgridConnection {
 
-  public LoggerUtil logger = new LoggerUtil(SendgridConnection.class);
+  public final LoggerUtil logger = new LoggerUtil(SendgridConnection.class);
 
   private Properties props = null;
   private String host;

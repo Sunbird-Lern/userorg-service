@@ -7,7 +7,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 
 public abstract class BaseActor extends UntypedAbstractActor {
-  public LoggerUtil logger = new LoggerUtil(this.getClass());
+  public final LoggerUtil logger = new LoggerUtil(this.getClass());
 
   public abstract void onReceive(Request request) throws Throwable;
 
