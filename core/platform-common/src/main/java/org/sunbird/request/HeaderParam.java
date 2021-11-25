@@ -34,6 +34,8 @@ public enum HeaderParam {
   X_REQUEST_ID("x-request-id"),
   X_TRACE_ENABLED("x-trace-enabled"),
   X_APP_VERSION("x-app-ver"),
+  X_APP_VERSION_PORTAL("x-app-version"),
+  X_SOURCE("x-source"),
   X_Response_Length("x-response-length");
   /** name of the parameter */
   private String name;

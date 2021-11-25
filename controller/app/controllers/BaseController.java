@@ -58,9 +58,9 @@ import util.Common;
  */
 public class BaseController extends Controller {
 
-  private static LoggerUtil logger = new LoggerUtil(BaseController.class);
+  private static final LoggerUtil logger = new LoggerUtil(BaseController.class);
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
   public static final int AKKA_WAIT_TIME = 30;
   private static final String version = "v1";
   protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
@@ -838,32 +838,34 @@ public class BaseController extends Controller {
   public void setContextData(Http.Request httpReq, org.sunbird.request.Request reqObj) {
     try {
       String context = Common.getFromRequest(httpReq, Attrs.CONTEXT);
-      logger.info("Request Context Info : " + context);
       Map<String, Object> requestInfo = objectMapper.readValue(context, new TypeReference<>() {});
       reqObj.setRequestId(Common.getFromRequest(httpReq, Attrs.X_REQUEST_ID));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.CONTEXT));
       reqObj.getContext().putAll((Map<String, Object>) requestInfo.get(JsonKey.ADDITIONAL_INFO));
-      reqObj.setRequestContext(
-          getRequestContext(
-              (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT), reqObj.getOperation()));
+      reqObj.setRequestContext(getRequestContext(requestInfo, reqObj.getOperation()));
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
   }
 
-  private RequestContext getRequestContext(Map<String, Object> context, String actorOperation) {
-    return new RequestContext(
-        (String) context.get(JsonKey.ACTOR_ID),
-        (String) context.get(JsonKey.DEVICE_ID),
-        (String) context.get(JsonKey.X_Session_ID),
-        (String) context.get(JsonKey.APP_ID),
-        (String) context.get(JsonKey.X_APP_VERSION),
-        (String) context.get(JsonKey.X_REQUEST_ID),
-        (String)
-            ((context.get(JsonKey.X_TRACE_ENABLED) != null)
-                ? context.get(JsonKey.X_TRACE_ENABLED)
-                : debugEnabled),
-        actorOperation);
+  private RequestContext getRequestContext(Map<String, Object> requestInfo, String actorOperation) {
+    Map<String, Object> context = (Map<String, Object>) requestInfo.get(JsonKey.CONTEXT);
+    RequestContext requestContext =
+        new RequestContext(
+            (String) context.get(JsonKey.ACTOR_ID),
+            (String) context.get(JsonKey.DEVICE_ID),
+            (String) context.get(JsonKey.X_Session_ID),
+            (String) context.get(JsonKey.APP_ID),
+            (String) context.get(JsonKey.X_APP_VERSION),
+            (String) context.get(JsonKey.X_REQUEST_ID),
+            (String) context.get(JsonKey.X_Source),
+            (String)
+                ((context.get(JsonKey.X_TRACE_ENABLED) != null)
+                    ? context.get(JsonKey.X_TRACE_ENABLED)
+                    : debugEnabled),
+            actorOperation);
+    requestContext.setTelemetryContext(requestInfo);
+    return requestContext;
   }
 
   public Map<String, String> getAllRequestHeaders(Request request) {

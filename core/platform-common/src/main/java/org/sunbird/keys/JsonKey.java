@@ -358,6 +358,7 @@ public final class JsonKey {
   public static final String SET_PW_LINK = "setPasswordLink";
   public static final String SUNBIRD_URL_SHORTNER_ENABLE = "sunbird_url_shortner_enable";
   public static final String USER_PROFILE_CONFIG = "userProfileConfig";
+  public static final String PROFILE_USERTYPES = "profileUserTypes";
   public static final String PROFILE_USERTYPE = "profileUserType";
   public static final String PROFILE_LOCATION = "profileLocation";
   public static final String BATCH_START_DATE = "batchStartDate";
@@ -471,7 +472,7 @@ public final class JsonKey {
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
   public static final String TEMPLATE_OPTIONS = "templateOptions";
-  public static final String TEMPLATE_ID_VALUE = "resetPasswordWithOtp";
+  public static final String RESET_PASSWORD_TEMPLATE_ID = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
   public static final String VERSION_4 = "v4";
   public static final String WARD_LOGIN_OTP_TEMPLATE_ID = "wardLoginOTP";
@@ -479,7 +480,7 @@ public final class JsonKey {
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
   public static final String LIMIT_MANAGED_USER_CREATION = "limit_managed_user_creation";
   public static final String MANAGED_USER_LIMIT = "managed_user_limit";
-  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken.publickey.basepath";
+  public static final String ACCESS_TOKEN_PUBLICKEY_BASEPATH = "accesstoken_publickey_basepath";
   public static final String SHA_256_WITH_RSA = "SHA256withRSA";
   public static final String SUB = "sub";
   public static final String DOT_SEPARATOR = ".";
@@ -536,6 +537,8 @@ public final class JsonKey {
   public static final String CONSENT_OBJECTID = "objectId";
   public static final String CONSENT_CONSUMERTYPE = "consumerType";
   public static final String CONSENT_OBJECTTYPE = "objectType";
+  public static final String CONSENT_OBJECTTYPE_ORG = "Organisation";
+  public static final String CONSENT_STATUS_REVOKED = "REVOKED";
   // user consent req-response attributes listing - ended
   // user consent table columns listing - started
   public static final String CONSENT_CONSUMER_ID = "consumer_id";
@@ -593,6 +596,16 @@ public final class JsonKey {
   public static final String NIC = "NIC";
   public static final String SMS_GATEWAY_PROVIDER = "sms_gateway_provider";
   public static final String WELCOME_SMS_TEMPLATE = "welcomeSmsTemplate";
+  public static final String IDS = "ids";
+  public static final String NOTIFICATIONS = "notifications";
+  public static final String FEEDS = "feeds";
+  public static final String EMAIL_VERIFICATION_SUBJECT = "OTP to verify Email";
+  public static final String CONTACT_UPDATE_TEMPLATE_ID = "otpContactUpdateTemplate";
+  public static final String OTP_CONTACT_UPDATE_TEMPLATE_EMAIL = "otpContactUpdateTemplateEmail";
+  public static final String OTP_CONTACT_UPDATE_TEMPLATE_SMS = "otpContactUpdateTemplateSms";
+  public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
+      "OTP to edit Diksha Profile";
+  public static final String X_Source = "x-source";
 
   private JsonKey() {}
 }

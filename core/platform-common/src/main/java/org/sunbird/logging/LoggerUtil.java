@@ -1,5 +1,6 @@
 package org.sunbird.logging;
 
+import java.util.HashMap;
 import java.util.Map;
 import net.logstash.logback.marker.Markers;
 import org.apache.commons.lang3.StringUtils;
@@ -34,11 +35,14 @@ public class LoggerUtil {
   }
 
   public void error(RequestContext requestContext, String message, Throwable e) {
-    if (null != requestContext) {
-      logger.error(Markers.appendEntries(requestContext.getContextMap()), message, e);
-    } else {
-      logger.error(message, e);
-    }
+    Map<String, Object> context =
+        (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
+    Map<String, Object> params = new HashMap<>();
+    params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
+    Map<String, Object> telemetryInfo = new HashMap<>();
+    telemetryInfo.put(JsonKey.CONTEXT, context);
+    telemetryInfo.put(JsonKey.PARAMS, params);
+    error(requestContext, message, e, telemetryInfo);
   }
 
   public void error(String message, Throwable e) {
@@ -50,12 +54,8 @@ public class LoggerUtil {
       String message,
       Throwable e,
       Map<String, Object> telemetryInfo) {
-    if (null != requestContext) {
-      logger.error(Markers.appendEntries(requestContext.getContextMap()), message, e);
-    } else {
-      logger.error(message, e);
-    }
-    telemetryProcess(requestContext, telemetryInfo, e);
+
+    telemetryProcess(requestContext, telemetryInfo, e, message);
   }
 
   public void warn(RequestContext requestContext, String message, Throwable e) {
@@ -84,7 +84,10 @@ public class LoggerUtil {
   }
 
   private void telemetryProcess(
-      RequestContext requestContext, Map<String, Object> telemetryInfo, Throwable e) {
+      RequestContext requestContext,
+      Map<String, Object> telemetryInfo,
+      Throwable e,
+      String message) {
     ProjectCommonException projectCommonException = null;
     if (e instanceof ProjectCommonException) {
       projectCommonException = (ProjectCommonException) e;
@@ -101,13 +104,13 @@ public class LoggerUtil {
 
     Map<String, Object> params = (Map<String, Object>) telemetryInfo.get(JsonKey.PARAMS);
     params.put(JsonKey.ERROR, projectCommonException.getCode());
-    params.put(JsonKey.STACKTRACE, generateStackTrace(e.getStackTrace()));
+    params.put(JsonKey.STACKTRACE, generateStackTrace(e.getStackTrace(), message));
     request.setRequest(telemetryInfo);
     TelemetryWriter.write(request);
   }
 
-  private String generateStackTrace(StackTraceElement[] elements) {
-    StringBuilder builder = new StringBuilder("");
+  private String generateStackTrace(StackTraceElement[] elements, String errMsg) {
+    StringBuilder builder = new StringBuilder(errMsg + " ");
     for (StackTraceElement element : elements) {
       builder.append(element.toString());
     }

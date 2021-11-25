@@ -3,6 +3,13 @@ package modules;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseController;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -19,29 +26,21 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 import util.Attrs;
-import util.Common;
 import util.RequestInterceptor;
-
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.WeakHashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 public class OnRequestHandler implements ActionCreator {
 
-  private static LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
-  private ObjectMapper mapper = new ObjectMapper();
+  private static final LoggerUtil logger = new LoggerUtil(OnRequestHandler.class);
+  private final ObjectMapper mapper = new ObjectMapper();
   public static boolean isServiceHealthy = true;
 
   @Override
   public Action createAction(Http.Request request, Method method) {
-    Optional<String> optionalMessageId = request.header(JsonKey.MESSAGE_ID);
     String requestId;
-    if (optionalMessageId.isPresent()) {
-      requestId = optionalMessageId.get();
+    if (request.header(HeaderParam.X_REQUEST_ID.getName()).isPresent()) {
+      requestId = request.header(HeaderParam.X_REQUEST_ID.getName()).get();
+    } else if (request.header(JsonKey.MESSAGE_ID).isPresent()) {
+      requestId = request.header(JsonKey.MESSAGE_ID).get();
     } else {
       UUID uuid = UUID.randomUUID();
       requestId = uuid.toString();
@@ -54,16 +53,24 @@ public class OnRequestHandler implements ActionCreator {
         request.getHeaders();
         CompletionStage<Result> result = checkForServiceHealth(request);
         if (result != null) return result;
+        // call method to set all the required params for the telemetry event(log)...
+        Map<String, Object> requestContext = getRequestContext(request);
+        request = updateRequestId(request, requestContext, requestId);
         // From 3.0.0 checking user access-token and managed-by from the request header
-        Map userAuthentication = RequestInterceptor.verifyRequestData(request);
+        Map userAuthentication = RequestInterceptor.verifyRequestData(request, requestContext);
         String message = (String) userAuthentication.get(JsonKey.USER_ID);
+        updateActorIdAndType(requestContext, request, message);
+        try {
+          request = request.addAttr(Attrs.CONTEXT, mapper.writeValueAsString(requestContext));
+        } catch (Exception e) {
+          logger.error("Exception while parsing request context.", e);
+          ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+        }
         if (userAuthentication.get(JsonKey.MANAGED_FOR) != null) {
           request =
               request.addAttr(
                   Attrs.MANAGED_FOR, (String) userAuthentication.get(JsonKey.MANAGED_FOR));
         }
-        // call method to set all the required params for the telemetry event(log)...
-        request = initializeRequestInfo(request, message, requestId);
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
           request = request.addAttr(Attrs.USER_ID, message);
           request = request.addAttr(Attrs.IS_AUTH_REQ, "false");
@@ -75,14 +82,46 @@ public class OnRequestHandler implements ActionCreator {
           }
           result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
-          result =
-              onDataValidationError(request, message, ResponseCode.UNAUTHORIZED.getResponseCode());
+          result = onDataValidationError(request, ResponseCode.UNAUTHORIZED.getResponseCode());
         } else {
           result = delegate.call(request);
         }
         return result.thenApply(res -> res.withHeader("Access-Control-Allow-Origin", "*"));
       }
     };
+  }
+
+  private void updateActorIdAndType(
+      Map<String, Object> reqContext, Http.Request request, String userId) {
+    if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.ACTOR_ID, userId);
+      ((Map) reqContext.get(JsonKey.CONTEXT))
+          .put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
+    } else {
+      Optional<String> optionalConsumerId = request.header(HeaderParam.X_Consumer_ID.getName());
+      String consumerId;
+      if (optionalConsumerId.isPresent()) {
+        consumerId = optionalConsumerId.get();
+      } else {
+        consumerId = JsonKey.DEFAULT_CONSUMER_ID;
+      }
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.ACTOR_ID, consumerId);
+      ((Map) reqContext.get(JsonKey.CONTEXT))
+          .put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.CONSUMER));
+    }
+  }
+
+  private Http.Request updateRequestId(
+      Http.Request request, Map<String, Object> reqContext, String requestId) {
+    Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
+    if (optionalTraceId.isPresent()) {
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
+      request = request.addAttr(Attrs.X_REQUEST_ID, optionalTraceId.get());
+    } else {
+      request = request.addAttr(Attrs.X_REQUEST_ID, requestId);
+      ((Map) reqContext.get(JsonKey.CONTEXT)).put(JsonKey.X_REQUEST_ID, requestId);
+    }
+    return request;
   }
 
   public CompletionStage<Result> checkForServiceHealth(Http.Request request) {
@@ -103,18 +142,17 @@ public class OnRequestHandler implements ActionCreator {
    * send some key in header.
    *
    * @param request Request
-   * @param errorMessage String
    * @return CompletionStage<Result>
    */
-  public CompletionStage<Result> onDataValidationError(
-      Http.Request request, String errorMessage, int responseCode) {
-    String context = Common.getFromRequest(request, Attrs.CONTEXT);
-    logger.info("onDataValidationError: Data error found with context info : "+context +" , Error Msg: " + errorMessage);
-    Response resp = BaseController.createFailureResponse(request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
+  public CompletionStage<Result> onDataValidationError(Http.Request request, int responseCode) {
+    Response resp =
+        BaseController.createFailureResponse(
+            request, ResponseCode.unAuthorized, ResponseCode.UNAUTHORIZED);
     return CompletableFuture.completedFuture(Results.status(responseCode, Json.toJson(resp)));
   }
 
-  private Http.Request initializeRequestInfo(Http.Request request, String userId, String requestId) {
+  private Map<String, Object> getRequestContext(Http.Request request) {
+    Map<String, Object> requestContext = new HashMap<>();
     try {
       String actionMethod = request.method();
       String url = request.uri();
@@ -163,50 +201,33 @@ public class OnRequestHandler implements ActionCreator {
         reqContext.put(JsonKey.X_Session_ID, optionalSessionId.get());
       }
 
-      Optional<String> optionalAppVersion = request.header(HeaderParam.X_APP_VERSION.getName());
-      if (optionalAppVersion.isPresent()) {
-        reqContext.put(JsonKey.X_APP_VERSION, optionalAppVersion.get());
+      Optional<String> optionalSource = request.header(HeaderParam.X_SOURCE.getName());
+      if (optionalSource.isPresent()) {
+        reqContext.put(JsonKey.X_Source, optionalSource.get());
+      }
+
+      if (request.header(HeaderParam.X_APP_VERSION.getName()).isPresent()) {
+        reqContext.put(
+            JsonKey.X_APP_VERSION, request.header(HeaderParam.X_APP_VERSION.getName()).get());
+      } else if (request.header(HeaderParam.X_APP_VERSION_PORTAL.getName()).isPresent()) {
+        reqContext.put(
+            JsonKey.X_APP_VERSION,
+            request.header(HeaderParam.X_APP_VERSION_PORTAL.getName()).get());
       }
 
       Optional<String> optionalTraceEnabled = request.header(HeaderParam.X_TRACE_ENABLED.getName());
       if (optionalTraceEnabled.isPresent()) {
         reqContext.put(JsonKey.X_TRACE_ENABLED, optionalTraceEnabled.get());
       }
-
-      Optional<String> optionalTraceId = request.header(HeaderParam.X_REQUEST_ID.getName());
-      if (optionalTraceId.isPresent()) {
-        reqContext.put(JsonKey.X_REQUEST_ID, optionalTraceId.get());
-        request = request.addAttr(Attrs.X_REQUEST_ID, optionalTraceId.get());
-      } else {
-        request = request.addAttr(Attrs.X_REQUEST_ID, requestId);
-        reqContext.put(JsonKey.X_REQUEST_ID, requestId);
-      }
-      if (!JsonKey.USER_UNAUTH_STATES.contains(userId)) {
-        reqContext.put(JsonKey.ACTOR_ID, userId);
-        reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.USER));
-      } else {
-        Optional<String> optionalConsumerId = request.header(HeaderParam.X_Consumer_ID.getName());
-        String consumerId;
-        if (optionalConsumerId.isPresent()) {
-          consumerId = optionalConsumerId.get();
-        } else {
-          consumerId = JsonKey.DEFAULT_CONSUMER_ID;
-        }
-        reqContext.put(JsonKey.ACTOR_ID, consumerId);
-        reqContext.put(JsonKey.ACTOR_TYPE, StringUtils.capitalize(JsonKey.CONSUMER));
-      }
-      Map<String, Object> map = new WeakHashMap<>();
-      map.put(JsonKey.CONTEXT, reqContext);
-      Map<String, Object> additionalInfo = new WeakHashMap<>();
+      requestContext.put(JsonKey.CONTEXT, reqContext);
+      Map<String, Object> additionalInfo = new HashMap<>();
       additionalInfo.put(JsonKey.URL, url);
       additionalInfo.put(JsonKey.METHOD, methodName);
-      map.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
-
-      request = request.addAttr(Attrs.CONTEXT, mapper.writeValueAsString(map));
+      requestContext.put(JsonKey.ADDITIONAL_INFO, additionalInfo);
     } catch (Exception ex) {
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
-    return request;
+    return requestContext;
   }
 
   private String getEnv(Http.Request request) {
