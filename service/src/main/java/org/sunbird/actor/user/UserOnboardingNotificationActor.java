@@ -33,10 +33,6 @@ public class UserOnboardingNotificationActor extends BaseActor {
   @Named("email_service_actor")
   private ActorRef emailServiceActor;
 
-  @Inject
-  @Named("email_service_actor")
-  private ActorRef emailServiceActor;
-
   @Override
   public void onReceive(Request request) throws Throwable {
     if ((UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS

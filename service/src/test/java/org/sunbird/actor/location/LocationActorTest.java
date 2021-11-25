@@ -98,12 +98,6 @@ public class LocationActorTest {
   }
 
   @Test
-  public void testDeleteLocationSuccess() {
-    boolean result = testScenario(LocationActorOperation.DELETE_LOCATION, true, data, null);
-    assertTrue(result);
-  }
-
-  @Test
   public void testCreateLocationSuccess() {
     Map<String, Object> res = new HashMap<>(data);
     res.remove(JsonKey.PARENT_CODE);

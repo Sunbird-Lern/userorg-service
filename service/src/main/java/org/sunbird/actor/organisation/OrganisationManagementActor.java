@@ -39,10 +39,6 @@ public class OrganisationManagementActor extends BaseActor {
   @Named("org_background_actor")
   private ActorRef organisationBackgroundActor;
 
-  @Inject
-  @Named("org_background_actor")
-  private ActorRef organisationBackgroundActor;
-
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.ORGANISATION);

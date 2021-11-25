@@ -17,16 +17,6 @@ public abstract class BaseActor extends UntypedAbstractActor {
       Request request = (Request) message;
       String operation = request.getOperation();
       try {
-        logger.info(
-            request.getRequestContext(),
-            "Actor Info: Dispatcher : "
-                + context().dispatcher().toString()
-                + " , Parent Actor : "
-                + context().parent().toString()
-                + " , Self Actor : "
-                + context().self().toString()
-                + " , called for operation: "
-                + operation);
         onReceive(request);
       } catch (Exception e) {
         logger.error(

@@ -164,53 +164,6 @@ public class UserSelfDeclarationServiceImpl implements UserSelfDeclarationServic
     return declaredFields;
   }
 
-  public Response updateSelfDeclaration(
-      Map<String, Object> updateFieldsMap,
-      Map<String, Object> compositeKey,
-      RequestContext context) {
-    return userSelfDeclarationDao.updateUserSelfDeclaredFields(
-        updateFieldsMap, compositeKey, context);
-  }
-
-  @Override
-  public List<Map<String, Object>> fetchUserDeclarations(String userId, RequestContext context) {
-    List<Map<String, Object>> finalRes = new ArrayList<>();
-    List<Map<String, Object>> resExternalIds =
-        userSelfDeclarationDao.getUserSelfDeclaredFields(userId, context);
-    if (CollectionUtils.isNotEmpty(resExternalIds)) {
-      resExternalIds.forEach(
-          item -> {
-            Map<String, Object> declaration = new HashMap<>();
-            Map<String, String> declaredFields = (Map<String, String>) item.get(JsonKey.USER_INFO);
-            if (MapUtils.isNotEmpty(declaredFields)) {
-              decryptDeclarationFields(declaredFields, context);
-            }
-            declaration.put(JsonKey.STATUS, item.get(JsonKey.STATUS));
-            declaration.put(JsonKey.ERROR_TYPE, item.get(JsonKey.ERROR_TYPE));
-            declaration.put(JsonKey.ORG_ID, item.get(JsonKey.ORG_ID));
-            declaration.put(JsonKey.PERSONA, item.get(JsonKey.PERSONA));
-            declaration.put(JsonKey.INFO, declaredFields);
-            finalRes.add(declaration);
-          });
-    }
-    return finalRes;
-  }
-
-  private Map<String, String> decryptDeclarationFields(
-      Map<String, String> declaredFields, RequestContext context) {
-    if (declaredFields.containsKey(JsonKey.DECLARED_EMAIL)) {
-      declaredFields.put(
-          JsonKey.DECLARED_EMAIL,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_EMAIL), context));
-    }
-    if (declaredFields.containsKey(JsonKey.DECLARED_PHONE)) {
-      declaredFields.put(
-          JsonKey.DECLARED_PHONE,
-          UserUtil.getDecryptedData(declaredFields.get(JsonKey.DECLARED_PHONE), context));
-    }
-    return declaredFields;
-  }
-
   private void addUserSelfDeclaredDetails(
       UserDeclareEntity userDeclareEntity, RequestContext context) {
     List<Map<String, Object>> dbSelfDeclaredResults =
