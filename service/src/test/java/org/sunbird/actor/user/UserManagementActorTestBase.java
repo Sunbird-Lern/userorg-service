@@ -22,8 +22,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.location.LocationClient;
-import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.client.org.OrganisationClient;
 import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
@@ -71,7 +69,6 @@ import scala.concurrent.Promise;
   OrgService.class,
   UserUtil.class,
   Patterns.class,
-  LocationClientImpl.class,
   DataCacheHandler.class,
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
@@ -105,7 +102,6 @@ public abstract class UserManagementActorTestBase {
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
   protected static OrganisationClient organisationClient;
-  public LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static UserRoleServiceImpl userRoleService;
 
@@ -147,15 +143,6 @@ public abstract class UserManagementActorTestBase {
             Mockito.any()))
         .thenReturn(new HashMap<>());
 
-    PowerMockito.mockStatic(LocationClientImpl.class);
-    locationClient = mock(LocationClientImpl.class);
-    when(LocationClientImpl.getInstance()).thenReturn(locationClient);
-    when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationLists());
-    when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationIdLists());
-    when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
     PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("locationCode1"), Mockito.any()))
         .thenReturn(getFormApiConfig());
