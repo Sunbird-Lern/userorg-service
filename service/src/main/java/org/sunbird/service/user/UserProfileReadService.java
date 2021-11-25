@@ -77,7 +77,7 @@ public class UserProfileReadService {
             || readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue()))) {
       Util.getOrgDefaultValue().keySet().forEach(rootOrg::remove);
       Util.getUserDefaultValue().keySet().forEach(result::remove);
-    }else{
+    } else {
       result.putAll(Util.getUserDefaultValue());
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
@@ -175,14 +175,14 @@ public class UserProfileReadService {
     try {
       if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPES))) {
         userTypeDetailsList =
-                mapper.readValue(
-                        (String) result.get(JsonKey.PROFILE_USERTYPES), new TypeReference<>() {});
+            mapper.readValue(
+                (String) result.get(JsonKey.PROFILE_USERTYPES), new TypeReference<>() {});
       }
     } catch (Exception e) {
       logger.error(
-              actorMessage.getRequestContext(),
-              "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPES),
-              e);
+          actorMessage.getRequestContext(),
+          "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPES),
+          e);
     }
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {
