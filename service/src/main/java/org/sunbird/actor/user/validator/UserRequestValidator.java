@@ -1,7 +1,10 @@
 package org.sunbird.actor.user.validator;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
@@ -431,43 +434,46 @@ public class UserRequestValidator extends BaseRequestValidator {
             ERROR_CODE);
       }
     }
-    if (userRequest
-            .getOperation()
-            .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue()) || userRequest
-            .getOperation()
-            .equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
-      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)){
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,JsonKey.PROFILE_USERTYPES);
+    if (userRequest.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())
+        || userRequest.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter, JsonKey.PROFILE_USERTYPES);
       }
-    }else{
-      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPE)){
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,JsonKey.PROFILE_USERTYPE);
+    } else {
+      if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPE)) {
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter, JsonKey.PROFILE_USERTYPE);
       }
     }
     if (userRequest.getRequest().containsKey(JsonKey.PROFILE_USERTYPES)
-            && null != userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES)) {
-      if (userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List){
+        && null != userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES)) {
+      if (userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List) {
         List profileusertypes = (List) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
         if (CollectionUtils.isEmpty(profileusertypes)) {
           ProjectCommonException.throwClientErrorException(ResponseCode.profileUserTypesRequired);
-        }else {
+        } else {
           try {
             List<Map<String, String>> profUserTypeList =
-                    (List<Map<String, String>>) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
-          }catch (ClassCastException e) {
+                (List<Map<String, String>>) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
+          } catch (ClassCastException e) {
             throw new ProjectCommonException(
-                    ResponseCode.dataTypeError.getErrorCode(),
-                    ProjectUtil.formatMessage(
-                            ResponseCode.dataTypeError.getErrorMessage(), JsonKey.PROFILE_USERTYPES, JsonKey.LIST),
-                    ERROR_CODE);
+                ResponseCode.dataTypeError.getErrorCode(),
+                ProjectUtil.formatMessage(
+                    ResponseCode.dataTypeError.getErrorMessage(),
+                    JsonKey.PROFILE_USERTYPES,
+                    JsonKey.LIST),
+                ERROR_CODE);
           }
         }
       } else if (!(userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List)) {
         throw new ProjectCommonException(
-                ResponseCode.dataTypeError.getErrorCode(),
-                ProjectUtil.formatMessage(
-                        ResponseCode.dataTypeError.getErrorMessage(), JsonKey.PROFILE_USERTYPES, JsonKey.LIST),
-                ERROR_CODE);
+            ResponseCode.dataTypeError.getErrorCode(),
+            ProjectUtil.formatMessage(
+                ResponseCode.dataTypeError.getErrorMessage(),
+                JsonKey.PROFILE_USERTYPES,
+                JsonKey.LIST),
+            ERROR_CODE);
       }
     }
   }
@@ -790,20 +796,20 @@ public class UserRequestValidator extends BaseRequestValidator {
           String.format(
               "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
       List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
-      if(CollectionUtils.isNotEmpty(profileUserTypes) && MapUtils.isNotEmpty((Map)profileUserTypes.get(0))){
+      if (CollectionUtils.isNotEmpty(profileUserTypes)
+          && MapUtils.isNotEmpty((Map) profileUserTypes.get(0))) {
         profileUserTypes.forEach(
-                item -> {
-                  String userTypeItem = (String) item.get(JsonKey.TYPE);
-                  if (!userTypeMap.containsKey(userTypeItem)) {
-                    ProjectCommonException.throwClientErrorException(
-                            ResponseCode.invalidParameterValue,
-                            MessageFormat.format(
-                                    ResponseCode.invalidParameterValue.getErrorMessage(),
-                                    new String[] {userType, JsonKey.USER_TYPE}));
-                  }
-                }
-        );
-      }else if (!userTypeMap.containsKey(userType)) {
+            item -> {
+              String userTypeItem = (String) item.get(JsonKey.TYPE);
+              if (!userTypeMap.containsKey(userTypeItem)) {
+                ProjectCommonException.throwClientErrorException(
+                    ResponseCode.invalidParameterValue,
+                    MessageFormat.format(
+                        ResponseCode.invalidParameterValue.getErrorMessage(),
+                        new String[] {userType, JsonKey.USER_TYPE}));
+              }
+            });
+      } else if (!userTypeMap.containsKey(userType)) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.invalidParameterValue,
             MessageFormat.format(
@@ -822,23 +828,23 @@ public class UserRequestValidator extends BaseRequestValidator {
     Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
 
     List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
-    if(CollectionUtils.isNotEmpty(profileUserTypes) && MapUtils.isNotEmpty(profileUserTypes.get(0))){
+    if (CollectionUtils.isNotEmpty(profileUserTypes)
+        && MapUtils.isNotEmpty(profileUserTypes.get(0))) {
       profileUserTypes.forEach(
-              item -> {
-                String userTypeItem = (String) item.get(JsonKey.TYPE);
-                String userSubTypeItem = (String) item.get(JsonKey.SUB_TYPE);
-                if(StringUtils.isNotEmpty(userSubTypeItem)) {
-                  if (null == userTypeMap.get(userTypeItem) ||
-                          !userTypeMap.get(userTypeItem).contains(userSubTypeItem)) {
-                    ProjectCommonException.throwClientErrorException(
-                            ResponseCode.invalidParameterValue,
-                            MessageFormat.format(
-                                    ResponseCode.invalidParameterValue.getErrorMessage(),
-                                    new String[] {userSubTypeItem, JsonKey.USER_SUB_TYPE}));
-                  }
-                }
+          item -> {
+            String userTypeItem = (String) item.get(JsonKey.TYPE);
+            String userSubTypeItem = (String) item.get(JsonKey.SUB_TYPE);
+            if (StringUtils.isNotEmpty(userSubTypeItem)) {
+              if (null == userTypeMap.get(userTypeItem)
+                  || !userTypeMap.get(userTypeItem).contains(userSubTypeItem)) {
+                ProjectCommonException.throwClientErrorException(
+                    ResponseCode.invalidParameterValue,
+                    MessageFormat.format(
+                        ResponseCode.invalidParameterValue.getErrorMessage(),
+                        new String[] {userSubTypeItem, JsonKey.USER_SUB_TYPE}));
               }
-      );
+            }
+          });
     } else if (null != userSubType
         && (null == userTypeMap.get(userType)
             || !userTypeMap.get(userType).contains(userSubType))) {

@@ -2,10 +2,8 @@ package org.sunbird.service.feed.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.sql.Timestamp;
 import java.util.*;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +14,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.Feed;
-import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.IFeedService;
@@ -73,23 +70,24 @@ public class FeedServiceImpl implements IFeedService {
       responseList = (List<Map<String, Object>>) dbResponse.getResult().get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {
         responseList.forEach(
-                s -> {
-                  try {
-                    String data = (String) s.get(JsonKey.FEED_DATA);
-                    if (StringUtils.isNotBlank(data)) {
-                      s.put(
-                              JsonKey.FEED_DATA,
-                              mapper.readValue(data, new TypeReference<Map<String, Object>>() {}));
-                    } else {
-                      s.put(JsonKey.FEED_DATA, Collections.emptyMap());
-                    }
-                    feedList.add(mapper.convertValue(s, Feed.class));
-                  } catch (Exception ex) {
-                    logger.error(
-                            context,
-                            "FeedServiceImpl:getRecordsByUserId :Exception occurred while mapping feed data.",
-                            ex);
-                  } });
+            s -> {
+              try {
+                String data = (String) s.get(JsonKey.FEED_DATA);
+                if (StringUtils.isNotBlank(data)) {
+                  s.put(
+                      JsonKey.FEED_DATA,
+                      mapper.readValue(data, new TypeReference<Map<String, Object>>() {}));
+                } else {
+                  s.put(JsonKey.FEED_DATA, Collections.emptyMap());
+                }
+                feedList.add(mapper.convertValue(s, Feed.class));
+              } catch (Exception ex) {
+                logger.error(
+                    context,
+                    "FeedServiceImpl:getRecordsByUserId :Exception occurred while mapping feed data.",
+                    ex);
+              }
+            });
       }
     }
     return feedList;
@@ -98,8 +96,8 @@ public class FeedServiceImpl implements IFeedService {
   @Override
   public void delete(String id, String userId, String category, RequestContext context) {
     logger.debug(
-            context, "FeedServiceImpl:delete method called for feedId : " + id + "user-id:" + userId);
-     iFeedDao.delete(id, userId, category, context);
+        context, "FeedServiceImpl:delete method called for feedId : " + id + "user-id:" + userId);
+    iFeedDao.delete(id, userId, category, context);
   }
 
   private Map<String, String> getHeaders(RequestContext context) {

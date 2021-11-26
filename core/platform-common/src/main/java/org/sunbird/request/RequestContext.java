@@ -12,7 +12,9 @@ public class RequestContext {
   private String reqId;
   private String debugEnabled;
   private String op;
+  private String source;
   private Map<String, Object> contextMap = new HashMap<>();
+  private Map<String, Object> telemetryContext = new HashMap<>();
 
   public RequestContext() {}
 
@@ -23,6 +25,7 @@ public class RequestContext {
       String appId,
       String appVer,
       String reqId,
+      String source,
       String debugEnabled,
       String op) {
     super();
@@ -32,6 +35,7 @@ public class RequestContext {
     this.appId = appId;
     this.appVer = appVer;
     this.reqId = reqId;
+    this.source = source;
     this.debugEnabled = debugEnabled;
     this.op = op;
 
@@ -41,6 +45,7 @@ public class RequestContext {
     contextMap.put("appId", appId);
     contextMap.put("appVer", appVer);
     contextMap.put("reqId", reqId);
+    contextMap.put("source", source);
     contextMap.put("op", op);
   }
 
@@ -110,5 +115,13 @@ public class RequestContext {
 
   public Map<String, Object> getContextMap() {
     return contextMap;
+  }
+
+  public Map<String, Object> getTelemetryContext() {
+    return telemetryContext;
+  }
+
+  public void setTelemetryContext(Map<String, Object> telemetryContext) {
+    this.telemetryContext = telemetryContext;
   }
 }

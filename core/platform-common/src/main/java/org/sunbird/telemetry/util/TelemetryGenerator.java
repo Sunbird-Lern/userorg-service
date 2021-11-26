@@ -1,22 +1,13 @@
 package org.sunbird.telemetry.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.telemetry.dto.Actor;
-import org.sunbird.telemetry.dto.Context;
-import org.sunbird.telemetry.dto.Producer;
-import org.sunbird.telemetry.dto.Target;
-import org.sunbird.telemetry.dto.Telemetry;
-import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.telemetry.dto.*;
 import org.sunbird.util.ProjectUtil;
 
 /**
@@ -336,21 +327,22 @@ public class TelemetryGenerator {
       eventContext.getCdata().add(map);
     }
 
-    Map<String, Object> edata = generateErrorEdata(params);
+    Map<String, Object> edata = generateErrorEdata(params, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.ERROR.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
     return getTelemetry(telemetry);
   }
 
-  private static Map<String, Object> generateErrorEdata(Map<String, Object> params) {
+  private static Map<String, Object> generateErrorEdata(Map<String, Object> params, String reqId) {
     Map<String, Object> edata = new HashMap<>();
     String error = (String) params.get(JsonKey.ERROR);
     String errorType = (String) params.get(JsonKey.ERR_TYPE);
     String stackTrace = (String) params.get(JsonKey.STACKTRACE);
     edata.put(JsonKey.ERROR, error);
     edata.put(JsonKey.ERR_TYPE, errorType);
-    edata.put(JsonKey.STACKTRACE, ProjectUtil.getFirstNCharacterString(stackTrace, 100));
+    edata.put(JsonKey.REQUEST_ID, reqId);
+    edata.put(JsonKey.STACKTRACE, ProjectUtil.getFirstNCharacterString(stackTrace, 2048));
     return edata;
   }
 

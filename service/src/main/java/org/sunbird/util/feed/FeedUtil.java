@@ -1,11 +1,6 @@
 package org.sunbird.util.feed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +10,6 @@ import org.sunbird.model.ShadowUser;
 import org.sunbird.model.user.Feed;
 import org.sunbird.model.user.FeedAction;
 import org.sunbird.model.user.FeedStatus;
-import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
@@ -66,7 +60,7 @@ public class FeedUtil {
     return response;
   }
 
-  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context){
+  private static Feed createFeedObj(ShadowUser shadowUser, String userId, RequestContext context) {
     Feed feed = new Feed();
     feed.setPriority(1);
     feed.setCreatedBy(shadowUser.getAddedBy());
