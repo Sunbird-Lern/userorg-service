@@ -1,6 +1,5 @@
 package org.sunbird.service.systemsettings;
 
-import akka.actor.ActorRef;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;

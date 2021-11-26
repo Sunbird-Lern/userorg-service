@@ -341,17 +341,9 @@ public class TenantMigrationActor extends BaseActor {
     userRequest.put(JsonKey.ROOT_ORG_ID, request.getRequest().get(JsonKey.ROOT_ORG_ID));
     userRequest.put(JsonKey.FLAGS_VALUE, request.getRequest().get(JsonKey.FLAGS_VALUE));
     userRequest.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
-    if (request.getRequest().containsKey(JsonKey.PROFILE_LOCATION)) {
-      Object profileLocation = request.getRequest().get(JsonKey.PROFILE_LOCATION);
-      if (profileLocation != null && !(profileLocation instanceof String)) {
-        org.codehaus.jackson.map.ObjectMapper objMap = new org.codehaus.jackson.map.ObjectMapper();
-        try {
-          profileLocation = objMap.writeValueAsString(profileLocation);
-        } catch (Exception e) {
-          profileLocation = "";
-        }
-      }
-      userRequest.put(JsonKey.PROFILE_LOCATION, profileLocation);
+    if (request.getRequest().containsKey(JsonKey.PROFILE_LOCATION)
+            && StringUtils.isNotEmpty((String) request.getRequest().get(JsonKey.PROFILE_LOCATION))) {
+      userRequest.put(JsonKey.PROFILE_LOCATION, request.getRequest().get(JsonKey.PROFILE_LOCATION));
     }
     if (request.getRequest().containsKey(JsonKey.STATUS)) {
       userRequest.put(JsonKey.STATUS, request.getRequest().get(JsonKey.STATUS));

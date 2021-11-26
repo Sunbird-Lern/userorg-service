@@ -24,6 +24,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
@@ -50,11 +51,12 @@ import scala.concurrent.Promise;
 })
 public class OrgServiceImplTest {
   private ElasticSearchService esService = null;
+  private CassandraOperation cassandraOperation = null;
 
   @Before
   public void setUp() {
     PowerMockito.mockStatic(ServiceFactory.class);
-    CassandraOperation cassandraOperation = mock(CassandraOperationImpl.class);
+    cassandraOperation = mock(CassandraOperationImpl.class);
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
 
     PowerMockito.when(
@@ -68,7 +70,8 @@ public class OrgServiceImplTest {
     PowerMockito.when(
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(getRecordsByProperty(false));
+        .thenReturn(getRecordsByProperty(false))
+    .thenReturn(getRecordsByProperty(false));
 
     PowerMockito.when(
             cassandraOperation.getRecordsByPrimaryKeys(
@@ -114,6 +117,13 @@ public class OrgServiceImplTest {
   }
 
   @Test
+  public void testGetOrgObjById() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    Organisation orgObj = orgService.getOrgObjById("id", new RequestContext());
+    Assert.assertNotNull(orgObj);
+  }
+
+  @Test
   public void testGetOrgByIds() {
     OrgService orgService = OrgServiceImpl.getInstance();
     List<String> orgIds = new ArrayList<>();
@@ -151,6 +161,16 @@ public class OrgServiceImplTest {
     OrgService orgService = OrgServiceImpl.getInstance();
     String rootOrgId = orgService.getRootOrgIdFromChannel("channel", new RequestContext());
     Assert.assertNotNull(rootOrgId);
+  }
+
+  @Test
+  public void testOrganisationObjSearch() {
+    Map<String, Object> filters = new HashMap<>();
+    filters.put(JsonKey.ID, "orgId");
+    filters.put(JsonKey.ORG_NAME, "orgName");
+    OrgService orgService = OrgServiceImpl.getInstance();
+    List<Organisation> orgList = orgService.organisationObjSearch(filters, new RequestContext());
+    Assert.assertNotNull(orgList);
   }
 
   @Test

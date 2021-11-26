@@ -118,21 +118,32 @@ public class TenantMigrationActorTest {
     orgs.put(JsonKey.USER_ID, "anyUserId");
     orgs.put(JsonKey.ORGANISATION_ID, "anyRootOrgId");
     listMap.add(orgs);
-    Map<String, Object> userDetails = new HashMap<>();
-    userDetails.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
-    userDetails.put(JsonKey.ORGANISATIONS, listMap);
+
+    Map<String, Object> userDetails1 = new HashMap<>();
+    userDetails1.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
+    userDetails1.put(JsonKey.ORGANISATIONS, listMap);
     Response response1 = new Response();
-    List<Map<String, Object>> list = new ArrayList<>();
-    list.add(userDetails);
-    response1.getResult().put(JsonKey.RESPONSE, list);
+    List<Map<String, Object>> list1 = new ArrayList<>();
+    list1.add(userDetails1);
+    response1.getResult().put(JsonKey.RESPONSE, list1);
+
+    Map<String, Object> userDetails2 = new HashMap<>();
+    userDetails2.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
+    userDetails2.put(JsonKey.ORGANISATIONS, listMap);
+    Response response2 = new Response();
+    List<Map<String, Object>> list2 = new ArrayList<>();
+    list2.add(userDetails2);
+    response2.getResult().put(JsonKey.RESPONSE, list2);
     PowerMockito.when(
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(response1);
+        .thenReturn(response1)
+        .thenReturn(response2);
     PowerMockito.when(
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getSelfDeclarationResponse());
+        .thenReturn(getSelfDeclarationResponse())
+            .thenReturn(getSelfDeclarationResponse());
     PowerMockito.when(
             cassandraOperation.updateRecord(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -149,7 +160,8 @@ public class TenantMigrationActorTest {
         .thenReturn(updateResponse);
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getOrgFromCassandra());
+        .thenReturn(getOrgFromCassandra())
+            .thenReturn(getOrgFromCassandra());
   }
 
   public static Response getEsResponse() {
@@ -275,7 +287,7 @@ public class TenantMigrationActorTest {
   public Map<String, Object> getOrgandLocation() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ORG_ID, "anyOrgId");
-    map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+   // map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
     return map;
   }
 
@@ -284,7 +296,7 @@ public class TenantMigrationActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ORG_ID, "anyRootOrgId");
-    map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+   // map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
     map.put("template", "anyTemplate");
     list.add(map);
     response.put(Constants.RESPONSE, list);
