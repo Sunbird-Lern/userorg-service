@@ -23,7 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.location.impl.LocationClientImpl;
 import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
@@ -69,7 +68,6 @@ import scala.concurrent.Promise;
   UserServiceImpl.class,
   OrgServiceImpl.class,
   UserUtil.class,
-  LocationClientImpl.class,
   DataCacheHandler.class,
   UserExternalIdentityService.class,
   UserExternalIdentityServiceImpl.class,
