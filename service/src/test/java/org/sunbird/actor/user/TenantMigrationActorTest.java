@@ -94,7 +94,10 @@ public class TenantMigrationActorTest {
     PowerMockito.when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     PowerMockito.when(
             cassandraOperation.getRecordsByProperties(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any(RequestContext.class)))
+                Mockito.anyString(),
+                Mockito.anyString(),
+                Mockito.anyMap(),
+                Mockito.any(RequestContext.class)))
         .thenReturn(response);
 
     Response upsertResponse = new Response();
@@ -151,8 +154,8 @@ public class TenantMigrationActorTest {
         .thenReturn(response);
     PowerMockito.when(
             cassandraOperation.upsertRecord(
-                    Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(response);
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
     Response updateResponse = new Response();
     updateResponse.getResult().put(JsonKey.RESPONSE, "FAILED");
     PowerMockito.when(
@@ -242,22 +245,21 @@ public class TenantMigrationActorTest {
     fMap.put(JsonKey.CATEGORY, "category");
     return fMap;
   }
+
   @Test
   public void testUserMigration() {
     try {
-    PowerMockito.mockStatic(DataCacheHandler.class);
-    Map<String, String> dataCache = new HashMap<>();
-    dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
-    when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
-    boolean result =
-            testScenario(
-                    getMigrateReq(ActorOperations.USER_TENANT_MIGRATE),
-                    null,
-                    props);
-  } catch (ProjectCommonException e) {
-    assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      PowerMockito.mockStatic(DataCacheHandler.class);
+      Map<String, String> dataCache = new HashMap<>();
+      dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
+      when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
+      boolean result =
+          testScenario(getMigrateReq(ActorOperations.USER_TENANT_MIGRATE), null, props);
+    } catch (ProjectCommonException e) {
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+    }
   }
-  }
+
   @Test
   public void testUserSelfDeclarationMigrationWithValidatedStatus() {
     PowerMockito.mockStatic(DataCacheHandler.class);

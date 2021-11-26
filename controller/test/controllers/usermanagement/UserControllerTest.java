@@ -9,11 +9,7 @@ import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import controllers.TestUtil;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -264,10 +260,10 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testUpdateUserV3Success() throws Exception {
     Result result =
-            performTest(
-                    "/v3/user/update",
-                    "PATCH",
-                    (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
+        performTest(
+            "/v3/user/update",
+            "PATCH",
+            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
     assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
