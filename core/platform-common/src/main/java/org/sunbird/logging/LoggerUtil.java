@@ -35,14 +35,18 @@ public class LoggerUtil {
   }
 
   public void error(RequestContext requestContext, String message, Throwable e) {
-    Map<String, Object> context =
-        (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
-    Map<String, Object> params = new HashMap<>();
-    params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
-    Map<String, Object> telemetryInfo = new HashMap<>();
-    telemetryInfo.put(JsonKey.CONTEXT, context);
-    telemetryInfo.put(JsonKey.PARAMS, params);
-    error(requestContext, message, e, telemetryInfo);
+    if (requestContext != null) {
+      Map<String, Object> context =
+          (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
+      Map<String, Object> params = new HashMap<>();
+      params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
+      Map<String, Object> telemetryInfo = new HashMap<>();
+      telemetryInfo.put(JsonKey.CONTEXT, context);
+      telemetryInfo.put(JsonKey.PARAMS, params);
+      error(requestContext, message, e, telemetryInfo);
+    } else {
+      error(message, e);
+    }
   }
 
   public void error(String message, Throwable e) {
