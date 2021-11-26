@@ -31,6 +31,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.systemsettings.SystemSettingsService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserMergeServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
@@ -54,11 +55,7 @@ public class UserMergeActor extends UserBaseActor {
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final UserService userService = UserServiceImpl.getInstance();
   private final SSOManager keyCloakService = SSOServiceFactory.getInstance();
-  private final SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
-
-  @Inject
-  @Named("system_settings_actor")
-  private ActorRef systemSettingsActor;
+  private final SystemSettingsService systemSettingsService = new SystemSettingsService();
 
   @Inject
   @Named("background_job_manager_actor")
@@ -174,8 +171,8 @@ public class UserMergeActor extends UserBaseActor {
       custodianId = configSettingMap.get(JsonKey.CUSTODIAN_ORG_ID);
       if (custodianId == null || custodianId.isEmpty()) {
         SystemSetting custodianIdSetting =
-            systemSettingClient.getSystemSettingByField(
-                systemSettingsActor, JsonKey.CUSTODIAN_ORG_ID, context);
+                systemSettingsService.getSystemSettingByKey(
+                JsonKey.CUSTODIAN_ORG_ID, context);
         if (custodianIdSetting != null) {
           configSettingMap.put(custodianIdSetting.getId(), custodianIdSetting.getValue());
           custodianId = custodianIdSetting.getValue();

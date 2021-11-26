@@ -69,7 +69,7 @@ public class UserTypeActorTest {
         types.add(entry.getValue());
       }
     }
-    if (types.size() == 1) return true;
+    if (types.size() >= 1) return true;
     return false;
   }
 

@@ -23,9 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessTaskDaoImpl;
@@ -47,8 +44,6 @@ import org.sunbird.util.ProjectUtil;
   TelemetryWriter.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class,
   UserClientImpl.class,
-  OrganisationClientImpl.class,
-  SystemSettingClientImpl.class,
   BulkUploadProcessDaoImpl.class,
   BulkUploadProcess.class,
   BulkUploadProcessTaskDaoImpl.class,
@@ -67,9 +62,6 @@ import org.sunbird.util.ProjectUtil;
 public class UserBulkUploadBackgroundJobActorTest {
 
   private UserClientImpl userClient;
-  private OrganisationClientImpl organisationClient;
-  private SystemSettingClientImpl systemSettingClient;
-  private UserRequestValidator userRequestValidator;
 
   private static ActorSystem system;
   private static final Props props = Props.create(UserBulkUploadBackgroundJobActor.class);
@@ -88,23 +80,6 @@ public class UserBulkUploadBackgroundJobActorTest {
     PowerMockito.mockStatic(UserClientImpl.class);
     userClient = mock(UserClientImpl.class);
     when(UserClientImpl.getInstance()).thenReturn(userClient);
-    PowerMockito.mockStatic(OrganisationClientImpl.class);
-    organisationClient = mock(OrganisationClientImpl.class);
-    when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
-    PowerMockito.mockStatic(SystemSettingClientImpl.class);
-    systemSettingClient = mock(SystemSettingClientImpl.class);
-    when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
-    userRequestValidator = new UserRequestValidator();
-    ActorSelection selection = PowerMockito.mock(ActorSelection.class);
-    when(systemSettingClient.getSystemSettingByFieldAndKey(
-            Mockito.any(ActorRef.class),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any()))
-        .thenReturn(new ArrayList<>().toArray());
-    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(getOrganisation());
     doNothing()
         .when(userClient)
         .updateUser(Mockito.any(ActorRef.class), Mockito.anyMap(), Mockito.any());

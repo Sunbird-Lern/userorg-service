@@ -10,28 +10,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.operations.BulkUploadActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.systemsettings.SystemSettingsService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.Util;
 
 public class UserBulkUploadActor extends BaseBulkUploadActor {
 
-  private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
+  private final SystemSettingsService systemSettingsService = new SystemSettingsService();
 
   @Inject
   @Named("user_bulk_upload_background_job_actor")
   private ActorRef userBulkUploadBackgroundJobActor;
-
-  @Inject
-  @Named("system_settings_actor")
-  private ActorRef systemSettingsActor;
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -48,8 +43,7 @@ public class UserBulkUploadActor extends BaseBulkUploadActor {
   private void upload(Request request) throws IOException {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     Object dataObject =
-        systemSettingClient.getSystemSettingByFieldAndKey(
-            systemSettingsActor,
+            systemSettingsService.getSystemSettingByFieldAndKey(
             "userProfileConfig",
             "csv",
             new TypeReference<Map>() {},

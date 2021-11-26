@@ -27,7 +27,10 @@ import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.role.RoleService;
+import org.sunbird.service.systemsettings.SystemSettingsService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserUtility;
@@ -36,13 +39,9 @@ import org.sunbird.util.Util;
 public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private UserClient userClient = UserClientImpl.getInstance();
-  private OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
-  private SystemSettingClient systemSettingClient = SystemSettingClientImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
-
-  @Inject
-  @Named("system_settings_actor")
-  private ActorRef systemSettingsActor;
+  private final SystemSettingsService systemSettingsService = new SystemSettingsService();
 
   @Inject
   @Named("user_role_actor")
@@ -117,8 +116,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       ObjectMapper mapper = new ObjectMapper();
       Map<String, Object> userMap = mapper.readValue(data, Map.class);
       String[] mandatoryColumnsObject =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              systemSettingsActor,
+              systemSettingsService.getSystemSettingByFieldAndKey(
               "userProfileConfig",
               "csv.mandatoryColumns",
               new TypeReference<String[]>() {},
@@ -333,12 +331,13 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       Map<String, Object> filters = new HashMap<>();
       filters.put(
           JsonKey.EXTERNAL_ID, ((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
-      if (CollectionUtils.isNotEmpty(organisationClient.esSearchOrgByFilter(filters, context))) {
-        return organisationClient.esSearchOrgByFilter(filters, context).get(0);
+      List<Organisation> orgList = orgService.organisationObjSearch(filters, context);
+      if (CollectionUtils.isNotEmpty(orgList)) {
+        return orgList.get(0);
       }
       return null;
     } else if (StringUtils.isNotBlank((String) userMap.get(JsonKey.ORG_ID))) {
-      return organisationClient.esGetOrgById((String) userMap.get(JsonKey.ORG_ID), context);
+      return orgService.getOrgObjById((String) userMap.get(JsonKey.ORG_ID), context);
     }
     return null;
   }

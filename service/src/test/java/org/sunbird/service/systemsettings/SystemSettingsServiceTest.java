@@ -1,5 +1,6 @@
 package org.sunbird.service.systemsettings;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,6 +75,19 @@ public class SystemSettingsServiceTest {
     Assert.assertNotNull(setting31);
   }
 
+  @Test
+  public void getSystemSettingByFieldAndKeyTestSuccess() {
+    initDataCacheMock();
+    getRecordByIdNonEmptyResponse();
+    SystemSettingsService service = new SystemSettingsService();
+    Map<String, Object> setting1 = service.getSystemSettingByFieldAndKey(
+            "setting3",
+            "valueKey1",
+            new TypeReference<Map>() {},
+            new RequestContext());
+    Assert.assertNotNull(setting1);
+  }
+
   @Test(expected = ProjectCommonException.class)
   public void getSystemSettingByKeyTestFailure() {
     initDataCacheMock();
@@ -122,6 +136,7 @@ public class SystemSettingsServiceTest {
     Map<String, String> systemSettings = new HashMap<>();
     systemSettings.put("setting1","value1");
     systemSettings.put("setting2","value2");
+    systemSettings.put("setting3","{\"valueKey1\":{\"url\":\"http://dev/terms.html\"}}");
     PowerMockito.when(DataCacheHandler.getConfigSettings()).thenReturn(systemSettings);
   }
 
