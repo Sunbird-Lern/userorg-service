@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.operations.BulkUploadActorOperation;
