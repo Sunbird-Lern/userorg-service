@@ -39,11 +39,10 @@ import org.sunbird.util.user.UserActorOperations;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  Util.class,
+  UserUtility.class,
   DataCacheHandler.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
-  Util.class,
   EsClientFactory.class
 })
 @PowerMockIgnore({
@@ -97,7 +96,7 @@ public class UserExternalIdManagementActorTest {
         Mockito.anyString(),
         Mockito.anyMap(),
         Mockito.any(RequestContext.class));
-    PowerMockito.mockStatic(Util.class);
+    PowerMockito.mockStatic(UserUtility.class);
     when(UserUtility.encryptData(Mockito.anyString())).thenReturn("userExtId");
   }
 
