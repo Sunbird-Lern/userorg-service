@@ -24,7 +24,17 @@ public class LoggerUtil {
 
   public void info(RequestContext requestContext, String message) {
     if (null != requestContext) {
-      logger.info(Markers.appendEntries(requestContext.getContextMap()), message);
+      Map<String, Object> context =
+          (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
+      Map<String, Object> params = new HashMap<>();
+      params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
+      Map<String, Object> telemetryInfo = new HashMap<>();
+      telemetryInfo.put(JsonKey.CONTEXT, context);
+      telemetryInfo.put(JsonKey.PARAMS, params);
+      params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
+      params.put(JsonKey.LOG_LEVEL, JsonKey.INFO);
+      params.put(JsonKey.MESSAGE, message);
+      telemetryProcess(requestContext, telemetryInfo, null, message);
     } else {
       logger.info(message);
     }
@@ -92,24 +102,28 @@ public class LoggerUtil {
       Map<String, Object> telemetryInfo,
       Throwable e,
       String message) {
-    ProjectCommonException projectCommonException = null;
-    if (e instanceof ProjectCommonException) {
-      projectCommonException = (ProjectCommonException) e;
-    } else {
-      projectCommonException =
-          new ProjectCommonException(
-              ResponseCode.internalError.getErrorCode(),
-              ResponseCode.internalError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-    }
     Request request = new Request();
+    if (null != e) {
+      ProjectCommonException projectCommonException = null;
+      if (e instanceof ProjectCommonException) {
+        projectCommonException = (ProjectCommonException) e;
+      } else {
+        projectCommonException =
+            new ProjectCommonException(
+                ResponseCode.internalError.getErrorCode(),
+                ResponseCode.internalError.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getResponseCode());
+      }
+      telemetryInfo.put(JsonKey.TELEMETRY_EVENT_TYPE, TelemetryEvents.ERROR.getName());
+      Map<String, Object> params = (Map<String, Object>) telemetryInfo.get(JsonKey.PARAMS);
+      params.put(JsonKey.ERROR, projectCommonException.getCode());
+      params.put(JsonKey.STACKTRACE, generateStackTrace(e.getStackTrace(), message));
+      request.setRequest(telemetryInfo);
+    } else {
+      telemetryInfo.put(JsonKey.TELEMETRY_EVENT_TYPE, TelemetryEvents.LOG.getName());
+      request.setRequest(telemetryInfo);
+    }
     request.setRequestContext(requestContext);
-    telemetryInfo.put(JsonKey.TELEMETRY_EVENT_TYPE, TelemetryEvents.ERROR.getName());
-
-    Map<String, Object> params = (Map<String, Object>) telemetryInfo.get(JsonKey.PARAMS);
-    params.put(JsonKey.ERROR, projectCommonException.getCode());
-    params.put(JsonKey.STACKTRACE, generateStackTrace(e.getStackTrace(), message));
-    request.setRequest(telemetryInfo);
     TelemetryWriter.write(request);
   }
 
