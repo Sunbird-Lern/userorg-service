@@ -40,7 +40,6 @@ import org.sunbird.util.user.UserUtil;
   "javax.crypto.*"
 })
 public class UserExternalIdentityServiceTest {
-  ObjectMapper mapper = new ObjectMapper();
 
   @Test
   public void getUserV1Test() {
@@ -115,53 +114,5 @@ public class UserExternalIdentityServiceTest {
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
     List selfDeclareExternalId = userExternalIdentityService.getSelfDeclaredDetails("1234", null);
     Assert.assertNotNull(selfDeclareExternalId);
-  }
-
-  @Test
-  public void testConvertSelfDeclareFieldsToExternalIds() {
-    Map<String, Object> selfDeclaredFields = getSelfDeclareFields();
-    List<Map<String, String>> externalIds =
-            UserExternalIdentityServiceImpl.convertSelfDeclareFieldsToExternalIds(selfDeclaredFields);
-    String declaredEmail = "";
-    String declaredPhone = "";
-    for (Map<String, String> extIdMap : externalIds) {
-      if (JsonKey.DECLARED_EMAIL.equals((String) extIdMap.get(JsonKey.ORIGINAL_ID_TYPE))) {
-        declaredEmail = (String) extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID);
-      }
-      if (JsonKey.DECLARED_PHONE.equals((String) extIdMap.get(JsonKey.ORIGINAL_ID_TYPE))) {
-        declaredPhone = (String) extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID);
-      }
-    }
-
-    Assert.assertEquals("abc@tenant.com", declaredEmail);
-    Assert.assertEquals("999999999", declaredPhone);
-  }
-
-  @Test
-  public void testConvertExternalFieldsToSelfDeclareFields() {
-    Map<String, Object> declaredFeilds = getSelfDeclareFields();
-    List<Map<String, String>> externalIds =
-            UserExternalIdentityServiceImpl.convertSelfDeclareFieldsToExternalIds(declaredFeilds);
-    Map<String, Object> resultDeclaredFields =
-            UserExternalIdentityServiceImpl.convertExternalFieldsToSelfDeclareFields(externalIds);
-    Assert.assertEquals(
-            declaredFeilds.get(JsonKey.USER_ID), resultDeclaredFields.get(JsonKey.USER_ID));
-    Assert.assertEquals(
-            ((Map<String, Object>) declaredFeilds.get(JsonKey.USER_INFO)).get(JsonKey.DECLARED_EMAIL),
-            ((Map<String, Object>) resultDeclaredFields.get(JsonKey.USER_INFO))
-                    .get(JsonKey.DECLARED_EMAIL));
-  }
-
-  private Map<String, Object> getSelfDeclareFields() {
-    UserDeclareEntity userDeclareEntity = new UserDeclareEntity();
-    userDeclareEntity.setUserId("userid");
-    userDeclareEntity.setOrgId("org");
-    userDeclareEntity.setPersona(JsonKey.TEACHER_PERSONA);
-    Map<String, Object> userInfo = new HashMap<>();
-    userInfo.put(JsonKey.DECLARED_EMAIL, "abc@tenant.com");
-    userInfo.put(JsonKey.DECLARED_PHONE, "999999999");
-    userDeclareEntity.setUserInfo(userInfo);
-    Map<String, Object> selfDeclaredMap = mapper.convertValue(userDeclareEntity, Map.class);
-    return selfDeclaredMap;
   }
 }
