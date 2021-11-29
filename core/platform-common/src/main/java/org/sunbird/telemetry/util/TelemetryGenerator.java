@@ -54,7 +54,7 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateAuditEdata(params);
-
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.AUDIT.getName(), actor, eventContext, edata, targetObject);
     telemetry.setMid(reqId);
@@ -208,6 +208,7 @@ public class TelemetryGenerator {
       eventContext.getCdata().add(map);
     }
     Map<String, Object> edata = generateSearchEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.SEARCH.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
@@ -263,6 +264,7 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateLogEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry = new Telemetry(TelemetryEvents.LOG.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
     return getTelemetry(telemetry);
@@ -327,21 +329,21 @@ public class TelemetryGenerator {
       eventContext.getCdata().add(map);
     }
 
-    Map<String, Object> edata = generateErrorEdata(params, reqId);
+    Map<String, Object> edata = generateErrorEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.ERROR.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
     return getTelemetry(telemetry);
   }
 
-  private static Map<String, Object> generateErrorEdata(Map<String, Object> params, String reqId) {
+  private static Map<String, Object> generateErrorEdata(Map<String, Object> params) {
     Map<String, Object> edata = new HashMap<>();
     String error = (String) params.get(JsonKey.ERROR);
     String errorType = (String) params.get(JsonKey.ERR_TYPE);
     String stackTrace = (String) params.get(JsonKey.STACKTRACE);
     edata.put(JsonKey.ERROR, error);
     edata.put(JsonKey.ERR_TYPE, errorType);
-    edata.put(JsonKey.REQUEST_ID, reqId);
     edata.put(JsonKey.STACKTRACE, ProjectUtil.getFirstNCharacterString(stackTrace, 2048));
     return edata;
   }
