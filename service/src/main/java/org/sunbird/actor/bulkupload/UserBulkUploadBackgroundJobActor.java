@@ -346,7 +346,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   @Override
   public void preProcessResult(Map<String, Object> result) {
     UserUtility.decryptUserData(result);
-    Util.addMaskEmailAndPhone(result);
+    UserUtility.addMaskEmailAndPhone(result);
   }
 
   private String upsertUser(

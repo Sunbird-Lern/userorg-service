@@ -19,6 +19,8 @@ import org.sunbird.logging.LoggerUtil;
  */
 public final class UserUtility {
   private static final LoggerUtil logger = new LoggerUtil(UserUtility.class);
+  private static final DecryptionService decService =
+          org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
 
   private static List<String> userKeyToEncrypt;
   private static List<String> userKeyToDecrypt;
@@ -112,6 +114,19 @@ public final class UserUtility {
       return maskingService.maskEmail(decryptionService.decryptData(encryptedEmailOrPhone, null));
     }
     return StringUtils.EMPTY;
+  }
+
+  public static void addMaskEmailAndPhone(Map<String, Object> userMap) {
+    String phone = (String) userMap.get(JsonKey.PHONE);
+    String email = (String) userMap.get(JsonKey.EMAIL);
+    userMap.put(JsonKey.ENC_PHONE, phone);
+    userMap.put(JsonKey.ENC_EMAIL, email);
+    if (!StringUtils.isBlank(phone)) {
+      userMap.put(JsonKey.PHONE, maskingService.maskPhone(decService.decryptData(phone, null)));
+    }
+    if (!StringUtils.isBlank(email)) {
+      userMap.put(JsonKey.EMAIL, maskingService.maskEmail(decService.decryptData(email, null)));
+    }
   }
 
   private static void init() {

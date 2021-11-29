@@ -41,6 +41,7 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
@@ -113,7 +114,7 @@ public class UserSelfDeclarationManagementActorTest {
         .thenReturn(response);
 
     PowerMockito.mockStatic(Util.class);
-    when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
+    when(UserUtility.encryptData(Mockito.anyString())).thenReturn("userExtId");
 
     PowerMockito.mockStatic(UserUtil.class);
     UserDeclareEntity userDeclareEntity = new UserDeclareEntity();

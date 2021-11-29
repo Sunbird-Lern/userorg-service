@@ -105,7 +105,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
                     .forEach(
                         x -> {
                           UserUtility.decryptUserData((Map<String, Object>) x);
-                          Util.addMaskEmailAndPhone((Map<String, Object>) x);
+                          UserUtility.addMaskEmailAndPhone((Map<String, Object>) x);
                         });
               }
               resMap.put(JsonKey.SUCCESS_RESULT, successMap);
@@ -122,7 +122,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
                     .forEach(
                         x -> {
                           UserUtility.decryptUserData((Map<String, Object>) x);
-                          Util.addMaskEmailAndPhone((Map<String, Object>) x);
+                          UserUtility.addMaskEmailAndPhone((Map<String, Object>) x);
                         });
               }
               resMap.put(JsonKey.FAILURE_RESULT, failureMap);
