@@ -28,7 +28,7 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
         userExternalIdentityDao.getUserSelfDeclaredDetails(userId, context);
     if (CollectionUtils.isNotEmpty(dbSelfDeclareExternalIds)) {
       externalIds =
-              UserExternalIdentityAdapter.convertSelfDeclareFieldsToExternalIds(
+          UserExternalIdentityAdapter.convertSelfDeclareFieldsToExternalIds(
               dbSelfDeclareExternalIds.get(0));
     }
     return externalIds;
@@ -134,5 +134,4 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   public String getUserV2(String extId, String orgId, String idType, RequestContext context) {
     return userExternalIdentityDao.getUserIdByExternalId(extId.toLowerCase(), orgId, context);
   }
-
 }
