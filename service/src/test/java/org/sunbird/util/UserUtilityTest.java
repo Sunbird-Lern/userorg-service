@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.sunbird.keys.JsonKey;
 
@@ -124,5 +126,20 @@ public class UserUtilityTest {
     assertEquals(userMap.get(JsonKey.FIRST_NAME), response.get(JsonKey.FIRST_NAME));
     assertEquals(email, response.get(JsonKey.EMAIL));
     assertEquals(userName, response.get(JsonKey.USER_NAME));
+  }
+
+  @Test
+  public void addMaskEmailAndPhoneTest() {
+    Map<String, Object> userMap = new HashMap<String, Object>();
+    userMap.put(JsonKey.EMAIL, "test@test.com");
+    userMap.put(JsonKey.PHONE, "999999999");
+    try {
+      UserUtility.addMaskEmailAndPhone(userMap);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    Assert.assertEquals("test@test.com", userMap.get(JsonKey.ENC_EMAIL));
+    Assert.assertEquals("999999999", userMap.get(JsonKey.ENC_PHONE));
   }
 }
