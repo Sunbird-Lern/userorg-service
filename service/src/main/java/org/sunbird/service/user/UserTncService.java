@@ -24,14 +24,14 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.Util;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.Util;
 
 public class UserTncService {
   private static LoggerUtil logger = new LoggerUtil(UserTncService.class);
@@ -122,9 +122,9 @@ public class UserTncService {
     // check if it is org admin TnC and user is not an admin of the organisation
     // OR check if it is report viewer tnc and user not having the report viewer role
     if ((JsonKey.ORG_ADMIN_TNC.equals(tncType) && !roleCheck(user, JsonKey.ORG_ADMIN, context))
-            || (JsonKey.REPORT_VIEWER_TNC.equals(tncType)
-            && (!roleCheck(user, JsonKey.REPORT_VIEWER, context)
-            || !roleCheck(user, JsonKey.REPORT_ADMIN, context)))) {
+        || (JsonKey.REPORT_VIEWER_TNC.equals(tncType)
+            && !(roleCheck(user, JsonKey.REPORT_VIEWER, context)
+                || roleCheck(user, JsonKey.REPORT_ADMIN, context)))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
