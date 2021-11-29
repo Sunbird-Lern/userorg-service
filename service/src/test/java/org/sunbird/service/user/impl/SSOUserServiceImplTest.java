@@ -88,7 +88,7 @@ public class SSOUserServiceImplTest {
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(false);
-    PowerMockito.when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+    PowerMockito.when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
         .thenReturn(organisation);
 
     PowerMockito.when(OrgExternalServiceImpl.getInstance()).thenReturn(orgExternalService);

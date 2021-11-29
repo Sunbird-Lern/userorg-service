@@ -1,6 +1,8 @@
 package org.sunbird.actor.bulkupload;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,15 +12,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.client.location.LocationClient;
-import org.sunbird.client.location.impl.LocationClientImpl;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
@@ -26,20 +26,24 @@ import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.model.organisation.Organisation;
+import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
+import org.sunbird.service.location.LocationService;
+import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.systemsettings.SystemSettingsService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
-  private OrganisationClient orgClient = new OrganisationClientImpl();
-  private SystemSettingClient systemSettingClient = new SystemSettingClientImpl();
-
-  @Inject
-  @Named("system_settings_actor")
-  private ActorRef systemSettingsActor;
+  private final LocationService locationService = new LocationServiceImpl();
+  private final SystemSettingsService systemSettingsService = new SystemSettingsService();
 
   @Inject
   @Named("location_actor")
@@ -74,11 +78,10 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   private void processTasks(
       List<BulkUploadProcessTask> bulkUploadProcessTasks, RequestContext context) {
     Map<String, Location> locationCache = new HashMap<>();
-    LocationClient locationClient = new LocationClientImpl();
     for (BulkUploadProcessTask task : bulkUploadProcessTasks) {
       if (task.getStatus() != null
           && task.getStatus() != ProjectUtil.BulkProcessStatus.COMPLETED.getValue()) {
-        processOrg(task, locationClient, locationCache, locationActor, context);
+        processOrg(task, locationCache, context);
         task.setLastUpdatedOn(new Timestamp(System.currentTimeMillis()));
         task.setIterationId(task.getIterationId() + 1);
       }
@@ -87,9 +90,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
 
   private void processOrg(
       BulkUploadProcessTask task,
-      LocationClient locationClient,
       Map<String, Location> locationCache,
-      ActorRef locationActor,
       RequestContext context) {
     logger.info(context, "OrgBulkUploadBackgroundJobActor: processOrg called");
     String data = task.getData();
@@ -97,8 +98,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     try {
       Map<String, Object> orgMap = mapper.readValue(data, Map.class);
       Object mandatoryColumnsObject =
-          systemSettingClient.getSystemSettingByFieldAndKey(
-              systemSettingsActor,
+              systemSettingsService.getSystemSettingByFieldAndKey(
               "orgProfileConfig",
               "csv.mandatoryColumns",
               new TypeReference<String[]>() {},
@@ -135,7 +135,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
         callUpdateOrg(organisation, task, locationCodes, context);
       }
       setLocationInformation(
-          task, locationClient, locationCache, locationActor, locationCodes, context);
+          task, locationCache, locationCodes, context);
     } catch (Exception e) {
       logger.error(
           context,
@@ -147,9 +147,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
 
   private void setLocationInformation(
       BulkUploadProcessTask task,
-      LocationClient locationClient,
       Map<String, Location> locationCache,
-      ActorRef locationActor,
       List<String> locationCodes,
       RequestContext context)
       throws IOException {
@@ -160,9 +158,11 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
         if (locationCache.containsKey(locationCode)) {
           locationNames.add(locationCache.get(locationCode).getName());
         } else {
-          Location location =
-              locationClient.getLocationByCode(locationActor, locationCode, context);
-          locationNames.add(location.getName());
+          List<Location> locationList = locationService.locationSearch(JsonKey.CODE, locationCode, context);
+          if (CollectionUtils.isNotEmpty(locationList)) {
+            Location location = locationList.get(0);
+            locationNames.add(location.getName());
+          }
         }
       }
       Map<String, Object> row = mapper.readValue(task.getSuccessResult(), Map.class);
@@ -204,7 +204,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     String orgId;
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
-      orgId = orgClient.createOrg(organisationManagementActor, row, context);
+      orgId = upsertOrg(organisationManagementActor, row, OrganisationActorOperation.CREATE_ORG.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -242,7 +242,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
-      orgClient.updateOrg(organisationManagementActor, row, context);
+      upsertOrg(organisationManagementActor, row, OrganisationActorOperation.UPDATE_ORG.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -262,5 +262,42 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   @Override
   public void preProcessResult(Map<String, Object> result) {
     // Do nothing
+  }
+
+  private String upsertOrg(
+          ActorRef actorRef, Map<String, Object> orgMap, String operation, RequestContext context) {
+    String orgId = null;
+    Object obj = null;
+
+    Request request = new Request();
+    request.setRequestContext(context);
+    request.setRequest(orgMap);
+    request.setOperation(operation);
+    request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce) {
+      throw pce;
+    } catch (Exception e) {
+      logger.error(
+              context, "upsertOrg: Exception occurred with error message = " + e.getMessage(), e);
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    if (obj instanceof Response) {
+      Response response = (Response) obj;
+      orgId = (String) response.get(JsonKey.ORGANISATION_ID);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else if (obj instanceof Exception) {
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    return orgId;
   }
 }

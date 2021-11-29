@@ -4,11 +4,7 @@ package org.sunbird.actor.user.validator;
 import static org.junit.Assert.assertEquals;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -406,7 +402,7 @@ public class UserRequestValidatorTest {
 
     List<Map<String, String>> usertypes = new ArrayList();
     Map<String, String> typemap = new HashMap<>();
-    typemap.put("type","administrator");
+    typemap.put("type", "administrator");
     usertypes.add(typemap);
     requestObj.put(JsonKey.PROFILE_USERTYPES, usertypes);
 
@@ -427,6 +423,7 @@ public class UserRequestValidatorTest {
     }
     assertEquals(true, response);
   }
+
   @Test
   public void testUpdateUserfailurewithusertypes() {
     Request request = initailizeRequest();
@@ -437,7 +434,7 @@ public class UserRequestValidatorTest {
 
     List<Map<String, String>> usertypes = new ArrayList();
     Map<String, String> typemap = new HashMap<>();
-    typemap.put("type","teacher");
+    typemap.put("type", "teacher");
     usertypes.add(typemap);
     requestObj.put(JsonKey.PROFILE_USERTYPES, requestObj);
 
@@ -458,6 +455,7 @@ public class UserRequestValidatorTest {
     }
     assertEquals(false, response);
   }
+
   @Test
   public void testUpdateUserfailurewithusertypesstring() {
     Request request = initailizeRequest();
@@ -487,6 +485,7 @@ public class UserRequestValidatorTest {
     }
     assertEquals(false, response);
   }
+
   @Test
   public void testValidateUploadUserSuccessWithOrgId() {
     boolean response = false;

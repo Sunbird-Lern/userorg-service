@@ -34,6 +34,8 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.AssociationMechanism;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
@@ -47,6 +49,7 @@ public class UserUpdateActor extends UserBaseActor {
   private final UserRequestValidator userRequestValidator = new UserRequestValidator();
   private final ObjectMapper mapper = new ObjectMapper();
   private final UserService userService = UserServiceImpl.getInstance();
+  private final OrgService orgService = OrgServiceImpl.getInstance();
   private final UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
 
@@ -91,26 +94,24 @@ public class UserUpdateActor extends UserBaseActor {
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
-    if (actorMessage
-            .getOperation()
-            .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_LOCATION);
     } else {
       populateLocationCodesFromProfileLocation(userMap);
     }
     validateAndGetLocationCodes(actorMessage);
-    if (actorMessage
-        .getOperation()
-        .equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
+    if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPES);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
       validateUserTypeAndSubType(
-              actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
-    } else if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
+          actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+    } else if (actorMessage
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.UPDATE_USER_V2.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPES);
       populateUserTypeAndSubType(userMap);
       validateUserTypeAndSubType(
-              actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+          actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
     } else if (actorMessage
         .getOperation()
         .equalsIgnoreCase(ActorOperations.UPDATE_USER_V3.getValue())) {
@@ -135,7 +136,7 @@ public class UserUpdateActor extends UserBaseActor {
           userMap.put(JsonKey.USER_SUB_TYPE, userTypeAndSubType.get(JsonKey.SUB_TYPE));
         }
         validateUserTypeAndSubType(
-                actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
+            actorMessage.getRequest(), userDbRecord, actorMessage.getRequestContext());
         try {
           userMap.put(
               JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(distinctUserTypeAndSubTypes));
@@ -233,17 +234,15 @@ public class UserUpdateActor extends UserBaseActor {
         logger.info(
             actorMessage.getRequestContext(),
             "fetching org by orgExternalId and orgLocationId : " + filters);
-        List<Organisation> organisations =
-            organisationClient.esSearchOrgByFilter(filters, actorMessage.getRequestContext());
+        List<Map<String, Object>> organisations =
+            orgService.organisationSearch(filters, actorMessage.getRequestContext());
         if (organisations.size() == 0 || organisations.size() > 1) {
           logger.info(
               actorMessage.getRequestContext(),
               "Got empty or more than one search result by orgExternalId and orgLocationId : "
                   + filters);
         } else {
-          Map<String, Object> org =
-              (Map<String, Object>) mapper.convertValue(organisations.get(0), Map.class);
-
+          Map<String, Object> org = organisations.get(0);
           if (MapUtils.isNotEmpty(org)) {
             orgList.add(org);
           }

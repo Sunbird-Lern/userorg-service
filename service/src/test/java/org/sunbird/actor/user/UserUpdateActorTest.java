@@ -127,8 +127,6 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     user.putAll(getMapObject());
     when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
         .thenReturn(user);
-    when(organisationClient.esSearchOrgByFilter(Mockito.anyMap(), Mockito.any()))
-        .thenReturn(orgList);
 
     Map<String, Object> userOrg = new HashMap<>();
     userOrg.put(JsonKey.USER_ID, "userId");
@@ -320,8 +318,6 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     when(Patterns.ask(
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
-    when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationLists2());
     boolean result =
         testScenario(
             getRequest(

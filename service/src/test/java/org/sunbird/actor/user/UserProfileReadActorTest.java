@@ -23,8 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.location.impl.LocationClientImpl;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -65,11 +63,9 @@ import scala.concurrent.Promise;
   ElasticSearchHelper.class,
   EsClientFactory.class,
   Util.class,
-  SystemSettingClientImpl.class,
   UserServiceImpl.class,
   OrgServiceImpl.class,
   UserUtil.class,
-  LocationClientImpl.class,
   DataCacheHandler.class,
   UserExternalIdentityService.class,
   UserExternalIdentityServiceImpl.class,
@@ -120,16 +116,6 @@ public class UserProfileReadActorTest {
     PowerMockito.mockStatic(SSOServiceFactory.class);
     ssoManager = mock(KeyCloakServiceImpl.class);
     when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
-    PowerMockito.mockStatic(SystemSettingClientImpl.class);
-    SystemSettingClientImpl systemSettingClient = mock(SystemSettingClientImpl.class);
-    when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
-    when(systemSettingClient.getSystemSettingByFieldAndKey(
-            Mockito.any(ActorRef.class),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyObject(),
-            Mockito.any()))
-        .thenReturn(new HashMap<>());
 
     PowerMockito.mockStatic(OrgServiceImpl.class);
     orgService = mock(OrgServiceImpl.class);

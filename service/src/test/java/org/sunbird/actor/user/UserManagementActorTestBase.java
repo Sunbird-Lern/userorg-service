@@ -22,11 +22,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.location.LocationClient;
-import org.sunbird.client.location.impl.LocationClientImpl;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.client.user.UserClient;
 import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.Constants;
@@ -64,20 +59,17 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class,
   Util.class,
-  SystemSettingClientImpl.class,
   UserService.class,
   UserServiceImpl.class,
   OrgServiceImpl.class,
   OrgService.class,
   UserUtil.class,
   Patterns.class,
-  LocationClientImpl.class,
   DataCacheHandler.class,
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
   UserClientImpl.class,
   UserClient.class,
-  OrganisationClientImpl.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
   ActorSelection.class,
@@ -104,8 +96,6 @@ public abstract class UserManagementActorTestBase {
   public static OrgServiceImpl orgService;
   public static CassandraOperationImpl cassandraOperation;
   public static ElasticSearchService esService;
-  protected static OrganisationClient organisationClient;
-  public LocationClient locationClient;
   public static UserLookUpServiceImpl userLookupService;
   public static UserRoleServiceImpl userRoleService;
 
@@ -136,26 +126,6 @@ public abstract class UserManagementActorTestBase {
             Mockito.any(ActorRef.class), Mockito.any(Request.class), Mockito.any(Timeout.class)))
         .thenReturn(future);
 
-    PowerMockito.mockStatic(SystemSettingClientImpl.class);
-    SystemSettingClientImpl systemSettingClient = mock(SystemSettingClientImpl.class);
-    when(SystemSettingClientImpl.getInstance()).thenReturn(systemSettingClient);
-    when(systemSettingClient.getSystemSettingByFieldAndKey(
-            Mockito.any(ActorRef.class),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(),
-            Mockito.any()))
-        .thenReturn(new HashMap<>());
-
-    PowerMockito.mockStatic(LocationClientImpl.class);
-    locationClient = mock(LocationClientImpl.class);
-    when(LocationClientImpl.getInstance()).thenReturn(locationClient);
-    when(locationClient.getLocationsByCodes(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationLists());
-    when(locationClient.getRelatedLocationIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationIdLists());
-    when(locationClient.getLocationByIds(Mockito.any(), Mockito.anyList(), Mockito.any()))
-        .thenReturn(getLocationLists());
     PowerMockito.mockStatic(FormApiUtilHandler.class);
     PowerMockito.when(FormApiUtilHandler.getFormApiConfig(eq("locationCode1"), Mockito.any()))
         .thenReturn(getFormApiConfig());
@@ -235,21 +205,12 @@ public abstract class UserManagementActorTestBase {
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
     reqMap = getMapObject();
-    organisationClient = mock(OrganisationClient.class);
-    mockStatic(OrganisationClientImpl.class);
-    when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
-    Organisation org = new Organisation();
-    org.setRootOrgId("anyOrgId");
-    org.setId("anyOrgId");
-    when(organisationClient.esGetOrgByExternalId(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(org);
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(true);
-    when(organisationClient.esGetOrgById(Mockito.anyString(), Mockito.any()))
+    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
         .thenReturn(organisation);
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.IS_DELETED, false);

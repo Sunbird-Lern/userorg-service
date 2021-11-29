@@ -14,6 +14,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.model.organisation.Organisation;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgExternalService;
@@ -46,6 +47,16 @@ public class OrgServiceImpl implements OrgService {
   @Override
   public Map<String, Object> getOrgById(String orgId, RequestContext context) {
     return orgDao.getOrgById(orgId, context);
+  }
+
+  @Override
+  public Organisation getOrgObjById(String orgId, RequestContext context) {
+    Map<String, Object> orgMap = orgDao.getOrgById(orgId, context);
+    if (MapUtils.isEmpty(orgMap)) {
+      return null;
+    } else {
+      return mapper.convertValue(orgMap, Organisation.class);
+    }
   }
 
   @Override
@@ -89,6 +100,21 @@ public class OrgServiceImpl implements OrgService {
       orgResponseList = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
     return orgResponseList;
+  }
+
+  public List<Organisation> organisationObjSearch(Map<String, Object> filters, RequestContext context) {
+    List<Organisation> orgList = new ArrayList<>();
+    ObjectMapper objectMapper = new ObjectMapper();
+    List<Map<String, Object>> orgMapList = organisationSearch(filters, context);
+    if (CollectionUtils.isNotEmpty(orgMapList)) {
+      for (Map<String, Object> orgMap : orgMapList) {
+        orgMap.put(JsonKey.CONTACT_DETAILS, String.valueOf(orgMap.get(JsonKey.CONTACT_DETAILS)));
+        orgList.add(objectMapper.convertValue(orgMap, Organisation.class));
+      }
+      return orgList;
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   @Override

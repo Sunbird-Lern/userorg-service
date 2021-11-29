@@ -57,6 +57,7 @@ public class TenantMigrationActor extends BaseActor {
   private final UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
   private final UserService userService = UserServiceImpl.getInstance();
   private final UserConsentService userConsentService = UserConsentServiceImpl.getInstance();
+
   @Inject
   @Named("user_external_identity_management_actor")
   private ActorRef userExternalIdManagementActor;
@@ -178,14 +179,15 @@ public class TenantMigrationActor extends BaseActor {
         tenantServiceImpl.updateUserOrg(
             request, (List<Map<String, Object>>) userDetails.get(JsonKey.ORGANISATIONS));
 
-    //Revoke org consent
-    Map<String,Object> consentReqMap = new HashMap<>();
+    // Revoke org consent
+    Map<String, Object> consentReqMap = new HashMap<>();
     consentReqMap.put(JsonKey.USER_ID, (String) request.getRequest().get(JsonKey.USER_ID));
     consentReqMap.put(JsonKey.CONSENT_CONSUMERID, orgId);
     consentReqMap.put(JsonKey.CONSENT_OBJECTID, orgId);
     consentReqMap.put(JsonKey.CONSENT_OBJECTTYPE, JsonKey.CONSENT_OBJECTTYPE_ORG);
     consentReqMap.put(JsonKey.STATUS, JsonKey.CONSENT_STATUS_REVOKED);
-    Response consentRes = userConsentService.updateConsent(consentReqMap, request.getRequestContext());
+    Response consentRes =
+        userConsentService.updateConsent(consentReqMap, request.getRequestContext());
 
     // Collect all the error message
     List<Map<String, Object>> userOrgErrMsgList = new ArrayList<>();
@@ -228,7 +230,7 @@ public class TenantMigrationActor extends BaseActor {
     Request notificationRequest = createNotificationData(userData, context);
     notificationRequest.setRequestContext(context);
     try {
-    emailServiceActor.tell(notificationRequest, self());
+      emailServiceActor.tell(notificationRequest, self());
     } catch (Exception ex) {
       logger.error(context, "Exception while sending user migrate notification", ex);
     }

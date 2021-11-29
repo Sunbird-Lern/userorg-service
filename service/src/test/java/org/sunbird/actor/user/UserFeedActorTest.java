@@ -28,7 +28,6 @@ import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
-import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -77,12 +76,12 @@ public class UserFeedActorTest {
     upsertResponse.getResult().putAll(responseMap2);
     PowerMockito.when(
             cassandraOperation.insertRecord(
-                    Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-            .thenReturn(upsertResponse);
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(upsertResponse);
     PowerMockito.when(
             cassandraOperation.updateRecord(
-                    Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
-            .thenReturn(upsertResponse);
+                Mockito.any(), Mockito.any(), Mockito.anyMap(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(upsertResponse);
   }
 
   @Test
@@ -156,5 +155,4 @@ public class UserFeedActorTest {
           || res.getResponseCode() == errorCode.getResponseCode();
     }
   }
-
 }

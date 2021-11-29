@@ -1,22 +1,13 @@
 package org.sunbird.telemetry.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.telemetry.dto.Actor;
-import org.sunbird.telemetry.dto.Context;
-import org.sunbird.telemetry.dto.Producer;
-import org.sunbird.telemetry.dto.Target;
-import org.sunbird.telemetry.dto.Telemetry;
-import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.telemetry.dto.*;
 import org.sunbird.util.ProjectUtil;
 
 /**
@@ -63,7 +54,7 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateAuditEdata(params);
-
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.AUDIT.getName(), actor, eventContext, edata, targetObject);
     telemetry.setMid(reqId);
@@ -217,6 +208,7 @@ public class TelemetryGenerator {
       eventContext.getCdata().add(map);
     }
     Map<String, Object> edata = generateSearchEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.SEARCH.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
@@ -272,6 +264,7 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateLogEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry = new Telemetry(TelemetryEvents.LOG.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
     return getTelemetry(telemetry);
@@ -337,6 +330,7 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateErrorEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.ERROR.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
@@ -350,7 +344,7 @@ public class TelemetryGenerator {
     String stackTrace = (String) params.get(JsonKey.STACKTRACE);
     edata.put(JsonKey.ERROR, error);
     edata.put(JsonKey.ERR_TYPE, errorType);
-    edata.put(JsonKey.STACKTRACE, ProjectUtil.getFirstNCharacterString(stackTrace, 100));
+    edata.put(JsonKey.STACKTRACE, ProjectUtil.getFirstNCharacterString(stackTrace, 2048));
     return edata;
   }
 

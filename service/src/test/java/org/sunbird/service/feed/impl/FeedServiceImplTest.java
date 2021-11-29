@@ -1,10 +1,6 @@
 package org.sunbird.service.feed.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +24,10 @@ import org.sunbird.service.feed.IFeedService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        ServiceFactory.class,
-        CassandraOperationImpl.class,
-        FeedDaoImpl.class,
-        IFeedDao.class
+  ServiceFactory.class,
+  CassandraOperationImpl.class,
+  FeedDaoImpl.class,
+  IFeedDao.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -59,10 +55,10 @@ public class FeedServiceImplTest {
     PowerMockito.when(iFeedDao.insert(Mockito.anyMap(), Mockito.any())).thenReturn(upsertResponse);
     PowerMockito.when(iFeedDao.update(Mockito.anyMap(), Mockito.any())).thenReturn(upsertResponse);
     PowerMockito.doNothing()
-            .when(iFeedDao)
-            .delete(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any());
+        .when(iFeedDao)
+        .delete(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any());
     PowerMockito.when(iFeedDao.getFeedsByProperties(Mockito.anyMap(), Mockito.any()))
-            .thenReturn(response);
+        .thenReturn(response);
     feedService = FeedFactory.getInstance();
   }
 
@@ -72,6 +68,7 @@ public class FeedServiceImplTest {
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
+
   @Test
   public void testDelete() {
     boolean response = false;
@@ -121,5 +118,4 @@ public class FeedServiceImplTest {
     feed.setData(map);
     return feed;
   }
-
 }

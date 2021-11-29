@@ -4,14 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -30,11 +23,7 @@ import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.impl.*;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.UserFlagUtil;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
+import org.sunbird.util.*;
 import org.sunbird.util.user.UserUtil;
 
 public class UserProfileReadService {
@@ -77,7 +66,7 @@ public class UserProfileReadService {
             || readVersion.equalsIgnoreCase(ActorOperations.GET_USER_PROFILE_V5.getValue()))) {
       Util.getOrgDefaultValue().keySet().forEach(rootOrg::remove);
       Util.getUserDefaultValue().keySet().forEach(result::remove);
-    }else{
+    } else {
       result.putAll(Util.getUserDefaultValue());
     }
     result.put(JsonKey.ROOT_ORG, rootOrg);
@@ -175,14 +164,14 @@ public class UserProfileReadService {
     try {
       if (StringUtils.isNotEmpty((String) result.get(JsonKey.PROFILE_USERTYPES))) {
         userTypeDetailsList =
-                mapper.readValue(
-                        (String) result.get(JsonKey.PROFILE_USERTYPES), new TypeReference<>() {});
+            mapper.readValue(
+                (String) result.get(JsonKey.PROFILE_USERTYPES), new TypeReference<>() {});
       }
     } catch (Exception e) {
       logger.error(
-              actorMessage.getRequestContext(),
-              "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPES),
-              e);
+          actorMessage.getRequestContext(),
+          "Exception because of mapper read value" + result.get(JsonKey.PROFILE_USERTYPES),
+          e);
     }
     Map<String, Object> userTypeDetails = new HashMap<>();
     try {

@@ -132,7 +132,7 @@ public class SSOUserServiceImpl implements SSOUserService {
     }
     Organisation fetchedOrgById;
     if (StringUtils.isNotBlank(requestedOrgId)) {
-      fetchedOrgById = organisationClient.esGetOrgById(requestedOrgId, context);
+      fetchedOrgById = orgService.getOrgObjById(requestedOrgId, context);
       if (null == fetchedOrgById) {
         ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgData);
       }
@@ -220,7 +220,7 @@ public class SSOUserServiceImpl implements SSOUserService {
       }
       try {
         ObjectMapper mapper = new ObjectMapper();
-        if(!userMap.containsKey(JsonKey.PROFILE_USERTYPES)){
+        if (!userMap.containsKey(JsonKey.PROFILE_USERTYPES)) {
           List<Map<String, String>> userTypeAndSubTypes = new ArrayList<>();
           userTypeAndSubTypes.add(userTypeAndSubType);
           userMap.put(JsonKey.PROFILE_USERTYPES, mapper.writeValueAsString(userTypeAndSubTypes));

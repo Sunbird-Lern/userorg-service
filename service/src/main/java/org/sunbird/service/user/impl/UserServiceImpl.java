@@ -474,7 +474,9 @@ public class UserServiceImpl implements UserService {
           userTypeDetails = mapper.readValue(profUserTypes, List.class);
         } catch (Exception e) {
           logger.error(
-                  context, "Exception while converting profileUserTypes to List<Map<String, Object>>.", e);
+              context,
+              "Exception while converting profileUserTypes to List<Map<String, Object>>.",
+              e);
         }
       }
       userDetails.put(JsonKey.PROFILE_USERTYPES, userTypeDetails);
