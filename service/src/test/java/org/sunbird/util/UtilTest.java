@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
@@ -63,5 +63,20 @@ public class UtilTest {
     req.getContext().put( JsonKey.ACTOR_TYPE, JsonKey.USER);
     req.getContext().put(JsonKey.REQUESTED_BY,"user1");
     Util.initializeContext(req,null);
+  }
+
+  @Test
+  public void addMaskEmailAndPhoneTest() {
+    Map<String, Object> userMap = new HashMap<String, Object>();
+    userMap.put(JsonKey.EMAIL, "test@test.com");
+    userMap.put(JsonKey.PHONE, "999999999");
+    try {
+      Util.addMaskEmailAndPhone(userMap);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    Assert.assertEquals("test@test.com", userMap.get(JsonKey.ENC_EMAIL));
+    Assert.assertEquals("999999999", userMap.get(JsonKey.ENC_PHONE));
   }
 }

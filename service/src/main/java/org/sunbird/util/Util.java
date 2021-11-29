@@ -132,6 +132,19 @@ public final class Util {
     }
   }
 
+  public static void addMaskEmailAndPhone(Map<String, Object> userMap) {
+    String phone = (String) userMap.get(JsonKey.PHONE);
+    String email = (String) userMap.get(JsonKey.EMAIL);
+    userMap.put(JsonKey.ENC_PHONE, phone);
+    userMap.put(JsonKey.ENC_EMAIL, email);
+    if (!StringUtils.isBlank(phone)) {
+      userMap.put(JsonKey.PHONE, maskingService.maskPhone(decService.decryptData(phone, null)));
+    }
+    if (!StringUtils.isBlank(email)) {
+      userMap.put(JsonKey.EMAIL, maskingService.maskEmail(decService.decryptData(email, null)));
+    }
+  }
+
   public static Map<String, Object> getUserDefaultValue() {
     Map<String, Object> user = new HashMap<>();
     user.put("avatar", null);

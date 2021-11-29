@@ -114,19 +114,6 @@ public final class UserUtility {
     return StringUtils.EMPTY;
   }
 
-  public static void addMaskEmailAndPhone(Map<String, Object> userMap) {
-    String phone = (String) userMap.get(JsonKey.PHONE);
-    String email = (String) userMap.get(JsonKey.EMAIL);
-    userMap.put(JsonKey.ENC_PHONE, phone);
-    userMap.put(JsonKey.ENC_EMAIL, email);
-    if (!StringUtils.isBlank(phone)) {
-      userMap.put(JsonKey.PHONE, maskingService.maskPhone(decryptionService.decryptData(phone, null)));
-    }
-    if (!StringUtils.isBlank(email)) {
-      userMap.put(JsonKey.EMAIL, maskingService.maskEmail(decryptionService.decryptData(email, null)));
-    }
-  }
-
   private static void init() {
     decryptionService = org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
     maskingService = org.sunbird.datasecurity.impl.ServiceFactory.getMaskingServiceInstance();

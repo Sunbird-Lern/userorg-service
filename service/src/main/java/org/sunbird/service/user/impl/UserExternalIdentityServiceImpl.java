@@ -2,11 +2,9 @@ package org.sunbird.service.user.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.user.UserExternalIdentityDao;
 import org.sunbird.dao.user.impl.UserExternalIdentityDaoImpl;
@@ -16,18 +14,12 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.user.UserExternalIdentityService;
+import org.sunbird.util.user.UserExternalIdentityAdapter;
 import org.sunbird.util.user.UserUtil;
 
 public class UserExternalIdentityServiceImpl implements UserExternalIdentityService {
   private final UserExternalIdentityDao userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private final LocationService locationService = LocationServiceImpl.getInstance();
-
-  @Override
-  public List<Map<String, Object>> getSelfDeclaredDetails(
-      String userId, String orgId, String role, RequestContext context) {
-    // Todo:For new Update Api
-    return null;
-  }
 
   @Override
   public List<Map<String, String>> getSelfDeclaredDetails(String userId, RequestContext context) {
@@ -36,7 +28,7 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
         userExternalIdentityDao.getUserSelfDeclaredDetails(userId, context);
     if (CollectionUtils.isNotEmpty(dbSelfDeclareExternalIds)) {
       externalIds =
-          convertSelfDeclareFieldsToExternalIds(
+              UserExternalIdentityAdapter.convertSelfDeclareFieldsToExternalIds(
               dbSelfDeclareExternalIds.get(0));
     }
     return externalIds;
@@ -143,44 +135,4 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
     return userExternalIdentityDao.getUserIdByExternalId(extId.toLowerCase(), orgId, context);
   }
 
-    public static List<Map<String, String>> convertSelfDeclareFieldsToExternalIds(
-            Map<String, Object> selfDeclaredFields) {
-        List<Map<String, String>> externalIds = new ArrayList<>();
-        if (MapUtils.isNotEmpty(selfDeclaredFields)) {
-            Map<String, String> userInfo =
-                    (Map<String, String>) selfDeclaredFields.get(JsonKey.USER_INFO);
-            if (MapUtils.isNotEmpty(userInfo)) {
-                for (Map.Entry<String, String> itr : userInfo.entrySet()) {
-                    Map<String, String> externalIdMap = new HashMap<>();
-                    externalIdMap.put(JsonKey.USER_ID, (String) selfDeclaredFields.get(JsonKey.USER_ID));
-                    externalIdMap.put(JsonKey.ID_TYPE, itr.getKey());
-                    externalIdMap.put(JsonKey.ORIGINAL_ID_TYPE, itr.getKey());
-                    externalIdMap.put(JsonKey.PROVIDER, (String) selfDeclaredFields.get(JsonKey.ORG_ID));
-                    externalIdMap.put(
-                            JsonKey.ORIGINAL_PROVIDER, (String) selfDeclaredFields.get(JsonKey.ORG_ID));
-                    externalIdMap.put(JsonKey.EXTERNAL_ID, itr.getValue());
-                    externalIdMap.put(JsonKey.ORIGINAL_EXTERNAL_ID, itr.getValue());
-                    externalIds.add(externalIdMap);
-                }
-            }
-        }
-        return externalIds;
-    }
-
-  public static Map<String, Object> convertExternalFieldsToSelfDeclareFields(
-          List<Map<String, String>> externalIds) {
-    Map<String, Object> selfDeclaredField = new HashMap<>();
-    if (CollectionUtils.isNotEmpty(externalIds)) {
-       Map<String, String> userInfo = new HashMap<>();
-       for (Map<String, String> extIdMap : externalIds) {
-           userInfo.put(
-                   extIdMap.get(JsonKey.ORIGINAL_ID_TYPE), extIdMap.get(JsonKey.ORIGINAL_EXTERNAL_ID));
-       }
-       selfDeclaredField.put(JsonKey.USER_ID, externalIds.get(0).get(JsonKey.USER_ID));
-       selfDeclaredField.put(JsonKey.ORG_ID, externalIds.get(0).get(JsonKey.ORIGINAL_PROVIDER));
-       selfDeclaredField.put(JsonKey.PERSONA, JsonKey.TEACHER_PERSONA);
-       selfDeclaredField.put(JsonKey.USER_INFO, userInfo);
-    }
-    return selfDeclaredField;
-  }
 }

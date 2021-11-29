@@ -6,9 +6,6 @@ import org.sunbird.request.RequestContext;
 
 public interface UserExternalIdentityService {
 
-  List<Map<String, Object>> getSelfDeclaredDetails(
-      String userId, String orgId, String role, RequestContext context);
-
   List<Map<String, String>> getSelfDeclaredDetails(String userId, RequestContext context);
 
   List<Map<String, String>> getUserExternalIds(String userId, RequestContext context);

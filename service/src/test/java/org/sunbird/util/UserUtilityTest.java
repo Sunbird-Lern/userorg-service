@@ -5,10 +5,20 @@ import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
 
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore({
+        "javax.management.*",
+        "javax.net.ssl.*",
+        "javax.security.*",
+        "jdk.internal.reflect.*",
+        "javax.crypto.*"
+})
 public class UserUtilityTest {
 
   @Test
@@ -128,18 +138,4 @@ public class UserUtilityTest {
     assertEquals(userName, response.get(JsonKey.USER_NAME));
   }
 
-  @Test
-  public void addMaskEmailAndPhoneTest() {
-    Map<String, Object> userMap = new HashMap<String, Object>();
-    userMap.put(JsonKey.EMAIL, "test@test.com");
-    userMap.put(JsonKey.PHONE, "999999999");
-    try {
-      UserUtility.addMaskEmailAndPhone(userMap);
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    Assert.assertEquals("test@test.com", userMap.get(JsonKey.ENC_EMAIL));
-    Assert.assertEquals("999999999", userMap.get(JsonKey.ENC_PHONE));
-  }
 }
