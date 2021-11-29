@@ -226,9 +226,11 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       } else {
         userMap.put(JsonKey.UPDATED_BY, uploadedBy);
         Map<String, Object> newUserReqMap = SerializationUtils.clone(new HashMap<>(userMap));
-        callUpdateUser(newUserReqMap, task, orgName, context);
+        newUserReqMap.put(JsonKey.ORG_NAME, orgName);
+
+        callUpdateUser(userUpdateActor, ActorOperations.UPDATE_USER.getValue(), JsonKey.UPDATE,newUserReqMap, task, context);
         if (userMap.containsKey(JsonKey.ROLES)) {
-          callAssignRole(userMap, task, context);
+          callUpdateUser(userRoleActor, ActorOperations.ASSIGN_ROLES.getValue(), ActorOperations.ASSIGN_ROLES.getValue(),userMap, task, context);
         }
       }
     } catch (Exception e) {
@@ -251,6 +253,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           "UserBulkUploadBackgroundJobActor:callCreateUser: Exception occurred with error message = "
               + ex.getMessage(),
           ex);
+      user.put(JsonKey.ERROR_MSG, ex.getMessage());
       setTaskStatus(
           task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), user, JsonKey.CREATE);
       return;
@@ -272,58 +275,26 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   }
 
   @SuppressWarnings("unchecked")
-  private void callUpdateUser(
-      Map<String, Object> user, BulkUploadProcessTask task, String orgName, RequestContext context)
+  private void callUpdateUser(ActorRef actorRef, String operation, String taskAction,
+                              Map<String, Object> user, BulkUploadProcessTask task, RequestContext context)
       throws JsonProcessingException {
-    logger.info(context, "UserBulkUploadBackgroundJobActor: callUpdateUser called");
+    logger.info(context, "UserBulkUploadBackgroundJobActor: "+operation+" called");
     try {
-      user.put(JsonKey.ORG_NAME, orgName);
-      upsertUser(userUpdateActor, user, ActorOperations.UPDATE_USER.getValue(), context);
+      upsertUser(actorRef, user, operation, context);
     } catch (Exception ex) {
       logger.error(
           context,
-          "UserBulkUploadBackgroundJobActor:callUpdateUser: Exception occurred with error message = "
+          "UserBulkUploadBackgroundJobActor:"+operation+": Exception occurred with error message = "
               + ex.getMessage(),
           ex);
       user.put(JsonKey.ERROR_MSG, ex.getMessage());
       setTaskStatus(
-          task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), user, JsonKey.UPDATE);
+          task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), user, taskAction);
     }
     if (task.getStatus() != ProjectUtil.BulkProcessStatus.FAILED.getValue()) {
       ObjectMapper mapper = new ObjectMapper();
       task.setData(mapper.writeValueAsString(user));
-      setSuccessTaskStatus(task, ProjectUtil.BulkProcessStatus.COMPLETED, user, JsonKey.UPDATE);
-    }
-  }
-
-  private void callAssignRole(
-      Map<String, Object> user, BulkUploadProcessTask task, RequestContext context)
-      throws JsonProcessingException {
-    logger.info(context, "UserBulkUploadBackgroundJobActor: callAssignRole called");
-    try {
-      upsertUser(userRoleActor, user, ActorOperations.ASSIGN_ROLES.getValue(), context);
-    } catch (Exception ex) {
-      logger.error(
-          context,
-          "UserBulkUploadBackgroundJobActor:callAssignRole: Exception occurred with error message = "
-              + ex.getMessage(),
-          ex);
-      user.put(JsonKey.ERROR_MSG, ex.getMessage());
-      setTaskStatus(
-          task,
-          ProjectUtil.BulkProcessStatus.FAILED,
-          ex.getMessage(),
-          user,
-          ActorOperations.ASSIGN_ROLES.getValue());
-    }
-    if (task.getStatus() != ProjectUtil.BulkProcessStatus.FAILED.getValue()) {
-      ObjectMapper mapper = new ObjectMapper();
-      task.setData(mapper.writeValueAsString(user));
-      setSuccessTaskStatus(
-          task,
-          ProjectUtil.BulkProcessStatus.COMPLETED,
-          user,
-          ActorOperations.ASSIGN_ROLES.getValue());
+      setSuccessTaskStatus(task, ProjectUtil.BulkProcessStatus.COMPLETED, user, taskAction);
     }
   }
 
@@ -352,42 +323,23 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   private String upsertUser(
           ActorRef actorRef, Map<String, Object> userMap, String operation, RequestContext context) {
     String userId = null;
-    Object obj = null;
 
     Request request = new Request();
-    request.setRequest(userMap);
     request.setRequestContext(context);
+    request.setRequest(userMap);
     request.setOperation(operation);
-    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_USER_UPLOAD);
+    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
     request.getContext().put(JsonKey.ROOT_ORG_ID, userMap.get(JsonKey.ROOT_ORG_ID));
     userMap.remove(JsonKey.ROOT_ORG_ID);
+    Object obj = actorCall(actorRef, request, context);
 
-    try {
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      Future<Object> future = Patterns.ask(actorRef, request, t);
-      obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce) {
-      throw pce;
-    } catch (Exception e) {
-      logger.error(
-              context, "upsertUser: Exception occurred with error message = " + e.getMessage(), e);
-      throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-    }
     if (obj instanceof Response) {
       Response response = (Response) obj;
-      userId = (String) response.get(JsonKey.USER_ID);
-    } else if (obj instanceof ProjectCommonException) {
-      throw (ProjectCommonException) obj;
-    } else if (obj instanceof Exception) {
-      ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+      if(response.get(JsonKey.USER_ID) != null) {
+        userId = (String) response.get(JsonKey.USER_ID);
+      }
     }
-
     return userId;
   }
 }

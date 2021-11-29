@@ -1,11 +1,15 @@
 package org.sunbird.actor.bulkupload;
 
+import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.common.Constants;
@@ -23,6 +27,9 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadActor {
 
@@ -193,4 +200,37 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
   }
 
   public abstract void preProcessResult(Map<String, Object> result);
+
+  public Object actorCall(ActorRef actorRef, Request request, RequestContext context) {
+    Object obj = null;
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce) {
+      throw pce;
+    } catch (Exception e) {
+      logger.error(
+              context,
+              "Unable to communicate with actor: Exception occurred with error message = "
+                      + e.getMessage(),
+              e);
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+    checkResponseForException(obj);
+    return obj;
+  }
+
+  private void checkResponseForException(Object obj) {
+    if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else if (obj instanceof Exception) {
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+  }
 }
