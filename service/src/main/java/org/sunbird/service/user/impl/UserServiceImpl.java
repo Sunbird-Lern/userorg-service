@@ -534,5 +534,4 @@ public class UserServiceImpl implements UserService {
       userDetails.putAll(userFlagMap);
     }
   }
-
 }

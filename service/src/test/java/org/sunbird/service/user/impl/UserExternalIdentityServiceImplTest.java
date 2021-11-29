@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,17 +26,18 @@ import org.sunbird.service.user.UserExternalIdentityService;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-        ServiceFactory.class,
-        CassandraOperationImpl.class,
+  ServiceFactory.class,
+  CassandraOperationImpl.class,
 })
 @PowerMockIgnore({
-        "javax.management.*",
-        "javax.net.ssl.*",
-        "javax.security.*",
-        "jdk.internal.reflect.*",
-        "javax.crypto.*"
+  "javax.management.*",
+  "javax.net.ssl.*",
+  "javax.security.*",
+  "jdk.internal.reflect.*",
+  "javax.crypto.*"
 })
 public class UserExternalIdentityServiceImplTest {
+
   private static CassandraOperation cassandraOperationImpl = null;
 
   @Before
@@ -85,5 +85,4 @@ public class UserExternalIdentityServiceImplTest {
         userExternalIdentityService.getExternalIds("userId", true, new RequestContext());
     Assert.assertNotNull(externalIds);
   }
-
 }
