@@ -1,24 +1,22 @@
 package org.sunbird.actor.bulkupload;
 
 import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserRequestValidator;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
-import org.sunbird.client.user.UserClient;
-import org.sunbird.client.user.impl.UserClientImpl;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
@@ -27,6 +25,7 @@ import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.role.RoleService;
@@ -35,10 +34,12 @@ import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
-  private UserClient userClient = UserClientImpl.getInstance();
   private final OrgService orgService = OrgServiceImpl.getInstance();
   private UserRequestValidator userRequestValidator = new UserRequestValidator();
   private final SystemSettingsService systemSettingsService = new SystemSettingsService();
@@ -243,7 +244,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     logger.info(context, "UserBulkUploadBackgroundJobActor: callCreateUser called");
     String userId;
     try {
-      userId = userClient.createUser(ssoUserCreateActor, user, context);
+      userId = upsertUser(ssoUserCreateActor, user, ActorOperations.CREATE_USER.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -277,7 +278,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     logger.info(context, "UserBulkUploadBackgroundJobActor: callUpdateUser called");
     try {
       user.put(JsonKey.ORG_NAME, orgName);
-      userClient.updateUser(userUpdateActor, user, context);
+      upsertUser(userUpdateActor, user, ActorOperations.UPDATE_USER.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -300,7 +301,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       throws JsonProcessingException {
     logger.info(context, "UserBulkUploadBackgroundJobActor: callAssignRole called");
     try {
-      userClient.assignRolesToUser(userRoleActor, user, context);
+      upsertUser(userRoleActor, user, ActorOperations.ASSIGN_ROLES.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -346,5 +347,47 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   public void preProcessResult(Map<String, Object> result) {
     UserUtility.decryptUserData(result);
     Util.addMaskEmailAndPhone(result);
+  }
+
+  private String upsertUser(
+          ActorRef actorRef, Map<String, Object> userMap, String operation, RequestContext context) {
+    String userId = null;
+    Object obj = null;
+
+    Request request = new Request();
+    request.setRequest(userMap);
+    request.setRequestContext(context);
+    request.setOperation(operation);
+    request.getContext().put(JsonKey.VERSION, JsonKey.VERSION_2);
+    request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_USER_UPLOAD);
+    request.getContext().put(JsonKey.ROOT_ORG_ID, userMap.get(JsonKey.ROOT_ORG_ID));
+    userMap.remove(JsonKey.ROOT_ORG_ID);
+
+    try {
+      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
+      Future<Object> future = Patterns.ask(actorRef, request, t);
+      obj = Await.result(future, t.duration());
+    } catch (ProjectCommonException pce) {
+      throw pce;
+    } catch (Exception e) {
+      logger.error(
+              context, "upsertUser: Exception occurred with error message = " + e.getMessage(), e);
+      throw new ProjectCommonException(
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
+    }
+    if (obj instanceof Response) {
+      Response response = (Response) obj;
+      userId = (String) response.get(JsonKey.USER_ID);
+    } else if (obj instanceof ProjectCommonException) {
+      throw (ProjectCommonException) obj;
+    } else if (obj instanceof Exception) {
+      ProjectCommonException.throwServerErrorException(
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+    }
+
+    return userId;
   }
 }

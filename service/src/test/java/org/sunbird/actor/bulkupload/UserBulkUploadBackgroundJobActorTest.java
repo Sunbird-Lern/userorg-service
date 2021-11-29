@@ -23,7 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.datasecurity.EncryptionService;
@@ -43,7 +42,6 @@ import org.sunbird.util.ProjectUtil;
   ServiceFactory.class,
   TelemetryWriter.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class,
-  UserClientImpl.class,
   BulkUploadProcessDaoImpl.class,
   BulkUploadProcess.class,
   BulkUploadProcessTaskDaoImpl.class,
@@ -61,8 +59,6 @@ import org.sunbird.util.ProjectUtil;
 })
 public class UserBulkUploadBackgroundJobActorTest {
 
-  private UserClientImpl userClient;
-
   private static ActorSystem system;
   private static final Props props = Props.create(UserBulkUploadBackgroundJobActor.class);
   private static EncryptionService encryptionService;
@@ -77,12 +73,6 @@ public class UserBulkUploadBackgroundJobActorTest {
     when(org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance())
         .thenReturn(encryptionService);
     system = ActorSystem.create("system");
-    PowerMockito.mockStatic(UserClientImpl.class);
-    userClient = mock(UserClientImpl.class);
-    when(UserClientImpl.getInstance()).thenReturn(userClient);
-    doNothing()
-        .when(userClient)
-        .updateUser(Mockito.any(ActorRef.class), Mockito.anyMap(), Mockito.any());
   }
 
   @Test
