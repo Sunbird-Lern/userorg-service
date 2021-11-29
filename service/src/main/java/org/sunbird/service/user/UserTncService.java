@@ -122,8 +122,9 @@ public class UserTncService {
     // check if it is org admin TnC and user is not an admin of the organisation
     // OR check if it is report viewer tnc and user not having the report viewer role
     if ((JsonKey.ORG_ADMIN_TNC.equals(tncType) && !roleCheck(user, JsonKey.ORG_ADMIN, context))
-        || (JsonKey.REPORT_VIEWER_TNC.equals(tncType)
-            && !roleCheck(user, JsonKey.REPORT_VIEWER, context))) {
+            || (JsonKey.REPORT_VIEWER_TNC.equals(tncType)
+            && (!roleCheck(user, JsonKey.REPORT_VIEWER, context)
+            || !roleCheck(user, JsonKey.REPORT_ADMIN, context)))) {
       ProjectCommonException.throwClientErrorException(
           ResponseCode.invalidParameterValue,
           MessageFormat.format(
