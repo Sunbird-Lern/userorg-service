@@ -2,7 +2,8 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
