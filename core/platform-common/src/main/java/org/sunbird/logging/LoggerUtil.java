@@ -11,12 +11,20 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+import org.sunbird.telemetry.collector.TelemetryAssemblerFactory;
+import org.sunbird.telemetry.collector.TelemetryDataAssembler;
 import org.sunbird.telemetry.util.TelemetryEvents;
 import org.sunbird.telemetry.util.TelemetryWriter;
+import org.sunbird.telemetry.validator.TelemetryObjectValidator;
+import org.sunbird.telemetry.validator.TelemetryObjectValidatorV3;
 
 public class LoggerUtil {
 
   private Logger logger;
+  private static final TelemetryDataAssembler telemetryDataAssembler =
+      TelemetryAssemblerFactory.get();
+  private static final TelemetryObjectValidator telemetryObjectValidator =
+      new TelemetryObjectValidatorV3();
 
   public LoggerUtil(Class c) {
     logger = LoggerFactory.getLogger(c);
@@ -82,7 +90,21 @@ public class LoggerUtil {
 
   public void debug(RequestContext requestContext, String message) {
     if (isDebugEnabled(requestContext)) {
-      logger.info(Markers.appendEntries(requestContext.getContextMap()), message);
+      Map<String, Object> context =
+          (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
+      Map<String, Object> params = new HashMap<>();
+      Map<String, Object> telemetryInfo = new HashMap<>();
+      telemetryInfo.put(JsonKey.CONTEXT, context);
+      telemetryInfo.put(JsonKey.PARAMS, params);
+      params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
+      params.put(JsonKey.LOG_LEVEL, JsonKey.DEBUG);
+      params.put(JsonKey.MESSAGE, message);
+      String telemetry = telemetryDataAssembler.log(context, params);
+      if (StringUtils.isNotBlank(telemetry) && telemetryObjectValidator.validateLog(telemetry)) {
+        logger.info(Markers.appendEntries(requestContext.getContextMap()), telemetry);
+      } else {
+        logger.info(Markers.appendEntries(requestContext.getContextMap()), message);
+      }
     } else {
       logger.debug(message);
     }

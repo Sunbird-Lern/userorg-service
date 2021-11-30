@@ -603,6 +603,7 @@ public final class JsonKey {
   public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
       "OTP to edit Diksha Profile";
   public static final String X_Source = "x-source";
+  public static final Object DEBUG = "DEBUG";
 
   private JsonKey() {}
 }
