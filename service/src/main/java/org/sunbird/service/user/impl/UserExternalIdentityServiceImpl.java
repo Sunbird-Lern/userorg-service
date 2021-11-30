@@ -22,13 +22,6 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   private final LocationService locationService = LocationServiceImpl.getInstance();
 
   @Override
-  public List<Map<String, Object>> getSelfDeclaredDetails(
-      String userId, String orgId, String role, RequestContext context) {
-    // Todo:For new Update Api
-    return null;
-  }
-
-  @Override
   public List<Map<String, String>> getSelfDeclaredDetails(String userId, RequestContext context) {
     List<Map<String, String>> externalIds = new ArrayList<>();
     List<Map<String, Object>> dbSelfDeclareExternalIds =

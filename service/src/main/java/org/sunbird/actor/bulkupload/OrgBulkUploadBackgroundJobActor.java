@@ -26,6 +26,7 @@ import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.model.organisation.Organisation;
+import org.sunbird.operations.LocationActorOperation;
 import org.sunbird.operations.OrganisationActorOperation;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -267,36 +268,19 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
   private String upsertOrg(
           ActorRef actorRef, Map<String, Object> orgMap, String operation, RequestContext context) {
     String orgId = null;
-    Object obj = null;
 
     Request request = new Request();
     request.setRequestContext(context);
     request.setRequest(orgMap);
     request.setOperation(operation);
     request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
-    try {
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      Future<Object> future = Patterns.ask(actorRef, request, t);
-      obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce) {
-      throw pce;
-    } catch (Exception e) {
-      logger.error(
-              context, "upsertOrg: Exception occurred with error message = " + e.getMessage(), e);
-      ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
-    }
+    Object obj = actorCall(actorRef, request, context);
+
     if (obj instanceof Response) {
       Response response = (Response) obj;
-      orgId = (String) response.get(JsonKey.ORGANISATION_ID);
-    } else if (obj instanceof ProjectCommonException) {
-      throw (ProjectCommonException) obj;
-    } else if (obj instanceof Exception) {
-      throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+      if(response.get(JsonKey.ORGANISATION_ID) != null) {
+        orgId = (String) response.get(JsonKey.ORGANISATION_ID);
+      }
     }
     return orgId;
   }

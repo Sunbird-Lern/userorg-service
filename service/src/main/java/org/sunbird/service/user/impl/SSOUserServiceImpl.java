@@ -9,8 +9,6 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
@@ -37,7 +35,6 @@ public class SSOUserServiceImpl implements SSOUserService {
   private final LoggerUtil logger = new LoggerUtil(SSOUserServiceImpl.class);
 
   private static SSOUserService ssoUserService = null;
-  private final OrganisationClient organisationClient = OrganisationClientImpl.getInstance();
   private final OrgExternalService orgExternalService = OrgExternalServiceImpl.getInstance();
   private final UserService userService = UserServiceImpl.getInstance();
   private final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();

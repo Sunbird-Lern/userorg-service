@@ -29,6 +29,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -38,11 +39,10 @@ import org.sunbird.util.user.UserActorOperations;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   ServiceFactory.class,
-  Util.class,
+  UserUtility.class,
   DataCacheHandler.class,
   org.sunbird.datasecurity.impl.ServiceFactory.class,
   EmailTemplateDaoImpl.class,
-  Util.class,
   EsClientFactory.class
 })
 @PowerMockIgnore({
@@ -96,8 +96,8 @@ public class UserExternalIdManagementActorTest {
         Mockito.anyString(),
         Mockito.anyMap(),
         Mockito.any(RequestContext.class));
-    PowerMockito.mockStatic(Util.class);
-    when(Util.encryptData(Mockito.anyString())).thenReturn("userExtId");
+    PowerMockito.mockStatic(UserUtility.class);
+    when(UserUtility.encryptData(Mockito.anyString())).thenReturn("userExtId");
   }
 
   private Response getCassandraRecordsByIndexedProperty() {

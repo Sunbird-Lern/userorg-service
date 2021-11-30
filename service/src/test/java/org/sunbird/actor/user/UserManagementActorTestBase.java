@@ -22,8 +22,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.user.UserClient;
-import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -68,8 +66,6 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
-  UserClientImpl.class,
-  UserClient.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
   ActorSelection.class,
