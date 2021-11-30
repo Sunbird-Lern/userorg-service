@@ -1,8 +1,6 @@
 package org.sunbird.actor.bulkupload;
 
 import akka.actor.ActorRef;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -10,10 +8,8 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
@@ -31,13 +27,11 @@ import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private final LocationService locationService = new LocationServiceImpl();
+
   @Inject
   @Named("location_actor")
   private ActorRef locationActor;
@@ -79,7 +73,8 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       if (checkMandatoryFields(row, JsonKey.CODE)) {
         Location location = null;
         try {
-          List<Location> locationList = locationService.locationSearch(JsonKey.CODE, row.get(JsonKey.CODE), context);
+          List<Location> locationList =
+              locationService.locationSearch(JsonKey.CODE, row.get(JsonKey.CODE), context);
           if (CollectionUtils.isNotEmpty(locationList)) {
             location = locationList.get(0);
           }
@@ -144,12 +139,9 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     }
     ObjectMapper mapper = new ObjectMapper();
     try {
-      Request request = new Request();
-      request.getRequest().putAll(row);
-      request.setOperation(LocationActorOperation.UPDATE_LOCATION.getValue());
       logger.info(context, "callUpdateLocation ");
-      locationActor.tell(request, self());
-
+      upsertLocation(
+          locationActor, row, LocationActorOperation.UPDATE_LOCATION.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -173,19 +165,12 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
   private void callCreateLocation(
       Map<String, Object> row, BulkUploadProcessTask task, RequestContext context)
       throws JsonProcessingException {
-
-    Request request = new Request();
-    request.getRequest().putAll(row);
-    request.setRequestContext(context);
     String locationId = "";
     try {
-      request.setOperation(LocationActorOperation.CREATE_LOCATION.getValue());
       logger.info(context, "callCreateLocation ");
-      Object obj = actorCall(locationActor, request, context);
-      if (obj instanceof Response) {
-        Response response = (Response) obj;
-        locationId = (String) response.get(JsonKey.ID);
-      }
+      locationId =
+          upsertLocation(
+              locationActor, row, LocationActorOperation.CREATE_LOCATION.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -224,41 +209,31 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     }
   }
 
-  private Object actorCall(ActorRef actorRef, Request request, RequestContext context) {
-    Object obj = null;
-    try {
-      Timeout t = new Timeout(Duration.create(10, TimeUnit.SECONDS));
-      Future<Object> future = Patterns.ask(actorRef, request, t);
-      obj = Await.result(future, t.duration());
-    } catch (ProjectCommonException pce) {
-      throw pce;
-    } catch (Exception e) {
-      logger.error(
-              context,
-              "Unable to communicate with actor: Exception occurred with error message = "
-                      + e.getMessage(),
-              e);
-      ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
-    }
-    checkLocationResponseForException(obj);
-    return obj;
-  }
-
-  private void checkLocationResponseForException(Object obj) {
-    if (obj instanceof ProjectCommonException) {
-      throw (ProjectCommonException) obj;
-    } else if (obj instanceof Exception) {
-      throw new ProjectCommonException(
-              ResponseCode.SERVER_ERROR.getErrorCode(),
-              ResponseCode.SERVER_ERROR.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
-    }
-  }
-
   @Override
   public void preProcessResult(Map<String, Object> result) {
     // Do nothing
+  }
+
+  private String upsertLocation(
+      ActorRef actorRef,
+      Map<String, Object> locationMap,
+      String operation,
+      RequestContext context) {
+    String locId = null;
+
+    Request request = new Request();
+    request.setRequestContext(context);
+    request.setRequest(locationMap);
+    request.setOperation(operation);
+    request.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_LOCATION_UPLOAD);
+    Object obj = actorCall(actorRef, request, context);
+
+    if (obj instanceof Response) {
+      Response response = (Response) obj;
+      if (response.get(JsonKey.ID) != null) {
+        locId = (String) response.get(JsonKey.ID);
+      }
+    }
+    return locId;
   }
 }

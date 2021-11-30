@@ -38,6 +38,7 @@ public final class JsonKey {
   public static final String BULK_UPLOAD_ORG_DATA_SIZE = "bulk_upload_org_data_size";
   public static final String BULK_UPLOAD_USER_DATA_SIZE = "sunbird_user_bulk_upload_size";
   public static final String BULK_USER_UPLOAD = "bulkUserUpload";
+  public static final String BULK_LOCATION_UPLOAD = "bulkLocationUpload";
   public static final String CASSANDRA_SERVICE = "Cassandra service";
   public static final String CATEGORIES = "categories";
   public static final String CHANNEL = "channel";
@@ -555,6 +556,7 @@ public final class JsonKey {
   public static final String ORG_ADMIN = "ORG_ADMIN";
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
   public static final String REPORT_VIEWER = "REPORT_VIEWER";
+  public static final String REPORT_ADMIN = "REPORT_ADMIN";
   public static final String REPORT_VIEWER_TNC = "reportViewerTnc";
   public static final String REQUEST_ID = "requestid";
   public static final String LOCATION_TYPE_SCHOOL = "school";

@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -59,26 +58,6 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
 
   @Test
   public void testGetManagedUsers() throws Exception {
-    HashMap<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.ID, "102fcbd2-8ec1-4870-b9e1-5dc01f2acc75");
-    reqMap.put(JsonKey.WITH_TOKENS, "true");
-
-    PowerMockito.mockStatic(UserClientImpl.class);
-    UserClientImpl userClient = mock(UserClientImpl.class);
-    when(UserClientImpl.getInstance()).thenReturn(userClient);
-
-    Map<String, Object> responseMap = new HashMap<>();
-    List<Map<String, Object>> content = new ArrayList<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put("anyString", new Object());
-    content.add(map);
-    responseMap.put(JsonKey.CONTENT, content);
-
-    when(userClient.searchManagedUser(
-            Mockito.any(ActorRef.class),
-            Mockito.any(Request.class),
-            Mockito.any(RequestContext.class)))
-        .thenReturn(responseMap);
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.GET_MANAGED_USERS),
@@ -97,9 +76,6 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
     PowerMockito.mockStatic(Util.class);
     Map<String, Object> userMap = new HashMap<>(getMapObject());
     userMap.put(JsonKey.USER_ID, "3dc4e0bc-43a6-4ba0-84f9-6606a9c17320");
-    // when(Util.getUserDetails(Mockito.anyMap(), Mockito.anyMap(),
-    // Mockito.any(RequestContext.class)))
-    //    .thenReturn(userMap);
 
     PowerMockito.mockStatic(EsClientFactory.class);
     ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);

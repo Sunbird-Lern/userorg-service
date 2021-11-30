@@ -3,7 +3,6 @@ package org.sunbird.service.user.impl;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,8 +17,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.org.OrganisationClient;
-import org.sunbird.client.org.impl.OrganisationClientImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.organisation.Organisation;
@@ -48,7 +45,6 @@ import org.sunbird.util.user.UserUtil;
   DataCacheHandler.class,
   OrgExternalServiceImpl.class,
   UserCreateRequestValidator.class,
-  OrganisationClientImpl.class,
   UserLookupService.class,
   UserLookUpServiceImpl.class,
   UserUtil.class
@@ -61,13 +57,11 @@ import org.sunbird.util.user.UserUtil;
   "javax.crypto.*"
 })
 public class SSOUserServiceImplTest {
-  private static OrganisationClient organisationClient;
 
   @Before
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(UserCreateRequestValidator.class);
     PowerMockito.mockStatic(OrgServiceImpl.class);
-    mockStatic(OrganisationClientImpl.class);
     PowerMockito.mockStatic(OrgServiceImpl.class);
     PowerMockito.mockStatic(OrgExternalServiceImpl.class);
     PowerMockito.mockStatic(UserServiceImpl.class);
@@ -75,8 +69,6 @@ public class SSOUserServiceImplTest {
     PowerMockito.when(OrgServiceImpl.getInstance()).thenReturn(orgService);
     OrgExternalServiceImpl orgExternalService = PowerMockito.mock(OrgExternalServiceImpl.class);
 
-    organisationClient = mock(OrganisationClient.class);
-    PowerMockito.when(OrganisationClientImpl.getInstance()).thenReturn(organisationClient);
     UserService userService = mock(UserService.class);
     PowerMockito.when(UserServiceImpl.getInstance()).thenReturn(userService);
 

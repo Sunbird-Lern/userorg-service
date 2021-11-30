@@ -35,7 +35,6 @@ public class LoggerUtil {
       Map<String, Object> context =
           (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
       Map<String, Object> params = new HashMap<>();
-      params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
       Map<String, Object> telemetryInfo = new HashMap<>();
       telemetryInfo.put(JsonKey.CONTEXT, context);
       telemetryInfo.put(JsonKey.PARAMS, params);

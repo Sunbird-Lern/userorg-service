@@ -3,7 +3,9 @@ package org.sunbird.util;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,30 +16,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.common.ElasticSearchHelper;
-import org.sunbird.common.ElasticSearchRestHighImpl;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
+import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.notification.sms.provider.ISmsProvider;
-import org.sunbird.notification.utils.SMSFactory;
-import org.sunbird.request.RequestContext;
+import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.service.organisation.OrgService;
-import org.sunbird.service.organisation.impl.OrgServiceImpl;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  ServiceFactory.class,
-  EsClientFactory.class,
-  ElasticSearchRestHighImpl.class,
-  ElasticSearchHelper.class,
-  CassandraOperationImpl.class,
-  SMSFactory.class,
-  ISmsProvider.class
-})
+@PrepareForTest({ServiceFactory.class, CassandraOperation.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -46,68 +32,48 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
   "javax.crypto.*"
 })
 public class UtilTest {
-  private static CassandraOperationImpl cassandraOperationImpl;
-  private static ElasticSearchService esService;
-  private OrgService orgService = OrgServiceImpl.getInstance();
+  private static CassandraOperation cassandraOperation;
 
   @Before
   public void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
-    cassandraOperationImpl = mock(CassandraOperationImpl.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
-    esService = mock(ElasticSearchRestHighImpl.class);
-    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    cassandraOperation = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
   }
 
   @Test
-  public void testRegisterChannel() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.CHANNEL, "ch");
-    map.put(JsonKey.DESCRIPTION, "desc");
-    map.put(JsonKey.ID, "id");
-    Boolean bool = orgService.registerChannel(map, new RequestContext());
-    Assert.assertNotNull(bool);
-  }
+  public void initializeContextTest() {
 
-  @Test
-  public void testUpdateChannel() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.CHANNEL, "ch");
-    map.put(JsonKey.DESCRIPTION, "desc");
-    map.put(JsonKey.ID, "id");
-    Boolean bool = orgService.updateChannel(map, new RequestContext());
-    Assert.assertNotNull(bool);
-  }
+    List<Map<String, Object>> userList = new ArrayList<>();
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.ROOT_ORG_ID, "rootorgid1");
+    userList.add(user);
 
-  @Test
-  public void testRegisterUserToOrg() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.ID, "123456");
-    map.put(JsonKey.USER_ID, "123456");
-    map.put(JsonKey.ORGANISATION_ID, "123456");
-    map.put(JsonKey.IS_DELETED, false);
-    map.put(JsonKey.ASSOCIATION_TYPE, "1");
     Response response = new Response();
-    when(cassandraOperationImpl.insertRecord(JsonKey.SUNBIRD, "user_organisation", map, null))
+    response.put(JsonKey.RESPONSE, userList);
+
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
-    Assert.assertNotNull(response);
+
+    Request req = new Request();
+    req.getContext().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+    req.getContext().put(JsonKey.REQUESTED_BY, "user1");
+    Util.initializeContext(req, null);
   }
 
-  public static Map<String, Object> getEsResponseMap() {
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_TENANT, true);
-    map.put(JsonKey.ID, "rootOrgId");
-    map.put(JsonKey.CHANNEL, "anyChannel");
-    return map;
-  }
-
-  public static Map<String, Map<String, Object>> getEs2ResponseMap() {
-    Map<String, Map<String, Object>> map2 = new HashMap<>();
-    Map<String, Object> map = new HashMap<>();
-    map.put(JsonKey.IS_TENANT, true);
-    map.put(JsonKey.ID, "rootOrgId");
-    map.put(JsonKey.CHANNEL, "anyChannel");
-    map2.put(JsonKey.RESPONSE, map);
-    return map2;
+  @Test
+  public void addMaskEmailAndPhoneTest() {
+    Map<String, Object> userMap = new HashMap<String, Object>();
+    userMap.put(JsonKey.EMAIL, "test@test.com");
+    userMap.put(JsonKey.PHONE, "999999999");
+    try {
+      Util.addMaskEmailAndPhone(userMap);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    Assert.assertEquals("test@test.com", userMap.get(JsonKey.ENC_EMAIL));
+    Assert.assertEquals("999999999", userMap.get(JsonKey.ENC_PHONE));
   }
 }
