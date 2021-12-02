@@ -8,10 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
@@ -214,13 +211,13 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       throw pce;
     } catch (Exception e) {
       logger.error(
-          context,
-          "Unable to communicate with actor: Exception occurred with error message = "
-              + e.getMessage(),
-          e);
+              context,
+              "Unable to communicate with actor: Exception occurred with error message = "
+                      + e.getMessage(),
+              e);
       ProjectCommonException.throwServerErrorException(
-          ResponseCode.unableToCommunicateWithActor,
-          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+              ResponseCode.unableToCommunicateWithActor,
+              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
     }
     checkResponseForException(obj);
     return obj;
@@ -231,9 +228,9 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       throw (ProjectCommonException) obj;
     } else if (obj instanceof Exception) {
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              ResponseCode.SERVER_ERROR.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 }

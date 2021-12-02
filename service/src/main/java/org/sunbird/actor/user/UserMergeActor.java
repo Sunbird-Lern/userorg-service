@@ -35,7 +35,11 @@ import org.sunbird.service.user.impl.UserMergeServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.telemetry.dto.*;
+import org.sunbird.telemetry.dto.Actor;
+import org.sunbird.telemetry.dto.Context;
+import org.sunbird.telemetry.dto.Target;
+import org.sunbird.telemetry.dto.Telemetry;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ConfigUtil;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
@@ -165,7 +169,8 @@ public class UserMergeActor extends UserBaseActor {
       custodianId = configSettingMap.get(JsonKey.CUSTODIAN_ORG_ID);
       if (custodianId == null || custodianId.isEmpty()) {
         SystemSetting custodianIdSetting =
-            systemSettingsService.getSystemSettingByKey(JsonKey.CUSTODIAN_ORG_ID, context);
+                systemSettingsService.getSystemSettingByKey(
+                JsonKey.CUSTODIAN_ORG_ID, context);
         if (custodianIdSetting != null) {
           configSettingMap.put(custodianIdSetting.getId(), custodianIdSetting.getValue());
           custodianId = custodianIdSetting.getValue();
