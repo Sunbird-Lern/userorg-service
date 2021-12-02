@@ -21,10 +21,6 @@ import org.sunbird.telemetry.validator.TelemetryObjectValidatorV3;
 public class LoggerUtil {
 
   private Logger logger;
-  private static final TelemetryDataAssembler telemetryDataAssembler =
-      TelemetryAssemblerFactory.get();
-  private static final TelemetryObjectValidator telemetryObjectValidator =
-      new TelemetryObjectValidatorV3();
 
   public LoggerUtil(Class c) {
     logger = LoggerFactory.getLogger(c);
@@ -89,6 +85,8 @@ public class LoggerUtil {
 
   public void debug(RequestContext requestContext, String message) {
     if (isDebugEnabled(requestContext)) {
+      TelemetryDataAssembler telemetryDataAssembler = TelemetryAssemblerFactory.get();
+      TelemetryObjectValidator telemetryObjectValidator = new TelemetryObjectValidatorV3();
       Map<String, Object> context =
           (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
       Map<String, Object> params = new HashMap<>();
