@@ -86,7 +86,7 @@ public class LoggerUtil {
   public void debug(RequestContext requestContext, String message) {
     if (isDebugEnabled(requestContext)) {
       TelemetryDataAssembler telemetryDataAssembler = TelemetryAssemblerFactory.get();
-      TelemetryObjectValidator telemetryObjectValidator = new TelemetryObjectValidatorV3();
+      TelemetryObjectValidator telemetryObjectValidator = TelemetryObjectValidatorV3.getInstance();
       Map<String, Object> context =
           (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
       Map<String, Object> params = new HashMap<>();
@@ -98,9 +98,9 @@ public class LoggerUtil {
       params.put(JsonKey.MESSAGE, message);
       String telemetry = telemetryDataAssembler.log(context, params);
       if (StringUtils.isNotBlank(telemetry) && telemetryObjectValidator.validateLog(telemetry)) {
-        logger.info(Markers.appendEntries(requestContext.getContextMap()), telemetry);
+        logger.debug(Markers.appendEntries(requestContext.getContextMap()), telemetry);
       } else {
-        logger.info(Markers.appendEntries(requestContext.getContextMap()), message);
+        logger.debug(Markers.appendEntries(requestContext.getContextMap()), message);
       }
     } else {
       logger.debug(message);

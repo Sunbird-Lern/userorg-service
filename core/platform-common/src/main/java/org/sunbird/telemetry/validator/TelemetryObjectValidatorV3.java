@@ -14,8 +14,16 @@ import org.sunbird.telemetry.util.TelemetryEvents;
 /** @author arvind */
 public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
   private static final LoggerUtil logger = new LoggerUtil(TelemetryObjectValidatorV3.class);
+  private static TelemetryObjectValidator telemetryObjectValidator = null;
 
   private final ObjectMapper mapper = new ObjectMapper();
+
+  public static TelemetryObjectValidator getInstance() {
+    if (telemetryObjectValidator == null) {
+      telemetryObjectValidator = new TelemetryObjectValidatorV3();
+    }
+    return telemetryObjectValidator;
+  }
 
   @Override
   public boolean validateAudit(String jsonString) {
