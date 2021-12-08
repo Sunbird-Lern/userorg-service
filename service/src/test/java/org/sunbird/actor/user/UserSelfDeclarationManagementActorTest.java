@@ -42,7 +42,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;

@@ -110,7 +110,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       ObjectMapper mapper = new ObjectMapper();
       Map<String, Object> userMap = mapper.readValue(data, Map.class);
       String[] mandatoryColumnsObject =
-              systemSettingsService.getSystemSettingByFieldAndKey(
+          systemSettingsService.getSystemSettingByFieldAndKey(
               "userProfileConfig",
               "csv.mandatoryColumns",
               new TypeReference<String[]>() {},
@@ -221,9 +221,21 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         Map<String, Object> newUserReqMap = SerializationUtils.clone(new HashMap<>(userMap));
         newUserReqMap.put(JsonKey.ORG_NAME, orgName);
 
-        callUpdateUser(userUpdateActor, ActorOperations.UPDATE_USER.getValue(), JsonKey.UPDATE,newUserReqMap, task, context);
+        callUpdateUser(
+            userUpdateActor,
+            ActorOperations.UPDATE_USER.getValue(),
+            JsonKey.UPDATE,
+            newUserReqMap,
+            task,
+            context);
         if (userMap.containsKey(JsonKey.ROLES)) {
-          callUpdateUser(userRoleActor, ActorOperations.ASSIGN_ROLES.getValue(), ActorOperations.ASSIGN_ROLES.getValue(),userMap, task, context);
+          callUpdateUser(
+              userRoleActor,
+              ActorOperations.ASSIGN_ROLES.getValue(),
+              ActorOperations.ASSIGN_ROLES.getValue(),
+              userMap,
+              task,
+              context);
         }
       }
     } catch (Exception e) {
@@ -239,7 +251,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
     logger.info(context, "UserBulkUploadBackgroundJobActor: callCreateUser called");
     String userId;
     try {
-      userId = upsertUser(ssoUserCreateActor, user, ActorOperations.CREATE_USER.getValue(), context);
+      userId =
+          upsertUser(ssoUserCreateActor, user, ActorOperations.CREATE_USER.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -268,21 +281,27 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   }
 
   @SuppressWarnings("unchecked")
-  private void callUpdateUser(ActorRef actorRef, String operation, String taskAction,
-                              Map<String, Object> user, BulkUploadProcessTask task, RequestContext context)
+  private void callUpdateUser(
+      ActorRef actorRef,
+      String operation,
+      String taskAction,
+      Map<String, Object> user,
+      BulkUploadProcessTask task,
+      RequestContext context)
       throws JsonProcessingException {
-    logger.info(context, "UserBulkUploadBackgroundJobActor: "+operation+" called");
+    logger.info(context, "UserBulkUploadBackgroundJobActor: " + operation + " called");
     try {
       upsertUser(actorRef, user, operation, context);
     } catch (Exception ex) {
       logger.error(
           context,
-          "UserBulkUploadBackgroundJobActor:"+operation+": Exception occurred with error message = "
+          "UserBulkUploadBackgroundJobActor:"
+              + operation
+              + ": Exception occurred with error message = "
               + ex.getMessage(),
           ex);
       user.put(JsonKey.ERROR_MSG, ex.getMessage());
-      setTaskStatus(
-          task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), user, taskAction);
+      setTaskStatus(task, ProjectUtil.BulkProcessStatus.FAILED, ex.getMessage(), user, taskAction);
     }
     if (task.getStatus() != ProjectUtil.BulkProcessStatus.FAILED.getValue()) {
       ObjectMapper mapper = new ObjectMapper();
@@ -314,7 +333,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
   }
 
   private String upsertUser(
-          ActorRef actorRef, Map<String, Object> userMap, String operation, RequestContext context) {
+      ActorRef actorRef, Map<String, Object> userMap, String operation, RequestContext context) {
     String userId = null;
 
     Request request = new Request();
@@ -329,7 +348,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
 
     if (obj instanceof Response) {
       Response response = (Response) obj;
-      if(response.get(JsonKey.USER_ID) != null) {
+      if (response.get(JsonKey.USER_ID) != null) {
         userId = (String) response.get(JsonKey.USER_ID);
       }
     }

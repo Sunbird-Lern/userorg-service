@@ -71,7 +71,7 @@ public class OrgServiceImplTest {
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false))
-    .thenReturn(getRecordsByProperty(false));
+        .thenReturn(getRecordsByProperty(false));
 
     PowerMockito.when(
             cassandraOperation.getRecordsByPrimaryKeys(
@@ -229,5 +229,4 @@ public class OrgServiceImplTest {
     Boolean bool = orgService.updateChannel(map, new RequestContext());
     Assert.assertNotNull(bool);
   }
-
 }

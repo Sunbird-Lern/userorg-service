@@ -24,7 +24,6 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
-import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.User;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.model.user.UserOrg;

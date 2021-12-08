@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +23,7 @@ import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-  ServiceFactory.class,
-  CassandraOperation.class
-})
+@PrepareForTest({ServiceFactory.class, CassandraOperation.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -44,8 +40,9 @@ public class UtilTest {
     cassandraOperation = mock(CassandraOperation.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
   }
+
   @Test
-  public void initializeContextTest(){
+  public void initializeContextTest() {
 
     List<Map<String, Object>> userList = new ArrayList<>();
     Map<String, Object> user = new HashMap<>();
@@ -57,12 +54,12 @@ public class UtilTest {
 
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(response);
+        .thenReturn(response);
 
     Request req = new Request();
-    req.getContext().put( JsonKey.ACTOR_TYPE, JsonKey.USER);
-    req.getContext().put(JsonKey.REQUESTED_BY,"user1");
-    Util.initializeContext(req,null);
+    req.getContext().put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+    req.getContext().put(JsonKey.REQUESTED_BY, "user1");
+    Util.initializeContext(req, null);
   }
 
   @Test

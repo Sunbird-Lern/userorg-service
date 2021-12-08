@@ -3,7 +3,6 @@ package org.sunbird.service.user.impl;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import java.util.HashMap;
 import java.util.Map;

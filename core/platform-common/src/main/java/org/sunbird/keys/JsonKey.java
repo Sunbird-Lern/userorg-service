@@ -608,6 +608,7 @@ public final class JsonKey {
   public static final String IDS = "ids";
   public static final String NOTIFICATIONS = "notifications";
   public static final String FEEDS = "feeds";
+  public static final String DEBUG = "DEBUG";
 
   private JsonKey() {}
 }
