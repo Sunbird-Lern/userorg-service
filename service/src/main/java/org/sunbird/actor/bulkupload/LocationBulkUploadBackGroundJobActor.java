@@ -1,8 +1,6 @@
 package org.sunbird.actor.bulkupload;
 
 import akka.actor.ActorRef;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -10,10 +8,8 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
@@ -31,9 +27,6 @@ import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
@@ -217,7 +210,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
   }
 
   private String upsertLocation(
-          ActorRef actorRef, Map<String, Object> locationMap, String operation, RequestContext context) {
+      ActorRef actorRef, Map<String, Object> locationMap, String operation, RequestContext context) {
     String locId = null;
 
     Request request = new Request();

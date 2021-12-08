@@ -28,12 +28,11 @@ import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.UserUtility;
-import org.sunbird.util.Util;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.UserUtility;
 import org.sunbird.util.user.UserActorOperations;
 
 @RunWith(PowerMockRunner.class)
