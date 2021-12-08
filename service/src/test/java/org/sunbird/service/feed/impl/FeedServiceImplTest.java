@@ -77,6 +77,18 @@ public class FeedServiceImplTest {
   }
 
   @Test
+  public void testDelete() {
+    boolean response = false;
+    try {
+      feedService.delete(getFeedDelete(true), null);
+      response = true;
+    } catch (Exception ex) {
+      Assert.assertTrue(response);
+    }
+    Assert.assertTrue(response);
+  }
+
+  @Test
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
@@ -143,5 +155,19 @@ public class FeedServiceImplTest {
       Assert.assertFalse(false);
     }
     return jsonStr;
+  }
+
+  private Request getFeedDelete(boolean needId) {
+    Request request = new Request();
+    Feed feed = new Feed();
+    feed.setUserId("123-456-7890");
+    feed.setCategory("category");
+    if (needId) {
+      feed.setId("123-456-789");
+    }
+    Map<String, Object> map = new HashMap<>();
+    feed.setData(map);
+    request.setRequest(new ObjectMapper().convertValue(feed,Map.class));
+    return request;
   }
 }
