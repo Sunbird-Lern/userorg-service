@@ -236,6 +236,7 @@ public final class JsonKey {
   public static final String SSO_URL = "sso.url";
   public static final String SSO_USERNAME = "sso.username";
   public static final String STACKTRACE = "stacktrace";
+  public static final String STACKTRACE_CHAR_LENGTH = "stacktrace_char_length";
   public static final String START_DATE = "startDate";
   public static final String START_TIME = "startTime";
   public static final String STATE = "state";
