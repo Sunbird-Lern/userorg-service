@@ -60,8 +60,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
       response.put(Constants.RESPONSE, Constants.SUCCESS);
       if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-        logger.info(context, "Cassandra Service updateRecord in user table ");
-        request.forEach((key, value) -> logger.info(context, key + " " + value));
+        logger.info(context, "Cassandra Service insertRecord in user table :" + request);
       }
     } catch (Exception e) {
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)
@@ -115,8 +114,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       connectionManager.getSession(keyspaceName).execute(boundStatement);
       response.put(Constants.RESPONSE, Constants.SUCCESS);
       if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-        logger.info(context, "Cassandra Service updateRecord in user table ");
-        request.forEach((key, value) -> logger.info(context, key + " " + value));
+        logger.info(context, "Cassandra Service updateRecord in user table :" + request);
       }
     } catch (Exception e) {
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)) {
@@ -393,8 +391,7 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
       response.put(Constants.RESPONSE, Constants.SUCCESS);
       if (tableName.equalsIgnoreCase(JsonKey.USER)) {
-        logger.info(context, "Cassandra Service upsertRecord in user table ");
-        request.forEach((key, value) -> logger.info(context, key + " " + value));
+        logger.info(context, "Cassandra Service upsertRecord in user table :" + request);
       }
     } catch (Exception e) {
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)) {
