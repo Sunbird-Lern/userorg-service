@@ -5,14 +5,12 @@ import java.util.*;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
-import org.sunbird.model.user.FeedStatus;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 
 public class UserFeedActor extends BaseActor {
@@ -57,20 +55,20 @@ public class UserFeedActor extends BaseActor {
   }
 
   private void createUserFeed(Request request, RequestContext context) {
-    request.getRequest().put(JsonKey.CREATED_BY,(String) request.getContext().get(JsonKey.REQUESTED_BY));
+    request
+        .getRequest()
+        .put(JsonKey.CREATED_BY, (String) request.getContext().get(JsonKey.REQUESTED_BY));
     Response feedCreateResponse = feedService.insert(request, context);
     sender().tell(feedCreateResponse, self());
-
   }
 
   private void deleteUserFeed(Request request, RequestContext context) {
     Response feedDeleteResponse = new Response();
-    feedService.delete(request,context);
+    feedService.delete(request, context);
     feedDeleteResponse.getResult().put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     sender().tell(feedDeleteResponse, self());
   }
 
-  
   private void updateUserFeed(Request request, RequestContext context) {
     Map<String, Object> updateRequest = request.getRequest();
     String feedId = (String) updateRequest.get(JsonKey.FEED_ID);

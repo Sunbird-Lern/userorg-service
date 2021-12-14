@@ -2,17 +2,14 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-
-import java.util.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,8 +21,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.feed.UserFeedActor;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -77,13 +72,20 @@ public class UserFeedActorTest {
     ObjectMapper Obj = new ObjectMapper();
     String jsonStr = Obj.writeValueAsString(upsertResponse);
     PowerMockito.mockStatic(HttpClientUtil.class);
-    PowerMockito.when(HttpClientUtil.post(Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(),Mockito.any())).thenReturn(jsonStr);
-    PowerMockito.when(HttpClientUtil.patch(Mockito.anyString(),Mockito.anyString(),Mockito.anyMap(),Mockito.any())).thenReturn(jsonStr);
-    PowerMockito.when(HttpClientUtil.get(Mockito.anyString(),Mockito.anyMap(),Mockito.any())).thenReturn(getUserFeedData());
+    PowerMockito.when(
+            HttpClientUtil.post(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(jsonStr);
+    PowerMockito.when(
+            HttpClientUtil.patch(
+                Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(jsonStr);
+    PowerMockito.when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(getUserFeedData());
   }
 
   @Test
-  public void getUserFeedTest() throws JsonProcessingException{
+  public void getUserFeedTest() throws JsonProcessingException {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
@@ -154,20 +156,20 @@ public class UserFeedActorTest {
     }
   }
 
-  public String getUserFeedData () {
+  public String getUserFeedData() {
     Response response = new Response();
-    Map<String,Object> result = new HashMap<>();
-    List<Map<String,Object>> feeds = new ArrayList<>();
-    Map<String,Object> feed = new HashMap<>();
-    feed.put(JsonKey.ID,"12312312");
+    Map<String, Object> result = new HashMap<>();
+    List<Map<String, Object>> feeds = new ArrayList<>();
+    Map<String, Object> feed = new HashMap<>();
+    feed.put(JsonKey.ID, "12312312");
     feeds.add(feed);
-    result.put(JsonKey.FEEDS,feeds);
+    result.put(JsonKey.FEEDS, feeds);
     response.putAll(result);
     ObjectMapper Obj = new ObjectMapper();
-    String jsonStr=null;
+    String jsonStr = null;
     try {
       jsonStr = Obj.writeValueAsString(response);
-    }catch (Exception e){
+    } catch (Exception e) {
       Assert.assertFalse(false);
     }
     return jsonStr;
