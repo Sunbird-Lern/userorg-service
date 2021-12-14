@@ -17,10 +17,11 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({PropertiesCache.class})
+@PrepareForTest({PropertiesCache.class, ProjectUtil.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -96,6 +97,8 @@ public class TelemetryGeneratorTest {
     PropertiesCache propertiesCache = mock(PropertiesCache.class);
     when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
     PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
+    PowerMockito.mockStatic(ProjectUtil.class);
+    when(ProjectUtil.getConfigValue("stacktrace_char_length")).thenReturn("2500");
     String audit = TelemetryGenerator.error(context, params);
     assertNotNull(audit);
   }
