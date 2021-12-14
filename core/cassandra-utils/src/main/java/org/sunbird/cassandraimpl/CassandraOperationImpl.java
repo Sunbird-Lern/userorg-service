@@ -2,24 +2,14 @@ package org.sunbird.cassandraimpl;
 
 import static com.datastax.driver.core.querybuilder.QueryBuilder.eq;
 
-import com.datastax.driver.core.BatchStatement;
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
 import com.datastax.driver.core.exceptions.QueryValidationException;
-import com.datastax.driver.core.querybuilder.Clause;
-import com.datastax.driver.core.querybuilder.Delete;
-import com.datastax.driver.core.querybuilder.Insert;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.core.querybuilder.*;
 import com.datastax.driver.core.querybuilder.Select.Builder;
 import com.datastax.driver.core.querybuilder.Select.Selection;
 import com.datastax.driver.core.querybuilder.Select.Where;
-import com.datastax.driver.core.querybuilder.Update;
 import com.datastax.driver.core.querybuilder.Update.Assignments;
 import java.text.MessageFormat;
 import java.util.Iterator;
@@ -69,6 +59,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
       connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
       response.put(Constants.RESPONSE, Constants.SUCCESS);
+      if (tableName.equalsIgnoreCase(JsonKey.USER)) {
+        logger.info(context, "Cassandra Service updateRecord in user table ");
+        request.forEach((key, value) -> logger.info(context, key + " " + value));
+      }
     } catch (Exception e) {
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)
           || e.getMessage().contains(JsonKey.UNDEFINED_IDENTIFIER)) {
@@ -120,6 +114,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       BoundStatement boundStatement = statement.bind(array);
       connectionManager.getSession(keyspaceName).execute(boundStatement);
       response.put(Constants.RESPONSE, Constants.SUCCESS);
+      if (tableName.equalsIgnoreCase(JsonKey.USER)) {
+        logger.info(context, "Cassandra Service updateRecord in user table ");
+        request.forEach((key, value) -> logger.info(context, key + " " + value));
+      }
     } catch (Exception e) {
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)) {
         logger.error(
@@ -394,7 +392,10 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
       connectionManager.getSession(keyspaceName).execute(boundStatement.bind(array));
       response.put(Constants.RESPONSE, Constants.SUCCESS);
-
+      if (tableName.equalsIgnoreCase(JsonKey.USER)) {
+        logger.info(context, "Cassandra Service upsertRecord in user table ");
+        request.forEach((key, value) -> logger.info(context, key + " " + value));
+      }
     } catch (Exception e) {
       if (e.getMessage().contains(JsonKey.UNKNOWN_IDENTIFIER)) {
         logger.error(
