@@ -3,6 +3,7 @@ package org.sunbird.actor.feed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.client.NotificationServiceClient;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.Feed;
 import org.sunbird.request.Request;
@@ -15,8 +16,8 @@ import org.sunbird.util.Util;
 
 public class UserFeedActor extends BaseActor {
 
-  private final IFeedService feedService = FeedFactory.getInstance();
-  ObjectMapper mapper = new ObjectMapper();
+  private IFeedService feedService;
+
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -24,6 +25,8 @@ public class UserFeedActor extends BaseActor {
     RequestContext context = request.getRequestContext();
     String operation = request.getOperation();
     logger.debug(context, "UserFeedActor:onReceive called for operation : " + operation);
+    NotificationServiceClient serviceClient = new NotificationServiceClient();
+    feedService = FeedFactory.getInstance(serviceClient);
     switch (operation) {
       case "getUserFeedById":
         String userId = (String) request.getRequest().get(JsonKey.USER_ID);

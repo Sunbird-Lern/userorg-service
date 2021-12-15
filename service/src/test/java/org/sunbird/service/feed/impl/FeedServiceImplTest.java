@@ -12,6 +12,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.client.NotificationServiceClient;
 import org.sunbird.common.Constants;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
@@ -22,9 +23,10 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
+import org.sunbird.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, HttpClientUtil.class})
+@PrepareForTest({ServiceFactory.class, HttpClientUtil.class, System.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -58,19 +60,36 @@ public class FeedServiceImplTest {
         .thenReturn(jsonStr);
     PowerMockito.when(HttpClientUtil.get(Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getUserFeedData());
-    feedService = FeedFactory.getInstance();
+    PowerMockito.mockStatic(System.class);
+    PowerMockito.when(System.getenv(JsonKey.NOTIFICATION_SERVICE_BASE_URL)).thenReturn("http://notification-service");
+    PowerMockito.when(System.getenv(JsonKey.NOTIFICATION_SERVICE_V2_SEND_URL)).thenReturn("/private/notification/v2/send");
+    PowerMockito.when(System.getenv(JsonKey.NOTIFICATION_SERVICE_V1_UPDATE_URL)).thenReturn("/private/v1/update");
+    PowerMockito.when(System.getenv(JsonKey.NOTIFICATION_SERVICE_V1_READ_URL)).thenReturn("/private/v1/read");
+    PowerMockito.when(System.getenv(JsonKey.NOTIFICATION_SERVICE_V1_DELETE_URL)).thenReturn("/private/v1/delete");
+
+
+    NotificationServiceClient notificationServiceClient = new NotificationServiceClient();
+    feedService = FeedFactory.getInstance(notificationServiceClient);
+
   }
 
+  private RequestContext getRequestContext(){
+    RequestContext context = new RequestContext();
+    context.setReqId("131313");
+    context.getContextMap().put(JsonKey.X_REQUEST_ID,"131313");
+
+    return context;
+  }
   @Test
   public void testInsert() {
-    Response res = feedService.update(getFeed(true), null);
+    Response res = feedService.update(getFeed(true), getRequestContext());
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
 
   @Test
   public void testUpdate() {
-    Response res = feedService.update(getFeedUpdate(true), null);
+    Response res = feedService.update(getFeedUpdate(true), getRequestContext());
     Assert.assertTrue(
         ((String) res.getResult().get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS));
   }
@@ -79,7 +98,7 @@ public class FeedServiceImplTest {
   public void testDelete() {
     boolean response = false;
     try {
-      feedService.delete(getFeedDelete(true), null);
+      feedService.delete(getFeedDelete(true), getRequestContext());
       response = true;
     } catch (Exception ex) {
       Assert.assertTrue(response);
@@ -91,7 +110,7 @@ public class FeedServiceImplTest {
   public void testGetRecordsByProperties() {
     Map<String, Object> props = new HashMap<>();
     props.put(JsonKey.USER_ID, "123-456-789");
-    List<Feed> res = feedService.getFeedsByProperties(props, new RequestContext());
+    List<Feed> res = feedService.getFeedsByProperties(props, getRequestContext());
     Assert.assertTrue(res != null);
   }
 
