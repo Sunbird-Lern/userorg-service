@@ -49,7 +49,12 @@ public class GetUserRoleTest {
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(getCassandraUserRoleResponse());
+        .thenReturn(getCassandraUserRoleResponse())
+        .thenReturn(getUserResponse());
+
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(getUserResponse());
   }
 
   @Test
@@ -78,9 +83,22 @@ public class GetUserRoleTest {
     Assert.assertNotNull(exception);
   }
 
+  private Response getUserResponse() {
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.FIRST_NAME, "firstName");
+    userMap.put(JsonKey.LAST_NAME, "lastName");
+    list.add(userMap);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
+  }
+
   private Response getCassandraUserRoleResponse() {
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
+
     Map<String, Object> orgMap = new HashMap<>();
     orgMap.put(JsonKey.ID, "ORGANISATION_ID");
     orgMap.put(JsonKey.USER_ID, "USER_ID");
