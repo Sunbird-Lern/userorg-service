@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
@@ -50,8 +51,11 @@ public class FetchUserRoleActor extends BaseActor {
       Map<String, Object> user =
           userService.getUserDetailsById(userId, request.getRequestContext());
       if (MapUtils.isNotEmpty(user)) {
-        response.put(
-            JsonKey.NAME, user.get(JsonKey.FIRST_NAME) + " " + user.get(JsonKey.LAST_NAME));
+        String name = (String) user.get(JsonKey.FIRST_NAME);
+        if (StringUtils.isNotEmpty((String) user.get(JsonKey.LAST_NAME))) {
+          name = name + " " + user.get(JsonKey.LAST_NAME);
+        }
+        response.put(JsonKey.NAME, name);
       }
     }
     response.put(JsonKey.ROLES, userRoles);
