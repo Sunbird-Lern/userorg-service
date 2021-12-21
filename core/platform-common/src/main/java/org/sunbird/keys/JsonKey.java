@@ -38,6 +38,7 @@ public final class JsonKey {
   public static final String BULK_UPLOAD_ORG_DATA_SIZE = "bulk_upload_org_data_size";
   public static final String BULK_UPLOAD_USER_DATA_SIZE = "sunbird_user_bulk_upload_size";
   public static final String BULK_USER_UPLOAD = "bulkUserUpload";
+  public static final String BULK_LOCATION_UPLOAD = "bulkLocationUpload";
   public static final String CASSANDRA_SERVICE = "Cassandra service";
   public static final String CATEGORIES = "categories";
   public static final String CHANNEL = "channel";
@@ -235,6 +236,7 @@ public final class JsonKey {
   public static final String SSO_URL = "sso.url";
   public static final String SSO_USERNAME = "sso.username";
   public static final String STACKTRACE = "stacktrace";
+  public static final String STACKTRACE_CHAR_LENGTH = "stacktrace_char_length";
   public static final String START_DATE = "startDate";
   public static final String START_TIME = "startTime";
   public static final String STATE = "state";
@@ -604,6 +606,15 @@ public final class JsonKey {
   public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
       "OTP to edit Diksha Profile";
   public static final String X_Source = "x-source";
+  public static final String IDS = "ids";
+  public static final String NOTIFICATIONS = "notifications";
+  public static final String FEEDS = "feeds";
+  public static final String DEBUG = "DEBUG";
+  public static final String NOTIFICATION_SERVICE_BASE_URL ="notification_service_base_url";
+  public static final String NOTIFICATION_SERVICE_V2_SEND_URL ="notification_service_v2_send_url";
+  public static final String NOTIFICATION_SERVICE_V1_UPDATE_URL ="notification_service_v1_update_url";
+  public static final String NOTIFICATION_SERVICE_V1_READ_URL ="notification_service_v1_read_url";
+  public static final String NOTIFICATION_SERVICE_V1_DELETE_URL ="notification_service_v1_delete_url";
 
   private JsonKey() {}
 }

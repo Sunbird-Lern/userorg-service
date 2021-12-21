@@ -71,7 +71,7 @@ public class OrgServiceImplTest {
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(getRecordsByProperty(false))
-    .thenReturn(getRecordsByProperty(false));
+        .thenReturn(getRecordsByProperty(false));
 
     PowerMockito.when(
             cassandraOperation.getRecordsByPrimaryKeys(
@@ -206,5 +206,27 @@ public class OrgServiceImplTest {
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
     return res;
+  }
+
+  @Test
+  public void testRegisterChannel() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = orgService.registerChannel(map, new RequestContext());
+    Assert.assertNotNull(bool);
+  }
+
+  @Test
+  public void testUpdateChannel() {
+    OrgService orgService = OrgServiceImpl.getInstance();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = orgService.updateChannel(map, new RequestContext());
+    Assert.assertNotNull(bool);
   }
 }

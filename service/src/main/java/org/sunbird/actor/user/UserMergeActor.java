@@ -15,8 +15,6 @@ import javax.inject.Named;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.sunbird.auth.verifier.AccessTokenValidator;
-import org.sunbird.client.systemsettings.SystemSettingClient;
-import org.sunbird.client.systemsettings.impl.SystemSettingClientImpl;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.datasecurity.OneWayHashing;

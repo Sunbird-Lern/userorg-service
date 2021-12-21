@@ -2,7 +2,8 @@ package org.sunbird.actor.user;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -22,8 +23,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
-import org.sunbird.client.user.UserClient;
-import org.sunbird.client.user.impl.UserClientImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -68,8 +67,6 @@ import scala.concurrent.Promise;
   DataCacheHandler.class,
   ElasticSearchRestHighImpl.class,
   PipeToSupport.PipeableFuture.class,
-  UserClientImpl.class,
-  UserClient.class,
   FormApiUtilHandler.class,
   UserLookUpServiceImpl.class,
   ActorSelection.class,
@@ -210,8 +207,7 @@ public abstract class UserManagementActorTestBase {
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(true);
-    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(organisation);
+    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any())).thenReturn(organisation);
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.IS_DELETED, false);
     user.put(JsonKey.ROOT_ORG_ID, "custodianRootOrgId");

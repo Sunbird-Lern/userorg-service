@@ -132,10 +132,6 @@ public final class Util {
     }
   }
 
-  public static String encryptData(String value) {
-    return encryptionService.encryptData(value, null);
-  }
-
   public static void addMaskEmailAndPhone(Map<String, Object> userMap) {
     String phone = (String) userMap.get(JsonKey.PHONE);
     String email = (String) userMap.get(JsonKey.EMAIL);

@@ -344,7 +344,11 @@ public class TelemetryGenerator {
     String stackTrace = (String) params.get(JsonKey.STACKTRACE);
     edata.put(JsonKey.ERROR, error);
     edata.put(JsonKey.ERR_TYPE, errorType);
-    edata.put(JsonKey.STACKTRACE, ProjectUtil.getFirstNCharacterString(stackTrace, 2048));
+    edata.put(
+        JsonKey.STACKTRACE,
+        ProjectUtil.getFirstNCharacterString(
+            stackTrace,
+            Integer.parseInt(ProjectUtil.getConfigValue(JsonKey.STACKTRACE_CHAR_LENGTH))));
     return edata;
   }
 
