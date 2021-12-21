@@ -6,6 +6,7 @@ import controllers.feed.validator.FeedRequestValidator;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.commons.lang.StringUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -21,16 +22,17 @@ public class FeedController extends BaseController {
   private ActorRef userFeedActor;
 
   public CompletionStage<Result> getUserFeed(String userId, Http.Request httpRequest) {
-    String callerId1 = Common.getFromRequest(httpRequest, Attrs.USER_ID);
-    String callerId2 = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
+    // Read userId from auth token, ignore the request
+    String managedForTokenUserId = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
+    userId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+    if (StringUtils.isNotBlank(managedForTokenUserId)) {
+      userId = managedForTokenUserId;
+    }
     return handleRequest(
         userFeedActor,
         ActorOperations.GET_USER_FEED_BY_ID.getValue(),
         null,
-        req -> {
-          FeedRequestValidator.userIdValidation(callerId1, callerId2, userId);
-          return null;
-        },
+        req -> null,
         userId,
         JsonKey.USER_ID,
         false,
@@ -61,8 +63,15 @@ public class FeedController extends BaseController {
         ActorOperations.DELETE_USER_FEED.getValue(),
         httpRequest.body().asJson(),
         req -> {
+          // Read userId from auth token, ignore the request
+          String managedForTokenUserId = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
+          String userId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+          if (StringUtils.isNotBlank(managedForTokenUserId)) {
+            userId = managedForTokenUserId;
+          }
           Request request = (Request) req;
-          FeedRequestValidator.validateFeedDeleteRequest(request, callerId1, callerId2);
+          request.getRequest().put(JsonKey.USER_ID, userId);
+          FeedRequestValidator.validateFeedDeleteRequest(request);
           return null;
         },
         null,
@@ -72,15 +81,20 @@ public class FeedController extends BaseController {
   }
 
   public CompletionStage<Result> updateUserFeed(Http.Request httpRequest) {
-    String callerId1 = Common.getFromRequest(httpRequest, Attrs.USER_ID);
-    String callerId2 = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
     return handleRequest(
         userFeedActor,
         ActorOperations.UPDATE_USER_FEED.getValue(),
         httpRequest.body().asJson(),
         req -> {
+          // Read userId from auth token, ignore the request
+          String managedForTokenUserId = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
+          String userId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+          if (StringUtils.isNotBlank(managedForTokenUserId)) {
+            userId = managedForTokenUserId;
+          }
           Request request = (Request) req;
-          FeedRequestValidator.validateFeedUpdateRequest(request, callerId1, callerId2);
+          request.getRequest().put(JsonKey.USER_ID, userId);
+          FeedRequestValidator.validateFeedUpdateRequest(request);
           return null;
         },
         null,

@@ -6,15 +6,12 @@ import static org.junit.Assert.assertTrue;
 import akka.http.javadsl.model.HttpMethods;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-import controllers.feed.validator.FeedRequestValidator;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -27,7 +24,7 @@ import util.ACTORS;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
-@PrepareForTest({OnRequestHandler.class, FeedRequestValidator.class})
+@PrepareForTest({OnRequestHandler.class})
 public class FeedControllerTest extends BaseApplicationTest {
 
   String SAVE_FEED_URL = "/v1/user/feed/create";
@@ -49,12 +46,6 @@ public class FeedControllerTest extends BaseApplicationTest {
 
   @Test
   public void testGetUserFeed() {
-    PowerMockito.mockStatic(FeedRequestValidator.class);
-    PowerMockito.when(
-            FeedRequestValidator.userIdValidation(
-                Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(true)
-        .thenReturn(false);
     Http.RequestBuilder req =
         new Http.RequestBuilder().uri("/v1/user/feed/1234567890").method("GET");
     Result result = Helpers.route(application, req);
