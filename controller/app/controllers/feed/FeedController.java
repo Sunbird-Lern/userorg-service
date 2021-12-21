@@ -24,16 +24,16 @@ public class FeedController extends BaseController {
   public CompletionStage<Result> getUserFeed(String userId, Http.Request httpRequest) {
     // Read userId from auth token, ignore the request
     String managedForTokenUserId = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
-    userId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+    String usrId = Common.getFromRequest(httpRequest, Attrs.USER_ID);
     if (StringUtils.isNotBlank(managedForTokenUserId)) {
-      userId = managedForTokenUserId;
+      usrId = managedForTokenUserId;
     }
     return handleRequest(
         userFeedActor,
         ActorOperations.GET_USER_FEED_BY_ID.getValue(),
         null,
         req -> null,
-        userId,
+        usrId,
         JsonKey.USER_ID,
         false,
         httpRequest);
@@ -56,8 +56,6 @@ public class FeedController extends BaseController {
   }
 
   public CompletionStage<Result> deleteUserFeed(Http.Request httpRequest) {
-    String callerId1 = Common.getFromRequest(httpRequest, Attrs.USER_ID);
-    String callerId2 = Common.getFromRequest(httpRequest, Attrs.MANAGED_FOR);
     return handleRequest(
         userFeedActor,
         ActorOperations.DELETE_USER_FEED.getValue(),
