@@ -127,7 +127,7 @@ public class UserTnCActorTest {
 
     Response response =
         setManagedUSerRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("10 second"), Response.class);
+            .expectMsgClass(duration("100 second"), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -324,6 +324,7 @@ public class UserTnCActorTest {
   private Map<String, Object> getUser(String lastAcceptedVersion) throws JsonProcessingException {
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.NAME, "someName");
+    user.put(JsonKey.ID, "4546467897");
     user.put(JsonKey.IS_DELETED, false);
     user.put(JsonKey.MANAGED_BY, "managedby");
     if (lastAcceptedVersion != null) {
