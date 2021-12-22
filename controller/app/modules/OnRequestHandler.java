@@ -73,13 +73,6 @@ public class OnRequestHandler implements ActionCreator {
         }
         if (!JsonKey.USER_UNAUTH_STATES.contains(message)) {
           request = request.addAttr(Attrs.USER_ID, message);
-          request = request.addAttr(Attrs.IS_AUTH_REQ, "false");
-          for (String uri : RequestInterceptor.restrictedUriList) {
-            if (request.path().contains(uri)) {
-              request = request.addAttr(Attrs.IS_AUTH_REQ, "true");
-              break;
-            }
-          }
           result = delegate.call(request);
         } else if (JsonKey.UNAUTHORIZED.equals(message)) {
           result = onDataValidationError(request, ResponseCode.UNAUTHORIZED.getResponseCode());

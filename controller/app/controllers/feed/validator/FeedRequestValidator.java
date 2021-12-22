@@ -2,7 +2,6 @@ package controllers.feed.validator;
 
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
@@ -10,15 +9,6 @@ import org.sunbird.validator.BaseRequestValidator;
 
 /** This call will validate the Feed API request */
 public class FeedRequestValidator extends BaseRequestValidator {
-  public static boolean userIdValidation(
-      String accessTokenUserId, String managedForUserId, String requestUserId) {
-    if (!StringUtils.equalsIgnoreCase(accessTokenUserId, requestUserId)
-        && !StringUtils.equalsIgnoreCase(managedForUserId, requestUserId)) {
-      ProjectCommonException.throwUnauthorizedErrorException();
-    }
-    return true;
-  }
-
   public static void validateFeedRequest(Request request) {
     Map<String, Object> feedReq = request.getRequest();
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.USER_ID))) {
@@ -32,18 +22,14 @@ public class FeedRequestValidator extends BaseRequestValidator {
     }
   }
 
-  public static boolean validateFeedDeleteRequest(
-      Request request, String callerId1, String callerId2) {
-    return validateFeedUpdateRequest(request, callerId1, callerId2);
+  public static boolean validateFeedDeleteRequest(Request request) {
+    return validateFeedUpdateRequest(request);
   }
 
-  public static boolean validateFeedUpdateRequest(
-      Request request, String callerId1, String callerId2) {
+  public static boolean validateFeedUpdateRequest(Request request) {
     Map<String, Object> feedReq = request.getRequest();
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.USER_ID))) {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.USER_ID);
-    } else {
-      userIdValidation(callerId1, callerId2, (String) feedReq.get(JsonKey.USER_ID));
     }
     if (StringUtils.isBlank((String) feedReq.get(JsonKey.CATEGORY))) {
       createClientError(ResponseCode.mandatoryParamsMissing, JsonKey.CATEGORY);

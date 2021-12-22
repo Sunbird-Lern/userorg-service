@@ -6,38 +6,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.cassandra.CassandraOperation;
-import org.sunbird.common.factory.EsClientFactory;
-import org.sunbird.common.inf.ElasticSearchService;
-import org.sunbird.dao.user.UserRoleDao;
-import org.sunbird.dao.user.impl.UserRoleDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
-import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
+import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Util;
 
 public class UserTncService {
-  private static LoggerUtil logger = new LoggerUtil(UserTncService.class);
-  private ObjectMapper mapper = new ObjectMapper();
-  private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
+  private LoggerUtil logger = new LoggerUtil(UserTncService.class);
+  private final UserService userService = UserServiceImpl.getInstance();
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
+  private final ObjectMapper mapper = new ObjectMapper();
 
   public String getTncType(Request request) {
     String tncType = (String) request.getRequest().get(JsonKey.TNC_TYPE);
@@ -81,29 +73,16 @@ public class UserTncService {
   }
 
   public Map<String, Object> getUserById(String userId, RequestContext context) {
-    Util.DbInfo usrDbInfo = Util.dbInfoMap.get(JsonKey.USER_DB);
-    Response response =
-        cassandraOperation.getRecordById(
-            usrDbInfo.getKeySpace(), usrDbInfo.getTableName(), userId, context);
-    if (null != response && null != response.getResult()) {
-      List<Map<String, Object>> dbUserList =
-          (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
-      if (CollectionUtils.isNotEmpty(dbUserList)) {
-        Map<String, Object> user = dbUserList.get(0);
-        // Check whether user account is locked or not
-        if (null != user.get(JsonKey.IS_DELETED)
-            && BooleanUtils.isTrue((Boolean) user.get(JsonKey.IS_DELETED))) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
-        }
-        return user;
-      }
-    } else {
-      throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    Map<String, Object> user = userService.getUserDetailsById(userId, context);
+    if (null != user.get(JsonKey.IS_DELETED)
+        && BooleanUtils.isTrue((Boolean) user.get(JsonKey.IS_DELETED))) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.userAccountlocked);
     }
-    return Collections.emptyMap();
+    return user;
+  }
+
+  public Response updateUser(Map<String, Object> user, RequestContext context) {
+    return userService.updateUser(user, context);
   }
 
   public void isAccountManagedUser(boolean isManagedUser, Map<String, Object> user) {
@@ -136,9 +115,8 @@ public class UserTncService {
 
   private boolean roleCheck(Map<String, Object> user, String role, RequestContext context) {
     AtomicBoolean isRoleExists = new AtomicBoolean(false);
-    UserRoleDao userRoleDao = UserRoleDaoImpl.getInstance();
     List<Map<String, Object>> dbUserRoleList =
-        userRoleDao.getUserRoles((String) user.get(JsonKey.ID), role, context);
+        userRoleService.getUserRoles((String) user.get(JsonKey.ID), role, context);
     if (CollectionUtils.isNotEmpty(dbUserRoleList)) {
       ObjectMapper mapper = new ObjectMapper();
       dbUserRoleList.forEach(
@@ -168,20 +146,6 @@ public class UserTncService {
     return isRoleExists.get();
   }
 
-  // Convert Acceptance tnc object as a Json String in cassandra table
-  public Map<String, Object> convertTncStringToJsonMap(Map<String, String> allTncAcceptedMap) {
-    Map<String, Object> allTncMap = new HashMap<>();
-    for (Map.Entry<String, String> mapItr : allTncAcceptedMap.entrySet()) {
-      try {
-        allTncMap.put(mapItr.getKey(), mapper.readValue(mapItr.getValue(), Map.class));
-      } catch (JsonProcessingException e) {
-        logger.error("JsonParsing error while parsing tnc acceptance", e);
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidRequestData);
-      }
-    }
-    return allTncMap;
-  }
-
   public void generateTelemetry(
       Map<String, Object> userMap, String lastAcceptedVersion, Map<String, Object> context) {
     Map<String, Object> targetObject = null;
@@ -196,10 +160,8 @@ public class UserTncService {
   }
 
   public void syncUserDetails(Map<String, Object> userMap, RequestContext context) {
-    logger.info(context, "UserTnCActor:syncUserDetails: Trigger sync of user details to ES");
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS'Z'");
     userMap.put(JsonKey.TNC_ACCEPTED_ON, simpleDateFormat.format(new Date()));
-    esService.update(
-        ProjectUtil.EsType.user.getTypeName(), (String) userMap.get(JsonKey.ID), userMap, context);
+    userService.updateUserDataToES((String) userMap.get(JsonKey.ID), userMap, context);
   }
 }

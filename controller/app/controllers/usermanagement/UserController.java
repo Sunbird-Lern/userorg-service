@@ -157,21 +157,21 @@ public class UserController extends BaseController {
   }
 
   public CompletionStage<Result> updateUser(Http.Request httpRequest) {
-
     return handleRequest(
         userUpdateActor,
         ActorOperations.UPDATE_USER.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
-          request
-              .getContext()
-              .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          String userIdFromAuthToken = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+          request.getContext().put(JsonKey.USER_ID, userIdFromAuthToken);
           new UserRequestValidator().validateUpdateUserRequest(request);
-          request
-              .getContext()
-              .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
-
+          // Ignore request body user/id field, only consider auth token userid
+          if (null != ((Request) req).getRequest().get(JsonKey.USER_ID)) {
+            ((Request) req).getRequest().put(JsonKey.USER_ID, userIdFromAuthToken);
+          } else {
+            ((Request) req).getRequest().put(JsonKey.ID, userIdFromAuthToken);
+          }
           return null;
         },
         null,
@@ -181,21 +181,21 @@ public class UserController extends BaseController {
   }
 
   public CompletionStage<Result> updateUserV2(Http.Request httpRequest) {
-
     return handleRequest(
         userUpdateActor,
         ActorOperations.UPDATE_USER_V2.getValue(),
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
-          request
-              .getContext()
-              .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          String userIdFromAuthToken = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+          request.getContext().put(JsonKey.USER_ID, userIdFromAuthToken);
           new UserRequestValidator().validateUpdateUserRequest(request);
-          request
-              .getContext()
-              .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
-
+          // Ignore request body user/id field, only consider auth token userid
+          if (null != ((Request) req).getRequest().get(JsonKey.USER_ID)) {
+            ((Request) req).getRequest().put(JsonKey.USER_ID, userIdFromAuthToken);
+          } else {
+            ((Request) req).getRequest().put(JsonKey.ID, userIdFromAuthToken);
+          }
           return null;
         },
         null,
@@ -211,14 +211,15 @@ public class UserController extends BaseController {
         httpRequest.body().asJson(),
         req -> {
           Request request = (Request) req;
-          request
-              .getContext()
-              .put(JsonKey.USER_ID, Common.getFromRequest(httpRequest, Attrs.USER_ID));
+          String userIdFromAuthToken = Common.getFromRequest(httpRequest, Attrs.USER_ID);
+          request.getContext().put(JsonKey.USER_ID, userIdFromAuthToken);
           new UserRequestValidator().validateUpdateUserRequestV3(request);
-          request
-              .getContext()
-              .put(JsonKey.IS_AUTH_REQ, Common.getFromRequest(httpRequest, Attrs.IS_AUTH_REQ));
-
+          // Ignore request body user/id field, only consider auth token userid
+          if (null != ((Request) req).getRequest().get(JsonKey.USER_ID)) {
+            ((Request) req).getRequest().put(JsonKey.USER_ID, userIdFromAuthToken);
+          } else {
+            ((Request) req).getRequest().put(JsonKey.ID, userIdFromAuthToken);
+          }
           return null;
         },
         null,

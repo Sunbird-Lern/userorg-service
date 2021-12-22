@@ -11,16 +11,6 @@ import org.sunbird.request.Request;
 
 public class FeedRequestValidatorTest {
 
-  @Test
-  public void userIdValidationTestSuccess() {
-    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-789", null, "123-456-789"));
-  }
-
-  @Test(expected = ProjectCommonException.class)
-  public void userIdValidationTestFailure() {
-    Assert.assertTrue(FeedRequestValidator.userIdValidation("123-456-7890", null, "123-456-789"));
-  }
-
   @Test(expected = ProjectCommonException.class)
   public void validateFeedRequestTestFailure() {
     Request reqObj = new Request();
@@ -44,8 +34,7 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.DATA, dataMap);
     reqObj.setRequest(requestMap);
-    Assert.assertTrue(
-        FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId", "someUserId"));
+    Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj));
   }
 
   @Test
@@ -57,8 +46,7 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.FEED_ID, "someFeedId");
     reqObj.setRequest(requestMap);
-    Assert.assertTrue(
-        FeedRequestValidator.validateFeedUpdateRequest(reqObj, "someUserId", "someUserId"));
+    Assert.assertTrue(FeedRequestValidator.validateFeedUpdateRequest(reqObj));
   }
 
   @Test
@@ -70,7 +58,6 @@ public class FeedRequestValidatorTest {
     requestMap.put(JsonKey.CATEGORY, "someCategory");
     requestMap.put(JsonKey.FEED_ID, "someFeedId");
     reqObj.setRequest(requestMap);
-    Assert.assertTrue(
-        FeedRequestValidator.validateFeedDeleteRequest(reqObj, "someUserId", "someUserId"));
+    Assert.assertTrue(FeedRequestValidator.validateFeedDeleteRequest(reqObj));
   }
 }

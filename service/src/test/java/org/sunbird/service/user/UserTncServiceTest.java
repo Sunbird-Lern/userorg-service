@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -25,14 +25,13 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.DataCacheHandler;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.user.UserUtil;
+import org.sunbird.util.DataCacheHandler;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
-  UserUtil.class,
   ServiceFactory.class,
   CassandraOperationImpl.class,
   EsClientFactory.class,
@@ -47,18 +46,21 @@ import org.sunbird.util.user.UserUtil;
   "javax.crypto.*"
 })
 public class UserTncServiceTest {
-  private String tncConfig =
+  private static CassandraOperation cassandraOperationImpl = null;
+  private static String tncConfig =
       "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
-  private String groupsConfig =
-      "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
-
-  private String orgAdminTnc =
+  private static String groupsConfig =
       "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
 
-  @Before
-  public void beforeEachTest() {
-    PowerMockito.mockStatic(DataCacheHandler.class);
+  private static String orgAdminTnc =
+      "{\"latestVersion\":\"V1\",\"v1\":{\"url\":\"http://dev/terms.html\"},\"v2\":{\"url\":\"http://dev/terms.html\"},\"v4\":{\"url\":\"http://dev/terms.html\"}}";
+
+  @BeforeClass
+  public static void beforeEachTest() {
     PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperationImpl = mock(CassandraOperation.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    PowerMockito.mockStatic(DataCacheHandler.class);
     Map<String, String> config = new HashMap<>();
     config.put(JsonKey.TNC_CONFIG, tncConfig);
     config.put("groups", groupsConfig);
@@ -68,8 +70,6 @@ public class UserTncServiceTest {
 
   @Test
   public void getUserByIdTest() {
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
@@ -80,6 +80,13 @@ public class UserTncServiceTest {
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getCassandraUserRoleResponse());
+
     UserTncService tncService = new UserTncService();
 
     Map<String, Object> user = tncService.getUserById("1234", null);
@@ -88,8 +95,6 @@ public class UserTncServiceTest {
 
   @Test
   public void getUserByIdForLockedAccountTest() {
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     List<Map<String, Object>> resp = new ArrayList<>();
     Map<String, Object> userList = new HashMap<>();
@@ -100,6 +105,13 @@ public class UserTncServiceTest {
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getCassandraUserRoleResponse());
+
     UserTncService tncService = new UserTncService();
     try {
       tncService.getUserById("1234", null);
@@ -110,12 +122,17 @@ public class UserTncServiceTest {
 
   @Test
   public void getUserByIdForEmptyResultTest() {
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     Response response = new Response();
     when(cassandraOperationImpl.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(response);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(getCassandraUserRoleResponse());
+
     UserTncService tncService = new UserTncService();
     try {
       tncService.getUserById("1234", null);
@@ -138,15 +155,16 @@ public class UserTncServiceTest {
 
   @Test
   public void acceptOrgAdminTncTest() {
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraUserRoleAdminResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
-      tncService.validateRoleForTnc(null, "orgAdminTnc", searchMap);
+      tncService.validateRoleForTnc(new RequestContext(), "orgAdminTnc", searchMap);
     } catch (ProjectCommonException ex) {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
@@ -154,15 +172,16 @@ public class UserTncServiceTest {
 
   @Test
   public void validateOrgAdminTncTest() {
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraUserRoleResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
-      tncService.validateRoleForTnc(null, "orgAdminTnc", searchMap);
+      tncService.validateRoleForTnc(new RequestContext(), "orgAdminTnc", searchMap);
     } catch (ProjectCommonException ex) {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
@@ -170,15 +189,16 @@ public class UserTncServiceTest {
 
   @Test
   public void reportViewerTncTest() {
-    CassandraOperation cassandraOperationImpl = mock(CassandraOperation.class);
-    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
         .thenReturn(getCassandraUserRoleResponse());
     UserTncService tncService = new UserTncService();
     Map<String, Object> searchMap = userOrgData();
     try {
-      tncService.validateRoleForTnc(null, "reportViewerTnc", searchMap);
+      tncService.validateRoleForTnc(new RequestContext(), "reportViewerTnc", searchMap);
     } catch (ProjectCommonException ex) {
       Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
     }
@@ -208,7 +228,7 @@ public class UserTncServiceTest {
   }
 
   private Map<String, Object> userOrgData() {
-    Map<String, Object> searchMap = new LinkedHashMap<>(2);
+    Map<String, Object> searchMap = new LinkedHashMap<>(23);
     searchMap.put(JsonKey.USER_ID, "1234");
     searchMap.put(JsonKey.ORGANISATION_ID, "4567");
     searchMap.put(JsonKey.ROOT_ORG_ID, "4567");

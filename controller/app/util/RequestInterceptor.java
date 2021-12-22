@@ -3,9 +3,7 @@ package util;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,23 +23,12 @@ import play.mvc.Http;
 public class RequestInterceptor {
 
   private static final LoggerUtil logger = new LoggerUtil(RequestInterceptor.class);
-  public static List<String> restrictedUriList = null;
   private static final ConcurrentHashMap<String, Short> apiHeaderIgnoreMap =
       new ConcurrentHashMap<>();
 
   private RequestInterceptor() {}
 
   static {
-    restrictedUriList = new ArrayList<>();
-    restrictedUriList.add("/v1/user/update");
-    restrictedUriList.add("/v1/note/create");
-    restrictedUriList.add("/v1/note/update");
-    restrictedUriList.add("/v1/note/search");
-    restrictedUriList.add("/v1/note/read");
-    restrictedUriList.add("/v1/note/delete");
-    restrictedUriList.add("/v1/user/feed");
-
-    // ---------------------------
     short var = 1;
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
