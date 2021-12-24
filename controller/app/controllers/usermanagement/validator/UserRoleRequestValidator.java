@@ -111,6 +111,15 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
                                 "String"),
                             ResponseCode.CLIENT_ERROR.getResponseCode());
                       }
+                      if (StringUtils.isBlank((String) orgId)) {
+                        throw new ProjectCommonException(
+                            ResponseCode.invalidParameterValue.getErrorCode(),
+                            ProjectUtil.formatMessage(
+                                ResponseCode.invalidParameterValue.getErrorMessage(),
+                                " ",
+                                "scope.organisationId"),
+                            ResponseCode.CLIENT_ERROR.getResponseCode());
+                      }
                     });
           });
     }
