@@ -1,5 +1,9 @@
 package org.sunbird.service.userconsent.impl;
 
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +17,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.Constants;
 import org.sunbird.dao.organisation.OrgDao;
@@ -48,19 +53,26 @@ import org.sunbird.util.DataCacheHandler;
 public class UserConsentServiceImplTest {
 
   private static UserConsentService userConsentService;
+  private static CassandraOperation cassandraOperationImpl = null;
 
   @Before
   public void setUp() {
+    PowerMockito.mockStatic(ServiceFactory.class);
+    cassandraOperationImpl = mock(CassandraOperationImpl.class);
+    when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
+    Response response = new Response();
+    List<Map<String, Object>> orgList = new ArrayList<>();
+    response.getResult().put(JsonKey.RESPONSE, orgList);
+    when(cassandraOperationImpl.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response);
     PowerMockito.mockStatic(DataCacheHandler.class);
     Map<String, String> config = new HashMap<>();
     config.put(JsonKey.CUSTODIAN_ORG_ID, "custodianOrgId");
     PowerMockito.when(DataCacheHandler.getConfigSettings()).thenReturn(config);
     PowerMockito.mockStatic(UserConsentDaoImpl.class);
-    PowerMockito.mockStatic(OrgDaoImpl.class);
     UserConsentDao userConsentDao = PowerMockito.mock(UserConsentDaoImpl.class);
     PowerMockito.when(UserConsentDaoImpl.getInstance()).thenReturn(userConsentDao);
-    OrgDao orgDao = PowerMockito.mock(OrgDaoImpl.class);
-    PowerMockito.when(OrgDaoImpl.getInstance()).thenReturn(orgDao);
     Response upsertResponse = new Response();
     Map<String, Object> responseMap2 = new HashMap<>();
     responseMap2.put(Constants.RESPONSE, Constants.SUCCESS);
@@ -75,13 +87,10 @@ public class UserConsentServiceImplTest {
     responseMap.put(JsonKey.CONSENT_OBJECTID, "do_31313966505806233613406");
     responseMap.put(JsonKey.CONSENT_OBJECTTYPE, "Collection");
     responseMap.put(JsonKey.STATUS, "ACTIVE");
-    Map<String, Object> orgMap = new HashMap<>();
-    orgMap.put(JsonKey.ID, "0130107621805015045");
     PowerMockito.when(userConsentDao.getConsent(Mockito.anyMap(), Mockito.any()))
         .thenReturn(Arrays.asList(responseMap));
     PowerMockito.when(userConsentDao.updateConsent(Mockito.anyMap(), Mockito.any()))
         .thenReturn(upsertResponse);
-    PowerMockito.when(orgDao.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
     userConsentService = UserConsentServiceImpl.getInstance();
   }
 
@@ -93,9 +102,12 @@ public class UserConsentServiceImplTest {
 
   @Test(expected = ProjectCommonException.class)
   public void testValidateConsumerId() {
-    Map<String, Object> consent = consentUpdateMap();
-    consent.put(JsonKey.CONSENT_CONSUMERID, "custodianOrgId");
     userConsentService.validateConsumerId("custodianOrgId", new RequestContext());
+  }
+
+  @Test(expected = ProjectCommonException.class)
+  public void testValidateConsumerIdV2() {
+    userConsentService.validateConsumerId("OrgId", new RequestContext());
   }
 
   @Test
