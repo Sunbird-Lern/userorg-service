@@ -86,6 +86,41 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
                   ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
+            List<Map<String, String>> scopeList =
+                (List<Map<String, String>>) roleObj.get(JsonKey.SCOPE);
+            scopeList
+                .stream()
+                .forEach(
+                    scope -> {
+                      Object orgId = scope.get(JsonKey.ORGANISATION_ID);
+                      if ((null == orgId)) {
+                        throw new ProjectCommonException(
+                            ResponseCode.invalidParameterValue.getErrorCode(),
+                            ProjectUtil.formatMessage(
+                                ResponseCode.invalidParameterValue.getErrorMessage(),
+                                "null",
+                                "scope.organisationId"),
+                            ResponseCode.CLIENT_ERROR.getResponseCode());
+                      }
+                      if (!(orgId instanceof String)) {
+                        throw new ProjectCommonException(
+                            ResponseCode.dataTypeError.getErrorCode(),
+                            ProjectUtil.formatMessage(
+                                ResponseCode.dataTypeError.getErrorMessage(),
+                                "scope.organisationId",
+                                "String"),
+                            ResponseCode.CLIENT_ERROR.getResponseCode());
+                      }
+                      if (StringUtils.isBlank((String) orgId)) {
+                        throw new ProjectCommonException(
+                            ResponseCode.invalidParameterValue.getErrorCode(),
+                            ProjectUtil.formatMessage(
+                                ResponseCode.invalidParameterValue.getErrorMessage(),
+                                " ",
+                                "scope.organisationId"),
+                            ResponseCode.CLIENT_ERROR.getResponseCode());
+                      }
+                    });
           });
     }
   }
