@@ -11,6 +11,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -252,10 +254,12 @@ public class UserSelfDeclarationManagementActorTest {
 
     Request request = new Request();
     request.setOperation(ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
-    List<UserDeclareEntity> list = new ArrayList<>();
+    List<Map<String, Object>> list = new ArrayList<>();
     UserDeclareEntity userDeclareEntity = editOrgChangeUserDeclaredEntity();
     userDeclareEntity.setOrgId("anyOrgId");
-    list.add(userDeclareEntity);
+    ObjectMapper mapper = new ObjectMapper();
+
+    list.add(mapper.convertValue(userDeclareEntity, new TypeReference<Map<String, Object>>() {}));
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.DECLARATIONS, list);
     request.setRequest(requestMap);
