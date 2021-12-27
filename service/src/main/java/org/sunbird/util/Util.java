@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
-import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
@@ -22,8 +21,6 @@ public final class Util {
   public static final Map<String, DbInfo> dbInfoMap = new HashMap<>();
   private static final String KEY_SPACE_NAME = "sunbird";
   private static final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static final EncryptionService encryptionService =
-      org.sunbird.datasecurity.impl.ServiceFactory.getEncryptionServiceInstance();
   private static final DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();
   private static final DataMaskingService maskingService =

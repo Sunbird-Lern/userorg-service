@@ -325,6 +325,7 @@ public class UserTnCActorTest {
     Map<String, Object> user = new HashMap<>();
     user.put(JsonKey.NAME, "someName");
     user.put(JsonKey.IS_DELETED, false);
+    user.put(JsonKey.ID, "4546467897");
     user.put(JsonKey.MANAGED_BY, "managedby");
     if (lastAcceptedVersion != null) {
       user.put(JsonKey.TNC_ACCEPTED_VERSION, lastAcceptedVersion);

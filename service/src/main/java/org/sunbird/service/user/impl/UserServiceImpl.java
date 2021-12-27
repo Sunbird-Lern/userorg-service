@@ -33,9 +33,9 @@ import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.UserTncService;
 import org.sunbird.util.*;
 import org.sunbird.util.user.UserActorOperations;
+import org.sunbird.util.user.UserTncUtil;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserService {
   private final UserLookupDao userLookupDao = UserLookupDaoImpl.getInstance();
   private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
   private final OrgService orgService = OrgServiceImpl.getInstance();
-  private final UserTncService tncService = new UserTncService();
   private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();
 
@@ -439,7 +438,7 @@ public class UserServiceImpl implements UserService {
           (Map<String, String>) userDetails.get(JsonKey.ALL_TNC_ACCEPTED);
       if (MapUtils.isNotEmpty(allTncAccepted)) {
         userDetails.put(
-            JsonKey.ALL_TNC_ACCEPTED, tncService.convertTncStringToJsonMap(allTncAccepted));
+            JsonKey.ALL_TNC_ACCEPTED, UserTncUtil.convertTncStringToJsonMap(allTncAccepted));
       }
       userDetails.remove(JsonKey.PASSWORD);
       checkEmailAndPhoneVerified(userDetails);
