@@ -775,9 +775,9 @@ public class UserUtil {
     }
     userDeclareEntity.setOperation((String) declareFieldMap.get(JsonKey.OPERATION));
     if (JsonKey.ADD.equals(userDeclareEntity.getOperation())) {
-      userDeclareEntity.setCreatedBy((String) declareFieldMap.get(JsonKey.CREATED_BY));
+      userDeclareEntity.setCreatedBy(callerId);
     } else {
-      userDeclareEntity.setUpdatedBy((String) declareFieldMap.get(JsonKey.UPDATED_BY));
+      userDeclareEntity.setUpdatedBy(callerId);
       userDeclareEntity.setStatus((String) declareFieldMap.get(JsonKey.STATUS));
     }
     if (StringUtils.isBlank((String) declareFieldMap.get(JsonKey.STATUS))) {
