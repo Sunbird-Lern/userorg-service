@@ -82,6 +82,10 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
 
       List<UserDeclareEntity> userDeclareEntityList = new ArrayList<>();
       for (Map<String, Object> declareFieldMap : declarations) {
+        String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+        if (((String) declareFieldMap.get(JsonKey.ORG_ID)).equalsIgnoreCase(custodianOrgId)) {
+          ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
+        }
         UserDeclareEntity userDeclareEntity =
             UserUtil.createUserDeclaredObject(declareFieldMap, callerId);
         Map userInfo = userDeclareEntity.getUserInfo();

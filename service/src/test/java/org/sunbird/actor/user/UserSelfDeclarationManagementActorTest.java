@@ -11,6 +11,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -56,7 +58,6 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   UserUtil.class,
-  DataCacheHandler.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -243,6 +244,27 @@ public class UserSelfDeclarationManagementActorTest {
     Response response = probe.expectMsgClass(duration("100 second"), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
+  }
+
+  @Test
+  public void testUpdateUserSelfDeclaredDetails() {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request request = new Request();
+    request.setOperation(ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
+    List<Map<String, Object>> list = new ArrayList<>();
+    UserDeclareEntity userDeclareEntity = editOrgChangeUserDeclaredEntity();
+    userDeclareEntity.setOrgId("anyOrgId");
+    ObjectMapper mapper = new ObjectMapper();
+
+    list.add(mapper.convertValue(userDeclareEntity, new TypeReference<Map<String, Object>>() {}));
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.DECLARATIONS, list);
+    request.setRequest(requestMap);
+    subject.tell(request, probe.getRef());
+    probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
   }
 
   private UserDeclareEntity addUserDeclaredEntity() {
