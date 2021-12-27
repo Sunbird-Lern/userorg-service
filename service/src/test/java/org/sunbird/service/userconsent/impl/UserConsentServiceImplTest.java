@@ -1,7 +1,5 @@
 package org.sunbird.service.userconsent.impl;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,11 +19,14 @@ import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.dao.userconsent.UserConsentDao;
 import org.sunbird.dao.userconsent.impl.UserConsentDaoImpl;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
+import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.userconsent.UserConsentService;
+import org.sunbird.util.DataCacheHandler;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -34,7 +35,8 @@ import org.sunbird.service.userconsent.UserConsentService;
   UserConsentDaoImpl.class,
   UserConsentDao.class,
   OrgDaoImpl.class,
-  OrgDao.class
+  OrgDao.class,
+  DataCacheHandler.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -49,6 +51,10 @@ public class UserConsentServiceImplTest {
 
   @Before
   public void setUp() {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    Map<String, String> config = new HashMap<>();
+    config.put(JsonKey.CUSTODIAN_ORG_ID, "custodianOrgId");
+    PowerMockito.when(DataCacheHandler.getConfigSettings()).thenReturn(config);
     PowerMockito.mockStatic(UserConsentDaoImpl.class);
     PowerMockito.mockStatic(OrgDaoImpl.class);
     UserConsentDao userConsentDao = PowerMockito.mock(UserConsentDaoImpl.class);
@@ -81,8 +87,15 @@ public class UserConsentServiceImplTest {
 
   @Test
   public void testUpdateConsent() {
-    Response response = userConsentService.updateConsent(consentUpdateMap(), null);
+    Response response = userConsentService.updateConsent(consentUpdateMap(), new RequestContext());
     Assert.assertNotNull(response);
+  }
+
+  @Test(expected = ProjectCommonException.class)
+  public void testValidateConsumerId() {
+    Map<String, Object> consent = consentUpdateMap();
+    consent.put(JsonKey.CONSENT_CONSUMERID, "custodianOrgId");
+    userConsentService.validateConsumerId("custodianOrgId", new RequestContext());
   }
 
   @Test
