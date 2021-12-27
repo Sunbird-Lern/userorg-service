@@ -24,6 +24,7 @@ import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.impl.*;
 import org.sunbird.util.*;
+import org.sunbird.util.user.UserTncUtil;
 import org.sunbird.util.user.UserUtil;
 
 public class UserProfileReadService {
@@ -31,7 +32,6 @@ public class UserProfileReadService {
   private final LoggerUtil logger = new LoggerUtil(UserProfileReadService.class);
   private final UserService userService = UserServiceImpl.getInstance();
   private final OrgService orgService = OrgServiceImpl.getInstance();
-  private final UserTncService tncService = new UserTncService();
   private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private final UserOrgService userOrgService = UserOrgServiceImpl.getInstance();
   private final LocationService locationService = LocationServiceImpl.getInstance();
@@ -125,7 +125,7 @@ public class UserProfileReadService {
     if (null != result.get(JsonKey.ALL_TNC_ACCEPTED)) {
       result.put(
           JsonKey.ALL_TNC_ACCEPTED,
-          tncService.convertTncStringToJsonMap(
+          UserTncUtil.convertTncStringToJsonMap(
               (Map<String, String>) result.get(JsonKey.ALL_TNC_ACCEPTED)));
     }
     addFlagValue(result);

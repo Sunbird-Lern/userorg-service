@@ -57,6 +57,33 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   }
 
   @Test
+  public void testAssignRolesV2SuccessReq1() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2Req3(true, true, true, true));
+    assertEquals(getResponseCode(result), ResponseCode.dataTypeError.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testAssignRolesV2SuccessReq2() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2Req2(true, true, true, true));
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testAssignRolesV2SuccessReq3() {
+    Result result =
+        performTest(
+            "/v2/user/assign/role", "POST", createUserRoleRequestV2Req4(true, true, true, true));
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
   public void testAssignRolesV2FailueWithoutUserId() {
     Result result =
         performTest(
@@ -146,6 +173,84 @@ public class UserRoleControllerTest extends BaseApplicationTest {
       innerMap.put(JsonKey.ROLES, roles);
     }
     requestMap.put(JsonKey.REQUEST, innerMap);
+
+    return requestMap;
+  }
+
+  private Map createUserRoleRequestV2Req3(
+      boolean isUserIdReq, boolean isScopeReq, boolean isRoleReq, boolean isOpReq) {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> requestMapObj = new HashMap<>();
+
+    if (isUserIdReq) requestMapObj.put(JsonKey.USER_ID, userId);
+    if (isRoleReq) {
+      List<Map<String, Object>> scopeList = new ArrayList<>();
+      Map<String, Object> scopeMap = new HashMap<>();
+      scopeMap.put(JsonKey.ORGANISATION_ID, Arrays.asList("545667489132"));
+      scopeList.add(scopeMap);
+
+      List<Map<String, Object>> rolesList = new ArrayList<>();
+      Map<String, Object> roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "someRole1");
+      if (isOpReq) roleMap.put(JsonKey.OPERATION, JsonKey.ADD);
+      if (isScopeReq) roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+
+      requestMapObj.put(JsonKey.ROLES, rolesList);
+    }
+    requestMap.put(JsonKey.REQUEST, requestMapObj);
+
+    return requestMap;
+  }
+
+  private Map createUserRoleRequestV2Req2(
+      boolean isUserIdReq, boolean isScopeReq, boolean isRoleReq, boolean isOpReq) {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> requestMapObj = new HashMap<>();
+
+    if (isUserIdReq) requestMapObj.put(JsonKey.USER_ID, userId);
+    if (isRoleReq) {
+      List<Map<String, Object>> scopeList = new ArrayList<>();
+      Map<String, Object> scopeMap = new HashMap<>();
+      scopeMap.put(JsonKey.ORGANISATION_ID, "");
+      scopeList.add(scopeMap);
+
+      List<Map<String, Object>> rolesList = new ArrayList<>();
+      Map<String, Object> roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "someRole1");
+      if (isOpReq) roleMap.put(JsonKey.OPERATION, JsonKey.ADD);
+      if (isScopeReq) roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+
+      requestMapObj.put(JsonKey.ROLES, rolesList);
+    }
+    requestMap.put(JsonKey.REQUEST, requestMapObj);
+
+    return requestMap;
+  }
+
+  private Map createUserRoleRequestV2Req4(
+      boolean isUserIdReq, boolean isScopeReq, boolean isRoleReq, boolean isOpReq) {
+    Map<String, Object> requestMap = new HashMap<>();
+    Map<String, Object> requestMapObj = new HashMap<>();
+
+    if (isUserIdReq) requestMapObj.put(JsonKey.USER_ID, userId);
+    if (isRoleReq) {
+      List<Map<String, Object>> scopeList = new ArrayList<>();
+      Map<String, Object> scopeMap = new HashMap<>();
+      scopeMap.put(JsonKey.ORGANISATION_ID, null);
+      scopeList.add(scopeMap);
+
+      List<Map<String, Object>> rolesList = new ArrayList<>();
+      Map<String, Object> roleMap = new HashMap<>();
+      roleMap.put(JsonKey.ROLE, "someRole1");
+      if (isOpReq) roleMap.put(JsonKey.OPERATION, JsonKey.ADD);
+      if (isScopeReq) roleMap.put(JsonKey.SCOPE, scopeList);
+      rolesList.add(roleMap);
+
+      requestMapObj.put(JsonKey.ROLES, rolesList);
+    }
+    requestMap.put(JsonKey.REQUEST, requestMapObj);
 
     return requestMap;
   }
