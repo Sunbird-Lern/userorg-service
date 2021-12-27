@@ -8,8 +8,6 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.dao.user.UserDao;
-import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -20,11 +18,11 @@ import org.sunbird.response.Response;
 import org.sunbird.service.user.UserTncService;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
+import org.sunbird.util.user.UserTncUtil;
 
 public class UserTnCActor extends BaseActor {
   private final UserTncService tncService = new UserTncService();
   private final ObjectMapper mapper = new ObjectMapper();
-  private final UserDao userDao = UserDaoImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -113,12 +111,12 @@ public class UserTnCActor extends BaseActor {
         logger.error(requestContext, "Exception occurred while mapping", ex);
         ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
-      response = userDao.updateUser(userMap, requestContext);
+      response = tncService.updateUser(userMap, requestContext);
       sender().tell(response, self());
       if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
         // In ES this field is getting stored as Map<String, Map<String,String>>
         userMap.put(
-            JsonKey.ALL_TNC_ACCEPTED, tncService.convertTncStringToJsonMap(allTncAcceptedMap));
+            JsonKey.ALL_TNC_ACCEPTED, UserTncUtil.convertTncStringToJsonMap(allTncAcceptedMap));
         tncService.syncUserDetails(userMap, requestContext);
       }
     } else {
@@ -152,7 +150,7 @@ public class UserTnCActor extends BaseActor {
       userMap.put(JsonKey.TNC_ACCEPTED_VERSION, acceptedTnC);
       userMap.put(
           JsonKey.TNC_ACCEPTED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
-      response = userDao.updateUser(userMap, requestContext);
+      response = tncService.updateUser(userMap, requestContext);
       if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
         tncService.syncUserDetails(userMap, requestContext);
       }
