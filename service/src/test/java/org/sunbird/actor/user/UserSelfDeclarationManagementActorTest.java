@@ -56,7 +56,6 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
   UserUtil.class,
-  DataCacheHandler.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -243,6 +242,25 @@ public class UserSelfDeclarationManagementActorTest {
     Response response = probe.expectMsgClass(duration("100 second"), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
+  }
+
+  @Test
+  public void testUpdateUserSelfDeclaredDetails() {
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request request = new Request();
+    request.setOperation(ActorOperations.UPDATE_USER_DECLARATIONS.getValue());
+    List<UserDeclareEntity> list = new ArrayList<>();
+    UserDeclareEntity userDeclareEntity = editOrgChangeUserDeclaredEntity();
+    userDeclareEntity.setOrgId("anyOrgId");
+    list.add(userDeclareEntity);
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.DECLARATIONS, list);
+    request.setRequest(requestMap);
+    subject.tell(request, probe.getRef());
+    probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
   }
 
   private UserDeclareEntity addUserDeclaredEntity() {
