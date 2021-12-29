@@ -102,7 +102,8 @@ public class OrgServiceImpl implements OrgService {
     return orgResponseList;
   }
 
-  public List<Organisation> organisationObjSearch(Map<String, Object> filters, RequestContext context) {
+  public List<Organisation> organisationObjSearch(
+      Map<String, Object> filters, RequestContext context) {
     List<Organisation> orgList = new ArrayList<>();
     ObjectMapper objectMapper = new ObjectMapper();
     List<Map<String, Object>> orgMapList = organisationSearch(filters, context);
@@ -215,7 +216,11 @@ public class OrgServiceImpl implements OrgService {
   }
 
   /** @param req Map<String,Object> */
-  public boolean registerChannel(Map<String, Object> req, RequestContext context) {
+  public boolean registerChannel(
+      Map<String, Object> req, String operationType, RequestContext context) {
+    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.CHANNEL_REGISTRATION_DISABLED)))
+      return true;
+
     Map<String, String> headerMap = new HashMap<>();
     String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
     if (StringUtils.isBlank(header)) {
@@ -246,87 +251,41 @@ public class OrgServiceImpl implements OrgService {
           && StringUtils.isNotBlank((String) req.get(JsonKey.LICENSE))) {
         channelMap.put(JsonKey.DEFAULT_LICENSE, req.get(JsonKey.LICENSE));
       }
-
       String defaultFramework = (String) req.get(JsonKey.DEFAULT_FRAMEWORK);
       if (StringUtils.isNotBlank(defaultFramework))
         channelMap.put(JsonKey.DEFAULT_FRAMEWORK, defaultFramework);
       reqMap.put(JsonKey.CHANNEL, channelMap);
       map.put(JsonKey.REQUEST, reqMap);
-
       reqString = mapper.writeValueAsString(map);
       logger.info(
-          context, "Util:registerChannel: Channel registration request data = " + reqString);
-      regStatus =
-          HttpClientUtil.post(
-              (ekStepBaseUrl
-                  + PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
-              reqString,
-              headerMap,
-              context);
-      logger.info(context, "end call for channel registration for org id ==" + req.get(JsonKey.ID));
+          context, "Channel request data = " + reqString + " for operation : " + operationType);
+      if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
+        regStatus =
+            HttpClientUtil.post(
+                (ekStepBaseUrl
+                    + PropertiesCache.getInstance()
+                        .getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
+                reqString,
+                headerMap,
+                context);
+      } else if (JsonKey.UPDATE.equalsIgnoreCase(operationType)) {
+        regStatus =
+            HttpClientUtil.patch(
+                (ekStepBaseUrl
+                        + PropertiesCache.getInstance()
+                            .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
+                    + "/"
+                    + req.get(JsonKey.ID),
+                reqString,
+                headerMap,
+                context);
+      }
+      logger.info(
+          context,
+          "Call end for channel registration/update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
       logger.error(
-          context, "Exception occurred while registering channel in ekstep." + e.getMessage(), e);
-    }
-
-    return regStatus.contains("OK");
-  }
-
-  /** @param req Map<String,Object> */
-  public boolean updateChannel(Map<String, Object> req, RequestContext context) {
-    Map<String, String> headers = new HashMap<>();
-    headers.put("content-type", contentType);
-    headers.put("accept", contentType);
-    Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", contentType);
-    headerMap.put("user-id", "");
-    ProjectUtil.setTraceIdInHeader(headers, context);
-    String reqString = "";
-    String regStatus = "";
-    try {
-      logger.info(
-          context, "start call for updateChannel for hashTag id ==" + req.get(JsonKey.HASHTAGID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
-      Map<String, Object> map = new HashMap<>();
-      Map<String, Object> reqMap = new HashMap<>();
-      Map<String, Object> channelMap = new HashMap<>();
-      channelMap.put(JsonKey.NAME, req.get(JsonKey.CHANNEL));
-      channelMap.put(JsonKey.DESCRIPTION, req.get(JsonKey.DESCRIPTION));
-      channelMap.put(JsonKey.CODE, req.get(JsonKey.HASHTAGID));
-      String license = (String) req.get(JsonKey.LICENSE);
-      if (StringUtils.isNotBlank(license)) {
-        channelMap.put(JsonKey.DEFAULT_LICENSE, license);
-      }
-      reqMap.put(JsonKey.CHANNEL, channelMap);
-      map.put(JsonKey.REQUEST, reqMap);
-
-      reqString = mapper.writeValueAsString(map);
-
-      regStatus =
-          HttpClientUtil.patch(
-              (ekStepBaseUrl
-                      + PropertiesCache.getInstance()
-                          .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
-                  + "/"
-                  + req.get(JsonKey.ID),
-              reqString,
-              headerMap,
-              context);
-      logger.info(
-          context, "end call for channel update for org id ==" + req.get(JsonKey.HASHTAGID));
-    } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while updating channel in ekstep. " + e.getMessage(), e);
+          context, "Exception occurred while registering/update channel." + e.getMessage(), e);
     }
     return regStatus.contains("OK");
   }

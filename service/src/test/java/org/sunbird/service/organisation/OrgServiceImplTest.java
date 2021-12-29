@@ -215,7 +215,7 @@ public class OrgServiceImplTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = orgService.registerChannel(map, new RequestContext());
+    Boolean bool = orgService.registerChannel(map, JsonKey.CREATE, new RequestContext());
     Assert.assertNotNull(bool);
   }
 
@@ -226,7 +226,7 @@ public class OrgServiceImplTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = orgService.updateChannel(map, new RequestContext());
+    Boolean bool = orgService.registerChannel(map, JsonKey.UPDATE, new RequestContext());
     Assert.assertNotNull(bool);
   }
 }
