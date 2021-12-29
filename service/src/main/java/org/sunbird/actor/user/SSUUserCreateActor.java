@@ -154,9 +154,8 @@ public class SSUUserCreateActor extends UserBaseActor {
 
   private void saveUserOrgInfo(Map<String, Object> userMap, RequestContext context) {
     Map<String, Object> userOrgMap = new HashMap<>();
-    userOrgMap.put(JsonKey.ID, ProjectUtil.getUniqueIdFromTimestamp(1));
     userOrgMap.put(JsonKey.HASHTAGID, userMap.get(JsonKey.ROOT_ORG_ID));
-    userOrgMap.put(JsonKey.USER_ID, userMap.get(JsonKey.USER_ID));
+    userOrgMap.put(JsonKey.ID, userMap.get(JsonKey.USER_ID));
     userOrgMap.put(JsonKey.ORGANISATION_ID, userMap.get(JsonKey.ROOT_ORG_ID));
     userOrgMap.put(JsonKey.ORG_JOIN_DATE, ProjectUtil.getFormattedDate());
     userOrgMap.put(JsonKey.IS_DELETED, false);
