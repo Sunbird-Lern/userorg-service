@@ -108,7 +108,8 @@ public class OrganisationManagementActor extends BaseActor {
     }
 
     if (null != isTenant && isTenant) {
-      boolean bool = orgService.registerChannel(request, actorMessage.getRequestContext());
+      boolean bool =
+          orgService.registerChannel(request, JsonKey.CREATE, actorMessage.getRequestContext());
       request.put(
           JsonKey.IS_SSO_ROOTORG_ENABLED,
           request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)
@@ -347,7 +348,8 @@ public class OrganisationManagementActor extends BaseActor {
           tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.ID));
           tempMap.put(JsonKey.DESCRIPTION, dbOrgDetails.get(JsonKey.DESCRIPTION));
           tempMap.put(JsonKey.LICENSE, license);
-          boolean bool = orgService.updateChannel(tempMap, actorMessage.getRequestContext());
+          boolean bool =
+              orgService.registerChannel(request, JsonKey.UPDATE, actorMessage.getRequestContext());
           if (!bool) {
             ProjectCommonException.throwClientErrorException(ResponseCode.channelRegFailed);
             return;

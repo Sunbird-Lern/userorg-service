@@ -36,7 +36,8 @@ import scala.concurrent.Promise;
   ElasticSearchRestHighImpl.class,
   EsClientFactory.class,
   CassandraOperationImpl.class,
-  ServiceFactory.class
+  ServiceFactory.class,
+  ProjectUtil.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -92,7 +93,6 @@ public class OrgServiceImplTest {
 
     PowerMockito.mockStatic(EsClientFactory.class);
     esService = mock(ElasticSearchRestHighImpl.class);
-    PowerMockito.mockStatic(EsClientFactory.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
 
     Map<String, Object> esResponse = new HashMap<>();
@@ -215,7 +215,7 @@ public class OrgServiceImplTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = orgService.registerChannel(map, new RequestContext());
+    Boolean bool = orgService.registerChannel(map, JsonKey.CREATE, new RequestContext());
     Assert.assertNotNull(bool);
   }
 
@@ -226,7 +226,21 @@ public class OrgServiceImplTest {
     map.put(JsonKey.CHANNEL, "ch");
     map.put(JsonKey.DESCRIPTION, "desc");
     map.put(JsonKey.ID, "id");
-    Boolean bool = orgService.updateChannel(map, new RequestContext());
+    Boolean bool = orgService.registerChannel(map, JsonKey.UPDATE, new RequestContext());
+    Assert.assertNotNull(bool);
+  }
+
+  @Test
+  public void testUpdateChannelV2() {
+    PowerMockito.mockStatic(ProjectUtil.class);
+
+    when(ProjectUtil.getConfigValue(JsonKey.CHANNEL_REGISTRATION_DISABLED)).thenReturn("true");
+    OrgService orgService = OrgServiceImpl.getInstance();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.CHANNEL, "ch");
+    map.put(JsonKey.DESCRIPTION, "desc");
+    map.put(JsonKey.ID, "id");
+    Boolean bool = orgService.registerChannel(map, JsonKey.UPDATE, new RequestContext());
     Assert.assertNotNull(bool);
   }
 }
