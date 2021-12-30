@@ -38,6 +38,7 @@
                     <argLine>
                         @{argLine} --illegal-access=permit
                     </argLine>
+                    <forkCount>0</forkCount>
                     <properties>
                         <property>
                             <name>parallel</name>
