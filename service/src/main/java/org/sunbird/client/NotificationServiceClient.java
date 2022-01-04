@@ -105,7 +105,7 @@ public class NotificationServiceClient {
             Response response = mapper.readValue(responseStr, Response.class);
             return response;
         }  catch (Exception ex) {
-            logger.error(context, "FeedServiceImpl:insert Exception occurred while mapping.", ex);
+            logger.error(context, "FeedServiceImpl:readV1Notification Exception occurred while mapping.", ex);
             ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
         }
 
@@ -119,17 +119,17 @@ public class NotificationServiceClient {
      * @return
      */
     public Response  deleteV1Notification(Request reqObj, RequestContext context) {
-        logger.debug(context, "NotificationServiceClient:readV1Notification method called : ");
+        logger.debug(context, "NotificationServiceClient:deleteV1Notification method called : ");
 
         String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V1_DELETE_URL);
         logger.debug(
                 context,
-                "NotificationServiceClient:readV1Notification :: calling notification service URL :" + serviceUrl);
+                "NotificationServiceClient:deleteV1Notification :: calling notification service URL :" + serviceUrl);
         try {
             Response response = callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
             return response;
         }  catch (Exception ex) {
-            logger.error(context, "FeedServiceImpl:insert Exception occurred while mapping.", ex);
+            logger.error(context, "FeedServiceImpl:deleteV1Notification Exception occurred while mapping.", ex);
             ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
         }
 
