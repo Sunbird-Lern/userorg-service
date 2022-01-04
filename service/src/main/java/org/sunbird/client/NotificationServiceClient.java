@@ -121,7 +121,7 @@ public class NotificationServiceClient {
     public Response  deleteV1Notification(Request reqObj, RequestContext context) {
         logger.debug(context, "NotificationServiceClient:readV1Notification method called : ");
 
-        String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V1_READ_URL);
+        String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V1_DELETE_URL);
         logger.debug(
                 context,
                 "NotificationServiceClient:readV1Notification :: calling notification service URL :" + serviceUrl);
