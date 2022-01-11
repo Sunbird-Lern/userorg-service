@@ -19,6 +19,7 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.userconsent.UserConsentService;
+import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.user.DateUtil;
 
@@ -111,20 +112,13 @@ public class UserConsentServiceImpl implements UserConsentService {
   }
 
   public void validateConsumerId(String consumerId, RequestContext context) {
-    Map<String, Object> org = null;
-    try {
-      org = orgDao.getOrgById(consumerId, context);
-    } catch (Exception ex) {
-      throw new ProjectCommonException(
-          ResponseCode.internalError.getErrorCode(),
-          ResponseCode.internalError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+    String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
+    if (consumerId.equalsIgnoreCase(custodianOrgId)) {
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
     }
+    Map<String, Object> org = orgDao.getOrgById(consumerId, context);
     if (MapUtils.isEmpty(org)) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidOrgId.getErrorCode(),
-          ResponseCode.invalidOrgId.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
     }
   }
 

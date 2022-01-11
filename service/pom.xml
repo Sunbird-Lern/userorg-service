@@ -89,6 +89,16 @@
             <groupId>com.intuit.fuzzymatcher</groupId>
             <artifactId>fuzzy-matcher</artifactId>
             <version>0.4.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.lucene</groupId>
+                    <artifactId>lucene-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.lucene</groupId>
+                    <artifactId>lucene-analyzers-common</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
