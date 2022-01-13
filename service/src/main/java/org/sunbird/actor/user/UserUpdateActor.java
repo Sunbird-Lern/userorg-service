@@ -208,6 +208,7 @@ public class UserUpdateActor extends UserBaseActor {
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
         Map<String, Object> filters = new HashMap<>();
         filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        filters.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
         if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {
           filters.put(
               String.join(".", JsonKey.ORG_LOCATION, JsonKey.ID), userMap.get(JsonKey.STATE_ID));
