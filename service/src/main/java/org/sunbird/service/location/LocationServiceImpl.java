@@ -99,6 +99,7 @@ public class LocationServiceImpl implements LocationService {
       throwInvalidParameterValueException(codeList);
     }
     locationIdList.addAll(locationIds);
+
     return locationIdList;
   }
 

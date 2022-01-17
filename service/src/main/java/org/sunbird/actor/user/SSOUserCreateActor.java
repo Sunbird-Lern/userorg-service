@@ -82,9 +82,11 @@ public class SSOUserCreateActor extends UserBaseActor {
     }
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.CREATE_SSO_USER.getValue())) {
       populateUserTypeAndSubType(userMap);
-      populateLocationCodesFromProfileLocation(userMap);
+      validateProfileLocation(userMap, actorMessage.getRequestContext());
+    } else {
+      validateAndGetLocationCodes(actorMessage);
+      convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     }
-    validateAndGetLocationCodes(actorMessage);
     ssoUserService.validateOrgIdAndPrimaryRecoveryKeys(userMap, actorMessage);
     processSSOUser(userMap, callerId, actorMessage);
     logger.debug(actorMessage.getRequestContext(), "SSOUserCreateActor:createSSOUser: ends : ");
@@ -98,7 +100,6 @@ public class SSOUserCreateActor extends UserBaseActor {
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
     userMap.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
-    convertValidatedLocationCodesToIDs(userMap, request.getRequestContext());
     UserUtil.toLower(userMap);
     UserUtil.validateUserPhoneAndEmailUniqueness(user, JsonKey.CREATE, request.getRequestContext());
     UserUtil.addMaskEmailAndMaskPhone(userMap);

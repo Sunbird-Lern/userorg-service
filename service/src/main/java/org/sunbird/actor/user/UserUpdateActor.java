@@ -93,10 +93,11 @@ public class UserUpdateActor extends UserBaseActor {
         UserUtil.validateExternalIdsAndReturnActiveUser(userMap, actorMessage.getRequestContext());
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_LOCATION);
+      validateAndGetLocationCodes(actorMessage);
+      convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     } else {
-      populateLocationCodesFromProfileLocation(userMap);
+      validateProfileLocation(userMap, actorMessage.getRequestContext());
     }
-    validateAndGetLocationCodes(actorMessage);
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPES);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
@@ -165,7 +166,6 @@ public class UserUpdateActor extends UserBaseActor {
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
-    convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.UPDATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));

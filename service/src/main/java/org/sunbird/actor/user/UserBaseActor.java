@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -143,6 +145,64 @@ public abstract class UserBaseActor extends BaseActor {
         userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
       }
       userRequest.getRequest().put(JsonKey.LOCATION_CODES, set);
+    }
+  }
+
+  protected void validateProfileLocation(Map<String, Object> userMap, RequestContext context) {
+    if (userMap.containsKey(JsonKey.PROFILE_LOCATION)) {
+      userMap.remove(JsonKey.LOCATION_CODES);
+      List<Map<String, String>> profLocList =
+          (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
+      if (CollectionUtils.isNotEmpty(profLocList)) {
+        Set<String> locationIds = new HashSet<>();
+        String stateCode = UserCreateRequestValidator.getStateLocationCode(profLocList);
+        List<String> allowedLocationTypeList = getStateLocationTypeConfig(stateCode, context);
+        String stateId = "";
+        for (Map<String, String> location : profLocList) {
+          String locType = location.get(JsonKey.TYPE);
+          UserCreateRequestValidator.isValidLocationType(locType, allowedLocationTypeList);
+          if (locType.equalsIgnoreCase(JsonKey.STATE)) {
+            stateId = location.get(JsonKey.ID);
+          }
+          if (locType.equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
+            userMap.put(JsonKey.ORG_EXTERNAL_ID, location.get(JsonKey.CODE));
+          } else {
+            locationIds.add(location.get(JsonKey.ID));
+          }
+        }
+        if (StringUtils.isNotBlank((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
+          userMap.put(JsonKey.STATE_ID, stateId);
+        }
+        List<Map<String, Object>> locationList =
+            locationService.getLocationsByIds(new ArrayList<>(locationIds), null, context);
+        List<Map<String, String>> locationIdType = new ArrayList<>();
+
+        if (locationList.size() == locationIds.size()) {
+          locationList.forEach(
+              location -> {
+                Map<String, String> locationIdTypeMap = new HashMap();
+                locationIdTypeMap.put(JsonKey.ID, (String) location.get(JsonKey.ID));
+                locationIdTypeMap.put(JsonKey.TYPE, (String) location.get(JsonKey.TYPE));
+                locationIdType.add(locationIdTypeMap);
+              });
+          try {
+            userMap.put(JsonKey.PROFILE_LOCATION, mapper.writeValueAsString(locationIdType));
+          } catch (Exception ex) {
+            logger.error(context, "Exception occurred while mapping", ex);
+            ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
+          }
+        } else {
+          String exceptionMsg =
+              String.format(
+                  ResponseCode.invalidParameterValue.getErrorMessage(),
+                  locationIds,
+                  JsonKey.PROFILE_LOCATION);
+          ProjectCommonException.throwClientErrorException(
+              ResponseCode.invalidParameterValue, exceptionMsg);
+        }
+      } else {
+        userMap.remove(JsonKey.LOCATION_CODES);
+      }
     }
   }
 

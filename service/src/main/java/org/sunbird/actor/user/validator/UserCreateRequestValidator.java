@@ -56,6 +56,25 @@ public class UserCreateRequestValidator {
     return stateCode;
   }
 
+  public static String getStateLocationCode(List<Map<String, String>> locationList) {
+    String stateCode = "";
+    for (Map<String, String> location : locationList) {
+      if (JsonKey.STATE.equals(location.get(JsonKey.TYPE))) {
+        stateCode = location.get(JsonKey.CODE);
+      }
+    }
+    // Throw an exception if location codes update does not contains state code
+    if (StringUtils.isBlank(stateCode)) {
+      throw new ProjectCommonException(
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ProjectUtil.formatMessage(
+              ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+              JsonKey.LOCATION_CODES + " of type State"),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+    return stateCode;
+  }
+
   public static void validatePrimaryAndRecoveryKeys(Map<String, Object> userReqMap) {
     String userPhone = (String) userReqMap.get(JsonKey.PHONE);
     String userEmail = (String) userReqMap.get(JsonKey.EMAIL);
