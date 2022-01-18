@@ -14,6 +14,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -99,7 +100,7 @@ public class HttpClientUtil {
           httpPost.addHeader(entry.getKey(), entry.getValue());
         }
       }
-      StringEntity entity = new StringEntity(params);
+      StringEntity entity = new StringEntity(params,ContentType.APPLICATION_JSON);
       httpPost.setEntity(entity);
 
       response = httpclient.execute(httpPost);
@@ -154,7 +155,7 @@ public class HttpClientUtil {
           httpPatch.addHeader(entry.getKey(), entry.getValue());
         }
       }
-      StringEntity entity = new StringEntity(params);
+      StringEntity entity = new StringEntity(params, ContentType.APPLICATION_JSON);
       httpPatch.setEntity(entity);
 
       response = httpclient.execute(httpPatch);

@@ -2,6 +2,7 @@ package org.sunbird.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.binary.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
@@ -33,7 +34,6 @@ public class NotificationServiceClient {
 
     private String getJsonString(Request req) throws JsonProcessingException {
         String json = mapper.writeValueAsString(req);
-        json = new String(json.getBytes(), StandardCharsets.UTF_8);
         return json;
     }
 
