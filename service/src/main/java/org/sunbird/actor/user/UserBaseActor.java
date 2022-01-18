@@ -212,7 +212,7 @@ public abstract class UserBaseActor extends BaseActor {
       userMap.remove(JsonKey.LOCATION_CODES);
       List<Map<String, String>> profLocList =
           (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-      List<String> locationCodes = null;
+      List<String> locationCodes = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(profLocList)) {
         for (Map<String, String> location : profLocList) {
           if (JsonKey.LOCATION_TYPE_SCHOOL.equals(location.get(JsonKey.LOCATION_TYPE))) {
