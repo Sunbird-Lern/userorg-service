@@ -543,6 +543,26 @@ public class UserRequestValidatorTest {
     assertEquals(true, response);
   }
 
+  @Test(expected = ProjectCommonException.class)
+  public void testGetStateLocationCode() {
+    List<Map<String, String>> locationList = new ArrayList<>();
+    Map<String, String> location = new HashMap<>();
+    location.put(JsonKey.TYPE, "district");
+    locationList.add(location);
+    UserCreateRequestValidator.getStateLocationCode(locationList);
+  }
+
+  @Test()
+  public void testGetStateLocationCodeSuccess() {
+    List<Map<String, String>> locationList = new ArrayList<>();
+    Map<String, String> location = new HashMap<>();
+    location.put(JsonKey.TYPE, "state");
+    location.put(JsonKey.CODE, "stateCode");
+    locationList.add(location);
+    String stateCode = UserCreateRequestValidator.getStateLocationCode(locationList);
+    Assert.assertNotNull(stateCode);
+  }
+
   @Test
   public void testValidateAssignRoleSuccessWithProviderAndExternalId() {
     Request request = new Request();

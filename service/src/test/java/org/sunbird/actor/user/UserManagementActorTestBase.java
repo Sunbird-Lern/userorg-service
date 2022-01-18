@@ -383,7 +383,7 @@ public abstract class UserManagementActorTestBase {
 
   public Map<String, List<String>> getLocationTypeConfig() {
     Map<String, List<String>> locationTypeConfig = new HashMap<>();
-    locationTypeConfig.put("locationCode1", Arrays.asList("school", "state"));
+    locationTypeConfig.put("locationCode1", Arrays.asList("school", "state", "district", "block"));
     // locationTypeConfig.put("default", Arrays.asList("school", "state"));
     return locationTypeConfig;
   }

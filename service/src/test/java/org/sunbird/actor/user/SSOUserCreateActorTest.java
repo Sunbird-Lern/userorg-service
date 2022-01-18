@@ -9,6 +9,7 @@ import akka.dispatch.Futures;
 import akka.pattern.Patterns;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -60,14 +61,51 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
   }
 
   @Test
+  public void testCreateUserSuccessWithUser() {
+    List<Map<String, String>> locList = new ArrayList<>();
+    Map<String, String> state = new HashMap<>();
+    state.put(JsonKey.CODE, "s1");
+    state.put(JsonKey.NAME, "name");
+    state.put(JsonKey.ID, "5464646464");
+    state.put(JsonKey.TYPE, "state");
+    locList.add(state);
+    Map<String, String> district = new HashMap<>();
+    district.put(JsonKey.CODE, "d1");
+    district.put(JsonKey.NAME, "name");
+    district.put(JsonKey.ID, "45646464646464");
+    district.put(JsonKey.TYPE, "district");
+    locList.add(district);
+    Map<String, String> block = new HashMap<>();
+    block.put(JsonKey.CODE, "b1");
+    block.put(JsonKey.NAME, "name");
+    block.put(JsonKey.ID, "89986464646464");
+    block.put(JsonKey.TYPE, "block");
+    locList.add(block);
+    Map<String, String> school = new HashMap<>();
+    school.put(JsonKey.CODE, "b1");
+    school.put(JsonKey.NAME, "name");
+    school.put(JsonKey.ID, "1212646464646464");
+    school.put(JsonKey.TYPE, "school");
+    locList.add(school);
+    reqMap.put(JsonKey.PROFILE_LOCATION, locList);
+    when(DataCacheHandler.getLocationTypeConfig()).thenReturn(getLocationTypeConfig());
+
+    boolean result =
+        testScenario(
+            getRequest(
+                true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_SSO_USER),
+            null);
+    assertTrue(result);
+  }
+
+  @Test
   public void testCreateUserSuccessWithIsTenantAsFalse() {
     Organisation organisation = new Organisation();
     organisation.setId("rootOrgId");
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(false);
-    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(organisation);
+    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any())).thenReturn(organisation);
     boolean result =
         testScenario(
             getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
@@ -82,8 +120,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(false);
-    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(organisation);
+    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any())).thenReturn(organisation);
     Request request =
         getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER);
     request.getRequest().remove(JsonKey.CHANNEL);
@@ -98,8 +135,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     organisation.setChannel("anyChannel");
     organisation.setRootOrgId("rootOrgId");
     organisation.setTenant(true);
-    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any()))
-        .thenReturn(organisation);
+    when(orgService.getOrgObjById(Mockito.anyString(), Mockito.any())).thenReturn(organisation);
     boolean result =
         testScenario(
             getRequest(

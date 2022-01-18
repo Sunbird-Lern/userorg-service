@@ -180,7 +180,7 @@ public abstract class UserBaseActor extends BaseActor {
         if (locationList.size() == locationIds.size()) {
           locationList.forEach(
               location -> {
-                Map<String, String> locationIdTypeMap = new HashMap();
+                Map<String, String> locationIdTypeMap = new HashMap<>();
                 locationIdTypeMap.put(JsonKey.ID, (String) location.get(JsonKey.ID));
                 locationIdTypeMap.put(JsonKey.TYPE, (String) location.get(JsonKey.TYPE));
                 locationIdType.add(locationIdTypeMap);
