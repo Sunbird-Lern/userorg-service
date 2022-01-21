@@ -54,7 +54,6 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateAuditEdata(params);
-    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.AUDIT.getName(), actor, eventContext, edata, targetObject);
     telemetry.setMid(reqId);
@@ -208,7 +207,6 @@ public class TelemetryGenerator {
       eventContext.getCdata().add(map);
     }
     Map<String, Object> edata = generateSearchEdata(params);
-    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.SEARCH.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
@@ -264,7 +262,6 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateLogEdata(params);
-    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry = new Telemetry(TelemetryEvents.LOG.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
     return getTelemetry(telemetry);
@@ -330,7 +327,6 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateErrorEdata(params);
-    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.ERROR.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
