@@ -327,6 +327,7 @@ public class TelemetryGenerator {
     }
 
     Map<String, Object> edata = generateErrorEdata(params);
+    edata.put(JsonKey.REQUEST_ID, reqId);
     Telemetry telemetry =
         new Telemetry(TelemetryEvents.ERROR.getName(), actor, eventContext, edata);
     telemetry.setMid(reqId);
