@@ -81,6 +81,21 @@ public class ProjectCommonException extends RuntimeException {
     this.responseCode = responseCode;
   }
 
+  public ProjectCommonException(ProjectCommonException pce, String actorOperation) {
+    super();
+    this.code = new StringBuilder("UOS_").append(actorOperation).append(pce.getCode()).toString();
+    this.message = pce.getMessage();
+    super.setStackTrace(pce.getStackTrace());
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append(code).append(": ");
+    builder.append(message);
+    return builder.toString();
+  }
+
   public ProjectCommonException(
       String code, String messageWithPlaceholder, int responseCode, String... placeholderValue) {
     super();

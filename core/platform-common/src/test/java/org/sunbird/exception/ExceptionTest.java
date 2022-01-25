@@ -10,29 +10,29 @@ public class ExceptionTest {
   public void testProjectCommonException() {
     ProjectCommonException exception =
         new ProjectCommonException(
-            ResponseCode.apiKeyRequired.getErrorCode(),
-            ResponseCode.apiKeyRequired.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-    Assert.assertEquals(exception.getCode(), ResponseCode.apiKeyRequired.getErrorCode());
-    Assert.assertEquals(exception.getMessage(), ResponseCode.apiKeyRequired.getErrorMessage());
-    Assert.assertEquals(exception.getResponseCode(), ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseCode.unAuthorized.getErrorCode(),
+            ResponseCode.unAuthorized.getErrorMessage(),
+            ResponseCode.UNAUTHORIZED.getResponseCode());
+    Assert.assertEquals(exception.getCode(), ResponseCode.unAuthorized.getErrorCode());
+    Assert.assertEquals(exception.getMessage(), ResponseCode.unAuthorized.getErrorMessage());
+    Assert.assertEquals(exception.getResponseCode(), ResponseCode.UNAUTHORIZED.getResponseCode());
   }
 
   @Test
   public void testProjectCommonExceptionUsingSetters() {
     ProjectCommonException exception =
         new ProjectCommonException(
-            ResponseCode.apiKeyRequired.getErrorCode(),
-            ResponseCode.apiKeyRequired.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-    Assert.assertEquals(exception.getCode(), ResponseCode.apiKeyRequired.getErrorCode());
-    Assert.assertEquals(exception.getMessage(), ResponseCode.apiKeyRequired.getErrorMessage());
+            ResponseCode.unAuthorized.getErrorCode(),
+            ResponseCode.unAuthorized.getErrorMessage(),
+            ResponseCode.UNAUTHORIZED.getResponseCode());
+    Assert.assertEquals(exception.getCode(), ResponseCode.unAuthorized.getErrorCode());
+    Assert.assertEquals(exception.getMessage(), ResponseCode.unAuthorized.getErrorMessage());
     Assert.assertEquals(exception.getResponseCode(), ResponseCode.CLIENT_ERROR.getResponseCode());
-    exception.setCode(ResponseCode.userAlreadyExists.getErrorCode());
-    exception.setMessage(ResponseCode.userAlreadyExists.getErrorMessage());
+    exception.setCode(ResponseCode.emailFormatError.getErrorCode());
+    exception.setMessage(ResponseCode.emailFormatError.getErrorMessage());
     exception.setResponseCode(ResponseCode.SERVER_ERROR.getResponseCode());
-    Assert.assertEquals(exception.getCode(), ResponseCode.userAlreadyExists.getErrorCode());
-    Assert.assertEquals(exception.getMessage(), ResponseCode.userAlreadyExists.getErrorMessage());
+    Assert.assertEquals(exception.getCode(), ResponseCode.emailFormatError.getErrorCode());
+    Assert.assertEquals(exception.getMessage(), ResponseCode.emailFormatError.getErrorMessage());
     Assert.assertEquals(exception.getResponseCode(), ResponseCode.SERVER_ERROR.getResponseCode());
   }
 }

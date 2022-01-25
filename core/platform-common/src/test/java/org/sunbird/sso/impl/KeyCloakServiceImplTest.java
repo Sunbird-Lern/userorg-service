@@ -99,15 +99,6 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
       doReturn(kcp).when(KeyCloakConnectionProvider.class, "getConnection");
       doReturn(realmRes).when(kcp).realm(Mockito.anyString());
       doReturn(usersRes).when(realmRes).users();
-      doReturn(response)
-          .doThrow(
-              new ProjectCommonException(
-                  ResponseCode.emailANDUserNameAlreadyExistError.getErrorCode(),
-                  ResponseCode.emailANDUserNameAlreadyExistError.getErrorMessage(),
-                  ResponseCode.CLIENT_ERROR.getResponseCode()))
-          .doReturn(response)
-          .when(usersRes)
-          .create(Mockito.any(UserRepresentation.class));
       doReturn(201).when(response).getStatus();
       doReturn("userdata").when(response).getHeaderString(Mockito.eq("Location"));
 
@@ -181,8 +172,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     try {
       keyCloakService.activateUser(reqMap, null);
     } catch (ProjectCommonException e) {
-      Assert.assertEquals(ResponseCode.invalidUsrData.getErrorCode(), e.getCode());
-      Assert.assertEquals(ResponseCode.invalidUsrData.getErrorMessage(), e.getMessage());
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
       Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
     }
   }

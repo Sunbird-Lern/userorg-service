@@ -76,11 +76,11 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
       logger.error(
           context,
-          "Exception occured while inserting record to " + tableName + " : " + e.getMessage(),
+          "Exception occurred while inserting record to " + tableName + " : " + e.getMessage(),
           e);
       throw new ProjectCommonException(
-          ResponseCode.dbInsertionError.getErrorCode(),
-          ResponseCode.dbInsertionError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          "DB insert operation failed.",
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       logQueryElapseTime("insertRecord", startTime, query, context);
@@ -127,8 +127,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
       }
       logger.error(context, Constants.EXCEPTION_MSG_UPDATE + tableName + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.dbUpdateError.getErrorCode(),
-          ResponseCode.dbUpdateError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          "Db update operation failed.",
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       logQueryElapseTime("updateRecord", startTime, query, context);
@@ -458,8 +458,8 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       throw new ProjectCommonException(
-          ResponseCode.dbUpdateError.getErrorCode(),
-          ResponseCode.dbUpdateError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          "Db update operation failed.",
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != updateQuery) {

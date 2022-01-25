@@ -28,7 +28,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNote(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.userIdRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -47,7 +47,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNote(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.titleRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -66,7 +66,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNote(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.noteRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -85,7 +85,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNote(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.contentIdError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -104,7 +104,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNote(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidTags.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -116,7 +116,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNoteId(noteId);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidNoteId.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
     }
   }
 
@@ -128,7 +128,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNoteId(noteId);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidNoteId.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
     }
   }
 }

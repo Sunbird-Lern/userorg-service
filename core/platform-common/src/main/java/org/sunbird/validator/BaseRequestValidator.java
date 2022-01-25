@@ -307,8 +307,8 @@ public class BaseRequestValidator {
   public void validatePhone(String phone) {
     if (!ProjectUtil.validatePhone(phone, null)) {
       throw new ProjectCommonException(
-          ResponseCode.phoneNoFormatError.getErrorCode(),
-          ResponseCode.phoneNoFormatError.getErrorMessage(),
+          ResponseCode.dataFormatError.getErrorCode(),
+          String.format(ResponseCode.dataFormatError.getErrorMessage(), JsonKey.PHONE),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }

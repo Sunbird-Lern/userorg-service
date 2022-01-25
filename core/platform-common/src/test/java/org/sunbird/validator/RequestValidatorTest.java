@@ -28,7 +28,7 @@ public class RequestValidatorTest {
       RequestValidator.validateFileUpload(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.storageContainerNameMandatory.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -80,7 +80,7 @@ public class RequestValidatorTest {
       RequestValidator.validateSendMail(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.emailBodyError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -94,7 +94,7 @@ public class RequestValidatorTest {
       RequestValidator.validateSendMail(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.emailSubjectError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 

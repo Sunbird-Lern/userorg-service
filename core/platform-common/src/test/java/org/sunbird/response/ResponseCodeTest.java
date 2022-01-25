@@ -38,18 +38,4 @@ public class ResponseCodeTest {
     String respMsg = ResponseCode.getResponseMessage("");
     assertEquals("", respMsg);
   }
-
-  @Test
-  public void testInvalidElementValueSuccess() {
-    ResponseCode respCode =
-        ResponseCode.getResponse(ResponseCode.invalidElementInList.getErrorCode());
-    assertEquals(ResponseCode.invalidElementInList, respCode);
-  }
-
-  @Test
-  public void testInvalidDeclaredInfo() {
-    ResponseCode respCode =
-        ResponseCode.getResponse(ResponseCode.InvalidUserInfoValue.getErrorCode());
-    assertEquals(ResponseCode.InvalidUserInfoValue, respCode);
-  }
 }

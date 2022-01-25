@@ -16,6 +16,7 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
@@ -29,8 +30,8 @@ import org.sunbird.util.ProjectUtil;
  * @author Manzarul
  */
 public class KeyCloakServiceImpl implements SSOManager {
-  private LoggerUtil logger = new LoggerUtil(KeyCloakServiceImpl.class);
-  private Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
+  private final LoggerUtil logger = new LoggerUtil(KeyCloakServiceImpl.class);
+  private final Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
 
   private static PublicKey SSO_PUBLIC_KEY = null;
 
@@ -83,7 +84,7 @@ public class KeyCloakServiceImpl implements SSOManager {
    * Method to remove the user on basis of user id.
    *
    * @param request Map
-   * @param context
+   * @param context RequestContext
    * @return boolean true if success otherwise false .
    */
   @Override
@@ -99,7 +100,9 @@ public class KeyCloakServiceImpl implements SSOManager {
       }
     } catch (Exception ex) {
       logger.error(context, "Error occurred : ", ex);
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrData);
+      String exMsg =
+          String.format(ResponseMessage.Message.INVALID_PARAMETER_VALUE, userId, JsonKey.USER_ID);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameterValue, exMsg);
     }
     return JsonKey.SUCCESS;
   }
@@ -155,7 +158,9 @@ public class KeyCloakServiceImpl implements SSOManager {
           context,
           "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ",
           e);
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrData);
+      String exMsg =
+          String.format(ResponseMessage.Message.INVALID_PARAMETER_VALUE, userId, JsonKey.USER_ID);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameterValue, exMsg);
     }
   }
 
@@ -168,7 +173,9 @@ public class KeyCloakServiceImpl implements SSOManager {
    */
   private void validateUserId(String userId) {
     if (StringUtils.isBlank(userId)) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidUsrData);
+      String exMsg =
+          String.format(ResponseMessage.Message.INVALID_PARAMETER_VALUE, userId, JsonKey.USER_ID);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameterValue, exMsg);
     }
   }
 
@@ -229,9 +236,9 @@ public class KeyCloakServiceImpl implements SSOManager {
       } else {
         logger.info(context, "verifyToken: SSO_PUBLIC_KEY is NULL.");
         throw new ProjectCommonException(
-            ResponseCode.keyCloakDefaultError.getErrorCode(),
-            ResponseCode.keyCloakDefaultError.getErrorMessage(),
-            ResponseCode.keyCloakDefaultError.getResponseCode());
+            ResponseCode.SERVER_ERROR.getErrorCode(),
+            ResponseCode.SERVER_ERROR.getErrorMessage(),
+            ResponseCode.SERVER_ERROR.getResponseCode());
       }
     } catch (Exception e) {
       logger.error(context, "verifyToken: Exception occurred: ", e);

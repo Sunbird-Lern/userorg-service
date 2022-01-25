@@ -151,8 +151,8 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.dbInsertionError.getErrorCode(),
-                ResponseCode.dbInsertionError.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                ResponseCode.SERVER_ERROR.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -265,8 +265,8 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.dbUpdateError.getErrorCode(),
-                ResponseCode.dbUpdateError.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                ResponseCode.SERVER_ERROR.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();

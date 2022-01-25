@@ -163,7 +163,7 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateUpdateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRootOrganisationId.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));

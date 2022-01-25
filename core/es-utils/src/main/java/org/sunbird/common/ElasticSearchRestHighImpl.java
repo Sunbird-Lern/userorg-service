@@ -200,7 +200,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
 
     } else {
       logger.info(context, "ElasticSearchRestHighImpl:update: Requested data is invalid.");
-      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidData));
+      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidRequestData));
     }
     return promise.future();
   }
@@ -272,7 +272,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
               + ","
               + " identifier = "
               + identifier);
-      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidData));
+      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidRequestData));
     }
 
     return promise.future();
@@ -327,7 +327,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
               + ","
               + " identifier = "
               + identifier);
-      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidData));
+      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidRequestData));
     }
 
     logger.debug(
@@ -690,7 +690,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       return promise.future();
     } else {
       logger.info(context, "ElasticSearchRestHighImpl:upsert: Requested data is invalid.");
-      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidData));
+      promise.failure(ProjectUtil.createClientException(ResponseCode.invalidRequestData));
       return promise.future();
     }
   }

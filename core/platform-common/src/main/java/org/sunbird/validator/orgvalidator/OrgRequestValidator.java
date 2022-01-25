@@ -44,7 +44,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
           ResponseCode.invalidParameterValue.getErrorCode(),
           MessageFormat.format(
               ResponseCode.invalidParameterValue.getErrorMessage(),
-              (String) orgRequest.getRequest().get(JsonKey.LICENSE),
+              orgRequest.getRequest().get(JsonKey.LICENSE),
               JsonKey.LICENSE),
           ERROR_CODE);
     }
@@ -55,8 +55,8 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
     if (request.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isEmpty((String) request.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRootOrganisationId.getErrorCode(),
-          ResponseCode.invalidRootOrganisationId.getErrorMessage(),
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          String.format(ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.ROOT_ORG_ID),
           ERROR_CODE);
     }
     if (request.getRequest().get(JsonKey.STATUS) != null) {

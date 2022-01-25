@@ -78,14 +78,14 @@ public final class RequestValidator {
   public static void validateSendMail(Request request) {
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.SUBJECT))) {
       throw new ProjectCommonException(
-          ResponseCode.emailSubjectError.getErrorCode(),
-          ResponseCode.emailSubjectError.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.SUBJECT),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.BODY))) {
       throw new ProjectCommonException(
-          ResponseCode.emailBodyError.getErrorCode(),
-          ResponseCode.emailBodyError.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.BODY),
           ERROR_CODE);
     }
     if (CollectionUtils.isEmpty((List<String>) (request.getRequest().get(JsonKey.RECIPIENT_EMAILS)))
@@ -113,8 +113,8 @@ public final class RequestValidator {
 
     if (StringUtils.isBlank((String) reqObj.get(JsonKey.CONTAINER))) {
       throw new ProjectCommonException(
-          ResponseCode.storageContainerNameMandatory.getErrorCode(),
-          ResponseCode.storageContainerNameMandatory.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CONTAINER),
           ERROR_CODE);
     }
   }
@@ -128,40 +128,42 @@ public final class RequestValidator {
   public static void validateNote(Request request) {
     if (StringUtils.isBlank((String) request.get(JsonKey.USER_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.userIdRequired.getErrorCode(),
-          ResponseCode.userIdRequired.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.USER_ID),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.get(JsonKey.TITLE))) {
       throw new ProjectCommonException(
-          ResponseCode.titleRequired.getErrorCode(),
-          ResponseCode.titleRequired.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.TITLE),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.get(JsonKey.NOTE))) {
       throw new ProjectCommonException(
-          ResponseCode.noteRequired.getErrorCode(),
-          ResponseCode.noteRequired.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.NOTE),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.get(JsonKey.CONTENT_ID))
         && StringUtils.isBlank((String) request.get(JsonKey.COURSE_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.contentIdError.getErrorCode(),
-          ResponseCode.contentIdError.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          String.format(
+              ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+              JsonKey.CONTENT_ID + "," + JsonKey.COURSE_ID),
           ERROR_CODE);
     }
     if (request.getRequest().containsKey(JsonKey.TAGS)
         && ((request.getRequest().get(JsonKey.TAGS) instanceof List)
             && ((List) request.getRequest().get(JsonKey.TAGS)).isEmpty())) {
       throw new ProjectCommonException(
-          ResponseCode.invalidTags.getErrorCode(),
-          ResponseCode.invalidTags.getErrorMessage(),
+          ResponseCode.errorMandatoryParamsEmpty.getErrorCode(),
+          String.format(ResponseCode.errorMandatoryParamsEmpty.getErrorMessage(), JsonKey.TAGS),
           ERROR_CODE);
     } else if (request.getRequest().get(JsonKey.TAGS) instanceof String) {
       throw new ProjectCommonException(
-          ResponseCode.invalidTags.getErrorCode(),
-          ResponseCode.invalidTags.getErrorMessage(),
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          String.format(ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.TAGS),
           ERROR_CODE);
     }
   }
@@ -173,14 +175,10 @@ public final class RequestValidator {
    */
   public static void validateNoteId(String noteId) {
     if (StringUtils.isBlank(noteId)) {
-      throw createExceptionInstance(ResponseCode.invalidNoteId.getErrorCode());
+      throw new ProjectCommonException(
+          ResponseCode.invalidParameterValue.getErrorCode(),
+          String.format(ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.NOTE_ID),
+          ERROR_CODE);
     }
-  }
-
-  private static ProjectCommonException createExceptionInstance(String errorCode) {
-    return new ProjectCommonException(
-        ResponseCode.getResponse(errorCode).getErrorCode(),
-        ResponseCode.getResponse(errorCode).getErrorMessage(),
-        ERROR_CODE);
   }
 }
