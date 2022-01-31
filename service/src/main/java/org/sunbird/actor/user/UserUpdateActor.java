@@ -97,6 +97,7 @@ public class UserUpdateActor extends UserBaseActor {
       populateLocationCodesFromProfileLocation(userMap);
     }
     validateAndGetLocationCodes(actorMessage);
+    convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     if (actorMessage.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_USER.getValue())) {
       userMap.remove(JsonKey.PROFILE_USERTYPES);
       userMap.remove(JsonKey.PROFILE_USERTYPE);
@@ -165,7 +166,6 @@ public class UserUpdateActor extends UserBaseActor {
         user, JsonKey.UPDATE, actorMessage.getRequestContext());
     // not allowing user to update the status,provider,userName
     removeFieldsFrmReq(userMap);
-    convertValidatedLocationCodesToIDs(userMap, actorMessage.getRequestContext());
     userMap.put(JsonKey.UPDATED_DATE, ProjectUtil.getFormattedDate());
     if (StringUtils.isBlank(callerId)) {
       userMap.put(JsonKey.UPDATED_BY, actorMessage.getContext().get(JsonKey.REQUESTED_BY));
@@ -208,6 +208,7 @@ public class UserUpdateActor extends UserBaseActor {
       if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
         Map<String, Object> filters = new HashMap<>();
         filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        filters.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
         if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {
           filters.put(
               String.join(".", JsonKey.ORG_LOCATION, JsonKey.ID), userMap.get(JsonKey.STATE_ID));

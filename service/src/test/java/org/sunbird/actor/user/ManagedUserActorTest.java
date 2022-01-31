@@ -125,6 +125,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
               ActorOperations.CREATE_MANAGED_USER);
       Map<String, String> proLocn = new HashMap<>();
       proLocn.put(JsonKey.CODE, "state");
+      proLocn.put(JsonKey.TYPE, "state");
       List<Map<String, String>> profileLocn = new ArrayList<>();
       profileLocn.add(proLocn);
       reqObj.getRequest().put(JsonKey.PROFILE_LOCATION, profileLocn);
