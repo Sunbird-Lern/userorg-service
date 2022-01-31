@@ -15,6 +15,7 @@ import org.sunbird.operations.ActorOperations;
 public class SSUUserCreateActorTest extends UserManagementActorTestBase {
 
   public final Props props = Props.create(SSUUserCreateActor.class);
+
   @Test
   public void testCreateUserV3Failure() {
     Organisation organisation = new Organisation();
