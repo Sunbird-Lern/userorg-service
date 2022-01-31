@@ -133,11 +133,7 @@ public abstract class UserBaseActor extends BaseActor {
         if (location.getType().equalsIgnoreCase(JsonKey.STATE)) {
           stateId = location.getId();
         }
-        if (location.getType().equals(JsonKey.LOCATION_TYPE_SCHOOL)) {
-          userRequest.getRequest().put(JsonKey.ORG_EXTERNAL_ID, location.getCode());
-        } else {
-          set.add(location.getCode());
-        }
+        set.add(location.getCode());
       }
       if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.ORG_EXTERNAL_ID))) {
         userRequest.getRequest().put(JsonKey.STATE_ID, stateId);
@@ -216,10 +212,15 @@ public abstract class UserBaseActor extends BaseActor {
       userMap.remove(JsonKey.LOCATION_CODES);
       List<Map<String, String>> profLocList =
           (List<Map<String, String>>) userMap.get(JsonKey.PROFILE_LOCATION);
-      List<String> locationCodes = null;
+      List<String> locationCodes = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(profLocList)) {
-        locationCodes =
-            profLocList.stream().map(m -> m.get(JsonKey.CODE)).collect(Collectors.toList());
+        for (Map<String, String> location : profLocList) {
+          if (JsonKey.LOCATION_TYPE_SCHOOL.equals(location.get(JsonKey.LOCATION_TYPE))) {
+            userMap.put(JsonKey.ORG_EXTERNAL_ID, location.get(JsonKey.CODE));
+          } else {
+            locationCodes.add(location.get(JsonKey.CODE));
+          }
+        }
         userMap.put(JsonKey.LOCATION_CODES, locationCodes);
       }
       userMap.remove(JsonKey.PROFILE_LOCATION);
