@@ -108,7 +108,7 @@ public class NotesManagementActorTest {
     Map<String, Object> reqMap = new HashMap<>();
     req.setRequest(reqMap);
     req.setOperation(ActorOperations.CREATE_NOTE.getValue());
-    boolean result = testScenario(req, ResponseCode.invalidUserId);
+    boolean result = testScenario(req, ResponseCode.invalidParameter);
     assertTrue(result);
   }
 
@@ -122,7 +122,7 @@ public class NotesManagementActorTest {
     when(esUtil.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     req.setOperation(ActorOperations.CREATE_NOTE.getValue());
-    boolean result = testScenario(req, ResponseCode.invalidUserId);
+    boolean result = testScenario(req, ResponseCode.invalidParameter);
     assertTrue(result);
   }
 

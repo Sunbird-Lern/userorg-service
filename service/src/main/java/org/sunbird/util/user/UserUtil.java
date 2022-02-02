@@ -158,7 +158,7 @@ public class UserUtil {
               : ((String) userMap.get(JsonKey.ID));
       user = userService.getUserDetailsForES(userId, context);
       if (MapUtils.isEmpty(user)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.userNotFound, null);
+        ProjectCommonException.throwClientErrorException(ResponseCode.resourceNotFound, null);
       }
     }
     if (MapUtils.isNotEmpty(user)) {
@@ -227,10 +227,11 @@ public class UserUtil {
     try {
       return decService.decryptData(value, context);
     } catch (Exception e) {
+      logger.error(context, e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.userDataEncryptionError.getErrorCode(),
-          ResponseCode.userDataEncryptionError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+        ResponseCode.SERVER_ERROR.getErrorCode(),
+        null,
+        ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 
@@ -314,7 +315,11 @@ public class UserUtil {
     try {
       UserUtility.encryptUserData(userMap);
     } catch (Exception e1) {
-      ProjectCommonException.throwServerErrorException(ResponseCode.userDataEncryptionError, null);
+      logger.error(e1.getMessage(), e1);
+      throw new ProjectCommonException(
+        ResponseCode.SERVER_ERROR.getErrorCode(),
+        null,
+        ResponseCode.SERVER_ERROR.getResponseCode());
     }
     Map<String, Object> requestMap = new HashMap<>();
     User user = mapper.convertValue(userMap, User.class);
@@ -353,7 +358,10 @@ public class UserUtil {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userLookupService.checkUsernameUniqueness(
           (String) userMap.get(JsonKey.USERNAME), false, context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.userNameAlreadyExistError);
+        ProjectCommonException.throwClientErrorException(ResponseCode.errorParamExists,
+          MessageFormat.format(
+            ResponseCode.errorParamExists.getErrorMessage(),
+            JsonKey.USERNAME));
       }
     }
   }
@@ -590,8 +598,9 @@ public class UserUtil {
         || (null != managedByInfo.get(JsonKey.IS_DELETED)
             && (boolean) (managedByInfo.get(JsonKey.IS_DELETED)))) {
       throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
+          ResponseCode.resourceNotFound.getErrorCode(),
+          MessageFormat.format(
+            ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return managedByInfo;

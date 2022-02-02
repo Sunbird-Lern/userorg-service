@@ -51,9 +51,9 @@ public enum OrgTypeEnum {
       }
     }
     throw new ProjectCommonException(
-        ResponseCode.invalidOrgType.getErrorCode(),
+        ResponseCode.invalidParameter.getErrorCode(),
         MessageFormat.format(
-            ResponseCode.invalidOrgType.getErrorMessage(), JsonKey.ORG_TYPE, value, orgValueList),
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ORG_TYPE, value, orgValueList),
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 }

@@ -145,8 +145,8 @@ public enum ActorOperations {
   GET_RELATED_LOCATION_IDS("getRelatedLocationIds", "LOCRED"),
   READ_LOCATION_TYPE("readLocationType", "LOCTYPRED"),
   UPSERT_LOCATION_TO_ES("upsertLocationDataToES", "LBKGUPSRT"),
-  DELETE_LOCATION_FROM_ES("deleteLocationDataFromES", "LBKGDEL");
-
+  DELETE_LOCATION_FROM_ES("deleteLocationDataFromES", "LBKGDEL"),
+  USER_CURRENT_LOGIN("userCurrentLogin", "USRLOG");
   private String value;
 
   private String operationCode;

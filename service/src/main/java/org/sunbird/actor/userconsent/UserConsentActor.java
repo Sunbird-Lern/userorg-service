@@ -1,5 +1,6 @@
 package org.sunbird.actor.userconsent;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,8 +54,9 @@ public class UserConsentActor extends BaseActor {
       response.put(JsonKey.CONSENT_RESPONSE, consentResponseList);
     } else {
       throw new ProjectCommonException(
-          ResponseCode.userConsentNotFound.getErrorCode(),
-          ResponseCode.userConsentNotFound.getErrorMessage(),
+        ResponseCode.resourceNotFound.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER_CONSENT_TEXT),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     sender().tell(response, self());

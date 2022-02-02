@@ -618,6 +618,8 @@ public final class JsonKey {
   public static final String NOTIFICATION_SERVICE_V1_DELETE_URL =
       "notification_service_v1_delete_url";
   public static final String CHANNEL_REGISTRATION_DISABLED = "channel_registration_disabled";
-
+  public static final String USER_CONSENT_TEXT = "user consent";
+  public static final Object COUNTRY_CODE_TEXT = "country code";
+  
   private JsonKey() {}
 }

@@ -1,5 +1,6 @@
 package org.sunbird.actor.notes;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +55,10 @@ public class NotesManagementActor extends BaseActor {
     try {
       Map<String, Object> req = actorMessage.getRequest();
       if (!notesService.validUser((String) req.get(JsonKey.USER_ID), context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidUserId);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(),
+            JsonKey.USER_ID));
       }
       Response response = notesService.createNote(actorMessage);
       sender().tell(response, self());
@@ -91,7 +95,9 @@ public class NotesManagementActor extends BaseActor {
       }
       Map<String, Object> list = notesService.getNoteById(noteId, context);
       if (list.isEmpty()) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidNoteId);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
       }
       Response response = notesService.updateNote(actorMessage);
       sender().tell(response, self());
@@ -130,7 +136,9 @@ public class NotesManagementActor extends BaseActor {
       Response response = new Response();
       Map<String, Object> result = notesService.searchNotes(request, context);
       if (!result.isEmpty() && ((Long) result.get(JsonKey.COUNT) == 0)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidNoteId);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
       }
       response.put(JsonKey.RESPONSE, result);
       sender().tell(response, self());
@@ -169,7 +177,9 @@ public class NotesManagementActor extends BaseActor {
         ProjectCommonException.throwUnauthorizedErrorException();
       }
       if (!notesService.noteIdExists(noteId, context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidNoteId);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
       }
       Response result = notesService.deleteNote(noteId, userId, context);
       result.getResult().remove(JsonKey.RESPONSE);

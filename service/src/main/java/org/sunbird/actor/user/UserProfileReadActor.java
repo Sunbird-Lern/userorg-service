@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -97,7 +98,9 @@ public class UserProfileReadActor extends BaseActor {
       sender().tell(response, self());
     } else {
       ProjectCommonException.throwResourceNotFoundException(
-          ResponseCode.userNotFound, ResponseCode.userNotFound.getErrorMessage());
+        ResponseCode.resourceNotFound,
+        MessageFormat.format(
+          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER));
     }
   }
 }

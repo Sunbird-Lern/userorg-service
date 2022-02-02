@@ -216,8 +216,7 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
                       + e.getMessage(),
               e);
       ProjectCommonException.throwServerErrorException(
-              ResponseCode.unableToCommunicateWithActor,
-              ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+        ResponseCode.SERVER_ERROR);
     }
     checkResponseForException(obj);
     return obj;

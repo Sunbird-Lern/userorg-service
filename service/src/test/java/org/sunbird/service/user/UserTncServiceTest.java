@@ -136,7 +136,7 @@ public class UserTncServiceTest {
     try {
       tncService.getUserById("1234", new RequestContext());
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.userNotFound.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.resourceNotFound.getErrorCode(), ex.getCode());
     }
   }
 

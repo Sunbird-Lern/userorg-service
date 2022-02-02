@@ -250,7 +250,10 @@ public class OrganisationManagementActor extends BaseActor {
               (Boolean) dbOrgDetails.get(JsonKey.IS_TENANT),
               actorMessage.getRequestContext())) {
         logger.info(actorMessage.getRequestContext(), "Channel validation failed");
-        ProjectCommonException.throwClientErrorException(ResponseCode.channelUniquenessInvalid);
+        ProjectCommonException.throwClientErrorException(ResponseCode.errorDuplicateEntry, MessageFormat.format(
+          ResponseCode.errorDuplicateEntry.getErrorMessage(),
+          (String) request.get(JsonKey.CHANNEL),
+          JsonKey.CHANNEL));
       }
       // allow lower case values for source and externalId to the database
       if (request.get(JsonKey.PROVIDER) != null) {
@@ -326,7 +329,10 @@ public class OrganisationManagementActor extends BaseActor {
               updateOrgDao.put(JsonKey.SLUG, slug);
             } else {
               sender()
-                  .tell(ProjectUtil.createClientException(ResponseCode.slugIsNotUnique), self());
+                  .tell(ProjectUtil.createClientException(ResponseCode.errorDuplicateEntry, MessageFormat.format(
+                    ResponseCode.errorDuplicateEntry.getErrorMessage(),
+                    slug,
+                    JsonKey.SLUG)), self());
               return;
             }
           } else {
@@ -421,8 +427,9 @@ public class OrganisationManagementActor extends BaseActor {
       }
     } else {
       throw new ProjectCommonException(
-          ResponseCode.orgDoesNotExist.getErrorCode(),
-          ResponseCode.orgDoesNotExist.getErrorMessage(),
+        ResponseCode.resourceNotFound.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.ORGANISATION),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     result.putAll(Util.getOrgDefaultValue());

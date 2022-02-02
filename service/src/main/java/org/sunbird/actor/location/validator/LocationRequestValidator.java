@@ -317,21 +317,21 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     if (!locationMapList.isEmpty()) {
       if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
         throw new ProjectCommonException(
-            ResponseCode.alreadyExists.getErrorCode(),
+            ResponseCode.errorDuplicateEntry.getErrorCode(),
             ProjectUtil.formatMessage(
-                ResponseCode.alreadyExists.getErrorMessage(),
-                GeoLocationJsonKey.CODE,
-                locationRequest.getCode()),
+                ResponseCode.errorDuplicateEntry.getErrorMessage(),
+              locationRequest.getCode(),
+                GeoLocationJsonKey.CODE),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       } else if (opType.equalsIgnoreCase(JsonKey.UPDATE)) {
         Map<String, Object> locn = locationMapList.get(0);
         if (!(((String) locn.get(JsonKey.ID)).equalsIgnoreCase(locationRequest.getId()))) {
           throw new ProjectCommonException(
-              ResponseCode.alreadyExists.getErrorCode(),
+              ResponseCode.errorDuplicateEntry.getErrorCode(),
               ProjectUtil.formatMessage(
-                  ResponseCode.alreadyExists.getErrorMessage(),
-                  GeoLocationJsonKey.CODE,
-                  locationRequest.getCode()),
+                  ResponseCode.errorDuplicateEntry.getErrorMessage(),
+                locationRequest.getCode(),
+                  GeoLocationJsonKey.CODE),
               ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }

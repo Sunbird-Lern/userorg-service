@@ -279,8 +279,9 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
     if (responseList.isEmpty()) {
       throw new ProjectCommonException(
-          ResponseCode.invalidOrgData.getErrorCode(),
-          ResponseCode.invalidOrgData.getErrorMessage(),
+          ResponseCode.invalidParameter.getErrorCode(),
+          ProjectUtil.formatMessage(
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ORGANISATION),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     } else {
       orgId = (String) responseList.get(0).get(JsonKey.ID);
@@ -425,8 +426,8 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
               + e.getMessage(),
           e);
       throw new ProjectCommonException(
-          ResponseCode.internalError.getErrorCode(),
-          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          null,
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();

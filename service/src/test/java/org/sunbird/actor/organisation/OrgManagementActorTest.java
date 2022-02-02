@@ -187,7 +187,7 @@ public class OrgManagementActorTest {
     boolean result =
         testScenario(
             getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
-            ResponseCode.channelUniquenessInvalid);
+            ResponseCode.errorDuplicateEntry);
     assertTrue(result);
   }
 
@@ -224,7 +224,7 @@ public class OrgManagementActorTest {
     boolean result =
         testScenario(
             getRequest(req, OrganisationActorOperation.GET_ORG_DETAILS.getValue()),
-            ResponseCode.orgDoesNotExist);
+            ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 

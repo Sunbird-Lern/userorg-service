@@ -224,7 +224,7 @@ public class UserControllerTest extends BaseApplicationTest {
     RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
     // req.headers(headerMap);
     Result result = Helpers.route(application, req);
-    assertEquals(getResponseCode(result), ResponseCode.contentTypeRequiredError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.mandatoryHeaderParamsMissing.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -235,7 +235,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.dataFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -279,7 +279,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/update",
             "PATCH",
             (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.dataFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -333,7 +333,7 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testGetUserDetailsFailureWithoutLoginId() {
     Result result = performTest("/v1/user/getuser", "POST", getUserRequest(null, null));
-    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameter.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -369,7 +369,7 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testSearchUserFailureWithoutFilter() {
     Result result = performTest("/v1/user/getuser", "POST", searchUserRequest(null));
-    assertEquals(getResponseCode(result), ResponseCode.loginIdRequired.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.invalidParameter.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 

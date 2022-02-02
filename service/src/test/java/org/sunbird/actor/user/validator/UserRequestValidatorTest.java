@@ -279,7 +279,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateForgotPassword(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.userNameRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -292,7 +292,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateForgotPassword(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.userNameRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -347,7 +347,7 @@ public class UserRequestValidatorTest {
     try {
       userRequestValidator.phoneValidation(request);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidPhoneNumber.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
   }
 
@@ -362,7 +362,7 @@ public class UserRequestValidatorTest {
     try {
       userRequestValidator.phoneValidation(request);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidCountryCode.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
   }
 
@@ -574,7 +574,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.createUserBasicValidation(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.firstNameRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
     }
   }
 
@@ -590,7 +590,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.createUserBasicValidation(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dateFormatError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.dataFormatError.getErrorCode(), e.getCode());
     }
   }
 
@@ -606,7 +606,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.createUserBasicValidation(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.emailorPhoneorManagedByRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
   }
 
@@ -676,7 +676,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.invalidCountryCode.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
   }
 
@@ -695,7 +695,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.emailorPhoneorManagedByRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
   }
 
@@ -758,7 +758,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.phoneNoFormatError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.dataFormatError.getErrorCode(), e.getCode());
     }
   }
 
@@ -790,7 +790,7 @@ public class UserRequestValidatorTest {
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.loginIdRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
     Assert.assertFalse(response);
   }
@@ -842,7 +842,7 @@ public class UserRequestValidatorTest {
       response = true;
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.loginIdRequired.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameter.getErrorCode(), e.getCode());
     }
     Assert.assertFalse(response);
   }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,7 +99,9 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       }
       int status = getOrgStatus(orgMap);
       if (status == -1) {
-        orgMap.put(JsonKey.ERROR_MSG, ResponseCode.invalidOrgStatus.getErrorMessage());
+        orgMap.put(JsonKey.ERROR_MSG, MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(),
+          JsonKey.ORGANISATION + JsonKey.STATUS));
         task.setFailureResult(mapper.writeValueAsString(orgMap));
         task.setStatus(ProjectUtil.BulkProcessStatus.FAILED.getValue());
         return;
@@ -216,7 +219,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
-          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
           row,
           JsonKey.CREATE);
     } else {

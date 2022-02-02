@@ -85,7 +85,7 @@ public class ResetPasswordActorTest {
   private void getRecordByIdEmptyResponse() {
     Response response = new Response();
     PowerMockito.when(
-            cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USER, "invalidUserId", null))
+            cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USER, "invalidParameter", null))
         .thenReturn(response);
   }
 
@@ -122,7 +122,7 @@ public class ResetPasswordActorTest {
   /*@Test
   public void testResetPasswordWithInvalidUserIdFailure() {
     getRecordByIdEmptyResponse();
-    boolean result = testScenario(getInvalidRequest(), ResponseCode.userNotFound);
+    boolean result = testScenario(getInvalidRequest(), ResponseCode.resourceNotFound);
     Assert.assertTrue(result);
   }*/
 
@@ -156,7 +156,7 @@ public class ResetPasswordActorTest {
   private Request getInvalidRequest() {
     Request request = new Request();
     Map<String, Object> reqMap = new HashMap<>();
-    reqMap.put(JsonKey.USER_ID, "invalidUserId");
+    reqMap.put(JsonKey.USER_ID, "invalidParameter");
     reqMap.put(JsonKey.TYPE, "phone");
     request.setRequest(reqMap);
     request.setOperation("resetPassword");

@@ -113,7 +113,9 @@ public class UserRequestValidator extends BaseRequestValidator {
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.PHONE))
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.MANAGED_BY))) {
       ProjectCommonException.throwClientErrorException(
-          ResponseCode.emailorPhoneorManagedByRequired);
+        ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(), JsonKey.EMAIL+" or "+JsonKey.PHONE));
     }
 
     if ((StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
@@ -184,7 +186,9 @@ public class UserRequestValidator extends BaseRequestValidator {
           ProjectUtil.validateCountryCode(
               (String) userRequest.getRequest().get(JsonKey.COUNTRY_CODE));
       if (!bool) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidCountryCode);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.COUNTRY_CODE_TEXT));
       }
     }
     if (StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.PHONE))) {
@@ -222,7 +226,9 @@ public class UserRequestValidator extends BaseRequestValidator {
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.PHONE))
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.MANAGED_BY))) {
       ProjectCommonException.throwClientErrorException(
-          ResponseCode.emailorPhoneorManagedByRequired);
+        ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(), JsonKey.EMAIL+" or "+JsonKey.PHONE));
     }
 
     if ((StringUtils.isNotBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
@@ -249,7 +255,9 @@ public class UserRequestValidator extends BaseRequestValidator {
               + ProjectUtil.getConfigValue(JsonKey.DEFAULT_MONTH_DATE);
       boolean bool = ProjectUtil.isDateValidFormat(ProjectUtil.YEAR_MONTH_DATE_FORMAT, dobValue);
       if (!bool) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.dateFormatError);
+        ProjectCommonException.throwClientErrorException(ResponseCode.dataFormatError,
+          MessageFormat.format(
+            ResponseCode.dataFormatError.getErrorMessage(), JsonKey.DOB));
       } else {
         userRequest.getRequest().put(JsonKey.DOB, dobValue);
         userRequest.getRequest().put(JsonKey.DOB_VALIDATION_DONE, true);
@@ -259,12 +267,17 @@ public class UserRequestValidator extends BaseRequestValidator {
 
   private boolean validatePhoneNo(String phone, String countryCode) {
     if (phone.contains("+")) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidPhoneNumber);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(), JsonKey.PHONE));
     }
     if (ProjectUtil.validatePhone(phone, countryCode)) {
       return true;
     } else {
-      ProjectCommonException.throwClientErrorException(ResponseCode.phoneNoFormatError);
+      ProjectCommonException.throwClientErrorException(ResponseCode.dataFormatError,
+        MessageFormat.format(
+          ResponseCode.dataFormatError.getErrorMessage(),
+          JsonKey.PHONE));
     }
     return false;
   }
@@ -288,7 +301,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     }
     if (userRequest.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.ROOT_ORG_ID))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidRootOrganisationId);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(),
+          "root "+JsonKey.ORGANISATION+" "+JsonKey.ID));
     }
     validateExtIdTypeAndProvider(userRequest);
     validateFrameworkDetails(userRequest);
@@ -412,7 +428,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     validateUserIdOrExternalId(userRequest);
     if (userRequest.getRequest().containsKey(JsonKey.FIRST_NAME)
         && (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.FIRST_NAME)))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.firstNameRequired);
+      ProjectCommonException.throwClientErrorException(
+        ResponseCode.mandatoryParamsMissing,
+        MessageFormat.format(
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.FIRST_NAME));
     }
 
     if ((userRequest.getRequest().containsKey(JsonKey.EMAIL)
@@ -425,7 +444,8 @@ public class UserRequestValidator extends BaseRequestValidator {
         && null != userRequest.getRequest().get(JsonKey.ROLES)) {
       if (userRequest.getRequest().get(JsonKey.ROLES) instanceof List
           && ((List) userRequest.getRequest().get(JsonKey.ROLES)).isEmpty()) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.rolesRequired);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE));
       } else if (!(userRequest.getRequest().get(JsonKey.ROLES) instanceof List)) {
         throw new ProjectCommonException(
             ResponseCode.dataTypeError.getErrorCode(),
@@ -451,7 +471,9 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES) instanceof List) {
         List profileusertypes = (List) userRequest.getRequest().get(JsonKey.PROFILE_USERTYPES);
         if (CollectionUtils.isEmpty(profileusertypes)) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.profileUserTypesRequired);
+          ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+            MessageFormat.format(
+              ResponseCode.invalidParameter.getErrorMessage(), JsonKey.PROFILE_USERTYPES));
         } else {
           try {
             List<Map<String, String>> profUserTypeList =
@@ -506,7 +528,10 @@ public class UserRequestValidator extends BaseRequestValidator {
    */
   public void validateVerifyUser(Request userRequest) {
     if (StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.LOGIN_ID))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.loginIdRequired);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(),
+          JsonKey.LOGIN_ID));
     }
   }
 
@@ -517,7 +542,9 @@ public class UserRequestValidator extends BaseRequestValidator {
    */
   public void validateAssignRole(Request request) {
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.USER_ID))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.userIdRequired);
+      ProjectCommonException.throwClientErrorException(ResponseCode.mandatoryParamsMissing,
+        MessageFormat.format(
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.USER_ID));
     }
 
     if (request.getRequest().get(JsonKey.ROLES) == null
@@ -550,8 +577,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     if (request.getRequest().get(JsonKey.USERNAME) == null
         || StringUtils.isBlank((String) request.getRequest().get(JsonKey.USERNAME))) {
       throw new ProjectCommonException(
-          ResponseCode.userNameRequired.getErrorCode(),
-          ResponseCode.userNameRequired.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(),
+          JsonKey.USERNAME),
           ERROR_CODE);
     }
   }
@@ -860,15 +889,17 @@ public class UserRequestValidator extends BaseRequestValidator {
       Request request, String authUserToken, String sourceUserToken) {
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.FROM_ACCOUNT_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.fromAccountIdRequired.getErrorCode(),
-          ResponseCode.fromAccountIdRequired.getErrorMessage(),
+        ResponseCode.mandatoryParamsMissing.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.FROM_ACCOUNT_ID),
           ERROR_CODE);
     }
 
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.TO_ACCOUNT_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.toAccountIdRequired.getErrorCode(),
-          ResponseCode.toAccountIdRequired.getErrorMessage(),
+        ResponseCode.mandatoryParamsMissing.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.TO_ACCOUNT_ID),
           ERROR_CODE);
     }
 

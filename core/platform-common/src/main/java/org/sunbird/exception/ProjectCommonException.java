@@ -114,7 +114,8 @@ public class ProjectCommonException extends RuntimeException {
   public static void throwResourceNotFoundException() {
     throw new ProjectCommonException(
         ResponseCode.resourceNotFound.getErrorCode(),
-        ResponseCode.resourceNotFound.getErrorMessage(),
+      MessageFormat.format(
+        ResponseCode.resourceNotFound.getErrorMessage(), ""),
         ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 

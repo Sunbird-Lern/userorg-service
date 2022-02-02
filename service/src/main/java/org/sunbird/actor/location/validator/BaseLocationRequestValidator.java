@@ -1,5 +1,6 @@
 package org.sunbird.actor.location.validator;
 
+import java.text.MessageFormat;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,8 +41,9 @@ public class BaseLocationRequestValidator extends BaseRequestValidator {
   public void validateDeleteLocationRequest(String locationId) {
     if (StringUtils.isEmpty(locationId)) {
       throw new ProjectCommonException(
-          ResponseCode.locationIdRequired.getErrorCode(),
-          ResponseCode.locationIdRequired.getErrorMessage(),
+          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.LOCATION_ID),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }

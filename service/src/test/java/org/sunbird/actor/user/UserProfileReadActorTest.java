@@ -160,7 +160,7 @@ public class UserProfileReadActorTest {
         .thenReturn(response);
     boolean result =
         testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_PROFILE_V3), ResponseCode.userNotFound);
+            getRequest(reqMap, ActorOperations.GET_USER_PROFILE_V3), ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -535,7 +535,7 @@ public class UserProfileReadActorTest {
     setCassandraResponse(getCassandraResponse(false));
     boolean result =
         testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.userNotFound);
+            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 

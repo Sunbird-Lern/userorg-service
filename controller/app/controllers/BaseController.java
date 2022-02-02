@@ -525,8 +525,8 @@ public class BaseController extends Controller {
     } else {
       exception =
           new ProjectCommonException(
-              ResponseCode.internalError.getErrorCode(),
-              ResponseCode.internalError.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              null,
               ResponseCode.SERVER_ERROR.getResponseCode());
     }
     generateExceptionTelemetry(request, exception);

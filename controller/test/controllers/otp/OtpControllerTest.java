@@ -64,7 +64,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, INVALID_PHONE, true, VALID_PHONE_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.dataFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -120,7 +120,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             HttpMethods.POST.name(),
             createInvalidOtpRequest(
                 true, INVALID_PHONE, true, VALID_PHONE_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.dataFormatError.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 

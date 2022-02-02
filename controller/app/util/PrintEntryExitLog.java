@@ -103,8 +103,8 @@ public class PrintEntryExitLog {
       if (null == exception) {
         exception =
             new ProjectCommonException(
-                ResponseCode.internalError.getErrorCode(),
-                ResponseCode.internalError.getErrorMessage(),
+                ResponseCode.SERVER_ERROR.getErrorCode(),
+                null,
                 ResponseCode.SERVER_ERROR.getResponseCode());
       }
 

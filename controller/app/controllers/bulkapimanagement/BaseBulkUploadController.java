@@ -83,8 +83,8 @@ public class BaseBulkUploadController extends BaseController {
       map.putAll(reqObj.getRequest());
     } else {
       throw new ProjectCommonException(
-          ResponseCode.invalidData.getErrorCode(),
-          ResponseCode.invalidData.getErrorMessage(),
+          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (validateFileZize) {

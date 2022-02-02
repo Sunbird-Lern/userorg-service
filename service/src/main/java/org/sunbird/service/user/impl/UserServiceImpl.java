@@ -4,6 +4,8 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -75,7 +77,7 @@ public class UserServiceImpl implements UserService {
   public User getUserById(String userId, RequestContext context) {
     User user = userDao.getUserById(userId, context);
     if (null == user) {
-      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
+      ProjectCommonException.throwResourceNotFoundException(ResponseCode.resourceNotFound, "");
     }
     return user;
   }
@@ -84,7 +86,7 @@ public class UserServiceImpl implements UserService {
   public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
     Map<String, Object> user = userDao.getUserDetailsById(userId, context);
     if (MapUtils.isEmpty(user)) {
-      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
+      ProjectCommonException.throwResourceNotFoundException(ResponseCode.resourceNotFound, "");
     }
     user.putAll(Util.getUserDefaultValue());
     return user;
@@ -256,10 +258,9 @@ public class UserServiceImpl implements UserService {
     } catch (ProjectCommonException pe) {
       throw pe;
     } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.unableToParseData.getErrorCode(),
-          ResponseCode.unableToParseData.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      logger.error(context,"unable to parse data :", e);
+      ProjectCommonException.throwServerErrorException(
+          ResponseCode.SERVER_ERROR);
     }
     return encryptedTokenList;
   }
@@ -334,8 +335,9 @@ public class UserServiceImpl implements UserService {
     Map<String, Object> user = userDao.getUserDetailsById(userId, context);
     if (MapUtils.isEmpty(user)) {
       throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
+          ResponseCode.resourceNotFound.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     String emailPhone = getDecryptedValue((String) user.get(type), context);

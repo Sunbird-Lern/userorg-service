@@ -184,7 +184,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
-          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
           row,
           JsonKey.CREATE);
     } else {

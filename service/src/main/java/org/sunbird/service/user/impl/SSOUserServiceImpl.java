@@ -131,7 +131,10 @@ public class SSOUserServiceImpl implements SSOUserService {
     if (StringUtils.isNotBlank(requestedOrgId)) {
       fetchedOrgById = orgService.getOrgObjById(requestedOrgId, context);
       if (null == fetchedOrgById) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgData);
+        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(),
+            JsonKey.ORGANISATION));
       }
       // if requested orgId is not blank then its channel should match with requested channel
       if (StringUtils.isNotBlank(requestedChannel)

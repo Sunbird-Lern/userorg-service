@@ -570,6 +570,27 @@ public class ProjectUtil {
         responseCode.getErrorMessage(),
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
+  
+  /**
+   * This method will be used to create ProjectCommonException for all kind of client error for the
+   * given response code(enum).
+   *
+   * @param : An enum of all the api responses.
+   * @return ProjectCommonException
+   */
+  public static ProjectCommonException createClientException(ResponseCode responseCode, String exceptionMessage) {
+    return new ProjectCommonException(
+      responseCode.getErrorCode(),
+      StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
+      ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
+  
+  public static void throwClientErrorException(ResponseCode responseCode, String exceptionMessage) {
+    throw new ProjectCommonException(
+      responseCode.getErrorCode(),
+      StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
+      ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
 
   public static String getLmsUserId(String fedUserId) {
     String userId = fedUserId;

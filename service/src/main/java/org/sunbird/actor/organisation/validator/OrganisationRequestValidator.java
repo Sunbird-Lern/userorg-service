@@ -60,7 +60,12 @@ public class OrganisationRequestValidator {
       if (StringUtils.isBlank(orgId)) {
         request.put(JsonKey.SLUG, slug);
       } else {
-        ProjectCommonException.throwClientErrorException(ResponseCode.slugIsNotUnique);
+        ProjectCommonException.throwClientErrorException(
+          ResponseCode.errorDuplicateEntry,
+          MessageFormat.format(
+            ResponseCode.errorDuplicateEntry.getErrorMessage(),
+            slug,
+            JsonKey.SLUG));
       }
     } else {
       request.put(JsonKey.SLUG, slug);
@@ -136,7 +141,9 @@ public class OrganisationRequestValidator {
       logger.info("OrganisationManagementActor: no root org found with Id: " + id);
       throw new ProjectCommonException(
           ResponseCode.invalidRequestData.getErrorCode(),
-          ResponseCode.invalidOrgId.getErrorMessage(),
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(),
+          JsonKey.ORGANISATION + JsonKey.ID),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
@@ -267,8 +274,9 @@ public class OrganisationRequestValidator {
         logger.info(
             context, "OrganisationManagementActor:validateChannel: Invalid channel = " + channel);
         throw new ProjectCommonException(
-            ResponseCode.invalidChannel.getErrorCode(),
-            ResponseCode.invalidChannel.getErrorMessage(),
+            ResponseCode.invalidParameter.getErrorCode(),
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.CHANNEL),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       Object status = rootOrg.get(JsonKey.STATUS);
@@ -278,12 +286,15 @@ public class OrganisationRequestValidator {
             ProjectUtil.formatMessage(
                 ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
       }
-    } else if (!validateChannelUniqueness((String) req.get(JsonKey.CHANNEL), null, null, context)) {
+    } else if (!validateChannelUniqueness(channel, null, null, context)) {
       logger.info(
           context, "OrganisationManagementActor:validateChannel: Channel validation failed");
       throw new ProjectCommonException(
-          ResponseCode.channelUniquenessInvalid.getErrorCode(),
-          ResponseCode.channelUniquenessInvalid.getErrorMessage(),
+          ResponseCode.errorDuplicateEntry.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.errorDuplicateEntry.getErrorMessage(),
+          channel,
+          JsonKey.CHANNEL),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }

@@ -36,8 +36,8 @@ public class PrintEntryExitLogTest {
       ResponseParams params = new ResponseParams();
       ProjectCommonException exception =
           new ProjectCommonException(
-              ResponseCode.internalError.getErrorCode(),
-              ResponseCode.internalError.getErrorMessage(),
+              ResponseCode.SERVER_ERROR.getErrorCode(),
+              null,
               ResponseCode.SERVER_ERROR.getResponseCode());
       ResponseCode code = ResponseCode.getResponse(exception.getCode());
       params.setErr(code.getErrorCode());

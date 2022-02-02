@@ -406,10 +406,8 @@ public class UserUpdateActor extends UserBaseActor {
 
             } catch (Exception e) {
               logger.error("Error in encrypting in the external id details", e);
-              throw new ProjectCommonException(
-                  ResponseCode.dataEncryptionError.getErrorCode(),
-                  ResponseCode.dataEncryptionError.getErrorMessage(),
-                  ResponseCode.dataEncryptionError.getResponseCode());
+              ProjectCommonException.throwServerErrorException(
+                ResponseCode.SERVER_ERROR);
             }
           });
     }

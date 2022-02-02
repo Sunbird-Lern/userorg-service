@@ -1,5 +1,6 @@
 package controllers.notesmanagement.validator;
 
+import java.text.MessageFormat;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
@@ -23,28 +24,32 @@ public class NoteRequestValidator extends BaseRequestValidator {
     if (StringUtils.isBlank((String) request.get(JsonKey.CONTENT_ID))
         && StringUtils.isBlank((String) request.get(JsonKey.COURSE_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.contentIdError.getErrorCode(),
-          ResponseCode.contentIdError.getErrorMessage(),
+        ResponseCode.invalidParameter.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(), JsonKey.CONTENT_ID +" or " +JsonKey.COURSE_ID),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (request.getRequest().containsKey(JsonKey.TAGS)
         && request.getRequest().get(JsonKey.TAGS) instanceof List
         && ((List) request.getRequest().get(JsonKey.TAGS)).isEmpty()) {
       throw new ProjectCommonException(
-          ResponseCode.invalidTags.getErrorCode(),
-          ResponseCode.invalidTags.getErrorMessage(),
+        ResponseCode.invalidParameter.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(), JsonKey.TAGS),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     if (request.getRequest().get(JsonKey.TAGS) instanceof String) {
       throw new ProjectCommonException(
-          ResponseCode.invalidTags.getErrorCode(),
-          ResponseCode.invalidTags.getErrorMessage(),
+        ResponseCode.invalidParameter.getErrorCode(),
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(), JsonKey.TAGS),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
     validateUserId(request, JsonKey.USER_ID);
   }
 
   public void validateNoteId(String noteId) {
-    validateParam(noteId, ResponseCode.invalidNoteId);
+    validateParam(noteId, ResponseCode.invalidParameter, MessageFormat.format(
+      ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
   }
 }

@@ -95,7 +95,7 @@ public class OrganisationRequestValidatorTest {
       validator.validateChannel(requestMap, new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidChannel.getErrorCode());
+      Assert.assertEquals(ex.getCode(), ResponseCode.invalidParameter.getErrorCode());
     }
   }
 

@@ -174,7 +174,7 @@ public class UserLookupTest {
     try {
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.userAlreadyExists.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.errorParamExists.getErrorCode(), e.getCode());
     }
   }
 

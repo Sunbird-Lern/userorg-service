@@ -148,7 +148,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   public void testUpdateAssignedRolesFailureWithEmptyRole() {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.emptyRolesProvided.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.errorMandatoryParamsEmpty.getErrorCode());
     assertTrue(getResponseStatus(result) == 400);
   }
 

@@ -1,5 +1,6 @@
 package controllers.usermanagement.validator;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
@@ -51,8 +52,8 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
             JsonKey.LIST);
       } else if (CollectionUtils.isEmpty((List) request.getRequest().get(JsonKey.ROLES))) {
         throw new ProjectCommonException(
-            ResponseCode.emptyRolesProvided.getErrorCode(),
-            ResponseCode.emptyRolesProvided.getErrorMessage(),
+          ResponseCode.errorMandatoryParamsEmpty.getErrorCode(),
+          MessageFormat.format(ResponseCode.errorMandatoryParamsEmpty.getErrorMessage(),JsonKey.ROLES),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }

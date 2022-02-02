@@ -70,7 +70,7 @@ public class ResetPasswordActor extends BaseActor {
       logger.debug(
           request.getRequestContext(),
           "ResetPasswordActor:generateLink: not able to generate reset password link.");
-      ProjectCommonException.throwServerErrorException(ResponseCode.internalError);
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
   }
 

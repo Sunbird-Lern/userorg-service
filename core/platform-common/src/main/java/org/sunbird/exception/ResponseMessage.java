@@ -23,6 +23,7 @@ public interface ResponseMessage {
     // String CHANNEL_SHOULD_BE_UNIQUE =
     //    "Channel value already used by another organization. Provide different value for channel";
     String ERROR_DUPLICATE_ENTRY = "Value {0} for {1} is already in use.";
+    String ERROR_PARAM_EXISTS = "{0} already exists";
     // String INVALID_ORG_DATA =
     //    "Given Organization Data doesn't exist in our records. Please provide a valid one";
     // String INVALID_USR_DATA =
@@ -87,7 +88,7 @@ public interface ResponseMessage {
     // String INVALID_COUNTRY_CODE = "Please provide a valid country code.";
     String ERROR_DUPLICATE_ENTRIES = "System contains duplicate entry for {0}.";
     // String LOCATION_ID_REQUIRED = "Please provide Location Id.";
-    String RESOURCE_NOT_FOUND = "Requested resource not found";
+    String RESOURCE_NOT_FOUND = "Requested {0} resource not found";
     String MAX_ALLOWED_SIZE_LIMIT_EXCEED = "Max allowed size is {0}";
     String INACTIVE_USER = "User is Inactive. Please make it active to proceed.";
     // String ORG_NOT_EXIST = "Requested organisation does not exist.";
@@ -194,6 +195,7 @@ public interface ResponseMessage {
     // String FIRST_NAME_MISSING = "FIRST_NAME_REQUIRED_ERROR";
     String CHANNEL_SHOULD_BE_UNIQUE = "CHANNEL_SHOULD_BE_UNIQUE";
     String ERROR_DUPLICATE_ENTRY = "ERROR_DUPLICATE_ENTRY";
+    String ERROR_PARAM_EXISTS = "ERROR_PARAM_EXISTS";
     // String INVALID_ORG_DATA = "INVALID_ORGANIZATION_DATA";
     // String INVALID_USR_DATA = "INVALID_USER_DATA";
     // String INVALID_ROOT_ORGANIZATION = "INVALID ROOT ORGANIZATION";

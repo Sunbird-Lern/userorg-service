@@ -28,7 +28,7 @@ public class RequestMapperTest {
     try {
       RequestMapper.mapRequest(null, Request.class);
     } catch (ProjectCommonException e) {
-      Assert.assertEquals(ResponseCode.contentTypeRequiredError.getErrorMessage(), e.getMessage());
+      Assert.assertEquals(ResponseCode.mandatoryHeaderParamsMissing.getErrorMessage(), e.getMessage());
       Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
     }
   }
