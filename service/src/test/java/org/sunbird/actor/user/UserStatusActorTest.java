@@ -250,9 +250,10 @@ public class UserStatusActorTest {
       res = probe.expectMsgClass(duration("100 second"), Response.class);
       return (res != null && "SUCCESS".equals(res.getResult().get(JsonKey.RESPONSE)));
     } else {
+      String errString = ActorOperations.getOperationCodeByActorOperation(operation.getValue());
       ProjectCommonException exception =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return (exception.getCode().equals(expectedErrorResponse));
+      return (exception.getCode().equals("UOS_"+errString+expectedErrorResponse));
     }
   }
 }

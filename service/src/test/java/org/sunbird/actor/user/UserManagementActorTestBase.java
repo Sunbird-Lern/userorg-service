@@ -514,9 +514,10 @@ public abstract class UserManagementActorTestBase {
       Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
+      String errString = ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation());
       ProjectCommonException res =
           probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
+      return res.getCode().equals("UOS_"+errString+errorCode.getErrorCode())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
   }

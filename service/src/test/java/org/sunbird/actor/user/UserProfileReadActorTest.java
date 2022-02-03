@@ -585,10 +585,10 @@ public class UserProfileReadActorTest {
       Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
-
+      String errString = ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation());
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
+      return res.getCode().equals("UOS_"+errString+errorCode.name())
           || res.getResponseCode() == errorCode.getResponseCode();
     }
   }

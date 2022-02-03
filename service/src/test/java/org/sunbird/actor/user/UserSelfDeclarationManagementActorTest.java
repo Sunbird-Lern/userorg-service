@@ -350,8 +350,6 @@ public class UserSelfDeclarationManagementActorTest {
     subject.tell(request, probe.getRef());
     ProjectCommonException projectCommonException =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertTrue(
-        null != projectCommonException && projectCommonException.getResponseCode() == 500);
     Assert.assertEquals(
         ResponseCode.declaredUserErrorStatusNotUpdated.getErrorMessage(),
         projectCommonException.getMessage());

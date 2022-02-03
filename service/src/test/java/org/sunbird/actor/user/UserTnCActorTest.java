@@ -199,7 +199,7 @@ public class UserTnCActorTest {
         null != exception
             && exception
                 .getCode()
-                .equalsIgnoreCase(ResponseCode.invalidParameterValue.getErrorCode()));
+                .equalsIgnoreCase("UOS_TNCACCPT"+ResponseCode.invalidParameterValue.getErrorCode()));
   }
 
   @Test

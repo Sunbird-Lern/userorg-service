@@ -165,7 +165,7 @@ public class OTPActorTest {
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
         probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-    Assert.assertEquals(exception.getCode(), ResponseCode.errorInvalidOTP.getErrorCode());
+    Assert.assertEquals(exception.getCode(),ResponseCode.errorInvalidOTP.getErrorCode());
   }
 
   @Test
