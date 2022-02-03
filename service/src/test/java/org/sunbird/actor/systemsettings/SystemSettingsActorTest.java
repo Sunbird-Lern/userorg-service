@@ -126,7 +126,7 @@ public class SystemSettingsActorTest {
         probe.expectMsgAnyClassOf(ACTOR_MAX_WAIT_DURATION, ProjectCommonException.class);
     Assert.assertTrue(
         null != exception
-            && exception.getResponseCode() == ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+            && exception.getCode().equals("UOS_SYSRED"+ResponseCode.RESOURCE_NOT_FOUND.name()));
   }
 
   @Test

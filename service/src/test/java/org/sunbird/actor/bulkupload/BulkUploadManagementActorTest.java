@@ -147,7 +147,7 @@ public class BulkUploadManagementActorTest {
     ProjectCommonException res =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(res);
-    Assert.assertEquals(ResponseCode.csvError.getErrorCode(), "UOS_BLKUPLD"+res.getCode());
+    Assert.assertEquals("UOS_BLKUPLD"+ResponseCode.csvError.getErrorCode(), res.getCode());
     Assert.assertEquals(ResponseCode.csvError.getErrorMessage(), res.getMessage());
   }
 
@@ -288,7 +288,7 @@ public class BulkUploadManagementActorTest {
     ProjectCommonException ex =
         probe.expectMsgClass(duration("10 seconds"), ProjectCommonException.class);
     Assert.assertTrue(null != ex);
-    Assert.assertEquals(ResponseCode.invalidColumns.getErrorCode(), "UOS_BLKUPLD"+ex.getCode());
+    Assert.assertEquals("UOS_BLKUPLD"+ResponseCode.invalidColumns.getErrorCode(), ex.getCode());
     Assert.assertEquals(
         "Invalid column: password. Valid columns are: firstName, lastName, phone, countryCode, email, userName, roles, position, location, dob, language, profileSummary, subject, externalIdProvider, externalId, externalIdType, externalIds.",
         ex.getMessage());

@@ -165,7 +165,7 @@ public class OTPActorTest {
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
         probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-    Assert.assertEquals(exception.getCode(),ResponseCode.errorInvalidOTP.getErrorCode());
+    Assert.assertEquals(exception.getCode(),"UOS_OTPVERFY"+ResponseCode.errorInvalidOTP.getErrorCode());
   }
 
   @Test
@@ -230,7 +230,7 @@ public class OTPActorTest {
     Assert.assertTrue(
         ((ProjectCommonException) exception)
             .getCode()
-            .equals(ResponseCode.errorInvalidOTP.getErrorCode()));
+            .equals("UOS_OTPVERFY"+ResponseCode.errorInvalidOTP.getErrorCode()));
   }
 
   private void verifyOtpFailureTest(boolean isPhone, Response mockedCassandraResponse) {
