@@ -104,7 +104,7 @@ public class NotesRequestValidatorTest {
       RequestValidator.validateNote(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
     }
   }
 

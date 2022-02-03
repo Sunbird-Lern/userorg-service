@@ -27,7 +27,7 @@ public class ExceptionTest {
             ResponseCode.UNAUTHORIZED.getResponseCode());
     Assert.assertEquals(exception.getCode(), ResponseCode.unAuthorized.getErrorCode());
     Assert.assertEquals(exception.getMessage(), ResponseCode.unAuthorized.getErrorMessage());
-    Assert.assertEquals(exception.getResponseCode(), ResponseCode.CLIENT_ERROR.getResponseCode());
+    Assert.assertEquals(exception.getResponseCode(), ResponseCode.UNAUTHORIZED.getResponseCode());
     exception.setCode(ResponseCode.emailFormatError.getErrorCode());
     exception.setMessage(ResponseCode.emailFormatError.getErrorMessage());
     exception.setResponseCode(ResponseCode.SERVER_ERROR.getResponseCode());
