@@ -95,7 +95,10 @@ public class RoleService {
       roleList.forEach(
           roleObj -> {
             String roleStr = (String) roleObj.get(JsonKey.ROLE);
-            if (null == roleMap.get(roleStr.trim())) {
+            String operation = (String) roleObj.get(JsonKey.OPERATION);
+            // For remove operation don't validate the role
+            if (null == roleMap.get(roleStr.trim())
+                && !JsonKey.REMOVE.equalsIgnoreCase(operation)) {
               throw new ProjectCommonException(
                   ResponseCode.invalidRole.getErrorCode(),
                   ResponseCode.invalidRole.getErrorMessage(),
