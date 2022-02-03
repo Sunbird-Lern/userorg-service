@@ -427,7 +427,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
           e);
       throw new ProjectCommonException(
           ResponseCode.SERVER_ERROR.getErrorCode(),
-          null,
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();

@@ -230,7 +230,7 @@ public class UserUtil {
       logger.error(context, e.getMessage(), e);
       throw new ProjectCommonException(
         ResponseCode.SERVER_ERROR.getErrorCode(),
-        null,
+        ResponseCode.SERVER_ERROR.getErrorMessage(),
         ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
@@ -318,7 +318,7 @@ public class UserUtil {
       logger.error(e1.getMessage(), e1);
       throw new ProjectCommonException(
         ResponseCode.SERVER_ERROR.getErrorCode(),
-        null,
+        ResponseCode.SERVER_ERROR.getErrorMessage(),
         ResponseCode.SERVER_ERROR.getResponseCode());
     }
     Map<String, Object> requestMap = new HashMap<>();
