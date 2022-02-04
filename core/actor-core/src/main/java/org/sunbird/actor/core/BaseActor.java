@@ -9,7 +9,6 @@ import org.sunbird.request.Request;
 
 public abstract class BaseActor extends UntypedAbstractActor {
   public final LoggerUtil logger = new LoggerUtil(this.getClass());
-  private final String USER_ORG_SERVICE_PREFIX = "UOS_";
 
   public abstract void onReceive(Request request) throws Throwable;
 
