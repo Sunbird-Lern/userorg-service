@@ -49,9 +49,13 @@ public class UserConsentActor extends BaseActor {
 
     Response response = new Response();
     if (CollectionUtils.isNotEmpty(consentList)) {
+      //Remove revoked consent from the list
       List<Map<String, Object>> consentResponseList = constructConsentResponse(consentList);
-      response.put(JsonKey.CONSENT_RESPONSE, consentResponseList);
-    } else {
+      consentList=consentResponseList;
+    }
+    if(CollectionUtils.isNotEmpty(consentList)){
+      response.put(JsonKey.CONSENT_RESPONSE, consentList);
+    }else {
       throw new ProjectCommonException(
           ResponseCode.userConsentNotFound.getErrorCode(),
           ResponseCode.userConsentNotFound.getErrorMessage(),
