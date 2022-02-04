@@ -3,6 +3,7 @@ package org.sunbird.exception;
 
 import java.text.MessageFormat;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.keys.JsonKey;
 
 /**
  * This exception will be used across all backend code. This will send status code and error message
@@ -83,7 +84,11 @@ public class ProjectCommonException extends RuntimeException {
 
   public ProjectCommonException(ProjectCommonException pce, String actorOperation) {
     super();
-    this.code = new StringBuilder("UOS_").append(actorOperation).append(pce.getCode()).toString();
+    this.code =
+        new StringBuilder(JsonKey.USER_ORG_SERVICE_PREFIX)
+            .append(actorOperation)
+            .append(pce.getCode())
+            .toString();
     this.message = pce.getMessage();
     super.setStackTrace(pce.getStackTrace());
   }
@@ -114,8 +119,7 @@ public class ProjectCommonException extends RuntimeException {
   public static void throwResourceNotFoundException() {
     throw new ProjectCommonException(
         ResponseCode.resourceNotFound.getErrorCode(),
-      MessageFormat.format(
-        ResponseCode.resourceNotFound.getErrorMessage(), ""),
+        MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), ""),
         ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 
