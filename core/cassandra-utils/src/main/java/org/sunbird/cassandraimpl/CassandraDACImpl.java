@@ -59,8 +59,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != select) {
@@ -103,8 +103,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != select) {
@@ -156,8 +156,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           context,
           Constants.EXCEPTION_MSG_FETCH + table + " : primary key is a must for update call");
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     Update.Where where = update.where();
@@ -177,8 +177,8 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
       if (null != update) {

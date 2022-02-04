@@ -129,8 +129,8 @@ public class LoggerUtil {
       } else {
         projectCommonException =
             new ProjectCommonException(
-                ResponseCode.SERVER_ERROR.getErrorCode(),
-                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode());
       }
       telemetryInfo.put(JsonKey.TELEMETRY_EVENT_TYPE, TelemetryEvents.ERROR.getName());

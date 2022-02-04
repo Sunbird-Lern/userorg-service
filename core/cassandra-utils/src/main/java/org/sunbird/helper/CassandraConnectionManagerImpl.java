@@ -82,7 +82,7 @@ public class CassandraConnectionManagerImpl implements CassandraConnectionManage
     } catch (Exception e) {
       logger.error("Error occured while creating cassandra connection :", e);
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.serverError.getErrorCode(),
           e.getMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }

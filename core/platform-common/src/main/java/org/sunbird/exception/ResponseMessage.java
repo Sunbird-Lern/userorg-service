@@ -180,6 +180,7 @@ public interface ResponseMessage {
     // String INVALID_USER_INFO_VALUE = "Null value is not allowed";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
     String USER_TYPE_CONFIG_IS_EMPTY = "userType config is empty for the statecode {0}";
+    String SERVER_ERROR = "server error";
     // String ROLE_SAVE_ERROR = "Error while saving role";
   }
 
@@ -323,6 +324,7 @@ public interface ResponseMessage {
     // String USER_CONSENT_NOT_FOUND = "USER_CONSENT_NOT_FOUND";
     // String INVALID_USER_INFO_VALUE = "INVALID_USER_INFO_VALUE";
     String INVALID_CONSENT_STATUS = "INVALID_CONSENT_STATUS";
+    String SERVER_ERROR = "SERVER_ERROR";
     // String ROLE_SAVE_ERROR = "ROLE_SAVE_ERROR";
   }
 }

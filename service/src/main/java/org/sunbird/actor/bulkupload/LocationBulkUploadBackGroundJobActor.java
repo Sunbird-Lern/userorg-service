@@ -95,7 +95,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       }
     } catch (IOException e) {
       ProjectCommonException.throwClientErrorException(
-          ResponseCode.SERVER_ERROR, ResponseCode.SERVER_ERROR.getErrorMessage());
+          ResponseCode.SERVER_ERROR, ResponseCode.serverError.getErrorMessage());
     }
   }
 
@@ -184,7 +184,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError.getErrorMessage(),
           row,
           JsonKey.CREATE);
     } else {

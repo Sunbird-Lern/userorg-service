@@ -274,7 +274,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError.getErrorMessage(),
           user,
           JsonKey.CREATE);
     } else {

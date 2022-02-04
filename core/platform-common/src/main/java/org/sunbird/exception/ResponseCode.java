@@ -320,6 +320,7 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
   // -> roleSaveError(ResponseMessage.Key.ROLE_SAVE_ERROR, ResponseMessage.Message.ROLE_SAVE_ERROR),//
   // should be server error
+  serverError(ResponseMessage.Key.SERVER_ERROR, ResponseMessage.Message.SERVER_ERROR),
   OK(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),

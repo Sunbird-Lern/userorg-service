@@ -151,8 +151,8 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.SERVER_ERROR.getErrorCode(),
-                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -265,8 +265,8 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.SERVER_ERROR.getErrorCode(),
-                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -344,8 +344,8 @@ public class CassandraOperationImplTest {
     when(QueryBuilder.delete())
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.SERVER_ERROR.getErrorCode(),
-                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     try {
