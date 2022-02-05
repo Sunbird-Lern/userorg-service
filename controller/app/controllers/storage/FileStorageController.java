@@ -86,7 +86,7 @@ public class FileStorageController extends BaseController {
       } else {
         ProjectCommonException e =
             new ProjectCommonException(
-                ResponseCode.invalidRequestData.getErrorCode(),
+                ResponseCode.invalidRequestData,
                 ResponseCode.invalidRequestData.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));

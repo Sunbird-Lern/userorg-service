@@ -211,12 +211,11 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       throw pce;
     } catch (Exception e) {
       logger.error(
-              context,
-              "Unable to communicate with actor: Exception occurred with error message = "
-                      + e.getMessage(),
-              e);
-      ProjectCommonException.throwServerErrorException(
-        ResponseCode.SERVER_ERROR);
+          context,
+          "Unable to communicate with actor: Exception occurred with error message = "
+              + e.getMessage(),
+          e);
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     checkResponseForException(obj);
     return obj;
@@ -227,9 +226,9 @@ public abstract class BaseBulkUploadBackgroundJobActor extends BaseBulkUploadAct
       throw (ProjectCommonException) obj;
     } else if (obj instanceof Exception) {
       throw new ProjectCommonException(
-              ResponseCode.serverError.getErrorCode(),
-              ResponseCode.serverError.getErrorMessage(),
-              ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.serverError,
+          ResponseCode.serverError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 }

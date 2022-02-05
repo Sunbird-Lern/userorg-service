@@ -85,7 +85,8 @@ public class ResetPasswordActorTest {
   private void getRecordByIdEmptyResponse() {
     Response response = new Response();
     PowerMockito.when(
-            cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USER, "invalidParameter", null))
+            cassandraOperation.getRecordById(
+                JsonKey.SUNBIRD, JsonKey.USER, "invalidParameter", null))
         .thenReturn(response);
   }
 
@@ -231,8 +232,8 @@ public class ResetPasswordActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals(errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 }

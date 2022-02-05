@@ -61,11 +61,9 @@ public class OrganisationRequestValidator {
         request.put(JsonKey.SLUG, slug);
       } else {
         ProjectCommonException.throwClientErrorException(
-          ResponseCode.errorDuplicateEntry,
-          MessageFormat.format(
-            ResponseCode.errorDuplicateEntry.getErrorMessage(),
-            slug,
-            JsonKey.SLUG));
+            ResponseCode.errorDuplicateEntry,
+            MessageFormat.format(
+                ResponseCode.errorDuplicateEntry.getErrorMessage(), slug, JsonKey.SLUG));
       }
     } else {
       request.put(JsonKey.SLUG, slug);
@@ -75,7 +73,7 @@ public class OrganisationRequestValidator {
   public void channelMandatoryValidation(Map<String, Object> request) {
     if (StringUtils.isBlank((String) request.get(JsonKey.CHANNEL))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           MessageFormat.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CHANNEL),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -89,7 +87,7 @@ public class OrganisationRequestValidator {
     if (StringUtils.isBlank(orgId)) {
       if (StringUtils.isBlank(provider) || StringUtils.isBlank(externalId)) {
         throw new ProjectCommonException(
-            ResponseCode.invalidRequestData.getErrorCode(),
+            ResponseCode.invalidRequestData,
             ResponseCode.invalidRequestData.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       } else {
@@ -101,7 +99,7 @@ public class OrganisationRequestValidator {
                 (String) req.get(JsonKey.EXTERNAL_ID), (String) req.get(JsonKey.PROVIDER), context);
         if (StringUtils.isEmpty(organisationId)) {
           throw new ProjectCommonException(
-              ResponseCode.invalidRequestData.getErrorCode(),
+              ResponseCode.invalidRequestData,
               ResponseCode.invalidRequestData.getErrorMessage(),
               ResponseCode.CLIENT_ERROR.getResponseCode());
         }
@@ -113,7 +111,7 @@ public class OrganisationRequestValidator {
   public void validateOrgType(String orgType, String operation) {
     if (StringUtils.isBlank(orgType) && operation.equalsIgnoreCase(JsonKey.CREATE)) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           MessageFormat.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.ORG_TYPE),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -126,7 +124,7 @@ public class OrganisationRequestValidator {
 
     if (StringUtils.isNotBlank(orgType) && !orgTypeList.contains(orgType)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
+          ResponseCode.invalidValue,
           MessageFormat.format(
               ResponseCode.invalidValue.getErrorMessage(), JsonKey.ORG_TYPE, orgType, orgTypeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -140,10 +138,9 @@ public class OrganisationRequestValidator {
     if (!isValid) {
       logger.info("OrganisationManagementActor: no root org found with Id: " + id);
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
-        MessageFormat.format(
-          ResponseCode.invalidParameter.getErrorMessage(),
-          JsonKey.ORGANISATION + JsonKey.ID),
+          ResponseCode.invalidRequestData,
+          MessageFormat.format(
+              ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ORGANISATION + JsonKey.ID),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
@@ -274,9 +271,8 @@ public class OrganisationRequestValidator {
         logger.info(
             context, "OrganisationManagementActor:validateChannel: Invalid channel = " + channel);
         throw new ProjectCommonException(
-            ResponseCode.invalidParameter.getErrorCode(),
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.CHANNEL),
+            ResponseCode.invalidParameter,
+            MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.CHANNEL),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
       Object status = rootOrg.get(JsonKey.STATUS);
@@ -290,11 +286,9 @@ public class OrganisationRequestValidator {
       logger.info(
           context, "OrganisationManagementActor:validateChannel: Channel validation failed");
       throw new ProjectCommonException(
-          ResponseCode.errorDuplicateEntry.getErrorCode(),
-        MessageFormat.format(
-          ResponseCode.errorDuplicateEntry.getErrorMessage(),
-          channel,
-          JsonKey.CHANNEL),
+          ResponseCode.errorDuplicateEntry,
+          MessageFormat.format(
+              ResponseCode.errorDuplicateEntry.getErrorMessage(), channel, JsonKey.CHANNEL),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }

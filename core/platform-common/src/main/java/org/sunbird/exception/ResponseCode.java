@@ -1,7 +1,7 @@
 package org.sunbird.exception;
 
-import org.apache.commons.lang3.StringUtils;
-import org.sunbird.keys.JsonKey;
+import java.util.HashMap;
+import java.util.Map;
 
 /** @author Manzarul */
 public enum ResponseCode {
@@ -18,7 +18,8 @@ public enum ResponseCode {
   // Remove this instead use SERVER_ERROR
   // -> dbInsertionError( // Should throw SERVER_ERROR but with db error msg
   //    ResponseMessage.Key.DB_INSERTION_FAIL, ResponseMessage.Message.DB_INSERTION_FAIL),
-  // -> dbUpdateError(ResponseMessage.Key.DB_UPDATE_FAIL, ResponseMessage.Message.DB_UPDATE_FAIL), //
+  // -> dbUpdateError(ResponseMessage.Key.DB_UPDATE_FAIL, ResponseMessage.Message.DB_UPDATE_FAIL),
+  // //
   // Should throw SERVER_ERROR but with db error msg
   success(ResponseMessage.Key.SUCCESS_MESSAGE, ResponseMessage.Message.SUCCESS_MESSAGE),
   emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
@@ -30,7 +31,7 @@ public enum ResponseCode {
   errorDuplicateEntry(
       ResponseMessage.Key.ERROR_DUPLICATE_ENTRY, ResponseMessage.Message.ERROR_DUPLICATE_ENTRY),
   errorParamExists(
-    ResponseMessage.Key.ERROR_PARAM_EXISTS, ResponseMessage.Message.ERROR_PARAM_EXISTS),
+      ResponseMessage.Key.ERROR_PARAM_EXISTS, ResponseMessage.Message.ERROR_PARAM_EXISTS),
   // -> unableToParseData( // Should be thrown as SERVER_ERROR
   //    ResponseMessage.Key.UNABLE_TO_PARSE_DATA, ResponseMessage.Message.UNABLE_TO_PARSE_DATA),
   // -> invalidOrgData(ResponseMessage.Key.INVALID_ORG_DATA,
@@ -41,14 +42,16 @@ public enum ResponseCode {
   // -> invalidUsrData(ResponseMessage.Key.INVALID_USR_DATA,
   // ResponseMessage.Message.INVALID_USR_DATA),// SHOULD BE INVALID_PARAM
   errorInvalidOTP(ResponseMessage.Key.ERROR_INVALID_OTP, ResponseMessage.Message.ERROR_INVALID_OTP),
-  // -> emailAlreadyExistError(ResponseMessage.Key.EMAIL_IN_USE, ResponseMessage.Message.EMAIL_IN_USE),
+  // -> emailAlreadyExistError(ResponseMessage.Key.EMAIL_IN_USE,
+  // ResponseMessage.Message.EMAIL_IN_USE),
   // // Can be plugged with errorDuplicateEntry
   // -> userNameRequired(ResponseMessage.Key.USERNAME_MISSING,
   // ResponseMessage.Message.USERNAME_MISSING), // Should be Mandator param error
   // -> userNameAlreadyExistError( // Can be plugged with errorDuplicateEntry
   //    ResponseMessage.Key.USERNAME_IN_USE, ResponseMessage.Message.USERNAME_IN_USE), // Can be
   // plugged with errorDuplicateEntry
-  // -> userIdRequired(ResponseMessage.Key.USERID_MISSING, ResponseMessage.Message.USERID_MISSING), //
+  // -> userIdRequired(ResponseMessage.Key.USERID_MISSING, ResponseMessage.Message.USERID_MISSING),
+  // //
   // Should be Mandatory param error
   // -> authTokenRequired( //Should be Mandator param error
   //    ResponseMessage.Key.AUTH_TOKEN_MISSING, ResponseMessage.Message.AUTH_TOKEN_MISSING),
@@ -57,21 +60,25 @@ public enum ResponseCode {
   // -> keyCloakDefaultError(// should be server error
   //    ResponseMessage.Key.KEY_CLOAK_DEFAULT_ERROR,
   // ResponseMessage.Message.KEY_CLOAK_DEFAULT_ERROR),
-  // -> invalidOrgId(ResponseMessage.Key.INVALID_ORG_ID, ResponseMessage.Key.INVALID_ORG_ID),// should
+  // -> invalidOrgId(ResponseMessage.Key.INVALID_ORG_ID, ResponseMessage.Key.INVALID_ORG_ID),//
+  // should
   // be invalid param value
   // -> invalidOrgStatus(ResponseMessage.Key.INVALID_ORG_STATUS,
   // ResponseMessage.Key.INVALID_ORG_STATUS), // should be invalid param value
-  // -> invalidData(ResponseMessage.Key.INVALID_DATA, ResponseMessage.Message.INVALID_DATA), // Can be
+  // -> invalidData(ResponseMessage.Key.INVALID_DATA, ResponseMessage.Message.INVALID_DATA), // Can
+  // be
   // plugged with invalidRequestData
   // actorConnectionError(// Should be server error
   //    ResponseMessage.Key.ACTOR_CONNECTION_ERROR, ResponseMessage.Message.ACTOR_CONNECTION_ERROR),
   // -> userAlreadyExists( // Can be plugged with errorDuplicateEntry
   //    ResponseMessage.Key.USER_ALREADY_EXISTS, ResponseMessage.Message.USER_ALREADY_EXISTS),
-  // -> invalidUserId(ResponseMessage.Key.INVALID_USER_ID, ResponseMessage.Message.INVALID_USER_ID),//
+  // -> invalidUserId(ResponseMessage.Key.INVALID_USER_ID,
+  // ResponseMessage.Message.INVALID_USER_ID),//
   // Should be invalid param value
   // -> loginIdRequired(ResponseMessage.Key.LOGIN_ID_MISSING,
   // ResponseMessage.Message.LOGIN_ID_MISSING), // Should be Mandatory param missing
-  // -> userNotFound(ResponseMessage.Key.USER_NOT_FOUND, ResponseMessage.Message.USER_NOT_FOUND),// We
+  // -> userNotFound(ResponseMessage.Key.USER_NOT_FOUND, ResponseMessage.Message.USER_NOT_FOUND),//
+  // We
   // can create Not found error (can be used for both user and org read)
   dataTypeError(ResponseMessage.Key.DATA_TYPE_ERROR, ResponseMessage.Message.DATA_TYPE_ERROR),
   errorAttributeConflict(
@@ -99,19 +106,23 @@ public enum ResponseCode {
   invalidObjectType(
       ResponseMessage.Key.INVALID_OBJECT_TYPE, ResponseMessage.Message.INVALID_OBJECT_TYPE),
   csvFileEmpty(ResponseMessage.Key.EMPTY_CSV_FILE, ResponseMessage.Message.EMPTY_CSV_FILE),
-  // -> invalidChannel(ResponseMessage.Key.INVALID_CHANNEL, ResponseMessage.Message.INVALID_CHANNEL),//
+  // -> invalidChannel(ResponseMessage.Key.INVALID_CHANNEL,
+  // ResponseMessage.Message.INVALID_CHANNEL),//
   // Should be invalid param value
   // -> emailSubjectError(
   //    ResponseMessage.Key.EMAIL_SUBJECT_ERROR, ResponseMessage.Message.EMAIL_SUBJECT_ERROR),//
   // Should be Mandatory param missing error
-  // -> emailBodyError(ResponseMessage.Key.EMAIL_BODY_ERROR, ResponseMessage.Message.EMAIL_BODY_ERROR),
+  // -> emailBodyError(ResponseMessage.Key.EMAIL_BODY_ERROR,
+  // ResponseMessage.Message.EMAIL_BODY_ERROR),
   // // Should be Mandatory param missing error
   // -> storageContainerNameMandatory( //// Should be Mandatory param missing error
   //    ResponseMessage.Key.STORAGE_CONTAINER_NAME_MANDATORY,
   //    ResponseMessage.Message.STORAGE_CONTAINER_NAME_MANDATORY),
-  // -> invalidRole(ResponseMessage.Key.INVALID_ROLE, ResponseMessage.Message.INVALID_ROLE),// should
+  // -> invalidRole(ResponseMessage.Key.INVALID_ROLE, ResponseMessage.Message.INVALID_ROLE),//
+  // should
   // be clubbed with invalid param value
-  // -> saltValue(ResponseMessage.Key.INVALID_SALT, ResponseMessage.Message.INVALID_SALT), // Should be
+  // -> saltValue(ResponseMessage.Key.INVALID_SALT, ResponseMessage.Message.INVALID_SALT), // Should
+  // be
   // Mandatory param missing error
   // -> titleRequired(ResponseMessage.Key.TITLE_REQUIRED, ResponseMessage.Message.TITLE_REQUIRED),//
   // Should be Mandatory param missing error
@@ -119,9 +130,11 @@ public enum ResponseCode {
   // Should be Mandatory param missing error
   // -> contentIdError(ResponseMessage.Key.CONTENT_ID_ERROR,
   // ResponseMessage.Message.CONTENT_ID_ERROR),// Should be Mandatory param missing error
-  // -> invalidTags(ResponseMessage.Key.INVALID_TAGS, ResponseMessage.Message.INVALID_TAGS),// Should
+  // -> invalidTags(ResponseMessage.Key.INVALID_TAGS, ResponseMessage.Message.INVALID_TAGS),//
+  // Should
   // be Invalid param value
-  // -> invalidNoteId(ResponseMessage.Key.NOTE_ID_INVALID, ResponseMessage.Message.NOTE_ID_INVALID), //
+  // -> invalidNoteId(ResponseMessage.Key.NOTE_ID_INVALID, ResponseMessage.Message.NOTE_ID_INVALID),
+  // //
   // Should be Invalid param value
   // -> userDataEncryptionError( // Should SERVER ERROR
   //    ResponseMessage.Key.USER_DATA_ENCRYPTION_ERROR,
@@ -141,7 +154,8 @@ public enum ResponseCode {
       ResponseMessage.Message.ONLY_EMAIL_OR_PHONE_OR_MANAGEDBY_REQUIRED),
   // -> PhoneNumberInUse( // // Can be plugged with errorDuplicateEntry
   //    ResponseMessage.Key.PHONE_ALREADY_IN_USE, ResponseMessage.Message.PHONE_ALREADY_IN_USE),
-  // -> emailInUse(ResponseMessage.Key.EMAIL_IN_USE, ResponseMessage.Message.EMAIL_IN_USE),// // Can be
+  // -> emailInUse(ResponseMessage.Key.EMAIL_IN_USE, ResponseMessage.Message.EMAIL_IN_USE),// // Can
+  // be
   // plugged with errorDuplicateEntry
   // -> invalidPhoneNumber(// invalid param value
   //    ResponseMessage.Key.INVALID_PHONE_NUMBER, ResponseMessage.Message.INVALID_PHONE_NUMBER),
@@ -159,9 +173,11 @@ public enum ResponseCode {
       ResponseMessage.Key.MAX_ALLOWED_SIZE_LIMIT_EXCEED,
       ResponseMessage.Message.MAX_ALLOWED_SIZE_LIMIT_EXCEED),
   inactiveUser(ResponseMessage.Key.INACTIVE_USER, ResponseMessage.Message.INACTIVE_USER),
-  // -> orgDoesNotExist(ResponseMessage.Key.ORG_NOT_EXIST, ResponseMessage.Message.ORG_NOT_EXIST), //
+  // -> orgDoesNotExist(ResponseMessage.Key.ORG_NOT_EXIST, ResponseMessage.Message.ORG_NOT_EXIST),
+  // //
   // shoulb be resource not found
-  // -> alreadyExists(ResponseMessage.Key.ALREADY_EXISTS, ResponseMessage.Message.ALREADY_EXISTS), //
+  // -> alreadyExists(ResponseMessage.Key.ALREADY_EXISTS, ResponseMessage.Message.ALREADY_EXISTS),
+  // //
   // this can be clubbed with errorDuplicateEntry
   invalidValue(ResponseMessage.Key.INVALID_VALUE, ResponseMessage.Message.INVALID_VALUE),
   invalidParameter(
@@ -318,7 +334,8 @@ public enum ResponseCode {
   // ResponseMessage.Message.INVALID_USER_INFO_VALUE),
   invalidConsentStatus(
       ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
-  // -> roleSaveError(ResponseMessage.Key.ROLE_SAVE_ERROR, ResponseMessage.Message.ROLE_SAVE_ERROR),//
+  // -> roleSaveError(ResponseMessage.Key.ROLE_SAVE_ERROR,
+  // ResponseMessage.Message.ROLE_SAVE_ERROR),//
   // should be server error
   serverError(ResponseMessage.Key.SERVER_ERROR, ResponseMessage.Message.SERVER_ERROR),
   OK(200),
@@ -344,7 +361,7 @@ public enum ResponseCode {
    * @param errorCode String
    * @param errorMessage String
    */
-  private ResponseCode(String errorCode, String errorMessage) {
+  ResponseCode(String errorCode, String errorMessage) {
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;
   }
@@ -362,14 +379,6 @@ public enum ResponseCode {
     this.errorNumber = errorNumber;
   }
 
-  /**
-   * @param errorCode
-   * @return
-   */
-  public String getMessage(int errorCode) {
-    return "";
-  }
-
   /** @return */
   public String getErrorCode() {
     return errorCode;
@@ -385,31 +394,7 @@ public enum ResponseCode {
     return errorMessage;
   }
 
-  /** @param errorMessage */
-  public void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-  /**
-   * This method will provide status message based on code
-   *
-   * @param code
-   * @return String
-   */
-  public static String getResponseMessage(String code) {
-    if (StringUtils.isBlank(code)) {
-      return "";
-    }
-    ResponseCode responseCodes[] = ResponseCode.values();
-    for (ResponseCode actionState : responseCodes) {
-      if (actionState.getErrorCode().equals(code)) {
-        return actionState.getErrorMessage();
-      }
-    }
-    return "";
-  }
-
-  private ResponseCode(int responseCode) {
+  ResponseCode(int responseCode) {
     this.responseCode = responseCode;
   }
 
@@ -421,49 +406,33 @@ public enum ResponseCode {
     this.responseCode = responseCode;
   }
 
-  /**
-   * This method will take header response code as int value and it provide matched enum value, if
-   * code is not matched or exception occurs then it will provide SERVER_ERROR
-   *
-   * @param code int
-   * @return HeaderResponseCode
-   */
-  public static ResponseCode getHeaderResponseCode(int code) {
-    if (code > 0) {
-      try {
-        ResponseCode[] arr = ResponseCode.values();
-        if (null != arr) {
-          for (ResponseCode rc : arr) {
-            if (rc.getResponseCode() == code) return rc;
+  private static Map<String, Integer> responseCodeByCode;
+
+  static {
+    responseCodeByCode =
+        new HashMap<>() {
+          {
+            put("OK", 200);
+            put("CLIENT_ERROR", 400);
+            put("SERVER_ERROR", 500);
+            put("RESOURCE_NOT_FOUND", 404);
+            put("UNAUTHORIZED", 401);
+            put("FORBIDDEN", 403);
+            put("REDIRECTION_REQUIRED", 302);
+            put("TOO_MANY_REQUESTS", 429);
+            put("SERVICE_UNAVAILABLE", 503);
+            put("PARTIAL_SUCCESS_RESPONSE", 206);
+            put("IM_A_TEAPOT", 418);
           }
-        }
-      } catch (Exception e) {
-        return ResponseCode.SERVER_ERROR;
-      }
-    }
-    return ResponseCode.SERVER_ERROR;
+        };
   }
 
-  /**
-   * This method will provide ResponseCode enum based on error code
-   *
-   * @param errorCode
-   * @return String
-   */
-  public static ResponseCode getResponse(String errorCode) {
-    if (StringUtils.isBlank(errorCode)) {
-      return null;
-    } else if (JsonKey.UNAUTHORIZED.equals(errorCode)) {
-      return ResponseCode.unAuthorized;
+  public static int getResponseCodeByCode(String code) {
+    Integer responseCode = responseCodeByCode.get(code);
+    if (null != responseCode) {
+      return responseCode;
     } else {
-      ResponseCode value = null;
-      ResponseCode responseCodes[] = ResponseCode.values();
-      for (ResponseCode response : responseCodes) {
-        if (response.getErrorCode().equals(errorCode)) {
-          return response;
-        }
-      }
-      return value;
+      return 200;
     }
   }
 }

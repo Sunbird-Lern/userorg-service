@@ -102,7 +102,7 @@ public class UserLookupTest {
       new UserLookUpServiceImpl().checkPhoneUniqueness(user, "create", null);
       response = true;
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getErrorResponseCode(), 400);
     }
     assertFalse(response);
   }
@@ -116,7 +116,7 @@ public class UserLookupTest {
       new UserLookUpServiceImpl().checkPhoneUniqueness(user, "update", null);
       response = true;
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getErrorResponseCode(), 400);
     }
     assertFalse(response);
   }
@@ -128,7 +128,7 @@ public class UserLookupTest {
       new UserLookUpServiceImpl().checkPhoneUniqueness("9663890400", null);
       response = true;
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getErrorResponseCode(), 400);
     }
     assertFalse(response);
   }
@@ -140,7 +140,7 @@ public class UserLookupTest {
       new UserLookUpServiceImpl().checkEmailUniqueness("test@test.com", null);
       response = true;
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getErrorResponseCode(), 400);
     }
     assertFalse(response);
   }
@@ -153,7 +153,7 @@ public class UserLookupTest {
     try {
       new UserLookUpServiceImpl().checkEmailUniqueness(user, "create", null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getErrorResponseCode(), 400);
     }
     assertFalse(response);
   }
@@ -174,7 +174,7 @@ public class UserLookupTest {
     try {
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.CREATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.errorParamExists.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.errorParamExists.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -185,7 +185,7 @@ public class UserLookupTest {
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -197,7 +197,7 @@ public class UserLookupTest {
       user.getExternalIds().get(0).remove(JsonKey.OPERATION);
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.externalIdAssignedToOtherUser.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.externalIdAssignedToOtherUser.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -208,7 +208,7 @@ public class UserLookupTest {
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getErrorCode());
     }
   }
 }

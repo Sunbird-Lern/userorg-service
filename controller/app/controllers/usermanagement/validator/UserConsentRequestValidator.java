@@ -71,7 +71,7 @@ public class UserConsentRequestValidator extends BaseRequestValidator {
       CONSENT_STATUS.valueOf(status);
     } catch (IllegalArgumentException iae) {
       throw new ProjectCommonException(
-          ResponseCode.invalidConsentStatus.getErrorCode(),
+          ResponseCode.invalidConsentStatus,
           ResponseCode.invalidConsentStatus.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }

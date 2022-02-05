@@ -1,10 +1,20 @@
 package org.sunbird.actor.user;
 
+import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -37,17 +47,6 @@ import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import scala.concurrent.Promise;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -90,11 +89,11 @@ public class UserStatusActorTest {
     Promise<Boolean> promise2 = Futures.promise();
     promise2.success(true);
     when(esService.update(
-      Mockito.anyString(),
-      Mockito.anyString(),
-      Mockito.anyMap(),
-      Mockito.any(RequestContext.class)))
-      .thenReturn(promise2.future());
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(promise2.future());
   }
 
   @Before
@@ -127,14 +126,14 @@ public class UserStatusActorTest {
       userList.add(user);
       response2.getResult().put(JsonKey.RESPONSE, userList);
       when(cassandraOperation.getRecordById(
-        Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-        .thenReturn(response2);
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+          .thenReturn(response2);
 
       PowerMockito.mockStatic(SSOServiceFactory.class);
       SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
       PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
       PowerMockito.when(ssoManager.deactivateUser(Mockito.anyMap(), Mockito.any()))
-        .thenReturn(JsonKey.SUCCESS);
+          .thenReturn(JsonKey.SUCCESS);
       boolean result = testScenario(false, ActorOperations.BLOCK_USER, true, null);
       assertTrue(result);
     } catch (Exception ex) {
@@ -153,8 +152,8 @@ public class UserStatusActorTest {
     userList.add(user);
     response2.getResult().put(JsonKey.RESPONSE, userList);
     when(cassandraOperation.getRecordById(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-      .thenReturn(response2);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response2);
     boolean result =
         testScenario(
             true,
@@ -175,8 +174,8 @@ public class UserStatusActorTest {
     userList.add(user);
     response2.getResult().put(JsonKey.RESPONSE, userList);
     when(cassandraOperation.getRecordById(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-      .thenReturn(response2);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response2);
 
     PowerMockito.mockStatic(SSOServiceFactory.class);
     SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
@@ -198,8 +197,8 @@ public class UserStatusActorTest {
     userList.add(user);
     response2.getResult().put(JsonKey.RESPONSE, userList);
     when(cassandraOperation.getRecordById(
-      Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-      .thenReturn(response2);
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(response2);
     boolean result =
         testScenario(
             false,
@@ -216,7 +215,8 @@ public class UserStatusActorTest {
     Request request = new Request();
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
-    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -253,7 +253,7 @@ public class UserStatusActorTest {
       String errString = ActorOperations.getOperationCodeByActorOperation(operation.getValue());
       ProjectCommonException exception =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return (exception.getCode().equals("UOS_"+errString+expectedErrorResponse));
+      return (exception.getErrorCode().equals("UOS_" + errString + expectedErrorResponse));
     }
   }
 }

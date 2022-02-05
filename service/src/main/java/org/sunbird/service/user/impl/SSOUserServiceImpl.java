@@ -118,7 +118,7 @@ public class SSOUserServiceImpl implements SSOUserService {
       fetchedRootOrgIdByChannel = orgService.getRootOrgIdFromChannel(requestedChannel, context);
       if (StringUtils.isBlank(fetchedRootOrgIdByChannel)) {
         throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
+            ResponseCode.invalidParameterValue,
             ProjectUtil.formatMessage(
                 ResponseCode.invalidParameterValue.getErrorMessage(),
                 requestedChannel,
@@ -131,10 +131,10 @@ public class SSOUserServiceImpl implements SSOUserService {
     if (StringUtils.isNotBlank(requestedOrgId)) {
       fetchedOrgById = orgService.getOrgObjById(requestedOrgId, context);
       if (null == fetchedOrgById) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(),
-            JsonKey.ORGANISATION));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter,
+            MessageFormat.format(
+                ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ORGANISATION));
       }
       // if requested orgId is not blank then its channel should match with requested channel
       if (StringUtils.isNotBlank(requestedChannel)

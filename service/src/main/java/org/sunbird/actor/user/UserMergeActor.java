@@ -99,7 +99,7 @@ public class UserMergeActor extends UserBaseActor {
               + "or matching with mergerid root-org"
               + mergerId);
       throw new ProjectCommonException(
-          ResponseCode.accountNotFound.getErrorCode(),
+          ResponseCode.accountNotFound,
           ResponseCode.accountNotFound.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -150,7 +150,7 @@ public class UserMergeActor extends UserBaseActor {
     } else {
       logger.info("UserMergeActor:updateUserMergeDetails: User mergee is not exist : " + mergeeId);
       throw new ProjectCommonException(
-          ResponseCode.invalidIdentifier.getErrorCode(),
+          ResponseCode.invalidIdentifier,
           ProjectUtil.formatMessage(
               ResponseMessage.Message.INVALID_PARAMETER_VALUE, mergeeId, JsonKey.FROM_ACCOUNT_ID),
           ResponseCode.SERVER_ERROR.getResponseCode());
@@ -169,8 +169,7 @@ public class UserMergeActor extends UserBaseActor {
       custodianId = configSettingMap.get(JsonKey.CUSTODIAN_ORG_ID);
       if (custodianId == null || custodianId.isEmpty()) {
         SystemSetting custodianIdSetting =
-                systemSettingsService.getSystemSettingByKey(
-                JsonKey.CUSTODIAN_ORG_ID, context);
+            systemSettingsService.getSystemSettingByKey(JsonKey.CUSTODIAN_ORG_ID, context);
         if (custodianIdSetting != null) {
           configSettingMap.put(custodianIdSetting.getId(), custodianIdSetting.getValue());
           custodianId = custodianIdSetting.getValue();
@@ -272,7 +271,7 @@ public class UserMergeActor extends UserBaseActor {
             sourceUserAuthToken, subDomainUrl, context.getContextMap());
     if (!(mergeeId.equals(sourceUserId) && mergerId.equals(userId))) {
       throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized,
           ProjectUtil.formatMessage(ResponseMessage.Message.UNAUTHORIZED_USER, mergeeId),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }

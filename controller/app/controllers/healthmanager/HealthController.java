@@ -105,7 +105,7 @@ public class HealthController extends BaseController {
   private void handleSigTerm() {
     if (signalHandler.isShuttingDown()) {
       throw new ProjectCommonException(
-          ResponseCode.serviceUnAvailable.getErrorCode(),
+          ResponseCode.serviceUnAvailable,
           ResponseCode.serviceUnAvailable.getErrorMessage(),
           ResponseCode.SERVICE_UNAVAILABLE.getResponseCode());
     }

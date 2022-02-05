@@ -588,8 +588,8 @@ public class UserProfileReadActorTest {
       String errString = ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation());
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals("UOS_"+errString+errorCode.name())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals("UOS_" + errString + errorCode.name())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 

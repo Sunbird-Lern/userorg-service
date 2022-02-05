@@ -197,7 +197,7 @@ public final class CassandraUtil {
     } catch (Exception ex) {
       logger.error("Exception occurred - batchUpdateQuery", ex);
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
@@ -244,7 +244,7 @@ public final class CassandraUtil {
     } catch (Exception ex) {
       logger.error("Exception occurred - getPrimaryKey", ex);
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }

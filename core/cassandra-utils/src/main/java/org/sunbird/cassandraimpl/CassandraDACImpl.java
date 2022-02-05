@@ -59,7 +59,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
@@ -103,7 +103,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {
@@ -156,7 +156,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
           context,
           Constants.EXCEPTION_MSG_FETCH + table + " : primary key is a must for update call");
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
@@ -177,7 +177,7 @@ public class CassandraDACImpl extends CassandraOperationImpl {
     } catch (Exception e) {
       logger.error(context, Constants.EXCEPTION_MSG_FETCH + table + " : " + e.getMessage(), e);
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     } finally {

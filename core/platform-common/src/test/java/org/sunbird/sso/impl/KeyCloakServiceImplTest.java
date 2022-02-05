@@ -172,8 +172,8 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     try {
       keyCloakService.activateUser(reqMap, null);
     } catch (ProjectCommonException e) {
-      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getCode());
-      Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getErrorCode());
+      Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
   }
 

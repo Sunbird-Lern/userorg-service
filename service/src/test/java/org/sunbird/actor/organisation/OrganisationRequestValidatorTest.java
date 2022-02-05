@@ -72,7 +72,7 @@ public class OrganisationRequestValidatorTest {
       validator.isTenantIdValid("orgId", new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
 
@@ -95,7 +95,7 @@ public class OrganisationRequestValidatorTest {
       validator.validateChannel(requestMap, new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidParameter.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidParameter.getErrorCode());
     }
   }
 
@@ -109,7 +109,7 @@ public class OrganisationRequestValidatorTest {
       validator.validateChannel(requestMap, new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.errorInactiveOrg.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.errorInactiveOrg.getErrorCode());
     }
   }
 
@@ -123,7 +123,7 @@ public class OrganisationRequestValidatorTest {
       validator.validateOrgLocation(requestMap, new RequestContext());
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidParameterValue.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidParameterValue.getErrorCode());
     }
   }
 

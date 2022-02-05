@@ -474,6 +474,8 @@ public final class JsonKey {
   public static final String RESET_PASSWORD_TEMPLATE_ID = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
   public static final String VERSION_4 = "v4";
+  public static final String VERSION_5 = "v5";
+
   public static final String WARD_LOGIN_OTP_TEMPLATE_ID = "wardLoginOTP";
   public static final String OTP_PHONE_WARD_LOGIN_TEMPLATE = "verifyPhoneOtpTemplateWard";
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";

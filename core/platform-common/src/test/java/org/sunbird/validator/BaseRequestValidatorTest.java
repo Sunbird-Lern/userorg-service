@@ -24,7 +24,7 @@ public class BaseRequestValidatorTest {
     try {
       baseRequestValidator.validateSearchRequest(request);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getErrorCode());
       assertEquals(
           MessageFormat.format(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.FIELDS, "List"),
@@ -38,7 +38,7 @@ public class BaseRequestValidatorTest {
     try {
       baseRequestValidator.checkMandatoryFieldsPresent(request, "key");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -48,7 +48,7 @@ public class BaseRequestValidatorTest {
     try {
       baseRequestValidator.checkReadOnlyAttributesAbsent(request, "key");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -58,7 +58,7 @@ public class BaseRequestValidatorTest {
     try {
       baseRequestValidator.checkMandatoryFieldsPresent(request, new ArrayList<>());
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -72,7 +72,7 @@ public class BaseRequestValidatorTest {
     try {
       baseRequestValidator.validateSearchRequest(request);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getErrorCode());
       assertEquals(
           MessageFormat.format(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.FIELDS, "List of String"),

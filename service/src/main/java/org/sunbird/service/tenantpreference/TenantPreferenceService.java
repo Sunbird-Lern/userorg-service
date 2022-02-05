@@ -32,14 +32,14 @@ public class TenantPreferenceService {
     if (JsonKey.CREATE.equalsIgnoreCase(operationType)
         && CollectionUtils.isNotEmpty(orgPreference)) {
       throw new ProjectCommonException(
-          ResponseCode.preferenceAlreadyExists.getErrorCode(),
+          ResponseCode.preferenceAlreadyExists,
           MessageFormat.format(ResponseCode.preferenceAlreadyExists.getErrorMessage(), key, orgId),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     } else if (((JsonKey.GET.equalsIgnoreCase(operationType))
             || (JsonKey.UPDATE.equalsIgnoreCase(operationType)))
         && CollectionUtils.isEmpty(orgPreference)) {
       throw new ProjectCommonException(
-          ResponseCode.preferenceNotFound.getErrorCode(),
+          ResponseCode.preferenceNotFound,
           MessageFormat.format(ResponseCode.preferenceNotFound.getErrorMessage(), key, orgId),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }

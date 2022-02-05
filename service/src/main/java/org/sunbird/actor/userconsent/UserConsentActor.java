@@ -54,9 +54,9 @@ public class UserConsentActor extends BaseActor {
       response.put(JsonKey.CONSENT_RESPONSE, consentResponseList);
     } else {
       throw new ProjectCommonException(
-        ResponseCode.resourceNotFound.getErrorCode(),
-        MessageFormat.format(
-          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER_CONSENT_TEXT),
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER_CONSENT_TEXT),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     sender().tell(response, self());

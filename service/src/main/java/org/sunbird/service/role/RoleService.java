@@ -81,8 +81,9 @@ public class RoleService {
           roleObj -> {
             if (null == roleMap.get(roleObj.trim())) {
               throw new ProjectCommonException(
-                ResponseCode.invalidParameter.getErrorCode(),
-                MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE),
+                  ResponseCode.invalidParameter,
+                  MessageFormat.format(
+                      ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
           });
@@ -98,8 +99,9 @@ public class RoleService {
             String roleStr = (String) roleObj.get(JsonKey.ROLE);
             if (null == roleMap.get(roleStr.trim())) {
               throw new ProjectCommonException(
-                ResponseCode.invalidParameter.getErrorCode(),
-                MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE),
+                  ResponseCode.invalidParameter,
+                  MessageFormat.format(
+                      ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
           });

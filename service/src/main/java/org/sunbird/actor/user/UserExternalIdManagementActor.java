@@ -182,7 +182,7 @@ public class UserExternalIdManagementActor extends BaseActor {
 
   private void throwExternalIDNotFoundException(String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound.getErrorCode(),
+        ResponseCode.externalIdNotFound,
         ProjectUtil.formatMessage(
             ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
         ResponseCode.CLIENT_ERROR.getResponseCode());

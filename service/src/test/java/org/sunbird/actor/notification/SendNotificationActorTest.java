@@ -185,7 +185,7 @@ public class SendNotificationActorTest {
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    assertTrue(exc.getCode().equals(ResponseCode.invalidParameterValue.getErrorCode()));
+    assertTrue(exc.getErrorCode().equals(ResponseCode.invalidParameterValue.getErrorCode()));
   }
 
   @Test
@@ -227,7 +227,8 @@ public class SendNotificationActorTest {
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    assertEquals("UOS_NOTI"+ResponseCode.invalidParameterValue.getErrorCode(), exc.getCode());
+    assertEquals(
+        "UOS_NOTI" + ResponseCode.invalidParameterValue.getErrorCode(), exc.getErrorCode());
   }
 
   @Test

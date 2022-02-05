@@ -25,7 +25,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
         || (orgRequest.getRequest().containsKey(JsonKey.IS_TENANT)
             && null == orgRequest.getRequest().get(JsonKey.IS_TENANT))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           MessageFormat.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.IS_TENANT),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -41,7 +41,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
         && orgRequest.getRequest().containsKey(JsonKey.LICENSE)
         && StringUtils.isBlank((String) orgRequest.getRequest().get(JsonKey.LICENSE))) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           MessageFormat.format(
               ResponseCode.invalidParameterValue.getErrorMessage(),
               orgRequest.getRequest().get(JsonKey.LICENSE),
@@ -55,13 +55,13 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
     if (request.getRequest().containsKey(JsonKey.ROOT_ORG_ID)
         && StringUtils.isEmpty((String) request.getRequest().get(JsonKey.ROOT_ORG_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           String.format(ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.ROOT_ORG_ID),
           ERROR_CODE);
     }
     if (request.getRequest().get(JsonKey.STATUS) != null) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestParameter.getErrorCode(),
+          ResponseCode.invalidRequestParameter,
           ProjectUtil.formatMessage(
               ResponseCode.invalidRequestParameter.getErrorMessage(), JsonKey.STATUS),
           ERROR_CODE);
@@ -76,14 +76,14 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
 
     if (!request.getRequest().containsKey(JsonKey.STATUS)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData,
           ResponseCode.invalidRequestData.getErrorMessage(),
           ERROR_CODE);
     }
 
     if (!(request.getRequest().get(JsonKey.STATUS) instanceof Integer)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData,
           ResponseCode.invalidRequestData.getErrorMessage(),
           ERROR_CODE);
     }

@@ -36,7 +36,7 @@ public final class RequestValidator {
         && (StringUtils.isBlank((String) reqObj.get(JsonKey.ORG_EXTERNAL_ID))
             || StringUtils.isBlank((String) reqObj.get(JsonKey.ORG_PROVIDER)))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           ProjectUtil.formatMessage(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(),
               (ProjectUtil.formatMessage(
@@ -50,7 +50,7 @@ public final class RequestValidator {
     }
     if (null == reqObj.get(JsonKey.FILE)) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           ProjectUtil.formatMessage(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.FILE),
           ERROR_CODE);
@@ -60,16 +60,14 @@ public final class RequestValidator {
   public static void validateSyncRequest(Request request) {
     if (request.getRequest().get(JsonKey.OBJECT_TYPE) == null) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
-          ResponseCode.dataTypeError.getErrorMessage(),
-          ERROR_CODE);
+          ResponseCode.dataTypeError, ResponseCode.dataTypeError.getErrorMessage(), ERROR_CODE);
     }
     List<String> list =
         new ArrayList<>(
             Arrays.asList(new String[] {JsonKey.USER, JsonKey.ORGANISATION, JsonKey.LOCATION}));
     if (!list.contains(request.getRequest().get(JsonKey.OBJECT_TYPE))) {
       throw new ProjectCommonException(
-          ResponseCode.invalidObjectType.getErrorCode(),
+          ResponseCode.invalidObjectType,
           ResponseCode.invalidObjectType.getErrorMessage(),
           ERROR_CODE);
     }
@@ -78,13 +76,13 @@ public final class RequestValidator {
   public static void validateSendMail(Request request) {
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.SUBJECT))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.SUBJECT),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.getRequest().get(JsonKey.BODY))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.BODY),
           ERROR_CODE);
     }
@@ -96,7 +94,7 @@ public final class RequestValidator {
         && CollectionUtils.isEmpty(
             (List<String>) (request.getRequest().get(JsonKey.RECIPIENT_PHONES)))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           MessageFormat.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(),
               StringFormatter.joinByOr(
@@ -113,7 +111,7 @@ public final class RequestValidator {
 
     if (StringUtils.isBlank((String) reqObj.get(JsonKey.CONTAINER))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.CONTAINER),
           ERROR_CODE);
     }
@@ -128,26 +126,26 @@ public final class RequestValidator {
   public static void validateNote(Request request) {
     if (StringUtils.isBlank((String) request.get(JsonKey.USER_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.USER_ID),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.get(JsonKey.TITLE))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.TITLE),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.get(JsonKey.NOTE))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.NOTE),
           ERROR_CODE);
     }
     if (StringUtils.isBlank((String) request.get(JsonKey.CONTENT_ID))
         && StringUtils.isBlank((String) request.get(JsonKey.COURSE_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           String.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(),
               JsonKey.CONTENT_ID + "," + JsonKey.COURSE_ID),
@@ -157,12 +155,12 @@ public final class RequestValidator {
         && ((request.getRequest().get(JsonKey.TAGS) instanceof List)
             && ((List) request.getRequest().get(JsonKey.TAGS)).isEmpty())) {
       throw new ProjectCommonException(
-          ResponseCode.errorMandatoryParamsEmpty.getErrorCode(),
+          ResponseCode.errorMandatoryParamsEmpty,
           String.format(ResponseCode.errorMandatoryParamsEmpty.getErrorMessage(), JsonKey.TAGS),
           ERROR_CODE);
     } else if (request.getRequest().get(JsonKey.TAGS) instanceof String) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           String.format(ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.TAGS),
           ERROR_CODE);
     }
@@ -176,7 +174,7 @@ public final class RequestValidator {
   public static void validateNoteId(String noteId) {
     if (StringUtils.isBlank(noteId)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           String.format(ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.NOTE_ID),
           ERROR_CODE);
     }

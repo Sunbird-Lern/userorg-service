@@ -60,7 +60,7 @@ public class FileUploadServiceActor extends BaseActor {
         logger.info(context, "The cloud service is not available");
         ProjectCommonException exception =
             new ProjectCommonException(
-                ResponseCode.invalidRequestData.getErrorCode(),
+                ResponseCode.invalidRequestData,
                 ResponseCode.invalidRequestData.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());

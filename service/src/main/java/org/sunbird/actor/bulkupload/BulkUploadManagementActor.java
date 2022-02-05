@@ -226,13 +226,13 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         validateBulkUploadFields(columns, bulkOrgAllowedFields, false);
       } else {
         throw new ProjectCommonException(
-            ResponseCode.dataSizeError.getErrorCode(),
+            ResponseCode.dataSizeError,
             ProjectUtil.formatMessage(ResponseCode.dataSizeError.getErrorMessage(), orgDataSize),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } else {
       throw new ProjectCommonException(
-          ResponseCode.dataSizeError.getErrorCode(),
+          ResponseCode.dataSizeError,
           ProjectUtil.formatMessage(ResponseCode.dataSizeError.getErrorMessage(), orgDataSize),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -279,9 +279,9 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
 
     if (responseList.isEmpty()) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameter.getErrorCode(),
+          ResponseCode.invalidParameter,
           ProjectUtil.formatMessage(
-            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ORGANISATION),
+              ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ORGANISATION),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     } else {
       orgId = (String) responseList.get(0).get(JsonKey.ID);
@@ -311,7 +311,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
           msg = (String) req.get(JsonKey.ORGANISATION_ID);
         }
         throw new ProjectCommonException(
-            ResponseCode.rootOrgAssociationError.getErrorCode(),
+            ResponseCode.rootOrgAssociationError,
             ProjectUtil.formatMessage(ResponseCode.rootOrgAssociationError.getErrorMessage(), msg),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
@@ -321,7 +321,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
       userList = parseCsvFile((byte[]) req.get(JsonKey.FILE), processId, context);
     } catch (IOException e) {
       throw new ProjectCommonException(
-          ResponseCode.csvError.getErrorCode(),
+          ResponseCode.csvError,
           ResponseCode.csvError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -344,13 +344,13 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
         validateBulkUploadFields(columns, bulkUserAllowedFields, false);
       } else {
         throw new ProjectCommonException(
-            ResponseCode.csvError.getErrorCode(),
+            ResponseCode.csvError,
             ResponseCode.csvError.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } else {
       throw new ProjectCommonException(
-          ResponseCode.csvError.getErrorCode(),
+          ResponseCode.csvError,
           ResponseCode.csvError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -402,14 +402,14 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
       } catch (Exception e) {
         logger.error(context, e.getMessage(), e);
         throw new ProjectCommonException(
-            ResponseCode.csvError.getErrorCode(),
+            ResponseCode.csvError,
             ResponseCode.csvError.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } else {
       // tell sender that csv file is empty
       throw new ProjectCommonException(
-          ResponseCode.csvError.getErrorCode(),
+          ResponseCode.csvError,
           ResponseCode.csvError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -426,7 +426,7 @@ public class BulkUploadManagementActor extends BaseBulkUploadActor {
               + e.getMessage(),
           e);
       throw new ProjectCommonException(
-          ResponseCode.serverError.getErrorCode(),
+          ResponseCode.serverError,
           ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }

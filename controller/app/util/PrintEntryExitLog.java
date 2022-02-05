@@ -103,12 +103,12 @@ public class PrintEntryExitLog {
       if (null == exception) {
         exception =
             new ProjectCommonException(
-                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError,
                 ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode());
       }
 
-      ResponseCode code = ResponseCode.getResponse(exception.getCode());
+      ResponseCode code = exception.getResponseCode();
       if (code == null) {
         code = ResponseCode.SERVER_ERROR;
       }
@@ -116,7 +116,7 @@ public class PrintEntryExitLog {
           createResponseParamObj(code, exception.getMessage(), requestId);
       if (responseParams != null) {
         responseParams.setStatus(JsonKey.FAILED);
-        if (exception.getCode() != null) {
+        if (exception.getErrorCode() != null) {
           responseParams.setStatus(JsonKey.FAILED);
         }
         if (!StringUtils.isBlank(responseParams.getErrmsg())
@@ -127,7 +127,7 @@ public class PrintEntryExitLog {
       if (null != responseParams) {
         Map<String, Object> resParam = new HashMap<>();
         resParam.putAll(objectMapper.convertValue(responseParams, Map.class));
-        resParam.put(JsonKey.RESPONSE_CODE, exception.getResponseCode());
+        resParam.put(JsonKey.RESPONSE_CODE, exception.getErrorResponseCode());
         params.add(resParam);
       }
       exitLogEvent.setEdataParams(params);

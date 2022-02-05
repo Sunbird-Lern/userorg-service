@@ -447,7 +447,7 @@ public class LocationRequestValidatorTest {
       validator.validateSearchLocationRequest(req);
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
 
@@ -460,7 +460,7 @@ public class LocationRequestValidatorTest {
       validator.validateSearchLocationRequest(req);
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
 
@@ -470,7 +470,7 @@ public class LocationRequestValidatorTest {
       validator.validateDeleteLocationRequest("");
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.mandatoryParamsMissing.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.mandatoryParamsMissing.getErrorCode());
     }
   }
 

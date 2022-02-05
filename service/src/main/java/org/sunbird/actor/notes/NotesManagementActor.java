@@ -55,10 +55,9 @@ public class NotesManagementActor extends BaseActor {
     try {
       Map<String, Object> req = actorMessage.getRequest();
       if (!notesService.validUser((String) req.get(JsonKey.USER_ID), context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(),
-            JsonKey.USER_ID));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter,
+            MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.USER_ID));
       }
       Response response = notesService.createNote(actorMessage);
       sender().tell(response, self());
@@ -95,9 +94,9 @@ public class NotesManagementActor extends BaseActor {
       }
       Map<String, Object> list = notesService.getNoteById(noteId, context);
       if (list.isEmpty()) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter,
+            MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
       }
       Response response = notesService.updateNote(actorMessage);
       sender().tell(response, self());
@@ -124,7 +123,7 @@ public class NotesManagementActor extends BaseActor {
       String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
       if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
         throw new ProjectCommonException(
-            ResponseCode.invalidParameterValue.getErrorCode(),
+            ResponseCode.invalidParameterValue,
             ResponseCode.invalidParameterValue.getErrorMessage(),
             ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
       }
@@ -136,9 +135,9 @@ public class NotesManagementActor extends BaseActor {
       Response response = new Response();
       Map<String, Object> result = notesService.searchNotes(request, context);
       if (!result.isEmpty() && ((Long) result.get(JsonKey.COUNT) == 0)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter,
+            MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
       }
       response.put(JsonKey.RESPONSE, result);
       sender().tell(response, self());
@@ -177,9 +176,9 @@ public class NotesManagementActor extends BaseActor {
         ProjectCommonException.throwUnauthorizedErrorException();
       }
       if (!notesService.noteIdExists(noteId, context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.invalidParameter,
+            MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.NOTE_ID));
       }
       Response result = notesService.deleteNote(noteId, userId, context);
       result.getResult().remove(JsonKey.RESPONSE);

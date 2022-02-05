@@ -344,6 +344,7 @@ public class BaseController extends Controller {
   public static Response createFailureResponse(
       Http.Request request, ResponseCode code, ResponseCode headerCode) {
     Response response = new Response();
+    response.setId(getApiResponseId(request));
     response.setVer(request.path().split("[/]")[1]);
     response.setTs(ProjectUtil.getFormattedDate());
     response.setResponseCode(headerCode);
@@ -368,7 +369,7 @@ public class BaseController extends Controller {
 
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.success.getErrorCode());
+    ResponseCode code = ResponseCode.success;
     code.setResponseCode(ResponseCode.OK.getResponseCode());
     response.setParams(
         createResponseParamObj(code, null, Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
@@ -417,8 +418,8 @@ public class BaseController extends Controller {
     }
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
-    ResponseCode code = ResponseCode.getResponse(exception.getCode());
+    response.setResponseCode(exception.getResponseCode());
+    ResponseCode code = exception.getResponseCode();
     if (code == null) {
       code = ResponseCode.SERVER_ERROR;
     }
@@ -426,10 +427,7 @@ public class BaseController extends Controller {
         createResponseParamObj(
             code, exception.getMessage(), Common.getFromRequest(request, Attrs.X_REQUEST_ID)));
     if (response.getParams() != null) {
-      response.getParams().setStatus(response.getParams().getStatus());
-      if (exception.getCode() != null) {
-        response.getParams().setStatus(exception.getCode());
-      }
+      response.getParams().setErr(exception.getErrorCode());
       if (!StringUtils.isBlank(response.getParams().getErrmsg())
           && response.getParams().getErrmsg().contains("{0}")) {
         response.getParams().setErrmsg(exception.getMessage());
@@ -450,8 +448,8 @@ public class BaseController extends Controller {
     response.setVer(getApiVersion(path));
     response.setId(getApiResponseId(path, method));
     response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(ResponseCode.getHeaderResponseCode(exception.getResponseCode()));
-    ResponseCode code = ResponseCode.getResponse(exception.getCode());
+    response.setResponseCode(exception.getResponseCode());
+    ResponseCode code = exception.getResponseCode();
     response.setParams(createResponseParamObj(code, exception.getMessage(), null));
     return response;
   }
@@ -525,14 +523,14 @@ public class BaseController extends Controller {
     } else {
       exception =
           new ProjectCommonException(
-              ResponseCode.serverError.getErrorCode(),
+              ResponseCode.serverError,
               ResponseCode.serverError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     }
     generateExceptionTelemetry(request, exception);
     // cleaning request info ...
     return Results.status(
-        exception.getResponseCode(), Json.toJson(createResponseOnException(req, exception)));
+        exception.getErrorResponseCode(), Json.toJson(createResponseOnException(req, exception)));
   }
 
   private void generateExceptionTelemetry(Request request, ProjectCommonException exception) {
@@ -545,14 +543,14 @@ public class BaseController extends Controller {
       params.put(JsonKey.LOG_TYPE, JsonKey.API_ACCESS);
       params.put(JsonKey.MESSAGE, "");
       params.put(JsonKey.METHOD, request.method());
-      params.put("err", exception.getResponseCode() + "");
-      params.put("errtype", exception.getCode());
+      params.put("err", exception.getErrorResponseCode() + "");
+      params.put("errtype", exception.getErrorCode());
       if (null != params.get(JsonKey.START_TIME)) {
         long startTime = (Long) params.get(JsonKey.START_TIME);
         params.put(JsonKey.DURATION, calculateApiTimeTaken(startTime));
       }
       removeFields(params, JsonKey.START_TIME);
-      params.put(JsonKey.STATUS, String.valueOf(exception.getResponseCode()));
+      params.put(JsonKey.STATUS, String.valueOf(exception.getErrorResponseCode()));
       params.put(JsonKey.LOG_LEVEL, "error");
       params.put(JsonKey.STACKTRACE, generateStackTrace(exception.getStackTrace()));
       reqForTelemetry.setRequest(
@@ -688,7 +686,8 @@ public class BaseController extends Controller {
     generateExceptionTelemetry(httpReq, errorResponse.getException());
     Response responseObj = createResponseOnException(httpReq, errorResponse.getException());
     responseObj.getResult().putAll(errorResponse.getResult());
-    return Results.status(errorResponse.getException().getResponseCode(), Json.toJson(responseObj));
+    return Results.status(
+        errorResponse.getException().getErrorResponseCode(), Json.toJson(responseObj));
   }
 
   /**
@@ -749,10 +748,15 @@ public class BaseController extends Controller {
     final String ver2 = "/" + JsonKey.VERSION_2;
     final String ver3 = "/" + JsonKey.VERSION_3;
     final String ver4 = "/" + JsonKey.VERSION_4;
+    final String ver5 = "/" + JsonKey.VERSION_5;
     final String privateVersion = "/" + JsonKey.PRIVATE;
     path = path.trim();
     String respId = "";
-    if (path.startsWith(ver) || path.startsWith(ver2) || path.startsWith(ver3)) {
+    if (path.startsWith(ver)
+        || path.startsWith(ver2)
+        || path.startsWith(ver3)
+        || path.startsWith(ver4)
+        || path.startsWith(ver5)) {
       String requestUrl = (path.split("\\?"))[0];
       if (requestUrl.contains(ver)) {
         requestUrl = requestUrl.replaceFirst(ver, "api");
@@ -762,6 +766,8 @@ public class BaseController extends Controller {
         requestUrl = requestUrl.replaceFirst(ver3, "api");
       } else if (requestUrl.contains(ver4)) {
         requestUrl = requestUrl.replaceFirst(ver4, "api");
+      } else if (requestUrl.contains(ver5)) {
+        requestUrl = requestUrl.replaceFirst(ver5, "api");
       }
       String[] list = requestUrl.split("/");
       respId = String.join(".", list);

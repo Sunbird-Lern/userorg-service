@@ -151,7 +151,7 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError,
                 ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
@@ -189,7 +189,7 @@ public class CassandraOperationImplTest {
     session.execute(Mockito.any(BoundStatement.class));
     Exception e =
         new ProjectCommonException(
-            "Undefined column name xyz",
+            ResponseCode.invalidPropertyError,
             "Undefined column name xyz",
             ResponseCode.SERVER_ERROR.getResponseCode());
     when(session.execute(boundStatement.bind(Mockito.any()))).thenThrow(e);
@@ -265,7 +265,7 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError,
                 ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
@@ -302,7 +302,7 @@ public class CassandraOperationImplTest {
     session.execute(Mockito.any(BoundStatement.class));
     Exception e =
         new ProjectCommonException(
-            "Undefined column name xyz",
+            ResponseCode.invalidPropertyError,
             "Undefined column name xyz",
             ResponseCode.SERVER_ERROR.getResponseCode());
     when(session.execute(boundStatement.bind(Mockito.any()))).thenThrow(e);
@@ -344,7 +344,7 @@ public class CassandraOperationImplTest {
     when(QueryBuilder.delete())
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.serverError.getErrorCode(),
+                ResponseCode.serverError,
                 ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();

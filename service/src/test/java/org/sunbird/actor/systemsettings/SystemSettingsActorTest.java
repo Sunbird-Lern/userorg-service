@@ -126,7 +126,9 @@ public class SystemSettingsActorTest {
         probe.expectMsgAnyClassOf(ACTOR_MAX_WAIT_DURATION, ProjectCommonException.class);
     Assert.assertTrue(
         null != exception
-            && exception.getCode().equals("UOS_SYSRED"+ResponseCode.RESOURCE_NOT_FOUND.name()));
+            && exception
+                .getErrorCode()
+                .equals("UOS_SYSRED" + ResponseCode.RESOURCE_NOT_FOUND.name()));
   }
 
   @Test
@@ -154,7 +156,8 @@ public class SystemSettingsActorTest {
     Request request = new Request();
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
-    ProjectCommonException exception = probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 

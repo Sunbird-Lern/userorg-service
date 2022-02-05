@@ -28,9 +28,7 @@ public class BaseRequestValidator {
   public void validateParam(String value, ResponseCode error) {
     if (StringUtils.isBlank(value)) {
       throw new ProjectCommonException(
-          error.getErrorCode(),
-          error.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+          error, error.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 
@@ -44,7 +42,7 @@ public class BaseRequestValidator {
   public void validateParam(String value, ResponseCode error, String errorMsgArgument) {
     if (StringUtils.isBlank(value)) {
       throw new ProjectCommonException(
-          error.getErrorCode(),
+          error,
           MessageFormat.format(error.getErrorMessage(), errorMsgArgument),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -59,7 +57,7 @@ public class BaseRequestValidator {
   public void checkMandatoryFieldsPresent(Map<String, Object> data, String... keys) {
     if (MapUtils.isEmpty(data)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData,
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -68,7 +66,7 @@ public class BaseRequestValidator {
             key -> {
               if (StringUtils.isEmpty((String) data.get(key))) {
                 throw new ProjectCommonException(
-                    ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                    ResponseCode.mandatoryParamsMissing,
                     ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                     ResponseCode.CLIENT_ERROR.getResponseCode(),
                     key);
@@ -86,7 +84,7 @@ public class BaseRequestValidator {
       Map<String, Object> data, List<String> mandatoryParamsList) {
     if (MapUtils.isEmpty(data)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData,
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -94,14 +92,14 @@ public class BaseRequestValidator {
         key -> {
           if (StringUtils.isEmpty((String) data.get(key))) {
             throw new ProjectCommonException(
-                ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                ResponseCode.mandatoryParamsMissing,
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode(),
                 key);
           }
           if (!(data.get(key) instanceof String)) {
             throw new ProjectCommonException(
-                ResponseCode.dataTypeError.getErrorCode(),
+                ResponseCode.dataTypeError,
                 MessageFormat.format(ResponseCode.dataTypeError.getErrorMessage(), key, "String"),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
@@ -120,7 +118,7 @@ public class BaseRequestValidator {
 
     if (MapUtils.isEmpty(data)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData,
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -129,7 +127,7 @@ public class BaseRequestValidator {
             key -> {
               if (data.containsKey(key)) {
                 throw new ProjectCommonException(
-                    ResponseCode.unupdatableField.getErrorCode(),
+                    ResponseCode.unupdatableField,
                     ResponseCode.unupdatableField.getErrorMessage(),
                     ResponseCode.CLIENT_ERROR.getResponseCode(),
                     key);
@@ -157,7 +155,7 @@ public class BaseRequestValidator {
                     fieldPrefix != null ? StringFormatter.joinByDot(fieldPrefix, field) : field;
 
                 throw new ProjectCommonException(
-                    ResponseCode.dataTypeError.getErrorCode(),
+                    ResponseCode.dataTypeError,
                     ProjectUtil.formatMessage(
                         ResponseCode.dataTypeError.getErrorMessage(),
                         fieldWithPrefix,
@@ -190,7 +188,7 @@ public class BaseRequestValidator {
         .get(userIdKey)
         .equals(request.getContext().get(JsonKey.REQUESTED_BY)))) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           ResponseCode.invalidParameterValue.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
           (String) request.getRequest().get(JsonKey.USER_ID),
@@ -201,7 +199,7 @@ public class BaseRequestValidator {
   public void validateSearchRequest(Request request) {
     if (null == request.getRequest().get(JsonKey.FILTERS)) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           MessageFormat.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.FILTERS),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -209,7 +207,7 @@ public class BaseRequestValidator {
     if (request.getRequest().containsKey(JsonKey.FILTERS)
         && (!(request.getRequest().get(JsonKey.FILTERS) instanceof Map))) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError,
           MessageFormat.format(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.FILTERS, "Map"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -222,7 +220,7 @@ public class BaseRequestValidator {
     if (request.getRequest().containsKey(JsonKey.FIELDS)
         && (!(request.getRequest().get(JsonKey.FIELDS) instanceof List))) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError,
           MessageFormat.format(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.FIELDS, "List"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -232,7 +230,7 @@ public class BaseRequestValidator {
       for (Object obj : (List) request.getRequest().get(JsonKey.FIELDS)) {
         if (!(obj instanceof String)) {
           throw new ProjectCommonException(
-              ResponseCode.dataTypeError.getErrorCode(),
+              ResponseCode.dataTypeError,
               MessageFormat.format(
                   ResponseCode.dataTypeError.getErrorMessage(), JsonKey.FIELDS, "List of String"),
               ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -250,7 +248,7 @@ public class BaseRequestValidator {
           (key, val) -> {
             if (key == null) {
               throw new ProjectCommonException(
-                  ResponseCode.invalidParameterValue.getErrorCode(),
+                  ResponseCode.invalidParameterValue,
                   MessageFormat.format(
                       ResponseCode.invalidParameterValue.getErrorMessage(), key, JsonKey.FILTERS),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -262,7 +260,7 @@ public class BaseRequestValidator {
             } else if (val == null)
               if (StringUtils.isEmpty((String) val)) {
                 throw new ProjectCommonException(
-                    ResponseCode.invalidParameterValue.getErrorCode(),
+                    ResponseCode.invalidParameterValue,
                     MessageFormat.format(
                         ResponseCode.invalidParameterValue.getErrorMessage(), val, key),
                     ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -276,7 +274,7 @@ public class BaseRequestValidator {
         (k, v) -> {
           if (k == null || v == null) {
             throw new ProjectCommonException(
-                ResponseCode.invalidParameterValue.getErrorCode(),
+                ResponseCode.invalidParameterValue,
                 MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), v, k),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
@@ -288,7 +286,7 @@ public class BaseRequestValidator {
         v -> {
           if (v == null) {
             throw new ProjectCommonException(
-                ResponseCode.invalidParameterValue.getErrorCode(),
+                ResponseCode.invalidParameterValue,
                 MessageFormat.format(ResponseCode.invalidParameterValue.getErrorMessage(), v, key),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
@@ -298,7 +296,7 @@ public class BaseRequestValidator {
   public void validateEmail(String email) {
     if (!EmailValidator.isEmailValid(email)) {
       throw new ProjectCommonException(
-          ResponseCode.emailFormatError.getErrorCode(),
+          ResponseCode.emailFormatError,
           ResponseCode.emailFormatError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -307,7 +305,7 @@ public class BaseRequestValidator {
   public void validatePhone(String phone) {
     if (!ProjectUtil.validatePhone(phone, null)) {
       throw new ProjectCommonException(
-          ResponseCode.dataFormatError.getErrorCode(),
+          ResponseCode.dataFormatError,
           String.format(ResponseCode.dataFormatError.getErrorMessage(), JsonKey.PHONE),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -315,7 +313,7 @@ public class BaseRequestValidator {
 
   public static void createClientError(ResponseCode responseCode, String field) {
     throw new ProjectCommonException(
-        responseCode.getErrorCode(),
+        responseCode,
         ProjectUtil.formatMessage(responseCode.getErrorMessage(), field),
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }

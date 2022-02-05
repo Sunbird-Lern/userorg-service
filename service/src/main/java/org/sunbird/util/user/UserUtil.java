@@ -229,9 +229,9 @@ public class UserUtil {
     } catch (Exception e) {
       logger.error(context, e.getMessage(), e);
       throw new ProjectCommonException(
-        ResponseCode.serverError.getErrorCode(),
-        ResponseCode.serverError.getErrorMessage(),
-        ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.serverError,
+          ResponseCode.serverError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
   }
 
@@ -317,9 +317,9 @@ public class UserUtil {
     } catch (Exception e1) {
       logger.error(e1.getMessage(), e1);
       throw new ProjectCommonException(
-        ResponseCode.serverError.getErrorCode(),
-        ResponseCode.serverError.getErrorMessage(),
-        ResponseCode.SERVER_ERROR.getResponseCode());
+          ResponseCode.serverError,
+          ResponseCode.serverError.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
     }
     Map<String, Object> requestMap = new HashMap<>();
     User user = mapper.convertValue(userMap, User.class);
@@ -358,10 +358,10 @@ public class UserUtil {
       userMap.put(JsonKey.USERNAME, transliterateUserName((String) userMap.get(JsonKey.USERNAME)));
       if (!userLookupService.checkUsernameUniqueness(
           (String) userMap.get(JsonKey.USERNAME), false, context)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.errorParamExists,
-          MessageFormat.format(
-            ResponseCode.errorParamExists.getErrorMessage(),
-            JsonKey.USERNAME));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorParamExists,
+            MessageFormat.format(
+                ResponseCode.errorParamExists.getErrorMessage(), JsonKey.USERNAME));
       }
     }
   }
@@ -520,7 +520,7 @@ public class UserUtil {
   private static void throwExternalIDNotFoundException(
       String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound.getErrorCode(),
+        ResponseCode.externalIdNotFound,
         ProjectUtil.formatMessage(
             ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
         ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -598,9 +598,8 @@ public class UserUtil {
         || (null != managedByInfo.get(JsonKey.IS_DELETED)
             && (boolean) (managedByInfo.get(JsonKey.IS_DELETED)))) {
       throw new ProjectCommonException(
-          ResponseCode.resourceNotFound.getErrorCode(),
-          MessageFormat.format(
-            ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return managedByInfo;
@@ -620,7 +619,7 @@ public class UserUtil {
           && managedUserList.size()
               >= Integer.valueOf(ProjectUtil.getConfigValue(JsonKey.MANAGED_USER_LIMIT))) {
         throw new ProjectCommonException(
-            ResponseCode.managedUserLimitExceeded.getErrorCode(),
+            ResponseCode.managedUserLimitExceeded,
             ResponseCode.managedUserLimitExceeded.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
@@ -882,7 +881,7 @@ public class UserUtil {
           getFrameworkDetails(frameworkId, context);
       if (frameworkDetails == null)
         throw new ProjectCommonException(
-            ResponseCode.errorNoFrameworkFound.getErrorCode(),
+            ResponseCode.errorNoFrameworkFound,
             ResponseCode.errorNoFrameworkFound.getErrorMessage(),
             ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }

@@ -133,7 +133,7 @@ public class LocationServiceImpl implements LocationService {
         if (null != location) {
           if (!(currentLocation.getId().equals(location.getId()))) {
             throw new ProjectCommonException(
-                ResponseCode.conflictingOrgLocations.getErrorCode(),
+                ResponseCode.conflictingOrgLocations,
                 ProjectUtil.formatMessage(
                     ResponseCode.conflictingOrgLocations.getErrorMessage(),
                     requestedLocation.getCode(),
@@ -176,7 +176,7 @@ public class LocationServiceImpl implements LocationService {
 
   private void throwInvalidParameterValueException(List<String> codeList) {
     throw new ProjectCommonException(
-        ResponseCode.invalidParameterValue.getErrorCode(),
+        ResponseCode.invalidParameterValue,
         ProjectUtil.formatMessage(
             ResponseCode.invalidParameterValue.getErrorMessage(), codeList, JsonKey.LOCATION_CODE),
         ResponseCode.CLIENT_ERROR.getResponseCode());

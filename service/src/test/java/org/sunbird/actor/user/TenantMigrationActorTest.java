@@ -146,7 +146,7 @@ public class TenantMigrationActorTest {
             cassandraOperation.getRecordById(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getSelfDeclarationResponse())
-            .thenReturn(getSelfDeclarationResponse());
+        .thenReturn(getSelfDeclarationResponse());
     PowerMockito.when(
             cassandraOperation.updateRecord(
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
@@ -164,7 +164,7 @@ public class TenantMigrationActorTest {
     when(cassandraOperation.getRecordsByCompositeKey(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(getOrgFromCassandra())
-            .thenReturn(getOrgFromCassandra());
+        .thenReturn(getOrgFromCassandra());
   }
 
   public static Response getEsResponse() {
@@ -221,8 +221,8 @@ public class TenantMigrationActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals(errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 
@@ -256,7 +256,7 @@ public class TenantMigrationActorTest {
       boolean result =
           testScenario(getMigrateReq(ActorOperations.USER_TENANT_MIGRATE), null, props);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
   }
 
@@ -289,7 +289,7 @@ public class TenantMigrationActorTest {
   public Map<String, Object> getOrgandLocation() {
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ORG_ID, "anyOrgId");
-   // map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+    // map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
     return map;
   }
 
@@ -298,7 +298,7 @@ public class TenantMigrationActorTest {
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> map = new HashMap<>();
     map.put(JsonKey.ORG_ID, "anyRootOrgId");
-   // map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
+    // map.put(JsonKey.LOCATION_IDS, new ArrayList<String>(Arrays.asList("anyLocationId")));
     map.put("template", "anyTemplate");
     list.add(map);
     response.put(Constants.RESPONSE, list);

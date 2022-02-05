@@ -39,7 +39,7 @@ public abstract class BaseActor extends UntypedAbstractActor {
   protected void onReceiveUnsupportedOperation() {
     ProjectCommonException exception =
         new ProjectCommonException(
-            ResponseCode.invalidOperationName.getErrorCode(),
+            ResponseCode.invalidOperationName,
             ResponseCode.invalidOperationName.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
     sender().tell(exception, self());

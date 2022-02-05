@@ -444,8 +444,8 @@ public class UserSelfDeclarationManagementActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals(errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 

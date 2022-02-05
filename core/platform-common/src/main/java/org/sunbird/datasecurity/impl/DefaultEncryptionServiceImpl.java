@@ -113,7 +113,7 @@ public class DefaultEncryptionServiceImpl implements EncryptionService {
         logger.error(
             context, "Exception while encrypting user data, with message : " + e.getMessage(), e);
         throw new ProjectCommonException(
-            ResponseCode.serverError.getErrorCode(),
+            ResponseCode.serverError,
             ResponseCode.serverError.getErrorMessage(),
             ResponseCode.SERVER_ERROR.getResponseCode());
       }
@@ -140,7 +140,7 @@ public class DefaultEncryptionServiceImpl implements EncryptionService {
     if (StringUtils.isBlank(encryption_key)) {
       logger.info("throwing exception for invalid salt");
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           String.format(
               ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.ENCRYPTION_KEY),
           ResponseCode.SERVER_ERROR.getResponseCode());

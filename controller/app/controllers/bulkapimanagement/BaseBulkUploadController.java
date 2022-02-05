@@ -83,7 +83,7 @@ public class BaseBulkUploadController extends BaseController {
       map.putAll(reqObj.getRequest());
     } else {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData.getErrorCode(),
+          ResponseCode.invalidRequestData,
           ResponseCode.invalidRequestData.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -110,7 +110,7 @@ public class BaseBulkUploadController extends BaseController {
 
     if (null == byteArray) {
       throw new ProjectCommonException(
-          ResponseCode.missingFileAttachment.getErrorCode(),
+          ResponseCode.missingFileAttachment,
           ResponseCode.missingFileAttachment.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -121,7 +121,7 @@ public class BaseBulkUploadController extends BaseController {
       String allowedMaxSize = ProjectUtil.getConfigValue(JsonKey.UPLOAD_FILE_MAX_SIZE);
       if (StringUtils.isEmpty(allowedMaxSize)) {
         throw new ProjectCommonException(
-            ResponseCode.fileAttachmentSizeNotConfigured.getErrorCode(),
+            ResponseCode.fileAttachmentSizeNotConfigured,
             ResponseCode.fileAttachmentSizeNotConfigured.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
@@ -131,7 +131,7 @@ public class BaseBulkUploadController extends BaseController {
       Long allowedSize = filesize.longValue();
       if (byteArray.length > allowedSize) {
         throw new ProjectCommonException(
-            ResponseCode.sizeLimitExceed.getErrorCode(),
+            ResponseCode.sizeLimitExceed,
             ResponseCode.sizeLimitExceed.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode(),
             allowedMaxSize + FILE_SIZE_UNIT);

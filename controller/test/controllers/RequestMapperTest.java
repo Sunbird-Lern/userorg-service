@@ -2,7 +2,6 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,10 +29,12 @@ public class RequestMapperTest {
     try {
       RequestMapper.mapRequest(null, Request.class);
     } catch (ProjectCommonException e) {
-      Assert.assertEquals(MessageFormat.format(
-        ResponseCode.mandatoryHeaderParamsMissing.getErrorMessage(),
-        "Content-Type with value application/json"), e.getMessage());
-      Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      Assert.assertEquals(
+          MessageFormat.format(
+              ResponseCode.mandatoryHeaderParamsMissing.getErrorMessage(),
+              "Content-Type with value application/json"),
+          e.getMessage());
+      Assert.assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
   }
 

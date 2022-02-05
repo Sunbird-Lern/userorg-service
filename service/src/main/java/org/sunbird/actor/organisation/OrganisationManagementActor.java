@@ -159,7 +159,7 @@ public class OrganisationManagementActor extends BaseActor {
       if (MapUtils.isEmpty(orgDao)) {
         ProjectCommonException exception =
             new ProjectCommonException(
-                ResponseCode.invalidRequestData.getErrorCode(),
+                ResponseCode.invalidRequestData,
                 ResponseCode.invalidRequestData.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
@@ -236,7 +236,7 @@ public class OrganisationManagementActor extends BaseActor {
             actorMessage.getRequestContext(),
             "OrganisationManagementActor: updateOrgData invalid orgId");
         throw new ProjectCommonException(
-            ResponseCode.invalidRequestData.getErrorCode(),
+            ResponseCode.invalidRequestData,
             ResponseCode.invalidRequestData.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
@@ -250,10 +250,12 @@ public class OrganisationManagementActor extends BaseActor {
               (Boolean) dbOrgDetails.get(JsonKey.IS_TENANT),
               actorMessage.getRequestContext())) {
         logger.info(actorMessage.getRequestContext(), "Channel validation failed");
-        ProjectCommonException.throwClientErrorException(ResponseCode.errorDuplicateEntry, MessageFormat.format(
-          ResponseCode.errorDuplicateEntry.getErrorMessage(),
-          (String) request.get(JsonKey.CHANNEL),
-          JsonKey.CHANNEL));
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorDuplicateEntry,
+            MessageFormat.format(
+                ResponseCode.errorDuplicateEntry.getErrorMessage(),
+                (String) request.get(JsonKey.CHANNEL),
+                JsonKey.CHANNEL));
       }
       // allow lower case values for source and externalId to the database
       if (request.get(JsonKey.PROVIDER) != null) {
@@ -329,10 +331,14 @@ public class OrganisationManagementActor extends BaseActor {
               updateOrgDao.put(JsonKey.SLUG, slug);
             } else {
               sender()
-                  .tell(ProjectUtil.createClientException(ResponseCode.errorDuplicateEntry, MessageFormat.format(
-                    ResponseCode.errorDuplicateEntry.getErrorMessage(),
-                    slug,
-                    JsonKey.SLUG)), self());
+                  .tell(
+                      ProjectUtil.createClientException(
+                          ResponseCode.errorDuplicateEntry,
+                          MessageFormat.format(
+                              ResponseCode.errorDuplicateEntry.getErrorMessage(),
+                              slug,
+                              JsonKey.SLUG)),
+                      self());
               return;
             }
           } else {
@@ -427,9 +433,9 @@ public class OrganisationManagementActor extends BaseActor {
       }
     } else {
       throw new ProjectCommonException(
-        ResponseCode.resourceNotFound.getErrorCode(),
-        MessageFormat.format(
-          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.ORGANISATION),
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.ORGANISATION),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     result.putAll(Util.getOrgDefaultValue());

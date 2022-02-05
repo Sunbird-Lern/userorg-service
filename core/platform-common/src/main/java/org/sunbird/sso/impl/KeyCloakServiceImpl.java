@@ -236,14 +236,14 @@ public class KeyCloakServiceImpl implements SSOManager {
       } else {
         logger.info(context, "verifyToken: SSO_PUBLIC_KEY is NULL.");
         throw new ProjectCommonException(
-            ResponseCode.serverError.getErrorCode(),
+            ResponseCode.serverError,
             ResponseCode.serverError.getErrorMessage(),
             ResponseCode.SERVER_ERROR.getResponseCode());
       }
     } catch (Exception e) {
       logger.error(context, "verifyToken: Exception occurred: ", e);
       throw new ProjectCommonException(
-          ResponseCode.unAuthorized.getErrorCode(),
+          ResponseCode.unAuthorized,
           ResponseCode.unAuthorized.getErrorMessage(),
           ResponseCode.UNAUTHORIZED.getResponseCode());
     }

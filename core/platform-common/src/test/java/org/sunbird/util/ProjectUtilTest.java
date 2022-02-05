@@ -119,7 +119,7 @@ public class ProjectUtilTest extends BaseHttpTest {
             "LearnerService",
             true,
             new ProjectCommonException(
-                ResponseCode.invalidObjectType.getErrorCode(),
+                ResponseCode.invalidObjectType,
                 ResponseCode.invalidObjectType.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode()));
     assertEquals(false, responseMap.get(JsonKey.Healthy));

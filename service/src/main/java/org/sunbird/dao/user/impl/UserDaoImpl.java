@@ -1,7 +1,6 @@
 package org.sunbird.dao.user.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
@@ -105,9 +104,8 @@ public class UserDaoImpl implements UserDao {
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(esResultF);
     if (MapUtils.isEmpty(esResult)) {
       throw new ProjectCommonException(
-        ResponseCode.resourceNotFound.getErrorCode(),
-        MessageFormat.format(
-          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return esResult;
