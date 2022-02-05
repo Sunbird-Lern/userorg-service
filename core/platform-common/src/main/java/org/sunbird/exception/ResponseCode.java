@@ -21,7 +21,7 @@ public enum ResponseCode {
   // -> dbUpdateError(ResponseMessage.Key.DB_UPDATE_FAIL, ResponseMessage.Message.DB_UPDATE_FAIL), //
   // Should throw SERVER_ERROR but with db error msg
   success(ResponseMessage.Key.SUCCESS_MESSAGE, ResponseMessage.Message.SUCCESS_MESSAGE),
-  emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
+  // -> emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
   // -> firstNameRequired(// Should be thrown as MANDATORY_PARAM_MISSING
   //    ResponseMessage.Key.FIRST_NAME_MISSING, ResponseMessage.Message.FIRST_NAME_MISSING),
   // -> channelUniquenessInvalid( // Can be plugged with errorDuplicateEntry

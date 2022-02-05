@@ -75,7 +75,10 @@ public class OrganisationManagementActor extends BaseActor {
     Map<String, Object> request = actorMessage.getRequest();
     if (request.containsKey(JsonKey.EMAIL)
         && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+      ProjectCommonException.throwClientErrorException(ResponseCode.dataFormatError,
+        MessageFormat.format(
+          ResponseCode.dataFormatError.getErrorMessage(),
+          JsonKey.EMAIL));
     }
     String orgType = (String) request.get(JsonKey.ORG_TYPE);
     orgValidator.validateOrgType(orgType, JsonKey.CREATE);
@@ -221,7 +224,10 @@ public class OrganisationManagementActor extends BaseActor {
       orgValidator.validateOrgRequest(request, actorMessage.getRequestContext());
       if (request.containsKey(JsonKey.EMAIL)
           && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+        ProjectCommonException.throwClientErrorException(ResponseCode.dataFormatError,
+          MessageFormat.format(
+            ResponseCode.dataFormatError.getErrorMessage(),
+            JsonKey.EMAIL));
       }
       String orgType = (String) request.get(JsonKey.ORG_TYPE);
       orgValidator.validateOrgType(orgType, JsonKey.UPDATE);

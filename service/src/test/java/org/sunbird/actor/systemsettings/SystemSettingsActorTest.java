@@ -49,7 +49,7 @@ import scala.concurrent.duration.FiniteDuration;
   "javax.crypto.*"
 })
 public class SystemSettingsActorTest {
-  private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("10 second");
+  private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("100 second");
   private ActorSystem system;
   private Props props;
   private TestKit probe;
@@ -126,7 +126,7 @@ public class SystemSettingsActorTest {
         probe.expectMsgAnyClassOf(ACTOR_MAX_WAIT_DURATION, ProjectCommonException.class);
     Assert.assertTrue(
         null != exception
-            && exception.getCode().equals("UOS_SYSRED"+ResponseCode.RESOURCE_NOT_FOUND.name()));
+            && exception.getCode().equals("UOS_SYSRED"+ResponseCode.resourceNotFound.getErrorCode()));
   }
 
   @Test

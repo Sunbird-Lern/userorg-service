@@ -118,7 +118,7 @@ public class CassandraOperationImplTest {
 
     try {
       Response response = cassandraOperation.insertRecord("sunbird", "address1", address, null);
-      assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+      assertEquals(ResponseCode.success.getErrorMessage().toUpperCase(), response.get("response"));
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -232,7 +232,7 @@ public class CassandraOperationImplTest {
 
     try {
       Response response = cassandraOperation.updateRecord("sunbird", "address1", address, null);
-      assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+      assertEquals(ResponseCode.success.getErrorMessage().toUpperCase(), response.get("response"));
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -331,7 +331,7 @@ public class CassandraOperationImplTest {
     try {
       Response response =
           cassandraOperation.deleteRecord("sunbird", "address1", "1234567890", null);
-      assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+      assertEquals(ResponseCode.success.getErrorMessage().toUpperCase(), response.get("response"));
     } catch (Exception ex) {
       assertNotNull(ex);
     }

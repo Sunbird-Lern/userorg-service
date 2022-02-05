@@ -623,7 +623,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.createUserBasicValidation(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.emailFormatError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.dataFormatError.getErrorCode(), e.getCode());
     }
   }
 
@@ -708,7 +708,7 @@ public class UserRequestValidatorTest {
       userRequestValidator.validateCreateUserRequest(request);
     } catch (ProjectCommonException e) {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.emailFormatError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.dataFormatError.getErrorCode(), e.getCode());
     }
   }
 

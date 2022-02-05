@@ -162,7 +162,7 @@ public class OrgManagementActorTest {
     boolean result =
         testScenario(
             getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
-            ResponseCode.emailFormatError);
+            ResponseCode.dataFormatError);
     assertTrue(result);
   }
 
@@ -323,7 +323,7 @@ public class OrgManagementActorTest {
     boolean result =
         testScenario(
             getRequest(map, OrganisationActorOperation.UPDATE_ORG.getValue()),
-            ResponseCode.emailFormatError);
+            ResponseCode.dataFormatError);
     assertTrue(result);
   }
 

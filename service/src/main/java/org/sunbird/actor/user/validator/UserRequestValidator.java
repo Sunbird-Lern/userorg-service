@@ -244,7 +244,10 @@ public class UserRequestValidator extends BaseRequestValidator {
 
     if (!StringUtils.isBlank((String) userRequest.getRequest().get(JsonKey.EMAIL))
         && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+      ProjectCommonException.throwClientErrorException(ResponseCode.dataFormatError,
+        MessageFormat.format(
+          ResponseCode.dataFormatError.getErrorMessage(),
+          JsonKey.EMAIL));
     }
   }
 
@@ -437,7 +440,10 @@ public class UserRequestValidator extends BaseRequestValidator {
     if ((userRequest.getRequest().containsKey(JsonKey.EMAIL)
             && userRequest.getRequest().get(JsonKey.EMAIL) != null)
         && !ProjectUtil.isEmailvalid((String) userRequest.getRequest().get(JsonKey.EMAIL))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+      ProjectCommonException.throwClientErrorException(ResponseCode.dataFormatError,
+        MessageFormat.format(
+          ResponseCode.dataFormatError.getErrorMessage(),
+          JsonKey.EMAIL));
     }
 
     if (userRequest.getRequest().containsKey(JsonKey.ROLES)

@@ -28,11 +28,11 @@ public class ExceptionTest {
     Assert.assertEquals(exception.getCode(), ResponseCode.unAuthorized.getErrorCode());
     Assert.assertEquals(exception.getMessage(), ResponseCode.unAuthorized.getErrorMessage());
     Assert.assertEquals(exception.getResponseCode(), ResponseCode.UNAUTHORIZED.getResponseCode());
-    exception.setCode(ResponseCode.emailFormatError.getErrorCode());
-    exception.setMessage(ResponseCode.emailFormatError.getErrorMessage());
+    exception.setCode(ResponseCode.dataFormatError.getErrorCode());
+    exception.setMessage(ResponseCode.dataFormatError.getErrorMessage());
     exception.setResponseCode(ResponseCode.SERVER_ERROR.getResponseCode());
-    Assert.assertEquals(exception.getCode(), ResponseCode.emailFormatError.getErrorCode());
-    Assert.assertEquals(exception.getMessage(), ResponseCode.emailFormatError.getErrorMessage());
+    Assert.assertEquals(exception.getCode(), ResponseCode.dataFormatError.getErrorCode());
+    Assert.assertEquals(exception.getMessage(), ResponseCode.dataFormatError.getErrorMessage());
     Assert.assertEquals(exception.getResponseCode(), ResponseCode.SERVER_ERROR.getResponseCode());
   }
 }
