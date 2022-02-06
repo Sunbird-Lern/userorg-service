@@ -18,7 +18,7 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.OrganisationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -42,23 +42,19 @@ public class OrganisationManagementActor extends BaseActor {
   @Override
   public void onReceive(Request request) throws Throwable {
     Util.initializeContext(request, TelemetryEnvKey.ORGANISATION);
-    if (request.getOperation().equalsIgnoreCase(OrganisationActorOperation.CREATE_ORG.getValue())) {
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.CREATE_ORG.getValue())) {
       createOrg(request);
-    } else if (request
-        .getOperation()
-        .equalsIgnoreCase(OrganisationActorOperation.UPDATE_ORG.getValue())) {
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_ORG.getValue())) {
       updateOrgData(request);
     } else if (request
         .getOperation()
-        .equalsIgnoreCase(OrganisationActorOperation.UPDATE_ORG_STATUS.getValue())) {
+        .equalsIgnoreCase(ActorOperations.UPDATE_ORG_STATUS.getValue())) {
       updateOrgStatus(request);
     } else if (request
         .getOperation()
-        .equalsIgnoreCase(OrganisationActorOperation.GET_ORG_DETAILS.getValue())) {
+        .equalsIgnoreCase(ActorOperations.GET_ORG_DETAILS.getValue())) {
       getOrgDetails(request);
-    } else if (request
-        .getOperation()
-        .equalsIgnoreCase(OrganisationActorOperation.ASSIGN_KEYS.getValue())) {
+    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ASSIGN_KEYS.getValue())) {
       assignKey(request);
     } else {
       onReceiveUnsupportedOperation();
@@ -75,7 +71,9 @@ public class OrganisationManagementActor extends BaseActor {
     Map<String, Object> request = actorMessage.getRequest();
     if (request.containsKey(JsonKey.EMAIL)
         && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.dataFormatError,
+          MessageFormat.format(ResponseCode.dataFormatError.getErrorMessage(), JsonKey.EMAIL));
     }
     String orgType = (String) request.get(JsonKey.ORG_TYPE);
     orgValidator.validateOrgType(orgType, JsonKey.CREATE);
@@ -221,7 +219,9 @@ public class OrganisationManagementActor extends BaseActor {
       orgValidator.validateOrgRequest(request, actorMessage.getRequestContext());
       if (request.containsKey(JsonKey.EMAIL)
           && !EmailValidator.isEmailValid((String) request.get(JsonKey.EMAIL))) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.emailFormatError);
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.dataFormatError,
+            MessageFormat.format(ResponseCode.dataFormatError.getErrorMessage(), JsonKey.EMAIL));
       }
       String orgType = (String) request.get(JsonKey.ORG_TYPE);
       orgValidator.validateOrgType(orgType, JsonKey.UPDATE);
@@ -406,7 +406,7 @@ public class OrganisationManagementActor extends BaseActor {
   private void saveDataToES(Map<String, Object> locData, String opType, RequestContext context) {
     Request request = new Request();
     request.setRequestContext(context);
-    request.setOperation(OrganisationActorOperation.UPSERT_ORGANISATION_TO_ES.getValue());
+    request.setOperation(ActorOperations.UPSERT_ORGANISATION_TO_ES.getValue());
     request.getRequest().put(JsonKey.ORGANISATION, locData);
     request.getRequest().put(JsonKey.OPERATION_TYPE, opType);
     try {

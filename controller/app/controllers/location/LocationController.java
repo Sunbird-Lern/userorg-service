@@ -9,8 +9,9 @@ import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.sunbird.actor.location.validator.BaseLocationRequestValidator;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -39,16 +40,21 @@ public class LocationController extends BaseController {
    * @return Return a promise for create location API result
    */
   public CompletionStage<Result> createLocation(Http.Request httpRequest) {
+    Request request = null;
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
-      Request request =
-          createAndInitRequest(
-              LocationActorOperation.CREATE_LOCATION.getValue(), jsonNode, httpRequest);
+      request =
+          createAndInitRequest(ActorOperations.CREATE_LOCATION.getValue(), jsonNode, httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateCreateLocationRequest(request);
       return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 
@@ -64,16 +70,21 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result
    */
   public CompletionStage<Result> updateLocation(Http.Request httpRequest) {
+    Request request = null;
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
-      Request request =
-          createAndInitRequest(
-              LocationActorOperation.UPDATE_LOCATION.getValue(), jsonNode, httpRequest);
+      request =
+          createAndInitRequest(ActorOperations.UPDATE_LOCATION.getValue(), jsonNode, httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateUpdateLocationRequest(request);
       return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 
@@ -86,16 +97,22 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result.
    */
   public CompletionStage<Result> deleteLocation(String locationId, Http.Request httpRequest) {
+    Request request = null;
     try {
-      Request request =
-          createAndInitRequest(LocationActorOperation.DELETE_LOCATION.getValue(), httpRequest);
+      request = createAndInitRequest(ActorOperations.DELETE_LOCATION.getValue(), httpRequest);
       Map<String, Object> requestMap = request.getRequest();
       requestMap.put(JsonKey.LOCATION_ID, locationId);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateDeleteLocationRequest(locationId);
       return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 
@@ -109,16 +126,21 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result.
    */
   public CompletionStage<Result> searchLocation(Http.Request httpRequest) {
+    Request request = null;
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
-      Request request =
-          createAndInitRequest(
-              LocationActorOperation.SEARCH_LOCATION.getValue(), jsonNode, httpRequest);
+      request =
+          createAndInitRequest(ActorOperations.SEARCH_LOCATION.getValue(), jsonNode, httpRequest);
       setContextAndPrintEntryLog(httpRequest, request);
       validator.validateSearchLocationRequest(request);
       return actorResponseHandler(locationActor, request, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 }

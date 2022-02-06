@@ -37,7 +37,7 @@ public class UserTypeControllerTest extends BaseApplicationTest {
   @Test
   public void testGetUserTypeSuccess() {
     Result result = performTest("/v1/user/type/list", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -77,7 +77,7 @@ public class UserTypeControllerTest extends BaseApplicationTest {
       Response response = mapper.readValue(responseStr, Response.class);
       ResponseParams params = response.getParams();
       if (result.status() != 200) {
-        return params.getErr();
+        return response.getResponseCode().name();
       } else {
         return params.getStatus();
       }

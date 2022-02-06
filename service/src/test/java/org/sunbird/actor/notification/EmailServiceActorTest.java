@@ -23,11 +23,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
@@ -110,7 +110,7 @@ public class EmailServiceActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
-    reqObj.setOperation(BackgroundOperations.emailService.name());
+    reqObj.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> reqMap = new HashMap<>();
@@ -148,7 +148,7 @@ public class EmailServiceActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
-    reqObj.setOperation(BackgroundOperations.emailService.name());
+    reqObj.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     Map<String, Object> reqMap = new HashMap<>();

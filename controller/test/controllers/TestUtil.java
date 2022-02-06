@@ -54,7 +54,7 @@ public class TestUtil {
       if (response != null) {
         ResponseParams params = response.getParams();
         if (result.status() != 200) {
-          return params.getErr();
+          return response.getResponseCode().name();
         } else {
           return params.getStatus();
         }

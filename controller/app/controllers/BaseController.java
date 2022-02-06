@@ -270,6 +270,11 @@ public class BaseController extends Controller {
               + e.getMessage(),
           e);
       if (e instanceof ProjectCommonException) {
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                (ProjectCommonException) e,
+                ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+        e = exception;
         printExitLogOnFailure(request, (ProjectCommonException) e);
       } else {
         printExitLogOnFailure(request, null);
@@ -418,7 +423,7 @@ public class BaseController extends Controller {
     }
     response.setId(getApiResponseId(request));
     response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(exception.getResponseCode());
+    response.setResponseCode(ResponseCode.getResponseCodeByCode(exception.getErrorResponseCode()));
     ResponseCode code = exception.getResponseCode();
     if (code == null) {
       code = ResponseCode.SERVER_ERROR;

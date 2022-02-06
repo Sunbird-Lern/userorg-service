@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -35,9 +36,10 @@ public class SyncController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> sync(Http.Request httpRequest) {
+    Request reqObj = null;
     try {
       JsonNode requestData = httpRequest.body().asJson();
-      Request reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
+      reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
       RequestValidator.validateSyncRequest(reqObj);
       reqObj.setOperation(ActorOperations.SYNC.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
@@ -51,7 +53,12 @@ public class SyncController extends BaseController {
       setContextAndPrintEntryLog(httpRequest, reqObj);
       return actorResponseHandler(esSyncActor, reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 }

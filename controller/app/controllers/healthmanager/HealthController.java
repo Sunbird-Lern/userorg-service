@@ -46,9 +46,10 @@ public class HealthController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> getHealth(Http.Request httpRequest) {
+    Request reqObj = null;
     try {
       handleSigTerm();
-      Request reqObj = new Request();
+      reqObj = new Request();
       reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
       reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
       reqObj
@@ -57,7 +58,12 @@ public class HealthController extends BaseController {
       reqObj.setEnv(getEnvironment());
       return actorResponseHandler(healthActor, reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 
@@ -69,11 +75,12 @@ public class HealthController extends BaseController {
   public CompletionStage<Result> getLearnerServiceHealth(String val, Http.Request httpRequest) {
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
+    Request reqObj = null;
     if (list.contains(val) && !JsonKey.SERVICE.equalsIgnoreCase(val)) {
       try {
-        handleSigTerm();
-        Request reqObj = new Request();
+        reqObj = new Request();
         reqObj.setOperation(val);
+        handleSigTerm();
         reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
         reqObj
             .getRequest()
@@ -81,6 +88,10 @@ public class HealthController extends BaseController {
         reqObj.setEnv(getEnvironment());
         return actorResponseHandler(healthActor, reqObj, timeout, null, httpRequest);
       } catch (Exception e) {
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                (ProjectCommonException) e,
+                ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
         return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
       }
     } else {
@@ -97,7 +108,12 @@ public class HealthController extends BaseController {
         response.setTs(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
         return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));
       } catch (Exception e) {
-        return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                (ProjectCommonException) e,
+                ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+        return CompletableFuture.completedFuture(
+            createCommonExceptionResponse(exception, httpRequest));
       }
     }
   }

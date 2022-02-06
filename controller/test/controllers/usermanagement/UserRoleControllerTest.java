@@ -43,7 +43,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     // setup(DummyActor.class);
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -52,7 +52,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -61,7 +61,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2Req3(true, true, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.dataTypeError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -70,7 +70,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2Req2(true, true, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -79,7 +79,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2Req4(true, true, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -88,7 +88,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2(false, true, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -97,7 +97,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, false, true));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -106,7 +106,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, true, false));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -115,7 +115,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, false, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -123,7 +123,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   public void testAssignRolesFailueWithoutOrgId() {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -131,7 +131,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   public void testAssignRolesFailueWithoutUserId() {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(false, true, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -140,7 +140,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, false, null));
 
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -148,14 +148,14 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   public void testUpdateAssignedRolesFailureWithEmptyRole() {
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.errorMandatoryParamsEmpty.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testGetAllRolesSuccess() {
     Result result = performTest("/v1/role/read", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -328,7 +328,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
       Response response = mapper.readValue(responseStr, Response.class);
       ResponseParams params = response.getParams();
       if (result.status() != 200) {
-        return params.getErr();
+        return response.getResponseCode().name();
       } else {
         return params.getStatus();
       }

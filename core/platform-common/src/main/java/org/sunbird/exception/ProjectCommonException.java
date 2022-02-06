@@ -78,6 +78,14 @@ public class ProjectCommonException extends RuntimeException {
     this.responseCode = responseCode;
   }
 
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
+  }
+
   /**
    * three argument constructor.
    *
@@ -95,6 +103,7 @@ public class ProjectCommonException extends RuntimeException {
 
   public ProjectCommonException(ProjectCommonException pce, String actorOperation) {
     super();
+    super.setStackTrace(pce.getStackTrace());
     this.errorCode =
         new StringBuilder(JsonKey.USER_ORG_SERVICE_PREFIX)
             .append(actorOperation)
@@ -102,7 +111,6 @@ public class ProjectCommonException extends RuntimeException {
             .toString();
     this.errorResponseCode = pce.getErrorResponseCode();
     this.errorMessage = pce.getMessage();
-    super.setStackTrace(pce.getStackTrace());
     this.responseCode = pce.getResponseCode();
   }
 

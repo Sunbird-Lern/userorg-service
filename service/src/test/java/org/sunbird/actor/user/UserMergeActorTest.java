@@ -171,7 +171,7 @@ public class UserMergeActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getErrorCode().equals(errorCode.getErrorCode())
+      return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }

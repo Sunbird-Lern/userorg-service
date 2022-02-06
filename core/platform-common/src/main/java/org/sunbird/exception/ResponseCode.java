@@ -22,7 +22,7 @@ public enum ResponseCode {
   // //
   // Should throw SERVER_ERROR but with db error msg
   success(ResponseMessage.Key.SUCCESS_MESSAGE, ResponseMessage.Message.SUCCESS_MESSAGE),
-  emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
+  // -> emailFormatError(ResponseMessage.Key.EMAIL_FORMAT, ResponseMessage.Message.EMAIL_FORMAT),
   // -> firstNameRequired(// Should be thrown as MANDATORY_PARAM_MISSING
   //    ResponseMessage.Key.FIRST_NAME_MISSING, ResponseMessage.Message.FIRST_NAME_MISSING),
   // -> channelUniquenessInvalid( // Can be plugged with errorDuplicateEntry
@@ -339,6 +339,7 @@ public enum ResponseCode {
   // should be server error
   serverError(ResponseMessage.Key.SERVER_ERROR, ResponseMessage.Message.SERVER_ERROR),
   OK(200),
+  SUCCESS(200),
   CLIENT_ERROR(400),
   SERVER_ERROR(500),
   RESOURCE_NOT_FOUND(404),
@@ -364,19 +365,6 @@ public enum ResponseCode {
   ResponseCode(String errorCode, String errorMessage) {
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;
-  }
-
-  private ResponseCode(String errorCode, String errorMessage, int responseCode) {
-    this.errorCode = errorCode;
-    this.errorMessage = errorMessage;
-    this.responseCode = responseCode;
-  }
-
-  private ResponseCode(String errorCode, String errorMessage, int responseCode, int errorNumber) {
-    this.errorCode = errorCode;
-    this.errorMessage = errorMessage;
-    this.responseCode = responseCode;
-    this.errorNumber = errorNumber;
   }
 
   /** @return */
@@ -406,33 +394,33 @@ public enum ResponseCode {
     this.responseCode = responseCode;
   }
 
-  private static Map<String, Integer> responseCodeByCode;
+  private static Map<Integer, ResponseCode> responseCodeByCode;
 
   static {
     responseCodeByCode =
         new HashMap<>() {
           {
-            put("OK", 200);
-            put("CLIENT_ERROR", 400);
-            put("SERVER_ERROR", 500);
-            put("RESOURCE_NOT_FOUND", 404);
-            put("UNAUTHORIZED", 401);
-            put("FORBIDDEN", 403);
-            put("REDIRECTION_REQUIRED", 302);
-            put("TOO_MANY_REQUESTS", 429);
-            put("SERVICE_UNAVAILABLE", 503);
-            put("PARTIAL_SUCCESS_RESPONSE", 206);
-            put("IM_A_TEAPOT", 418);
+            put(200, ResponseCode.OK);
+            put(400, ResponseCode.CLIENT_ERROR);
+            put(500, ResponseCode.SERVER_ERROR);
+            put(404, ResponseCode.RESOURCE_NOT_FOUND);
+            put(401, ResponseCode.UNAUTHORIZED);
+            put(403, ResponseCode.FORBIDDEN);
+            put(302, ResponseCode.REDIRECTION_REQUIRED);
+            put(429, ResponseCode.TOO_MANY_REQUESTS);
+            put(503, ResponseCode.SERVICE_UNAVAILABLE);
+            put(206, ResponseCode.PARTIAL_SUCCESS_RESPONSE);
+            put(418, ResponseCode.IM_A_TEAPOT);
           }
         };
   }
 
-  public static int getResponseCodeByCode(String code) {
-    Integer responseCode = responseCodeByCode.get(code);
+  public static ResponseCode getResponseCodeByCode(Integer code) {
+    ResponseCode responseCode = responseCodeByCode.get(code);
     if (null != responseCode) {
       return responseCode;
     } else {
-      return 200;
+      return ResponseCode.OK;
     }
   }
 }

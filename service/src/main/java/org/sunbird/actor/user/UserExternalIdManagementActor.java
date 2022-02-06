@@ -16,11 +16,11 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.user.UserActorOperations;
 
 public class UserExternalIdManagementActor extends BaseActor {
 
@@ -28,7 +28,7 @@ public class UserExternalIdManagementActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
-    if (UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS
+    if (ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS
         .getValue()
         .equalsIgnoreCase(request.getOperation())) {
       upsertUserExternalIdentityDetails(request);

@@ -534,7 +534,7 @@ public abstract class UserManagementActorTestBase {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getErrorCode().equals(errorCode.getErrorCode())
+      return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }

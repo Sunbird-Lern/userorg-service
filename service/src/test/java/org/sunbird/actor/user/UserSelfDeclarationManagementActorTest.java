@@ -44,7 +44,6 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.UserUtility;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Promise;
 
@@ -173,7 +172,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
 
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(addUserDeclaredEntity());
@@ -194,7 +193,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(addUserDeclaredEntity());
     list.add(removeUserDeclaredEntity());
@@ -215,7 +214,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(editOrgChangeUserDeclaredEntity());
     Map<String, Object> requestMap = new HashMap<>();
@@ -234,7 +233,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue());
     List<UserDeclareEntity> list = new ArrayList<>();
     list.add(editOrgChangeUserDeclaredEntity());
     Map<String, Object> requestMap = new HashMap<>();
@@ -325,7 +324,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE.getValue());
+    request.setOperation(ActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE.getValue());
     UserDeclareEntity userDeclareEntity = userDeclaredEntityWithErrorStatus(true);
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
@@ -342,7 +341,7 @@ public class UserSelfDeclarationManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE.getValue());
+    request.setOperation(ActorOperations.UPDATE_USER_SELF_DECLARATIONS_ERROR_TYPE.getValue());
     UserDeclareEntity userDeclareEntity = userDeclaredEntityWithErrorStatus(false);
     Map<String, Object> requestMap = new HashMap<>();
     requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);

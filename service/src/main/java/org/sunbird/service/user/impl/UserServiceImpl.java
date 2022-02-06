@@ -26,6 +26,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.adminutil.AdminUtilRequestData;
 import org.sunbird.model.user.User;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -35,7 +36,6 @@ import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.util.*;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserTncUtil;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
@@ -311,7 +311,7 @@ public class UserServiceImpl implements UserService {
       Map<String, Object> userMap, ActorRef actorRef, RequestContext context) {
     Request request = new Request();
     request.setRequestContext(context);
-    request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
+    request.setOperation(ActorOperations.SAVE_USER_ATTRIBUTES.getValue());
     request.getRequest().putAll(userMap);
     logger.info(context, "saveUserAttributes");
     try {

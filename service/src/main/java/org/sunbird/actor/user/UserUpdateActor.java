@@ -38,7 +38,6 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.*;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 
 public class UserUpdateActor extends UserBaseActor {
@@ -406,8 +405,7 @@ public class UserUpdateActor extends UserBaseActor {
 
             } catch (Exception e) {
               logger.error("Error in encrypting in the external id details", e);
-              ProjectCommonException.throwServerErrorException(
-                ResponseCode.SERVER_ERROR);
+              ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
             }
           });
     }
@@ -647,8 +645,7 @@ public class UserUpdateActor extends UserBaseActor {
     Request EmailAndSmsRequest = new Request();
     EmailAndSmsRequest.getRequest().putAll(userMap);
     EmailAndSmsRequest.setRequestContext(context);
-    EmailAndSmsRequest.setOperation(
-        UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
+    EmailAndSmsRequest.setOperation(ActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
     userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
   }
 

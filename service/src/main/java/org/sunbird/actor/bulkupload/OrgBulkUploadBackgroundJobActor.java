@@ -22,7 +22,7 @@ import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.OrganisationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -99,9 +99,11 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
       }
       int status = getOrgStatus(orgMap);
       if (status == -1) {
-        orgMap.put(JsonKey.ERROR_MSG, MessageFormat.format(
-          ResponseCode.invalidParameter.getErrorMessage(),
-          JsonKey.ORGANISATION + JsonKey.STATUS));
+        orgMap.put(
+            JsonKey.ERROR_MSG,
+            MessageFormat.format(
+                ResponseCode.invalidParameter.getErrorMessage(),
+                JsonKey.ORGANISATION + JsonKey.STATUS));
         task.setFailureResult(mapper.writeValueAsString(orgMap));
         task.setStatus(ProjectUtil.BulkProcessStatus.FAILED.getValue());
         return;
@@ -199,10 +201,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     try {
       orgId =
           upsertOrg(
-              organisationManagementActor,
-              row,
-              OrganisationActorOperation.CREATE_ORG.getValue(),
-              context);
+              organisationManagementActor, row, ActorOperations.CREATE_ORG.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -240,11 +239,7 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
-      upsertOrg(
-          organisationManagementActor,
-          row,
-          OrganisationActorOperation.UPDATE_ORG.getValue(),
-          context);
+      upsertOrg(organisationManagementActor, row, ActorOperations.UPDATE_ORG.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,

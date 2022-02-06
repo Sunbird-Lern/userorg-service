@@ -39,7 +39,7 @@ public enum ActorOperations {
   UPDATE_USER_ROLES_ES("updateUserRoles", "UBKGROLUPD"),
   SYNC("sync", "ESSYNC"),
   BACKGROUND_SYNC("backgroundSync", "BKGESSYNC"),
-  EMAIL_SERVICE("emailService", "NOTI"),
+  EMAIL_SERVICE("emailService", "EMAILNOTI"),
   FILE_STORAGE_SERVICE("fileStorageService", "STRGSER"),
   HEALTH_CHECK("healthCheck", "HLTHCHK"),
   SEND_MAIL("sendMail", "NOTI"),

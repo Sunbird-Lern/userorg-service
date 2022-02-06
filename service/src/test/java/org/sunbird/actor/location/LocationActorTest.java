@@ -31,7 +31,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import scala.concurrent.Promise;
@@ -93,7 +93,7 @@ public class LocationActorTest {
 
   @Test
   public void testDeleteLocationSuccess() {
-    boolean result = testScenario(LocationActorOperation.DELETE_LOCATION, true, data, null);
+    boolean result = testScenario(ActorOperations.DELETE_LOCATION, true, data, null);
     assertTrue(result);
   }
 
@@ -102,21 +102,21 @@ public class LocationActorTest {
     Map<String, Object> res = new HashMap<>(data);
     res.remove(JsonKey.PARENT_CODE);
     res.remove(JsonKey.PARENT_ID);
-    boolean result = testScenario(LocationActorOperation.CREATE_LOCATION, true, null, null);
+    boolean result = testScenario(ActorOperations.CREATE_LOCATION, true, null, null);
     assertTrue(result);
   }
 
   @Test
   public void testUpdateLocationSuccess() {
 
-    boolean result = testScenario(LocationActorOperation.UPDATE_LOCATION, true, data, null);
+    boolean result = testScenario(ActorOperations.UPDATE_LOCATION, true, data, null);
     assertTrue(result);
   }
 
   @Test
   public void testSearchLocationSuccess() {
 
-    boolean result = testScenario(LocationActorOperation.SEARCH_LOCATION, true, data, null);
+    boolean result = testScenario(ActorOperations.SEARCH_LOCATION, true, data, null);
     assertTrue(result);
   }
 
@@ -125,8 +125,7 @@ public class LocationActorTest {
 
     data.put(JsonKey.LOCATION_TYPE, "anyLocationType");
     boolean result =
-        testScenario(
-            LocationActorOperation.CREATE_LOCATION, false, data, ResponseCode.invalidValue);
+        testScenario(ActorOperations.CREATE_LOCATION, false, data, ResponseCode.invalidValue);
     assertTrue(result);
   }
 
@@ -136,10 +135,7 @@ public class LocationActorTest {
     data.put(JsonKey.LOCATION_TYPE, "block");
     boolean result =
         testScenario(
-            LocationActorOperation.CREATE_LOCATION,
-            false,
-            data,
-            ResponseCode.mandatoryParamsMissing);
+            ActorOperations.CREATE_LOCATION, false, data, ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
 
@@ -148,8 +144,7 @@ public class LocationActorTest {
 
     data.put(JsonKey.PARENT_CODE, "anyCode");
     boolean result =
-        testScenario(
-            LocationActorOperation.CREATE_LOCATION, false, data, ResponseCode.parentNotAllowed);
+        testScenario(ActorOperations.CREATE_LOCATION, false, data, ResponseCode.parentNotAllowed);
     assertTrue(result);
   }
 
@@ -164,8 +159,7 @@ public class LocationActorTest {
     when(esSearch.getDataByIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise2.future());
     boolean result =
-        testScenario(
-            LocationActorOperation.DELETE_LOCATION, false, data, ResponseCode.invalidParameter);
+        testScenario(ActorOperations.DELETE_LOCATION, false, data, ResponseCode.invalidParameter);
     assertTrue(result);
   }
 
@@ -181,7 +175,7 @@ public class LocationActorTest {
   }
 
   private boolean testScenario(
-      LocationActorOperation actorOperation,
+      ActorOperations actorOperation,
       boolean isSuccess,
       Map<String, Object> data,
       ResponseCode errorCode) {

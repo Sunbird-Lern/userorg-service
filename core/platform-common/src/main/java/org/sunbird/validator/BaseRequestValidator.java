@@ -296,8 +296,8 @@ public class BaseRequestValidator {
   public void validateEmail(String email) {
     if (!EmailValidator.isEmailValid(email)) {
       throw new ProjectCommonException(
-          ResponseCode.emailFormatError,
-          ResponseCode.emailFormatError.getErrorMessage(),
+          ResponseCode.dataFormatError,
+          ResponseCode.dataFormatError.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
