@@ -43,7 +43,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     // setup(DummyActor.class);
     Result result =
         performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -52,7 +52,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     Result result =
         performTest(
             "/v2/user/assign/role", "POST", createUserRoleRequestV2(true, true, true, true));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -155,7 +155,7 @@ public class UserRoleControllerTest extends BaseApplicationTest {
   @Test
   public void testGetAllRolesSuccess() {
     Result result = performTest("/v1/role/read", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 

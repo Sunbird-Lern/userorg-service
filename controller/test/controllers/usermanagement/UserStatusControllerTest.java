@@ -40,7 +40,7 @@ public class UserStatusControllerTest extends BaseApplicationTest {
   @Test
   public void testBlockUserSuccess() {
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(userId));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -54,7 +54,7 @@ public class UserStatusControllerTest extends BaseApplicationTest {
   @Test
   public void testUnblockUserSuccess() {
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(userId));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 

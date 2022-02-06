@@ -377,7 +377,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testUpdateUserFrameworkSuccess() {
     Result result =
         performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", true));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 

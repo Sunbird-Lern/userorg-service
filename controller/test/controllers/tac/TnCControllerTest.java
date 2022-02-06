@@ -59,7 +59,7 @@ public class TnCControllerTest extends BaseApplicationTest {
   @Test
   public void testTnCAcceptSuccess() {
     Result result = performTest(url, post, getTnCData(true));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 

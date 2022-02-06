@@ -54,7 +54,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.DATA, map);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -90,7 +90,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.DATA, map);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/update", "PATCH", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -103,7 +103,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     map.put(JsonKey.FIELDS, new ArrayList<>());
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/read", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
