@@ -91,7 +91,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -102,7 +102,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/signup",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -112,7 +112,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v3/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -122,7 +122,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/ssouser/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -176,7 +176,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -186,7 +186,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/signup",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -196,7 +196,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v4/user/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -206,7 +206,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v2/user/signup",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
 
   @Test
@@ -216,7 +216,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/manageduser/create",
             "POST",
             (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
   }
   // @Test
   public void testCreateUserFailureWithoutContentType() {
@@ -246,7 +246,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v1/user/update",
             "PATCH",
             (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -257,7 +257,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v2/user/update",
             "PATCH",
             (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -268,7 +268,7 @@ public class UserControllerTest extends BaseApplicationTest {
             "/v3/user/update",
             "PATCH",
             (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -287,7 +287,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testGetUserDetailsSuccessByUserId() {
     Result result =
         performTest("/v1/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -295,7 +295,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testGetUserDetailsSuccessByUserIdV5() {
     Result result =
         performTest("/v5/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -303,7 +303,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testGetUserDetailsSuccessByUserIdV4() {
     Result result =
         performTest("/v4/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -311,7 +311,7 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testGetUserDetailsV3SuccessByUserId() {
     Result result =
         performTest("/v3/user/read/" + userId, "GET", (Map) getUserRequest(userId, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -319,14 +319,14 @@ public class UserControllerTest extends BaseApplicationTest {
   public void testGetUserDetailsSuccessByKey() {
     Result result =
         performTest("/v1/user/get/loginId/testloginid", "GET", (Map) getUserRequest(null, loginId));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetUserDetailsSuccessByLoginId() {
     Result result = performTest("/v1/user/getuser", "POST", (Map) getUserRequest(null, loginId));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -340,21 +340,21 @@ public class UserControllerTest extends BaseApplicationTest {
   @Test
   public void testSearchUserSuccess() {
     Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testSearchUserSuccessV2() {
     Result result = performTest("/v2/user/search", "POST", searchUserRequest(new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testSearchUserSuccessV3() {
     Result result = performTest("/v3/user/search", "POST", searchUserRequest(new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.success.getErrorMessage().toLowerCase());
     assertTrue(getResponseStatus(result) == 200);
   }
 
