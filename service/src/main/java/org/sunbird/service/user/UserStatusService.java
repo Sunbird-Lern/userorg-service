@@ -1,6 +1,7 @@
 package org.sunbird.service.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.dao.user.UserDao;
@@ -19,7 +20,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class UserStatusService {
 
-  private UserService userService = UserServiceImpl.getInstance();
+  private final UserService userService = UserServiceImpl.getInstance();
 
   public Response updateUserStatus(
       Map<String, Object> userMapES, String operation, RequestContext context) {
@@ -30,16 +31,16 @@ public class UserStatusService {
     if (operation.equals(ActorOperations.BLOCK_USER.getValue())
         && Boolean.TRUE.equals(user.getIsDeleted())) {
       throw new ProjectCommonException(
-          ResponseCode.userAlreadyInactive,
-          ResponseCode.userAlreadyInactive.getErrorMessage(),
+          ResponseCode.userStatusError,
+          MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "inactive"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
     if (operation.equals(ActorOperations.UNBLOCK_USER.getValue())
         && Boolean.FALSE.equals(user.getIsDeleted())) {
       throw new ProjectCommonException(
-          ResponseCode.userAlreadyActive,
-          ResponseCode.userAlreadyActive.getErrorMessage(),
+          ResponseCode.userStatusError,
+          MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "active"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 

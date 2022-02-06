@@ -156,10 +156,7 @@ public class UserStatusActorTest {
         .thenReturn(response2);
     boolean result =
         testScenario(
-            true,
-            ActorOperations.BLOCK_USER,
-            false,
-            ResponseCode.userAlreadyInactive.getErrorCode());
+            true, ActorOperations.BLOCK_USER, false, ResponseCode.userStatusError.getErrorCode());
     assertTrue(result);
   }
 
@@ -204,7 +201,7 @@ public class UserStatusActorTest {
             false,
             ActorOperations.UNBLOCK_USER,
             false,
-            ResponseCode.userAlreadyActive.getErrorCode());
+            ResponseCode.userStatusError.getErrorCode());
     assertTrue(result);
   }
 

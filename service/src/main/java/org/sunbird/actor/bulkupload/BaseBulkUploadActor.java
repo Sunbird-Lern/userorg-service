@@ -403,7 +403,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
       csvLine = csvReader.readNext();
       if (csvLine == null) {
         ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorCsvNoDataRows, ResponseCode.errorCsvNoDataRows.getErrorMessage());
+            ResponseCode.csvFileEmpty, ResponseCode.csvFileEmpty.getErrorMessage());
       }
     } catch (Exception ex) {
       logger.error(
