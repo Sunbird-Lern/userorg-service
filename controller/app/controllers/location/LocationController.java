@@ -40,7 +40,7 @@ public class LocationController extends BaseController {
    * @return Return a promise for create location API result
    */
   public CompletionStage<Result> createLocation(Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       request =
@@ -70,7 +70,7 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result
    */
   public CompletionStage<Result> updateLocation(Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       request =
@@ -97,7 +97,7 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result.
    */
   public CompletionStage<Result> deleteLocation(String locationId, Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       request = createAndInitRequest(ActorOperations.DELETE_LOCATION.getValue(), httpRequest);
       Map<String, Object> requestMap = request.getRequest();
@@ -126,7 +126,7 @@ public class LocationController extends BaseController {
    * @return Return a promise for update location API result.
    */
   public CompletionStage<Result> searchLocation(Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       JsonNode jsonNode = httpRequest.body().asJson();
       request =

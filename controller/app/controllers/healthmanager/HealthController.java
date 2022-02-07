@@ -46,7 +46,7 @@ public class HealthController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> getHealth(Http.Request httpRequest) {
-    Request reqObj = null;
+    Request reqObj = new Request();
     try {
       handleSigTerm();
       reqObj = new Request();
@@ -75,10 +75,9 @@ public class HealthController extends BaseController {
   public CompletionStage<Result> getLearnerServiceHealth(String val, Http.Request httpRequest) {
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
-    Request reqObj = null;
+    Request reqObj = new Request();
     if (list.contains(val) && !JsonKey.SERVICE.equalsIgnoreCase(val)) {
       try {
-        reqObj = new Request();
         reqObj.setOperation(val);
         handleSigTerm();
         reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
@@ -92,7 +91,8 @@ public class HealthController extends BaseController {
             new ProjectCommonException(
                 (ProjectCommonException) e,
                 ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
-        return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+        return CompletableFuture.completedFuture(
+            createCommonExceptionResponse(exception, httpRequest));
       }
     } else {
       try {

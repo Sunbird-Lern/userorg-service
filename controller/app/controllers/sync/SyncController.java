@@ -36,7 +36,7 @@ public class SyncController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> sync(Http.Request httpRequest) {
-    Request reqObj = null;
+    Request reqObj = new Request();
     try {
       JsonNode requestData = httpRequest.body().asJson();
       reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);

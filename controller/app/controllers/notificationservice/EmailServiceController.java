@@ -37,7 +37,7 @@ public class EmailServiceController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> sendMail(Http.Request httpRequest) {
-    Request reqObj = null;
+    Request reqObj = new Request();
     try {
       JsonNode requestData = httpRequest.body().asJson();
       reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);
@@ -74,7 +74,7 @@ public class EmailServiceController extends BaseController {
   }
 
   public CompletionStage<Result> sendNotification(Http.Request httpRequest) {
-    Request reqObj = null;
+    Request reqObj = new Request();
     try {
       JsonNode requestData = httpRequest.body().asJson();
       reqObj = (Request) mapper.RequestMapper.mapRequest(requestData, Request.class);

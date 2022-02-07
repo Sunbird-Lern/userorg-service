@@ -34,7 +34,7 @@ public class BulkUploadController extends BaseBulkUploadController {
   private BaseRequestValidator baseRequestValidator = new BaseRequestValidator();
 
   public CompletionStage<Result> userBulkUpload(Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       request =
           createAndInitBulkRequest(
@@ -52,7 +52,7 @@ public class BulkUploadController extends BaseBulkUploadController {
   }
 
   public CompletionStage<Result> orgBulkUpload(Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       request =
           createAndInitBulkRequest(
@@ -70,7 +70,7 @@ public class BulkUploadController extends BaseBulkUploadController {
   }
 
   public CompletionStage<Result> locationBulkUpload(Http.Request httpRequest) {
-    Request request = null;
+    Request request = new Request();
     try {
       request =
           createAndInitBulkRequest(

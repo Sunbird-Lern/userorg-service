@@ -228,25 +228,20 @@ public enum ResponseCode {
     this.responseCode = responseCode;
   }
 
-  private static final Map<Integer, ResponseCode> responseCodeByCode;
+  private static final Map<Integer, ResponseCode> responseCodeByCode = new HashMap<>();
 
   static {
-    responseCodeByCode =
-        new HashMap<>() {
-          {
-            put(200, ResponseCode.OK);
-            put(400, ResponseCode.CLIENT_ERROR);
-            put(500, ResponseCode.SERVER_ERROR);
-            put(404, ResponseCode.RESOURCE_NOT_FOUND);
-            put(401, ResponseCode.UNAUTHORIZED);
-            put(403, ResponseCode.FORBIDDEN);
-            put(302, ResponseCode.REDIRECTION_REQUIRED);
-            put(429, ResponseCode.TOO_MANY_REQUESTS);
-            put(503, ResponseCode.SERVICE_UNAVAILABLE);
-            put(206, ResponseCode.PARTIAL_SUCCESS_RESPONSE);
-            put(418, ResponseCode.IM_A_TEAPOT);
-          }
-        };
+    responseCodeByCode.put(200, ResponseCode.OK);
+    responseCodeByCode.put(400, ResponseCode.CLIENT_ERROR);
+    responseCodeByCode.put(500, ResponseCode.SERVER_ERROR);
+    responseCodeByCode.put(404, ResponseCode.RESOURCE_NOT_FOUND);
+    responseCodeByCode.put(401, ResponseCode.UNAUTHORIZED);
+    responseCodeByCode.put(403, ResponseCode.FORBIDDEN);
+    responseCodeByCode.put(302, ResponseCode.REDIRECTION_REQUIRED);
+    responseCodeByCode.put(429, ResponseCode.TOO_MANY_REQUESTS);
+    responseCodeByCode.put(503, ResponseCode.SERVICE_UNAVAILABLE);
+    responseCodeByCode.put(206, ResponseCode.PARTIAL_SUCCESS_RESPONSE);
+    responseCodeByCode.put(418, ResponseCode.IM_A_TEAPOT);
   }
 
   public static ResponseCode getResponseCodeByCode(Integer code) {

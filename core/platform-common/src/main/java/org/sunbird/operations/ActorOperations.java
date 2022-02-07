@@ -161,15 +161,6 @@ public enum ActorOperations {
   }
 
   /**
-   * constructor
-   *
-   * @param value String
-   */
-  ActorOperations(String value) {
-    this.value = value;
-  }
-
-  /**
    * returns the enum value
    *
    * @return String
