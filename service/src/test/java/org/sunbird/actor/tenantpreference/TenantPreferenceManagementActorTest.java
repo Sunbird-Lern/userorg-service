@@ -168,7 +168,8 @@ public class TenantPreferenceManagementActorTest {
     ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
-    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
+    Assert.assertEquals(
+        "UOS_TPREFUPD" + ResponseCode.preferenceNotFound.getErrorCode(), exception.getErrorCode());
   }
 
   @Test
@@ -189,7 +190,8 @@ public class TenantPreferenceManagementActorTest {
     ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
-    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
+    Assert.assertEquals(
+        "UOS_TPREFUPD" + ResponseCode.preferenceNotFound.getErrorCode(), exception.getErrorCode());
   }
 
   @Test
@@ -227,7 +229,8 @@ public class TenantPreferenceManagementActorTest {
     ProjectCommonException exception =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
-    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
+    Assert.assertEquals(
+        "UOS_TPREFRED" + ResponseCode.preferenceNotFound.getErrorCode(), exception.getErrorCode());
   }
 
   @Test

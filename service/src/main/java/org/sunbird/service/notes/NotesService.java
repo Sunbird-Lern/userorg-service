@@ -105,7 +105,7 @@ public class NotesService {
     }
     if (!userId.equalsIgnoreCase((String) noteData.get(JsonKey.USER_ID))) {
       throw new ProjectCommonException(
-          ResponseCode.errorForbidden.getErrorCode(),
+          ResponseCode.errorForbidden,
           ResponseCode.errorForbidden.getErrorMessage(),
           ResponseCode.FORBIDDEN.getResponseCode());
     }

@@ -28,12 +28,12 @@ import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.UserUtility;
-import org.sunbird.util.user.UserActorOperations;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -123,7 +123,7 @@ public class UserExternalIdManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.OPERATION_TYPE, "CREATE");
@@ -147,7 +147,7 @@ public class UserExternalIdManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.OPERATION_TYPE, "UPDATE");
@@ -173,7 +173,7 @@ public class UserExternalIdManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.OPERATION_TYPE, "UPDATE");
@@ -200,7 +200,7 @@ public class UserExternalIdManagementActorTest {
     ActorRef subject = system.actorOf(props);
 
     Request request = new Request();
-    request.setOperation(UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+    request.setOperation(ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.OPERATION_TYPE, "UPDATE");

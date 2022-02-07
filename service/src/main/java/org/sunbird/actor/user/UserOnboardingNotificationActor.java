@@ -8,11 +8,11 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
@@ -23,7 +23,6 @@ import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.SMSTemplateProvider;
 import org.sunbird.util.UserUtility;
-import org.sunbird.util.user.UserActorOperations;
 
 public class UserOnboardingNotificationActor extends BaseActor {
 
@@ -35,10 +34,10 @@ public class UserOnboardingNotificationActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
-    if ((UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
+    if ((ActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS
             .getValue()
             .equalsIgnoreCase(request.getOperation()))
-        || (UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS
+        || (ActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS
             .getValue()
             .equalsIgnoreCase(request.getOperation()))) {
       sendEmailAndSms(request);
@@ -55,9 +54,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
     requestMap.put(
         JsonKey.REDIRECT_URI, getSunbirdWebUrlPerTenant(requestMap, request.getRequestContext()));
     resetPasswordService.getUserRequiredActionLink(requestMap, true, request.getRequestContext());
-    if (request
-        .getOperation()
-        .equals(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue())) {
+    if (request.getOperation().equals(ActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue())) {
       // user created successfully send the onboarding mail
       Request welcomeMailReqObj = sendOnboardingMail(requestMap);
       if (null != welcomeMailReqObj && null != emailServiceActor) {
@@ -66,7 +63,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       }
     } else if (request
         .getOperation()
-        .equals(UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue())) {
+        .equals(ActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue())) {
       Request resetMailReqObj = sendResetPassMail(requestMap);
       if (null != resetMailReqObj && null != emailServiceActor) {
         resetMailReqObj.setRequestContext(request.getRequestContext());
@@ -110,7 +107,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       }
 
       request = new Request();
-      request.setOperation(BackgroundOperations.emailService.name());
+      request.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
       request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
     }
     return request;
@@ -192,7 +189,7 @@ public class UserOnboardingNotificationActor extends BaseActor {
       return null;
     }
     request = new Request();
-    request.setOperation(BackgroundOperations.emailService.name());
+    request.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
     request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
     return request;
   }

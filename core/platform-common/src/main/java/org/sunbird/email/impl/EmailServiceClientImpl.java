@@ -34,19 +34,14 @@ public class EmailServiceClientImpl implements EmailServiceClient {
     } catch (ProjectCommonException pce) {
       throw pce;
     } catch (Exception e) {
-      ProjectCommonException.throwServerErrorException(
-          ResponseCode.unableToCommunicateWithActor,
-          ResponseCode.unableToCommunicateWithActor.getErrorMessage());
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     if (obj instanceof Response) {
       response = (Response) obj;
     } else if (obj instanceof ProjectCommonException) {
       throw (ProjectCommonException) obj;
     } else {
-      throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     return response;
   }

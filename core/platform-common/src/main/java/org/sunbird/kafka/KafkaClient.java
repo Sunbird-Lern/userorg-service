@@ -81,7 +81,7 @@ public class KafkaClient {
     } else {
       logger.info("Topic id: " + topic + ", does not exists.");
       throw new ProjectCommonException(
-          "TOPIC_NOT_EXISTS_EXCEPTION",
+          ResponseCode.mandatoryParamsMissing,
           "Topic id: " + topic + ", does not exists.",
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -95,7 +95,7 @@ public class KafkaClient {
     } else {
       logger.info("Topic id: " + topic + ", does not exists.");
       throw new ProjectCommonException(
-          "TOPIC_NOT_EXISTS_EXCEPTION",
+          ResponseCode.mandatoryParamsMissing,
           "Topic id: " + topic + ", does not exists.",
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }

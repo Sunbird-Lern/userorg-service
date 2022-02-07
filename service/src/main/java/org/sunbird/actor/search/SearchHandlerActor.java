@@ -130,7 +130,7 @@ public class SearchHandlerActor extends BaseActor {
               (List<Map<String, Object>>) result.get(JsonKey.CONTENT));
       if (responseList.isEmpty()) {
         throw new ProjectCommonException(
-            ResponseCode.PARTIAL_SUCCESS_RESPONSE.getErrorCode(),
+            ResponseCode.PARTIAL_SUCCESS_RESPONSE,
             String.format(ResponseMessage.Message.PARAM_NOT_MATCH, JsonKey.NAME.toUpperCase()),
             ResponseCode.PARTIAL_SUCCESS_RESPONSE.getResponseCode());
       }

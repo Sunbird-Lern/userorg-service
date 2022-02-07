@@ -152,27 +152,29 @@ public class UserRoleServiceImpl implements UserRoleService {
   }
 
   private String convertScopeListToString(List scopeList) {
-    String scopeListString;
+    String scopeListString = null;
     try {
       scopeListString = mapper.writeValueAsString(scopeList);
     } catch (JsonProcessingException e) {
-      throw new ProjectCommonException(
-          ResponseCode.roleSaveError.getErrorCode(),
-          ResponseCode.roleSaveError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      logger.error(
+        "UserRoleServiceImpl:convertScopeListToString Exception occurred : " + e.getMessage(),
+        e);
+      ProjectCommonException.throwServerErrorException(
+        ResponseCode.SERVER_ERROR);
     }
     return scopeListString;
   }
 
   private List convertScopeStrToList(String scopeStr) {
-    List<Map<String, Object>> scopeList;
+    List<Map<String, Object>> scopeList = null;
     try {
       scopeList = mapper.readValue(scopeStr, new ArrayList<Map<String, String>>().getClass());
     } catch (JsonProcessingException ex) {
-      throw new ProjectCommonException(
-          ResponseCode.roleSaveError.getErrorCode(),
-          ResponseCode.roleSaveError.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      logger.error(
+        "UserRoleServiceImpl:convertScopeListToString Exception occurred : " + ex.getMessage(),
+        ex);
+      ProjectCommonException.throwServerErrorException(
+        ResponseCode.SERVER_ERROR);
     }
     return scopeList;
   }

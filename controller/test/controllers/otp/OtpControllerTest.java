@@ -53,7 +53,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(false, null, true, VALID_PHONE_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -64,7 +64,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, INVALID_PHONE, true, VALID_PHONE_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -75,7 +75,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(false, null, true, VALID_EMAIL_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -86,7 +86,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, INVALID_EMAIL, true, VALID_EMAIL_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.emailFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -97,7 +97,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             GENERATE_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.invalidValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -108,7 +108,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             VERIFY_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(false, null, true, VALID_PHONE_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -120,7 +120,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             HttpMethods.POST.name(),
             createInvalidOtpRequest(
                 true, INVALID_PHONE, true, VALID_PHONE_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.phoneNoFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -131,7 +131,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             VERIFY_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(false, null, true, VALID_EMAIL_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -143,7 +143,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             HttpMethods.POST.name(),
             createInvalidOtpRequest(
                 true, INVALID_EMAIL, true, VALID_EMAIL_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.emailFormatError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -154,7 +154,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             VERIFY_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, VALID_EMAIL, true, VALID_EMAIL_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -165,7 +165,7 @@ public class OtpControllerTest extends BaseApplicationTest {
             VERIFY_OTP_URL,
             HttpMethods.POST.name(),
             createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, true, INVALID_OTP));
-    assertEquals(getResponseCode(result), ResponseCode.invalidValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -227,7 +227,7 @@ public class OtpControllerTest extends BaseApplicationTest {
       Response response = mapper.readValue(responseStr, Response.class);
       ResponseParams params = response.getParams();
       if (result.status() != 200) {
-        return params.getErr();
+        return response.getResponseCode().name();
       } else {
         return params.getStatus();
       }

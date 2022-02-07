@@ -79,7 +79,10 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
           logger.debug(
               context,
               "TenantMigrationActor:validateOrgExternalIdOrOrgIdAndGetOrgId called. OrgId is Invalid");
-          ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
+          ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+            MessageFormat.format(
+              ResponseCode.invalidParameter.getErrorMessage(),
+              JsonKey.ORG_ID));
         } else {
           String reqOrgRootOrgId = (String) result.get(JsonKey.ROOT_ORG_ID);
           if (StringUtils.isNotBlank(reqOrgRootOrgId)

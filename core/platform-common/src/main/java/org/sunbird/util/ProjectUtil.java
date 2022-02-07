@@ -403,7 +403,7 @@ public class ProjectUtil {
       responseMap.put(JsonKey.Healthy, false);
       if (e != null && e instanceof ProjectCommonException) {
         ProjectCommonException commonException = (ProjectCommonException) e;
-        responseMap.put(JsonKey.ERROR, commonException.getResponseCode());
+        responseMap.put(JsonKey.ERROR, commonException.getErrorResponseCode());
         responseMap.put(JsonKey.ERRORMSG, commonException.getMessage());
       } else {
         responseMap.put(JsonKey.ERROR, e != null ? e.getMessage() : "CONNECTION_ERROR");
@@ -566,8 +566,28 @@ public class ProjectUtil {
    */
   public static ProjectCommonException createClientException(ResponseCode responseCode) {
     return new ProjectCommonException(
-        responseCode.getErrorCode(),
-        responseCode.getErrorMessage(),
+        responseCode, responseCode.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
+
+  /**
+   * This method will be used to create ProjectCommonException for all kind of client error for the
+   * given response code(enum).
+   *
+   * @param : An enum of all the api responses.
+   * @return ProjectCommonException
+   */
+  public static ProjectCommonException createClientException(
+      ResponseCode responseCode, String exceptionMessage) {
+    return new ProjectCommonException(
+        responseCode,
+        StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
+        ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
+
+  public static void throwClientErrorException(ResponseCode responseCode, String exceptionMessage) {
+    throw new ProjectCommonException(
+        responseCode,
+        StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 

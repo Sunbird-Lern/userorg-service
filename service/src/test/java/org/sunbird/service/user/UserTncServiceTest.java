@@ -116,7 +116,7 @@ public class UserTncServiceTest {
     try {
       tncService.getUserById("1234", new RequestContext());
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.userAccountlocked.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.userAccountlocked.getErrorCode(), ex.getErrorCode());
     }
   }
 
@@ -136,7 +136,7 @@ public class UserTncServiceTest {
     try {
       tncService.getUserById("1234", new RequestContext());
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.userNotFound.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.resourceNotFound.getErrorCode(), ex.getErrorCode());
     }
   }
 
@@ -148,7 +148,7 @@ public class UserTncServiceTest {
     try {
       tncService.validateLatestTncVersion(request, "groups");
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getErrorCode());
     }
   }
 
@@ -168,7 +168,7 @@ public class UserTncServiceTest {
     try {
       tncService.validateRoleForTnc(new RequestContext(), "orgAdminTnc", searchMap);
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getErrorCode());
     }
   }
 
@@ -188,7 +188,7 @@ public class UserTncServiceTest {
     try {
       tncService.validateRoleForTnc(new RequestContext(), "orgAdminTnc", searchMap);
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getErrorCode());
     }
   }
 
@@ -208,7 +208,7 @@ public class UserTncServiceTest {
     try {
       tncService.validateRoleForTnc(new RequestContext(), "reportViewerTnc", searchMap);
     } catch (ProjectCommonException ex) {
-      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getCode());
+      Assert.assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), ex.getErrorCode());
     }
   }
 

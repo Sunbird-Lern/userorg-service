@@ -104,8 +104,8 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateCreateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
   }
@@ -123,8 +123,8 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateCreateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
   }
@@ -163,8 +163,8 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateUpdateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRootOrganisationId.getErrorCode(), e.getCode());
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidParameterValue.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
   }
@@ -189,8 +189,8 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateUpdateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRequestParameter.getErrorCode(), e.getCode());
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidRequestParameter.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
   }
@@ -209,8 +209,8 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateUpdateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.dependentParamsMissing.getErrorCode(), e.getCode());
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.dependentParamsMissing.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
   }
@@ -246,8 +246,8 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateUpdateOrgStatusRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getCode());
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.invalidRequestData.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));
   }

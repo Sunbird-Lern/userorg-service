@@ -124,7 +124,7 @@ public class RateLimitServiceTest {
     try {
       rateLimitService.throttleByKey(KEY, JsonKey.PHONE, new RateLimiter[] {hourRateLimiter}, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.TOO_MANY_REQUESTS.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.TOO_MANY_REQUESTS.getResponseCode(), e.getErrorResponseCode());
       throw e;
     }
   }

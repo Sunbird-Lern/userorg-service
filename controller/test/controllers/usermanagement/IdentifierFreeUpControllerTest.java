@@ -46,8 +46,7 @@ public class IdentifierFreeUpControllerTest extends BaseApplicationTest {
     Result result =
         TestUtil.performTest(
             "/private/user/v1/identifier/freeup", "POST", getRequest(), application);
-    assertEquals(
-        ResponseCode.success.getErrorCode().toLowerCase(), TestUtil.getResponseCode(result));
+    assertEquals(ResponseCode.SUCCESS.name(), TestUtil.getResponseCode(result));
   }
 
   @Test
@@ -55,8 +54,7 @@ public class IdentifierFreeUpControllerTest extends BaseApplicationTest {
     Result result =
         TestUtil.performTest(
             "/private/user/v1/identifier/freeup", "POST", getFailureReq(), application);
-    assertEquals(
-        ResponseCode.mandatoryParamsMissing.getErrorCode(), TestUtil.getResponseCode(result));
+    assertEquals(ResponseCode.CLIENT_ERROR.name(), TestUtil.getResponseCode(result));
   }
 
   private Map<String, Object> getRequest() {

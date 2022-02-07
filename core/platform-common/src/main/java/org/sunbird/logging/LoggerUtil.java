@@ -129,13 +129,13 @@ public class LoggerUtil {
       } else {
         projectCommonException =
             new ProjectCommonException(
-                ResponseCode.internalError.getErrorCode(),
-                ResponseCode.internalError.getErrorMessage(),
+                ResponseCode.serverError,
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode());
       }
       telemetryInfo.put(JsonKey.TELEMETRY_EVENT_TYPE, TelemetryEvents.ERROR.getName());
       Map<String, Object> params = (Map<String, Object>) telemetryInfo.get(JsonKey.PARAMS);
-      params.put(JsonKey.ERROR, projectCommonException.getCode());
+      params.put(JsonKey.ERROR, projectCommonException.getErrorCode());
       params.put(JsonKey.STACKTRACE, generateStackTrace(e.getStackTrace(), message));
       request.setRequest(telemetryInfo);
     } else {

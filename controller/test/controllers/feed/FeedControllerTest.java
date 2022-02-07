@@ -64,13 +64,13 @@ public class FeedControllerTest extends BaseApplicationTest {
   @Test
   public void testUpdateUserFeed() {
     Result result = performTest(UPDATE_FEED_URL, HttpMethods.PATCH.name(), updateFeedRequest(true));
-    assertEquals(getResponseCode(result), ResponseCode.success.name());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   public void testCreateUserFeed() {
     Result result = performTest(SAVE_FEED_URL, HttpMethods.POST.name(), createFeedRequest(true));
-    assertEquals(getResponseCode(result), ResponseCode.success.name());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -79,14 +79,14 @@ public class FeedControllerTest extends BaseApplicationTest {
     Http.RequestBuilder req = new Http.RequestBuilder().uri("/v1/user/feed/update").method("PATCH");
     Result result =
         performTest(UPDATE_FEED_URL, HttpMethods.PATCH.name(), updateFeedRequest(false));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testDeleteUserFeed() {
     Result result = performTest(DELETE_FEED_URL, HttpMethods.POST.name(), updateFeedRequest(true));
-    assertEquals(getResponseCode(result), ResponseCode.success.name());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 

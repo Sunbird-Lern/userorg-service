@@ -225,7 +225,7 @@ public class UserRoleActorTest {
       }
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return res.getResponseCode() == errorResponse.getResponseCode();
+      return res.getErrorResponseCode() == errorResponse.getResponseCode();
     }
   }
 

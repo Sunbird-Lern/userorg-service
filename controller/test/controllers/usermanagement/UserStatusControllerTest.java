@@ -40,28 +40,28 @@ public class UserStatusControllerTest extends BaseApplicationTest {
   @Test
   public void testBlockUserSuccess() {
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(userId));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testBlockUserFailureWithoutUserId() {
     Result result = performTest("/v1/user/block", "POST", userStatusRequest(null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testUnblockUserSuccess() {
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(userId));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testUnblockUserFailureWithoutUserId() {
     Result result = performTest("/v1/user/unblock", "POST", userStatusRequest(null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -111,7 +111,7 @@ public class UserStatusControllerTest extends BaseApplicationTest {
       Response response = mapper.readValue(responseStr, Response.class);
       ResponseParams params = response.getParams();
       if (result.status() != 200) {
-        return params.getErr();
+        return response.getResponseCode().name();
       } else {
         return params.getStatus();
       }

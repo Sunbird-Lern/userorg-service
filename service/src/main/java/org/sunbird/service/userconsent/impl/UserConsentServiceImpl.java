@@ -1,6 +1,7 @@
 package org.sunbird.service.userconsent.impl;
 
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -114,11 +115,17 @@ public class UserConsentServiceImpl implements UserConsentService {
   public void validateConsumerId(String consumerId, RequestContext context) {
     String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     if (consumerId.equalsIgnoreCase(custodianOrgId)) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(),
+          JsonKey.ORGANISATION + JsonKey.ID));
     }
     Map<String, Object> org = orgDao.getOrgById(consumerId, context);
     if (MapUtils.isEmpty(org)) {
-      ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
+      ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+        MessageFormat.format(
+          ResponseCode.invalidParameter.getErrorMessage(),
+          JsonKey.ORGANISATION + JsonKey.ID));
     }
   }
 

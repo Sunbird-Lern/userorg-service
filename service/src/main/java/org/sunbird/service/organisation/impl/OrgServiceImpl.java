@@ -197,7 +197,7 @@ public class OrgServiceImpl implements OrgService {
       return (String) esContent.get(JsonKey.ID);
     } else {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue.getErrorCode(),
+          ResponseCode.invalidParameterValue,
           ProjectUtil.formatMessage(
               ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
           ResponseCode.CLIENT_ERROR.getResponseCode());

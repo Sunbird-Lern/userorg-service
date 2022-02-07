@@ -514,10 +514,11 @@ public abstract class UserManagementActorTestBase {
       Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
+      String errString = ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation());
       ProjectCommonException res =
           probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals("UOS_" + errString + errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 
@@ -533,8 +534,8 @@ public abstract class UserManagementActorTestBase {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getResponseCode().name().equals(errorCode.name())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 
@@ -551,8 +552,8 @@ public abstract class UserManagementActorTestBase {
     if (errorCode != null) {
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals(errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
     return true;
   }

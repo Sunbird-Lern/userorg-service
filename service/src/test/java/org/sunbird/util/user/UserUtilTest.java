@@ -147,7 +147,7 @@ public class UserUtilTest {
     try {
       UserUtil.validateManagedUserLimit("ManagedBy", null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), 400);
+      assertEquals(e.getErrorResponseCode(), 400);
       assertEquals(e.getMessage(), ResponseCode.managedUserLimitExceeded.getErrorMessage());
     }
   }

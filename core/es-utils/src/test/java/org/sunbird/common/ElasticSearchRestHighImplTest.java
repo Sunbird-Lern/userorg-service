@@ -138,7 +138,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.update("", "001", new HashMap<>(), null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -147,7 +147,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.update("test", "", new HashMap<>(), null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -156,7 +156,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.getDataByIdentifier("", "001", null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -165,7 +165,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.getDataByIdentifier("test", "", null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -206,7 +206,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.delete("test", "", null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -215,7 +215,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.delete("", "001", null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -240,7 +240,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.update("", "001", new HashMap<>(), null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 
@@ -249,7 +249,7 @@ public class ElasticSearchRestHighImplTest {
     try {
       esService.update("test", "", new HashMap<>(), null);
     } catch (ProjectCommonException e) {
-      assertEquals(e.getResponseCode(), ResponseCode.invalidData.getResponseCode());
+      assertEquals(e.getErrorResponseCode(), ResponseCode.invalidRequestData.getResponseCode());
     }
   }
 

@@ -160,7 +160,7 @@ public class UserProfileReadActorTest {
         .thenReturn(response);
     boolean result =
         testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_PROFILE_V3), ResponseCode.userNotFound);
+            getRequest(reqMap, ActorOperations.GET_USER_PROFILE_V3), ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -500,7 +500,7 @@ public class UserProfileReadActorTest {
         .thenReturn(new ArrayList<>());
     boolean result =
         testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.RESOURCE_NOT_FOUND);
+            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -512,7 +512,7 @@ public class UserProfileReadActorTest {
     setCassandraResponse(getCassandraResponse(true));
     boolean result =
         testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.RESOURCE_NOT_FOUND);
+            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -525,7 +525,7 @@ public class UserProfileReadActorTest {
     when(userService.searchUser(Mockito.any(SearchDTO.class), Mockito.any(RequestContext.class)))
         .thenReturn(getUserExistsSearchResponseMap());
     setCassandraResponse(getCassandraResponse(true));
-    boolean result = testScenario(request, ResponseCode.RESOURCE_NOT_FOUND);
+    boolean result = testScenario(request, ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -535,7 +535,7 @@ public class UserProfileReadActorTest {
     setCassandraResponse(getCassandraResponse(false));
     boolean result =
         testScenario(
-            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.userNotFound);
+            getRequest(reqMap, ActorOperations.GET_USER_BY_KEY), ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -585,11 +585,11 @@ public class UserProfileReadActorTest {
       Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
-
+      String errString = ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation());
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals("UOS_" + errString + errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 

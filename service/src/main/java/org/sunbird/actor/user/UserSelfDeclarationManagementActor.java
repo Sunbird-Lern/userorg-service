@@ -1,5 +1,6 @@
 package org.sunbird.actor.user;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,10 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
       for (Map<String, Object> declareFieldMap : declarations) {
         String custodianOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
         if (((String) declareFieldMap.get(JsonKey.ORG_ID)).equalsIgnoreCase(custodianOrgId)) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.invalidOrgId);
+          ProjectCommonException.throwClientErrorException(ResponseCode.invalidParameter,
+            MessageFormat.format(
+              ResponseCode.invalidParameter.getErrorMessage(),
+              JsonKey.ORGANISATION + JsonKey.ID));
         }
         UserDeclareEntity userDeclareEntity =
             UserUtil.createUserDeclaredObject(declareFieldMap, callerId);
@@ -118,7 +122,7 @@ public class UserSelfDeclarationManagementActor extends BaseActor {
 
     if (CollectionUtils.isNotEmpty((List<String>) response.getResult().get(JsonKey.ERROR_MSG))
         || CollectionUtils.isNotEmpty(errMsgs)) {
-      ProjectCommonException.throwServerErrorException(ResponseCode.internalError, errMsgs.get(0));
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR, errMsgs.get(0));
     }
 
     sender().tell(response, self());

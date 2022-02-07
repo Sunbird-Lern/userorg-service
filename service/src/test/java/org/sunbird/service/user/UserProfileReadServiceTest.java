@@ -325,7 +325,7 @@ public class UserProfileReadServiceTest {
       userProfileReadService.getUserProfileData(getProfileReadRequest("1234567890"));
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.userAccountlocked.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.userAccountlocked.getErrorCode());
     }
   }
 

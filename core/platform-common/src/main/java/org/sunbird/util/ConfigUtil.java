@@ -17,7 +17,6 @@ public class ConfigUtil {
   public static LoggerUtil logger = new LoggerUtil(ConfigUtil.class);
   private static Config config;
   private static final String DEFAULT_TYPE_SAFE_CONFIG_FILE_NAME = "service.conf";
-  private static final String INVALID_FILE_NAME = "Please provide a valid file name.";
 
   /** Private default constructor. */
   private ConfigUtil() {}
@@ -32,28 +31,6 @@ public class ConfigUtil {
     if (config == null) {
       synchronized (ConfigUtil.class) {
         config = createConfig(DEFAULT_TYPE_SAFE_CONFIG_FILE_NAME);
-      }
-    }
-    return config;
-  }
-
-  /**
-   * This method will create a type safe config object and return to caller. It will read the config
-   * value from System env first and as a fall back it will use provided file name. If file name is
-   * null or empty then it will throw ProjectCommonException with status code as 500.
-   *
-   * @return Type safe config object
-   */
-  public static Config getConfig(String fileName) {
-    if (StringUtils.isBlank(fileName)) {
-      throw new ProjectCommonException(
-          ResponseCode.internalError.getErrorCode(),
-          INVALID_FILE_NAME,
-          ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
-    if (config == null) {
-      synchronized (ConfigUtil.class) {
-        config = createConfig(fileName);
       }
     }
     return config;
