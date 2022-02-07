@@ -220,7 +220,6 @@ public final class JsonKey {
   public static final String ROLLUP = "rollup";
   public static final String ROOT_ORG = "rootOrg";
   public static final String ROOT_ORG_ID = "rootOrgId";
-  public static final String SEARCH = "search";
   public static final String SEARCH_TOP_N = "searchTopN";
   public static final String SIZE = "size";
   public static final String SLUG = "slug";
@@ -462,7 +461,6 @@ public final class JsonKey {
   public static final String IS_SSO_ROOTORG_ENABLED = "isSSOEnabled";
   public static final String USER_FEED_DB = "user_feed";
   public static final String USER_FEED = "userFeed";
-  public static final String FEED_DATA = "data";
   public static final String FEED_ID = "feedId";
   public static final String LICENSE = "license";
   public static final String DEFAULT_LICENSE = "defaultLicense";
@@ -470,13 +468,14 @@ public final class JsonKey {
   public static final String NESTED_EXISTS = "nested_exists";
   public static final String NESTED_NOT_EXISTS = "nested_not_exists";
   public static final String PROSPECT_CHANNELS = "prospectChannels";
-  public static final String PROSPECT_CHANNELS_IDS = "prospectChannelsIds";
   public static final String CATEGORY = "category";
   public static final String TEMPLATE_ID = "templateId";
   public static final String TEMPLATE_OPTIONS = "templateOptions";
   public static final String RESET_PASSWORD_TEMPLATE_ID = "resetPasswordWithOtp";
   public static final String VERSION_3 = "v3";
   public static final String VERSION_4 = "v4";
+  public static final String VERSION_5 = "v5";
+
   public static final String WARD_LOGIN_OTP_TEMPLATE_ID = "wardLoginOTP";
   public static final String OTP_PHONE_WARD_LOGIN_TEMPLATE = "verifyPhoneOtpTemplateWard";
   public static final String OTP_EMAIL_WARD_LOGIN_TEMPLATE = "verifyEmailOtpTemplateWard";
@@ -553,7 +552,6 @@ public final class JsonKey {
   public static final String CONSENT_OBJECT = "object";
   // user consent table columns listing - ended
   public static final String PRIORITY = "priority";
-  public static final String FEED_LIMIT = "feed_limit";
   public static final String ORG_ADMIN = "ORG_ADMIN";
   public static final String ORG_ADMIN_TNC = "orgAdminTnc";
   public static final String REPORT_VIEWER = "REPORT_VIEWER";
@@ -591,7 +589,6 @@ public final class JsonKey {
   public static final String ROLE_OPERATION = "roleOperation";
   public static final String SCOPE_STR = "scopeString";
   public static final String SUNBIRD_SSO_LB_IP = "sunbird_sso_lb_ip";
-  public static final String RESET_PASSWORD = "resetPassword";
   public static final String TENANT_PREFERENCE_V2_DB = "tenant_preference_v2";
   public static final String UPDATE_ORG_STATUS = "updateOrgStatus";
   public static final String SUNBIRD_WEB_URL = "sunbird_web_url";
@@ -618,6 +615,9 @@ public final class JsonKey {
   public static final String NOTIFICATION_SERVICE_V1_DELETE_URL =
       "notification_service_v1_delete_url";
   public static final String CHANNEL_REGISTRATION_DISABLED = "channel_registration_disabled";
+  public static final String USER_CONSENT_TEXT = "user consent";
+  public static final Object COUNTRY_CODE_TEXT = "country code";
+  public static final String USER_ORG_SERVICE_PREFIX = "UOS_";
 
   private JsonKey() {}
 }

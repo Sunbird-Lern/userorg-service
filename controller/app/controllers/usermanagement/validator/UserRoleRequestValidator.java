@@ -1,5 +1,6 @@
 package controllers.usermanagement.validator;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
@@ -44,15 +45,16 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
     if (request.getRequest().containsKey(JsonKey.ROLES)) {
       if (!(request.getRequest().get(JsonKey.ROLES) instanceof List)) {
         throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
+            ResponseCode.dataTypeError,
             ResponseCode.dataTypeError.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode(),
             JsonKey.ROLES,
             JsonKey.LIST);
       } else if (CollectionUtils.isEmpty((List) request.getRequest().get(JsonKey.ROLES))) {
         throw new ProjectCommonException(
-            ResponseCode.emptyRolesProvided.getErrorCode(),
-            ResponseCode.emptyRolesProvided.getErrorMessage(),
+            ResponseCode.errorMandatoryParamsEmpty,
+            MessageFormat.format(
+                ResponseCode.errorMandatoryParamsEmpty.getErrorMessage(), JsonKey.ROLES),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     }
@@ -68,21 +70,21 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
             if (!roleObj.containsKey(JsonKey.ROLE)
                 || StringUtils.isEmpty((CharSequence) roleObj.get(JsonKey.ROLE))) {
               throw new ProjectCommonException(
-                  ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                  ResponseCode.mandatoryParamsMissing,
                   ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
             if (!roleObj.containsKey(JsonKey.OPERATION)
                 || StringUtils.isEmpty((CharSequence) roleObj.get(JsonKey.OPERATION))) {
               throw new ProjectCommonException(
-                  ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                  ResponseCode.mandatoryParamsMissing,
                   ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
             if (!roleObj.containsKey(JsonKey.SCOPE)
                 || CollectionUtils.isEmpty((List) roleObj.get(JsonKey.SCOPE))) {
               throw new ProjectCommonException(
-                  ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                  ResponseCode.mandatoryParamsMissing,
                   ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
@@ -95,7 +97,7 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
                       Object orgId = scope.get(JsonKey.ORGANISATION_ID);
                       if ((null == orgId)) {
                         throw new ProjectCommonException(
-                            ResponseCode.invalidParameterValue.getErrorCode(),
+                            ResponseCode.invalidParameterValue,
                             ProjectUtil.formatMessage(
                                 ResponseCode.invalidParameterValue.getErrorMessage(),
                                 "null",
@@ -104,7 +106,7 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
                       }
                       if (!(orgId instanceof String)) {
                         throw new ProjectCommonException(
-                            ResponseCode.dataTypeError.getErrorCode(),
+                            ResponseCode.dataTypeError,
                             ProjectUtil.formatMessage(
                                 ResponseCode.dataTypeError.getErrorMessage(),
                                 "scope.organisationId",
@@ -113,7 +115,7 @@ public class UserRoleRequestValidator extends BaseRequestValidator {
                       }
                       if (StringUtils.isBlank((String) orgId)) {
                         throw new ProjectCommonException(
-                            ResponseCode.invalidParameterValue.getErrorCode(),
+                            ResponseCode.invalidParameterValue,
                             ProjectUtil.formatMessage(
                                 ResponseCode.invalidParameterValue.getErrorMessage(),
                                 " ",

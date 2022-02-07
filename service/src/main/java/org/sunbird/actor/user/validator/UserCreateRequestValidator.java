@@ -17,7 +17,7 @@ public class UserCreateRequestValidator {
   public static void validateLocationCodesDataType(Object locationCodes) {
     if ((locationCodes != null) && !(locationCodes instanceof List)) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError,
           ProjectUtil.formatMessage(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.LOCATION_CODES, JsonKey.LIST),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -29,7 +29,7 @@ public class UserCreateRequestValidator {
         && CollectionUtils.isNotEmpty(typeList)
         && !typeList.contains(type.toLowerCase())) {
       throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
+          ResponseCode.invalidValue,
           ProjectUtil.formatMessage(
               ResponseCode.invalidValue.getErrorMessage(), JsonKey.LOCATION_TYPE, type, typeList),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -47,7 +47,7 @@ public class UserCreateRequestValidator {
     // Throw an exception if location codes update does not contains state code
     if (StringUtils.isBlank(stateCode)) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           ProjectUtil.formatMessage(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(),
               JsonKey.LOCATION_CODES + " of type State"),

@@ -31,7 +31,7 @@ public class OtpRequestValidator extends BaseRequestValidator {
     String templateId = (String) otpRequest.getRequest().get(JsonKey.TEMPLATE_ID);
     if (StringUtils.isNotBlank(templateId) && !allowedTemplate.contains(templateId)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidIdentifier.getErrorCode(),
+          ResponseCode.invalidIdentifier,
           ProjectUtil.formatMessage(
               ResponseMessage.Message.INVALID_PARAMETER_VALUE, templateId, JsonKey.TEMPLATE_ID),
           ResponseCode.SERVER_ERROR.getResponseCode());

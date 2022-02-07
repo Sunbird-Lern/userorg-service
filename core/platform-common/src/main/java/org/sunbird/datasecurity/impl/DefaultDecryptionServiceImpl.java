@@ -114,7 +114,7 @@ public class DefaultDecryptionServiceImpl implements DecryptionService {
       if (throwExceptionOnFailure) {
         logger.info(
             context, "Throwing exception error upon explicit ask by callers for value " + value);
-        ProjectCommonException.throwClientErrorException(ResponseCode.userDataEncryptionError);
+        ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
       }
     }
     return value;

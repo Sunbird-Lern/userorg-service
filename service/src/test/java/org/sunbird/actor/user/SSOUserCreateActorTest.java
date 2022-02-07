@@ -283,7 +283,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_USER),
-            ResponseCode.invalidCountryCode);
+            ResponseCode.invalidParameter);
     assertTrue(result);
   }
 
@@ -294,7 +294,7 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.CREATE_SSO_USER),
-            ResponseCode.invalidCountryCode);
+            ResponseCode.invalidParameter);
     assertTrue(result);
   }
 

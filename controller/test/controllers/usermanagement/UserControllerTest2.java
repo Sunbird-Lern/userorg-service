@@ -77,7 +77,7 @@ public class UserControllerTest2 extends BaseApplicationTest {
   @Test
   public void testUserExistsWithValidEmail() {
     Result result = performTest(USER_EXISTS_API.concat("email/demo@gmail.com"), "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -103,7 +103,7 @@ public class UserControllerTest2 extends BaseApplicationTest {
   public void testUpdateUserDeclarations() {
     Result result =
         performTest("/v1/user/declarations", "PATCH", (Map) createUpdateUserDeclrationRequests());
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
   }
 
   private Map createUpdateUserDeclrationRequests() {
@@ -126,7 +126,7 @@ public class UserControllerTest2 extends BaseApplicationTest {
     Result result =
         performTest(
             "/v1/user/managed/102fcbd2-8ec1-4870-b9e1-5dc01f2acc75?withTokens=false", "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 

@@ -154,7 +154,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           setTaskStatus(
               task,
               ProjectUtil.BulkProcessStatus.FAILED,
-              ResponseCode.invalidOrgId.getErrorMessage(),
+            MessageFormat.format(
+              ResponseCode.invalidParameter.getErrorMessage(),
+              JsonKey.ORGANISATION + JsonKey.ID),
               userMap,
               JsonKey.CREATE);
           return;
@@ -200,7 +202,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         setTaskStatus(
             task,
             ProjectUtil.BulkProcessStatus.FAILED,
-            ResponseCode.invalidOrgStatus.getErrorMessage(),
+          MessageFormat.format(
+            ResponseCode.invalidParameter.getErrorMessage(),
+            JsonKey.ORGANISATION + JsonKey.STATUS),
             userMap,
             JsonKey.CREATE);
         return;
@@ -270,7 +274,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
-          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.serverError.getErrorMessage(),
           user,
           JsonKey.CREATE);
     } else {

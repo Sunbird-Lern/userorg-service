@@ -43,15 +43,16 @@ public class FileStorageController extends BaseController {
    * @return CompletionStage<Result>
    */
   public CompletionStage<Result> uploadFileService(Http.Request httpRequest) {
-
+    Request reqObj = new Request();
     try {
-
-      Request reqObj = new Request();
       Map<String, Object> map = new HashMap<>();
       byte[] byteArray = null;
       MultipartFormData body = httpRequest.body().asMultipartFormData();
       Map<String, String[]> formUrlEncodeddata = httpRequest.body().asFormUrlEncoded();
       JsonNode requestData = httpRequest.body().asJson();
+      reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
+      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
+      reqObj.setEnv(getEnvironment());
       if (body != null) {
         Map<String, String[]> data = body.asFormUrlEncoded();
         for (Entry<String, String[]> entry : data.entrySet()) {
@@ -86,14 +87,16 @@ public class FileStorageController extends BaseController {
       } else {
         ProjectCommonException e =
             new ProjectCommonException(
-                ResponseCode.invalidData.getErrorCode(),
-                ResponseCode.invalidData.getErrorMessage(),
+                ResponseCode.invalidRequestData,
+                ResponseCode.invalidRequestData.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
-        return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                e, ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+
+        return CompletableFuture.completedFuture(
+            createCommonExceptionResponse(exception, httpRequest));
       }
-      reqObj.setOperation(ActorOperations.FILE_STORAGE_SERVICE.getValue());
-      reqObj.setRequestId(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
-      reqObj.setEnv(getEnvironment());
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
       map.put(JsonKey.CREATED_BY, Common.getFromRequest(httpRequest, Attrs.USER_ID));
@@ -102,7 +105,12 @@ public class FileStorageController extends BaseController {
       setContextAndPrintEntryLog(httpRequest, reqObj);
       return actorResponseHandler(fileUploadServiceActor, reqObj, timeout, null, httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 }

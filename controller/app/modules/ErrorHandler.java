@@ -51,14 +51,14 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
     } else if (t instanceof akka.pattern.AskTimeoutException) {
       commonException =
           new ProjectCommonException(
-              ResponseCode.actorConnectionError.getErrorCode(),
-              ResponseCode.actorConnectionError.getErrorMessage(),
+              ResponseCode.serverError,
+              ResponseCode.serverError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     } else {
       commonException =
           new ProjectCommonException(
-              ResponseCode.internalError.getErrorCode(),
-              ResponseCode.internalError.getErrorMessage(),
+              ResponseCode.serverError,
+              ResponseCode.serverError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
     }
     response =

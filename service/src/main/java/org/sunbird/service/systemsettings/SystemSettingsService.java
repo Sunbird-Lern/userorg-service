@@ -29,7 +29,7 @@ public class SystemSettingsService {
       setting = systemSettingDaoImpl.readByField(key, context);
       if (null == setting) {
         throw new ProjectCommonException(
-            ResponseCode.resourceNotFound.getErrorCode(),
+            ResponseCode.resourceNotFound,
             ResponseCode.resourceNotFound.getErrorMessage(),
             ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
       }
@@ -60,10 +60,7 @@ public class SystemSettingsService {
   }
 
   public <T> T getSystemSettingByFieldAndKey(
-          String field,
-          String key,
-          TypeReference typeReference,
-          RequestContext context) {
+      String field, String key, TypeReference typeReference, RequestContext context) {
     SystemSetting systemSetting = getSystemSettingByKey(field, context);
     ObjectMapper objectMapper = new ObjectMapper();
     if (systemSetting != null) {
@@ -77,10 +74,10 @@ public class SystemSettingsService {
         return (T) objectMapper.convertValue(valueMap.get(keys[numKeys - 1]), typeReference);
       } catch (Exception e) {
         logger.error(
-                context,
-                "SystemSettingsService:getSystemSettingByFieldAndKey: Exception occurred with error message = "
-                        + e.getMessage(),
-                e);
+            context,
+            "SystemSettingsService:getSystemSettingByFieldAndKey: Exception occurred with error message = "
+                + e.getMessage(),
+            e);
       }
     }
     return null;

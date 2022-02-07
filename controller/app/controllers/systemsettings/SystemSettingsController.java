@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -32,7 +33,13 @@ public class SystemSettingsController extends BaseController {
           JsonKey.FIELD,
           httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(
+                  ActorOperations.GET_SYSTEM_SETTING.getValue()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 
@@ -49,7 +56,13 @@ public class SystemSettingsController extends BaseController {
           },
           httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(
+                  ActorOperations.SET_SYSTEM_SETTING.getValue()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 
@@ -59,7 +72,13 @@ public class SystemSettingsController extends BaseController {
       return handleRequest(
           systemSettingsActor, ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue(), httpRequest);
     } catch (Exception e) {
-      return CompletableFuture.completedFuture(createCommonExceptionResponse(e, httpRequest));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(
+                  ActorOperations.GET_ALL_SYSTEM_SETTINGS.getValue()));
+      return CompletableFuture.completedFuture(
+          createCommonExceptionResponse(exception, httpRequest));
     }
   }
 }

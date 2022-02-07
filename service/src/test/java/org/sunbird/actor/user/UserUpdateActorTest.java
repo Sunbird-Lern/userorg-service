@@ -66,7 +66,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER),
-            ResponseCode.CLIENT_ERROR,
+            ResponseCode.invalidRequestParameter,
             props);
     assertTrue(result);
   }
@@ -190,7 +190,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     boolean result =
         testScenario(
             getRequest(false, false, false, reqMap, ActorOperations.UPDATE_USER_V2),
-            ResponseCode.CLIENT_ERROR,
+            ResponseCode.invalidRequestParameter,
             props);
     assertTrue(result);
   }

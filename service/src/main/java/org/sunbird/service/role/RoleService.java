@@ -1,5 +1,6 @@
 package org.sunbird.service.role;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,8 +81,9 @@ public class RoleService {
           roleObj -> {
             if (null == roleMap.get(roleObj.trim())) {
               throw new ProjectCommonException(
-                  ResponseCode.invalidRole.getErrorCode(),
-                  ResponseCode.invalidRole.getErrorMessage(),
+                  ResponseCode.invalidParameter,
+                  MessageFormat.format(
+                      ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
           });
@@ -100,8 +102,9 @@ public class RoleService {
             if (null == roleMap.get(roleStr.trim())
                 && !JsonKey.REMOVE.equalsIgnoreCase(operation)) {
               throw new ProjectCommonException(
-                  ResponseCode.invalidRole.getErrorCode(),
-                  ResponseCode.invalidRole.getErrorMessage(),
+                  ResponseCode.invalidParameter,
+                  MessageFormat.format(
+                      ResponseCode.invalidParameter.getErrorMessage(), JsonKey.ROLE),
                   ResponseCode.CLIENT_ERROR.getResponseCode());
             }
           });

@@ -18,7 +18,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
-import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -31,6 +31,7 @@ import org.sunbird.util.Util;
 public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgroundJobActor {
 
   private final LocationService locationService = new LocationServiceImpl();
+
   @Inject
   @Named("location_actor")
   private ActorRef locationActor;
@@ -72,7 +73,8 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       if (checkMandatoryFields(row, JsonKey.CODE)) {
         Location location = null;
         try {
-          List<Location> locationList = locationService.locationSearch(JsonKey.CODE, row.get(JsonKey.CODE), context);
+          List<Location> locationList =
+              locationService.locationSearch(JsonKey.CODE, row.get(JsonKey.CODE), context);
           if (CollectionUtils.isNotEmpty(locationList)) {
             location = locationList.get(0);
           }
@@ -95,7 +97,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       }
     } catch (IOException e) {
       ProjectCommonException.throwClientErrorException(
-          ResponseCode.SERVER_ERROR, ResponseCode.SERVER_ERROR.getErrorMessage());
+          ResponseCode.SERVER_ERROR, ResponseCode.serverError.getErrorMessage());
     }
   }
 
@@ -138,7 +140,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     ObjectMapper mapper = new ObjectMapper();
     try {
       logger.info(context, "callUpdateLocation ");
-      upsertLocation(locationActor, row, LocationActorOperation.UPDATE_LOCATION.getValue(), context);
+      upsertLocation(locationActor, row, ActorOperations.UPDATE_LOCATION.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -165,7 +167,8 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
     String locationId = "";
     try {
       logger.info(context, "callCreateLocation ");
-      locationId = upsertLocation(locationActor, row, LocationActorOperation.CREATE_LOCATION.getValue(), context);
+      locationId =
+          upsertLocation(locationActor, row, ActorOperations.CREATE_LOCATION.getValue(), context);
     } catch (Exception ex) {
       logger.error(
           context,
@@ -184,7 +187,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
       setTaskStatus(
           task,
           ProjectUtil.BulkProcessStatus.FAILED,
-          ResponseCode.internalError.getErrorMessage(),
+          ResponseCode.serverError.getErrorMessage(),
           row,
           JsonKey.CREATE);
     } else {
@@ -210,7 +213,10 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
   }
 
   private String upsertLocation(
-      ActorRef actorRef, Map<String, Object> locationMap, String operation, RequestContext context) {
+      ActorRef actorRef,
+      Map<String, Object> locationMap,
+      String operation,
+      RequestContext context) {
     String locId = null;
 
     Request request = new Request();
@@ -222,7 +228,7 @@ public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgrou
 
     if (obj instanceof Response) {
       Response response = (Response) obj;
-      if(response.get(JsonKey.ID) != null) {
+      if (response.get(JsonKey.ID) != null) {
         locId = (String) response.get(JsonKey.ID);
       }
     }

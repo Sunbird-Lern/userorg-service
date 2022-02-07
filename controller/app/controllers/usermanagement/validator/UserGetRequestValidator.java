@@ -59,7 +59,7 @@ public class UserGetRequestValidator extends BaseRequestValidator {
     if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.ENABLE_CAPTCHA))
         && !new CaptchaHelper().validate(captcha, mobileApp)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidCaptcha.getErrorCode(),
+          ResponseCode.invalidCaptcha,
           ResponseCode.invalidCaptcha.getErrorMessage(),
           ResponseCode.IM_A_TEAPOT.getResponseCode());
     }

@@ -1,5 +1,6 @@
 package org.sunbird.service.user.impl;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +40,9 @@ public class UserLookUpServiceImpl implements UserLookupService {
     if (StringUtils.isNotBlank(email)) {
       List<Map<String, Object>> userMapList = userLookupDao.getEmailByType(email, context);
       if (CollectionUtils.isNotEmpty(userMapList)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.emailAlreadyExistError, null);
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorParamExists,
+            MessageFormat.format(ResponseCode.errorParamExists.getErrorMessage(), JsonKey.EMAIL));
       }
     }
   }
@@ -62,11 +65,16 @@ public class UserLookUpServiceImpl implements UserLookupService {
       List<Map<String, Object>> userMapList = userLookupDao.getEmailByType(email, context);
       if (!userMapList.isEmpty()) {
         if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
+          ProjectCommonException.throwClientErrorException(
+              ResponseCode.errorParamExists,
+              MessageFormat.format(ResponseCode.errorParamExists.getErrorMessage(), JsonKey.EMAIL));
         } else {
           Map<String, Object> userMap = userMapList.get(0);
           if (!(((String) userMap.get(JsonKey.USER_ID)).equalsIgnoreCase(user.getId()))) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.emailInUse, null);
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.errorParamExists,
+                MessageFormat.format(
+                    ResponseCode.errorParamExists.getErrorMessage(), JsonKey.EMAIL));
           }
         }
       }
@@ -79,7 +87,9 @@ public class UserLookUpServiceImpl implements UserLookupService {
     if (StringUtils.isNotBlank(phone)) {
       List<Map<String, Object>> userMapList = userLookupDao.getPhoneByType(phone, context);
       if (CollectionUtils.isNotEmpty(userMapList)) {
-        ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
+        ProjectCommonException.throwClientErrorException(
+            ResponseCode.errorParamExists,
+            MessageFormat.format(ResponseCode.errorParamExists.getErrorMessage(), JsonKey.PHONE));
       }
     }
   }
@@ -93,11 +103,16 @@ public class UserLookUpServiceImpl implements UserLookupService {
       List<Map<String, Object>> userMapList = userLookupDao.getPhoneByType(phone, context);
       if (!userMapList.isEmpty()) {
         if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
-          ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
+          ProjectCommonException.throwClientErrorException(
+              ResponseCode.errorParamExists,
+              MessageFormat.format(ResponseCode.errorParamExists.getErrorMessage(), JsonKey.PHONE));
         } else {
           Map<String, Object> userMap = userMapList.get(0);
           if (!(((String) userMap.get(JsonKey.USER_ID)).equalsIgnoreCase(user.getId()))) {
-            ProjectCommonException.throwClientErrorException(ResponseCode.PhoneNumberInUse, null);
+            ProjectCommonException.throwClientErrorException(
+                ResponseCode.errorParamExists,
+                MessageFormat.format(
+                    ResponseCode.errorParamExists.getErrorMessage(), JsonKey.PHONE));
           }
         }
       }
@@ -129,7 +144,7 @@ public class UserLookUpServiceImpl implements UserLookupService {
                 if (JsonKey.ADD.equalsIgnoreCase(externalId.get(JsonKey.OPERATION))
                     || StringUtils.isBlank(externalId.get(JsonKey.OPERATION))) {
                   throw new ProjectCommonException(
-                      ResponseCode.externalIdAssignedToOtherUser.getErrorCode(),
+                      ResponseCode.externalIdAssignedToOtherUser,
                       ProjectUtil.formatMessage(
                           ResponseCode.externalIdAssignedToOtherUser.getErrorMessage(),
                           externalId.get(JsonKey.ID),
@@ -223,9 +238,9 @@ public class UserLookUpServiceImpl implements UserLookupService {
   private static void throwUserAlreadyExistsException(
       String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-        ResponseCode.userAlreadyExists.getErrorCode(),
+        ResponseCode.errorParamExists,
         ProjectUtil.formatMessage(
-            ResponseCode.userAlreadyExists.getErrorMessage(),
+            ResponseCode.errorParamExists.getErrorMessage(),
             ProjectUtil.formatMessage(
                 ResponseMessage.Message.EXTERNAL_ID_FORMAT, externalId, idType, provider)),
         ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -234,7 +249,7 @@ public class UserLookUpServiceImpl implements UserLookupService {
   private static void throwExternalIDNotFoundException(
       String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound.getErrorCode(),
+        ResponseCode.externalIdNotFound,
         ProjectUtil.formatMessage(
             ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
         ResponseCode.CLIENT_ERROR.getResponseCode());

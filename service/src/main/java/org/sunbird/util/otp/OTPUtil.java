@@ -9,12 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.utils.SMSFactory;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.otp.OTPService;
@@ -156,7 +156,7 @@ public final class OTPUtil {
     }
     emailTemplateMap.put(JsonKey.INSTALLATION_NAME, envName);
     request = new Request();
-    request.setOperation(BackgroundOperations.emailService.name());
+    request.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
     request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);
     request.setRequestContext(context);
     return request;

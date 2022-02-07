@@ -182,7 +182,7 @@ public class OTPActor extends BaseActor {
     }
     ProjectCommonException ex =
         new ProjectCommonException(
-            ResponseCode.otpVerificationFailed.getErrorCode(),
+            ResponseCode.otpVerificationFailed,
             MessageFormat.format(
                 ResponseCode.otpVerificationFailed.getErrorMessage(), remainingCount),
             ResponseCode.CLIENT_ERROR.getResponseCode());

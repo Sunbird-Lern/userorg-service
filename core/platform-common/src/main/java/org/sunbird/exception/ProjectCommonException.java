@@ -3,6 +3,7 @@ package org.sunbird.exception;
 
 import java.text.MessageFormat;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.keys.JsonKey;
 
 /**
  * This exception will be used across all backend code. This will send status code and error message
@@ -14,19 +15,21 @@ public class ProjectCommonException extends RuntimeException {
   /** serialVersionUID. */
   private static final long serialVersionUID = 1L;
   /** code String code ResponseCode. */
-  private String code;
+  private String errorCode;
   /** message String ResponseCode. */
-  private String message;
+  private String errorMessage;
   /** responseCode int ResponseCode. */
-  private int responseCode;
+  private int errorResponseCode;
+
+  private ResponseCode responseCode;
 
   /**
    * This code is for client to identify the error and based on that do the message localization.
    *
    * @return String
    */
-  public String getCode() {
-    return code;
+  public String getErrorCode() {
+    return errorCode;
   }
 
   /**
@@ -34,8 +37,8 @@ public class ProjectCommonException extends RuntimeException {
    *
    * @param code String
    */
-  public void setCode(String code) {
-    this.code = code;
+  public void setErrorCode(String code) {
+    this.errorCode = code;
   }
 
   /**
@@ -45,12 +48,12 @@ public class ProjectCommonException extends RuntimeException {
    */
   @Override
   public String getMessage() {
-    return message;
+    return errorMessage;
   }
 
   /** @param message String */
   public void setMessage(String message) {
-    this.message = message;
+    this.errorMessage = message;
   }
 
   /**
@@ -58,13 +61,29 @@ public class ProjectCommonException extends RuntimeException {
    *
    * @return int
    */
-  public int getResponseCode() {
-    return responseCode;
+  public int getErrorResponseCode() {
+    return errorResponseCode;
   }
 
   /** @param responseCode int */
-  public void setResponseCode(int responseCode) {
+  public void setErrorResponseCode(int responseCode) {
+    this.errorResponseCode = responseCode;
+  }
+
+  public ResponseCode getResponseCode() {
+    return responseCode;
+  }
+
+  public void setResponseCode(ResponseCode responseCode) {
     this.responseCode = responseCode;
+  }
+
+  public String getErrorMessage() {
+    return errorMessage;
+  }
+
+  public void setErrorMessage(String errorMessage) {
+    this.errorMessage = errorMessage;
   }
 
   /**
@@ -74,46 +93,72 @@ public class ProjectCommonException extends RuntimeException {
    * @param message String
    * @param responseCode int
    */
-  public ProjectCommonException(String code, String message, int responseCode) {
+  public ProjectCommonException(ResponseCode code, String message, int responseCode) {
     super();
-    this.code = code;
-    this.message = message;
-    this.responseCode = responseCode;
+    this.responseCode = code;
+    this.errorCode = code.getErrorCode();
+    this.errorMessage = message;
+    this.errorResponseCode = responseCode;
+  }
+
+  public ProjectCommonException(ProjectCommonException pce, String actorOperation) {
+    super();
+    super.setStackTrace(pce.getStackTrace());
+    this.errorCode =
+        new StringBuilder(JsonKey.USER_ORG_SERVICE_PREFIX)
+            .append(actorOperation)
+            .append(pce.getErrorCode())
+            .toString();
+    this.errorResponseCode = pce.getErrorResponseCode();
+    this.errorMessage = pce.getMessage();
+    this.responseCode = pce.getResponseCode();
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder();
+    builder.append(errorCode).append(": ");
+    builder.append(errorMessage);
+    return builder.toString();
   }
 
   public ProjectCommonException(
-      String code, String messageWithPlaceholder, int responseCode, String... placeholderValue) {
+      ResponseCode code,
+      String messageWithPlaceholder,
+      int responseCode,
+      String... placeholderValue) {
     super();
-    this.code = code;
-    this.message = MessageFormat.format(messageWithPlaceholder, placeholderValue);
-    this.responseCode = responseCode;
+    this.errorCode = code.getErrorCode();
+    this.errorMessage = MessageFormat.format(messageWithPlaceholder, placeholderValue);
+    this.errorResponseCode = responseCode;
+    this.responseCode = code;
   }
 
   public static void throwClientErrorException(ResponseCode responseCode, String exceptionMessage) {
     throw new ProjectCommonException(
-        responseCode.getErrorCode(),
+        responseCode,
         StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
   public static void throwResourceNotFoundException() {
     throw new ProjectCommonException(
-        ResponseCode.resourceNotFound.getErrorCode(),
-        ResponseCode.resourceNotFound.getErrorMessage(),
+        ResponseCode.resourceNotFound,
+        MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), ""),
         ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 
   public static void throwResourceNotFoundException(
       ResponseCode responseCode, String exceptionMessage) {
     throw new ProjectCommonException(
-        responseCode.getErrorCode(),
+        responseCode,
         StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
         ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 
   public static void throwServerErrorException(ResponseCode responseCode, String exceptionMessage) {
     throw new ProjectCommonException(
-        responseCode.getErrorCode(),
+        responseCode,
         StringUtils.isBlank(exceptionMessage) ? responseCode.getErrorMessage() : exceptionMessage,
         ResponseCode.SERVER_ERROR.getResponseCode());
   }
@@ -128,7 +173,7 @@ public class ProjectCommonException extends RuntimeException {
 
   public static void throwUnauthorizedErrorException() {
     throw new ProjectCommonException(
-        ResponseCode.unAuthorized.getErrorCode(),
+        ResponseCode.unAuthorized,
         ResponseCode.unAuthorized.getErrorMessage(),
         ResponseCode.UNAUTHORIZED.getResponseCode());
   }

@@ -12,7 +12,7 @@ import org.sunbird.dto.SearchDTO;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.location.UpsertLocationRequest;
-import org.sunbird.operations.LocationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -143,7 +143,7 @@ public class LocationActor extends BaseLocationActor {
   private void saveDataToES(Map<String, Object> locData, String opType, RequestContext context) {
     Request request = new Request();
     request.setRequestContext(context);
-    request.setOperation(LocationActorOperation.UPSERT_LOCATION_TO_ES.getValue());
+    request.setOperation(ActorOperations.UPSERT_LOCATION_TO_ES.getValue());
     request.getRequest().put(JsonKey.LOCATION, locData);
     request.getRequest().put(JsonKey.OPERATION_TYPE, opType);
     try {
@@ -156,7 +156,7 @@ public class LocationActor extends BaseLocationActor {
   private void deleteDataFromES(String locId, RequestContext context) {
     Request request = new Request();
     request.setRequestContext(context);
-    request.setOperation(LocationActorOperation.DELETE_LOCATION_FROM_ES.getValue());
+    request.setOperation(ActorOperations.DELETE_LOCATION_FROM_ES.getValue());
     request.getRequest().put(JsonKey.LOCATION_ID, locId);
     try {
       locationBackgroundActor.tell(request, self());

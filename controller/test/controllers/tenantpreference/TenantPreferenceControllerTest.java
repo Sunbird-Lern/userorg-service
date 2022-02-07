@@ -54,7 +54,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.DATA, map);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
   }
 
   @Test
@@ -64,7 +64,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.KEY, "teacher");
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
   }
 
   @Test
@@ -76,7 +76,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.DATA, "data");
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/create", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.dataTypeError.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
   }
 
   @Test
@@ -90,7 +90,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.DATA, map);
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/update", "PATCH", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
   }
 
   @Test
@@ -103,7 +103,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     map.put(JsonKey.FIELDS, new ArrayList<>());
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/read", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
   }
 
   @Test
@@ -114,7 +114,7 @@ public class TenantPreferenceControllerTest extends BaseApplicationTest {
     innerMap.put(JsonKey.ORG_ID, "");
     requestMap.put(JsonKey.REQUEST, innerMap);
     Result result = performTest("/v2/org/preferences/read", "POST", requestMap);
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
   }
 
   public String mapToJson(Map map) {

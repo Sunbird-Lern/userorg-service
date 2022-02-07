@@ -50,7 +50,7 @@ public class ConfigUtilTest {
     try {
       ConfigUtil.getConfigFromJsonString(null, configType);
     } catch (ProjectCommonException e) {
-      assertTrue(e.getCode().equals(ResponseCode.errorConfigLoadEmptyString.getErrorCode()));
+      assertTrue(e.getErrorCode().equals(ResponseCode.errorConfigLoadEmptyString.getErrorCode()));
       throw e;
     }
   }
@@ -60,7 +60,7 @@ public class ConfigUtilTest {
     try {
       ConfigUtil.getConfigFromJsonString("", configType);
     } catch (ProjectCommonException e) {
-      assertTrue(e.getCode().equals(ResponseCode.errorConfigLoadEmptyString.getErrorCode()));
+      assertTrue(e.getErrorCode().equals(ResponseCode.errorConfigLoadEmptyString.getErrorCode()));
       throw e;
     }
   }
@@ -70,7 +70,7 @@ public class ConfigUtilTest {
     try {
       ConfigUtil.getConfigFromJsonString("{dummy}", configType);
     } catch (ProjectCommonException e) {
-      assertTrue(e.getCode().equals(ResponseCode.errorConfigLoadParseString.getErrorCode()));
+      assertTrue(e.getErrorCode().equals(ResponseCode.errorConfigLoadParseString.getErrorCode()));
       throw e;
     }
   }

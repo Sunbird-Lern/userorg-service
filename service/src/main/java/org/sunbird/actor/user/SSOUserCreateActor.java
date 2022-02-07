@@ -29,7 +29,6 @@ import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserFlagUtil;
 import org.sunbird.util.Util;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 
 public class SSOUserCreateActor extends UserBaseActor {
@@ -209,7 +208,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     Request EmailAndSmsRequest = new Request();
     EmailAndSmsRequest.getRequest().putAll(userMap);
     EmailAndSmsRequest.setRequestContext(context);
-    EmailAndSmsRequest.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
+    EmailAndSmsRequest.setOperation(ActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
     try {
       userOnBoardingNotificationActor.tell(EmailAndSmsRequest, self());
     } catch (Exception ex) {

@@ -5,7 +5,7 @@ import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sunbird.operations.OrganisationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.validator.orgvalidator.KeyManagementValidator;
 import play.mvc.Http;
@@ -26,7 +26,7 @@ public class KeyManagementController extends BaseController {
   public CompletionStage<Result> assignKeys(Http.Request httpRequest) {
     return handleRequest(
         organisationManagementActor,
-        OrganisationActorOperation.ASSIGN_KEYS.getValue(),
+        ActorOperations.ASSIGN_KEYS.getValue(),
         httpRequest.body().asJson(),
         orgRequest -> {
           KeyManagementValidator.getInstance((Request) orgRequest).validate();

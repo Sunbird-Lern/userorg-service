@@ -11,7 +11,6 @@ import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
@@ -38,7 +37,6 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.SMSTemplateProvider;
 import org.sunbird.util.UserFlagEnum;
 import org.sunbird.util.Util;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -259,7 +257,7 @@ public class TenantMigrationActor extends BaseActor {
     requestMap.put(
         JsonKey.SUBJECT, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_ACCOUNT_MERGE_SUBJECT));
     request.getRequest().put(JsonKey.EMAIL_REQUEST, requestMap);
-    request.setOperation(BackgroundOperations.emailService.name());
+    request.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
     return request;
   }
 
@@ -306,8 +304,7 @@ public class TenantMigrationActor extends BaseActor {
       UserUtil.validateExternalIds(user, JsonKey.CREATE, request.getRequestContext());
       userExtIdsReq.put(JsonKey.EXTERNAL_IDS, user.getExternalIds());
       Request userRequest = new Request();
-      userRequest.setOperation(
-          UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
+      userRequest.setOperation(ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue());
       userExtIdsReq.put(JsonKey.OPERATION_TYPE, JsonKey.CREATE);
       userRequest.getRequest().putAll(userExtIdsReq);
 

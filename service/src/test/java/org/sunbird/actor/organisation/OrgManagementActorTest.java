@@ -36,7 +36,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
-import org.sunbird.operations.OrganisationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -150,7 +150,7 @@ public class OrgManagementActorTest {
     req.remove(JsonKey.ORG_TYPE);
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()),
             ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
@@ -161,8 +161,7 @@ public class OrgManagementActorTest {
     req.put(JsonKey.EMAIL, "invalid_email_format.com");
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
-            ResponseCode.emailFormatError);
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.dataFormatError);
     assertTrue(result);
   }
 
@@ -172,8 +171,7 @@ public class OrgManagementActorTest {
     req.put(JsonKey.ORG_TYPE, "invalidValue");
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
-            ResponseCode.invalidValue);
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()), ResponseCode.invalidValue);
     assertTrue(result);
   }
 
@@ -186,8 +184,8 @@ public class OrgManagementActorTest {
 
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue()),
-            ResponseCode.channelUniquenessInvalid);
+            getRequest(req, ActorOperations.CREATE_ORG.getValue()),
+            ResponseCode.errorDuplicateEntry);
     assertTrue(result);
   }
 
@@ -201,8 +199,7 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
     Request req =
         getRequest(
-            getRequestDataForOrgCreate(basicRequestData),
-            OrganisationActorOperation.CREATE_ORG.getValue());
+            getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
     boolean result = testScenario(req, null);
     assertTrue(result);
   }
@@ -212,7 +209,7 @@ public class OrgManagementActorTest {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.ORGANISATION_ID, "orgId");
     boolean result =
-        testScenario(getRequest(req, OrganisationActorOperation.GET_ORG_DETAILS.getValue()), null);
+        testScenario(getRequest(req, ActorOperations.GET_ORG_DETAILS.getValue()), null);
     assertTrue(result);
   }
 
@@ -223,8 +220,8 @@ public class OrgManagementActorTest {
     req.put(JsonKey.ORGANISATION_ID, "orgId");
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.GET_ORG_DETAILS.getValue()),
-            ResponseCode.orgDoesNotExist);
+            getRequest(req, ActorOperations.GET_ORG_DETAILS.getValue()),
+            ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 
@@ -238,8 +235,7 @@ public class OrgManagementActorTest {
         .thenReturn(promise.future());
     Map<String, Object> map = getRequestDataForOrgCreate(basicRequestData);
     map.remove(JsonKey.EXTERNAL_ID);
-    boolean result =
-        testScenario(getRequest(map, OrganisationActorOperation.CREATE_ORG.getValue()), null);
+    boolean result = testScenario(getRequest(map, ActorOperations.CREATE_ORG.getValue()), null);
     assertTrue(result);
   }
 
@@ -257,7 +253,7 @@ public class OrgManagementActorTest {
     Map<String, Object> req = getRequestDataForOrgCreate(basicRequestData);
     req.put(JsonKey.HASHTAGID, "orgId");
     req.put(JsonKey.IS_TENANT, true);
-    Request reqst = getRequest(req, OrganisationActorOperation.CREATE_ORG.getValue());
+    Request reqst = getRequest(req, ActorOperations.CREATE_ORG.getValue());
     reqst.getContext().put(JsonKey.CALLER_ID, JsonKey.BULK_ORG_UPLOAD);
     boolean result = testScenario(reqst, null);
     assertTrue(result);
@@ -269,7 +265,7 @@ public class OrgManagementActorTest {
     map.remove(JsonKey.CHANNEL);
     boolean result =
         testScenario(
-            getRequest(map, OrganisationActorOperation.CREATE_ORG.getValue()),
+            getRequest(map, ActorOperations.CREATE_ORG.getValue()),
             ResponseCode.mandatoryParamsMissing);
     assertTrue(result);
   }
@@ -280,7 +276,7 @@ public class OrgManagementActorTest {
     req.remove(JsonKey.ORGANISATION_ID);
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.UPDATE_ORG.getValue()),
+            getRequest(req, ActorOperations.UPDATE_ORG.getValue()),
             ResponseCode.invalidRequestData);
     assertTrue(result);
   }
@@ -298,7 +294,7 @@ public class OrgManagementActorTest {
         .thenReturn("");
     boolean result =
         testScenario(
-            getRequest(req, OrganisationActorOperation.UPDATE_ORG.getValue()),
+            getRequest(req, ActorOperations.UPDATE_ORG.getValue()),
             ResponseCode.invalidRequestData);
     assertTrue(result);
   }
@@ -310,8 +306,7 @@ public class OrgManagementActorTest {
     req.put(JsonKey.EXTERNAL_ID, "extId");
     Request request =
         getRequest(
-            getRequestDataForOrgCreate(basicRequestData),
-            OrganisationActorOperation.CREATE_ORG.getValue());
+            getRequestDataForOrgCreate(basicRequestData), ActorOperations.CREATE_ORG.getValue());
     boolean result = testScenario(request, null);
     assertTrue(result);
   }
@@ -322,8 +317,7 @@ public class OrgManagementActorTest {
     map.put(JsonKey.EMAIL, "invalid_email_format.com");
     boolean result =
         testScenario(
-            getRequest(map, OrganisationActorOperation.UPDATE_ORG.getValue()),
-            ResponseCode.emailFormatError);
+            getRequest(map, ActorOperations.UPDATE_ORG.getValue()), ResponseCode.dataFormatError);
     assertTrue(result);
   }
 
@@ -464,8 +458,8 @@ public class OrgManagementActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getResponseCode().name().equals(errorCode.name())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 
