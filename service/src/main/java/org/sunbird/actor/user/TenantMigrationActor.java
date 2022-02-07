@@ -180,8 +180,8 @@ public class TenantMigrationActor extends BaseActor {
     // Revoke org consent
     Map<String, Object> consentReqMap = new HashMap<>();
     consentReqMap.put(JsonKey.USER_ID, (String) request.getRequest().get(JsonKey.USER_ID));
-    consentReqMap.put(JsonKey.CONSENT_CONSUMERID, orgId);
-    consentReqMap.put(JsonKey.CONSENT_OBJECTID, orgId);
+    consentReqMap.put(JsonKey.CONSENT_CONSUMERID, request.getRequest().get(JsonKey.ROOT_ORG_ID));
+    consentReqMap.put(JsonKey.CONSENT_OBJECTID, request.getRequest().get(JsonKey.ROOT_ORG_ID));
     consentReqMap.put(JsonKey.CONSENT_OBJECTTYPE, JsonKey.CONSENT_OBJECTTYPE_ORG);
     consentReqMap.put(JsonKey.STATUS, JsonKey.CONSENT_STATUS_REVOKED);
     Response consentRes =
