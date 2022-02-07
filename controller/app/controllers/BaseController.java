@@ -438,7 +438,35 @@ public class BaseController extends Controller {
         response.getParams().setErrmsg(exception.getMessage());
       }
     }
+    handleBackwardCompatibility(request, exception, response);
     return response;
+  }
+
+  private static void handleBackwardCompatibility(
+      Request request, ProjectCommonException exception, Response response) {
+    // This code is for backwards compatibility
+    if (request.path() != null && request.path().startsWith("/v1/otp/generate")) {
+      if ("errorRateLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
+        response.getParams().setErr("ERROR_RATE_LIMIT_EXCEEDED");
+        response.getParams().setStatus("ERROR_RATE_LIMIT_EXCEEDED");
+      }
+    }
+
+    if (request.path() != null && request.path().startsWith("/v1/otp/verify")) {
+      if ("otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name())) {
+        response.getParams().setErr("OTP_VERIFICATION_FAILED");
+        response.getParams().setStatus("OTP_VERIFICATION_FAILED");
+      }
+    }
+
+    if (request.path() != null
+        && (request.path().startsWith("/v1/manageduser/create")
+            || request.path().startsWith("/v4/user/create"))) {
+      if ("managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
+        response.getParams().setErr("MANAGED_USER_LIMIT_EXCEEDED");
+        response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
+      }
+    }
   }
 
   /**
