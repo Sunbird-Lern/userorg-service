@@ -11,6 +11,7 @@ POST	/v1/ssouser/create                      @controllers.usermanagement.UserCon
 # Managed-User creation, this is not for regular user creation.
 POST    /v4/user/create                         @controllers.usermanagement.UserController.createUserV4(request: play.mvc.Http.Request)
 POST    /v1/manageduser/create		            @controllers.usermanagement.UserController.createManagedUser(request: play.mvc.Http.Request)
+POST    /v2/manageduser/create		            @controllers.usermanagement.UserController.createManagedUser(request: play.mvc.Http.Request)
 # SSU user creation
 POST    /v1/user/signup                         @controllers.usermanagement.UserController.createUserV3(request: play.mvc.Http.Request)
 POST    /v2/user/signup                         @controllers.usermanagement.UserController.createSSUUser(request: play.mvc.Http.Request)
@@ -65,6 +66,8 @@ POST    /v1/user/consent/read                   @controllers.usermanagement.User
 # OTP APIs
 POST    /v1/otp/generate                        @controllers.otp.OtpController.generateOTP(request: play.mvc.Http.Request)
 POST    /v1/otp/verify                          @controllers.otp.OtpController.verifyOTP(request: play.mvc.Http.Request)
+POST    /v2/otp/generate                        @controllers.otp.OtpController.generateOTP(request: play.mvc.Http.Request)
+POST    /v2/otp/verify                          @controllers.otp.OtpController.verifyOTP(request: play.mvc.Http.Request)
 
 #Tenant Migration
 PATCH   /private/user/v1/migrate  	            @controllers.tenantmigration.TenantMigrationController.userTenantMigrate(request: play.mvc.Http.Request)
