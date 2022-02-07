@@ -151,8 +151,8 @@ public class UserFeedActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
-      return res.getCode().equals(errorCode.getErrorCode())
-          || res.getResponseCode() == errorCode.getResponseCode();
+      return res.getErrorCode().equals(errorCode.getErrorCode())
+          || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
 

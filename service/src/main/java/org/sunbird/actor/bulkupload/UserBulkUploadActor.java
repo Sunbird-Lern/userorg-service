@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
-import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.systemsettings.SystemSettingsService;
@@ -43,11 +43,8 @@ public class UserBulkUploadActor extends BaseBulkUploadActor {
   private void upload(Request request) throws IOException {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     Object dataObject =
-            systemSettingsService.getSystemSettingByFieldAndKey(
-            "userProfileConfig",
-            "csv",
-            new TypeReference<Map>() {},
-            request.getRequestContext());
+        systemSettingsService.getSystemSettingByFieldAndKey(
+            "userProfileConfig", "csv", new TypeReference<Map>() {}, request.getRequestContext());
     Map<String, Object> supportedColumnsMap = null;
     Map<String, Object> supportedColumnsLowerCaseMap = null;
     if (dataObject != null) {
@@ -116,7 +113,7 @@ public class UserBulkUploadActor extends BaseBulkUploadActor {
         recordCount,
         processId,
         bulkUploadProcess,
-        BulkUploadActorOperation.USER_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
+        ActorOperations.USER_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
         DataCacheHandler.bulkUserAllowedFields,
         context);
   }

@@ -27,8 +27,8 @@ public class UserCreateRequestValidatorTest {
     try {
       UserCreateRequestValidator.validateLocationCodesDataType(locationCodes);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
+      assertEquals(ResponseCode.dataTypeError.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -58,7 +58,7 @@ public class UserCreateRequestValidatorTest {
     try {
       UserCreateRequestValidator.validateAndGetStateLocationCode(locList);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.mandatoryParamsMissing.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -81,8 +81,8 @@ public class UserCreateRequestValidatorTest {
     try {
       UserCreateRequestValidator.validatePrimaryAndRecoveryKeys(userReqMap);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.recoveryParamsMatchException.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
+      assertEquals(ResponseCode.recoveryParamsMatchException.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -108,8 +108,8 @@ public class UserCreateRequestValidatorTest {
     try {
       UserCreateRequestValidator.validatePrimaryEmailOrPhone(dbUserReqMap, userReqMap);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getResponseCode());
-      assertEquals(ResponseCode.recoveryParamsMatchException.getErrorCode(), e.getCode());
+      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
+      assertEquals(ResponseCode.recoveryParamsMatchException.getErrorCode(), e.getErrorCode());
     }
   }
 }

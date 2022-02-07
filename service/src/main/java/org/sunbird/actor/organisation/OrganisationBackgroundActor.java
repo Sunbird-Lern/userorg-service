@@ -11,7 +11,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.OrganisationActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
@@ -25,7 +25,7 @@ public class OrganisationBackgroundActor extends BaseActor {
   public void onReceive(Request request) throws Throwable {
     if (request
         .getOperation()
-        .equalsIgnoreCase(OrganisationActorOperation.UPSERT_ORGANISATION_TO_ES.getValue())) {
+        .equalsIgnoreCase(ActorOperations.UPSERT_ORGANISATION_TO_ES.getValue())) {
       upsertOrganisationDataToES(request);
     } else {
       onReceiveUnsupportedOperation();

@@ -113,8 +113,8 @@ public class DefaultEncryptionServiceImpl implements EncryptionService {
         logger.error(
             context, "Exception while encrypting user data, with message : " + e.getMessage(), e);
         throw new ProjectCommonException(
-            ResponseCode.userDataEncryptionError.getErrorCode(),
-            ResponseCode.userDataEncryptionError.getErrorMessage(),
+            ResponseCode.serverError,
+            ResponseCode.serverError.getErrorMessage(),
             ResponseCode.SERVER_ERROR.getResponseCode());
       }
       eValue = new BASE64Encoder().encode(encValue);
@@ -138,10 +138,11 @@ public class DefaultEncryptionServiceImpl implements EncryptionService {
       }
     }
     if (StringUtils.isBlank(encryption_key)) {
-      logger.info("throwing exception for invalid salt==");
+      logger.info("throwing exception for invalid salt");
       throw new ProjectCommonException(
-          ResponseCode.saltValue.getErrorCode(),
-          ResponseCode.saltValue.getErrorMessage(),
+          ResponseCode.invalidParameterValue,
+          String.format(
+              ResponseCode.invalidParameterValue.getErrorMessage(), JsonKey.ENCRYPTION_KEY),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return encryption_key;

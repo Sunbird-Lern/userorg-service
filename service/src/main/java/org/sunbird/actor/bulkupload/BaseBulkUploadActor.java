@@ -58,7 +58,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
 
     if (ArrayUtils.isEmpty(csvHeaderLine)) {
       throw new ProjectCommonException(
-          ResponseCode.emptyHeaderLine.getErrorCode(),
+          ResponseCode.emptyHeaderLine,
           ResponseCode.emptyHeaderLine.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -72,7 +72,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
                 }
                 if (!(ArrayUtils.contains(csvHeaderLine, x))) {
                   throw new ProjectCommonException(
-                      ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                      ResponseCode.mandatoryParamsMissing,
                       ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                       ResponseCode.CLIENT_ERROR.getResponseCode(),
                       x);
@@ -93,7 +93,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
 
   private void throwInvalidColumnException(String invalidColumn, String validColumns) {
     throw new ProjectCommonException(
-        ResponseCode.invalidColumns.getErrorCode(),
+        ResponseCode.invalidColumns,
         ResponseCode.invalidColumns.getErrorMessage(),
         ResponseCode.CLIENT_ERROR.getResponseCode(),
         invalidColumn,
@@ -189,7 +189,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
   public void validateFileSizeAgainstLineNumbers(int maxLines, int actualLines) {
     if (actualLines > 0 && actualLines > maxLines) {
       throw new ProjectCommonException(
-          ResponseCode.dataSizeError.getErrorCode(),
+          ResponseCode.dataSizeError,
           ProjectUtil.formatMessage(ResponseCode.dataSizeError.getErrorMessage(), (maxLines - 1)),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -206,13 +206,13 @@ public abstract class BaseBulkUploadActor extends BaseActor {
     if (null != csvLines) {
       if (csvLines.size() < 2) {
         throw new ProjectCommonException(
-            ResponseCode.emptyFile.getErrorCode(),
+            ResponseCode.emptyFile,
             ResponseCode.emptyFile.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } else {
       throw new ProjectCommonException(
-          ResponseCode.emptyFile.getErrorCode(),
+          ResponseCode.emptyFile,
           ResponseCode.emptyFile.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -403,7 +403,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
       csvLine = csvReader.readNext();
       if (csvLine == null) {
         ProjectCommonException.throwClientErrorException(
-            ResponseCode.errorCsvNoDataRows, ResponseCode.errorCsvNoDataRows.getErrorMessage());
+            ResponseCode.csvFileEmpty, ResponseCode.csvFileEmpty.getErrorMessage());
       }
     } catch (Exception ex) {
       logger.error(
@@ -429,7 +429,7 @@ public abstract class BaseBulkUploadActor extends BaseActor {
         column -> {
           if (!(csvMappedColumns.contains(column))) {
             throw new ProjectCommonException(
-                ResponseCode.mandatoryParamsMissing.getErrorCode(),
+                ResponseCode.mandatoryParamsMissing,
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                 ResponseCode.CLIENT_ERROR.getResponseCode(),
                 column);
@@ -453,8 +453,8 @@ public abstract class BaseBulkUploadActor extends BaseActor {
           context,
           "BaseBulkUploadActor:handleUpload: Error creating record in bulk_upload_process.");
       throw new ProjectCommonException(
-          ResponseCode.SERVER_ERROR.getErrorCode(),
-          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.serverError,
+          ResponseCode.serverError.getErrorMessage(),
           ResponseCode.SERVER_ERROR.getResponseCode());
     }
     return bulkUploadProcess;

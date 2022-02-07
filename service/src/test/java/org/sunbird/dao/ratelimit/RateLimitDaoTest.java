@@ -98,7 +98,7 @@ public class RateLimitDaoTest {
     try {
       rateLimitDao.insertRateLimits(getInvalidRateLimits(), null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.SERVER_ERROR.getResponseCode(), e.getResponseCode());
+      assertEquals(ResponseCode.SERVER_ERROR.getResponseCode(), e.getErrorResponseCode());
       throw e;
     }
   }

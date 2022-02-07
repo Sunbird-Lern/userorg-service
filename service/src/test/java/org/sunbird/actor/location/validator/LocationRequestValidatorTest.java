@@ -155,7 +155,7 @@ public class LocationRequestValidatorTest {
       Assert.assertNotNull(ex);
       String msg =
           ProjectUtil.formatMessage(
-              ResponseCode.alreadyExists.getErrorMessage(), JsonKey.CODE, request.getCode());
+              ResponseCode.errorDuplicateEntry.getErrorMessage(), request.getCode(), JsonKey.CODE);
       Assert.assertEquals(msg, ex.getMessage());
     }
   }
@@ -190,7 +190,7 @@ public class LocationRequestValidatorTest {
       Assert.assertNotNull(ex);
       String msg =
           ProjectUtil.formatMessage(
-              ResponseCode.alreadyExists.getErrorMessage(), JsonKey.CODE, request.getCode());
+              ResponseCode.errorDuplicateEntry.getErrorMessage(), request.getCode(), JsonKey.CODE);
       Assert.assertEquals(msg, ex.getMessage());
     }
   }
@@ -447,7 +447,7 @@ public class LocationRequestValidatorTest {
       validator.validateSearchLocationRequest(req);
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
 
@@ -460,7 +460,7 @@ public class LocationRequestValidatorTest {
       validator.validateSearchLocationRequest(req);
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.invalidRequestData.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.invalidRequestData.getErrorCode());
     }
   }
 
@@ -470,7 +470,7 @@ public class LocationRequestValidatorTest {
       validator.validateDeleteLocationRequest("");
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
-      Assert.assertEquals(ex.getCode(), ResponseCode.locationIdRequired.getErrorCode());
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.mandatoryParamsMissing.getErrorCode());
     }
   }
 

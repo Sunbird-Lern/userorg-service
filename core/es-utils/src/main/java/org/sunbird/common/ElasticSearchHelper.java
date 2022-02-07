@@ -1,7 +1,6 @@
 package org.sunbird.common;
 
 import akka.util.Timeout;
-import com.typesafe.config.Config;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +38,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.ConfigUtil;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 
@@ -59,10 +57,7 @@ public class ElasticSearchHelper {
   public static final String ASC_ORDER = "ASC";
   public static final String STARTS_WITH = "startsWith";
   public static final String ENDS_WITH = "endsWith";
-  public static final String SOFT_MODE = "soft";
   public static final String RAW_APPEND = ".raw";
-  protected static final String ES_CONFIG_FILE = "elasticsearch.conf";
-  private static final Config config = ConfigUtil.getConfig(ES_CONFIG_FILE);
   public static final int WAIT_TIME = 5;
   public static Timeout timeout = new Timeout(WAIT_TIME, TimeUnit.SECONDS);
   public static final List<String> upsertResults =

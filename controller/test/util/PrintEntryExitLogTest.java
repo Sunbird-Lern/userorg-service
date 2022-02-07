@@ -36,10 +36,10 @@ public class PrintEntryExitLogTest {
       ResponseParams params = new ResponseParams();
       ProjectCommonException exception =
           new ProjectCommonException(
-              ResponseCode.internalError.getErrorCode(),
-              ResponseCode.internalError.getErrorMessage(),
+              ResponseCode.serverError,
+              ResponseCode.serverError.getErrorMessage(),
               ResponseCode.SERVER_ERROR.getResponseCode());
-      ResponseCode code = ResponseCode.getResponse(exception.getCode());
+      ResponseCode code = exception.getResponseCode();
       params.setErr(code.getErrorCode());
       params.setErrmsg(code.getErrorMessage());
       params.setStatus(JsonKey.FAILED);

@@ -4,6 +4,7 @@ import akka.actor.UntypedAbstractActor;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 
 public abstract class BaseActor extends UntypedAbstractActor {
@@ -20,8 +21,17 @@ public abstract class BaseActor extends UntypedAbstractActor {
         onReceive(request);
       } catch (Exception e) {
         logger.error(
-            request.getRequestContext(), "Error while processing the message : " + operation, e);
-        onReceiveException(e);
+            request.getRequestContext(),
+            "Error while processing the message for operation: " + operation,
+            e);
+        if (e instanceof ProjectCommonException) {
+          ProjectCommonException exception =
+              new ProjectCommonException(
+                  (ProjectCommonException) e,
+                  ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+          sender().tell(exception, self());
+        }
+        sender().tell(e, self());
       }
     }
   }
@@ -29,13 +39,9 @@ public abstract class BaseActor extends UntypedAbstractActor {
   protected void onReceiveUnsupportedOperation() {
     ProjectCommonException exception =
         new ProjectCommonException(
-            ResponseCode.invalidRequestData.getErrorCode(),
-            ResponseCode.invalidRequestData.getErrorMessage(),
+            ResponseCode.invalidOperationName,
+            ResponseCode.invalidOperationName.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
-    sender().tell(exception, self());
-  }
-
-  private void onReceiveException(Exception exception) {
     sender().tell(exception, self());
   }
 }

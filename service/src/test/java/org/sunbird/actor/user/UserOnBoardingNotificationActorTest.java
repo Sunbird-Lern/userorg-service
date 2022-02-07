@@ -19,6 +19,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.organisation.OrgService;
@@ -27,7 +28,6 @@ import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.util.UserUtility;
-import org.sunbird.util.user.UserActorOperations;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -76,7 +76,7 @@ public class UserOnBoardingNotificationActorTest {
     context.setReqId("54654654646546");
     context.setOp("operation");
     request.setRequestContext(context);
-    request.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
+    request.setOperation(ActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
     request.getRequest().put(JsonKey.USERNAME, "userName");
     request.getRequest().put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     request.getRequest().put(JsonKey.EMAIL, "xyz@xyz.com");
@@ -100,7 +100,7 @@ public class UserOnBoardingNotificationActorTest {
     context.setReqId("54654654646546");
     context.setOp("operation");
     request.setRequestContext(context);
-    request.setOperation(UserActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
+    request.setOperation(ActorOperations.PROCESS_ONBOARDING_MAIL_AND_SMS.getValue());
     request.getRequest().put(JsonKey.USERNAME, "userName");
     request.getRequest().put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     request.getRequest().put(JsonKey.SET_PASSWORD_LINK, "link");
@@ -125,7 +125,7 @@ public class UserOnBoardingNotificationActorTest {
     context.setReqId("54654654646546");
     context.setOp("operation");
     request.setRequestContext(context);
-    request.setOperation(UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
+    request.setOperation(ActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
     request.getRequest().put(JsonKey.USERNAME, "userName");
     request.getRequest().put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     request.getRequest().put(JsonKey.EMAIL, "xyz@xyz.com");
@@ -150,7 +150,7 @@ public class UserOnBoardingNotificationActorTest {
     context.setReqId("54654654646546");
     context.setOp("operation");
     request.setRequestContext(context);
-    request.setOperation(UserActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
+    request.setOperation(ActorOperations.PROCESS_PASSWORD_RESET_MAIL_AND_SMS.getValue());
     request.getRequest().put(JsonKey.USERNAME, "userName");
     request.getRequest().put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     request.getRequest().put(JsonKey.PHONE, "9999999999");

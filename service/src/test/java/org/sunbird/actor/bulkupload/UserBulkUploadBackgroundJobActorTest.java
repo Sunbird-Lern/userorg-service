@@ -32,7 +32,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryWriter;
@@ -105,7 +105,7 @@ public class UserBulkUploadBackgroundJobActorTest {
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     Request reqObj = new Request();
-    reqObj.setOperation(BulkUploadActorOperation.USER_BULK_UPLOAD_BACKGROUND_JOB.getValue());
+    reqObj.setOperation(ActorOperations.USER_BULK_UPLOAD_BACKGROUND_JOB.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     reqObj.getRequest().put(JsonKey.DATA, innerMap);
     subject.tell(reqObj, probe.getRef());

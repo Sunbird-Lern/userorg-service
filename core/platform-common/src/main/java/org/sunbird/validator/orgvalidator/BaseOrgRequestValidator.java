@@ -24,7 +24,7 @@ public class BaseOrgRequestValidator extends BaseRequestValidator {
             && (Boolean) request.getRequest().get(JsonKey.IS_TENANT))
         && StringUtils.isEmpty((String) request.getRequest().get(JsonKey.CHANNEL))) {
       throw new ProjectCommonException(
-          ResponseCode.dependentParameterMissing.getErrorCode(),
+          ResponseCode.dependentParameterMissing,
           MessageFormat.format(
               ResponseCode.dependentParameterMissing.getErrorMessage(),
               JsonKey.CHANNEL,

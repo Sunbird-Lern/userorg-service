@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
-import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
@@ -72,7 +72,7 @@ public class LocationBulkUploadActor extends BaseBulkUploadActor {
         recordCount,
         processId,
         bulkUploadProcess,
-        BulkUploadActorOperation.LOCATION_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
+        ActorOperations.LOCATION_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
         bulkLocationAllowedFields,
         context);
   }

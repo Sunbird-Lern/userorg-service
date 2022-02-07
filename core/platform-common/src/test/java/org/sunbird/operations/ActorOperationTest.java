@@ -22,10 +22,6 @@ public class ActorOperationTest {
     Assert.assertEquals("getRoles", ActorOperations.GET_ROLES.getValue());
     Assert.assertEquals(
         "getUserDetailsByLoginId", ActorOperations.GET_USER_DETAILS_BY_LOGINID.getValue());
-    Assert.assertEquals(
-        "updateOrgInfoToElastic", ActorOperations.UPDATE_ORG_INFO_ELASTIC.getValue());
-    Assert.assertEquals(
-        "insertOrgInfoToElastic", ActorOperations.INSERT_ORG_INFO_ELASTIC.getValue());
     Assert.assertEquals("blockUser", ActorOperations.BLOCK_USER.getValue());
     Assert.assertEquals("bulkUpload", ActorOperations.BULK_UPLOAD.getValue());
     Assert.assertEquals("processBulkUpload", ActorOperations.PROCESS_BULK_UPLOAD.getValue());
@@ -47,7 +43,6 @@ public class ActorOperationTest {
         "insertUserNotesToElastic", ActorOperations.INSERT_USER_NOTES_ES.getValue());
     Assert.assertEquals(
         "updateUserNotesToElastic", ActorOperations.UPDATE_USER_NOTES_ES.getValue());
-    Assert.assertEquals("userCurrentLogin", ActorOperations.USER_CURRENT_LOGIN.getValue());
     Assert.assertEquals("userSearch", ActorOperations.USER_SEARCH.getValue());
     Assert.assertEquals("orgSearch", ActorOperations.ORG_SEARCH.getValue());
   }

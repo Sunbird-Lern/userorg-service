@@ -186,7 +186,7 @@ public class UserTnCActorTest {
     ProjectCommonException response =
         setRequest(ACCEPTED_CORRECT_VERSION)
             .expectMsgClass(duration("10 second"), ProjectCommonException.class);
-    Assert.assertEquals(ResponseCode.userAccountlocked.getErrorCode(), response.getCode());
+    Assert.assertEquals(ResponseCode.userAccountlocked.getErrorCode(), response.getErrorCode());
     Assert.assertEquals("User account has been blocked .", response.getMessage());
   }
 
@@ -198,8 +198,9 @@ public class UserTnCActorTest {
     Assert.assertTrue(
         null != exception
             && exception
-                .getCode()
-                .equalsIgnoreCase(ResponseCode.invalidParameterValue.getErrorCode()));
+                .getErrorCode()
+                .equalsIgnoreCase(
+                    "UOS_TNCACCPT" + ResponseCode.invalidParameterValue.getErrorCode()));
   }
 
   @Test

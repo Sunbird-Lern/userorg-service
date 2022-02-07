@@ -18,10 +18,10 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserDeclareEntity;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -42,9 +42,7 @@ public class UserProfileUpdateActor extends BaseActor {
 
   @Override
   public void onReceive(Request request) throws Throwable {
-    if (UserActorOperations.SAVE_USER_ATTRIBUTES
-        .getValue()
-        .equalsIgnoreCase(request.getOperation())) {
+    if (ActorOperations.SAVE_USER_ATTRIBUTES.getValue().equalsIgnoreCase(request.getOperation())) {
       saveUserAttributes(request);
     } else {
       onReceiveUnsupportedOperation();
@@ -142,7 +140,7 @@ public class UserProfileUpdateActor extends BaseActor {
     return saveUserAttributes(
         userMap,
         userSelfDeclarationManagementActor,
-        UserActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue(),
+        ActorOperations.UPSERT_USER_SELF_DECLARATIONS.getValue(),
         context);
   }
 
@@ -152,16 +150,16 @@ public class UserProfileUpdateActor extends BaseActor {
     return saveUserAttributes(
         userMap,
         userExternalIdManagementActor,
-        UserActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue(),
+        ActorOperations.UPSERT_USER_EXTERNAL_IDENTITY_DETAILS.getValue(),
         context);
   }
 
   private Future<Object> saveUserOrgDetails(
       Map<String, Object> userMap, String callerId, String operationType, RequestContext context) {
-    String actorOperation = UserActorOperations.UPDATE_USER_ORG_DETAILS.getValue();
+    String actorOperation = ActorOperations.UPDATE_USER_ORG_DETAILS.getValue();
 
     if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
-      actorOperation = UserActorOperations.INSERT_USER_ORG_DETAILS.getValue();
+      actorOperation = ActorOperations.INSERT_USER_ORG_DETAILS.getValue();
     }
     Map<String, Object> reqMap = new HashMap<>(userMap);
     reqMap.put(JsonKey.CALLER_ID, callerId);

@@ -49,7 +49,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/create",
             "POST",
             createOrUpdateOrganisationRequest(orgName, null, false, null, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -59,7 +59,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
         createOrUpdateOrganisationRequest(orgName, null, false, null, null);
     ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "Test MIT license");
     Result result = performTest("/v1/org/create", "POST", reqMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -69,7 +69,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.CHANNEL, "test-123");
     ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "Test MIT license");
     Result result = performTest("/v1/org/create", "POST", reqMap);
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -79,7 +79,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.CHANNEL, "test-123");
     ((Map<String, Object>) reqMap.get(JsonKey.REQUEST)).put(JsonKey.LICENSE, "");
     Result result = performTest("/v1/org/create", "POST", reqMap);
-    assertEquals(getResponseCode(result), ResponseCode.invalidParameterValue.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -90,7 +90,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/create",
             "POST",
             createOrUpdateOrganisationRequest(null, null, false, null, null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -101,7 +101,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/create",
             "POST",
             createOrUpdateOrganisationRequest(orgName, null, true, rootOrgId, null));
-    assertEquals(getResponseCode(result), ResponseCode.dependentParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -112,7 +112,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/update",
             "PATCH",
             createOrUpdateOrganisationRequest(null, orgId, false, rootOrgId, null));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -123,7 +123,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/update",
             "PATCH",
             createOrUpdateOrganisationRequest(null, null, false, rootOrgId, null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -134,7 +134,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/status/update",
             "PATCH",
             createOrUpdateOrganisationRequest(null, orgId, false, null, status));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -145,21 +145,21 @@ public class OrganisationControllerTest extends BaseApplicationTest {
             "/v1/org/status/update",
             "PATCH",
             createOrUpdateOrganisationRequest(null, null, false, null, status));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
   @Test
   public void testGetOrgDetailsSuccess() {
     Result result = performTest("/v1/org/read", "POST", getOrganisationRequest(orgId, status));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testGetOrgDetailsFailureWithoutOrgId() {
     Result result = performTest("/v1/org/read", "POST", getOrganisationRequest(null, status));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -167,7 +167,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
   public void testSearchOrgSuccess() {
     Result result =
         performTest("/v1/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
@@ -175,14 +175,14 @@ public class OrganisationControllerTest extends BaseApplicationTest {
   public void testSearchOrgV2Success() {
     Result result =
         performTest("/v2/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.success.getErrorCode().toLowerCase());
+    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
 
   @Test
   public void testSearchOrgFailureWithoutFilters() {
     Result result = performTest("/v1/org/search", "POST", searchOrganisationRequest(status, null));
-    assertEquals(getResponseCode(result), ResponseCode.mandatoryParamsMissing.getErrorCode());
+    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
   }
 
@@ -264,7 +264,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
       Response response = mapper.readValue(responseStr, Response.class);
       ResponseParams params = response.getParams();
       if (result.status() != 200) {
-        return params.getErr();
+        return response.getResponseCode().name();
       } else {
         return params.getStatus();
       }

@@ -21,7 +21,7 @@ public class UserTnCRequestValidator extends BaseRequestValidator {
     String managedUserId = (String) request.getRequest().get(JsonKey.USER_ID);
     if (StringUtils.isNotBlank(managedUserId) && !ProjectUtil.validateUUID(managedUserId)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidPropertyError.getErrorCode(),
+          ResponseCode.invalidPropertyError,
           MessageFormat.format(
               ResponseCode.invalidPropertyError.getErrorMessage(), JsonKey.USER_ID),
           ResponseCode.CLIENT_ERROR.getResponseCode());

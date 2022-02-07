@@ -49,8 +49,7 @@ public class TenantMigrationControllerTest extends BaseApplicationTest {
     Result result =
         TestUtil.performTest(
             "/private/user/v1/migrate", "PATCH", getSuccessMigrationReq(), application);
-    assertEquals(
-        ResponseCode.success.getErrorCode().toLowerCase(), TestUtil.getResponseCode(result));
+    assertEquals(ResponseCode.SUCCESS.name(), TestUtil.getResponseCode(result));
   }
 
   private Map<String, Object> getSuccessMigrationReq() {

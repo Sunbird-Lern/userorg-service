@@ -57,7 +57,7 @@ public class RateLimitServiceImpl implements RateLimitService {
                     "RateLimitServiceImpl:throttleByKey: Rate limit threshold crossed for key = "
                         + OTPUtil.maskId(key, type));
                 throw new ProjectCommonException(
-                    ResponseCode.errorRateLimitExceeded.getErrorCode(),
+                    ResponseCode.errorRateLimitExceeded,
                     ResponseCode.errorRateLimitExceeded.getErrorMessage(),
                     ResponseCode.TOO_MANY_REQUESTS.getResponseCode(),
                     rateLimit.getUnit().toLowerCase());

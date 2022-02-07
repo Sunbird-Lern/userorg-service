@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.adminutil.AdminUtilRequestData;
 import org.sunbird.model.user.User;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -34,7 +36,6 @@ import org.sunbird.service.user.UserOrgService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.util.*;
-import org.sunbird.util.user.UserActorOperations;
 import org.sunbird.util.user.UserTncUtil;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Await;
@@ -75,7 +76,8 @@ public class UserServiceImpl implements UserService {
   public User getUserById(String userId, RequestContext context) {
     User user = userDao.getUserById(userId, context);
     if (null == user) {
-      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
+      ProjectCommonException.throwResourceNotFoundException(
+          ResponseCode.resourceNotFound, JsonKey.USER);
     }
     return user;
   }
@@ -84,7 +86,9 @@ public class UserServiceImpl implements UserService {
   public Map<String, Object> getUserDetailsById(String userId, RequestContext context) {
     Map<String, Object> user = userDao.getUserDetailsById(userId, context);
     if (MapUtils.isEmpty(user)) {
-      ProjectCommonException.throwResourceNotFoundException(ResponseCode.userNotFound, "");
+      ProjectCommonException.throwResourceNotFoundException(
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER));
     }
     user.putAll(Util.getUserDefaultValue());
     return user;
@@ -256,10 +260,8 @@ public class UserServiceImpl implements UserService {
     } catch (ProjectCommonException pe) {
       throw pe;
     } catch (Exception e) {
-      throw new ProjectCommonException(
-          ResponseCode.unableToParseData.getErrorCode(),
-          ResponseCode.unableToParseData.getErrorMessage(),
-          ResponseCode.SERVER_ERROR.getResponseCode());
+      logger.error(context, "unable to parse data :", e);
+      ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
     return encryptedTokenList;
   }
@@ -309,7 +311,7 @@ public class UserServiceImpl implements UserService {
       Map<String, Object> userMap, ActorRef actorRef, RequestContext context) {
     Request request = new Request();
     request.setRequestContext(context);
-    request.setOperation(UserActorOperations.SAVE_USER_ATTRIBUTES.getValue());
+    request.setOperation(ActorOperations.SAVE_USER_ATTRIBUTES.getValue());
     request.getRequest().putAll(userMap);
     logger.info(context, "saveUserAttributes");
     try {
@@ -334,8 +336,8 @@ public class UserServiceImpl implements UserService {
     Map<String, Object> user = userDao.getUserDetailsById(userId, context);
     if (MapUtils.isEmpty(user)) {
       throw new ProjectCommonException(
-          ResponseCode.userNotFound.getErrorCode(),
-          ResponseCode.userNotFound.getErrorMessage(),
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     String emailPhone = getDecryptedValue((String) user.get(type), context);

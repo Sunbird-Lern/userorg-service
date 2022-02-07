@@ -118,7 +118,7 @@ public class CassandraOperationImplTest {
 
     try {
       Response response = cassandraOperation.insertRecord("sunbird", "address1", address, null);
-      assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+      assertEquals(ResponseCode.success.getErrorMessage().toUpperCase(), response.get("response"));
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -151,8 +151,8 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.dbInsertionError.getErrorCode(),
-                ResponseCode.dbInsertionError.getErrorMessage(),
+                ResponseCode.serverError,
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -189,7 +189,7 @@ public class CassandraOperationImplTest {
     session.execute(Mockito.any(BoundStatement.class));
     Exception e =
         new ProjectCommonException(
-            "Undefined column name xyz",
+            ResponseCode.invalidPropertyError,
             "Undefined column name xyz",
             ResponseCode.SERVER_ERROR.getResponseCode());
     when(session.execute(boundStatement.bind(Mockito.any()))).thenThrow(e);
@@ -232,7 +232,7 @@ public class CassandraOperationImplTest {
 
     try {
       Response response = cassandraOperation.updateRecord("sunbird", "address1", address, null);
-      assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+      assertEquals(ResponseCode.success.getErrorMessage().toUpperCase(), response.get("response"));
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -265,8 +265,8 @@ public class CassandraOperationImplTest {
     when(session.execute(boundStatement.bind(Mockito.any())))
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.dbUpdateError.getErrorCode(),
-                ResponseCode.dbUpdateError.getErrorMessage(),
+                ResponseCode.serverError,
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
 
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -302,7 +302,7 @@ public class CassandraOperationImplTest {
     session.execute(Mockito.any(BoundStatement.class));
     Exception e =
         new ProjectCommonException(
-            "Undefined column name xyz",
+            ResponseCode.invalidPropertyError,
             "Undefined column name xyz",
             ResponseCode.SERVER_ERROR.getResponseCode());
     when(session.execute(boundStatement.bind(Mockito.any()))).thenThrow(e);
@@ -331,7 +331,7 @@ public class CassandraOperationImplTest {
     try {
       Response response =
           cassandraOperation.deleteRecord("sunbird", "address1", "1234567890", null);
-      assertEquals(ResponseCode.success.getErrorCode(), response.get("response"));
+      assertEquals(ResponseCode.success.getErrorMessage().toUpperCase(), response.get("response"));
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -344,8 +344,8 @@ public class CassandraOperationImplTest {
     when(QueryBuilder.delete())
         .thenThrow(
             new ProjectCommonException(
-                ResponseCode.SERVER_ERROR.getErrorCode(),
-                ResponseCode.SERVER_ERROR.getErrorMessage(),
+                ResponseCode.serverError,
+                ResponseCode.serverError.getErrorMessage(),
                 ResponseCode.SERVER_ERROR.getResponseCode()));
     CassandraOperation cassandraOperation = ServiceFactory.getInstance();
     try {

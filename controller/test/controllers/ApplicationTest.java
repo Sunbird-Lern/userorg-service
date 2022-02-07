@@ -26,7 +26,7 @@ public class ApplicationTest {
 
   @Test(expected = RuntimeException.class)
   public void testCreateCommonExceptionResponseSuccess() {
-    ResponseCode code = ResponseCode.getResponse(ResponseCode.authTokenRequired.getErrorCode());
+    ResponseCode code = ResponseCode.mandatoryParamsMissing;
     code.setResponseCode(ResponseCode.CLIENT_ERROR.getResponseCode());
     Result result = new BaseController().createCommonExceptionResponse(new Exception(), null);
     assertEquals(ResponseCode.OK.getResponseCode(), result.status());

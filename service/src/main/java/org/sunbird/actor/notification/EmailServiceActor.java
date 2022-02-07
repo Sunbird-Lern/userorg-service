@@ -8,11 +8,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
-import org.sunbird.actor.BackgroundOperations;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.mail.SendEmail;
 import org.sunbird.mail.SendgridConnection;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -34,7 +34,7 @@ public class EmailServiceActor extends BaseActor {
       // set timer value
       timer = System.currentTimeMillis();
     }
-    if (request.getOperation().equalsIgnoreCase(BackgroundOperations.emailService.name())) {
+    if (request.getOperation().equalsIgnoreCase(ActorOperations.EMAIL_SERVICE.getValue())) {
       sendMail(request);
     } else {
       onReceiveUnsupportedOperation();

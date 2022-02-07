@@ -58,7 +58,7 @@ public class UserFreeUpRequestValidator extends BaseRequestValidator {
   private void validatePresence() {
     if (!request.getRequest().containsKey(JsonKey.IDENTIFIER)) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           MessageFormat.format(
               ResponseCode.mandatoryParamsMissing.getErrorMessage(), JsonKey.IDENTIFIER),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -69,7 +69,7 @@ public class UserFreeUpRequestValidator extends BaseRequestValidator {
     Object identifierType = request.getRequest().get(JsonKey.IDENTIFIER);
     if (!(identifierType instanceof List)) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError,
           ProjectUtil.formatMessage(
               ResponseCode.dataTypeError.getErrorMessage(), JsonKey.IDENTIFIER, JsonKey.LIST),
           ERROR_CODE);
@@ -80,7 +80,7 @@ public class UserFreeUpRequestValidator extends BaseRequestValidator {
     List<String> identifierVal = (List<String>) request.getRequest().get(JsonKey.IDENTIFIER);
     if (!identifiers.containsAll(identifierVal)) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError,
           ProjectUtil.formatMessage(
               String.format(
                   "%s %s",

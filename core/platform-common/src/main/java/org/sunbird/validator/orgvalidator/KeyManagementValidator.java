@@ -60,7 +60,7 @@ public class KeyManagementValidator extends BaseRequestValidator {
   private void validateListTypeObject(String key) {
     if (!(request.get(key) instanceof List)) {
       throw new ProjectCommonException(
-          ResponseCode.dataTypeError.getErrorCode(),
+          ResponseCode.dataTypeError,
           MessageFormat.format(ResponseCode.dataTypeError.getErrorMessage(), key, "List"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -69,7 +69,7 @@ public class KeyManagementValidator extends BaseRequestValidator {
   private void validateKeyPresence(String key) {
     if (!request.getRequest().containsKey(key)) {
       throw new ProjectCommonException(
-          ResponseCode.mandatoryParamsMissing.getErrorCode(),
+          ResponseCode.mandatoryParamsMissing,
           ResponseCode.mandatoryParamsMissing.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
           key);
@@ -79,7 +79,7 @@ public class KeyManagementValidator extends BaseRequestValidator {
   private void validateSize(String key) {
     if (((List) request.get(key)).size() == 0) {
       throw new ProjectCommonException(
-          ResponseCode.errorMandatoryParamsEmpty.getErrorCode(),
+          ResponseCode.errorMandatoryParamsEmpty,
           ResponseCode.errorMandatoryParamsEmpty.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode(),
           key);

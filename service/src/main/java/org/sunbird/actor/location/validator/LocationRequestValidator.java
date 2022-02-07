@@ -79,7 +79,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
   public static boolean isValidLocationType(String type) {
     if (null != type && !typeList.contains(type.toLowerCase())) {
       throw new ProjectCommonException(
-          ResponseCode.invalidValue.getErrorCode(),
+          ResponseCode.invalidValue,
           ProjectUtil.formatMessage(
               ResponseCode.invalidValue.getErrorMessage(),
               GeoLocationJsonKey.LOCATION_TYPE,
@@ -109,7 +109,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
         if ((StringUtils.isEmpty(locationRequest.getParentCode())
             && StringUtils.isEmpty(locationRequest.getParentId()))) {
           throw new ProjectCommonException(
-              ResponseCode.mandatoryParamsMissing.getErrorCode(),
+              ResponseCode.mandatoryParamsMissing,
               ProjectUtil.formatMessage(
                   ResponseCode.mandatoryParamsMissing.getErrorMessage(),
                   (GeoLocationJsonKey.PARENT_ID + " or " + GeoLocationJsonKey.PARENT_CODE)),
@@ -119,7 +119,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
         if (StringUtils.isNotEmpty(locationRequest.getParentCode())
             || StringUtils.isNotEmpty(locationRequest.getParentId())) {
           throw new ProjectCommonException(
-              ResponseCode.parentNotAllowed.getErrorCode(),
+              ResponseCode.parentNotAllowed,
               ProjectUtil.formatMessage(
                   ResponseCode.parentNotAllowed.getErrorMessage(),
                   (GeoLocationJsonKey.PARENT_ID + " or " + GeoLocationJsonKey.PARENT_CODE)),
@@ -201,7 +201,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
             - parentLocTypeoOrdermap.get(parentType.toLowerCase()))
         <= levelLimit)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameter.getErrorCode(),
+          ResponseCode.invalidParameter,
           ProjectUtil.formatMessage(
               ResponseCode.invalidParameter.getErrorMessage(),
               (GeoLocationJsonKey.PARENT_ID + " or " + GeoLocationJsonKey.PARENT_CODE)),
@@ -232,7 +232,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
         (Map<String, Object>) ElasticSearchHelper.getResponseFromFuture(locationF);
     if (MapUtils.isEmpty(location)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameter.getErrorCode(),
+          ResponseCode.invalidParameter,
           ProjectUtil.formatMessage(ResponseCode.invalidParameter.getErrorMessage(), parameter),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
@@ -256,7 +256,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
       return locationMapList.get(0);
     } else {
       throw new ProjectCommonException(
-          ResponseCode.invalidParameter.getErrorCode(),
+          ResponseCode.invalidParameter,
           ProjectUtil.formatMessage(
               ResponseCode.invalidParameter.getErrorMessage(), GeoLocationJsonKey.PARENT_CODE),
           ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -289,7 +289,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
           getESSearchResult(map, ProjectUtil.EsType.location.getTypeName(), context);
       if (CollectionUtils.isNotEmpty(locationMapList)) {
         throw new ProjectCommonException(
-            ResponseCode.invalidLocationDeleteRequest.getErrorCode(),
+            ResponseCode.invalidLocationDeleteRequest,
             ResponseCode.invalidLocationDeleteRequest.getErrorMessage(),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
@@ -317,21 +317,21 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
     if (!locationMapList.isEmpty()) {
       if (opType.equalsIgnoreCase(JsonKey.CREATE)) {
         throw new ProjectCommonException(
-            ResponseCode.alreadyExists.getErrorCode(),
+            ResponseCode.errorDuplicateEntry,
             ProjectUtil.formatMessage(
-                ResponseCode.alreadyExists.getErrorMessage(),
-                GeoLocationJsonKey.CODE,
-                locationRequest.getCode()),
+                ResponseCode.errorDuplicateEntry.getErrorMessage(),
+                locationRequest.getCode(),
+                GeoLocationJsonKey.CODE),
             ResponseCode.CLIENT_ERROR.getResponseCode());
       } else if (opType.equalsIgnoreCase(JsonKey.UPDATE)) {
         Map<String, Object> locn = locationMapList.get(0);
         if (!(((String) locn.get(JsonKey.ID)).equalsIgnoreCase(locationRequest.getId()))) {
           throw new ProjectCommonException(
-              ResponseCode.alreadyExists.getErrorCode(),
+              ResponseCode.errorDuplicateEntry,
               ProjectUtil.formatMessage(
-                  ResponseCode.alreadyExists.getErrorMessage(),
-                  GeoLocationJsonKey.CODE,
-                  locationRequest.getCode()),
+                  ResponseCode.errorDuplicateEntry.getErrorMessage(),
+                  locationRequest.getCode(),
+                  GeoLocationJsonKey.CODE),
               ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }
@@ -400,7 +400,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
 
   private void throwInvalidParameterValueException(List<String> invalidList, String attributeName) {
     throw new ProjectCommonException(
-        ResponseCode.invalidParameterValue.getErrorCode(),
+        ResponseCode.invalidParameterValue,
         ProjectUtil.formatMessage(
             ResponseCode.invalidParameterValue.getErrorMessage(), invalidList, attributeName),
         ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -428,7 +428,7 @@ public class LocationRequestValidator extends BaseLocationRequestValidator {
                     if (type.equalsIgnoreCase(location.getType())
                         && !(currentLocation.getId().equals(location.getId()))) {
                       throw new ProjectCommonException(
-                          ResponseCode.conflictingOrgLocations.getErrorCode(),
+                          ResponseCode.conflictingOrgLocations,
                           ProjectUtil.formatMessage(
                               ResponseCode.conflictingOrgLocations.getErrorMessage(),
                               requestedLocation.getCode(),

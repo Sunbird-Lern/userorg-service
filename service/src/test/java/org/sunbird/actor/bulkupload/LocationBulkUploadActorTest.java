@@ -31,7 +31,7 @@ import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.util.Util;
@@ -183,7 +183,7 @@ public class LocationBulkUploadActorTest {
 
   private Request getRequestObjectForLocationBulkUpload(String locationType, byte[] file) {
     Request reqObj = new Request();
-    reqObj.setOperation(BulkUploadActorOperation.LOCATION_BULK_UPLOAD.getValue());
+    reqObj.setOperation(ActorOperations.LOCATION_BULK_UPLOAD.getValue());
     HashMap<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.CREATED_BY, USER_ID);
     innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.LOCATION);

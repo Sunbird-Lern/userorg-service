@@ -16,7 +16,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
-import org.sunbird.operations.BulkUploadActorOperation;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.organisation.OrgService;
@@ -51,11 +51,8 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
   private void upload(Request request) throws IOException {
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
     Object dataObject =
-            systemSettingsService.getSystemSettingByFieldAndKey(
-            "orgProfileConfig",
-            "csv",
-            new TypeReference<Map>() {},
-            request.getRequestContext());
+        systemSettingsService.getSystemSettingByFieldAndKey(
+            "orgProfileConfig", "csv", new TypeReference<Map>() {}, request.getRequestContext());
     Map<String, Object> supportedColumnsMap = null;
     Map<String, Object> supportedColumnsLowerCaseMap = null;
     if (dataObject != null) {
@@ -117,7 +114,8 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
       fileByteArray = (byte[]) req.get(JsonKey.FILE);
     }
     HashMap<String, Object> additionalInfo = new HashMap<>();
-    Map<String, Object> user = userService.getUserDetailsById((String) req.get(JsonKey.CREATED_BY), context);
+    Map<String, Object> user =
+        userService.getUserDetailsById((String) req.get(JsonKey.CREATED_BY), context);
     if (user != null) {
       String rootOrgId = (String) user.get(JsonKey.ROOT_ORG_ID);
       Map<String, Object> org = orgService.getOrgById(rootOrgId, context);
@@ -145,9 +143,8 @@ public class OrgBulkUploadActor extends BaseBulkUploadActor {
         recordCount,
         processId,
         bulkUploadProcess,
-        BulkUploadActorOperation.ORG_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
+        ActorOperations.ORG_BULK_UPLOAD_BACKGROUND_JOB.getValue(),
         DataCacheHandler.bulkOrgAllowedFields,
         context);
   }
-
 }

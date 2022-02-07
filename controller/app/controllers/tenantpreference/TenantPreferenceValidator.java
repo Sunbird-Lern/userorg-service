@@ -54,7 +54,7 @@ public class TenantPreferenceValidator extends BaseRequestValidator {
     for (String param : mandatoryParamsList) {
       if (!reqMap.containsKey(param)) {
         throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            ResponseCode.mandatoryParamsMissing,
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), parentKey + "." + param),
             ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -62,7 +62,7 @@ public class TenantPreferenceValidator extends BaseRequestValidator {
 
       if (!(isInstanceOf(reqMap.get(param).getClass(), type))) {
         throw new ProjectCommonException(
-            ResponseCode.dataTypeError.getErrorCode(),
+            ResponseCode.dataTypeError,
             MessageFormat.format(
                 ResponseCode.dataTypeError.getErrorMessage(),
                 parentKey + "." + param,
@@ -79,7 +79,7 @@ public class TenantPreferenceValidator extends BaseRequestValidator {
     if (type == String.class) {
       if (StringUtils.isBlank((String) value)) {
         throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            ResponseCode.mandatoryParamsMissing,
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), parentKey + "." + key),
             ResponseCode.CLIENT_ERROR.getResponseCode());
@@ -88,7 +88,7 @@ public class TenantPreferenceValidator extends BaseRequestValidator {
       Map<String, Object> map = (Map<String, Object>) value;
       if (MapUtils.isEmpty(map)) {
         throw new ProjectCommonException(
-            ResponseCode.mandatoryParamsMissing.getErrorCode(),
+            ResponseCode.mandatoryParamsMissing,
             MessageFormat.format(
                 ResponseCode.mandatoryParamsMissing.getErrorMessage(), parentKey + "." + key),
             ResponseCode.CLIENT_ERROR.getResponseCode());
