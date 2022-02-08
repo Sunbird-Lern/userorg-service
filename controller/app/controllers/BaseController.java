@@ -673,6 +673,11 @@ public class BaseController extends Controller {
               return reslt;
             } else if (ResponseCode.CLIENT_ERROR.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
+              ProjectCommonException exception =
+                  new ProjectCommonException(
+                      ((ClientErrorResponse) response).getException(),
+                      ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+              ((ClientErrorResponse) response).setException(exception);
               Result reslt = createClientErrorResponse(httpReq, (ClientErrorResponse) response);
               printExitLogOnFailure(request, ((ClientErrorResponse) response).getException());
               return reslt;
