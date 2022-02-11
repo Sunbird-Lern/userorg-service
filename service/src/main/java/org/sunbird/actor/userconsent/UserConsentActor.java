@@ -128,8 +128,8 @@ public class UserConsentActor extends BaseActor {
             .stream()
             .filter(
                 consents ->
-                    ((String) consents.get(JsonKey.STATUS)).equalsIgnoreCase(JsonKey.ACTIVE))
-            .map(
+                    !((String) consents.get(JsonKey.STATUS)).equalsIgnoreCase(JsonKey.CONSENT_STATUS_DELETED)
+            ).map(
                 consent -> {
                   Map<String, Object> consentRes = new HashMap<String, Object>();
                   consentRes.put(JsonKey.ID, consent.get(JsonKey.ID));
