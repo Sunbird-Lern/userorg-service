@@ -55,7 +55,6 @@ public class UserRoleActor extends UserBaseActor {
     sender().tell(response, self());
   }
 
-  @SuppressWarnings("unchecked")
   private void assignRoles(Request actorMessage) {
     List<Map<String, Object>> userRolesList;
 
