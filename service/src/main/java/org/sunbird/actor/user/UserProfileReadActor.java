@@ -98,9 +98,9 @@ public class UserProfileReadActor extends BaseActor {
       sender().tell(response, self());
     } else {
       ProjectCommonException.throwResourceNotFoundException(
-        ResponseCode.resourceNotFound,
-        MessageFormat.format(
-          ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER));
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER + "." + value));
     }
   }
 }

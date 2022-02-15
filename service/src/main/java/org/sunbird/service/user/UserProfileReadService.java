@@ -11,6 +11,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.organisation.OrgTypeEnum;
@@ -326,10 +327,11 @@ public class UserProfileReadService {
         userExternalIdentityService.getUserV1(
             id, provider, idType, actorMessage.getRequestContext());
     if (StringUtils.isBlank(userId)) {
-      ProjectCommonException.throwClientErrorException(
-          ResponseCode.externalIdNotFound,
+      throw new ProjectCommonException(
+          ResponseCode.resourceNotFound,
           ProjectUtil.formatMessage(
-              ResponseCode.externalIdNotFound.getErrorMessage(), id, idType, provider));
+              ResponseMessage.Message.EXTERNALID_NOT_FOUND, id, idType, provider),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     return userId;
   }
