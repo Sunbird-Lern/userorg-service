@@ -183,11 +183,7 @@ public class UserUtilTest {
             Mockito.anyMap(),
             Mockito.any(RequestContext.class)))
         .thenReturn(response);
-    /*when(cassandraOperationImpl.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class)))
-            .thenReturn(new Response());
-    */ Map<String, Object> user =
-        UserUtil.validateExternalIdsAndReturnActiveUser(requestMap, new RequestContext());
+    UserUtil.validateExternalIdsAndReturnActiveUser(requestMap, new RequestContext());
   }
 
   @Test
