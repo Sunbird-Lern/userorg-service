@@ -99,8 +99,7 @@ public class UserProfileReadActor extends BaseActor {
     } else {
       ProjectCommonException.throwResourceNotFoundException(
           ResponseCode.resourceNotFound,
-          MessageFormat.format(
-              ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER + "." + value));
+          MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), value));
     }
   }
 }
