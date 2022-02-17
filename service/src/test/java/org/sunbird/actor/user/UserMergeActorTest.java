@@ -133,6 +133,24 @@ public class UserMergeActorTest {
     boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), null);
     assertTrue(result);
   }
+  
+  @Test
+  public void testParameterMismatchMergeUser() throws Exception {
+    when(userService.getUserById(Mockito.anyString(), Mockito.any()))
+      .thenReturn(getUserDetails(false))
+      .thenReturn(getUserDetails(false));
+    when(userDao.updateUser(Mockito.anyMap(), Mockito.any())).thenReturn(getSuccessResponse());
+    when(tokenValidator.verifyUserToken(Mockito.anyString(), Mockito.anyMap()))
+      .thenReturn("anyUserId");
+    when(tokenValidator.verifySourceUserToken(
+      Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+      .thenReturn("anyUserId");
+    Map<String, String> configMap = configSettingsMap();
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "orgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
+    boolean result = testScenario(getRequest(ActorOperations.MERGE_USER), ResponseCode.parameterMismatch);
+    assertTrue(result);
+  }
 
   private Map<String, String> configSettingsMap() {
     Map<String, String> configMap = new HashMap<>();
