@@ -40,6 +40,7 @@ import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
@@ -62,7 +63,9 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ElasticSearchHelper.class,
   UserRoleDao.class,
-  UserRoleDaoImpl.class
+  UserRoleDaoImpl.class,
+  UserExternalIdentityServiceImpl.class,
+  UserProfileReadService.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -326,6 +329,24 @@ public class UserProfileReadServiceTest {
     } catch (ProjectCommonException ex) {
       Assert.assertNotNull(ex);
       Assert.assertEquals(ex.getErrorCode(), ResponseCode.userAccountlocked.getErrorCode());
+    }
+  }
+  
+  @Test
+  public void getUserIdByExternalIdTest() {
+    UserProfileReadService userProfileReadService = new UserProfileReadService();
+    Request request = getProfileReadRequest("1234567890");
+    request.getContext().put(JsonKey.PROVIDER, "4578963210");
+    request.getContext().put(JsonKey.ID_TYPE, "4578963210");
+    PowerMockito.mockStatic(UserExternalIdentityServiceImpl.class);
+    UserExternalIdentityServiceImpl userExternalIdentityService = PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    when(UserExternalIdentityServiceImpl.getInstance()).thenReturn(userExternalIdentityService);
+    when(userExternalIdentityService.getUserV1(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn("");
+    try {
+      userProfileReadService.getUserProfileData(request);
+    } catch (ProjectCommonException ex) {
+      Assert.assertNotNull(ex);
+      Assert.assertEquals(ex.getErrorCode(), ResponseCode.resourceNotFound.getErrorCode());
     }
   }
 

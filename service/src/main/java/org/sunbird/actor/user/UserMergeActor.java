@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,10 +99,10 @@ public class UserMergeActor extends UserBaseActor {
               + mergeeId
               + "or matching with mergerid root-org"
               + mergerId);
-      throw new ProjectCommonException(
-          ResponseCode.accountNotFound,
-          ResponseCode.accountNotFound.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+      ProjectCommonException.throwClientErrorException(
+          ResponseCode.parameterMismatch,
+          MessageFormat.format(
+              ResponseCode.parameterMismatch.getErrorMessage(), "merger and mergee rootOrgId"));
     }
     if (!mergee.getIsDeleted()) {
       prepareMergeeAccountData(mergee, mergeeDBMap);
