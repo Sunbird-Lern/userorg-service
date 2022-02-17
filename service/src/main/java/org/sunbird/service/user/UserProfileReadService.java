@@ -39,7 +39,7 @@ public class UserProfileReadService {
   private final UserSelfDeclarationService userSelfDeclarationService =
       UserSelfDeclarationServiceImpl.getInstance();
   private final UserExternalIdentityService userExternalIdentityService =
-      new UserExternalIdentityServiceImpl();
+    UserExternalIdentityServiceImpl.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();
 
   public Response getUserProfileData(Request actorMessage) {

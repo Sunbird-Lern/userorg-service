@@ -20,6 +20,14 @@ import org.sunbird.util.user.UserUtil;
 public class UserExternalIdentityServiceImpl implements UserExternalIdentityService {
   private final UserExternalIdentityDao userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private final LocationService locationService = LocationServiceImpl.getInstance();
+  private static UserExternalIdentityService selfDeclarationService = null;
+  
+  public static UserExternalIdentityService getInstance() {
+    if (selfDeclarationService == null) {
+      selfDeclarationService = new UserExternalIdentityServiceImpl();
+    }
+    return selfDeclarationService;
+  }
 
   @Override
   public List<Map<String, String>> getSelfDeclaredDetails(String userId, RequestContext context) {
