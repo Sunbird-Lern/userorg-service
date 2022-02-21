@@ -62,6 +62,7 @@ POST    /private/user/v1/password/reset         @controllers.usermanagement.Rese
 # User Consent APIs
 POST    /v1/user/consent/update                 @controllers.usermanagement.UserConsentController.updateUserConsent(request: play.mvc.Http.Request)
 POST    /v1/user/consent/read                   @controllers.usermanagement.UserConsentController.getUserConsent(request: play.mvc.Http.Request)
+POST    /v2/user/consent/read                   @controllers.usermanagement.UserConsentController.getUserConsent(request: play.mvc.Http.Request)
 
 # OTP APIs
 POST    /v1/otp/generate                        @controllers.otp.OtpController.generateOTP(request: play.mvc.Http.Request)

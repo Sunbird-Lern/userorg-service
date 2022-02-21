@@ -4,20 +4,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class TenantPreferenceService {
 
@@ -32,15 +30,19 @@ public class TenantPreferenceService {
     if (JsonKey.CREATE.equalsIgnoreCase(operationType)
         && CollectionUtils.isNotEmpty(orgPreference)) {
       throw new ProjectCommonException(
-          ResponseCode.preferenceAlreadyExists,
-          MessageFormat.format(ResponseCode.preferenceAlreadyExists.getErrorMessage(), key, orgId),
+          ResponseCode.errorParamExists,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(),
+              (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     } else if (((JsonKey.GET.equalsIgnoreCase(operationType))
             || (JsonKey.UPDATE.equalsIgnoreCase(operationType)))
         && CollectionUtils.isEmpty(orgPreference)) {
       throw new ProjectCommonException(
-          ResponseCode.preferenceNotFound,
-          MessageFormat.format(ResponseCode.preferenceNotFound.getErrorMessage(), key, orgId),
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(),
+              (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     if (CollectionUtils.isNotEmpty(orgPreference)) {

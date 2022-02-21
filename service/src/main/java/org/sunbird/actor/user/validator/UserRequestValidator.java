@@ -606,9 +606,9 @@ public class UserRequestValidator extends BaseRequestValidator {
       return;
     } else {
       throw new ProjectCommonException(
-          ResponseCode.dependentParamsMissing,
+          ResponseCode.invalidRequestParameter,
           ProjectUtil.formatMessage(
-              ResponseCode.dependentParamsMissing.getErrorMessage(),
+              ResponseCode.invalidRequestParameter.getErrorMessage(),
               StringFormatter.joinByComma(
                   JsonKey.EXTERNAL_ID, JsonKey.EXTERNAL_ID_TYPE, JsonKey.EXTERNAL_ID_PROVIDER)),
           ERROR_CODE);
@@ -963,8 +963,8 @@ public class UserRequestValidator extends BaseRequestValidator {
             throw new ProjectCommonException(
                 ResponseCode.mandatoryParamsMissing,
                 MessageFormat.format(
-                    ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
-                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID}),
+                    ResponseMessage.Message.MANDATORY_PARAMETER_MISSING,
+                    JsonKey.USER_ID + " or " + JsonKey.ORG_ID),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
           if (StringUtils.isBlank((String) declareFields.get(JsonKey.PERSONA))) {
