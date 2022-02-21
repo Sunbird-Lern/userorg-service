@@ -185,7 +185,7 @@ public class UserLookupTest {
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.UPDATE);
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.resourceNotFound.getErrorCode(), e.getErrorCode());
     }
   }
 
@@ -208,7 +208,7 @@ public class UserLookupTest {
       user.getExternalIds().get(0).put(JsonKey.OPERATION, JsonKey.REMOVE);
       new UserLookUpServiceImpl().checkExternalIdUniqueness(user, JsonKey.UPDATE, null);
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.externalIdNotFound.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.resourceNotFound.getErrorCode(), e.getErrorCode());
     }
   }
 }

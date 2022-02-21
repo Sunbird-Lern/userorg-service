@@ -225,9 +225,18 @@ public class OnRequestHandler implements ActionCreator {
 
     String uri = request.uri();
     String env;
-    if (uri.startsWith("/v1/user") || uri.startsWith("/v2/user") || uri.startsWith("/v3/user")) {
+    if (uri.startsWith("/v1/user")
+        || uri.startsWith("/v2/user")
+        || uri.startsWith("/v3/user")
+        || uri.startsWith("/v4/user")
+        || uri.startsWith("/v5/user")
+        || uri.startsWith("/v1/ssouser")
+        || uri.startsWith("/v1/manageduser")
+        || uri.startsWith("/v2/manageduser")
+        || uri.startsWith("/v5/user")
+        || uri.startsWith("/private/user")) {
       env = JsonKey.USER;
-    } else if (uri.startsWith("/v1/org")) {
+    } else if (uri.startsWith("/v1/org") || uri.startsWith("/v2/org")) {
       env = JsonKey.ORGANISATION;
     } else if (uri.startsWith("/v1/notification") || uri.startsWith("/v2/notification")) {
       env = JsonKey.NOTIFICATION;
@@ -237,10 +246,8 @@ public class OnRequestHandler implements ActionCreator {
       env = JsonKey.NOTE;
     } else if (uri.startsWith("/v1/location")) {
       env = JsonKey.LOCATION;
-    } else if (uri.startsWith("/v1/otp")) {
+    } else if (uri.startsWith("/v1/otp") || uri.startsWith("/v2/otp")) {
       env = "otp";
-    } else if (uri.startsWith("/private/user/v1/password/reset")) {
-      env = JsonKey.USER;
     } else {
       env = "miscellaneous";
     }

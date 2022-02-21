@@ -50,9 +50,13 @@ public class UserConsentActor extends BaseActor {
 
     Response response = new Response();
     if (CollectionUtils.isNotEmpty(consentList)) {
+      //Remove revoked consent from the list
       List<Map<String, Object>> consentResponseList = constructConsentResponse(consentList);
-      response.put(JsonKey.CONSENT_RESPONSE, consentResponseList);
-    } else {
+      consentList=consentResponseList;
+    }
+    if(CollectionUtils.isNotEmpty(consentList)){
+      response.put(JsonKey.CONSENT_RESPONSE, consentList);
+    }else {
       throw new ProjectCommonException(
           ResponseCode.resourceNotFound,
           MessageFormat.format(
@@ -124,8 +128,8 @@ public class UserConsentActor extends BaseActor {
             .stream()
             .filter(
                 consents ->
-                    ((String) consents.get(JsonKey.STATUS)).equalsIgnoreCase(JsonKey.ACTIVE))
-            .map(
+                    !((String) consents.get(JsonKey.STATUS)).equalsIgnoreCase(JsonKey.CONSENT_STATUS_DELETED)
+            ).map(
                 consent -> {
                   Map<String, Object> consentRes = new HashMap<String, Object>();
                   consentRes.put(JsonKey.ID, consent.get(JsonKey.ID));

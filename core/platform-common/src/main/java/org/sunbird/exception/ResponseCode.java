@@ -84,8 +84,6 @@ public enum ResponseCode {
   dependentParameterMissing(
       ResponseMessage.Key.DEPENDENT_PARAMETER_MISSING,
       ResponseMessage.Message.DEPENDENT_PARAMETER_MISSING),
-  externalIdNotFound(
-      ResponseMessage.Key.EXTERNALID_NOT_FOUND, ResponseMessage.Message.EXTERNALID_NOT_FOUND),
   externalIdAssignedToOtherUser(
       ResponseMessage.Key.EXTERNALID_ASSIGNED_TO_OTHER_USER,
       ResponseMessage.Message.EXTERNALID_ASSIGNED_TO_OTHER_USER),
@@ -147,7 +145,6 @@ public enum ResponseCode {
   recoveryParamsMatchException(
       ResponseMessage.Key.RECOVERY_PARAM_MATCH_EXCEPTION,
       ResponseMessage.Message.RECOVERY_PARAM_MATCH_EXCEPTION),
-  accountNotFound(ResponseMessage.Key.ACCOUNT_NOT_FOUND, ResponseMessage.Message.ACCOUNT_NOT_FOUND),
   passwordValidation(
       ResponseMessage.Key.INVALID_PASSWORD, ResponseMessage.Message.INVALID_PASSWORD),
   otpVerificationFailed(
