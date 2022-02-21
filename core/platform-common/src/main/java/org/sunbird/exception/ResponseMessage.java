@@ -60,7 +60,6 @@ public interface ResponseMessage {
     String OR_FORMAT = "{0} or {1}";
     String AND_FORMAT = "{0} and {1}";
     String DEPENDENT_PARAMETER_MISSING = "Missing parameter {0} which is dependent on {1}.";
-    String DEPENDENT_PARAMS_MISSING = "Missing parameter value in {0}.";
     String EXTERNALID_NOT_FOUND =
         "External ID (id: {0}, idType: {1}, provider: {2}) not found for given user.";
     String EXTERNAL_ID_FORMAT = "externalId (id: {0}, idType: {1}, provider: {2})";
@@ -76,8 +75,6 @@ public interface ResponseMessage {
         "Loading {0} configuration failed as empty string is passed as parameter.";
     String ERROR_CONFIG_LOAD_PARSE_STRING =
         "Loading {0} configuration failed due to parsing error.";
-    String MISSING_SELF_DECLARED_MANDATORY_PARAMETERS =
-        "Mandatory parameter {0} or {1} is missing.";
     String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "Loading {0} configuration failed.";
     String ERROR_NO_ROOT_ORG_ASSOCIATED = "Not able to associate with root org";
     String ERROR_UNSUPPORTED_CLOUD_STORAGE = "Unsupported cloud storage type {0}.";
@@ -105,9 +102,7 @@ public interface ResponseMessage {
     String MANAGED_BY_NOT_ALLOWED = "managedBy cannot be updated.";
     String MANAGED_USER_LIMIT_EXCEEDED = "Managed user creation limit exceeded";
     String INVALID_CAPTCHA = "Captcha is invalid";
-    String PREFERENCE_ALREADY_EXIST = "preference {0} already exits in the org {1}";
     String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "Declared user error status is not updated";
-    String PREFERENCE_NOT_FOUND = "preference {0} not found in the org {1}";
     String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED =
         "Declared user validated status is not updated";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
@@ -181,15 +176,13 @@ public interface ResponseMessage {
     String SERVICE_UNAVAILABLE = "0064";
     String MANAGED_BY_NOT_ALLOWED = "0065";
     String MANAGED_USER_LIMIT_EXCEEDED = "0066";
-    String PREFERENCE_ALREADY_EXIST = "0067";
-    String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "0068";
-    String PREFERENCE_NOT_FOUND = "0069";
-    String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED = "0070";
-    String SERVER_ERROR = JsonKey.USER_ORG_SERVICE_PREFIX + "0071";
-    String UNAUTHORIZED_USER = JsonKey.USER_ORG_SERVICE_PREFIX + "0072";
-    String FORBIDDEN = "0073";
-    String INVALID_OBJECT_TYPE = "0074";
-    String INACTIVE_USER = "0075";
-    String INVALID_CSV_FILE = "0076";
+    String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "0067";
+    String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED = "0068";
+    String SERVER_ERROR = JsonKey.USER_ORG_SERVICE_PREFIX + "0069";
+    String UNAUTHORIZED_USER = JsonKey.USER_ORG_SERVICE_PREFIX + "0070";
+    String FORBIDDEN = "0071";
+    String INVALID_OBJECT_TYPE = "0072";
+    String INACTIVE_USER = "0073";
+    String INVALID_CSV_FILE = "0074";
   }
 }
