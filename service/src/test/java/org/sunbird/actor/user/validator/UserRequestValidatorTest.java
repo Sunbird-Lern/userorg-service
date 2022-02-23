@@ -965,8 +965,8 @@ public class UserRequestValidatorTest {
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
       assertEquals(
           MessageFormat.format(
-              ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
-              new String[] {JsonKey.USER_ID, JsonKey.ORG_ID, JsonKey.PERSONA}),
+              ResponseMessage.Message.MANDATORY_PARAMETER_MISSING,
+              JsonKey.USER_ID + " or " + JsonKey.ORG_ID),
           e.getMessage());
       response = true;
     }

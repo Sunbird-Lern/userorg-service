@@ -84,14 +84,9 @@ public enum ResponseCode {
   dependentParameterMissing(
       ResponseMessage.Key.DEPENDENT_PARAMETER_MISSING,
       ResponseMessage.Message.DEPENDENT_PARAMETER_MISSING),
-  externalIdNotFound(
-      ResponseMessage.Key.EXTERNALID_NOT_FOUND, ResponseMessage.Message.EXTERNALID_NOT_FOUND),
   externalIdAssignedToOtherUser(
       ResponseMessage.Key.EXTERNALID_ASSIGNED_TO_OTHER_USER,
       ResponseMessage.Message.EXTERNALID_ASSIGNED_TO_OTHER_USER),
-  dependentParamsMissing(
-      ResponseMessage.Key.DEPENDENT_PARAMETER_MISSING,
-      ResponseMessage.Message.DEPENDENT_PARAMS_MISSING),
   duplicateExternalIds(
       ResponseMessage.Key.DUPLICATE_EXTERNAL_IDS, ResponseMessage.Message.DUPLICATE_EXTERNAL_IDS),
   emailNotSentRecipientsExceededMaxLimit(
@@ -147,7 +142,6 @@ public enum ResponseCode {
   recoveryParamsMatchException(
       ResponseMessage.Key.RECOVERY_PARAM_MATCH_EXCEPTION,
       ResponseMessage.Message.RECOVERY_PARAM_MATCH_EXCEPTION),
-  accountNotFound(ResponseMessage.Key.ACCOUNT_NOT_FOUND, ResponseMessage.Message.ACCOUNT_NOT_FOUND),
   passwordValidation(
       ResponseMessage.Key.INVALID_PASSWORD, ResponseMessage.Message.INVALID_PASSWORD),
   otpVerificationFailed(
@@ -160,17 +154,12 @@ public enum ResponseCode {
       ResponseMessage.Key.MANAGED_USER_LIMIT_EXCEEDED,
       ResponseMessage.Message.MANAGED_USER_LIMIT_EXCEEDED),
   invalidCaptcha(ResponseMessage.Key.INVALID_CAPTCHA, ResponseMessage.Message.INVALID_CAPTCHA),
-  preferenceAlreadyExists(
-      ResponseMessage.Key.PREFERENCE_ALREADY_EXIST,
-      ResponseMessage.Message.PREFERENCE_ALREADY_EXIST),
   declaredUserErrorStatusNotUpdated(
       ResponseMessage.Key.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED,
       ResponseMessage.Message.DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED),
   declaredUserValidatedStatusNotUpdated(
       ResponseMessage.Key.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED,
       ResponseMessage.Message.DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED),
-  preferenceNotFound(
-      ResponseMessage.Key.PREFERENCE_NOT_FOUND, ResponseMessage.Message.PREFERENCE_NOT_FOUND),
   invalidConsentStatus(
       ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
   serverError(ResponseMessage.Key.SERVER_ERROR, ResponseMessage.Message.SERVER_ERROR),

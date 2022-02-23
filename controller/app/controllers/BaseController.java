@@ -452,20 +452,26 @@ public class BaseController extends Controller {
       }
     }
 
-    if (request.path() != null && request.path().startsWith("/v1/otp/verify")) {
-      if ("otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name())) {
-        response.getParams().setErr("OTP_VERIFICATION_FAILED");
-        response.getParams().setStatus("OTP_VERIFICATION_FAILED");
-      }
+    if (request.path() != null
+        && request.path().startsWith("/v1/otp/verify")
+        && ("otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("OTP_VERIFICATION_FAILED");
+      response.getParams().setStatus("OTP_VERIFICATION_FAILED");
     }
 
     if (request.path() != null
         && (request.path().startsWith("/v1/manageduser/create")
-            || request.path().startsWith("/v4/user/create"))) {
-      if ("managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
-        response.getParams().setErr("MANAGED_USER_LIMIT_EXCEEDED");
-        response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
-      }
+            || request.path().startsWith("/v4/user/create"))
+        && ("managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("MANAGED_USER_LIMIT_EXCEEDED");
+      response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
+    }
+
+    if (request.path() != null
+        && (request.path().startsWith("/v1/user/consent/read"))
+        && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("USER_CONSENT_NOT_FOUND");
+      response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
     }
   }
 

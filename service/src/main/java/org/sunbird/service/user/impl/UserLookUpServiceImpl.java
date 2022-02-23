@@ -249,9 +249,9 @@ public class UserLookUpServiceImpl implements UserLookupService {
   private static void throwExternalIDNotFoundException(
       String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound,
+        ResponseCode.resourceNotFound,
         ProjectUtil.formatMessage(
-            ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseMessage.Message.EXTERNALID_NOT_FOUND, externalId, idType, provider),
+        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 }

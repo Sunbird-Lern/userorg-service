@@ -164,6 +164,28 @@ public class UserUtilTest {
     Assert.assertEquals("add", userDeclareEntityList.get(0).getOperation());
   }
 
+  @Test(expected = Exception.class)
+  public void testValidateExternalIdsAndReturnActiveUser() {
+    beforeEachTest();
+    Map<String, Object> requestMap = new HashMap<>();
+    requestMap.put(JsonKey.EXTERNAL_ID, "extId");
+    requestMap.put(JsonKey.EXTERNAL_ID_PROVIDER, "provider");
+    requestMap.put(JsonKey.EXTERNAL_ID_TYPE, "idType");
+
+    Response response = new Response();
+    List<Map<String, Object>> resList = new ArrayList<>();
+    Map<String, Object> res = new HashMap<>();
+    resList.add(res);
+    response.getResult().put(JsonKey.RESPONSE, resList);
+    when(cassandraOperationImpl.getRecordsByCompositeKey(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.anyMap(),
+            Mockito.any(RequestContext.class)))
+        .thenReturn(response);
+    UserUtil.validateExternalIdsAndReturnActiveUser(requestMap, new RequestContext());
+  }
+
   @Test
   public void testfetchOrgIdByProvider() {
     beforeEachTest();

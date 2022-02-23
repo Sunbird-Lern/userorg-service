@@ -24,6 +24,7 @@ import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
@@ -145,10 +146,11 @@ public class UserUtil {
         && StringUtils.isNotEmpty(idType)) {
       user = getUserFromExternalId(userMap, context);
       if (MapUtils.isEmpty(user)) {
-        ProjectCommonException.throwClientErrorException(
-            ResponseCode.externalIdNotFound,
+        throw new ProjectCommonException(
+            ResponseCode.resourceNotFound,
             ProjectUtil.formatMessage(
-                ResponseCode.externalIdNotFound.getErrorMessage(), extId, idType, provider));
+                ResponseMessage.Message.EXTERNALID_NOT_FOUND, extId, idType, provider),
+            ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
       }
     } else if (StringUtils.isNotBlank((String) userMap.get(JsonKey.USER_ID))
         || StringUtils.isNotBlank((String) userMap.get(JsonKey.ID))) {
@@ -520,10 +522,10 @@ public class UserUtil {
   private static void throwExternalIDNotFoundException(
       String externalId, String idType, String provider) {
     throw new ProjectCommonException(
-        ResponseCode.externalIdNotFound,
+        ResponseCode.resourceNotFound,
         ProjectUtil.formatMessage(
-            ResponseCode.externalIdNotFound.getErrorMessage(), externalId, idType, provider),
-        ResponseCode.CLIENT_ERROR.getResponseCode());
+            ResponseMessage.Message.EXTERNALID_NOT_FOUND, externalId, idType, provider),
+        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
 
   public static List<Map<String, String>> getExternalIds(
