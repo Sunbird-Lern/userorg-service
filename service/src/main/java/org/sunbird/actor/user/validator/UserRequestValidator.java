@@ -820,6 +820,7 @@ public class UserRequestValidator extends BaseRequestValidator {
         } else {
           userTypeConfigMap.put(stateCode, userProfileConfigMap);
         }
+        logger.info("form config for state:" + stateCode + " " + userTypeConfigMap);
       }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
@@ -828,6 +829,10 @@ public class UserRequestValidator extends BaseRequestValidator {
             ResponseCode.SERVER_ERROR,
             MessageFormat.format(ResponseMessage.Message.USER_TYPE_CONFIG_IS_EMPTY, stateCode));
       }
+      logger.info(
+          context,
+          String.format(
+              "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
       logger.info(
           context,
           String.format(
@@ -863,7 +868,7 @@ public class UserRequestValidator extends BaseRequestValidator {
     Map<String, Map<String, List<String>>> userTypeConfigMap =
         DataCacheHandler.getUserTypesConfig();
     Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
-
+    logger.info("usertype map for state code" + stateCode + "config:" + userTypeMap);
     List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
     if (CollectionUtils.isNotEmpty(profileUserTypes)
         && MapUtils.isNotEmpty(profileUserTypes.get(0))) {
