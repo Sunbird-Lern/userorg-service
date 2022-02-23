@@ -862,13 +862,14 @@ public class UserRequestValidator extends BaseRequestValidator {
     return stateCode;
   }
 
-  public void validateUserSubType(Map<String, Object> userRequestMap, String stateCode) {
+  public void validateUserSubType(
+      Map<String, Object> userRequestMap, String stateCode, RequestContext context) {
     String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
     String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
     Map<String, Map<String, List<String>>> userTypeConfigMap =
         DataCacheHandler.getUserTypesConfig();
     Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
-    logger.info("usertype map for state code" + stateCode + "config:" + userTypeMap);
+    logger.info(context, "usertype map for state code: " + stateCode + "config:" + userTypeMap);
     List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
     if (CollectionUtils.isNotEmpty(profileUserTypes)
         && MapUtils.isNotEmpty(profileUserTypes.get(0))) {
