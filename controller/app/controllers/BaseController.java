@@ -324,6 +324,11 @@ public class BaseController extends Controller {
               + e.getMessage(),
           e);
       if (e instanceof ProjectCommonException) {
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                (ProjectCommonException) e,
+                ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+        e = exception;
         printExitLogOnFailure(request, (ProjectCommonException) e);
       } else {
         printExitLogOnFailure(request, null);

@@ -64,6 +64,9 @@ public class ManagedUserActor extends UserBaseActor {
     actorMessage.toLower();
     Map<String, Object> userMap = actorMessage.getRequest();
     populateLocationCodesFromProfileLocation(userMap);
+    if (userMap.containsKey(JsonKey.ORG_EXTERNAL_ID)) {
+      userMap.remove(JsonKey.ORG_EXTERNAL_ID);
+    }
     validateLocationCodes(actorMessage);
 
     String managedBy = (String) userMap.get(JsonKey.MANAGED_BY);
