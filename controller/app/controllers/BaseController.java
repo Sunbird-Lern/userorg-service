@@ -479,7 +479,7 @@ public class BaseController extends Controller {
       response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
     }
     if (request.path() != null
-            && (request.path().startsWith("/v1/user/get/:idType/:id"))
+            && (request.path().startsWith("/v1/user/get/"))
             && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("USER_NOT_FOUND");
       response.getParams().setStatus("USER_NOT_FOUND");
