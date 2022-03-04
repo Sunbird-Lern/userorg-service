@@ -30,6 +30,7 @@ GET     /private/user/v1/read/:externalId       @controllers.usermanagement.User
 GET     /v1/user/managed/:lua_uuid              @controllers.usermanagement.UserController.getManagedUsers(lua_uuid:String, request: play.mvc.Http.Request)
 POST    /v1/user/getuser                        @controllers.usermanagement.UserController.getUserByLoginId(request: play.mvc.Http.Request)
 GET     /v1/user/get/:idType/:id                @controllers.usermanagement.UserController.getUserByKey(idType:String, id:String, request: play.mvc.Http.Request)
+GET     /v2/user/get/:idType/:id                @controllers.usermanagement.UserController.getUserByKey(idType:String, id:String, request: play.mvc.Http.Request)
 POST    /private/user/v1/lookup                 @controllers.usermanagement.UserController.userLookup(request: play.mvc.Http.Request)
 GET     /v1/user/exists/:key/:value             @controllers.usermanagement.UserController.isUserValid(key:String, value:String, request: play.mvc.Http.Request)
 GET     /v2/user/exists/:key/:value             @controllers.usermanagement.UserController.userExists(key:String, value:String, request: play.mvc.Http.Request)
