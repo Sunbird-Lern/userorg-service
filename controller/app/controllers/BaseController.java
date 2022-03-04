@@ -480,7 +480,7 @@ public class BaseController extends Controller {
     }
     if (request.path() != null
             && (request.path().startsWith("/v1/user/get/:idType/:id"))
-            && ("userNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+            && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("USER_NOT_FOUND");
       response.getParams().setStatus("USER_NOT_FOUND");
     }
