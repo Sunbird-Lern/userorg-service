@@ -324,6 +324,11 @@ public class BaseController extends Controller {
               + e.getMessage(),
           e);
       if (e instanceof ProjectCommonException) {
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                (ProjectCommonException) e,
+                ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+        e = exception;
         printExitLogOnFailure(request, (ProjectCommonException) e);
       } else {
         printExitLogOnFailure(request, null);
@@ -472,6 +477,12 @@ public class BaseController extends Controller {
         && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("USER_CONSENT_NOT_FOUND");
       response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
+    }
+    if (request.path() != null
+            && (request.path().startsWith("/v1/user/get/"))
+            && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("USER_NOT_FOUND");
+      response.getParams().setStatus("USER_NOT_FOUND");
     }
   }
 
