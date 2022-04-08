@@ -472,4 +472,17 @@ public class UserController extends BaseController {
         true,
         httpRequest);
   }
+
+  public CompletionStage<Result> autoSearchUser(String key, Http.Request httpRequest) {
+    return handleRequest(
+        searchHandlerActor,
+        ActorOperations.USER_AUTO_SEARCH.getValue(),
+        httpRequest.body().asJson(),
+        null,
+        key,
+        JsonKey.KEY,
+        getAllRequestHeaders(httpRequest),
+        false,
+        httpRequest);
+  }
 }

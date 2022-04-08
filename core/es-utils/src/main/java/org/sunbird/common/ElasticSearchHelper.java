@@ -22,6 +22,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -699,6 +700,9 @@ public class ElasticSearchHelper {
           .getSortBy()
           .putAll((Map<? extends String, ? extends String>) searchQueryMap.get(JsonKey.SORT_BY));
     }
+    if(searchQueryMap.containsKey(JsonKey.MULTI_QUERY_SEARCH_FIELDS)) {
+      search.setMultiSearchFields((Map<String, List<String>>) searchQueryMap.get(JsonKey.MULTI_QUERY_SEARCH_FIELDS));
+    }
     return search;
   }
 
@@ -769,5 +773,21 @@ public class ElasticSearchHelper {
       }
     }
     return finalFacetList;
+  }
+
+  /**
+   * This method return MultiMatchQueryBuilder Object with boosts if any provided
+   *
+   * @param query of the attribute
+   * @param fields of the attribute
+   * @param boost for increasing the search parameters priority
+   * @return MultiMatchQueryBuilder
+   */
+  public static MultiMatchQueryBuilder createMultiMatchQuery(String query, String[] fields, Float boost) {
+    if (null != (boost)) {
+      return QueryBuilders.multiMatchQuery(query, fields).boost(boost);
+    } else {
+      return QueryBuilders.multiMatchQuery(query, fields);
+    }
   }
 }

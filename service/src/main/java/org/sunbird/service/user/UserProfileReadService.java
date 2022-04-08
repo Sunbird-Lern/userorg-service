@@ -133,6 +133,7 @@ public class UserProfileReadService {
     appendMinorFlag(result);
     // For Backward compatibility , In ES we were sending identifier field
     result.put(JsonKey.IDENTIFIER, userId);
+    mapUserRoles(result);
 
     Response response = new Response();
     response.put(JsonKey.RESPONSE, result);
@@ -631,5 +632,19 @@ public class UserProfileReadService {
       }
     }
     return retList;
+  }
+
+  private void mapUserRoles(Map<String, Object> result) {
+    List<Map<String, Object>> organisations = (List<Map<String, Object>>) result.get(JsonKey.ORGANISATIONS);
+    List<String> roleList = new ArrayList<String>();
+    for(Map<String, Object> org : organisations) {
+      boolean isDeleted = (boolean) org.get(JsonKey.IS_DELETED);
+      if (!isDeleted && org.get(JsonKey.ROLES) != null) {
+        roleList.addAll((List<String>)org.get(JsonKey.ROLES));
+      }
+    }
+    if(CollectionUtils.isNotEmpty(roleList)) {
+      result.put(JsonKey.ROLES, roleList);
+    }
   }
 }

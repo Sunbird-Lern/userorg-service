@@ -19,6 +19,7 @@ POST    /v2/user/signup                         @controllers.usermanagement.User
 PATCH   /v1/user/update					        @controllers.usermanagement.UserController.updateUser(request: play.mvc.Http.Request)
 PATCH   /v2/user/update                         @controllers.usermanagement.UserController.updateUserV2(request: play.mvc.Http.Request)
 PATCH   /v3/user/update                         @controllers.usermanagement.UserController.updateUserV3(request: play.mvc.Http.Request)
+PATCH   /private/user/v1/update                 @controllers.usermanagement.UserController.updateUserV3(request: play.mvc.Http.Request)
 
 GET     /v1/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
 GET  	/v2/user/read/:uid				        @controllers.usermanagement.UserController.getUserByIdV3(uid:String, request: play.mvc.Http.Request)
@@ -39,6 +40,7 @@ POST    /v1/user/search					        @controllers.usermanagement.UserController.s
 POST    /v2/user/search					        @controllers.usermanagement.UserController.searchUserV2(request: play.mvc.Http.Request)
 POST    /v3/user/search					        @controllers.usermanagement.UserController.searchUserV3(request: play.mvc.Http.Request)
 POST    /private/user/v1/search                 @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
+GET     /v1/user/autocomplete/:key              @controllers.usermanagement.UserController.autoSearchUser(key:String, request: play.mvc.Http.Request)
 
 POST    /v1/user/block                          @controllers.usermanagement.UserStatusController.blockUser(request: play.mvc.Http.Request)
 POST    /v1/user/unblock			            @controllers.usermanagement.UserStatusController.unblockUser(request: play.mvc.Http.Request)

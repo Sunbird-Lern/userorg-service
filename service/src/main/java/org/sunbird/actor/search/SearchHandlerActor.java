@@ -56,6 +56,9 @@ public class SearchHandlerActor extends BaseActor {
     }
     String operation = request.getOperation();
     switch (operation) {
+      case "userAutoSearch":
+        handleUserAutoSearch(request);
+        break;
       case "userSearch":
       case "userSearchV2":
       case "userSearchV3":
@@ -531,5 +534,32 @@ public class SearchHandlerActor extends BaseActor {
   private Map<String, Object> getFuzzyFilterMap(Map<String, Object> searchQueryMap) {
     return (Map<String, Object>)
         ((Map<String, Object>) (searchQueryMap.get(JsonKey.FILTERS))).get(JsonKey.SEARCH_FUZZY);
+  }
+
+  private void handleUserAutoSearch(Request request) throws Exception {
+    String key = (String) request.getRequest().get(JsonKey.KEY);
+    Map<String, Object> searchQueryMap = new HashMap<>();
+    //prepare searchQuerymap
+    final String[] includeFields = { "profileDetails.personalDetails.firstname",
+            "profileDetails.personalDetails.surname",
+            "profileDetails.personalDetails.primaryEmail" };
+    Map<String, List<String>> querySearchFields = new HashMap();
+    querySearchFields.put(key, Arrays.asList(includeFields));
+    searchQueryMap.put(JsonKey.MULTI_QUERY_SEARCH_FIELDS, querySearchFields);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
+    searchDto.setExcludedFields(Arrays.asList(ProjectUtil.excludes));
+    Map<String, Object> result = userService.searchUser(searchDto, request.getRequestContext());
+    List<Map<String, Object>> userMapList =
+            (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+    List<String> fields = (List<String>) searchQueryMap.get(JsonKey.FIELDS);
+    Map<String, Object> userDefaultFieldValue = Util.getUserDefaultValue();
+    getDefaultValues(userDefaultFieldValue, fields);
+    for (Map<String, Object> userMap : userMapList) {
+      UserUtility.decryptUserDataFrmES(userMap);
+    }
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, result);
+    sender().tell(response, self());
+    generateSearchTelemetryEvent(searchDto, ProjectUtil.EsType.user.getTypeName(), result, request.getContext());
   }
 }

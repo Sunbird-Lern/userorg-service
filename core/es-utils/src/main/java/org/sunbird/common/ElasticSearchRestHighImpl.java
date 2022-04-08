@@ -432,6 +432,13 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       }
     }
 
+    //apply multimatch on query
+    if (searchDTO.getMultiSearchFields() != null && searchDTO.getMultiSearchFields().size() > 0) {
+      for (Map.Entry<String, List<String>> entry : searchDTO.getMultiSearchFields().entrySet()) {
+        query.should(ElasticSearchHelper.createMultiMatchQuery(entry.getKey(),entry.getValue().toArray(new String[entry.getValue().size()]),null));
+      }
+    }
+
     // set final query to search request builder
     searchSourceBuilder.query(query);
     List finalFacetList = new ArrayList();

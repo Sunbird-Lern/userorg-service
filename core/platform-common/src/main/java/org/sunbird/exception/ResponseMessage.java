@@ -108,6 +108,8 @@ public interface ResponseMessage {
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
     String USER_TYPE_CONFIG_IS_EMPTY = "userType config is empty for the statecode {0}";
     String SERVER_ERROR = "server error";
+    String EXTENDED_USER_PROFILE_NOT_LOADED = "Failed to load extendedProfileSchemaConfig from System_Settings table";
+    String ROLE_PROCESSING_INVALID_ORG = "Error while processing assign role. Invalid Organisation Id";
   }
 
   interface Key {
@@ -184,5 +186,7 @@ public interface ResponseMessage {
     String INVALID_OBJECT_TYPE = "0072";
     String INACTIVE_USER = "0073";
     String INVALID_CSV_FILE = "0074";
+    String EXTENDED_USER_PROFILE_NOT_LOADED = "EXTENDED_USER_PROFILE_NOT_LOADED";
+    String ROLE_PROCESSING_INVALID_ORG = "ROLE_PROCESSING_INVALID_ORG_ID";
   }
 }
