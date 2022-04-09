@@ -26,6 +26,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -55,7 +56,8 @@ import scala.concurrent.Promise;
   ActorSelection.class,
   OrgExternalServiceImpl.class,
   HttpClientUtil.class,
-  LocationServiceImpl.class
+  LocationServiceImpl.class,
+  OrgTypeValidator.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -142,6 +144,11 @@ public class OrgManagementActorTest {
     promise.success(getEsResponse(false));
     PowerMockito.when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+    OrgTypeValidator orgTypeValidator = mock(OrgTypeValidator.class);
+    PowerMockito.mockStatic(OrgTypeValidator.class);
+    when(OrgTypeValidator.getInstance()).thenReturn(orgTypeValidator);
+    when(orgTypeValidator.getValueByType(JsonKey.ORG_TYPE_SCHOOL)).thenReturn(2);
+    when(orgTypeValidator.isOrgTypeExist("board")).thenReturn(true);
   }
 
   @Test

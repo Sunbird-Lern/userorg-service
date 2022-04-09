@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.http.HttpClientUtil;
@@ -58,6 +59,7 @@ public class OrganisationBackgroundActor extends BaseActor {
       }
     }
     organisation.put(JsonKey.ORG_LOCATION, orgLocationList);
+    OrgTypeValidator.getInstance().updateOrganisationTypeFlags(organisation);
 
     esService.upsert(
         ProjectUtil.EsType.organisation.getTypeName(),

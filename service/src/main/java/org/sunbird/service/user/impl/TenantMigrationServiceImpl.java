@@ -156,8 +156,13 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
   public Response updateUserOrg(Request request, List<Map<String, Object>> userOrgList) {
     logger.debug(request.getRequestContext(), "TenantMigrationActor:updateUserOrg called.");
     Response response = new Response();
+    Boolean isSoftDelete = (Boolean) request.get(JsonKey.SOFT_DELETE_PREVIOUS_ORG);
     if (CollectionUtils.isNotEmpty(userOrgList)) {
-      deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
+      if (null != isSoftDelete && isSoftDelete) {
+        softDeleteOldUserOrgMapping(userOrgList, request.getRequestContext());
+      } else {
+        deleteOldUserOrgMapping(userOrgList, request.getRequestContext());
+      }
     }
     Map<String, Object> userDetails = request.getRequest();
     // add mapping root org
@@ -216,5 +221,10 @@ public class TenantMigrationServiceImpl implements TenantMigrationService {
         logger.info(context, "Exception occurred while converting orgLocation to String.");
       }
     }
+  }
+
+  private void softDeleteOldUserOrgMapping(
+          List<Map<String, Object>> userOrgList, RequestContext context) {
+    userOrgService.softDeleteOldUserOrgMapping(userOrgList, context);
   }
 }

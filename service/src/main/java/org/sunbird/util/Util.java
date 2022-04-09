@@ -174,8 +174,6 @@ public final class Util {
     org.put("addressId", null);
     org.put("approvedDate", null);
     org.put("communityId", null);
-    org.put("homeUrl", null);
-    org.put("imgUrl", null);
     org.put("isApproved", null);
     org.put("locationId", null);
     org.put("noOfMembers", null);

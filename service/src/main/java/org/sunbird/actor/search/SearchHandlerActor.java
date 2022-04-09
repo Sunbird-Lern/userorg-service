@@ -12,13 +12,13 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -297,7 +297,7 @@ public class SearchHandlerActor extends BaseActor {
                             int orgType = (int) org.get(JsonKey.ORGANISATION_TYPE);
                             boolean isSchool =
                                 (orgType
-                                        == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType()))
+                                        == OrgTypeValidator.getInstance().getValueByType(JsonKey.ORG_TYPE_SCHOOL))
                                     ? true
                                     : false;
                             org.put(JsonKey.IS_SCHOOL, isSchool);
