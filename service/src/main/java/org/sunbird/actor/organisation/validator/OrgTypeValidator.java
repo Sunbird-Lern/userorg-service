@@ -30,11 +30,7 @@ public class OrgTypeValidator {
 
     public static OrgTypeValidator getInstance() {
         if (instance == null) {
-            synchronized (OrgTypeValidator.class) {
-                if (instance == null) {
-                    instance = new OrgTypeValidator();
-                }
-            }
+            instance = new OrgTypeValidator();
         }
         return instance;
     }
