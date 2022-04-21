@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.service.user.ExtendedUserProfileService;
 import org.sunbird.util.user.UserExtendedProfileSchemaValidator;
@@ -33,7 +34,7 @@ public class ExtendedUserProfileServiceImpl implements ExtendedUserProfileServic
                 UserExtendedProfileSchemaValidator.validate(SCHEMA, obj);
                 ((Map)userRequest.getRequest().get(JsonKey.PROFILE_DETAILS)).put(JsonKey.MANDATORY_FIELDS_EXISTS, obj.get(JsonKey.MANDATORY_FIELDS_EXISTS));
             } catch (Exception e){
-                logger.error("ExtendedUserProfileServiceImpl.validateProfile :: failed to validate profile.", e);
+                logger.error(userRequest.getRequestContext(), "ExtendedUserProfileServiceImpl.validateProfile :: failed to validate profile.", e);
                 throw new ProjectCommonException(
                         ResponseCode.extendUserProfileNotLoaded,
                         ResponseCode.extendUserProfileNotLoaded.getErrorMessage(),

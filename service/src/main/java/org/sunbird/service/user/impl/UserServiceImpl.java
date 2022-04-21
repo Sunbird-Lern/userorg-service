@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
           MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER));
     }
     if (user.get(JsonKey.PROFILE_DETAILS) != null) {
-      logger.debug("getUserDetailsById :: read Profile details String is :: " + user.get(JsonKey.PROFILE_DETAILS).toString());
+      logger.debug(context, "getUserDetailsById :: read Profile details String is :: " + user.get(JsonKey.PROFILE_DETAILS).toString());
       user.put(JsonKey.PROFILE_DETAILS, ProfileUtil.toMap(user.get(JsonKey.PROFILE_DETAILS).toString()));
     }
     user.putAll(Util.getUserDefaultValue());

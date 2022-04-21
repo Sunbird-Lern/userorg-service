@@ -71,7 +71,7 @@ public class UserExtendedProfileSchemaValidator {
                     .schemaJson(rawSchema).build();
             schema = schemaLoader.load().build();
         } catch (Exception ioe) {
-            logger.error("UserExtendedProfileSchemaValidator.getEntitySchema :: failed to validate entityType : " + entityType, e);
+            logger.error("UserExtendedProfileSchemaValidator.getEntitySchema :: failed to validate entityType : " + entityType, ioe);
             throw new Exception("can't validate, " + entityType + ": schema has a problem!");
         }
         return schema;
