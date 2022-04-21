@@ -34,6 +34,7 @@ public class UserExtendedProfileSchemaValidator {
                 schemas.put(entry.getKey().toString(), mapper.writeValueAsString(entry.getValue()));
             }
         } catch (Exception e) {
+            logger.error("UserExtendedProfileSchemaValidator.loadSchemas :: failed to load schemas.", e);
             throw new ProjectCommonException(
                     ResponseCode.extendUserProfileNotLoaded,
                     ResponseCode.extendUserProfileNotLoaded.getErrorMessage(),
@@ -51,7 +52,7 @@ public class UserExtendedProfileSchemaValidator {
             if (e.getAllMessages().toString().contains(PRIMARY_EMAIL_FIELD)) {
                 throw new Exception(e.getAllMessages().toString());
             } else {
-                logger.error("Mandatory attributes are not present",e);
+                logger.error("Mandatory attributes are not present", e);
                 payload.put(JsonKey.MANDATORY_FIELDS_EXISTS, Boolean.FALSE);
             }
         }
@@ -70,24 +71,9 @@ public class UserExtendedProfileSchemaValidator {
                     .schemaJson(rawSchema).build();
             schema = schemaLoader.load().build();
         } catch (Exception ioe) {
-            ioe.printStackTrace();
+            logger.error("UserExtendedProfileSchemaValidator.getEntitySchema :: failed to validate entityType : " + entityType, e);
             throw new Exception("can't validate, " + entityType + ": schema has a problem!");
         }
         return schema;
-    }
-
-    private static String read(String file) {
-        StringBuilder fileData = new StringBuilder();
-        try {
-            File fileObj = new File(file);
-            Scanner reader = new Scanner(fileObj);
-            while (reader.hasNextLine()) {
-                fileData.append(reader.nextLine());
-            }
-            reader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return fileData.toString();
     }
 }

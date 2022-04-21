@@ -15,6 +15,7 @@ public class ExtendedUserProfileServiceImpl implements ExtendedUserProfileServic
     private static final String SCHEMA = "profileDetails.json";
     private static final ObjectMapper mapper = new ObjectMapper();
     private static ExtendedUserProfileServiceImpl instance = null;
+    private LoggerUtil logger = new LoggerUtil(UserExtendedProfileSchemaValidator.class);
 
     public static ExtendedUserProfileServiceImpl getInstance() {
         if(instance == null) {
@@ -32,8 +33,7 @@ public class ExtendedUserProfileServiceImpl implements ExtendedUserProfileServic
                 UserExtendedProfileSchemaValidator.validate(SCHEMA, obj);
                 ((Map)userRequest.getRequest().get(JsonKey.PROFILE_DETAILS)).put(JsonKey.MANDATORY_FIELDS_EXISTS, obj.get(JsonKey.MANDATORY_FIELDS_EXISTS));
             } catch (Exception e){
-                e.printStackTrace();
-                //TODO - Need to find proper error message
+                logger.error("ExtendedUserProfileServiceImpl.validateProfile :: failed to validate profile.", e);
                 throw new ProjectCommonException(
                         ResponseCode.extendUserProfileNotLoaded,
                         ResponseCode.extendUserProfileNotLoaded.getErrorMessage(),
