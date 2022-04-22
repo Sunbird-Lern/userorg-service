@@ -18,7 +18,7 @@ public class ExtendedUserProfileServiceImpl implements ExtendedUserProfileServic
     private static ExtendedUserProfileServiceImpl instance = null;
     private LoggerUtil logger = new LoggerUtil(UserExtendedProfileSchemaValidator.class);
 
-    public static ExtendedUserProfileServiceImpl getInstance() {
+    public static ExtendedUserProfileService getInstance() {
         if(instance == null) {
             instance = new ExtendedUserProfileServiceImpl();
         }
