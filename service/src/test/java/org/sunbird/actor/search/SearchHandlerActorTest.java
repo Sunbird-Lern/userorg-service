@@ -43,7 +43,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
+
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;
@@ -272,5 +272,32 @@ public class SearchHandlerActorTest {
     ProjectCommonException exc =
         probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
     Assert.assertTrue(null != exc);
+  }
+
+  @Test
+  public void autoSearchUser() {
+    PowerMockito.mockStatic(EsClientFactory.class);
+    ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
+    when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
+    Promise<Map<String, Object>> promise = Futures.promise();
+    promise.success(createResponseGet(true));
+    when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(promise.future());
+
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+
+    Request reqObj = new Request();
+    reqObj.setOperation(ActorOperations.USER_AUTO_SEARCH.getValue());
+    HashMap<String, Object> innerMap = new HashMap<>();
+    innerMap.put(JsonKey.KEY, "user");
+    reqObj.setRequest(innerMap);
+    subject.tell(reqObj, probe.getRef());
+    try {
+      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
   }
 }
