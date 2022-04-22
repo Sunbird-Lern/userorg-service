@@ -233,6 +233,8 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     reqMap.put(JsonKey.CHANNEL, "anyChannel");
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
+    reqMap.put(JsonKey.FORCE_MIGRATION, true);
+    reqMap.put(JsonKey.NOTIFY_USER_MIGRATION, true);
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
     return reqObj;
@@ -356,37 +358,5 @@ public class TenantMigrationActorTest {
     responseMap.put(Constants.RESPONSE, Arrays.asList(responseMap));
     response.getResult().putAll(responseMap);
     return response;
-  }
-
-  @Test
-  public void testForceUserMigration() {
-    try {
-      PowerMockito.mockStatic(DataCacheHandler.class);
-      Map<String, String> dataCache = new HashMap<>();
-      dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
-      when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
-      Request migRequest = getMigrateReq(ActorOperations.USER_TENANT_MIGRATE);
-      migRequest.getRequest().put(JsonKey.FORCE_MIGRATION, true);
-      boolean result =
-              testScenario(migRequest, null, props);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
-    }
-  }
-
-  @Test
-  public void testNotifyUserMigration() {
-    try {
-      PowerMockito.mockStatic(DataCacheHandler.class);
-      Map<String, String> dataCache = new HashMap<>();
-      dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "anyRootOrgId");
-      when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
-      Request migRequest = getMigrateReq(ActorOperations.USER_TENANT_MIGRATE);
-      migRequest.getRequest().put(JsonKey.NOTIFY_USER_MIGRATION, true);
-      boolean result =
-              testScenario(migRequest, null, props);
-    } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
-    }
   }
 }
