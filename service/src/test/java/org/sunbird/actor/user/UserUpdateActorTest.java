@@ -1,6 +1,7 @@
 package org.sunbird.actor.user;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -534,7 +535,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
   @Test
   public void testUpdateExtendedUserProfileFailureV3() {
     //Remove schemaConfig from DataCacheHandler
-          Map<String, String> configMap = new HashMap<>();
+    Map<String, String> configMap = new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
@@ -559,5 +560,41 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     Request request = getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3);
     boolean result = testScenario(request, ResponseCode.extendUserProfileNotLoaded, props);
     assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateInvalidExtendedUserProfileFailureV3() {
+    PowerMockito.mockStatic(ExtendedUserProfileServiceImpl.class);
+    ExtendedUserProfileService extendedUserProfileService = mock(ExtendedUserProfileService.class);
+    when(ExtendedUserProfileServiceImpl.getInstance()).thenReturn(extendedUserProfileService);
+
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.USER_ID, "userId");
+    req.put(JsonKey.PROFILE_DETAILS, "this is my profile");
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+            .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+            .thenReturn(user);
+    Request request = getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3);
+    boolean result = testScenario(request, ResponseCode.invalidValue, props);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserProfileWithInvalidOperation() {
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.USER_ID, "userId");
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    Request request = getRequest(true, true, true, req, ActorOperations.CREATE_USER);
+    boolean result = testScenario(request, ResponseCode.extendUserProfileNotLoaded, props);
+    assertFalse(result);
   }
 }

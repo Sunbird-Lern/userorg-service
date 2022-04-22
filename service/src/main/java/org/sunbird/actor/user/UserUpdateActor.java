@@ -161,15 +161,6 @@ public class UserUpdateActor extends UserBaseActor {
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser((String) userDbRecord.get(JsonKey.ROOT_ORG_ID));
     encryptExternalDetails(userMap, userDbRecord);
-    if(userMap.containsKey(JsonKey.PROFILE_DETAILS)) {
-      try {
-        Map map = ProfileUtil.toMap(userMap.get(JsonKey.PROFILE_DETAILS).toString());
-        ProfileUtil.appendIdToReferenceObjects(map);
-        userMap.put(JsonKey.PROFILE_DETAILS, ProfileUtil.mapper.writeValueAsString(map));
-      } catch (Exception e) {
-        logger.error(actorMessage.getRequestContext(), "User profile casting exception ", e);
-      }
-    }
     User user = mapper.convertValue(userMap, User.class);
     UserUtil.validateExternalIdsForUpdateUser(
         user, isCustodianOrgUser, actorMessage.getRequestContext());
@@ -678,9 +669,10 @@ public class UserUpdateActor extends UserBaseActor {
   }
 
   private void convertProfileObjToString(Request actorMessage) {
-    //Convert the profile object to String -- if it is available.
-    Object profileObject = actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS);
+    //ProfileObject is available - add 'osid' and then convert it to String.
     try {
+      Map profileObject = (Map) actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS);
+      ProfileUtil.appendIdToReferenceObjects(profileObject);
       String profileStr = mapper.writeValueAsString(profileObject);
       actorMessage.getRequest().put(JsonKey.PROFILE_DETAILS, profileStr);
     } catch(Exception e) {
