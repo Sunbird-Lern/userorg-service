@@ -606,9 +606,9 @@ public class UserRequestValidator extends BaseRequestValidator {
       return;
     } else {
       throw new ProjectCommonException(
-          ResponseCode.dependentParamsMissing,
+          ResponseCode.invalidRequestParameter,
           ProjectUtil.formatMessage(
-              ResponseCode.dependentParamsMissing.getErrorMessage(),
+              ResponseCode.invalidRequestParameter.getErrorMessage(),
               StringFormatter.joinByComma(
                   JsonKey.EXTERNAL_ID, JsonKey.EXTERNAL_ID_TYPE, JsonKey.EXTERNAL_ID_PROVIDER)),
           ERROR_CODE);
@@ -820,6 +820,7 @@ public class UserRequestValidator extends BaseRequestValidator {
         } else {
           userTypeConfigMap.put(stateCode, userProfileConfigMap);
         }
+        logger.info("form config for state:" + stateCode + " " + userTypeConfigMap);
       }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
@@ -828,6 +829,10 @@ public class UserRequestValidator extends BaseRequestValidator {
             ResponseCode.SERVER_ERROR,
             MessageFormat.format(ResponseMessage.Message.USER_TYPE_CONFIG_IS_EMPTY, stateCode));
       }
+      logger.info(
+          context,
+          String.format(
+              "Available User Type for stateCode:%s are %s", stateCode, userTypeMap.keySet()));
       logger.info(
           context,
           String.format(
@@ -857,13 +862,14 @@ public class UserRequestValidator extends BaseRequestValidator {
     return stateCode;
   }
 
-  public void validateUserSubType(Map<String, Object> userRequestMap, String stateCode) {
+  public void validateUserSubType(
+      Map<String, Object> userRequestMap, String stateCode, RequestContext context) {
     String userType = (String) userRequestMap.get(JsonKey.USER_TYPE);
     String userSubType = (String) userRequestMap.get(JsonKey.USER_SUB_TYPE);
     Map<String, Map<String, List<String>>> userTypeConfigMap =
         DataCacheHandler.getUserTypesConfig();
     Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
-
+    logger.info(context, "usertype map for state code: " + stateCode + "config:" + userTypeMap);
     List<Map> profileUserTypes = (List<Map>) userRequestMap.get(JsonKey.PROFILE_USERTYPES);
     if (CollectionUtils.isNotEmpty(profileUserTypes)
         && MapUtils.isNotEmpty(profileUserTypes.get(0))) {
@@ -963,8 +969,8 @@ public class UserRequestValidator extends BaseRequestValidator {
             throw new ProjectCommonException(
                 ResponseCode.mandatoryParamsMissing,
                 MessageFormat.format(
-                    ResponseMessage.Message.MISSING_SELF_DECLARED_MANDATORY_PARAMETERS,
-                    new String[] {JsonKey.USER_ID, JsonKey.ORG_ID}),
+                    ResponseMessage.Message.MANDATORY_PARAMETER_MISSING,
+                    JsonKey.USER_ID + " or " + JsonKey.ORG_ID),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
           if (StringUtils.isBlank((String) declareFields.get(JsonKey.PERSONA))) {

@@ -115,10 +115,7 @@ public class PrintEntryExitLog {
       ResponseParams responseParams =
           createResponseParamObj(code, exception.getMessage(), requestId);
       if (responseParams != null) {
-        responseParams.setStatus(JsonKey.FAILED);
-        if (exception.getErrorCode() != null) {
-          responseParams.setStatus(JsonKey.FAILED);
-        }
+        responseParams.setErr(exception.getErrorCode());
         if (!StringUtils.isBlank(responseParams.getErrmsg())
             && responseParams.getErrmsg().contains("{0}")) {
           responseParams.setErrmsg(exception.getMessage());

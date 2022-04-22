@@ -291,7 +291,7 @@ public class UserProfileReadActorTest {
     Request reqObj = getProfileReadV1request(VALID_USER_ID);
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, VALID_USER_ID);
-    boolean result = testScenario(reqObj, ResponseCode.externalIdNotFound);
+    boolean result = testScenario(reqObj, ResponseCode.resourceNotFound);
     assertTrue(result);
   }
 

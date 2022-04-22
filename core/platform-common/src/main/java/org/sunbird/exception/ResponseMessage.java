@@ -60,7 +60,6 @@ public interface ResponseMessage {
     String OR_FORMAT = "{0} or {1}";
     String AND_FORMAT = "{0} and {1}";
     String DEPENDENT_PARAMETER_MISSING = "Missing parameter {0} which is dependent on {1}.";
-    String DEPENDENT_PARAMS_MISSING = "Missing parameter value in {0}.";
     String EXTERNALID_NOT_FOUND =
         "External ID (id: {0}, idType: {1}, provider: {2}) not found for given user.";
     String EXTERNAL_ID_FORMAT = "externalId (id: {0}, idType: {1}, provider: {2})";
@@ -76,8 +75,6 @@ public interface ResponseMessage {
         "Loading {0} configuration failed as empty string is passed as parameter.";
     String ERROR_CONFIG_LOAD_PARSE_STRING =
         "Loading {0} configuration failed due to parsing error.";
-    String MISSING_SELF_DECLARED_MANDATORY_PARAMETERS =
-        "Mandatory parameter {0} or {1} is missing.";
     String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "Loading {0} configuration failed.";
     String ERROR_NO_ROOT_ORG_ASSOCIATED = "Not able to associate with root org";
     String ERROR_UNSUPPORTED_CLOUD_STORAGE = "Unsupported cloud storage type {0}.";
@@ -98,7 +95,6 @@ public interface ResponseMessage {
     String PARAM_NOT_MATCH = "%s-NOT-MATCH";
     String MANDATORY_HEADER_PARAMETER_MISSING = "Mandatory header parameter {0} is missing.";
     String RECOVERY_PARAM_MATCH_EXCEPTION = "{0} could not be same as {1}";
-    String ACCOUNT_NOT_FOUND = "Account not found.";
     String INVALID_PASSWORD =
         "Password must contain a minimum of 8 characters including numerals, lower and upper case alphabets and special characters";
     String OTP_VERIFICATION_FAILED = "OTP verification failed. Remaining attempt count is {0}.";
@@ -106,9 +102,7 @@ public interface ResponseMessage {
     String MANAGED_BY_NOT_ALLOWED = "managedBy cannot be updated.";
     String MANAGED_USER_LIMIT_EXCEEDED = "Managed user creation limit exceeded";
     String INVALID_CAPTCHA = "Captcha is invalid";
-    String PREFERENCE_ALREADY_EXIST = "preference {0} already exits in the org {1}";
     String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "Declared user error status is not updated";
-    String PREFERENCE_NOT_FOUND = "preference {0} not found in the org {1}";
     String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED =
         "Declared user validated status is not updated";
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
@@ -157,42 +151,38 @@ public interface ResponseMessage {
     String EMPTY_HEADER_LINE = "0039";
     String ROOT_ORG_ASSOCIATION_ERROR = "0040";
     String DEPENDENT_PARAMETER_MISSING = "0041";
-    String EXTERNALID_NOT_FOUND = "0042";
-    String EXTERNALID_ASSIGNED_TO_OTHER_USER = "0043";
-    String DUPLICATE_EXTERNAL_IDS = "0044";
-    String EMAIL_RECIPIENTS_EXCEEDS_MAX_LIMIT = "0045";
-    String PARAMETER_MISMATCH = "0046";
-    String ERROR_CONFIG_LOAD_EMPTY_STRING = "0047";
-    String ERROR_CONFIG_LOAD_PARSE_STRING = "0048";
-    String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "0049";
-    String ERROR_NO_ROOT_ORG_ASSOCIATED = "0050";
-    String ERROR_UNSUPPORTED_CLOUD_STORAGE = "0051";
-    String ERROR_UNSUPPORTED_FIELD = "0052";
-    String INVALID_PROPERTY_ERROR = "0053";
-    String ERROR_INACTIVE_ORG = "0054";
-    String ERROR_DUPLICATE_ENTRIES = "0055";
-    String ERROR_CONFLICTING_VALUES = "0056";
-    String ERROR_CONFLICTING_ROOT_ORG_ID = "0057";
-    String ERROR_INVALID_OTP = "0058";
-    String ERROR_INVALID_PARAMETER_SIZE = "0059";
-    String ERROR_RATE_LIMIT_EXCEEDED = "0060";
-    String ERROR_USER_MIGRATION_FAILED = "0061";
-    String MANDATORY_HEADER_PARAMETER_MISSING = "0062";
-    String RECOVERY_PARAM_MATCH_EXCEPTION = "0063";
-    String OTP_VERIFICATION_FAILED = "0064";
-    String SERVICE_UNAVAILABLE = "0065";
-    String MANAGED_BY_NOT_ALLOWED = "0066";
-    String MANAGED_USER_LIMIT_EXCEEDED = "0067";
-    String PREFERENCE_ALREADY_EXIST = "0068";
-    String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "0069";
-    String PREFERENCE_NOT_FOUND = "0070";
-    String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED = "0071";
-    String SERVER_ERROR = JsonKey.USER_ORG_SERVICE_PREFIX + "0072";
-    String UNAUTHORIZED_USER = JsonKey.USER_ORG_SERVICE_PREFIX + "0073";
-    String FORBIDDEN = "0074";
-    String INVALID_OBJECT_TYPE = "0075";
-    String INACTIVE_USER = "0076";
-    String INVALID_CSV_FILE = "0077";
-    String ACCOUNT_NOT_FOUND = "0078";
+    String EXTERNALID_ASSIGNED_TO_OTHER_USER = "0042";
+    String DUPLICATE_EXTERNAL_IDS = "0043";
+    String EMAIL_RECIPIENTS_EXCEEDS_MAX_LIMIT = "0044";
+    String PARAMETER_MISMATCH = "0045";
+    String ERROR_CONFIG_LOAD_EMPTY_STRING = "0046";
+    String ERROR_CONFIG_LOAD_PARSE_STRING = "0047";
+    String ERROR_CONFIG_LOAD_EMPTY_CONFIG = "0048";
+    String ERROR_NO_ROOT_ORG_ASSOCIATED = "0049";
+    String ERROR_UNSUPPORTED_CLOUD_STORAGE = "0050";
+    String ERROR_UNSUPPORTED_FIELD = "0051";
+    String INVALID_PROPERTY_ERROR = "0052";
+    String ERROR_INACTIVE_ORG = "0053";
+    String ERROR_DUPLICATE_ENTRIES = "0054";
+    String ERROR_CONFLICTING_VALUES = "0055";
+    String ERROR_CONFLICTING_ROOT_ORG_ID = "0056";
+    String ERROR_INVALID_OTP = "0057";
+    String ERROR_INVALID_PARAMETER_SIZE = "0058";
+    String ERROR_RATE_LIMIT_EXCEEDED = "0059";
+    String ERROR_USER_MIGRATION_FAILED = "0060";
+    String MANDATORY_HEADER_PARAMETER_MISSING = "0061";
+    String RECOVERY_PARAM_MATCH_EXCEPTION = "0062";
+    String OTP_VERIFICATION_FAILED = "0063";
+    String SERVICE_UNAVAILABLE = "0064";
+    String MANAGED_BY_NOT_ALLOWED = "0065";
+    String MANAGED_USER_LIMIT_EXCEEDED = "0066";
+    String DECLARED_USER_ERROR_STATUS_IS_NOT_UPDATED = "0067";
+    String DECLARED_USER_VALIDATED_STATUS_IS_NOT_UPDATED = "0068";
+    String SERVER_ERROR = JsonKey.USER_ORG_SERVICE_PREFIX + "0069";
+    String UNAUTHORIZED_USER = JsonKey.USER_ORG_SERVICE_PREFIX + "0070";
+    String FORBIDDEN = "0071";
+    String INVALID_OBJECT_TYPE = "0072";
+    String INACTIVE_USER = "0073";
+    String INVALID_CSV_FILE = "0074";
   }
 }

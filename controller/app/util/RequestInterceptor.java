@@ -67,6 +67,8 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/location/delete", var);
     apiHeaderIgnoreMap.put("/v1/otp/generate", var);
     apiHeaderIgnoreMap.put("/v1/otp/verify", var);
+    apiHeaderIgnoreMap.put("/v2/otp/generate", var);
+    apiHeaderIgnoreMap.put("/v2/otp/verify", var);
     apiHeaderIgnoreMap.put("/v1/user/get/email", var);
     apiHeaderIgnoreMap.put("/v1/user/get/phone", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/get", var);

@@ -209,7 +209,7 @@ public class OrgValidatorTest {
       new OrgRequestValidator().validateUpdateOrgRequest(request);
       requestObj.put("ext", "success");
     } catch (ProjectCommonException e) {
-      assertEquals(ResponseCode.dependentParamsMissing.getErrorCode(), e.getErrorCode());
+      assertEquals(ResponseCode.dependentParameterMissing.getErrorCode(), e.getErrorCode());
       assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), e.getErrorResponseCode());
     }
     assertEquals(null, requestObj.get("ext"));

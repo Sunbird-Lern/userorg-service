@@ -324,6 +324,11 @@ public class BaseController extends Controller {
               + e.getMessage(),
           e);
       if (e instanceof ProjectCommonException) {
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                (ProjectCommonException) e,
+                ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+        e = exception;
         printExitLogOnFailure(request, (ProjectCommonException) e);
       } else {
         printExitLogOnFailure(request, null);
@@ -452,20 +457,32 @@ public class BaseController extends Controller {
       }
     }
 
-    if (request.path() != null && request.path().startsWith("/v1/otp/verify")) {
-      if ("otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name())) {
-        response.getParams().setErr("OTP_VERIFICATION_FAILED");
-        response.getParams().setStatus("OTP_VERIFICATION_FAILED");
-      }
+    if (request.path() != null
+        && request.path().startsWith("/v1/otp/verify")
+        && ("otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("OTP_VERIFICATION_FAILED");
+      response.getParams().setStatus("OTP_VERIFICATION_FAILED");
     }
 
     if (request.path() != null
         && (request.path().startsWith("/v1/manageduser/create")
-            || request.path().startsWith("/v4/user/create"))) {
-      if ("managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
-        response.getParams().setErr("MANAGED_USER_LIMIT_EXCEEDED");
-        response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
-      }
+            || request.path().startsWith("/v4/user/create"))
+        && ("managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("MANAGED_USER_LIMIT_EXCEEDED");
+      response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
+    }
+
+    if (request.path() != null
+        && (request.path().startsWith("/v1/user/consent/read"))
+        && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("USER_CONSENT_NOT_FOUND");
+      response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
+    }
+    if (request.path() != null
+            && (request.path().startsWith("/v1/user/get/"))
+            && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+      response.getParams().setErr("USER_NOT_FOUND");
+      response.getParams().setStatus("USER_NOT_FOUND");
     }
   }
 
@@ -673,6 +690,11 @@ public class BaseController extends Controller {
               return reslt;
             } else if (ResponseCode.CLIENT_ERROR.getResponseCode()
                 == (response.getResponseCode().getResponseCode())) {
+              ProjectCommonException exception =
+                  new ProjectCommonException(
+                      ((ClientErrorResponse) response).getException(),
+                      ActorOperations.getOperationCodeByActorOperation(request.getOperation()));
+              ((ClientErrorResponse) response).setException(exception);
               Result reslt = createClientErrorResponse(httpReq, (ClientErrorResponse) response);
               printExitLogOnFailure(request, ((ClientErrorResponse) response).getException());
               return reslt;
