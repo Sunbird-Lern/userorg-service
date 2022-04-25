@@ -39,24 +39,6 @@ public class OrgTypeValidator {
         return !MapUtils.isEmpty(orgTypeMap);
     }
 
-    public void initializeOrgType(List<Map<String, String>> orgTypeConfig) {
-        ObjectMapper mapper = new ObjectMapper();
-        if (orgTypeMap == null) {
-            orgTypeMap = new ConcurrentHashMap<String, OrganisationType>();
-        } else {
-            orgTypeMap.clear();
-        }
-        for (Map<String, String> orgTypeString : orgTypeConfig) {
-            OrganisationType orgType = mapper.convertValue(orgTypeString, OrganisationType.class);
-            orgTypeMap.put(orgType.getName(), orgType);
-        }
-        try {
-            logger.info("OrgType Map is initialized. " + mapper.writeValueAsString(orgTypeMap));
-        } catch (JsonProcessingException e) {
-            logger.error("OrgTypeValidator: Failed to initialize using List of Map",e);
-        }
-    }
-
     public void initializeOrgTypeFromCache(List<OrganisationType> organisationTypeList) {
         if (orgTypeMap == null) {
             orgTypeMap = new ConcurrentHashMap<String, OrganisationType>();

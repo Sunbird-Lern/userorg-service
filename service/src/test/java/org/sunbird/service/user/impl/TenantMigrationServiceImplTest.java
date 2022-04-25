@@ -1,5 +1,8 @@
 package org.sunbird.service.user.impl;
 
+
+import static org.junit.Assert.assertTrue;
+
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
@@ -15,6 +18,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
@@ -116,6 +121,20 @@ public class TenantMigrationServiceImplTest {
   }
 
   @Test
+  public void validateInvalidUserCustodianOrgId() {
+    PowerMockito.mockStatic(DataCacheHandler.class);
+    Map<String, String> dataCache = new HashMap<>();
+    dataCache.put(JsonKey.CUSTODIAN_ORG_ID, "newRootOrgId");
+    PowerMockito.when(DataCacheHandler.getConfigSettings()).thenReturn(dataCache);
+    TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+    try {
+      tenantMigrationService.validateUserCustodianOrgId("anyRootOrgId");
+    } catch (ProjectCommonException pe) {
+      assertTrue(pe.getResponseCode() == ResponseCode.parameterMismatch);
+    }
+  }
+
+  @Test
   public void validateOrgExternalIdOrOrgIdAndGetOrgId() {
     List<Map<String, Object>> listMap = new ArrayList<>();
     listMap.add(new HashMap<String, Object>());
@@ -148,6 +167,24 @@ public class TenantMigrationServiceImplTest {
     userDetails.put(JsonKey.ORGANISATIONS, listMap);
     TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
     tenantMigrationService.updateUserOrg(getSelfDeclaredMigrateReq(), listMap);
+  }
+
+  @Test
+  public void updateUserOrgSoftDelete() {
+    List<Map<String, Object>> listMap = new ArrayList<>();
+    listMap.add(new HashMap<String, Object>());
+    Map<String, Object> userDetails = new HashMap<>();
+    userDetails.put(JsonKey.ROOT_ORG_ID, "");
+    userDetails.put(JsonKey.ORGANISATIONS, listMap);
+    TenantMigrationService tenantMigrationService = TenantMigrationServiceImpl.getInstance();
+    Request reqObj = new Request();
+    Map<String, Object> requestMap = new HashMap();
+    requestMap.put(JsonKey.USER_ID, "anyUserID");
+    requestMap.put(JsonKey.CHANNEL, "anyChannel");
+    requestMap.put(JsonKey.ROOT_ORG_ID, "anyRootOrgId");
+    requestMap.put(JsonKey.SOFT_DELETE_PREVIOUS_ORG, true);
+    reqObj.setRequest(requestMap);
+    tenantMigrationService.updateUserOrg(reqObj, listMap);
   }
 
   public Request getSelfDeclaredMigrateReq() {

@@ -626,6 +626,8 @@ public final class JsonKey {
   public static final String ORG_TYPE_SCHOOL = "school";
   public static final String ORG_TYPE_BOARD = "board";
   public static final String SOFT_DELETE_PREVIOUS_ORG = "softDeleteOldOrg";
+  public static final String FORCE_MIGRATION = "forceMigration";
+  public static final String NOTIFY_USER_MIGRATION = "notifyMigration";
 
   private JsonKey() {}
 }
