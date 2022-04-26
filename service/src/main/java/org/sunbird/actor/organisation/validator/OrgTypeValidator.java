@@ -9,13 +9,14 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.organisation.OrganisationType;
-
+import org.sunbird.request.RequestContext;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -46,10 +47,13 @@ public class OrgTypeValidator {
             orgTypeMap.clear();
         }
         orgTypeMap = organisationTypeList.stream().collect(Collectors.toConcurrentMap(OrganisationType::getName, orgType -> orgType));
+        RequestContext reqContext = new RequestContext();
+        reqContext.setReqId(UUID.randomUUID().toString());
+        reqContext.setDebugEnabled("false");
         try {
-            logger.info("OrgType Map is initialized. " + (new ObjectMapper()).writeValueAsString(orgTypeMap));
+            logger.info(reqContext, "OrgType Map is initialized. " + (new ObjectMapper()).writeValueAsString(orgTypeMap));
         } catch (JsonProcessingException e) {
-            logger.error("OrgTypeValidator: Failed to initialize using List of OrganizationType",e);
+            logger.error(reqContext, "OrgTypeValidator: Failed to initialize using List of OrganizationType. ", e);
         }
     }
 
