@@ -3,14 +3,12 @@ package org.sunbird.actor.organisation;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.organisation.OrganisationType;
-import org.sunbird.util.DataCacheHandler;
 
 import java.util.*;
 
@@ -18,10 +16,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({
-        DataCacheHandler.class,
-        OrgTypeValidator.class
-})
 @PowerMockIgnore({
         "javax.management.*",
         "javax.net.ssl.*",
@@ -30,7 +24,6 @@ import static org.junit.Assert.assertTrue;
         "javax.crypto.*"
 })
 public class OrgTypeValidatorTest {
-    private static OrgTypeValidator orgValidator = null;
 
     @Test
     public void testInitializeOrgTypeFromCache() {
