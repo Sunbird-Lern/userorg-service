@@ -233,8 +233,6 @@ public class TenantMigrationActorTest {
     reqMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     reqMap.put(JsonKey.CHANNEL, "anyChannel");
     reqMap.put(JsonKey.FEED_ID, "anyFeedId");
-    reqMap.put(JsonKey.FORCE_MIGRATION, true);
-    reqMap.put(JsonKey.NOTIFY_USER_MIGRATION, true);
     reqObj.setRequest(reqMap);
     reqObj.setOperation(actorOperation.getValue());
     return reqObj;

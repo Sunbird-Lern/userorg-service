@@ -627,8 +627,6 @@ public final class JsonKey {
   public static final String OSID = "osid";
   public static final String MULTI_QUERY_SEARCH_FIELDS = "multiQuerySearchFields";
   public static final String DISABLE_MULTIPLE_ORG_ROLE = "sunbird_disable_multiple_org_role";
-  public static final String FORCE_MIGRATION = "forceMigration";
-  public static final String NOTIFY_USER_MIGRATION = "notifyMigration";
 
   private JsonKey() {}
 }

@@ -138,10 +138,7 @@ public class TenantMigrationActor extends BaseActor {
     Map<String, Object> userDetails =
         userService.getUserDetailsForES(
             (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
-    if (null == request.getRequest().get(JsonKey.FORCE_MIGRATION)
-            || !(boolean) request.getRequest().get(JsonKey.FORCE_MIGRATION)) {
-      tenantServiceImpl.validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
-    }
+    tenantServiceImpl.validateUserCustodianOrgId((String) userDetails.get(JsonKey.ROOT_ORG_ID));
     tenantServiceImpl.validateChannelAndGetRootOrgId(request);
     Map<String, String> rollup = new HashMap<>();
     rollup.put("l1", (String) request.getRequest().get(JsonKey.ROOT_ORG_ID));
@@ -212,9 +209,6 @@ public class TenantMigrationActor extends BaseActor {
     // save user data to ES
     saveUserDetailsToEs(
         (String) request.getRequest().get(JsonKey.USER_ID), request.getRequestContext());
-    if (null != request.getRequest().get(JsonKey.NOTIFY_USER_MIGRATION)) {
-      notify = (boolean) request.getRequest().get(JsonKey.NOTIFY_USER_MIGRATION);
-    }
     if (notify) {
       notify(userDetails, request.getRequestContext());
     }
