@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -70,6 +70,8 @@ public class UserProfileReadService {
     } else {
       result.putAll(Util.getUserDefaultValue());
     }
+
+    OrgTypeValidator.getInstance().updateOrganisationTypeFlags(rootOrg);
     result.put(JsonKey.ROOT_ORG, rootOrg);
     Map<String, List<String>> userOrgRoles = null;
     List<Map<String, Object>> userRolesList =
@@ -609,7 +611,7 @@ public class UserProfileReadService {
         if (null != orgInfo.get(JsonKey.ORGANISATION_TYPE)) {
           int orgType = (int) orgInfo.get(JsonKey.ORGANISATION_TYPE);
           boolean isSchool =
-              (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+              (orgType == OrgTypeValidator.getInstance().getValueByType(JsonKey.ORG_TYPE_SCHOOL)) ? true : false;
           usrOrg.put(JsonKey.IS_SCHOOL, isSchool);
         }
         if (MapUtils.isNotEmpty(locationInfoMap)) {

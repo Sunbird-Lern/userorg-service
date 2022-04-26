@@ -14,7 +14,6 @@ import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.location.Location;
-import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
@@ -108,7 +107,7 @@ public class OrganisationRequestValidator {
     }
   }
 
-  public void validateOrgType(String orgType, String operation) {
+  public void validateOrgType(String orgType, String orgSubType, String operation) {
     if (StringUtils.isBlank(orgType) && operation.equalsIgnoreCase(JsonKey.CREATE)) {
       throw new ProjectCommonException(
           ResponseCode.mandatoryParamsMissing,
@@ -117,17 +116,20 @@ public class OrganisationRequestValidator {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    List<String> orgTypeList = new ArrayList<>();
-    for (OrgTypeEnum type : OrgTypeEnum.values()) {
-      orgTypeList.add(type.getType());
+    if (StringUtils.isNotBlank(orgType) && !OrgTypeValidator.getInstance().isOrgTypeExist(orgType)) {
+      throw new ProjectCommonException(
+              ResponseCode.invalidValue,
+              MessageFormat.format(
+                      ResponseCode.invalidValue.getErrorMessage(), JsonKey.ORG_TYPE, orgType, OrgTypeValidator.getInstance().getOrgTypeNames()),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    if (StringUtils.isNotBlank(orgType) && !orgTypeList.contains(orgType)) {
+    if (StringUtils.isNotBlank(orgSubType) && !OrgTypeValidator.getInstance().isOrgTypeExist(orgSubType)) {
       throw new ProjectCommonException(
-          ResponseCode.invalidValue,
-          MessageFormat.format(
-              ResponseCode.invalidValue.getErrorMessage(), JsonKey.ORG_TYPE, orgType, orgTypeList),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+              ResponseCode.invalidValue,
+              MessageFormat.format(
+                      ResponseCode.invalidValue.getErrorMessage(), JsonKey.ORG_TYPE, orgType, OrgTypeValidator.getInstance().getOrgTypeNames()),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 

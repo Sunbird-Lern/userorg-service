@@ -621,6 +621,13 @@ public final class JsonKey {
   public static final String USER_CONSENT_TEXT = "user consent";
   public static final Object COUNTRY_CODE_TEXT = "country code";
   public static final String USER_ORG_SERVICE_PREFIX = "UOS_";
+  public static final String ORG_SUB_TYPE = "organisationSubType";
+  public static final String ORG_TYPE_CONFIG = "orgTypeConfig";
+  public static final String ORG_TYPE_SCHOOL = "school";
+  public static final String ORG_TYPE_BOARD = "board";
+  public static final String SOFT_DELETE_PREVIOUS_ORG = "softDeleteOldOrg";
+  public static final String FORCE_MIGRATION = "forceMigration";
+  public static final String NOTIFY_USER_MIGRATION = "notifyMigration";
 
   private JsonKey() {}
 }
