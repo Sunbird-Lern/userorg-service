@@ -26,7 +26,6 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.Util;
@@ -79,7 +78,7 @@ public class OrgDaoImplTest {
       Map<String, Object> map = new HashMap<>();
       map.put(JsonKey.CONTACT_DETAILS, "contact");
       map.put(JsonKey.ID, "contact");
-      map.put(JsonKey.ORG_TYPE, OrgTypeEnum.BOARD.getValue());
+      map.put(JsonKey.ORG_TYPE, JsonKey.ORG_TYPE_BOARD);
       map.put(
           JsonKey.ORG_LOCATION,
           "[{\"id\":\"1\",\"type\":\"state\"},{\"id\":\"2\",\"type\":\"district\"}]");

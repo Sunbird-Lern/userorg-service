@@ -12,4 +12,6 @@ public interface UserOrgService {
   void deleteUserOrgMapping(List<Map<String, Object>> userOrgList, RequestContext context);
 
   void upsertUserOrgData(Map<String, Object> userMap, RequestContext context);
+
+  void softDeleteOldUserOrgMapping(List<Map<String, Object>> userOrgList, RequestContext context);
 }
