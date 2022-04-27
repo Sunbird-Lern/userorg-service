@@ -11,6 +11,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchHelper;
@@ -58,7 +59,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
         EsClientFactory.class,
         ElasticSearchHelper.class,
         UserRoleDao.class,
-        UserRoleDaoImpl.class
+        UserRoleDaoImpl.class,
+        OrgTypeValidator.class
 })
 @PowerMockIgnore({
         "javax.management.*",
@@ -77,6 +79,12 @@ public class UserExtendedProfileReadTest {
         Map<String, String> config = new HashMap<>();
         config.put("extendedProfileSchemaConfig", extendedProfileConfig);
         when(DataCacheHandler.getConfigSettings()).thenReturn(config);
+        OrgTypeValidator orgTypeValidator = mock(OrgTypeValidator.class);
+        PowerMockito.mockStatic(OrgTypeValidator.class);
+        when(OrgTypeValidator.getInstance()).thenReturn(orgTypeValidator);
+        when(orgTypeValidator.getValueByType(JsonKey.ORG_TYPE_SCHOOL)).thenReturn(2);
+        when(orgTypeValidator.isOrgTypeExist("board")).thenReturn(true);
+        when(orgTypeValidator.isOrgTypeExist("school")).thenReturn(true);
     }
 
     @Test

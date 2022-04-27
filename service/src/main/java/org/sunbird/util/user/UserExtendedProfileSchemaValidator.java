@@ -12,11 +12,8 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.util.DataCacheHandler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 public class UserExtendedProfileSchemaValidator {
     private static final String PRIMARY_EMAIL_FIELD = "primaryEmail";
