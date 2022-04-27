@@ -388,13 +388,6 @@ public class UserControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-  @Test
-  public void testAutoSearchUserSuccessV1() {
-    Result result = performTest("/v1/user/autocomplete/" + firstName, "GET", null);
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
-
   private Map updateUserFrameworkRequest(String userId, String frameworkId, boolean success) {
     Map<String, Object> request = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();

@@ -32,8 +32,6 @@ public class SearchDTO {
   private Map<String, Integer> softConstraints = new HashMap<>();
   private List<Map<String, Object>> groupQuery = new ArrayList<>();
   private List<String> mode = new ArrayList<>();
-  //added for multiMatch search option
-  private Map<String,List<String>> multiSearchFields = new HashMap<>();
 
   public List<Map<String, Object>> getGroupQuery() {
     return groupQuery;
@@ -175,13 +173,5 @@ public class SearchDTO {
 
   public void setQueryFields(List<String> queryFields) {
     this.queryFields = queryFields;
-  }
-
-  public Map<String, List<String>> getMultiSearchFields() {
-    return multiSearchFields;
-  }
-
-  public void setMultiSearchFields(Map<String, List<String>> multiSearchFields) {
-    this.multiSearchFields = multiSearchFields;
   }
 }

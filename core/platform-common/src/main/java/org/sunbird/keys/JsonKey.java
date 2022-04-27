@@ -632,7 +632,6 @@ public final class JsonKey {
   public static final String EXTENDED_PROFILE_SCHEMA_CONFIG = "extendedProfileSchemaConfig";
   public static final String MANDATORY_FIELDS_EXISTS = "mandatoryFieldsExists";
   public static final String OSID = "osid";
-  public static final String MULTI_QUERY_SEARCH_FIELDS = "multiQuerySearchFields";
   public static final String DISABLE_MULTIPLE_ORG_ROLE = "sunbird_disable_multiple_org_role";
 
   private JsonKey() {}

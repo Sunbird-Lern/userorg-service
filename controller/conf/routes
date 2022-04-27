@@ -40,7 +40,6 @@ POST    /v1/user/search					        @controllers.usermanagement.UserController.s
 POST    /v2/user/search					        @controllers.usermanagement.UserController.searchUserV2(request: play.mvc.Http.Request)
 POST    /v3/user/search					        @controllers.usermanagement.UserController.searchUserV3(request: play.mvc.Http.Request)
 POST    /private/user/v1/search                 @controllers.usermanagement.UserController.searchUser(request: play.mvc.Http.Request)
-GET     /v1/user/autocomplete/:key              @controllers.usermanagement.UserController.autoSearchUser(key:String, request: play.mvc.Http.Request)
 
 POST    /v1/user/block                          @controllers.usermanagement.UserStatusController.blockUser(request: play.mvc.Http.Request)
 POST    /v1/user/unblock			            @controllers.usermanagement.UserStatusController.unblockUser(request: play.mvc.Http.Request)
