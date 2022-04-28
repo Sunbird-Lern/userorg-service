@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.UserBaseActor;
 import org.sunbird.exception.ProjectCommonException;
@@ -147,11 +148,9 @@ public class UserRoleActor extends UserBaseActor {
             .forEach(
                     userRole -> {
                       try {
-                        String dbScope = (String) userRole.get(JsonKey.SCOPE);
-                        if (StringUtils.isNotBlank(dbScope)) {
-                          List<Map<String, String>> scope = mapper.readValue(dbScope, ArrayList.class);
-                          userRole.put(JsonKey.SCOPE, scope);
-                          for(Map<String, String> orgScope : scope) {
+                        List<Map<String, String>> dbScope = (List<Map<String, String>>) userRole.get(JsonKey.SCOPE);
+                        if (CollectionUtils.isNotEmpty(dbScope)) {
+                          for(Map<String, String> orgScope : dbScope) {
                             String oldOrgId = orgScope.get("organisationId");
                             if(StringUtils.isNotBlank(oldOrgId) && !oldOrgId.equalsIgnoreCase(organisationId)) {
                               logger.info(context, "UserRoleActor: Given OrganisationId is different than existing one.");
