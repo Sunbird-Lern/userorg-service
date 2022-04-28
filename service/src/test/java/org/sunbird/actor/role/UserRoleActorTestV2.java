@@ -34,7 +34,6 @@ import org.sunbird.service.role.RoleService;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
-import scala.sys.Prop;
 
 import java.util.*;
 
@@ -137,11 +136,11 @@ public class UserRoleActorTestV2 {
         subject.tell(request, probe.getRef());
 
         if (errorCode == null) {
-            Response res = probe.expectMsgClass(duration("100000 second"), Response.class);
+            Response res = probe.expectMsgClass(duration("100 second"), Response.class);
             return null != res && res.getResponseCode() == ResponseCode.OK;
         } else {
             ProjectCommonException res =
-                    probe.expectMsgClass(duration("100000 second"), ProjectCommonException.class);
+                    probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
             return res.getResponseCode().name().equals(errorCode.name())
                     || res.getErrorResponseCode() == errorCode.getResponseCode();
         }
