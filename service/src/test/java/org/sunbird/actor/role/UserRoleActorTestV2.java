@@ -42,14 +42,6 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({
-        "javax.management.*",
-        "javax.net.ssl.*",
-        "javax.security.*",
-        "jdk.internal.reflect.*",
-        "javax.crypto.*"
-})
 @PrepareForTest({
         RoleService.class,
         DataCacheHandler.class,
@@ -65,6 +57,15 @@ import static org.powermock.api.mockito.PowerMockito.when;
         PipeToSupport.PipeableFuture.class,
         OrgServiceImpl.class,
         OrgService.class
+})
+
+@RunWith(PowerMockRunner.class)
+@PowerMockIgnore({
+        "javax.management.*",
+        "javax.net.ssl.*",
+        "javax.security.*",
+        "jdk.internal.reflect.*",
+        "javax.crypto.*"
 })
 public class UserRoleActorTestV2 {
     private ActorSystem system = ActorSystem.create("system");
