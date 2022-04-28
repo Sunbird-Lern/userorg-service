@@ -1,6 +1,8 @@
 package org.sunbird.actor.user;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import akka.actor.ActorRef;
@@ -19,19 +21,28 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
+import org.sunbird.service.user.ExtendedUserProfileService;
+import org.sunbird.service.user.impl.ExtendedUserProfileServiceImpl;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
+@PrepareForTest({
+  ExtendedUserProfileServiceImpl.class,
+  ExtendedUserProfileService.class
+})
 public class UserUpdateActorTest extends UserManagementActorTestBase {
 
   public final Props props = Props.create(UserUpdateActor.class);
+  private String extendedProfileConfig =
+          "{\"profileDetails.json\":{\"$schema\":\"http://json-schema.org/draft-07/schema\",\"type\":\"object\",\"definitions\":{\"@type\":{\"type\":\"string\"},\"MaritalStatus\":{\"type\":\"string\",\"enum\":[\"Married\",\"Single\"]},\"NonEmptyStr\":{\"type\":\"string\",\"pattern\":\"\\\\A(?!\\\\s*\\\\Z).+\"}},\"properties\":{\"personalDetails\":{\"type\":\"object\",\"title\":\"The Personal Details Schema\",\"required\":[\"firstname\",\"surname\",\"maritalStatus\"],\"properties\":{\"firstname\":{\"$id\":\"#/properties/firstname\",\"$ref\":\"#/definitions/NonEmptyStr\",\"$comment\":\"User first name\"},\"surname\":{\"$id\":\"#/properties/surname\",\"$ref\":\"#/definitions/NonEmptyStr\",\"$comment\":\"User surname\"},\"maritalStatus\":{\"$id\":\"#/properties/maritalStatus\",\"$ref\":\"#/definitions/MaritalStatus\",\"$comment\":\"Marital Status\"}}}},\"title\":\"profileDetails\",\"required\":[\"personalDetails\"]}}";
 
   @Before
   public void before() {
@@ -50,6 +61,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     Map<String, String> configMap = new HashMap<>();
     configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
     configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    configMap.put("extendedProfileSchemaConfig", extendedProfileConfig);
     when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
 
     Map<String, Map<String, List<String>>> userTypeConfigMap = new HashMap<>();
@@ -488,5 +500,101 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     Request request = getRequest(false, false, true, req, ActorOperations.UPDATE_USER_V2);
     boolean result = testScenario(request, ResponseCode.mandatoryParamsMissing, props);
     assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateExtendedUserProfileV3() {
+    PowerMockito.mockStatic(ExtendedUserProfileServiceImpl.class);
+    ExtendedUserProfileService extendedUserProfileService = mock(ExtendedUserProfileService.class);
+    when(ExtendedUserProfileServiceImpl.getInstance()).thenReturn(extendedUserProfileService);
+
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.USER_ID, "userId");
+    Map<String, Object> profileDetails = new HashMap<>();
+    Map<String, Object> personalDetails = new HashMap<>();
+    personalDetails.put("firstname","Demo Name");
+    personalDetails.put("surname", "Surname");
+    personalDetails.put("maritalStatus","Married");
+    profileDetails.put("personalDetails", personalDetails);
+    req.put(JsonKey.PROFILE_DETAILS, profileDetails);
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+            .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+            .thenReturn(user);
+    Request request = getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3);
+    boolean result = testScenario(request, null, props);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateExtendedUserProfileFailureV3() {
+    //Remove schemaConfig from DataCacheHandler
+    Map<String, String> configMap = new HashMap<>();
+    configMap.put(JsonKey.CUSTODIAN_ORG_CHANNEL, "channel");
+    configMap.put(JsonKey.CUSTODIAN_ORG_ID, "custodianRootOrgId");
+    when(DataCacheHandler.getConfigSettings()).thenReturn(configMap);
+
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.USER_ID, "userId");
+    Map<String, Object> profileDetails = new HashMap<>();
+    Map<String, Object> personalDetails = new HashMap<>();
+    personalDetails.put("martialStatus","Married");
+    profileDetails.put("unknownObject", personalDetails);
+    req.put(JsonKey.PROFILE_DETAILS, profileDetails);
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+            .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+            .thenReturn(user);
+    Request request = getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3);
+    boolean result = testScenario(request, ResponseCode.extendUserProfileNotLoaded, props);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateInvalidExtendedUserProfileFailureV3() {
+    PowerMockito.mockStatic(ExtendedUserProfileServiceImpl.class);
+    ExtendedUserProfileService extendedUserProfileService = mock(ExtendedUserProfileService.class);
+    when(ExtendedUserProfileServiceImpl.getInstance()).thenReturn(extendedUserProfileService);
+
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.USER_ID, "userId");
+    req.put(JsonKey.PROFILE_DETAILS, "this is my profile");
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    user.put(JsonKey.EMAIL, "username@gmail.com");
+    user.put(JsonKey.USERNAME, "username");
+    user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
+    when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
+            .thenReturn(true);
+    when(UserUtil.validateExternalIdsAndReturnActiveUser(Mockito.anyMap(), Mockito.any()))
+            .thenReturn(user);
+    Request request = getRequest(true, true, true, req, ActorOperations.UPDATE_USER_V3);
+    boolean result = testScenario(request, ResponseCode.invalidValue, props);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testUpdateUserProfileWithInvalidOperation() {
+    Map<String, Object> req = getExternalIdMap();
+    getUpdateRequestWithDefaultFlags(req);
+    req.put(JsonKey.USER_ID, "userId");
+    Map<String, Object> user = new HashMap<>();
+    user.put(JsonKey.PHONE, "4346345377");
+    Request request = getRequest(true, true, true, req, ActorOperations.CREATE_USER);
+    boolean result = testScenario(request, ResponseCode.extendUserProfileNotLoaded, props);
+    assertFalse(result);
   }
 }

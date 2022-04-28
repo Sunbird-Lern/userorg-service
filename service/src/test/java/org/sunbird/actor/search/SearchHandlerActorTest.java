@@ -44,7 +44,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
+
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;

@@ -34,10 +34,13 @@ import org.sunbird.response.Response;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.AssociationMechanism;
+import org.sunbird.service.user.ExtendedUserProfileService;
 import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.ExtendedUserProfileServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.*;
+import org.sunbird.util.user.ProfileUtil;
 import org.sunbird.util.user.UserUtil;
 
 public class UserUpdateActor extends UserBaseActor {
@@ -48,6 +51,7 @@ public class UserUpdateActor extends UserBaseActor {
   private final OrgService orgService = OrgServiceImpl.getInstance();
   private final UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
+  private ExtendedUserProfileService userProfileService = ExtendedUserProfileServiceImpl.getInstance();
 
   @Inject
   @Named("user_profile_update_actor")
@@ -86,6 +90,10 @@ public class UserUpdateActor extends UserBaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
+    if(null != actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS)) {
+      userProfileService.validateProfile(actorMessage);
+      convertProfileObjToString(actorMessage);
+    }
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
     Map<String, Object> userDbRecord =
@@ -657,6 +665,22 @@ public class UserUpdateActor extends UserBaseActor {
     logger.info(context, "UserUpdateActor:saveUserDetailsToEs: Trigger sync of user details to ES");
     if (null != backgroundJobManager) {
       backgroundJobManager.tell(userRequest, self());
+    }
+  }
+
+  private void convertProfileObjToString(Request actorMessage) {
+    //ProfileObject is available - add 'osid' and then convert it to String.
+    try {
+      Map profileObject = (Map) actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS);
+      ProfileUtil.appendIdToReferenceObjects(profileObject);
+      String profileStr = mapper.writeValueAsString(profileObject);
+      actorMessage.getRequest().put(JsonKey.PROFILE_DETAILS, profileStr);
+    } catch(Exception e) {
+      throw new ProjectCommonException(
+              ResponseCode.invalidValue,
+              ProjectUtil.formatMessage(
+                      ResponseCode.invalidValue.getErrorMessage(), JsonKey.PROFILE_DETAILS),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }

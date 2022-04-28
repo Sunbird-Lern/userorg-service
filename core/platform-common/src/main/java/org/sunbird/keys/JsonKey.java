@@ -628,6 +628,11 @@ public final class JsonKey {
   public static final String SOFT_DELETE_PREVIOUS_ORG = "softDeleteOldOrg";
   public static final String FORCE_MIGRATION = "forceMigration";
   public static final String NOTIFY_USER_MIGRATION = "notifyMigration";
+  public static final String PROFILE_DETAILS = "profileDetails";
+  public static final String EXTENDED_PROFILE_SCHEMA_CONFIG = "extendedProfileSchemaConfig";
+  public static final String MANDATORY_FIELDS_EXISTS = "mandatoryFieldsExists";
+  public static final String OSID = "osid";
+  public static final String DISABLE_MULTIPLE_ORG_ROLE = "sunbird_disable_multiple_org_role";
 
   private JsonKey() {}
 }

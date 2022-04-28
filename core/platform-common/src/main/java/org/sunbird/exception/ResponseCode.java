@@ -174,7 +174,10 @@ public enum ResponseCode {
   TOO_MANY_REQUESTS(429),
   SERVICE_UNAVAILABLE(503),
   PARTIAL_SUCCESS_RESPONSE(206),
-  IM_A_TEAPOT(418);
+  IM_A_TEAPOT(418),
+  extendUserProfileNotLoaded(ResponseMessage.Key.EXTENDED_USER_PROFILE_NOT_LOADED,
+                             ResponseMessage.Message.EXTENDED_USER_PROFILE_NOT_LOADED),
+  roleProcessingInvalidOrgError(ResponseMessage.Key.ROLE_PROCESSING_INVALID_ORG, ResponseMessage.Message.ROLE_PROCESSING_INVALID_ORG);
   private int responseCode;
   /** error code contains String value */
   private String errorCode;

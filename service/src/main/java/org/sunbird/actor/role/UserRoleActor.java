@@ -1,11 +1,19 @@
 package org.sunbird.actor.role;
 
 import akka.actor.ActorRef;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.UserBaseActor;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -16,6 +24,7 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
 
 public class UserRoleActor extends UserBaseActor {
@@ -65,6 +74,11 @@ public class UserRoleActor extends UserBaseActor {
       requestMap.put(JsonKey.ROLE_OPERATION, "assignRole");
       List<String> roles = (List<String>) requestMap.get(JsonKey.ROLES);
       RoleService.validateRoles(roles);
+      String configValue = PropertiesCache.getInstance().getProperty(JsonKey.DISABLE_MULTIPLE_ORG_ROLE);
+      if(Boolean.parseBoolean(configValue)) {
+        validateRequest(userRoleService.getUserRoles((String) requestMap.get(JsonKey.USER_ID), actorMessage.getRequestContext()),
+                (String) requestMap.get(JsonKey.ORGANISATION_ID), actorMessage.getRequestContext());
+      }
       userRolesList = userRoleService.updateUserRole(requestMap, actorMessage.getRequestContext());
     } else {
       List<Map<String, Object>> roleList =
@@ -77,6 +91,25 @@ public class UserRoleActor extends UserBaseActor {
     response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
 
     sender().tell(response, self());
+    userRolesList = userRoleService.getUserRoles((String) requestMap.get(JsonKey.USER_ID), null, actorMessage.getRequestContext());
+    ObjectMapper mapper = new ObjectMapper();
+    userRolesList
+            .stream()
+            .forEach(
+                    userRole -> {
+                      try {
+                        String dbScope = (String) userRole.get(JsonKey.SCOPE);
+                        if (StringUtils.isNotBlank(dbScope)) {
+                          List<Map<String, String>> scope = mapper.readValue(dbScope, ArrayList.class);
+                          userRole.put(JsonKey.SCOPE, scope);
+                        }
+                      } catch (Exception e) {
+                        logger.error(
+                                actorMessage.getRequestContext(),
+                                "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
+                                e);
+                      }
+                    });
     syncUserRoles(
         JsonKey.USER,
         (String) requestMap.get(JsonKey.USER_ID),
@@ -106,5 +139,31 @@ public class UserRoleActor extends UserBaseActor {
           "UserRoleActor:syncUserRoles: Exception occurred with error message = " + ex.getMessage(),
           ex);
     }
+  }
+
+  private void validateRequest(List<Map<String, Object>> userRolesList, String organisationId, RequestContext context) {
+    userRolesList
+            .stream()
+            .forEach(
+                    userRole -> {
+                      try {
+                        List<Map<String, String>> dbScope = (List<Map<String, String>>) userRole.get(JsonKey.SCOPE);
+                        if (CollectionUtils.isNotEmpty(dbScope)) {
+                          for(Map<String, String> orgScope : dbScope) {
+                            if(StringUtils.isNotBlank(orgScope.get(JsonKey.ORGANISATION_ID)) && !orgScope.get(JsonKey.ORGANISATION_ID).equalsIgnoreCase(organisationId)) {
+                              logger.info(context, "UserRoleActor: Given OrganisationId is different than existing one.");
+                              throw new ProjectCommonException(
+                                      ResponseCode.roleProcessingInvalidOrgError,
+                                      ResponseCode.roleProcessingInvalidOrgError.getErrorMessage(),
+                                      ResponseCode.SERVER_ERROR.getResponseCode());
+                            }
+                          }
+                        }
+                      } catch(ProjectCommonException pce) {
+                        throw pce;
+                      } catch (Exception e) {
+                        logger.error( context, "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE), e);
+                      }
+                    });
   }
 }
