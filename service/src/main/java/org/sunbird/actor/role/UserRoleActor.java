@@ -142,7 +142,6 @@ public class UserRoleActor extends UserBaseActor {
   }
 
   private void validateRequest(List<Map<String, Object>> userRolesList, String organisationId, RequestContext context) {
-    ObjectMapper mapper = new ObjectMapper();
     userRolesList
             .stream()
             .forEach(
@@ -151,8 +150,7 @@ public class UserRoleActor extends UserBaseActor {
                         List<Map<String, String>> dbScope = (List<Map<String, String>>) userRole.get(JsonKey.SCOPE);
                         if (CollectionUtils.isNotEmpty(dbScope)) {
                           for(Map<String, String> orgScope : dbScope) {
-                            String oldOrgId = orgScope.get("organisationId");
-                            if(StringUtils.isNotBlank(oldOrgId) && !oldOrgId.equalsIgnoreCase(organisationId)) {
+                            if(StringUtils.isNotBlank(orgScope.get(JsonKey.ORGANISATION_ID)) && !orgScope.get(JsonKey.ORGANISATION_ID).equalsIgnoreCase(organisationId)) {
                               logger.info(context, "UserRoleActor: Given OrganisationId is different than existing one.");
                               throw new ProjectCommonException(
                                       ResponseCode.roleProcessingInvalidOrgError,
@@ -164,10 +162,7 @@ public class UserRoleActor extends UserBaseActor {
                       } catch(ProjectCommonException pce) {
                         throw pce;
                       } catch (Exception e) {
-                        logger.error(
-                                context,
-                                "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE),
-                                e);
+                        logger.error( context, "Exception because of mapper read value" + userRole.get(JsonKey.SCOPE), e);
                       }
                     });
   }
