@@ -19,6 +19,7 @@ import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -446,15 +447,12 @@ public class ElasticSearchHelper {
    *
    * @param name of the attribute
    * @param value of the attribute
-   * @param boost for increasing the search parameters priority
    * @return MatchQueryBuilder
    */
-  public static MatchQueryBuilder createMatchQuery(String name, Object value, Float boost) {
-    if (null != (boost)) {
-      return QueryBuilders.matchQuery(name, value).boost(boost);
-    } else {
-      return QueryBuilders.matchQuery(name, value);
-    }
+  public static MatchQueryBuilder createFuzzyMatchQuery(String name, Object value) {
+    return QueryBuilders.matchQuery(name, value)
+        .fuzziness(Fuzziness.AUTO)
+        .fuzzyTranspositions(true);
   }
 
   /**
@@ -608,6 +606,10 @@ public class ElasticSearchHelper {
               (Collection<? extends Map<String, Object>>) searchQueryMap.get(JsonKey.GROUP_QUERY));
     }
     search = getSoftConstraints(search, searchQueryMap);
+    Map<String, String> fuzzy = (Map<String, String>) searchQueryMap.get(JsonKey.SEARCH_FUZZY);
+    if (MapUtils.isNotEmpty(fuzzy)) {
+      search.setFuzzy(fuzzy);
+    }
     return search;
   }
 
