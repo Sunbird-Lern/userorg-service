@@ -20,7 +20,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
-import org.sunbird.model.organisation.OrgTypeEnum;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -118,7 +118,11 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
 
       String organisationType = (String) orgMap.get(JsonKey.ORG_TYPE);
       if (StringUtils.isNotBlank(organisationType)) {
-        orgMap.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(organisationType));
+        orgMap.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(organisationType));
+      }
+      String orgSubType = (String) orgMap.get(JsonKey.ORG_SUB_TYPE);
+      if (StringUtils.isNotBlank(orgSubType)) {
+        orgMap.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
       }
       Organisation organisation = mapper.convertValue(orgMap, Organisation.class);
       organisation.setStatus(status);
@@ -197,7 +201,8 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     String orgId;
-    row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
+    row.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationType()));
+    row.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
     try {
       orgId =
           upsertOrg(
@@ -236,7 +241,8 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     ObjectMapper mapper = new ObjectMapper();
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
-    row.put(JsonKey.ORG_TYPE, OrgTypeEnum.getTypeByValue(org.getOrganisationType()));
+    row.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationType()));
+    row.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
       upsertOrg(organisationManagementActor, row, ActorOperations.UPDATE_ORG.getValue(), context);

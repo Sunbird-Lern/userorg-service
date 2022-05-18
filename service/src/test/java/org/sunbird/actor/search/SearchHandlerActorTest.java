@@ -23,6 +23,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -35,7 +36,7 @@ import org.sunbird.response.Response;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, ElasticSearchRestHighImpl.class, EsClientFactory.class})
+@PrepareForTest({ServiceFactory.class, ElasticSearchRestHighImpl.class, EsClientFactory.class, OrgTypeValidator.class})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -43,7 +44,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
+
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;
@@ -98,6 +99,10 @@ public class SearchHandlerActorTest {
     ElasticSearchService esService = mock(ElasticSearchRestHighImpl.class);
     when(EsClientFactory.getInstance(Mockito.anyString())).thenReturn(esService);
     Promise<Map<String, Object>> promise = Futures.promise();
+    OrgTypeValidator orgTypeValidator = mock(OrgTypeValidator.class);
+    PowerMockito.mockStatic(OrgTypeValidator.class);
+    when(OrgTypeValidator.getInstance()).thenReturn(orgTypeValidator);
+    when(orgTypeValidator.getValueByType(JsonKey.ORG_TYPE_SCHOOL)).thenReturn(2);
     promise.success(createResponseGet(true));
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());

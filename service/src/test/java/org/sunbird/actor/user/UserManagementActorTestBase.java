@@ -15,6 +15,8 @@ import akka.pattern.PipeToSupport;
 import akka.testkit.javadsl.TestKit;
 import akka.util.Timeout;
 import java.util.*;
+
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
