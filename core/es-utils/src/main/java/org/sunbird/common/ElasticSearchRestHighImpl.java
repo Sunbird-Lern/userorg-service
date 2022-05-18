@@ -26,10 +26,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.SimpleQueryStringBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -365,9 +362,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     // add channel field as mandatory
     String channel = PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_ES_CHANNEL);
     if (!(StringUtils.isBlank(channel) || JsonKey.SUNBIRD_ES_CHANNEL.equals(channel))) {
-      query.must(
-          ElasticSearchHelper.createMatchQuery(
-              JsonKey.CHANNEL, channel, constraintsMap.get(JsonKey.CHANNEL)));
+      query.must(QueryBuilders.matchQuery(JsonKey.CHANNEL, channel));
     }
 
     // apply simple query string
@@ -434,6 +429,14 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
 
     // set final query to search request builder
     searchSourceBuilder.query(query);
+
+    // do fuzzy search
+    if (MapUtils.isNotEmpty(searchDTO.getFuzzy())) {
+      Map.Entry<String, String> entry = searchDTO.getFuzzy().entrySet().iterator().next();
+      MatchQueryBuilder queryBuilder =
+          ElasticSearchHelper.createFuzzyMatchQuery(entry.getKey(), entry.getValue());
+      searchSourceBuilder.query(queryBuilder);
+    }
     List finalFacetList = new ArrayList();
 
     if (null != searchDTO.getFacets() && !searchDTO.getFacets().isEmpty()) {
