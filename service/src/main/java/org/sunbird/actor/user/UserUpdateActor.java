@@ -228,9 +228,14 @@ public class UserUpdateActor extends UserBaseActor {
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       List<Map<String, Object>> orgList = new ArrayList();
-      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
+      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))
+          || (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORGANISATION_ID)))) {
         Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        if ((StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)))) {
+          filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        } else {
+          filters.put(JsonKey.ID, userMap.get(JsonKey.ORGANISATION_ID));
+        }
         filters.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
         if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {
           filters.put(
