@@ -51,7 +51,8 @@ public class UserUpdateActor extends UserBaseActor {
   private final OrgService orgService = OrgServiceImpl.getInstance();
   private final UserSelfDeclarationDao userSelfDeclarationDao =
       UserSelfDeclarationDaoImpl.getInstance();
-  private ExtendedUserProfileService userProfileService = ExtendedUserProfileServiceImpl.getInstance();
+  private ExtendedUserProfileService userProfileService =
+      ExtendedUserProfileServiceImpl.getInstance();
 
   @Inject
   @Named("user_profile_update_actor")
@@ -90,9 +91,24 @@ public class UserUpdateActor extends UserBaseActor {
     Map<String, Object> userMap = actorMessage.getRequest();
     logger.info(actorMessage.getRequestContext(), "Incoming update request body: " + userMap);
     userRequestValidator.validateUpdateUserRequest(actorMessage);
-    if(null != actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS)) {
+    if (null != actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS)) {
       userProfileService.validateProfile(actorMessage);
       convertProfileObjToString(actorMessage);
+    }
+    // validate organisationId if passed in requestBody
+    String organisationId = (String) userMap.get(JsonKey.ORGANISATION_ID);
+    if (StringUtils.isNotBlank(organisationId)) {
+      Map<String, Object> org =
+          orgService.getOrgById(organisationId, actorMessage.getRequestContext());
+      if (MapUtils.isEmpty(org)) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidParameterValue,
+            MessageFormat.format(
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                organisationId,
+                JsonKey.ORGANISATION_ID),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
     }
     // update externalIds provider from channel to orgId
     UserUtil.updateExternalIdsProviderWithOrgId(userMap, actorMessage.getRequestContext());
@@ -212,9 +228,14 @@ public class UserUpdateActor extends UserBaseActor {
     Response resp = null;
     if (((String) response.get(JsonKey.RESPONSE)).equalsIgnoreCase(JsonKey.SUCCESS)) {
       List<Map<String, Object>> orgList = new ArrayList();
-      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
+      if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))
+          || (StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORGANISATION_ID)))) {
         Map<String, Object> filters = new HashMap<>();
-        filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        if ((StringUtils.isNotEmpty((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)))) {
+          filters.put(JsonKey.EXTERNAL_ID, userMap.get(JsonKey.ORG_EXTERNAL_ID));
+        } else {
+          filters.put(JsonKey.ID, userMap.get(JsonKey.ORGANISATION_ID));
+        }
         filters.put(JsonKey.STATUS, ProjectUtil.Status.ACTIVE.getValue());
         if (StringUtils.isNotEmpty((String) userMap.get(JsonKey.STATE_ID))) {
           filters.put(
@@ -669,18 +690,18 @@ public class UserUpdateActor extends UserBaseActor {
   }
 
   private void convertProfileObjToString(Request actorMessage) {
-    //ProfileObject is available - add 'osid' and then convert it to String.
+    // ProfileObject is available - add 'osid' and then convert it to String.
     try {
       Map profileObject = (Map) actorMessage.getRequest().get(JsonKey.PROFILE_DETAILS);
       ProfileUtil.appendIdToReferenceObjects(profileObject);
       String profileStr = mapper.writeValueAsString(profileObject);
       actorMessage.getRequest().put(JsonKey.PROFILE_DETAILS, profileStr);
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new ProjectCommonException(
-              ResponseCode.invalidValue,
-              ProjectUtil.formatMessage(
-                      ResponseCode.invalidValue.getErrorMessage(), JsonKey.PROFILE_DETAILS),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
+          ResponseCode.invalidValue,
+          ProjectUtil.formatMessage(
+              ResponseCode.invalidValue.getErrorMessage(), JsonKey.PROFILE_DETAILS),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
 }
