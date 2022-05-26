@@ -584,7 +584,7 @@ public class UserUpdateActor extends UserBaseActor {
               : (String) org.get(JsonKey.ID);
 
       userOrg.setUserId(userId);
-      userOrg.setIsDeleted(false);
+      userOrg.setDeleted(false);
       if (null != orgId && userOrgDbMap.containsKey(orgId)) {
         userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
         userOrg.setUpdatedBy((String) (actorMessage.getContext().get(JsonKey.REQUESTED_BY)));
@@ -622,7 +622,7 @@ public class UserUpdateActor extends UserBaseActor {
     ObjectMapper mapper = new ObjectMapper();
     for (String id : ids) {
       UserOrg userOrg = mapper.convertValue(userOrgDbMap.get(id), UserOrg.class);
-      userOrg.setIsDeleted(true);
+      userOrg.setDeleted(true);
       userOrg.setId((String) ((Map<String, Object>) userOrgDbMap.get(id)).get(JsonKey.ID));
       userOrg.setUpdatedDate(ProjectUtil.getFormattedDate());
       userOrg.setUpdatedBy(requestedBy);

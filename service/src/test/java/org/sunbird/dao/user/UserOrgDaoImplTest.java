@@ -59,7 +59,7 @@ public class UserOrgDaoImplTest {
     UserOrg userOrg = new UserOrg();
     userOrg.setUserId("123-456-789");
     userOrg.setOrganisationId("1234567890");
-    userOrg.setIsDeleted(true);
+    userOrg.setDeleted(true);
     UserOrgDao userOrgDao = UserOrgDaoImpl.getInstance();
     Response res = userOrgDao.updateUserOrg(userOrg, new RequestContext());
     Assert.assertNotNull(res);

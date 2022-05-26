@@ -105,7 +105,7 @@ public class UserOrg implements Serializable {
     return isDeleted;
   }
 
-  public void setIsDeleted(boolean isDeleted) {
+  public void setDeleted(boolean isDeleted) {
     this.isDeleted = isDeleted;
   }
 
