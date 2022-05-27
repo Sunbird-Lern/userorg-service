@@ -65,13 +65,11 @@ public class UserOrgServiceImpl implements UserOrgService {
       List<Map<String, Object>> resList = (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (!resList.isEmpty()) {
         Map<String, Object> res = resList.get(0);
-        Map<String, Object> reqMap = new WeakHashMap<>();
-        reqMap.put(JsonKey.USER_ID, res.get(JsonKey.USER_ID));
-        reqMap.put(JsonKey.ORGANISATION_ID, res.get(JsonKey.ORGANISATION_ID));
-        reqMap.put(JsonKey.IS_DELETED, true);
         try {
-          ObjectMapper mapper = new ObjectMapper();
-          UserOrg userOrg = mapper.convertValue(reqMap, UserOrg.class);
+          UserOrg userOrg = new UserOrg();
+          userOrg.setUserId((String)res.get(JsonKey.USER_ID));
+          userOrg.setOrganisationId((String)res.get(JsonKey.ORGANISATION_ID));
+          userOrg.setDeleted(true);
           userOrgDao.updateUserOrg(userOrg, context);
         } catch (Exception e) {
           logger.error(context, "upsertUserOrgData exception : " + e.getMessage(), e);
