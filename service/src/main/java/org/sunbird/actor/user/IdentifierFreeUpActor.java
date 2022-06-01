@@ -18,6 +18,8 @@ import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 
 /**
  * this Actor class is being used to free Up used User Identifier for now it only free Up user
@@ -61,6 +63,7 @@ public class IdentifierFreeUpActor extends BaseActor {
     Response response = new Response();
     if (userMap.size() > 1) {
       response = userService.updateUser(userMap, context);
+      deleteUserInKeyclock(userMap, context);
       response.getResult().put(JsonKey.USER, userMap);
     } else {
       response.put(Constants.RESPONSE, Constants.SUCCESS);
@@ -72,6 +75,7 @@ public class IdentifierFreeUpActor extends BaseActor {
     if (StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
       updatedUserMap.put(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
       updatedUserMap.put(JsonKey.EMAIL, null);
+      updatedUserMap.put(JsonKey.IS_DELETED, true);
       updatedUserMap.put(JsonKey.MASKED_EMAIL, null);
       updatedUserMap.put(JsonKey.FLAGS_VALUE, calculateFlagValue(userDbMap));
     }
@@ -83,8 +87,15 @@ public class IdentifierFreeUpActor extends BaseActor {
       updatedUserMap.put(JsonKey.PHONE, null);
       updatedUserMap.put(JsonKey.MASKED_PHONE, null);
       updatedUserMap.put(JsonKey.COUNTRY_CODE, null);
+      updatedUserMap.put(JsonKey.IS_DELETED, true);
       updatedUserMap.put(JsonKey.FLAGS_VALUE, calculateFlagValue(userDbMap));
     }
+  }
+
+  private void deleteUserInKeyclock(Map<String, Object> userMapES, RequestContext context) {
+    SSOManager ssoManager = SSOServiceFactory.getInstance();
+    ssoManager.deactivateUser(userMapES, context);
+    logger.info(context, "User deleted in keyclock:");
   }
 
   private int calculateFlagValue(Map<String, Object> userDbMap) {
