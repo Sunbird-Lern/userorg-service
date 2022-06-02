@@ -20,7 +20,7 @@ import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
-
+import org.sunbird.util.ProjectUtil;
 /**
  * this Actor class is being used to free Up used User Identifier for now it only free Up user
  * Email, Phone.
@@ -62,9 +62,13 @@ public class IdentifierFreeUpActor extends BaseActor {
 
     Response response = new Response();
     if (userMap.size() > 1) {
+      // deactivate user
+      userMap.put(JsonKey.IS_DELETED, true);
+      userMap.put(JsonKey.STATUS, ProjectUtil.Status.INACTIVE.getValue());
       response = userService.updateUser(userMap, context);
-      deleteUserInKeyclock(userMap, context);
       response.getResult().put(JsonKey.USER, userMap);
+      // update user status in keycloak
+      SSOServiceFactory.getInstance().deactivateUser(userMap, context);
     } else {
       response.put(Constants.RESPONSE, Constants.SUCCESS);
     }
@@ -75,7 +79,6 @@ public class IdentifierFreeUpActor extends BaseActor {
     if (StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
       updatedUserMap.put(JsonKey.PREV_USED_EMAIL, userDbMap.get(JsonKey.EMAIL));
       updatedUserMap.put(JsonKey.EMAIL, null);
-      updatedUserMap.put(JsonKey.IS_DELETED, true);
       updatedUserMap.put(JsonKey.MASKED_EMAIL, null);
       updatedUserMap.put(JsonKey.FLAGS_VALUE, calculateFlagValue(userDbMap));
     }
@@ -87,15 +90,8 @@ public class IdentifierFreeUpActor extends BaseActor {
       updatedUserMap.put(JsonKey.PHONE, null);
       updatedUserMap.put(JsonKey.MASKED_PHONE, null);
       updatedUserMap.put(JsonKey.COUNTRY_CODE, null);
-      updatedUserMap.put(JsonKey.IS_DELETED, true);
       updatedUserMap.put(JsonKey.FLAGS_VALUE, calculateFlagValue(userDbMap));
     }
-  }
-
-  private void deleteUserInKeyclock(Map<String, Object> userMapES, RequestContext context) {
-    SSOManager ssoManager = SSOServiceFactory.getInstance();
-    ssoManager.deactivateUser(userMapES, context);
-    logger.info(context, "User deleted in keyclock:");
   }
 
   private int calculateFlagValue(Map<String, Object> userDbMap) {

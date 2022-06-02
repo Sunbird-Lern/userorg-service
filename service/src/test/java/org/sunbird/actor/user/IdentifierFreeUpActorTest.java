@@ -3,7 +3,18 @@ package org.sunbird.actor.user;
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
+
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.UserRepresentation;
+
+import org.sunbird.sso.KeyCloakConnectionProvider;
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -42,6 +53,9 @@ import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
+  KeyCloakConnectionProvider.class,
+  SSOServiceFactory.class,
+  SSOManager.class,
   UserServiceImpl.class,
   ServiceFactory.class,
   ElasticSearchRestHighImpl.class,
@@ -74,6 +88,25 @@ public class IdentifierFreeUpActorTest {
     cassandraOperation = PowerMockito.mock(CassandraOperation.class);
     PowerMockito.mockStatic(ServiceFactory.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
+
+    UserRepresentation userRepresentation = mock(UserRepresentation.class);
+    RealmResource realmResource = mock(RealmResource.class);
+    Keycloak keycloak = mock(Keycloak.class);
+    PowerMockito.mockStatic(KeyCloakConnectionProvider.class);
+    when(KeyCloakConnectionProvider.getConnection()).thenReturn(keycloak);
+    when(keycloak.realm(Mockito.anyString())).thenReturn(realmResource);
+
+    UsersResource usersResource = mock(UsersResource.class);
+    when(realmResource.users()).thenReturn(usersResource);
+
+    UserResource userResource = mock(UserResource.class);
+    when(usersResource.get(Mockito.any())).thenReturn(userResource);
+    when(userResource.toRepresentation()).thenReturn(userRepresentation);
+    PowerMockito.mockStatic(SSOServiceFactory.class);
+    SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+    PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+    PowerMockito.when(ssoManager.deactivateUser(Mockito.anyMap(), Mockito.any()))
+        .thenReturn(JsonKey.SUCCESS);
   }
 
   @Test
