@@ -18,7 +18,9 @@ import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
-
+import org.sunbird.sso.SSOManager;
+import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.util.ProjectUtil;
 /**
  * this Actor class is being used to free Up used User Identifier for now it only free Up user
  * Email, Phone.
@@ -60,8 +62,13 @@ public class IdentifierFreeUpActor extends BaseActor {
 
     Response response = new Response();
     if (userMap.size() > 1) {
+      // deactivate user
+      userMap.put(JsonKey.IS_DELETED, true);
+      userMap.put(JsonKey.STATUS, ProjectUtil.Status.INACTIVE.getValue());
       response = userService.updateUser(userMap, context);
       response.getResult().put(JsonKey.USER, userMap);
+      // update user status in keycloak
+      SSOServiceFactory.getInstance().deactivateUser(userMap, context);
     } else {
       response.put(Constants.RESPONSE, Constants.SUCCESS);
     }
