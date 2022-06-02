@@ -95,6 +95,7 @@ public class IdentifierFreeUpActorTest {
     userDbMap.put(JsonKey.MASKED_EMAIL, "user*******");
     userDbMap.put(JsonKey.MASKED_PHONE, "98***08908");
     userDbMap.put(JsonKey.FLAGS_VALUE, 3);
+    userDbMap.put(JsonKey.IS_DELETED, true);
     userDbMap.put(JsonKey.ID, id);
     responseList.add(userDbMap);
     response.put(JsonKey.RESPONSE, responseList);
