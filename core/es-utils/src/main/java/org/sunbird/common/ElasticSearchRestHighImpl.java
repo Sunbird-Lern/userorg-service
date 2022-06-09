@@ -432,7 +432,6 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       Map.Entry<String, String> entry = searchDTO.getFuzzy().entrySet().iterator().next();
       ElasticSearchHelper.createFuzzyMatchQuery(query, entry.getKey(), entry.getValue());
     }
-
     // set final query to search request builder
     searchSourceBuilder.query(query);
 
