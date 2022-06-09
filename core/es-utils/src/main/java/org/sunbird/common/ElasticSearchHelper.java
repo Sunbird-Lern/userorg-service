@@ -22,7 +22,6 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.ExistsQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -449,10 +448,9 @@ public class ElasticSearchHelper {
    * @param value of the attribute
    * @return MatchQueryBuilder
    */
-  public static MatchQueryBuilder createFuzzyMatchQuery(String name, Object value) {
-    return QueryBuilders.matchQuery(name, value)
-        .fuzziness(Fuzziness.AUTO)
-        .fuzzyTranspositions(true);
+  public static void createFuzzyMatchQuery(BoolQueryBuilder query, String name, Object value) {
+    query.must(
+        QueryBuilders.matchQuery(name, value).fuzziness(Fuzziness.AUTO).fuzzyTranspositions(true));
   }
 
   /**

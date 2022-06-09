@@ -427,16 +427,15 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       }
     }
 
-    // set final query to search request builder
-    searchSourceBuilder.query(query);
-
     // do fuzzy search
     if (MapUtils.isNotEmpty(searchDTO.getFuzzy())) {
       Map.Entry<String, String> entry = searchDTO.getFuzzy().entrySet().iterator().next();
-      MatchQueryBuilder queryBuilder =
-          ElasticSearchHelper.createFuzzyMatchQuery(entry.getKey(), entry.getValue());
-      searchSourceBuilder.query(queryBuilder);
+      ElasticSearchHelper.createFuzzyMatchQuery(query, entry.getKey(), entry.getValue());
     }
+
+    // set final query to search request builder
+    searchSourceBuilder.query(query);
+
     List finalFacetList = new ArrayList();
 
     if (null != searchDTO.getFacets() && !searchDTO.getFacets().isEmpty()) {
