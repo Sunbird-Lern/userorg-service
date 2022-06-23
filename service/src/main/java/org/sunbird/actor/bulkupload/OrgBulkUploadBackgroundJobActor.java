@@ -202,7 +202,10 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     String orgId;
     row.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationType()));
-    row.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
+
+    if (org.getOrganisationSubType() != null) {
+      row.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
+    }
     try {
       orgId =
           upsertOrg(
@@ -242,7 +245,11 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
     Map<String, Object> row = mapper.convertValue(org, Map.class);
     row.put(JsonKey.LOCATION_CODE, locationCodes);
     row.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationType()));
-    row.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
+
+    if (org.getOrganisationSubType() != null) {
+      row.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
+    }
+
     try {
       row.put(JsonKey.ORGANISATION_ID, org.getId());
       upsertOrg(organisationManagementActor, row, ActorOperations.UPDATE_ORG.getValue(), context);
