@@ -79,7 +79,7 @@ public class OrganisationManagementActor extends BaseActor {
     String orgSubType = (String) request.get(JsonKey.ORG_SUB_TYPE);
     orgValidator.validateOrgType(orgType, orgSubType, JsonKey.CREATE);
     request.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(orgType));
-    if(StringUtils.isNotBlank(orgSubType)) {
+    if (StringUtils.isNotBlank(orgSubType)) {
       request.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
     }
     // Channel is mandatory for all org
@@ -110,7 +110,8 @@ public class OrganisationManagementActor extends BaseActor {
     }
 
     if (null != isTenant && isTenant) {
-      boolean bool = orgService.registerChannel(request, JsonKey.CREATE, actorMessage.getRequestContext());
+      boolean bool =
+          orgService.registerChannel(request, JsonKey.CREATE, actorMessage.getRequestContext());
       request.put(
           JsonKey.IS_SSO_ROOTORG_ENABLED,
           request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)
@@ -232,8 +233,9 @@ public class OrganisationManagementActor extends BaseActor {
       if (StringUtils.isNotBlank(orgType)) {
         request.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(orgType));
       }
-      if(StringUtils.isNotBlank(orgSubType)) {
-        request.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
+      if (StringUtils.isNotBlank(orgSubType)) {
+        request.put(
+            JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
       }
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Map<String, Object> dbOrgDetails =
@@ -435,7 +437,9 @@ public class OrganisationManagementActor extends BaseActor {
       if (null != result.get(JsonKey.ORGANISATION_TYPE)) {
         int orgType = (int) result.get(JsonKey.ORGANISATION_TYPE);
         boolean isSchool =
-                (orgType == OrgTypeValidator.getInstance().getValueByType(JsonKey.ORG_TYPE_SCHOOL)) ? true : false;
+            (orgType == OrgTypeValidator.getInstance().getValueByType(JsonKey.ORG_TYPE_SCHOOL))
+                ? true
+                : false;
         result.put(JsonKey.IS_SCHOOL, isSchool);
       }
     } else {
