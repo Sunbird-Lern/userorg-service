@@ -134,6 +134,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           if (CollectionUtils.isNotEmpty(roleList)) {
             userMap.put(JsonKey.ROLES, roleList);
             RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
+          } else {
+            userMap.remove(JsonKey.ROLES);
           }
         }
         userRequestValidator.validateUserType(userMap, null, context);
@@ -154,9 +156,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           setTaskStatus(
               task,
               ProjectUtil.BulkProcessStatus.FAILED,
-            MessageFormat.format(
-              ResponseCode.invalidParameter.getErrorMessage(),
-              JsonKey.ORGANISATION + JsonKey.ID),
+              MessageFormat.format(
+                  ResponseCode.invalidParameter.getErrorMessage(),
+                  JsonKey.ORGANISATION + JsonKey.ID),
               userMap,
               JsonKey.CREATE);
           return;
@@ -202,9 +204,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         setTaskStatus(
             task,
             ProjectUtil.BulkProcessStatus.FAILED,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(),
-            JsonKey.ORGANISATION + JsonKey.STATUS),
+            MessageFormat.format(
+                ResponseCode.invalidParameter.getErrorMessage(),
+                JsonKey.ORGANISATION + JsonKey.STATUS),
             userMap,
             JsonKey.CREATE);
         return;

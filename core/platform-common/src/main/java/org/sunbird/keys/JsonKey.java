@@ -633,6 +633,8 @@ public final class JsonKey {
   public static final String MANDATORY_FIELDS_EXISTS = "mandatoryFieldsExists";
   public static final String OSID = "osid";
   public static final String DISABLE_MULTIPLE_ORG_ROLE = "sunbird_disable_multiple_org_role";
+  public static final String PASSWORD_RESET_LOGIN_PAGE_URL =
+      "sunbird_password_reset_login_page_url";
 
   private JsonKey() {}
 }
