@@ -71,7 +71,8 @@ public class SSOUserServiceImpl implements SSOUserService {
         isCustodianOrg = true;
       }
     }
-    if (userMap.containsKey(JsonKey.ORG_EXTERNAL_ID)) {
+    if (null != userMap.get(JsonKey.ORG_EXTERNAL_ID)
+        && StringUtils.isNotBlank((String) userMap.get(JsonKey.ORG_EXTERNAL_ID))) {
       String orgId = validateExternalIdAndGetOrgId(userMap, actorMessage.getRequestContext());
       userMap.put(JsonKey.ORGANISATION_ID, orgId);
 
