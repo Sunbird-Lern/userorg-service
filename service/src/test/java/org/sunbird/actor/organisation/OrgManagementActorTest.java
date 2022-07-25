@@ -26,6 +26,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
@@ -55,7 +56,8 @@ import scala.concurrent.Promise;
   ActorSelection.class,
   OrgExternalServiceImpl.class,
   HttpClientUtil.class,
-  LocationServiceImpl.class
+  LocationServiceImpl.class,
+  OrgTypeValidator.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -142,6 +144,12 @@ public class OrgManagementActorTest {
     promise.success(getEsResponse(false));
     PowerMockito.when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
+    OrgTypeValidator orgTypeValidator = mock(OrgTypeValidator.class);
+    PowerMockito.mockStatic(OrgTypeValidator.class);
+    when(OrgTypeValidator.getInstance()).thenReturn(orgTypeValidator);
+    when(orgTypeValidator.getValueByType(JsonKey.ORG_TYPE_SCHOOL)).thenReturn(2);
+    when(orgTypeValidator.isOrgTypeExist("board")).thenReturn(true);
+    when(orgTypeValidator.isOrgTypeExist("school")).thenReturn(true);
   }
 
   @Test
@@ -234,6 +242,7 @@ public class OrgManagementActorTest {
     when(esService.search(Mockito.any(), Mockito.anyString(), Mockito.any()))
         .thenReturn(promise.future());
     Map<String, Object> map = getRequestDataForOrgCreate(basicRequestData);
+    map.put(JsonKey.ORG_SUB_TYPE, "school");
     map.remove(JsonKey.EXTERNAL_ID);
     boolean result = testScenario(getRequest(map, ActorOperations.CREATE_ORG.getValue()), null);
     assertTrue(result);
@@ -282,6 +291,17 @@ public class OrgManagementActorTest {
   }
 
   @Test
+  public void testUpdateOrgFailureInvalidOrgTypeData() {
+    Map<String, Object> req = getRequestDataForOrgUpdate();
+    req.put(JsonKey.ORG_SUB_TYPE, "invalid");
+    boolean result =
+            testScenario(
+                    getRequest(req, ActorOperations.UPDATE_ORG.getValue()),
+                    ResponseCode.invalidValue);
+    assertTrue(result);
+  }
+
+  @Test
   public void testUpdateOrgFailureWithInvalidExternalAndProviderId() throws Exception {
     Map<String, Object> req = getRequestDataForOrgUpdate();
     req.remove(JsonKey.ORGANISATION_ID);
@@ -315,6 +335,8 @@ public class OrgManagementActorTest {
   public void testUpdateOrgFailureWithInvalidEmailFormat() {
     Map<String, Object> map = getRequestDataForOrgUpdate();
     map.put(JsonKey.EMAIL, "invalid_email_format.com");
+    map.put(JsonKey.ORG_TYPE, "board");
+    map.put(JsonKey.ORG_SUB_TYPE, "school");
     boolean result =
         testScenario(
             getRequest(map, ActorOperations.UPDATE_ORG.getValue()), ResponseCode.dataFormatError);

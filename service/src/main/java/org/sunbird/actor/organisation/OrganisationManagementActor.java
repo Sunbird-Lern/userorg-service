@@ -12,11 +12,11 @@ import javax.inject.Named;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.actor.organisation.validator.OrganisationRequestValidator;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.model.organisation.OrgTypeEnum;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -76,8 +76,12 @@ public class OrganisationManagementActor extends BaseActor {
           MessageFormat.format(ResponseCode.dataFormatError.getErrorMessage(), JsonKey.EMAIL));
     }
     String orgType = (String) request.get(JsonKey.ORG_TYPE);
-    orgValidator.validateOrgType(orgType, JsonKey.CREATE);
-    request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
+    String orgSubType = (String) request.get(JsonKey.ORG_SUB_TYPE);
+    orgValidator.validateOrgType(orgType, orgSubType, JsonKey.CREATE);
+    request.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(orgType));
+    if (StringUtils.isNotBlank(orgSubType)) {
+      request.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
+    }
     // Channel is mandatory for all org
     orgValidator.channelMandatoryValidation(request);
     String channel = (String) request.get(JsonKey.CHANNEL);
@@ -224,9 +228,14 @@ public class OrganisationManagementActor extends BaseActor {
             MessageFormat.format(ResponseCode.dataFormatError.getErrorMessage(), JsonKey.EMAIL));
       }
       String orgType = (String) request.get(JsonKey.ORG_TYPE);
-      orgValidator.validateOrgType(orgType, JsonKey.UPDATE);
+      String orgSubType = (String) request.get(JsonKey.ORG_SUB_TYPE);
+      orgValidator.validateOrgType(orgType, orgSubType, JsonKey.UPDATE);
       if (StringUtils.isNotBlank(orgType)) {
-        request.put(JsonKey.ORG_TYPE, OrgTypeEnum.getValueByType(orgType));
+        request.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(orgType));
+      }
+      if (StringUtils.isNotBlank(orgSubType)) {
+        request.put(
+            JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
       }
       String orgId = (String) request.get(JsonKey.ORGANISATION_ID);
       Map<String, Object> dbOrgDetails =
@@ -428,7 +437,9 @@ public class OrganisationManagementActor extends BaseActor {
       if (null != result.get(JsonKey.ORGANISATION_TYPE)) {
         int orgType = (int) result.get(JsonKey.ORGANISATION_TYPE);
         boolean isSchool =
-            (orgType == OrgTypeEnum.getValueByType(OrgTypeEnum.SCHOOL.getType())) ? true : false;
+            (orgType == OrgTypeValidator.getInstance().getValueByType(JsonKey.ORG_TYPE_SCHOOL))
+                ? true
+                : false;
         result.put(JsonKey.IS_SCHOOL, isSchool);
       }
     } else {

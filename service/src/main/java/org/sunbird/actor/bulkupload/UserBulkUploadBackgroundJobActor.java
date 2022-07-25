@@ -134,6 +134,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           if (CollectionUtils.isNotEmpty(roleList)) {
             userMap.put(JsonKey.ROLES, roleList);
             RoleService.validateRoles((List<String>) userMap.get(JsonKey.ROLES));
+          } else {
+            userMap.remove(JsonKey.ROLES);
           }
         }
         userRequestValidator.validateUserType(userMap, null, context);
@@ -149,21 +151,27 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       uploaderMap.put(JsonKey.ORG_ID, organisationId);
       Organisation uploaderOrg = getOrgDetails(uploaderMap, context);
       if (StringUtils.isNotBlank(orgId) || StringUtils.isNotBlank(orgExternalId)) {
+        // will upload user to same channel as uploader means org admin channel
+        userMap.put(JsonKey.CHANNEL, uploaderOrg.getChannel());
         organisation = getOrgDetails(userMap, context);
         if (null == organisation) {
           setTaskStatus(
               task,
               ProjectUtil.BulkProcessStatus.FAILED,
-            MessageFormat.format(
-              ResponseCode.invalidParameter.getErrorMessage(),
-              JsonKey.ORGANISATION + JsonKey.ID),
+              MessageFormat.format(
+                  ResponseCode.invalidParameter.getErrorMessage(),
+                  JsonKey.ORGANISATION + JsonKey.ID),
               userMap,
               JsonKey.CREATE);
           return;
         } else {
-          if (StringUtils.isNotBlank(orgId)
+          if (StringUtils.isNotBlank(orgId) // orgId is csv orgId
               && StringUtils.isNotBlank(orgExternalId)
-              && !(orgId).equalsIgnoreCase(organisation.getId())) {
+              && !(orgId)
+                  .equalsIgnoreCase(
+                      organisation
+                          .getId())) { // organisation is the org response from csv orgExternalId
+            // and uploader channel search response
 
             String message =
                 MessageFormat.format(
@@ -185,9 +193,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           }
         }
       }
-      if (null != organisation
-          && (!(organisation.getRootOrgId()).equalsIgnoreCase(organisationId))
-          && (!(organisation.getRootOrgId()).equalsIgnoreCase(uploaderOrg.getRootOrgId()))) {
+      if (null != organisation // (uploaded user orgId or orgExternalId org details)
+          && (!(organisation.getChannel()).equalsIgnoreCase(uploaderOrg.getChannel()))) {
         setTaskStatus(
             task,
             ProjectUtil.BulkProcessStatus.FAILED,
@@ -202,9 +209,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         setTaskStatus(
             task,
             ProjectUtil.BulkProcessStatus.FAILED,
-          MessageFormat.format(
-            ResponseCode.invalidParameter.getErrorMessage(),
-            JsonKey.ORGANISATION + JsonKey.STATUS),
+            MessageFormat.format(
+                ResponseCode.invalidParameter.getErrorMessage(),
+                JsonKey.ORGANISATION + JsonKey.STATUS),
             userMap,
             JsonKey.CREATE);
         return;
@@ -319,6 +326,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       Map<String, Object> filters = new HashMap<>();
       filters.put(
           JsonKey.EXTERNAL_ID, ((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
+      filters.put(JsonKey.CHANNEL, ((String) userMap.get(JsonKey.CHANNEL)).toLowerCase());
       List<Organisation> orgList = orgService.organisationObjSearch(filters, context);
       if (CollectionUtils.isNotEmpty(orgList)) {
         return orgList.get(0);

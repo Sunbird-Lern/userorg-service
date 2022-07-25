@@ -55,6 +55,31 @@ public class UserOrgServiceImpl implements UserOrgService {
     userOrgDao.deleteUserOrgMapping(userOrgList, context);
   }
 
+  public void softDeleteOldUserOrgMapping(
+      List<Map<String, Object>> userOrgList, RequestContext context) {
+    for (Map<String, Object> userOrgMap : userOrgList) {
+      Response response =
+          userOrgDao.getUserOrgDetails(
+              (String) userOrgMap.get(JsonKey.USER_ID),
+              (String) userOrgMap.get(JsonKey.ORGANISATION_ID),
+              context);
+      List<Map<String, Object>> resList =
+          (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
+      if (!resList.isEmpty()) {
+        Map<String, Object> res = resList.get(0);
+        try {
+          UserOrg userOrg = new UserOrg();
+          userOrg.setUserId((String) res.get(JsonKey.USER_ID));
+          userOrg.setOrganisationId((String) res.get(JsonKey.ORGANISATION_ID));
+          userOrg.setDeleted(true);
+          userOrgDao.updateUserOrg(userOrg, context);
+        } catch (Exception e) {
+          logger.error(context, "upsertUserOrgData exception : " + e.getMessage(), e);
+        }
+      }
+    }
+  }
+
   @Override
   public void upsertUserOrgData(Map<String, Object> userMap, RequestContext context) {
     Response response =

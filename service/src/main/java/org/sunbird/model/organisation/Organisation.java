@@ -27,6 +27,7 @@ public class Organisation implements Serializable {
   private String externalId;
   private String orgName;
   private Integer organisationType;
+  private Integer organisationSubType;
   private String provider;
   private String rootOrgId;
   private String slug;
@@ -115,6 +116,14 @@ public class Organisation implements Serializable {
 
   public void setOrganisationType(Integer organisationType) {
     this.organisationType = organisationType;
+  }
+
+  public Integer getOrganisationSubType() { 
+  	return organisationSubType; 
+  }
+
+  public void setOrganisationSubType(Integer organisationSubType) {
+    this.organisationSubType = organisationSubType;
   }
 
   public String getProvider() {

@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
@@ -93,6 +94,7 @@ public class EsSyncBackgroundActor extends BaseActor {
             String esResponse = "";
             if (JsonKey.ORGANISATION.equals(objectType)
                 || (JsonKey.LOCATION.equalsIgnoreCase(objectType))) {
+              OrgTypeValidator.getInstance().updateOrganisationTypeFlags(map);
               esResponse = saveDataToEs(getType(objectType), objectId, map, requestContext);
             }
             if (StringUtils.isNotBlank(esResponse) && (esResponse).equalsIgnoreCase(objectId)) {

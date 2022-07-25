@@ -1,17 +1,24 @@
 package org.sunbird.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
+
+import com.microsoft.azure.storage.core.Logger;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
+import org.sunbird.model.organisation.OrganisationType;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.role.RoleService;
@@ -75,14 +82,19 @@ public class DataCacheHandler implements Runnable {
 
   @Override
   public void run() {
-    logger.info("DataCacheHandler:run: Cache refresh started.");
-    roleCache();
-    cacheSystemConfig();
-    cacheRoleForRead();
-    cacheTelemetryPdata();
-    cacheFormApiDataConfig();
-    initLocationOrderMap();
-    logger.info("DataCacheHandler:run: Cache refresh completed.");
+    try {
+      logger.info("DataCacheHandler:run: Cache refresh started.");
+      roleCache();
+      cacheSystemConfig();
+      cacheRoleForRead();
+      cacheTelemetryPdata();
+      cacheFormApiDataConfig();
+      initLocationOrderMap();
+      initOrgTypeMap();
+      logger.info("DataCacheHandler:run: Cache refresh completed.");
+    } catch(Exception e) {
+      logger.error("Failed to initialize DataCacheHandler", e);
+    }
   }
 
   // Get form data config
@@ -314,5 +326,24 @@ public class DataCacheHandler implements Runnable {
 
   public static Map<String, Map<String, Object>> getFormApiDataConfigMap() {
     return formApiDataConfigMap;
+  }
+
+  private void initOrgTypeMap() {
+    String orgTypeConfig = getConfigSettings().get(JsonKey.ORG_TYPE_CONFIG);
+    logger.info("Using DataCacheHandler value. " + orgTypeConfig);
+    Map<String, Object> orgTypeConfigMap;
+    try {
+      orgTypeConfigMap = (new ObjectMapper()).readValue(orgTypeConfig,
+              new TypeReference<HashMap<String, Object>>() {
+              });
+      if (orgTypeConfigMap.containsKey(JsonKey.FIELDS)) {
+        List<OrganisationType> orgTypeList = (new ObjectMapper()).convertValue(orgTypeConfigMap.get(JsonKey.FIELDS),
+                new TypeReference<List<OrganisationType>>() {
+                });
+        OrgTypeValidator.getInstance().initializeOrgTypeFromCache(orgTypeList);
+      }
+    } catch (Exception e) {
+      logger.error("Failed to Map orgTypeConfig to OrganisationType member", e);
+    }
   }
 }
