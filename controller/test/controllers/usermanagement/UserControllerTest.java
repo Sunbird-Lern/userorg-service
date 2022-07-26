@@ -17,6 +17,7 @@ import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -42,6 +43,7 @@ import util.CaptchaHelper;
   HttpClientUtil.class
 })
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
+@Ignore
 public class UserControllerTest extends BaseApplicationTest {
 
   private static String userId = "someUserId";
