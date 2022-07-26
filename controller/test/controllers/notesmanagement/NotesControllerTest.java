@@ -29,6 +29,7 @@ import util.ACTORS;
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
+@Ignore
 public class NotesControllerTest extends BaseApplicationTest {
 
   private static String USER_ID = "{userId} uuiuhcf784508 8y8c79-fhh";

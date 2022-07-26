@@ -11,10 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
@@ -36,6 +33,7 @@ import util.RequestInterceptor;
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
 @PrepareForTest(OnRequestHandler.class)
+@Ignore
 public class BulkUploadControllerTest extends BaseApplicationTest {
 
   @Before
