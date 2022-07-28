@@ -193,7 +193,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
           }
         }
       } else {
-        userMap.put(JsonKey.CHANNEL, uploaderOrg.getChannel());
+        // userMap.put(JsonKey.CHANNEL, uploaderOrg.getChannel());
         userMap.put(JsonKey.ORGANISATION_ID, uploaderOrg.getId());
       }
       if (null != organisation // (uploaded user orgId or orgExternalId org details)
