@@ -234,7 +234,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         userMap.put(JsonKey.UPDATED_BY, uploadedBy);
         Map<String, Object> newUserReqMap = SerializationUtils.clone(new HashMap<>(userMap));
         newUserReqMap.put(JsonKey.ORG_NAME, orgName);
-
+        newUserReqMap.remove(JsonKey.CHANNEL);
         callUpdateUser(
             userUpdateActor,
             ActorOperations.UPDATE_USER.getValue(),
