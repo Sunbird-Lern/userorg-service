@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -51,7 +50,6 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-@Ignore
 public class NotesManagementActorTest {
 
   private static String userId = "userId-example";
@@ -209,7 +207,7 @@ public class NotesManagementActorTest {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
-      return res.getErrorCode().equals(errorCode.getErrorCode())
+      return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }
