@@ -57,8 +57,8 @@ public class OrganisationBackgroundActor extends BaseActor {
             request.getRequestContext(),
             "Exception occurred while converting orgLocation to List<Map<String,String>>.");
       }
+      organisation.put(JsonKey.ORG_LOCATION, orgLocationList);
     }
-    organisation.put(JsonKey.ORG_LOCATION, orgLocationList);
     OrgTypeValidator.getInstance().updateOrganisationTypeFlags(organisation);
 
     esService.upsert(
