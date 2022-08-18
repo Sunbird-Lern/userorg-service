@@ -79,7 +79,6 @@ public class OrganisationManagementActor extends BaseActor {
     String orgSubType = (String) request.get(JsonKey.ORG_SUB_TYPE);
     orgValidator.validateOrgType(orgType, orgSubType, JsonKey.CREATE);
     request.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(orgType));
-
     if (StringUtils.isNotBlank(orgSubType)) {
       request.put(JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
     }
@@ -234,7 +233,6 @@ public class OrganisationManagementActor extends BaseActor {
       if (StringUtils.isNotBlank(orgType)) {
         request.put(JsonKey.ORG_TYPE, OrgTypeValidator.getInstance().getValueByType(orgType));
       }
-
       if (StringUtils.isNotBlank(orgSubType)) {
         request.put(
             JsonKey.ORG_SUB_TYPE, OrgTypeValidator.getInstance().getValueByType(orgSubType));
