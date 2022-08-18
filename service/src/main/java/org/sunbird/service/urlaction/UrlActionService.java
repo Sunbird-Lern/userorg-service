@@ -14,6 +14,8 @@ public class UrlActionService {
 
   private static final UrlActionDao urlActionDao = UrlActionDaoImpl.getInstance();
 
+  private UrlActionService() {}
+
   public static Map<String, Object> getUrlActionMap(String urlId) {
     Map<String, Object> response = new HashMap<>();
     List<UrlAction> urlActionList = urlActionDao.getUrlActions();

@@ -30,6 +30,9 @@ public class SearchDTO {
   // additional properties will hold , filters, exist , not exist
   private Map<String, Object> additionalProperties = new HashMap<>();
   private Map<String, Integer> softConstraints = new HashMap<>();
+
+  private Map<String, String> fuzzy = new HashMap<>();
+
   private List<Map<String, Object>> groupQuery = new ArrayList<>();
   private List<String> mode = new ArrayList<>();
 
@@ -173,5 +176,13 @@ public class SearchDTO {
 
   public void setQueryFields(List<String> queryFields) {
     this.queryFields = queryFields;
+  }
+
+  public Map<String, String> getFuzzy() {
+    return fuzzy;
+  }
+
+  public void setFuzzy(Map<String, String> fuzzy) {
+    this.fuzzy = fuzzy;
   }
 }
