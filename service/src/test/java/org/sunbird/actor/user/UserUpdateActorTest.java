@@ -34,7 +34,6 @@ import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 
-
 @PrepareForTest({ExtendedUserProfileServiceImpl.class, ExtendedUserProfileService.class})
 public class UserUpdateActorTest extends UserManagementActorTestBase {
 
