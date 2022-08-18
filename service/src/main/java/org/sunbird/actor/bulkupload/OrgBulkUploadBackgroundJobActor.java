@@ -209,7 +209,6 @@ public class OrgBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJob
           JsonKey.ORG_SUB_TYPE,
           OrgTypeValidator.getInstance().getTypeByValue(org.getOrganisationSubType()));
     }
-
     try {
       orgId =
           upsertOrg(
