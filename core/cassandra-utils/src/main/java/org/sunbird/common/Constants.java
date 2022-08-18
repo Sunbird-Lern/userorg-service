@@ -62,4 +62,5 @@ public interface Constants {
   public static final String GTE = ">=";
   public static final String GT = ">";
   public static final String ID = "id";
+  public static final String IS_MULTI_DC_ENABLED = "isMultiDCEnabled";
 }
