@@ -13,6 +13,7 @@ import java.util.Map;
 import modules.OnRequestHandler;
 import modules.StartModule;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -47,6 +48,7 @@ import util.RequestInterceptor;
   "org.xml.*"
 })
 @PrepareForTest({RequestInterceptor.class, TelemetryWriter.class, ActorSelection.class})
+@Ignore
 public abstract class BaseApplicationTest {
   protected Application application;
 

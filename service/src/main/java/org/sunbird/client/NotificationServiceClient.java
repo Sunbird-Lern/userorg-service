@@ -51,8 +51,7 @@ public class NotificationServiceClient {
         "NotificationServiceClient:sendSyncV2Notification :: calling notification service URL :"
             + serviceUrl);
     try {
-      Response response = callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
-      return response;
+      return callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
     } catch (Exception ex) {
       logger.error(
           context, "FeedServiceImpl:sendSyncV2Notification Exception occurred while mapping.", ex);
@@ -80,8 +79,7 @@ public class NotificationServiceClient {
     try {
       String json = getJsonString(reqObj);
       String responseStr = HttpClientUtil.patch(serviceUrl, json, getHeader(context), context);
-      Response response = mapper.readValue(responseStr, Response.class);
-      return response;
+      return mapper.readValue(responseStr, Response.class);
     } catch (Exception ex) {
       logger.error(
           context, "FeedServiceImpl:updateV1Notification Exception occurred while mapping.", ex);
@@ -111,8 +109,7 @@ public class NotificationServiceClient {
               serviceUrl + "/" + reqObj.getRequest().get(JsonKey.USER_ID),
               getHeader(context),
               context);
-      Response response = mapper.readValue(responseStr, Response.class);
-      return response;
+      return mapper.readValue(responseStr, Response.class);
     } catch (Exception ex) {
       logger.error(
           context, "FeedServiceImpl:readV1Notification Exception occurred while mapping.", ex);
@@ -138,8 +135,7 @@ public class NotificationServiceClient {
         "NotificationServiceClient:deleteV1Notification :: calling notification service URL :"
             + serviceUrl);
     try {
-      Response response = callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
-      return response;
+      return callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
     } catch (Exception ex) {
       logger.error(
           context, "FeedServiceImpl:deleteV1Notification Exception occurred while mapping.", ex);

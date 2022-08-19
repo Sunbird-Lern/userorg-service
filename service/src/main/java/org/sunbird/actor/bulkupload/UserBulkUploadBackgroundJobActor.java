@@ -192,6 +192,9 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
             }
           }
         }
+      } else {
+        // userMap.put(JsonKey.CHANNEL, uploaderOrg.getChannel());
+        userMap.put(JsonKey.ORGANISATION_ID, uploaderOrg.getId());
       }
       if (null != organisation // (uploaded user orgId or orgExternalId org details)
           && (!(organisation.getChannel()).equalsIgnoreCase(uploaderOrg.getChannel()))) {
@@ -231,7 +234,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         userMap.put(JsonKey.UPDATED_BY, uploadedBy);
         Map<String, Object> newUserReqMap = SerializationUtils.clone(new HashMap<>(userMap));
         newUserReqMap.put(JsonKey.ORG_NAME, orgName);
-
+        newUserReqMap.remove(JsonKey.CHANNEL);
         callUpdateUser(
             userUpdateActor,
             ActorOperations.UPDATE_USER.getValue(),

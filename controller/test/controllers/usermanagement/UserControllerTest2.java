@@ -11,6 +11,7 @@ import controllers.DummyActor;
 import java.util.*;
 import modules.OnRequestHandler;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -34,6 +35,7 @@ import util.CaptchaHelper;
   HttpClientUtil.class
 })
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
+@Ignore
 public class UserControllerTest2 extends BaseApplicationTest {
   private static String userId = "someUserId";
   private static String emailId = "someone@someorg.com";
