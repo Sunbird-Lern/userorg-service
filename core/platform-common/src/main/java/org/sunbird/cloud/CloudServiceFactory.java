@@ -1,9 +1,12 @@
-package org.sunbird.azure;
+package org.sunbird.cloud;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.sunbird.cloud.aws.AwsCloudService;
+import org.sunbird.cloud.azure.AzureCloudService;
+import org.sunbird.cloud.gcp.GcpCloudService;
 
 /**
  * Factory class to store the various upload download services like Azure , Amazon S3 etc... Created
@@ -12,7 +15,7 @@ import java.util.Map;
 public class CloudServiceFactory {
 
   private static final Map<String, CloudService> factory = new HashMap<>();
-  private static final List<String> allowedServiceNames = Arrays.asList("Azure", "Amazon S3");
+  private static final List<String> allowedServiceNames = Arrays.asList("azure", "aws", "gcloud");
 
   private CloudServiceFactory() {}
 
@@ -41,9 +44,15 @@ public class CloudServiceFactory {
     }
 
     synchronized (CloudServiceFactory.class) {
-      if (null == (factory.get(serviceName)) && "Azure".equalsIgnoreCase(serviceName)) {
+      if (null == (factory.get(serviceName)) && "azure".equalsIgnoreCase(serviceName)) {
         CloudService service = new AzureCloudService();
-        factory.put("Azure", service);
+        factory.put("azure", service);
+      } else if (null == (factory.get(serviceName)) && "aws".equalsIgnoreCase(serviceName)) {
+        CloudService service = new AwsCloudService();
+        factory.put("aws", service);
+      } else if (null == (factory.get(serviceName)) && "gcloud".equalsIgnoreCase(serviceName)) {
+        CloudService service = new GcpCloudService();
+        factory.put("gcloud", service);
       }
     }
     return factory.get(serviceName);

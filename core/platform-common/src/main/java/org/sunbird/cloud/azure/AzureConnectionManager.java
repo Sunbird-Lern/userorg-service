@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.azure;
+package org.sunbird.cloud.azure;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
