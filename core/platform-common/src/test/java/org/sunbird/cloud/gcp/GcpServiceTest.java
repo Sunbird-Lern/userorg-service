@@ -44,12 +44,12 @@ public class GcpServiceTest {
     when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
     PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
 
-    obj = CloudServiceFactory.get("gcp");
+    obj = CloudServiceFactory.get("gcloud");
   }
 
   @Test
   public void testGetSuccess() {
-    Object obj1 = CloudServiceFactory.get("gcp");
+    Object obj1 = CloudServiceFactory.get("gcloud");
     Assert.assertNotNull(obj1);
     Assert.assertTrue(obj.equals(obj1));
   }
