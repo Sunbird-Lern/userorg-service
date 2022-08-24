@@ -1,4 +1,4 @@
-package org.sunbird.azure;
+package org.sunbird.cloud;
 
 import java.io.File;
 import java.util.List;
