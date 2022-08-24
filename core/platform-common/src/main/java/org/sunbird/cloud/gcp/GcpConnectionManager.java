@@ -24,8 +24,8 @@ public class GcpConnectionManager {
     if (null == storageService) {
       String accountName = System.getenv(JsonKey.ACCOUNT_NAME);
       String accountKey = System.getenv(JsonKey.ACCOUNT_KEY);
-      StorageConfig storageConfig = new StorageConfig("gcloud", accountName, accountKey);
-      logger.info("StorageParams:init:all storage params initialized for gcp block");
+      StorageConfig storageConfig = new StorageConfig("aws", accountKey, accountName);
+      logger.info("StorageParams:init:all storage params initialized for aws block");
       storageService = StorageServiceFactory.getStorageService(storageConfig);
     }
     return storageService;
