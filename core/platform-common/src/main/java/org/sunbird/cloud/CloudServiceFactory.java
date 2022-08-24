@@ -44,13 +44,13 @@ public class CloudServiceFactory {
     }
 
     synchronized (CloudServiceFactory.class) {
-      if (null == (factory.get(serviceName)) && "Azure".equalsIgnoreCase(serviceName)) {
+      if (null == (factory.get(serviceName)) && "azure".equalsIgnoreCase(serviceName)) {
         CloudService service = new AzureCloudService();
         factory.put("azure", service);
-      } else if (null == (factory.get(serviceName)) && "Aws".equalsIgnoreCase(serviceName)) {
+      } else if (null == (factory.get(serviceName)) && "aws".equalsIgnoreCase(serviceName)) {
         CloudService service = new AwsCloudService();
         factory.put("aws", service);
-      } else if (null == (factory.get(serviceName)) && "Gcloud".equalsIgnoreCase(serviceName)) {
+      } else if (null == (factory.get(serviceName)) && "gcloud".equalsIgnoreCase(serviceName)) {
         CloudService service = new GcpCloudService();
         factory.put("gcloud", service);
       }

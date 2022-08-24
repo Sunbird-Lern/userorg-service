@@ -68,9 +68,7 @@ public class AzureServiceFactoryTest {
     when(PropertiesCache.getInstance()).thenReturn(propertiesCache);
     PowerMockito.when(propertiesCache.getProperty(Mockito.anyString())).thenReturn("anyString");
 
-    obj = CloudServiceFactory.get("Azure");
-    Assert.assertTrue(obj instanceof CloudService);
-    Assert.assertNotNull(obj);
+    obj = CloudServiceFactory.get("azure");
   }
 
   @Before
@@ -105,7 +103,7 @@ public class AzureServiceFactoryTest {
 
   @Test
   public void testGetSuccess() {
-    Object obj1 = CloudServiceFactory.get("Azure");
+    Object obj1 = CloudServiceFactory.get("azure");
     Assert.assertNotNull(obj1);
     Assert.assertTrue(obj.equals(obj1));
   }
