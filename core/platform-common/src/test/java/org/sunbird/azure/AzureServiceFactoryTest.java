@@ -26,6 +26,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.sunbird.cloud.CloudService;
+import org.sunbird.cloud.CloudServiceFactory;
+import org.sunbird.cloud.azure.AzureConnectionManager;
 import org.sunbird.util.PropertiesCache;
 
 /** @author Manzarul */
