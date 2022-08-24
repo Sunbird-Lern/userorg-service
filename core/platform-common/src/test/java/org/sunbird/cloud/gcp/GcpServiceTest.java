@@ -16,7 +16,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cloud.CloudService;
 import org.sunbird.cloud.CloudServiceFactory;
-import org.sunbird.request.RequestContext;
 import org.sunbird.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
@@ -57,37 +56,16 @@ public class GcpServiceTest {
   @Test
   public void testUploadFileSuccess() {
     CloudService service = (CloudService) obj;
-    String url =
-        service.uploadFile(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class));
+    String url = service.uploadFile("containerName", "fileName", "/conf", null);
     Assert.assertEquals(null, url);
   }
 
   @Test
   public void testDownloadFileSuccess() {
     CloudService service = (CloudService) obj;
-    boolean url =
-        service.downLoadFile(
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.anyString(),
-            Mockito.any(RequestContext.class));
+    boolean url = service.downLoadFile("containerName", "fileName", "/conf", null);
     Assert.assertFalse(url);
   }
-
-
-  public void testUploadFileFailure() {
-    try {
-      CloudService service = (CloudService) obj;
-      service.uploadFile("/container/sub/", new File("test.txt"), null);
-    } catch (Exception ex) {
-      Assert.assertNotNull(ex);
-    }
-  }
-
   @Test
   public void testUploadFileFailure2() {
     try {
@@ -101,16 +79,14 @@ public class GcpServiceTest {
   @Test
   public void testDeleteFileSuccess() {
     CloudService service = (CloudService) obj;
-    boolean url =
-        service.deleteFile(
-            Mockito.anyString(), Mockito.anyString(), Mockito.any(RequestContext.class));
+    boolean url = service.deleteFile("containerName", "fileName", null);
     Assert.assertFalse(url);
   }
 
   @Test
   public void testListAllFileSuccess() {
     CloudService service = (CloudService) obj;
-    List url = service.listAllFiles(Mockito.anyString(), Mockito.any(RequestContext.class));
+    List url = service.listAllFiles("containerName", null);
     Assert.assertNull(url);
   }
 
