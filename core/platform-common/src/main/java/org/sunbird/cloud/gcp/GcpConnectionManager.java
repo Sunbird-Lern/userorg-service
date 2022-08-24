@@ -18,9 +18,7 @@ public class GcpConnectionManager {
 
   private static BaseStorageService storageService = null;
 
-  private GcpConnectionManager() throws CloneNotSupportedException {
-    if (storageService != null) throw new CloneNotSupportedException();
-  }
+  private GcpConnectionManager() {}
 
   public static BaseStorageService getStorageService() {
     if (null == storageService) {

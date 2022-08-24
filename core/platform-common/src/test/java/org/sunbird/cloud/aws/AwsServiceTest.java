@@ -59,7 +59,17 @@ public class AwsServiceTest {
   public void testUploadFileFailure() {
     try {
       CloudService service = (CloudService) obj;
-      String url = service.uploadFile("container/sub/", new File("test.txt"), null);
+      String url = service.uploadFile("/container/sub/", new File("test.txt"), null);
+    } catch (Exception ex) {
+      Assert.assertNotNull(ex);
+    }
+  }
+
+  @Test
+  public void testUploadFileFailure2() {
+    try {
+      CloudService service = (CloudService) obj;
+      String url = service.uploadFile("", new File("test.txt"), null);
     } catch (Exception ex) {
       Assert.assertNotNull(ex);
     }

@@ -18,9 +18,7 @@ public class AwsConnectionManager {
 
   private static BaseStorageService storageService = null;
 
-  private AwsConnectionManager() throws CloneNotSupportedException {
-    if (storageService != null) throw new CloneNotSupportedException();
-  }
+  private AwsConnectionManager() {}
 
   public static BaseStorageService getStorageService() {
     if (null == storageService) {
