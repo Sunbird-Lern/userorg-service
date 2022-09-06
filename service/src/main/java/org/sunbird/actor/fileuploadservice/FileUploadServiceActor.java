@@ -54,7 +54,7 @@ public class FileUploadServiceActor extends BaseActor {
     try {
       fos = new FileOutputStream(file);
       fos.write((byte[]) req.get(JsonKey.FILE));
-      String cspProvider = ProjectUtil.getConfigValue(JsonKey.DEFAULT_SERVICE_PROVIDER);
+      String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
       CloudService service = (CloudService) CloudServiceFactory.get(cspProvider);
       if (null == service) {
         logger.info(context, "The cloud service is not available");
