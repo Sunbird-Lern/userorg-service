@@ -24,7 +24,7 @@ public class GcpFileUtility {
     } else {
       contrName = containerName.toLowerCase();
     }
-    if (containerName.startsWith("/")) {
+    if (contrName.startsWith("/")) {
       contrName = containerName.substring(1);
     }
     if (contrName.contains("/")) {
@@ -35,6 +35,8 @@ public class GcpFileUtility {
     }
 
     String objectKey = containerPath + source.getName();
+    // upload(container, file, objectKey, isDirectory , attempt , retryCount , ttl )
+
     return GcpConnectionManager.getStorageService()
         .upload(
             contrName,
@@ -43,6 +45,6 @@ public class GcpFileUtility {
             Option.apply(false),
             Option.apply(1),
             Option.apply(3),
-            Option.apply(1));
+            Option.empty());
   }
 }

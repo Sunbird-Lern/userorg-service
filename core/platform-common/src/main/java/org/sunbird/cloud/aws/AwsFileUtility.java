@@ -24,7 +24,7 @@ public class AwsFileUtility {
     } else {
       contrName = containerName.toLowerCase();
     }
-    if (containerName.startsWith("/")) {
+    if (contrName.startsWith("/")) {
       contrName = containerName.substring(1);
     }
     if (contrName.contains("/")) {
@@ -43,6 +43,6 @@ public class AwsFileUtility {
             Option.apply(false),
             Option.apply(1),
             Option.apply(3),
-            Option.apply(1));
+            Option.empty());
   }
 }

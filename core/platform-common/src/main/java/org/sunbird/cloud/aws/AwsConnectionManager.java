@@ -25,7 +25,7 @@ public class AwsConnectionManager {
       String accountName = System.getenv(JsonKey.ACCOUNT_NAME);
       String accountKey = System.getenv(JsonKey.ACCOUNT_KEY);
 
-      StorageConfig storageConfig = new StorageConfig("aws", accountKey, accountName);
+      StorageConfig storageConfig = new StorageConfig("aws", accountName, accountKey);
       logger.info("StorageParams:init:all storage params initialized for aws block");
       storageService = StorageServiceFactory.getStorageService(storageConfig);
     }

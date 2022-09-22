@@ -141,7 +141,7 @@ public class AzureFileUtility {
     } else {
       contrName = containerName.toLowerCase();
     }
-    if (containerName.startsWith("/")) {
+    if (contrName.startsWith("/")) {
       contrName = containerName.substring(1);
     }
     if (contrName.contains("/")) {
