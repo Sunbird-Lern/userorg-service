@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.cloud.CloudService;
-import org.sunbird.cloud.CloudServiceFactory;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -15,6 +13,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.CloudStorageUtil;
 import org.sunbird.util.ProjectUtil;
 
 public class FileUploadServiceActor extends BaseActor {
@@ -55,8 +54,7 @@ public class FileUploadServiceActor extends BaseActor {
       fos = new FileOutputStream(file);
       fos.write((byte[]) req.get(JsonKey.FILE));
       String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
-      CloudService service = (CloudService) CloudServiceFactory.get(cspProvider);
-      if (null == service) {
+      if (null == cspProvider) {
         logger.info(context, "The cloud service is not available");
         ProjectCommonException exception =
             new ProjectCommonException(
@@ -66,7 +64,7 @@ public class FileUploadServiceActor extends BaseActor {
         sender().tell(exception, self());
       }
       String container = (String) req.get(JsonKey.CONTAINER);
-      avatarUrl = service.uploadFile(container, file, context);
+      avatarUrl= CloudStorageUtil.upload(cspProvider,container,fileName,fName);
     } catch (IOException e) {
       logger.error(context, "Exception Occurred while reading file in FileUploadServiceActor", e);
       throw e;
