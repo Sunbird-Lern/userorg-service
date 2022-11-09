@@ -9,6 +9,7 @@ import java.util.*;
 import modules.OnRequestHandler;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -20,6 +21,7 @@ import util.ACTORS;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
+@Ignore
 public class IdentifierFreeUpControllerTest extends BaseApplicationTest {
 
   public static Map<String, List<String>> headerMap;

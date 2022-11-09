@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
-import org.sunbird.azure.CloudService;
-import org.sunbird.azure.CloudServiceFactory;
+import org.sunbird.cloud.CloudService;
+import org.sunbird.cloud.CloudServiceFactory;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -54,8 +54,8 @@ public class FileUploadServiceActor extends BaseActor {
     try {
       fos = new FileOutputStream(file);
       fos.write((byte[]) req.get(JsonKey.FILE));
-
-      CloudService service = (CloudService) CloudServiceFactory.get("Azure");
+      String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
+      CloudService service = (CloudService) CloudServiceFactory.get(cspProvider);
       if (null == service) {
         logger.info(context, "The cloud service is not available");
         ProjectCommonException exception =

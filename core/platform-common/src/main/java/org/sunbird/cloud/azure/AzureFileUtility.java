@@ -1,5 +1,5 @@
 /** */
-package org.sunbird.azure;
+package org.sunbird.cloud.azure;
 
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
@@ -141,7 +141,7 @@ public class AzureFileUtility {
     } else {
       contrName = containerName.toLowerCase();
     }
-    if (containerName.startsWith("/")) {
+    if (contrName.startsWith("/")) {
       contrName = containerName.substring(1);
     }
     if (contrName.contains("/")) {

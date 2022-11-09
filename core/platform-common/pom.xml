@@ -114,7 +114,7 @@
         <dependency>
             <groupId>org.sunbird</groupId>
             <artifactId>cloud-store-sdk</artifactId>
-            <version>1.2.6</version>
+            <version>1.4.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.sun.jersey</groupId>

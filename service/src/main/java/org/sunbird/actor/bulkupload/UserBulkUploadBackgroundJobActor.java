@@ -151,6 +151,8 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       uploaderMap.put(JsonKey.ORG_ID, organisationId);
       Organisation uploaderOrg = getOrgDetails(uploaderMap, context);
       if (StringUtils.isNotBlank(orgId) || StringUtils.isNotBlank(orgExternalId)) {
+        // will upload user to same channel as uploader means org admin channel
+        userMap.put(JsonKey.CHANNEL, uploaderOrg.getChannel());
         organisation = getOrgDetails(userMap, context);
         if (null == organisation) {
           setTaskStatus(
@@ -163,9 +165,13 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
               JsonKey.CREATE);
           return;
         } else {
-          if (StringUtils.isNotBlank(orgId)
+          if (StringUtils.isNotBlank(orgId) // orgId is csv orgId
               && StringUtils.isNotBlank(orgExternalId)
-              && !(orgId).equalsIgnoreCase(organisation.getId())) {
+              && !(orgId)
+                  .equalsIgnoreCase(
+                      organisation
+                          .getId())) { // organisation is the org response from csv orgExternalId
+            // and uploader channel search response
 
             String message =
                 MessageFormat.format(
@@ -186,10 +192,12 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
             }
           }
         }
+      } else {
+        // userMap.put(JsonKey.CHANNEL, uploaderOrg.getChannel());
+        userMap.put(JsonKey.ORGANISATION_ID, uploaderOrg.getId());
       }
-      if (null != organisation
-          && (!(organisation.getRootOrgId()).equalsIgnoreCase(organisationId))
-          && (!(organisation.getRootOrgId()).equalsIgnoreCase(uploaderOrg.getRootOrgId()))) {
+      if (null != organisation // (uploaded user orgId or orgExternalId org details)
+          && (!(organisation.getChannel()).equalsIgnoreCase(uploaderOrg.getChannel()))) {
         setTaskStatus(
             task,
             ProjectUtil.BulkProcessStatus.FAILED,
@@ -226,7 +234,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
         userMap.put(JsonKey.UPDATED_BY, uploadedBy);
         Map<String, Object> newUserReqMap = SerializationUtils.clone(new HashMap<>(userMap));
         newUserReqMap.put(JsonKey.ORG_NAME, orgName);
-
+        newUserReqMap.remove(JsonKey.CHANNEL);
         callUpdateUser(
             userUpdateActor,
             ActorOperations.UPDATE_USER.getValue(),
@@ -321,6 +329,7 @@ public class UserBulkUploadBackgroundJobActor extends BaseBulkUploadBackgroundJo
       Map<String, Object> filters = new HashMap<>();
       filters.put(
           JsonKey.EXTERNAL_ID, ((String) userMap.get(JsonKey.ORG_EXTERNAL_ID)).toLowerCase());
+      filters.put(JsonKey.CHANNEL, ((String) userMap.get(JsonKey.CHANNEL)).toLowerCase());
       List<Organisation> orgList = orgService.organisationObjSearch(filters, context);
       if (CollectionUtils.isNotEmpty(orgList)) {
         return orgList.get(0);

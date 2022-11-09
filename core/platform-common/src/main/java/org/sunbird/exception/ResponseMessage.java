@@ -82,7 +82,7 @@ public interface ResponseMessage {
     String ERROR_INACTIVE_ORG = "Organisation corresponding to given {0} ({1}) is inactive.";
     String ERROR_CONFLICTING_VALUES = "Conflicting values for {0} ({1}) and {2} ({3}).";
     String ERROR_CONFLICTING_ROOT_ORG_ID =
-        "Root organisation ID of API user is conflicting with that of specified organisation ID.";
+        "Root organisation channel of uploader user is conflicting with that of specified organisation ID/orgExternalId channel value.";
     String ERROR_INVALID_PARAMETER_SIZE =
         "Parameter {0} is of invalid size (expected: {1}, actual: {2}).";
     String ERROR_RATE_LIMIT_EXCEEDED =
@@ -108,8 +108,10 @@ public interface ResponseMessage {
     String INVALID_CONSENT_STATUS = "Consent status is invalid";
     String USER_TYPE_CONFIG_IS_EMPTY = "userType config is empty for the statecode {0}";
     String SERVER_ERROR = "server error";
-    String EXTENDED_USER_PROFILE_NOT_LOADED = "Failed to load extendedProfileSchemaConfig from System_Settings table";
-    String ROLE_PROCESSING_INVALID_ORG = "Error while processing assign role. Invalid Organisation Id";
+    String EXTENDED_USER_PROFILE_NOT_LOADED =
+        "Failed to load extendedProfileSchemaConfig from System_Settings table";
+    String ROLE_PROCESSING_INVALID_ORG =
+        "Error while processing assign role. Invalid Organisation Id";
   }
 
   interface Key {
