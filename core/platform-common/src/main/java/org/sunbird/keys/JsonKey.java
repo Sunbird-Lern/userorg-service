@@ -12,6 +12,8 @@ public final class JsonKey {
   public static final String ANONYMOUS = "Anonymous";
   public static final String UNAUTHORIZED = "Unauthorized";
   public static final String KEY_CLOAK_AUTH_ENABLED = "keycloakAuthenticationEnabled";
+
+  public static final String IS_FORM_VALIDATION_REQUIRED = "isFormValidationRequired";
   public static final String ACCOUNT_KEY = "sunbird_account_key";
   public static final String ACCOUNT_NAME = "sunbird_account_name";
   public static final String DOWNLOAD_LINK_EXPIRY_TIMEOUT = "download_link_expiry_timeout";

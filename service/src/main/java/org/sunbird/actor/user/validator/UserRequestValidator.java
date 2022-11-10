@@ -24,6 +24,8 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
 import org.sunbird.validator.BaseRequestValidator;
 
+import com.typesafe.config.ConfigFactory;
+
 public class UserRequestValidator extends BaseRequestValidator {
 
   private final int ERROR_CODE = ResponseCode.CLIENT_ERROR.getResponseCode();
@@ -798,31 +800,31 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (StringUtils.isBlank(stateCode)) {
         stateCode = JsonKey.DEFAULT_PERSONA;
       }
-
-      if (!userTypeConfigMap.containsKey(stateCode)) {
-        // Get profile data config
-        Map<String, List<String>> userProfileConfigMap =
-            FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-        if (MapUtils.isEmpty(userProfileConfigMap)) {
-          // Get Default Config
-          stateCode = JsonKey.DEFAULT_PERSONA;
-          userProfileConfigMap = userTypeConfigMap.get(stateCode);
+      if(Boolean.getBoolean(System.getenv(JsonKey.IS_FORM_VALIDATION_REQUIRED))){
+        if (!userTypeConfigMap.containsKey(stateCode)) {
+          // Get profile data config
+          Map<String, List<String>> userProfileConfigMap =
+                  FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
           if (MapUtils.isEmpty(userProfileConfigMap)) {
-            userProfileConfigMap =
-                FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
-            if (MapUtils.isNotEmpty(userProfileConfigMap)) {
-              userTypeConfigMap.put(stateCode, userProfileConfigMap);
-            } else {
-              logger.info(
-                  context, String.format("Form Config not found for stateCode:%s", stateCode));
+            // Get Default Config
+            stateCode = JsonKey.DEFAULT_PERSONA;
+            userProfileConfigMap = userTypeConfigMap.get(stateCode);
+            if (MapUtils.isEmpty(userProfileConfigMap)) {
+              userProfileConfigMap =
+                      FormApiUtil.getUserTypeConfig(FormApiUtil.getProfileConfig(stateCode, context));
+              if (MapUtils.isNotEmpty(userProfileConfigMap)) {
+                userTypeConfigMap.put(stateCode, userProfileConfigMap);
+              } else {
+                logger.info(
+                        context, String.format("Form Config not found for stateCode:%s", stateCode));
+              }
             }
+          } else {
+            userTypeConfigMap.put(stateCode, userProfileConfigMap);
           }
-        } else {
-          userTypeConfigMap.put(stateCode, userProfileConfigMap);
+          logger.info("form config for state:" + stateCode + " " + userTypeConfigMap);
         }
-        logger.info("form config for state:" + stateCode + " " + userTypeConfigMap);
       }
-
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
       if (MapUtils.isEmpty(userTypeMap)) {
         ProjectCommonException.throwClientErrorException(
