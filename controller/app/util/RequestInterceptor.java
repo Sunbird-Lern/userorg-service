@@ -45,6 +45,46 @@ public class RequestInterceptor {
 
     // ---------------------------
     short var = 1;
+    apiHeaderIgnoreMap.put("/v1/user/create", var);
+    apiHeaderIgnoreMap.put("/v2/user/create", var);
+    apiHeaderIgnoreMap.put("/v2/org/search", var);
+    apiHeaderIgnoreMap.put("/v3/user/create", var);
+    apiHeaderIgnoreMap.put("/v1/user/signup", var);
+    apiHeaderIgnoreMap.put("/v2/user/signup", var);
+    apiHeaderIgnoreMap.put("/v1/ssouser/create", var);
+    apiHeaderIgnoreMap.put("/v1/org/search", var);
+    apiHeaderIgnoreMap.put("/service/health", var);
+    apiHeaderIgnoreMap.put("/health", var);
+    apiHeaderIgnoreMap.put("/v1/notification/email", var);
+    apiHeaderIgnoreMap.put("/v2/notification", var);
+    apiHeaderIgnoreMap.put("/v1/data/sync", var);
+    apiHeaderIgnoreMap.put("/v1/file/upload", var);
+    apiHeaderIgnoreMap.put("/v1/user/getuser", var);
+    // making org read as public access
+    apiHeaderIgnoreMap.put("/v1/org/read", var);
+    // making location APIs public access
+    apiHeaderIgnoreMap.put("/v1/location/create", var);
+    apiHeaderIgnoreMap.put("/v1/location/update", var);
+    apiHeaderIgnoreMap.put("/v1/location/search", var);
+    apiHeaderIgnoreMap.put("/v1/location/delete", var);
+    apiHeaderIgnoreMap.put("/v1/otp/generate", var);
+    apiHeaderIgnoreMap.put("/v1/otp/verify", var);
+    apiHeaderIgnoreMap.put("/v2/otp/generate", var);
+    apiHeaderIgnoreMap.put("/v2/otp/verify", var);
+    apiHeaderIgnoreMap.put("/v1/user/get/email", var);
+    apiHeaderIgnoreMap.put("/v1/user/get/phone", var);
+    apiHeaderIgnoreMap.put("/v1/system/settings/get", var);
+    apiHeaderIgnoreMap.put("/v1/system/settings/list", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/search", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/migrate", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/identifier/freeup", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/password/reset", var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/email", var);
+    apiHeaderIgnoreMap.put("/v1/user/exists/phone", var);
+    apiHeaderIgnoreMap.put("/v1/role/read", var);
+    apiHeaderIgnoreMap.put("/v1/user/role/read", var);
+    apiHeaderIgnoreMap.put("/private/user/v1/lookup", var);
+    apiHeaderIgnoreMap.put("/private/user/feed/v1/create", var);
   }
 
   private static String getUserRequestedFor(Http.Request request) {
@@ -88,7 +128,7 @@ public class RequestInterceptor {
   public static Map verifyRequestData(Http.Request request, Map<String, Object> requestContext) {
     Map userAuthentication = new HashMap<String, String>();
     String clientId = null;
-    if(ConfigFactory.load().getBoolean(JsonKey.KEY_CLOAK_AUTH_ENABLED)){
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
       userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
       clientId = JsonKey.UNAUTHORIZED;
     }else{
