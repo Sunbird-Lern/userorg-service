@@ -84,6 +84,11 @@ public class RequestInterceptorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("authorized-user");
     assertEquals(
+            (String)
+                    RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
+                            .get(JsonKey.USER_ID),
+            "Anonymous");
+    assertEquals(
         (String)
             RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
                 .get(JsonKey.USER_ID),
