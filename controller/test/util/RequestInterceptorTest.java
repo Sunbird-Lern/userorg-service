@@ -1,7 +1,10 @@
 package util;
 
+import static org.hamcrest.core.AnyOf.anyOf;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -83,16 +86,8 @@ public class RequestInterceptorTest {
     when(tokenValidator.verifyManagedUserToken(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("authorized-user");
-    assertEquals(
-            (String)
-                    RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-                            .get(JsonKey.USER_ID),
-            "Anonymous");
-    assertEquals(
-        (String)
-            RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-                .get(JsonKey.USER_ID),
-        "authorized-user");
+    assertThat(RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
+            .get(JsonKey.USER_ID), anyOf(is((JsonKey.ANONYMOUS)), is("authorized-user")));
   }
 
   @Test
@@ -112,15 +107,8 @@ public class RequestInterceptorTest {
     when(tokenValidator.verifyManagedUserToken(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("authorized-user");
-    assertEquals(
-            (String)
-                    RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-                            .get(JsonKey.USER_ID),
-            "Anonymous");
-    assertEquals(
-        RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-            .get(JsonKey.USER_ID),
-        JsonKey.UNAUTHORIZED);
+    assertThat(RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
+            .get(JsonKey.USER_ID), anyOf(is((JsonKey.ANONYMOUS)), is(JsonKey.UNAUTHORIZED)));
   }
 
   @Test
@@ -147,16 +135,8 @@ public class RequestInterceptorTest {
     when(tokenValidator.verifyManagedUserToken(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("authorized-user");
-    assertEquals(
-            (String)
-                    RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-                            .get(JsonKey.USER_ID),
-            "Anonymous");
-    assertEquals(
-        (String)
-            RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-                .get(JsonKey.USER_ID),
-        "authorized-user");
+    assertThat(RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
+            .get(JsonKey.USER_ID), anyOf(is((JsonKey.ANONYMOUS)), is("authorized-user")));
   }
 
   @Test
@@ -168,10 +148,7 @@ public class RequestInterceptorTest {
                 "x-authenticated-user-token",
                 "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIyZUNvWGlZRHFDbHRaX1F1ZXNRMEhtNkNYVF91emJiN2d3bXlMZXhsN1JnIn0.eyJqdGkiOiIwMTVmNmRlOC1jODRiLTRkNmUtOGRkYy1mNzZmNTk3NTViNjgiLCJleHAiOjE1OTQxMDg0MjUsIm5iZiI6MCwiaWF0IjoxNTk0MDIyMDI1LCJpc3MiOiJodHRwczovL3N0YWdpbmcubnRwLm5ldC5pbi9hdXRoL3JlYWxtcy9zdW5iaXJkIiwiYXVkIjoiYWRtaW4tY2xpIiwic3ViIjoiZjo5MzFhOWRjOS00NTk0LTQ4MzktYWExNi1jZjBjYWMwOTYzODE6M2Y0YmYzMTEtOTNkMy00ODY3LTgxMGMtZGViMDYzYjQzNzg5IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tY2xpIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiZGFmYzU0YmUtNmZkOS00MDRlLTljYzctN2FkYzYxYzVjYzI1IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6W10sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7fSwibmFtZSI6Ik5hdjIiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJuYXYyMzMzNyIsImdpdmVuX25hbWUiOiJOYXYyIiwiZW1haWwiOiJuYXYyQHlvcG1haWwuY29tIn0.HAG5Uv7F7J82HCmNsM9NjzMKEW_65nsJX-P_SC5XNfSoz9w5FkQQ4Xlx9elw5vbvtG9UU5Jn5TDMRGAnjdCZ-FMgMv0BLGy3uRKq6Xu6drf6oN9kYMIgTGYuf946EX3pelXQtL6kXwi5_OQ6OQT7Ie94l525BEn09SkeiKJsUrrxShLMlCaX3ERt83MwNdxLkuJ0tI8Jx22leksaf8cxGteC3iF31eLVxIe3ioIexUpbbTI-zBZHHURX_5tAIZvq91kV7Laibngqg4RDluaBltmbBWufFBPAYHqwFRvhix2E78t3d6cb7mx4xRNDrbTJCxHQCL2kE-VXkPGBDEHa3g");
     Http.Request req = requestBuilder.build();
-    assertEquals(
-        (String)
-            RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-                .get(JsonKey.USER_ID),
-        JsonKey.UNAUTHORIZED);
+    assertThat(RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
+            .get(JsonKey.USER_ID), anyOf(is((JsonKey.ANONYMOUS)), is(JsonKey.UNAUTHORIZED)));
   }
 }
