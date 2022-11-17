@@ -798,7 +798,6 @@ public class UserRequestValidator extends BaseRequestValidator {
       if (StringUtils.isBlank(stateCode)) {
         stateCode = JsonKey.DEFAULT_PERSONA;
       }
-      if(Boolean.getBoolean(System.getenv(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
         if (!userTypeConfigMap.containsKey(stateCode)) {
           // Get profile data config
           Map<String, List<String>> userProfileConfigMap =
@@ -822,7 +821,6 @@ public class UserRequestValidator extends BaseRequestValidator {
           }
           logger.info("form config for state:" + stateCode + " " + userTypeConfigMap);
         }
-      }
 
       Map<String, List<String>> userTypeMap = userTypeConfigMap.get(stateCode);
       if (MapUtils.isEmpty(userTypeMap)) {

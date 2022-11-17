@@ -10,14 +10,17 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 
 public class FormApiUtil {
-
   public static Map<String, Object> getProfileConfig(String stateCode, RequestContext context) {
     Map<String, Map<String, Object>> stateProfileConfigMap =
-        DataCacheHandler.getFormApiDataConfigMap();
+            DataCacheHandler.getFormApiDataConfigMap();
     if (MapUtils.isEmpty(stateProfileConfigMap)
-        || MapUtils.isEmpty(stateProfileConfigMap.get(stateCode))) {
-      Map<String, Object> profileConfigMap =
-          FormApiUtilHandler.getFormApiConfig(stateCode, context);
+            || MapUtils.isEmpty(stateProfileConfigMap.get(stateCode))) {
+      Map<String, Object> profileConfigMap;
+      if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
+        profileConfigMap = FormApiUtilHandler.getFormApiConfig(stateCode, context);
+      }else{
+        profileConfigMap = getFormApiConfig();
+      }
       if (MapUtils.isNotEmpty(profileConfigMap)) {
         stateProfileConfigMap.put(stateCode, profileConfigMap);
       }
@@ -93,5 +96,26 @@ public class FormApiUtil {
       }
     }
     return locationTypeList;
+  }
+
+  public static Map<String, Object> getFormApiConfig() {
+    Map<String, Object> formData = new HashMap<>();
+    Map<String, Object> formMap = new HashMap<>();
+    Map<String, Object> dataMap = new HashMap<>();
+    List<Map<String, Object>> fieldsList = new ArrayList<>();
+    Map<String, Object> field = new HashMap<>();
+    Map<String, Object> children = new HashMap<>();
+    List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
+    Map<String, Object> schoolConfig = new HashMap<>();
+    schoolConfig.put(JsonKey.CODE, JsonKey.LOCATION_TYPE_SCHOOL);
+    userTypeConfigList.add(schoolConfig);
+    children.put("teacher", userTypeConfigList);
+    field.put(JsonKey.CODE, JsonKey.PERSONA);
+    field.put(JsonKey.CHILDREN, children);
+    fieldsList.add(field);
+    dataMap.put(JsonKey.FIELDS, fieldsList);
+    formMap.put(JsonKey.DATA, dataMap);
+    formData.put(JsonKey.FORM, formMap);
+    return formData;
   }
 }
