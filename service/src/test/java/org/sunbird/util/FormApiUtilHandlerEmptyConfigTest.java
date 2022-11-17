@@ -38,7 +38,7 @@ public class FormApiUtilHandlerEmptyConfigTest {
         .thenReturn("");
     Map<String, Object> dataConfigMap =
         FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertNotNull(dataConfigMap);
+    Assert.assertNull(dataConfigMap);
   }
 
   @Test
@@ -48,7 +48,7 @@ public class FormApiUtilHandlerEmptyConfigTest {
         .thenReturn(getFormApiEmptyResponse());
     Map<String, Object> dataConfigMap =
         FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertNotNull(dataConfigMap);
+    Assert.assertNull(dataConfigMap);
   }
 
   public String getFormApiEmptyResponse() {
