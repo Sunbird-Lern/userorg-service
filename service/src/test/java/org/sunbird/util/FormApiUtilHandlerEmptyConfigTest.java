@@ -13,6 +13,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.http.HttpClientUtil;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 
 @RunWith(PowerMockRunner.class)
@@ -36,9 +37,11 @@ public class FormApiUtilHandlerEmptyConfigTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn("");
-    Map<String, Object> dataConfigMap =
-        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertNull(dataConfigMap);
+    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
+      Map<String, Object> dataConfigMap =
+              FormApiUtil.getProfileConfig("locationCode", new RequestContext());
+      Assert.assertNull(dataConfigMap);
+    }
   }
 
   @Test
@@ -46,9 +49,11 @@ public class FormApiUtilHandlerEmptyConfigTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiEmptyResponse());
-    Map<String, Object> dataConfigMap =
-        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertNull(dataConfigMap);
+    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
+      Map<String, Object> dataConfigMap =
+              FormApiUtil.getProfileConfig("locationCode", new RequestContext());
+      Assert.assertNull(dataConfigMap);
+    }
   }
 
   public String getFormApiEmptyResponse() {

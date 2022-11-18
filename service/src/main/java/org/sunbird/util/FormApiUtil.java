@@ -107,7 +107,7 @@ public class FormApiUtil {
     Map<String, Object> children = new HashMap<>();
     List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
     Map<String, Object> schoolConfig = new HashMap<>();
-    schoolConfig.put(JsonKey.CODE, JsonKey.LOCATION_TYPE_SCHOOL);
+    schoolConfig.put(JsonKey.CODE, "state");
     userTypeConfigList.add(schoolConfig);
     children.put("teacher", userTypeConfigList);
     field.put(JsonKey.CODE, JsonKey.PERSONA);
