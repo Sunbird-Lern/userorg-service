@@ -267,7 +267,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     Map<String, Object> usertypes = new HashMap<>();
     usertypes.put("type", "teacher");
-    usertypes.put("subType", "crc");
+    usertypes.put("subType", null);
     List<Map<String, Object>> userTypeList = new ArrayList<>();
     userTypeList.add(usertypes);
     user.put(JsonKey.PROFILE_USERTYPES, userTypeList);
@@ -445,7 +445,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     Map<String, Object> req = getExternalIdMap();
     getUpdateRequestWithDefaultFlags(req);
     req.put(JsonKey.USER_TYPE, "teacher");
-    req.put(JsonKey.USER_SUB_TYPE, "crc");
+    req.put(JsonKey.USER_SUB_TYPE, null);
     List<String> locCodes = new ArrayList<>();
     locCodes.add("locationCode");
     req.put(JsonKey.LOCATION_CODES, locCodes);
