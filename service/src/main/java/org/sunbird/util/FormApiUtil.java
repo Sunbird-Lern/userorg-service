@@ -8,6 +8,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FormApiUtil {
   public static Map<String, Object> getProfileConfig(String stateCode, RequestContext context) {
@@ -18,8 +20,17 @@ public class FormApiUtil {
       Map<String, Object> profileConfigMap;
       if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
         profileConfigMap = FormApiUtilHandler.getFormApiConfig(stateCode, context);
-      }else{
-        profileConfigMap = getFormApiConfig();
+      }else {
+          Map<String, Object> formData;
+        try {
+          formData = new ObjectMapper()
+                  .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
+        } catch (JsonProcessingException e) {
+          throw new RuntimeException(e);
+        }
+        Map<String, Object> dataMap = new HashMap<>();
+          dataMap.put(JsonKey.FORM,formData);
+          profileConfigMap = dataMap;
       }
       if (MapUtils.isNotEmpty(profileConfigMap)) {
         stateProfileConfigMap.put(stateCode, profileConfigMap);
@@ -96,31 +107,5 @@ public class FormApiUtil {
       }
     }
     return locationTypeList;
-  }
-
-  public static Map<String, Object> getFormApiConfig() {
-    Map<String, Object> formData = new HashMap<>();
-    Map<String, Object> formMap = new HashMap<>();
-    Map<String, Object> dataMap = new HashMap<>();
-    List<Map<String, Object>> fieldsList = new ArrayList<>();
-    Map<String, Object> field = new HashMap<>();
-    Map<String, Object> children = new HashMap<>();
-    List<Map<String, Object>> userTypeConfigList = new ArrayList<>();
-    Map<String, Object> schoolConfig = new HashMap<>();
-    schoolConfig.put(JsonKey.CODE, "state");
-    userTypeConfigList.add(schoolConfig);
-    children.put("teacher", userTypeConfigList);
-    field.put(JsonKey.CODE, JsonKey.PERSONA);
-    field.put(JsonKey.CHILDREN, children);
-    fieldsList.add(field);
-    dataMap.put(JsonKey.FIELDS, fieldsList);
-    formMap.put(JsonKey.DATA, dataMap);
-    formMap.put("type","profileconfig");
-    formMap.put("subtype", "28");
-    formMap.put("action","get");
-    formMap.put("component", "*");
-    formMap.put( "framework", "*");
-    formData.put(JsonKey.FORM, formMap);
-    return formData;
   }
 }
