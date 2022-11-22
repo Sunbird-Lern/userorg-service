@@ -291,7 +291,7 @@ public class UserUpdateActorTest extends UserManagementActorTestBase {
     user.put(JsonKey.USERNAME, "username");
     user.put(JsonKey.ROOT_ORG_ID, "rootOrgId");
     user.put(JsonKey.USER_TYPE, "teacher");
-    user.put(JsonKey.USER_SUB_TYPE, null);
+    user.put(JsonKey.USER_SUB_TYPE, "crc");
     user.put(JsonKey.PROFILE_LOCATION, Arrays.asList("anyLocationCodes"));
     when(UserUtil.isEmailOrPhoneDiff(Mockito.anyMap(), Mockito.anyMap(), Mockito.anyString()))
         .thenReturn(true);
