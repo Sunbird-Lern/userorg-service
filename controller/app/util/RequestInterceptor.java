@@ -127,14 +127,7 @@ public class RequestInterceptor {
    */
   public static Map verifyRequestData(Http.Request request, Map<String, Object> requestContext) {
     Map userAuthentication = new HashMap<String, String>();
-    String clientId = null;
-    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
-      userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
-      clientId = JsonKey.UNAUTHORIZED;
-    }else{
-      userAuthentication.put(JsonKey.USER_ID, JsonKey.ANONYMOUS);
-      clientId = JsonKey.ANONYMOUS;
-    }
+    String clientId =  JsonKey.UNAUTHORIZED;
     userAuthentication.put(JsonKey.MANAGED_FOR, null);
     String managedForId = null;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());

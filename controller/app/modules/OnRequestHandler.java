@@ -2,6 +2,8 @@ package modules;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.typesafe.config.ConfigFactory;
+
 import controllers.BaseController;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -57,7 +59,13 @@ public class OnRequestHandler implements ActionCreator {
         Map<String, Object> requestContext = getRequestContext(request);
         request = updateRequestId(request, requestContext, requestId);
         // From 3.0.0 checking user access-token and managed-by from the request header
-        Map userAuthentication = RequestInterceptor.verifyRequestData(request, requestContext);
+        Map userAuthentication = new HashMap<String, String>();
+        if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
+        userAuthentication = RequestInterceptor.verifyRequestData(request, requestContext);
+        }else{
+          userAuthentication.put(JsonKey.USER_ID, JsonKey.ANONYMOUS);
+          userAuthentication.put(JsonKey.MANAGED_FOR, null);
+        }
         String message = (String) userAuthentication.get(JsonKey.USER_ID);
         updateActorIdAndType(requestContext, request, message);
         try {
