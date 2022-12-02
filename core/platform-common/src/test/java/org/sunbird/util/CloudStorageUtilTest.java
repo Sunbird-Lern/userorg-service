@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -17,8 +16,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cloud.storage.BaseStorageService;
 import org.sunbird.cloud.storage.factory.StorageServiceFactory;
-import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.util.CloudStorageUtil.CloudStorageType;
 import scala.Option;
 
 @RunWith(PowerMockRunner.class)
@@ -70,28 +67,17 @@ public class CloudStorageUtilTest {
   }
 
   @Test
-  public void testGetStorageTypeSuccess() {
-    CloudStorageType storageType = CloudStorageType.getByName("azure");
-    assertTrue(CloudStorageType.AZURE.equals(storageType));
-  }
-
-  @Test(expected = ProjectCommonException.class)
-  public void testGetStorageTypeFailureWithWrongType() {
-    CloudStorageType.getByName("wrongstorage");
-  }
-
-  @Test
   // @Ignore
   public void testUploadSuccess() {
     String result =
-        CloudStorageUtil.upload(CloudStorageType.AZURE, "container", "key", "/file/path");
+        CloudStorageUtil.upload("azure", "container", "key", "/file/path");
     assertTrue(UPLOAD_URL.equals(result));
   }
 
   @Test
   @Ignore
   public void testGetSignedUrlSuccess() {
-    String signedUrl = CloudStorageUtil.getSignedUrl(CloudStorageType.AZURE, "container", "key");
+    String signedUrl = CloudStorageUtil.getSignedUrl("azure", "container", "key");
     assertTrue(SIGNED_URL.equals(signedUrl));
   }
 }
