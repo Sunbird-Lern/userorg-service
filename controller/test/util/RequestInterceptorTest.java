@@ -109,6 +109,7 @@ public class RequestInterceptorTest {
     when(tokenValidator.verifyManagedUserToken(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("authorized-user");
+    //checking auth enabled condition
     if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
       assertEquals(
               RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
