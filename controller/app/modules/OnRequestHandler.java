@@ -60,6 +60,7 @@ public class OnRequestHandler implements ActionCreator {
         request = updateRequestId(request, requestContext, requestId);
         // From 3.0.0 checking user access-token and managed-by from the request header
         Map userAuthentication = new HashMap<String, String>();
+        //making user authentication optional based on the flag
         if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
         userAuthentication = RequestInterceptor.verifyRequestData(request, requestContext);
         }else{
