@@ -1,8 +1,6 @@
 package util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.typesafe.config.ConfigFactory;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -127,8 +125,10 @@ public class RequestInterceptor {
    */
   public static Map verifyRequestData(Http.Request request, Map<String, Object> requestContext) {
     Map userAuthentication = new HashMap<String, String>();
-    String clientId =  JsonKey.UNAUTHORIZED;
+    userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
     userAuthentication.put(JsonKey.MANAGED_FOR, null);
+
+    String clientId;
     String managedForId = null;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
