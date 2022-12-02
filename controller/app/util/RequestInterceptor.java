@@ -128,7 +128,7 @@ public class RequestInterceptor {
     userAuthentication.put(JsonKey.USER_ID, JsonKey.UNAUTHORIZED);
     userAuthentication.put(JsonKey.MANAGED_FOR, null);
 
-    String clientId;
+    String clientId = JsonKey.UNAUTHORIZED;
     String managedForId = null;
     Optional<String> accessToken = request.header(HeaderParam.X_Authenticated_User_Token.getName());
     if (!isRequestInExcludeList(request.path()) && !isRequestPrivate(request.path())) {
