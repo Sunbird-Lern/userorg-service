@@ -11,6 +11,7 @@ import java.util.List;
 public final class JsonKey {
   public static final String ANONYMOUS = "Anonymous";
   public static final String UNAUTHORIZED = "Unauthorized";
+  public static final String AUTH_ENABLED = "AuthenticationEnabled";
   public static final String ACCOUNT_KEY = "sunbird_account_key";
   public static final String IS_FORM_VALIDATION_REQUIRED = "isFormValidationRequired";
   public static final String USER_PROFILE_CONFIG_MAP = "userProfileConfigMap";
@@ -637,8 +638,6 @@ public final class JsonKey {
   public static final String DISABLE_MULTIPLE_ORG_ROLE = "sunbird_disable_multiple_org_role";
   public static final String PASSWORD_RESET_LOGIN_PAGE_URL =
       "sunbird_password_reset_login_page_url";
-
   public static final String CLOUD_SERVICE_PROVIDER = "sunbird_cloud_service_provider";
-
   private JsonKey() {}
 }
