@@ -3,7 +3,6 @@ package org.sunbird.util;
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,9 +18,6 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.formutil.FormApiUtilRequestPayload;
 import org.sunbird.model.formutil.FormUtilRequest;
 import org.sunbird.request.RequestContext;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, FormApiUtilHandlerTest.class})
@@ -53,25 +49,13 @@ public class FormApiUtilHandlerTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiResponse());
-    Map<String, Object> dataConfigMap =
-        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertEquals(
-        "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
-  }
-
-  @Test
-  public void testGetFormApiConfigFromFile() throws JsonProcessingException {
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
-            .thenReturn(getFormApiResponse());
-    if (!Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
-      Map<String, Object> dataConfigMap = new ObjectMapper()
-                .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
+    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
+      Map<String, Object> dataConfigMap =
+              FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertEquals(
-              "profileconfig", (dataConfigMap.get(JsonKey.TYPE)));
-      }
-
+              "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
+    }
   }
-
   public String getFormApiResponse() {
     String formData =
         "{ \"id\": \"api.form.read\", \"params\": { \"resmsgid\": \"5ebb6cb5-07a0-4407-8013-b45043270d7a\", \"msgid\": \"3af660bf-fc92-4c93-acd1-36ad81cb8f35\", \"status\": \"successful\" }, \"responseCode\": \"OK\", \"result\":"
