@@ -19,9 +19,6 @@ import org.sunbird.model.formutil.FormApiUtilRequestPayload;
 import org.sunbird.model.formutil.FormUtilRequest;
 import org.sunbird.request.RequestContext;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, FormApiUtilHandlerTest.class})
 @PowerMockIgnore({
@@ -52,20 +49,15 @@ public class FormApiUtilHandlerTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiResponse());
-    Map<String, Object> dataConfigMap;
-    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
-      dataConfigMap =
-              FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-      Assert.assertEquals(
-              "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
-    }else{
-      try {
-        dataConfigMap = new ObjectMapper()
-                .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
-      } catch (JsonProcessingException e) {
-        throw new RuntimeException(e);
-      }
-      Assert.assertNotNull(dataConfigMap);
+      Map<String, Object> dataConfigMap;
+      if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
+          dataConfigMap =
+                  FormApiUtil.getProfileConfig("locationCode", new RequestContext());
+          Assert.assertEquals(
+                  "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
+      } else {
+        dataConfigMap = FormApiUtil.getFormConfigFromFile();
+        Assert.assertNotNull(dataConfigMap);
     }
   }
   public String getFormApiResponse() {
