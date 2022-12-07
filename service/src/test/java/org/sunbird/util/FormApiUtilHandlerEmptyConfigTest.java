@@ -1,6 +1,7 @@
 package org.sunbird.util;
 
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.sunbird.util.FormApiUtil.getFormConfigFromFile;
 
 import java.util.Map;
 import org.junit.Assert;
@@ -41,6 +42,9 @@ public class FormApiUtilHandlerEmptyConfigTest {
       Map<String, Object> dataConfigMap =
               FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertNull(dataConfigMap);
+    }else{
+      Map<String, Object> formData = getFormConfigFromFile();
+      Assert.assertNotNull(formData);
     }
   }
 
@@ -53,6 +57,9 @@ public class FormApiUtilHandlerEmptyConfigTest {
       Map<String, Object> dataConfigMap =
               FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertNull(dataConfigMap);
+    }else{
+      Map<String, Object> formData = getFormConfigFromFile();
+      Assert.assertNotNull(formData);
     }
   }
 
