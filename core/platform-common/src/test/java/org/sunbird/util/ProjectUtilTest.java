@@ -17,6 +17,9 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.sso.impl.BaseHttpTest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /** Created by arvind on 6/10/17. */
 public class ProjectUtilTest extends BaseHttpTest {
 
@@ -368,4 +371,17 @@ public class ProjectUtilTest extends BaseHttpTest {
     boolean isValid = ProjectUtil.validateUUID("1df03f56-ceba-4f2d-892c-2b1609e7b05f");
     assertTrue(isValid);
   }
+
+  @Test
+  public void testGetFormConfigFromFile() {
+    Map<String, Object> formData;
+    try {
+      formData = new ObjectMapper()
+              .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException();
+    }
+    assertNotNull(formData);
+  }
+
 }
