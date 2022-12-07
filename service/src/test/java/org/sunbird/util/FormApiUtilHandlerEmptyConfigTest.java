@@ -16,6 +16,9 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, FormApiUtilHandlerEmptyConfigTest.class})
 @PowerMockIgnore({
@@ -42,6 +45,16 @@ public class FormApiUtilHandlerEmptyConfigTest {
               FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertNull(dataConfigMap);
     }
+    else{
+      Map<String, Object>  formData;
+      try {
+        formData = new ObjectMapper()
+                .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+      Assert.assertNotNull(formData);
+    }
   }
 
   @Test
@@ -53,6 +66,16 @@ public class FormApiUtilHandlerEmptyConfigTest {
       Map<String, Object> dataConfigMap =
               FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertNull(dataConfigMap);
+    }
+    else{
+      Map<String, Object>  formData;
+      try {
+        formData = new ObjectMapper()
+                .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+      Assert.assertNotNull(formData);
     }
   }
 
