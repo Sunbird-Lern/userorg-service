@@ -57,8 +57,16 @@ public class FormApiUtilHandlerTest {
           Assert.assertEquals(
                   "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
   }
+
   @Test
-  public void testGetFormApiConfigA() {
+  public void testGetFormConfigFromFile() {
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
+            .thenReturn("");
+    Map<String, Object> formData = FormApiUtil.getFormConfigFromFile();
+    assertNotNull(formData);
+  }
+  @Test
+  public void testGetProfileConfig() {
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
             .thenReturn("");
     Map<String, Object> dataConfigMap =  FormApiUtil.getFormConfigFromFile();
@@ -66,13 +74,6 @@ public class FormApiUtilHandlerTest {
     dataMap.put(JsonKey.FORM, dataConfigMap);
     Assert.assertEquals(
             "profileconfig", ((Map<String, Object>) dataMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
-  }
-  @Test
-  public void testGetFormConfigFromFile() {
-    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
-            .thenReturn("");
-    Map<String, Object> formData = FormApiUtil.getFormConfigFromFile();
-    assertNotNull(formData);
   }
   public String getFormApiResponse() {
     String formData =
