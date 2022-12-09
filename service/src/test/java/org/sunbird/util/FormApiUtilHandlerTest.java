@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,8 +20,6 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.formutil.FormApiUtilRequestPayload;
 import org.sunbird.model.formutil.FormUtilRequest;
 import org.sunbird.request.RequestContext;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, FormApiUtilHandlerTest.class})
@@ -58,10 +57,17 @@ public class FormApiUtilHandlerTest {
                   FormApiUtil.getProfileConfig("locationCode", new RequestContext());
           Assert.assertEquals(
                   "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
-      } else {
-        dataConfigMap = FormApiUtil.getFormConfigFromFile();
-        Assert.assertNotNull(dataConfigMap);
-    }
+      }
+  }
+  @Test
+  public void testGetFormApiConfigA() {
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
+            .thenReturn(getFormApiResponse());
+    Map<String, Object> dataConfigMap =  FormApiUtil.getFormConfigFromFile();
+    Map<String, Object> dataMap = new HashMap<>();
+    dataMap.put(JsonKey.FORM, dataConfigMap);
+    Assert.assertEquals(
+            "profileconfig", ((Map<String, Object>) dataMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
   }
   @Test
   public void testGetFormConfigFromFile() {
