@@ -69,6 +69,8 @@ public class FormApiUtilHandlerTest {
   }
   @Test
   public void testGetFormConfigFromFile() {
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
+            .thenReturn("");
     Map<String, Object> formData = FormApiUtil.getFormConfigFromFile();
     assertNotNull(formData);
   }
