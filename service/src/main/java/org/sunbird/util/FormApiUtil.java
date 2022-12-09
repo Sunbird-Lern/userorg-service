@@ -20,12 +20,11 @@ public class FormApiUtil {
             Map<String, Object> profileConfigMap;
             if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
                 profileConfigMap = FormApiUtilHandler.getFormApiConfig(stateCode, context);
-            } else {
+            }
                 Map<String, Object> formData = getFormConfigFromFile();
                 Map<String, Object> dataMap = new HashMap<>();
                 dataMap.put(JsonKey.FORM, formData);
                 profileConfigMap = dataMap;
-            }
             if (MapUtils.isNotEmpty(profileConfigMap)) {
                 stateProfileConfigMap.put(stateCode, profileConfigMap);
             }
