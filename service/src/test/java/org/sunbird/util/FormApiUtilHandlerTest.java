@@ -1,6 +1,7 @@
 package org.sunbird.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Map;
@@ -18,6 +19,8 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.formutil.FormApiUtilRequestPayload;
 import org.sunbird.model.formutil.FormUtilRequest;
 import org.sunbird.request.RequestContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({HttpClientUtil.class, FormApiUtilHandlerTest.class})
@@ -59,6 +62,11 @@ public class FormApiUtilHandlerTest {
         dataConfigMap = FormApiUtil.getFormConfigFromFile();
         Assert.assertNotNull(dataConfigMap);
     }
+  }
+  @Test
+  public void testGetFormConfigFromFile() {
+    Map<String, Object> formData = FormApiUtil.getFormConfigFromFile();
+    assertNotNull(formData);
   }
   public String getFormApiResponse() {
     String formData =
