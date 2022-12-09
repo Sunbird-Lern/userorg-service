@@ -7,11 +7,14 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FormApiUtil {
+
+    private static final LoggerUtil logger = new LoggerUtil(FormApiUtil.class);
     public static Map<String, Object> getProfileConfig(String stateCode, RequestContext context) {
         Map<String, Map<String, Object>> stateProfileConfigMap =
                 DataCacheHandler.getFormApiDataConfigMap();
@@ -20,11 +23,12 @@ public class FormApiUtil {
             Map<String, Object> profileConfigMap;
             if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
                 profileConfigMap = FormApiUtilHandler.getFormApiConfig(stateCode, context);
-            }
+            } else {
                 Map<String, Object> formData = getFormConfigFromFile();
                 Map<String, Object> dataMap = new HashMap<>();
                 dataMap.put(JsonKey.FORM, formData);
                 profileConfigMap = dataMap;
+            }
             if (MapUtils.isNotEmpty(profileConfigMap)) {
                 stateProfileConfigMap.put(stateCode, profileConfigMap);
             }
@@ -33,12 +37,13 @@ public class FormApiUtil {
     }
 
     public static Map<String, Object> getFormConfigFromFile() {
-        Map<String, Object> formData;
+        Map<String, Object> formData = new HashMap<>();
         try {
             formData = new ObjectMapper()
                     .readValue(ProjectUtil.getConfigValue(JsonKey.USER_PROFILE_CONFIG_MAP), Map.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            logger.error("Exception occurred while getting form-config from properties:"
+                    + " " + e.getMessage(),e);
         }
         return formData;
     }
