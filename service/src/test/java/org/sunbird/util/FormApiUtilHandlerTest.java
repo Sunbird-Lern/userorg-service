@@ -52,17 +52,15 @@ public class FormApiUtilHandlerTest {
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiResponse());
       Map<String, Object> dataConfigMap;
-      if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
           dataConfigMap =
                   FormApiUtil.getProfileConfig("locationCode", new RequestContext());
           Assert.assertEquals(
                   "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
-      }
   }
   @Test
   public void testGetFormApiConfigA() {
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
-            .thenReturn(getFormApiResponse());
+            .thenReturn("");
     Map<String, Object> dataConfigMap =  FormApiUtil.getFormConfigFromFile();
     Map<String, Object> dataMap = new HashMap<>();
     dataMap.put(JsonKey.FORM, dataConfigMap);

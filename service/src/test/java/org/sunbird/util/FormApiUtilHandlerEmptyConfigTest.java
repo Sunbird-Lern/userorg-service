@@ -38,14 +38,9 @@ public class FormApiUtilHandlerEmptyConfigTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn("");
-    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
       Map<String, Object> dataConfigMap =
               FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertNull(dataConfigMap);
-    }else{
-      Map<String, Object> formData = getFormConfigFromFile();
-      Assert.assertNotNull(formData);
-    }
   }
 
   @Test
@@ -53,14 +48,9 @@ public class FormApiUtilHandlerEmptyConfigTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiEmptyResponse());
-    if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
       Map<String, Object> dataConfigMap =
               FormApiUtil.getProfileConfig("locationCode", new RequestContext());
       Assert.assertNull(dataConfigMap);
-    }else{
-      Map<String, Object> formData = getFormConfigFromFile();
-      Assert.assertNotNull(formData);
-    }
   }
 
   public String getFormApiEmptyResponse() {
