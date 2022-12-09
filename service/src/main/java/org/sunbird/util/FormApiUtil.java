@@ -21,19 +21,25 @@ public class FormApiUtil {
         if (MapUtils.isEmpty(stateProfileConfigMap)
                 || MapUtils.isEmpty(stateProfileConfigMap.get(stateCode))) {
             Map<String, Object> profileConfigMap;
-            if (Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED))) {
-                profileConfigMap = FormApiUtilHandler.getFormApiConfig(stateCode, context);
-            } else {
-                Map<String, Object> formData = getFormConfigFromFile();
-                Map<String, Object> dataMap = new HashMap<>();
-                dataMap.put(JsonKey.FORM, formData);
-                profileConfigMap = dataMap;
-            }
-            if (MapUtils.isNotEmpty(profileConfigMap)) {
+        Boolean flag = Boolean.parseBoolean(ProjectUtil.getConfigValue(JsonKey.IS_FORM_VALIDATION_REQUIRED));
+        profileConfigMap = getStringObjectMap(flag,stateCode, context);
+        if (MapUtils.isNotEmpty(profileConfigMap)) {
                 stateProfileConfigMap.put(stateCode, profileConfigMap);
             }
         }
         return stateProfileConfigMap.get(stateCode);
+    }
+    public static Map<String, Object> getStringObjectMap(Boolean flag,String stateCode, RequestContext context) {
+        Map<String, Object> profileConfigMap;
+        if (flag) {
+            profileConfigMap = FormApiUtilHandler.getFormApiConfig(stateCode, context);
+        } else {
+            Map<String, Object> formData = getFormConfigFromFile();
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put(JsonKey.FORM, formData);
+            profileConfigMap = dataMap;
+        }
+        return profileConfigMap;
     }
 
     public static Map<String, Object> getFormConfigFromFile() {
