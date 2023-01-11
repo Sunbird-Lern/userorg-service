@@ -1,8 +1,11 @@
 package org.sunbird.util;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,12 +52,28 @@ public class FormApiUtilHandlerTest {
 
     when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
         .thenReturn(getFormApiResponse());
-    Map<String, Object> dataConfigMap =
-        FormApiUtil.getProfileConfig("locationCode", new RequestContext());
-    Assert.assertEquals(
-        "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
+      Map<String, Object> dataConfigMap;
+          dataConfigMap =
+                  FormApiUtil.getProfileConfig("locationCode", new RequestContext());
+          Assert.assertEquals(
+                  "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
   }
 
+  @Test
+  public void testGetFormConfigFromFile() {
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
+            .thenReturn("");
+    Map<String, Object> formData = FormApiUtil.getFormConfigFromFile();
+    assertNotNull(formData);
+  }
+  @Test
+  public void testGetProfileConfig() {
+    when(HttpClientUtil.post(Mockito.anyString(), Mockito.anyString(), Mockito.anyObject(), Mockito.any(RequestContext.class)))
+            .thenReturn("");
+    Map<String, Object> dataConfigMap =  FormApiUtil.getStringObjectMap(false,"locationCode", new RequestContext());
+    Assert.assertEquals(
+            "profileconfig", ((Map<String, Object>) dataConfigMap.get(JsonKey.FORM)).get(JsonKey.TYPE));
+  }
   public String getFormApiResponse() {
     String formData =
         "{ \"id\": \"api.form.read\", \"params\": { \"resmsgid\": \"5ebb6cb5-07a0-4407-8013-b45043270d7a\", \"msgid\": \"3af660bf-fc92-4c93-acd1-36ad81cb8f35\", \"status\": \"successful\" }, \"responseCode\": \"OK\", \"result\":"

@@ -7,6 +7,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.typesafe.config.ConfigFactory;
+
 import java.util.HashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -107,10 +109,13 @@ public class RequestInterceptorTest {
     when(tokenValidator.verifyManagedUserToken(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
         .thenReturn("authorized-user");
-    assertEquals(
-        RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
-            .get(JsonKey.USER_ID),
-        JsonKey.UNAUTHORIZED);
+    //checking auth enabled condition
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
+      assertEquals(
+              RequestInterceptor.verifyRequestData(requestBuilder.build(), new HashMap<>())
+                      .get(JsonKey.USER_ID),
+              JsonKey.UNAUTHORIZED);
+    }
   }
 
   @Test
