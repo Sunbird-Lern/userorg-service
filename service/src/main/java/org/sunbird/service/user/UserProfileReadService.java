@@ -6,6 +6,8 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.typesafe.config.ConfigFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -100,8 +102,10 @@ public class UserProfileReadService {
             + managedForId
             + " managedBy "
             + managedBy);
-    if (!isPrivate && StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
-      ProjectCommonException.throwUnauthorizedErrorException();
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)) {
+      if (!isPrivate && StringUtils.isNotEmpty(managedBy) && !managedBy.equals(requestedById)) {
+        ProjectCommonException.throwUnauthorizedErrorException();
+      }
     }
     getManagedToken(actorMessage, userId, result, managedBy);
     String requestFields = (String) actorMessage.getContext().get(JsonKey.FIELDS);

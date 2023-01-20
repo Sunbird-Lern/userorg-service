@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
@@ -83,8 +85,10 @@ public class NotesManagementActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
     String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-    if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
-      ProjectCommonException.throwUnauthorizedErrorException();
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)) {
+      if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
+        ProjectCommonException.throwUnauthorizedErrorException();
+      }
     }
     Map<String, Object> list = notesService.getNoteById(noteId, context);
     if (list.isEmpty()) {
@@ -108,11 +112,13 @@ public class NotesManagementActor extends BaseActor {
     logger.debug(context, "Get Note method call start");
     String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
     String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-    if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue,
-          ResponseCode.invalidParameterValue.getErrorMessage(),
-          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)) {
+      if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
+        throw new ProjectCommonException(
+                ResponseCode.invalidParameterValue,
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+      }
     }
     Map<String, Object> request = new HashMap<>();
     Map<String, Object> filters = new HashMap<>();
@@ -148,8 +154,10 @@ public class NotesManagementActor extends BaseActor {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     String noteId = (String) actorMessage.getContext().get(JsonKey.NOTE_ID);
     String userId = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
-    if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
-      ProjectCommonException.throwUnauthorizedErrorException();
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)) {
+      if (!notesService.validateUserForNoteUpdate(userId, noteId, context)) {
+        ProjectCommonException.throwUnauthorizedErrorException();
+      }
     }
     if (!notesService.noteIdExists(noteId, context)) {
       ProjectCommonException.throwClientErrorException(
