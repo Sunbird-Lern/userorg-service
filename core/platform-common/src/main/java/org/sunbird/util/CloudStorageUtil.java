@@ -45,18 +45,20 @@ public class CloudStorageUtil {
   private static IStorageService getStorageService(String storageType) {
     String storageKey = PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_NAME);
     String storageSecret = PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_KEY);
-    return getStorageService(storageType, storageKey, storageSecret);
+    scala.Option<String> storageEndpoint = scala.Option.apply(PropertiesCache.getInstance().getProperty(JsonKey.ACCOUNT_ENDPOINT));
+    scala.Option<String> storageRegion = scala.Option.apply("");
+    return getStorageService(storageType, storageKey, storageSecret,storageEndpoint,storageRegion);
   }
 
   private static IStorageService getStorageService(
-      String storageType, String storageKey, String storageSecret) {
+      String storageType, String storageKey, String storageSecret,scala.Option<String> storageEndpoint, scala.Option<String> storageRegion ) {
     String compositeKey = storageType + "-" + storageKey;
     if (storageServiceMap.containsKey(compositeKey)) {
       return storageServiceMap.get(compositeKey);
     }
     synchronized (CloudStorageUtil.class) {
       StorageConfig storageConfig =
-          new StorageConfig(storageType, storageKey, storageSecret);
+          new StorageConfig(storageType, storageKey, storageSecret,storageEndpoint,storageRegion);
       IStorageService storageService = StorageServiceFactory.getStorageService(storageConfig);
       storageServiceMap.put(compositeKey, storageService);
     }
