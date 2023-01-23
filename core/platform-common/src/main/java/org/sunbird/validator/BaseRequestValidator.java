@@ -185,8 +185,7 @@ public class BaseRequestValidator {
    * @param userIdKey Attribute name for user ID in API request
    */
   public static void validateUserId(Request request, String userIdKey) {
-    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
-      if (!(request
+      if (ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED) && !(request
               .getRequest()
               .get(userIdKey)
               .equals(request.getContext().get(JsonKey.REQUESTED_BY)))) {
@@ -197,7 +196,6 @@ public class BaseRequestValidator {
                 (String) request.getRequest().get(JsonKey.USER_ID),
                 JsonKey.USER_ID);
       }
-    }
   }
 
   public void validateSearchRequest(Request request) {
