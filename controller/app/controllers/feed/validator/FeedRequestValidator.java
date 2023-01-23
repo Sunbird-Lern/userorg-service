@@ -1,6 +1,8 @@
 package controllers.feed.validator;
 
 import java.util.Map;
+
+import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -12,9 +14,11 @@ import org.sunbird.validator.BaseRequestValidator;
 public class FeedRequestValidator extends BaseRequestValidator {
   public static boolean userIdValidation(
       String accessTokenUserId, String managedForUserId, String requestUserId) {
-    if (!StringUtils.equalsIgnoreCase(accessTokenUserId, requestUserId)
-        && !StringUtils.equalsIgnoreCase(managedForUserId, requestUserId)) {
-      ProjectCommonException.throwUnauthorizedErrorException();
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)){
+      if (!StringUtils.equalsIgnoreCase(accessTokenUserId, requestUserId)
+              && !StringUtils.equalsIgnoreCase(managedForUserId, requestUserId)) {
+        ProjectCommonException.throwUnauthorizedErrorException();
+      }
     }
     return true;
   }
