@@ -47,8 +47,6 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 public class UserServiceImplTest {
 
   private static CassandraOperation cassandraOperationImpl = null;
-  private static final UserServiceImpl userServiceImpl = new UserServiceImpl();
-
   @Before
   public void setUp() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
@@ -160,9 +158,10 @@ public class UserServiceImplTest {
 
   @Test(expected = ProjectCommonException.class)
   public void testValidateUserIdFailure() {
+    UserService userService = UserServiceImpl.getInstance();
     Request request = new Request();
     request.getContext().put(JsonKey.USER_ID, "userId");
     request.getContext().put(JsonKey.MANAGED_FOR, "managedFor");
-    userServiceImpl.validateUserId(request, "123456", new RequestContext());
+    userService.validateUserId(request, "123456", new RequestContext());
   }
 }
