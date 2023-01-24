@@ -1,0 +1,237 @@
+{
+  "info": {
+    "name": "Sunbird Metrics API(s)",
+    "_postman_id": "f3bea905-27e9-42f2-a327-fe015876efd0",
+    "description": "\nThe Metrics resources analyze sunbird's overall performance and efficiency.These resources perform operations related to \n\n  the _metrics_ on the Sunbird Platform. The metrics resource performs various operations related to content consumption, Content Snapshot aggregation, ",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/"
+  },
+  "item": [
+    {
+      "name": "Metrics APIs",
+      "item": [
+        {
+          "id": "4fe7b776-da62-45d2-ba62-ca71956519ce",
+          "name": "Metrics - Content Usage",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/consumption/content-usage",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.\nPossible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Metrics - Content Usage\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Metrics - Content Usage\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API keeps track on how content is being used on the Sunbird Platform.\n\n  -  The **_/consumption/content-usage_** endpoint executes \"Metrics - Content Usage\" request based on parameters provided as metadata in the request body.\n\n  - The Usage resource helps to demonstrate the impact in consumption and prioritize efforts.Also, the Usage metrics may show that one of the reports is used daily by a huge segment of the users and it may show that a dashboard created isn't being viewed at all.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "5d1d0aa0-5010-44d4-850d-37a3563cecc7",
+          "name": "Tag - Register",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "host": "staging.open-sunbird.org",
+              "path": [
+                "api",
+                "v1",
+                "tag/register/:Tag_Id"
+              ],
+              "variable": [
+                {
+                  "id": "Tag_Id",
+                  "value": "abc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Tag - Register\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Tag - Register\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API registers a Tag Id  on the Sunbird Platform.\n\n  -  The **_/tag/register_** endpoint executes \"Tag - Register\" request based on parameters provided as metadata in the request body.\n\n  - The register resource uses **Tag Id** for the analysis of content.E.g. whenever a new organisation or a course batch is created, the system creates a particular tag(a string by which the request can be identified uniquely)for that and send data for analytical purposes.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "253ff8b4-5708-4e05-8488-262e4eca80f3",
+          "name": "Tag - Delete",
+          "request": {
+            "url": {
+              "protocol": "https",
+              "host": "staging.open-sunbird.org",
+              "path": [
+                "api",
+                "v1",
+                "tag/delete/:Tag_Id"
+              ],
+              "variable": [
+                {
+                  "id": "Tag_Id",
+                  "value": "abc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Tag - Delete\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Tag - Delete\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API registers a Tag Id  on the Sunbird Platform.\n\n  -  The **_/tag/delete_** endpoint executes \"Tag - Register\" request based on parameters provided as metadata in the request body.\n\n  - The tag/delete/ resource uses specific **Tag Id** provided as a part of request URL for deletion of a specific tag Id.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "ecba66d1-ca8c-4937-bd4a-16ed2991c3e5",
+          "name": "Metrics - Content Snapshot Aggregate",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/v1/creation/content-snapshot",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Metrics - Content Snapshot Aggregate\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Metrics - Content Snapshot Aggregate\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! These errors are tracked automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API provides Content Snapshot in aggregate  on the Sunbird Platform.\n\n  -  The **_/creation/content-snapshot_** endpoint executes \"Metrics - Content Snapshot Aggregate\" request based on parameters provided as metadata in the request body.\n\n  - An **Aggregate Content Snapshot** is a point-in-time, read-only image. Aggregate Snapshot is created for recording entire aggregated content.The snapshot's content is the same as the master volume at the exact point in time that the snapshot was created. The snapshot remains unchanged, although the master volume keeps changing after the snapshot is created. Upon a successful completion of this command, the snapshot is created and assigned a name that can later be used by other command.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.Content Snapshot Aggregate Metrics API",
+            "type": "text/markdown"
+          }
+        }
+      ]
+    }
+  ]
+}
