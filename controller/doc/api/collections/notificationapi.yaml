@@ -1,0 +1,274 @@
+openapi: 3.0.1
+info:
+  title: Notification API(s)
+  description: The API resources provides the notification mechanism for all the
+    users on Sunbird .This API can be used to notify the sunbird system's user officially about any event or action on the Sunbird.
+  termsOfService: https://github.com/project-sunbird/sunbird-commons/blob/master/LICENSE
+  contact:
+    email: info@sunbird.org
+  version: "1.0"
+
+externalDocs:
+   description: "Testcases"
+   url: "https://www.getpostman.com/collections/0d115856f5fb996ad38c"
+servers:
+- url: https://staging.open-sunbird.org/api
+paths:
+  '/user/v1/notification/email ':
+    post:
+      tags:
+      - Notification APIs
+      summary: ' Notifiying Users'
+      description: >-
+        This API is associated with notifying a user on the Sunbird Platform. If the
+         request will contain the mode attribute with value as sms, then the user will be notified
+         via sms else the user will be notified with email. During sms notification you can pass list of phone number or list of phone number and userid both. 
+    
+        - The **_/email/_** endpoint executes the notification request based on parameters
+          provided as metadata in the request body.
+        - It is mandatory to provide values for parameters marked with * . 
+        
+        - Mandatory fields cannot be null or empty.
+      operationId: '{{host}}/user/v1/notification/email '
+      parameters:
+      - name: Authorization
+        in: header
+        description: To make use of the API, you require authorization. Raise a request
+          to the administrator for the use of the API. You will receive the authorization
+          key. Specify the key received, here.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: |-
+          The body refers to the format of the request.
+            - The body contains metadata about the notification to be sent.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/notificationapiemailRequest'
+        required: true
+      responses:
+        200:
+          description: OK ! Successful operation."Notifying User" operation was successfully
+            executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/notificationapiContentCreateResponse'
+              example:
+                id: api.notification.email
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: null
+                  status: success
+                  errmsg: null.
+                responseCode: OK
+                result: 
+                 response: "SUCCESS"
+        400:
+          description: BAD REQUEST. The "Notifying User" operation failed ! The possible
+            reason for failure is that you may have missed providing input for a mandatory
+            parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/notificationapiContentCreateErrorResponse'
+              example:
+                id: api.otp.generate
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: INVALID_PARAMETER_VALUE
+                  status: INVALID_PARAMETER_VALUE
+                  errmsg: Invalid value 5ee4a77c-4600-46de-a938-dsdsdsdb for parameter recipientUserIds. Please provide a valid value.
+                responseCode: SERVER_ERROR
+                result: {}
+                
+        500:
+          description: "'INTERNAL SERVER ERROR. We track these errors automatically and
+            try to set it right at the earliest. Try refreshing the page. If the
+            problem persists contact us at info@sunbird.org.'"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/notificationapiContentCreateErrorResponse"
+              example:
+                id: api.notification.email
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: INTERNAL_ERROR
+                  status: INTERNAL_ERROR
+                  errmsg: Process failed,please try again later.
+                responseCode: SERVER_ERROR
+                result: {}
+components:
+  schemas:
+    notificationapiemailRequest:
+      title: Request structure for sending email notification
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/notificationapiRequest'
+      example:
+        request:
+          name: Amit
+          subject: test email
+          body: Hello Amit.
+          downloadUrl: https://www.google.com/
+          recipientEmails:
+          - amit.kumar@tarento.com
+          - amit1.kumar@tarento.com
+          mode: sms
+          recipientPhones:
+          - valid phone number without country code
+          recipientUserIds:
+          - valid userId
+          recipentSearchQuery:
+            filters:
+              channel: nameof channel
+              rootOrgId: rootOrgIds
+              organisations.roles:
+              - valid roles
+    notificationapiRequest:
+      title: Request
+      required:
+      - body
+      - downloadUrl
+      - recipientEmails
+      - recipientUserIds
+      - subject
+      type: object
+      properties:
+        name:
+          type: string
+          description: Recipient name to whom mail is sending
+        subject:
+          type: string
+          description: Subject of mail
+        body:
+          type: string
+          description: Contents of mail body
+        mode:
+          type: object
+          description: supported value is sms, apart from sms all other values will
+            be ignore.if value is sms then it will notify user via sms, and body will
+            become sms text
+        downloadUrl:
+          type: string
+          description: Download link of content
+        recipientEmails:
+          type: array
+          description: List of recipient mail ids
+          items:
+            type: string
+        recipientPhones:
+          type: array
+          description: List of valid phone numbers without country code
+          items:
+            type: string
+        recipientUserIds:
+          type: array
+          description: List of recipient user ids. With help of user ids system fetches
+            user email to send mail.
+          items:
+            type: string
+        recipientSearchQuery:
+          type: object
+          properties:
+            filters:
+              type: object
+              properties: {}
+          description: 'Filter query to find user based on some criteria, Example:
+            send all users with particular rootOrgId and having certain roles. among
+            recipientEmails,recipientUserIds,recipientSearchQuery any one is mandatory.'
+    notificationapiContentCreateResponse:
+      description: Create Content Response
+      allOf:
+      - $ref: '#/components/schemas/notificationapiResultWithNodeId'
+      - $ref: '#/components/schemas/notificationapiResponseHeader'
+    notificationapiResultWithNodeId:
+      title: Result Body
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/notificationapiSendNotificationMailResult'
+    notificationapiResponseHeader:
+      title: ResponseHeader
+      type: object
+      properties:
+        id:
+          type: string
+          description: API Identifier
+        ver:
+          type: string
+          description: API version information
+        ts:
+          type: string
+          description: API execution timespan
+        params:
+          $ref: '#/components/schemas/notificationapiResponseParams'
+        responseCode:
+          type: object
+          properties: {}
+          description: 'API response code '
+    notificationapiSendNotificationMailResult:
+      title: Send Notification Result
+      type: object
+      properties:
+        response:
+          type: string
+          description: SUCCESS in case mail send successfully otherwise user id with
+            reason of mailsending fail .
+    notificationapiResponseParams:
+      title: Response Parameter
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          description: Response Message Id
+        msgid:
+          type: string
+          description: Message Id
+        err:
+          type: string
+          description: Error Code
+        status:
+          type: string
+          description: Response Status
+        errmsg:
+          type: string
+          description: Error Message
+    notificationapiContentCreateErrorResponse:
+      title: Create Content Error Response
+      allOf:
+      - $ref: '#/components/schemas/notificationapiEmptyResult'
+      - $ref: '#/components/schemas/notificationapiResponseHeader'
+    notificationapiEmptyResult:
+      title: Empty Result
+      type: object
+      properties:
+        result:
+          type: object
+          properties: {}
+          description: Empty Result
+  securitySchemes:
+    bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+    userToken:
+      type: apiKey
+      name: x-authenticated-user-token
+      in: header
+
