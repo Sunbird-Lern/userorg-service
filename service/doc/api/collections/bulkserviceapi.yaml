@@ -1,0 +1,1535 @@
+openapi: 3.0.1
+info:
+  title: Bulk Upload Service API(s).
+  description: >-
+    - The  Bulk Upload API resources perform operations related to uploads on the Sunbird Platform. The Bulk Upload API(s) operations include uploads and updates .
+
+    - The URL for Bulk Upload Service API(s) is `/api`
+  termsOfService: https://github.com/project-sunbird/sunbird-commons/blob/master/LICENSE
+  contact:
+    email: info@sunbird.org
+  version: '1.0'
+externalDocs:
+ description: "Testcases"
+ url: "https://www.getpostman.com/collections/4daecddad18254fb6819"  
+servers:
+- url: https://staging.open-sunbird.org/api
+paths:
+  /user/v1/upload:
+    post:
+      tags:
+      - upload users
+      summary: Upload Users in Bulk
+      description: >-
+        This API is associated with upload users in bulk on the Sunbird Platform.
+           - The endpoint for **Upload Users in Bulk** is `/user/v1/upload`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: UploadUsersinBulk
+      parameters:
+      - name: Authorization
+        in: header
+        description: '(Required) Specify authorization key (format: Bearer api-key) received from administrator when performing given API request.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      - name: X-Authenticated-User-Token
+        in: header
+        description: (Required) Access token of registered user performing given API request.
+        required: true
+        style: simple
+        schema:
+          type: string
+      - name: Content-Type
+        in: header
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: multipart/form-data
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            encoding: {}
+            schema:
+              required:
+              - user
+              type: object
+              properties:
+                user:
+                  type: string
+                  description: >-
+                    This is a .csv file.
+                      - Each line of the file is a data record. Each record consists of one or more user fields, separated by commas. Each successfully created user is associated with root org of uploader (org admin).
+
+                    The CSV file format supported is mentioned below:
+                      - NAME: Name of user(firstName)
+                      - MOBILE PHONE: Phone number. Either phone or email is mandatory.
+                      - EMAIL: Email. Either phone or email is mandatory.
+                      - SCHOOL ID: Organisation ID to which user must be associated(orgId).
+                      - USER_TYPE: Type of user. Supported user types are 'teacher' or 'other'.
+                      - ROLES: List of valid roles for assignment to user on association to an organisation.roles must be in Capital letters
+                      - USER ID: User ID. Required only in case of user update.
+                      - External ID: External ID of user. Either, school ID or external ID is mandatory for user association to organisation.
+        required: false
+      responses:
+        200:
+          description: 'OK ! Successful operation."bulk upload user" operation was
+            successfully executed.'
+          headers:
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Tue, 01 Dec 2020 16:24:35 GMT
+            Content-Length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 251
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 36
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 121
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 76
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiSuccess-UploadUsersinBulk'
+              example:
+                id: api.user.upload
+                ver: v1
+                ts: 2020-12-01 16:24:35:250+0000
+                params:
+                  resmsgid: 
+                  msgid: bf2d6e695e927a885eaae649c45b84b4
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  processId: 01316323485186457631
+        400:
+          description: 'BAD REQUEST. The "bulk upload user" operation failed ! The
+            possible reason for failure is that you may have missed providing input
+            for a mandatory parameter.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-BadRequest'
+              example:
+                id: api.user.upload
+                ver: v1
+                ts: 2020-12-07 05:55:54:636+0000
+                params:
+                  resmsgid: 
+                  msgid: cfaddf7e346675b6aeeb9803e32d0ed8
+                  err: INVALID_COLUMNS
+                  status: INVALID_COLUMNS
+                  errmsg: 'Invalid column: firstnamee. Valid columns are: firstname, firstName, roles, roles, usertype, userType, user id, userId, school external id, orgExternalId, userid, userId, orgid, orgId, user_type, userType, school id, orgId, phone, phone, orgexternalid, orgExternalId, mobile phone, phone, name, firstName, email, email.'
+                responseCode: CLIENT_ERROR
+                result: {}
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-BadRequest'
+              example:
+                id: api.user.upload
+                ver: v1
+                ts: 2020-12-07 05:44:39:138+0000
+                params:
+                  resmsgid: 
+                  msgid: 1b4f72063d1b43ef397e9b6ded1dbd90
+                  err: UNAUTHORIZED_USER
+                  status: SERVER_ERROR
+                  errmsg: You are not authorized.
+                responseCode: CLIENT_ERROR
+                result: {}
+      deprecated: false
+      security: []
+  /user/v2/bulk/upload:
+    post:
+      tags:
+      - upload shadow users and self-declared users
+      summary: Upload Shadow Users in Bulk
+      description: "This API allows you to upload users of an organization from a shadow (temporary) database to a permanent database on the Sunbird platform. Only the org administrator has permissions to upload users. A user becomes eligible for migration from the temporary database to the permanent database, if the user identifier (email,phone) of the temporary database matches the user identifier of the permananent database. \n - The endpoint for **Upload Users in Bulk** is `/user/v2/bulk/upload`\n - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+      operationId: UploadShadowUsersinBulk
+      parameters:
+      - name: Authorization
+        in: header
+        description: '(Required) Specify authorization key (format: Bearer api-key) received from administrator when performing given API request.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      - name: X-Authenticated-User-Token
+        in: header
+        description: (Required) Access token of registered user performing given API request.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{user_token}}'
+      - name: Content-Type
+        in: header
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: multipart/form-data
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            encoding: {}
+            schema:
+              required:
+              - user
+              type: object
+              properties:
+                user:
+                  type: string
+                  description: >-
+                    - This is a .csv file.
+                      - Each line of the file is a data record. Each record consists of one or more user fields, separated by commas. Each successfully created user is associated with the root organization of the org administrator.
+                    - The CSV file format for shadow-upload supported is as follows:
+                      - NAME: Name of user(firstName+lastName)
+                      - PHONE: Phone number. Either phone or email is mandatory.
+                      - EMAIL: Email. Either phone or email is mandatory.
+                      - Ext Org id: The organisation ID to which the user must be associated(extOrgId). This is an optional field. If a value is is provided, the user is associated with that organisation, i.e. the sub-organization of the root organization. If not, the user is only associated to the root organization od the org administrator uploading the users.
+                      - Input Status: This is a mandatory attribute. It indicates if the user is active or inactive in the organization.
+                      - Ext User ID: This is a mandatory field. It is the ID provided by the root or sub-organization to users to uniquely identify them.
+                    - The CSV file format for self-declared-user-upload supported is as follows:
+                      - Diksha UUID: It is the identifier of the user.
+                      - Status: This is a mandatory attribute. It indicates if the user is Validated or has any Error showing value.
+                      - State provided ext. ID: This is a mandatory field. It is the ID provided by the root or sub-organization to users to uniquely identify them.
+                      - Channel: Channel of the user belongs to
+                      - Persona: It represents type of the user(person) like teacher/other/student etc.
+        required: false
+      responses:
+        200:
+          description: 'OK ! Successful operation. ** Bulk upload user** operation
+            was successfully executed, with processId that can be used for further
+            communication.'
+          headers:
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 04 Dec 2020 06:45:24 GMT
+            Transfer-Encoding:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: chunked
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            Vary:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Accept-Encoding
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 5000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 4999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 58
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 24
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 15
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+            Content-Encoding:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: gzip
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadShadowUsersinBulk'
+              example:
+                id: api.bulk.user.upload
+                ver: v2
+                ts: 2020-12-04 06:45:24:931+0000
+                params:
+                  resmsgid: 
+                  msgid: 5f18f128b083e50a09b137dbac323845
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  processId: 013165071979683840148
+                  response: SUCCESS
+        400:
+          description: 'BAD REQUEST. The **Bulk upload user** operation failed. You
+            may have missed input for a mandatory parameter.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-BadRequest'
+              example:
+                id: api.bulk.user.upload
+                ver: v2
+                ts: 2020-12-07 05:57:57:015+0000
+                params:
+                  resmsgid: 
+                  msgid: f75747ef04d30f7c613d83ad58d64462
+                  err: MANDATORY_PARAMETER_MISSING
+                  status: MANDATORY_PARAMETER_MISSING
+                  errmsg: Mandatory parameter ext user id is missing.
+                responseCode: CLIENT_ERROR
+                result: {}
+      deprecated: false
+      security: []
+  /data/v1/upload/status/{processId}:
+    get:
+      tags:
+      - Check upload status
+      summary: Check Upload Status
+      description: >-
+        This API is used to check the upload status
+           - The endpoint for **Check Upload Status** is `/data/v1/upload/status/{processId}`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: CheckUploadStatus
+      parameters:
+      - name: Accept
+        in: header
+        description: (Required) **Accept** relates to content-Type such as **"MIME"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: <string>
+      - name: Content-Type
+        in: header
+        description: >-
+          (Required) The Content Type entity is the media type of the resource.Possible media types can be:-
+            - Application/json
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: <string>
+      - name: Authorization
+        in: header
+        description: (Required) To make use of the API, you require bearerorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      - name: x-authenticated-user-token
+        in: header
+        description: (Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{user_token}}'
+      - name: processId
+        in: path
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        200:
+          description: 'OK ! Successful operation." check upload status" operation
+            was successfully executed'
+          headers:
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Tue, 01 Dec 2020 17:13:43 GMT
+            Transfer-Encoding:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: chunked
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            Vary:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Accept-Encoding
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 551
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 27
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 80
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+            Content-Encoding:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: gzip
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiCheckUploadStatus-Success'
+              example:
+                id: api.upload.status
+                ver: v1
+                ts: 2020-12-01 17:13:43:230+0000
+                params:
+                  resmsgid: 
+                  msgid: ff70ec24aae247f1a2b21fae2c200f6c
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response:
+                  - failureResult: []
+                    processId: 01316326144873267234
+                    successResult:
+                    - code: APDIST1
+                      parentCode: APCODE
+                      name: APDIST1
+                      type: district
+                      parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+                      id: 333a45f6-ce34-491c-b63b-2187c2df367a
+                      operation: create
+                    - code: APDIST2
+                      parentCode: APCODE
+                      name: APDIST2
+                      type: district
+                      parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+                      id: 97287c81-f439-4f69-85fe-d1cf6fca3003
+                      operation: create
+                    message: Operation is completed.
+                    objectType: location
+                    status: COMPLETED
+        404:
+          description: >-
+            - Not Found
+            - The "check upload status" operation failed ! The
+            possible reason for failure is that you may have missed providing input
+            for a mandatory parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-BadRequest'
+              example:
+                id: api.upload.status
+                ver: v1
+                ts: 2020-12-07 06:08:49:310+0000
+                params:
+                  resmsgid: 
+                  msgid: 67cd9b124a93284a1fbd5341ab84e195
+                  err: RESOURCE_NOT_FOUND
+                  status: RESOURCE_NOT_FOUND
+                  errmsg: Requested resource not found
+                responseCode: RESOURCE_NOT_FOUND
+                result: {}
+      deprecated: false
+      security: []
+  /data/v1/bulk/location/upload:
+    post:
+      tags:
+      - upload locations
+      summary: Upload Location Data in Bulk
+      description: >-
+        This API is used to create a background job for bulk upload of location data into the platform. The upload data is provided in CSV format.
+          - The endpoint for **Upload Location Data in Bulk** is `/data/v1/bulk/location/upload`
+          - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: UploadLocationDatainBulk
+      parameters:
+      - name: Authorization
+        in: header
+        description: (Required) To make use of any Location API, you require authorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      - name: x-authenticated-user-token
+        in: header
+        description: (Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{user_token}}'
+      - name: Content-Type
+        in: header
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: multipart/form-data
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            encoding: {}
+            schema:
+              required:
+              - csvFile
+              - type
+              type: object
+              properties:
+                csvFile:
+                  type: string
+                  description: "CSV file which contains location data in following format:\n  - code: 'National level code for state'\n  - name: 'Name of entity e.g a state'\n  - parentCode: 'code of the parent'\n  - parentId : 'ID of the parent (In a hierarchy),    \n\n    - if there exists a parent node either parentCode and parentID is required (in case of a child node) \n    - if it is highest (top) node in the hierarchy,then no parent details are required"
+                type:
+                  type: string
+                  description: Represents the information about the possible values of location types state, district, block, cluster
+                  example: district
+        required: false
+      responses:
+        200:
+          description: 'OK. Successful operation. The data upload operation is accepted
+            for further processing.'
+          headers:
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Tue, 01 Dec 2020 17:13:28 GMT
+            Transfer-Encoding:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: chunked
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            Vary:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Accept-Encoding
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 36
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1600
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 89
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+            Content-Encoding:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: gzip
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiSuccess-UploadLocationDatainBulk'
+              example:
+                id: api.bulk.location.upload
+                ver: v1
+                ts: 2020-12-01 17:13:28:034+0000
+                params:
+                  resmsgid: 
+                  msgid: 0eef8c3ff45390894ecd98c146248792
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  processId: 01316326144873267234
+        400:
+          description: >- 
+            - Bad Request
+            - CLIENT_ERROR. The upload operation failed due to bad request
+            from client. Possible reasons for failure, Mandatory parameter "csvFile"
+            is missing. Maximum upload file size x MB is exceeded. CSV file content
+            is improper.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-BadRequest'
+              example:
+                id: api.bulk.location.upload
+                ver: v1
+                ts: 2020-12-07 06:12:12:070+0000
+                params:
+                  resmsgid: 
+                  msgid: 4061f9877889c52d4eb0b0fe569be1ff
+                  err: MANDATORY_PARAMETER_MISSING
+                  status: MANDATORY_PARAMETER_MISSING
+                  errmsg: Mandatory parameter code is missing.
+                responseCode: CLIENT_ERROR
+                result: {}
+      deprecated: false
+      security: []
+  /org/v1/upload:
+    post:
+      tags:
+      - Bulk Organisation Upload
+      summary: Upload Organisations in Bulk
+      description: >-
+        This API is associated with bulk uploading organisations on the Sunbird Platform.
+           - The endpoint for **Upload Organisations in Bulk** is `/org/v1/upload`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: UploadOrganisationsinBulk
+      parameters:
+      - name: Authorization
+        in: header
+        description: '(Required) Specify authorization key (format: Bearer api-key) received from administrator when performing given API request.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      - name: X-Authenticated-User-Token
+        in: header
+        description: (Required) Access token of registered user performing given API request.
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{user_token}}'
+      - name: Content-Type
+        in: header
+        description: ''
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: multipart/form-data
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            encoding: {}
+            schema:
+              required:
+              - org
+              type: object
+              properties:
+                org:
+                  type: string
+                  description: >-
+                    This is a .csv file.
+                      - Each line of the file is a data record. Each record consists of one or more organisation fields, separated by commas. Each successfully created organisation is associated with root org of uploader (org admin).
+
+                    The CSV file format supported is mentioned below:
+                      - SCHOOL NAME: Organisation name(orgName)
+                      - BLOCK CODE: Location code (locationCode)
+                      - SCHOOL ID: Organisation ID. Required only in case of organisation update(organisationId).
+                      - EXTERNAL ID: External ID of organisation(externalId)
+                      - STATUS: Status. Supported values are 'active' and 'inactive'(status) mandatory param.
+                      - DESCRIPTION: Organisation description(description)
+        required: false
+      responses:
+        200:
+          description: 'OK ! Successful operation."bulk org upload " operation was
+            successfully executed.'
+          headers:
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 04 Dec 2020 06:51:24 GMT
+            Content-Length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 249
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 35
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 80
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 43
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-Suceess'
+              example:
+                id: api.org.upload
+                ver: v1
+                ts: 2020-12-04 06:51:24:413+0000
+                params:
+                  resmsgid: 
+                  msgid: 54f533acafefddb758704fb75caad1f9
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  processId: 0131650814782423040
+        400:
+          description: >- 
+           - Bad Request. The "bulk org upload " operation failed ! The
+            possible reason for failure is that you may have missed providing input
+            for a mandatory parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/bulkserviceapiUploadOrganisationsinBulk-BadRequest'
+              example:
+                id: api.org.upload
+                ver: v1
+                ts: 2020-12-07 06:14:05:979+0000
+                params:
+                  resmsgid: 
+                  msgid: 6f50eb71cd56b52a65aea643df42e80b
+                  err: MANDATORY_PARAMETER_MISSING
+                  status: MANDATORY_PARAMETER_MISSING
+                  errmsg: Mandatory parameter orgName is missing.
+                responseCode: CLIENT_ERROR
+                result: {}
+      deprecated: false
+      security: []
+components:
+  schemas:
+    bulkserviceapiSuccess-UploadUsersinBulk:
+      title: Success-UploadUsersinBulk
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/bulkserviceapiUserBulkUploadResult'
+      example:
+        id: api.user.upload
+        ver: v1
+        ts: 2020-12-01 16:24:35:250+0000
+        params:
+          resmsgid: 
+          msgid: bf2d6e695e927a885eaae649c45b84b4
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          processId: 01316323485186457631
+    bulkserviceapiParams:
+      title: Params
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+          nullable: true
+        status:
+          type: string
+        errmsg:
+          type: string
+          nullable: true
+      example:
+        resmsgid: 
+        msgid: bf2d6e695e927a885eaae649c45b84b4
+        err: 
+        status: success
+        errmsg: 
+    bulkserviceapiUserBulkUploadResult:
+      title: UserBulkUploadResult
+      required:
+      - processId
+      type: object
+      properties:
+        processId:
+          type: string
+      example:
+        processId: 01316323485186457631
+    bulkserviceapiFailureParams:
+      title: FailureParams
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+        status:
+          type: string
+        errmsg:
+          type: string
+      example:
+        resmsgid: 
+        msgid: 1b4f72063d1b43ef397e9b6ded1dbd90
+        err: UNAUTHORIZED_USER
+        status: SERVER_ERROR
+        errmsg: You are not authorized.
+    bulkserviceapiUploadShadowUsersinBulk:
+      title: UploadShadowUsersinBulk
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/bulkserviceapiShadowUserBulkUploadResult'
+      example:
+        id: api.bulk.user.upload
+        ver: v2
+        ts: 2020-12-04 06:45:24:931+0000
+        params:
+          resmsgid: 
+          msgid: 5f18f128b083e50a09b137dbac323845
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          processId: 013165071979683840148
+          response: SUCCESS
+    bulkserviceapiShadowUserBulkUploadResult:
+      title: ShadowUserBulkUploadResult
+      required:
+      - processId
+      - response
+      type: object
+      properties:
+        processId:
+          type: string
+        response:
+          type: string
+      example:
+        processId: 013165071979683840148
+        response: SUCCESS
+    bulkserviceapiBulk-uploadself-declaredusers:
+      title: Bulk-uploadself-declaredusers
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/bulkserviceapiShadowUserBulkUploadResult'
+      example:
+        id: api.bulk.user.upload
+        ver: v2
+        ts: 2020-12-04 06:45:45:157+0000
+        params:
+          resmsgid: 
+          msgid: 0b7d0768cf7086a921cdaa48f6414564
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          processId: 013165079212539904150
+          response: SUCCESS
+    bulkserviceapiCheckUploadStatus-Success:
+      title: CheckUploadStatus-Success
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/bulkserviceapiCheckUploadStatusResult'
+      example:
+        id: api.upload.status
+        ver: v1
+        ts: 2020-12-01 17:13:43:230+0000
+        params:
+          resmsgid: 
+          msgid: ff70ec24aae247f1a2b21fae2c200f6c
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response:
+          - failureResult: []
+            processId: 01316326144873267234
+            successResult:
+            - code: APDIST1
+              parentCode: APCODE
+              name: APDIST1
+              type: district
+              parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+              id: 333a45f6-ce34-491c-b63b-2187c2df367a
+              operation: create
+            - code: APDIST2
+              parentCode: APCODE
+              name: APDIST2
+              type: district
+              parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+              id: 97287c81-f439-4f69-85fe-d1cf6fca3003
+              operation: create
+            message: Operation is completed.
+            objectType: location
+            status: COMPLETED
+    bulkserviceapiCheckUploadStatusResult:
+      title: CheckUploadStatusResult
+      required:
+      - response
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/bulkserviceapiResponse'
+          description: ''
+      example:
+        response:
+        - failureResult: []
+          processId: 01316326144873267234
+          successResult:
+          - code: APDIST1
+            parentCode: APCODE
+            name: APDIST1
+            type: district
+            parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+            id: 333a45f6-ce34-491c-b63b-2187c2df367a
+            operation: create
+          - code: APDIST2
+            parentCode: APCODE
+            name: APDIST2
+            type: district
+            parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+            id: 97287c81-f439-4f69-85fe-d1cf6fca3003
+            operation: create
+          message: Operation is completed.
+          objectType: location
+          status: COMPLETED
+    bulkserviceapiResponse:
+      title: Response
+      required:
+      - failureResult
+      - processId
+      - successResult
+      - message
+      - objectType
+      - status
+      type: object
+      properties:
+        failureResult:
+          type: array
+          items:
+            type: string
+          description: ''
+        processId:
+          type: string
+        successResult:
+          type: array
+          items:
+            $ref: '#/components/schemas/bulkserviceapiSuccessResult'
+          description: ''
+        message:
+          type: string
+        objectType:
+          type: string
+        status:
+          type: string
+      example:
+        failureResult: []
+        processId: 01316326144873267234
+        successResult:
+        - code: APDIST1
+          parentCode: APCODE
+          name: APDIST1
+          type: district
+          parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+          id: 333a45f6-ce34-491c-b63b-2187c2df367a
+          operation: create
+        - code: APDIST2
+          parentCode: APCODE
+          name: APDIST2
+          type: district
+          parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+          id: 97287c81-f439-4f69-85fe-d1cf6fca3003
+          operation: create
+        message: Operation is completed.
+        objectType: location
+        status: COMPLETED
+    bulkserviceapiSuccessResult:
+      title: SuccessResult
+      required:
+      - code
+      - parentCode
+      - name
+      - type
+      - parentId
+      - id
+      - operation
+      type: object
+      properties:
+        code:
+          type: string
+        parentCode:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        parentId:
+          type: string
+        id:
+          type: string
+        operation:
+          type: string
+      example:
+        code: APDIST1
+        parentCode: APCODE
+        name: APDIST1
+        type: district
+        parentId: 6824e3d3-5512-4344-a481-7bac011edaa8
+        id: 333a45f6-ce34-491c-b63b-2187c2df367a
+        operation: create
+    bulkserviceapiSuccess-UploadLocationDatainBulk:
+      title: Success-UploadLocationDatainBulk
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/bulkserviceapiUserBulkUploadResult'
+      example:
+        id: api.bulk.location.upload
+        ver: v1
+        ts: 2020-12-01 17:13:28:034+0000
+        params:
+          resmsgid: 
+          msgid: 0eef8c3ff45390894ecd98c146248792
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          processId: 01316326144873267234
+    bulkserviceapiUploadOrganisationsinBulk-BadRequest:
+      title: UploadOrganisationsinBulk-BadRequest
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiFailureParams'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.upload
+        ver: v1
+        ts: 2020-12-07 06:14:05:979+0000
+        params:
+          resmsgid: 
+          msgid: 6f50eb71cd56b52a65aea643df42e80b
+          err: MANDATORY_PARAMETER_MISSING
+          status: MANDATORY_PARAMETER_MISSING
+          errmsg: Mandatory parameter orgName is missing.
+        responseCode: CLIENT_ERROR
+        result: {}
+    bulkserviceapiUploadOrganisationsinBulk-Suceess:
+      title: UploadOrganisationsinBulk-Suceess
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/bulkserviceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/bulkserviceapiUserBulkUploadResult'
+      example:
+        id: api.org.upload
+        ver: v1
+        ts: 2020-12-04 06:51:24:413+0000
+        params:
+          resmsgid: 
+          msgid: 54f533acafefddb758704fb75caad1f9
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          processId: 0131650814782423040
+tags:
+- name: upload users
+  description: Upload custodian users.
+- name: upload shadow users and self-declared users
+  description: upload shadow users and self-declared users
+- name: Check upload status
+  description: Check the upload status
+- name: Upload status download link
+  description: Get upload status download link.
+- name: upload locations
+  description: upload locations api
+- name: Bulk Organisation Upload
+  description: Bulk Organisation Upload

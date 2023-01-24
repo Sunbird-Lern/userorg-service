@@ -1,0 +1,198 @@
+openapi: 3.0.1
+info:
+  version: '1.0'
+  title: Refresh Token API
+  termsOfService: 'https://github.com/project-sunbird/sunbird-commons/blob/master/LICENSE'
+  description: >-
+    The refresh token API is used to obtain an access token for a user or device
+    when the current access token is expired. The access token and refresh token
+    validity depends on your configuration. The default validity for the access
+    token is 12 hours and for refresh token it's 180 days. This API is usually
+    invoked by the mobile client to request new access tokens on user's behalf
+    when the access token expires. The user is not logged off when the access
+    token is expired. If the refresh token is expired (default - 180 days), the
+    user is logged out of the mobile app and needs to re-login to renew the
+    refresh token. This API endpoint can also be used by users to renew their
+    access tokens instead of obtaining fresh set of tokens using username and
+    password.
+paths:
+  /auth/v1/refresh/token:
+    post:
+      description: |-
+        This API is used to obtain a new access token
+           - Required fields cannot be left null or empty
+      summary: Get a new access token
+      tags:
+        - Refresh Token API
+      operationId: RefreshToken
+      requestBody:
+        required: true
+        description: The refresh token obtained from the server
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshToken'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+              example:
+                id: "api.refresh.token"
+                ver: "1.0"
+                ts: 1606816047013
+                params:
+                  resmsgid: "abf4051d-1449-4ea6-8c56-af44faa4c86e"
+                  status: "successful"
+                  err: null
+                  errmsg: null
+                result:
+                  access_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6ImFjY2VzczAifQ.eyJhdWQiOiJhbmRyb2lkIiwic3ViIjoiZjo1MGY5NjdkNC1iOWRiLTQ1MjgtOTUwYy1iOWYwMzMyZTYzYmE6YTFlNjRiNDEtMTZjZC00N2Y3LTk4OWQtYTYwNWU3NDBkMDQwIiwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLm9yZy9hdXRoL3JlYWxtcy9zdW5iaXJkIiwidHlwIjoiQmVhcmVyIiwiZXhwIjoxNjA2OTI5MjA0LCJpYXQiOjE2MDY4ODYwMDR9.cR4tzLWL0hD066lHARPcPs7INnY97ZzeBGqs4JCWaHi1Y22-hFxBv5xxY0JHanydeagc8a0Z3F4ZdDqlICClrIPJB1qcMi1TUjmCiabS-brVL9LMuSwV1X_Gri1o-K5uYZL87BmLeW6K7mfRZ1XoEfweGhBgVg3hvAOiLdbzYU_zGK26GCj_oTtuMIF0aiR0MksSi5HV1vhtH-BXP_aCgi_2zSK_NKayGg-yjbGPFWFV25Aib9_mlKKygRluCvDizCWT50EV7Q1TVn11qkXNP943A0hR9ko_GQRReHLG3NQsFP9fm6PNuns2-t9bwr27Vjdlo9LCCzGkioGTMBxnIg"
+                  expires_in: 0
+                  refresh_expires_in: 0
+                  refresh_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFjY2Vzc3B1YjAifQ.eyJqdGkiOiIyNGYwOTRkOS1mZjBlLTQwNzQtODA4MC0yOTUwYjk2MjQwMjYiLCJleHAiOjAsIm5iZiI6MCwiaWF0IjoxNjA2ODg1NzI5LCJpc3MiOiJodHRwczovL2V4YW1wbGUub3JnL2F1dGgvcmVhbG1zL3N1bmJpcmQiLCJhdWQiOiJhbmRyb2lkIiwic3ViIjoiZjo1MGY5NjdkNC1iOWRiLTQ1MjgtOTUwYy1iOWYwMzMyZTYzYmE6YTFlNjRiNDEtMTZjZC00N2Y3LTk4OWQtYTYwNWU3NDBkMDQwIiwidHlwIjoiT2ZmbGluZSIsImF6cCI6ImFuZHJvaWQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIzNDNlNDBkYS0xMmE1LTRhNjctOGVmNS0zNzUzZTlmM2ZiZTMiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX19.J6DNcnUUrqyCXlBo0qtgm5csDvRTDPElZUETCBlNVFSh6SsT04frzvVRotJ2bfRFA11AqpWblyFVkopIY6hk23xzP3zxh6tw6fn6GLClvFamYIKTZi9FBMT1qhVcKtIcHDdgs69xRwZu72ip6Ks4kccOC_HTTDQ_BUpY95ZrS-P90LGb9SD4JV5XU9e7YIUPxs-bnJ-G564wRfmc7xdg8J6SZZCsD5iXyTXFT7_O3kQci9EIhwVEuS6AIOz_gWtsVW_ee1wEX8dYK2OGqXZWa00dCue6KdLshHY4vB_Gewed2V7_tAS6vAkX4vCzthC6lBKlPpzBW0KF0B-n8urfpA"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+              example:
+                id: "api.refresh.token"
+                ver: "1.0"
+                ts: 1606815735499
+                params:
+                  resmsgid: "079446df-a9ee-4696-acb5-f30e4a4d30dc"
+                  status: "failed"
+                  err: "invalid_grant"
+                  errmsg: "invalid_grant"
+                result:
+                  access_token: null
+                  expires_in: 0
+                  refresh_expires_in: 0
+                  refresh_token: null
+        '415':
+          description: Unsupported media type
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenUnsupprtedType'
+              example:
+                timestamp: 1606886105918
+                status: 415
+                error: "Unsupported Media Type"
+                exception: "org.springframework.web.HttpMediaTypeNotSupportedException"
+                message: "Unsupported Media Type"
+                path: "/v1/auth/refresh/token"
+        '500':
+          description: Internal Server Error
+          content:
+            text/html:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+              example:
+                id: "api.refresh.token"
+                ver: "1.0"
+                ts: 1606885615109
+                params:
+                  resmsgid: "8fd739a2-41db-4d13-a183-ac18c7c29fe8"
+                  status: "failed"
+                  err: "INTERNAL_SERVER_ERROR"
+                  errmsg: "Oops! Something went wrong!"
+                result:
+                  access_token: null
+                  expires_in: 0
+                  refresh_expires_in: 0
+                  refresh_token: null
+security:
+  - bearerAuth: []
+servers:
+  - url: 'https://staging.open-sunbird.org/api/'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RefreshToken:
+      description: Refresh Token
+      type: object
+      properties:
+        refresh_token:
+          type: string
+      required:
+      - refresh_token
+    RefreshTokenResponse:
+      description: Refresh token response structure
+      type: object
+      properties:
+        id:
+          description: Represents the api id
+          type: string
+        ver:
+          description: Represents the api version
+          type: string
+        ts:
+          description: Represents the EPOCH epoch time in milliseconds
+          type: integer
+          format: int64
+        params:
+          type: object
+          properties:
+            resmsgid:
+              description: Represents the message id of the response
+              type: string
+            status:
+              description: Represents the status of the request
+              type: string
+              enum:
+                - success
+                - failed
+            err:
+              description: Represents the error
+              type: string
+              nullable: true
+            errmsg:
+              description: Represents the error message
+              type: string
+              nullable: true
+        result:
+          type: object
+          properties:
+            access_token:
+              description: Represents the access token
+              type: string
+              nullable: true
+            expires_in:
+              type: integer
+            refresh_expires_in:
+              type: integer
+            refresh_token:
+              type: string
+              nullable: true
+    RefreshTokenUnsupprtedType:
+      description: Refresh token error response for unsupported media type
+      type: object
+      properties:
+        timestamp:
+          description: Represents the EPOCH (UTC) timestamp in milliseconds since EPOCH
+          type: integer
+          format: int64
+        status:
+          description: Represents the status of the request
+          type: integer
+        error:
+          description: Represents the error type
+          type: string
+        exception:
+          description: Represents the exception message
+          type: string
+        message:
+          description: Represents the error message
+          type: string
+        path:
+          description: Represents the API path the request
+          type: string
