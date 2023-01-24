@@ -1,0 +1,327 @@
+openapi: 3.0.1
+info:
+  title: OTP API(s)
+  description: 'The Email resources provides the notification mechanism for all the
+    users on Sunbird. The otp generate api will generate the otp for the users which can be verified using otp verify api. '
+  termsOfService: https://github.com/project-sunbird/sunbird-commons/blob/master/LICENSE
+  contact:
+    email: info@sunbird.org
+  version: "1.0"
+  
+externalDocs:
+ description: "Testcases"
+ url: "https://www.getpostman.com/collections/0d115856f5fb996ad38c"
+servers:
+- url: https://staging.sunbirded.org/api
+paths:
+  /otp/v1/generate:
+    post:
+      tags:
+      - OTP APIs
+      summary: Generate OTP
+      description: |-
+        This API is associated with sending OTP to user on the Sunbird Platform.
+           - The endpoint for **Generate OTP** is `otp/v1/generate`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: '{{host}}/otp/v1/generate'
+      parameters:
+      - name: Authorization
+        in: header
+        description: To make use of the API, you require authorization. Raise a request
+          to the administrator for the use of the API. You will receive the authorization
+          key. Specify the key received, here.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: |-
+          The body refers to the format of the request.
+            - The body contains metadata about the notification to be sent.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/otpapigenerateOtpRequest'
+        required: true
+      responses:
+        200:
+          description: OK ! Successful operation."Generate OTP" operation was successfully
+            executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/otpapiContentCreateResponse'
+              example:
+                id: api.otp.generate
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: null
+                  status: success
+                  errmsg: null.
+                responseCode: OK
+                result: 
+                 response: "SUCCESS"
+        400:
+          description: BAD REQUEST. The "Generate OTP" operation failed ! The possible
+            reason for failure is that you may have missed providing input for a mandatory
+            parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/otpapiContentCreateErrorResponse'
+              example:
+                id: api.otp.generate
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: MANDATORY_PARAMETER_MISSING
+                  status: MANDATORY_PARAMETER_MISSING
+                  errmsg: Mandatory parameter key is missing.
+                responseCode: SERVER_ERROR
+                result: {}
+        500:
+          description: INTERNAL SERVER ERROR ! Looks like something went wrong! These
+            errors are tracked automatically, but if the problem persists feel free
+            to contact us. In the meantime, try refreshing.
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/otpapiContentCreateErrorResponse'
+              example:
+                id: api.otp.generate
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: INTERNAL_ERROR
+                  status: INTERNAL_ERROR
+                  errmsg: Process failed,please try again later.
+                responseCode: SERVER_ERROR
+                result: {}
+  /otp/v1/verify:
+    post:
+      tags:
+      - OTP APIs
+      summary: Verify OTP
+      description: |-
+        This API is associated with verifying the OTP of the user on the Sunbird Platform.
+           - The endpoint for **Verifiy OTP** is `otp/v1/verify`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+           - The Otp provided in the request is verified with the available otp generated for the user within the sunbird system.
+      operationId: '{{host}}/otp/v1/verify'
+      parameters:
+      - name: Authorization
+        in: header
+        description: To make use of the API, you require authorization. Raise a request
+          to the administrator for the use of the API. You will receive the authorization
+          key. Specify the key received, here.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: |-
+          The body refers to the format of the request.
+            - The body contains metadata about the notification to be sent.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/otpapiverifyOtpRequest'
+        required: true
+      responses:
+        200:
+          description: OK ! Successful operation."Verify Otp" operation was successfully
+            executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/otpapiContentCreateResponse'
+              example:
+                id: api.otp.generate
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: null
+                  status: success
+                  errmsg: null.
+                responseCode: OK
+                result: 
+                 response: "SUCCESS"
+        400:
+          description: BAD REQUEST. The "Verify Otp" operation failed! The possible
+            reason for failure is that you may have missed providing input for a mandatory
+            parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/otpapiContentCreateErrorResponse'
+        500:
+          description: INTERNAL SERVER ERROR ! Looks like something went wrong! These
+            errors are tracked automatically, but if the problem persists feel free
+            to contact us. In the meantime, try refreshing.
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/otpapiContentCreateErrorResponse'
+              example:
+                id: api.otp.verify
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: INTERNAL_ERROR
+                  status: INTERNAL_ERROR
+                  errmsg: Process failed,please try again later.
+                responseCode: SERVER_ERROR
+                result: {}
+components:
+  schemas:
+    otpapigenerateOtpRequest:
+      title: Request structure for sending OTP
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/otpapigenOtpRequest'
+      example:
+        request:
+          userId: 372175df-7f44-48df-8aa5-4t6228996b06s
+          key: amit@gmail.com
+          type: email
+    otpapigenOtpRequest:
+      title: Request
+      required:
+      - key
+      - type
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Recipient name to whom mail is sending
+        key:
+          type: string
+          description: Subject of mail
+        type:
+          type: string
+          description: Contents of mail body
+    otpapiverifyOtpRequest:
+      title: Request structure for verifying OTP
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/otpapiverOtpRequest'
+      example:
+        request:
+          userId: 372175df-7f44-48df-8aa5-4t6228996b06s
+          key: amit@gmail.com
+          type: email
+          otp: "79562"
+    otpapiverOtpRequest:
+      title: Request
+      required:
+      - key
+      - otp
+      - type
+      type: object
+      properties:
+        userId:
+          type: string
+          description: Recipient name to whom mail is sending
+        key:
+          type: string
+          description: Subject of mail
+        type:
+          type: string
+          description: Contents of mail body
+        otp:
+          type: string
+          description: OTP
+    otpapiContentCreateResponse:
+      description: Create Content Response
+      allOf:
+      - $ref: '#/components/schemas/otpapiResultWithNodeId'
+      - $ref: '#/components/schemas/otpapiResponseHeader'
+    otpapiResultWithNodeId:
+      title: Result Body
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/otpapiSendOtpResult'
+    otpapiResponseHeader:
+      title: ResponseHeader
+      type: object
+      properties:
+        id:
+          type: string
+          description: API Identifier
+        ver:
+          type: string
+          description: API version information
+        ts:
+          type: string
+          description: API execution timespan
+        params:
+          $ref: '#/components/schemas/otpapiResponseParams'
+        responseCode:
+          type: object
+          properties: {}
+          description: 'API response code '
+    otpapiSendOtpResult:
+      title: Send Otp Result
+      type: object
+      properties:
+        response:
+          type: string
+          description: It will contain "SUCCESS" as a value,if the Otp is generated and send successfully to the user otherwise user id with reason of failure.
+    otpapiResponseParams:
+      title: Response Parameter
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          description: Response Message Id
+        msgid:
+          type: string
+          description: Message Id
+        err:
+          type: string
+          description: Error Code
+        status:
+          type: string
+          description: Response Status
+        errmsg:
+          type: string
+          description: Error Message
+    otpapiContentCreateErrorResponse:
+      title: Create Content Error Response
+      allOf:
+      - $ref: '#/components/schemas/otpapiEmptyResult'
+      - $ref: '#/components/schemas/otpapiResponseHeader'
+    otpapiEmptyResult:
+      title: Empty Result
+      type: object
+      properties:
+        result:
+          type: object
+          properties: {}
+          description: Empty Result
+  securitySchemes:
+    bearer:
+      type: apiKey
+      name: Authorization
+      in: header
+    userToken:
+      type: apiKey
+      name: x-authenticated-user-token
+      in: header
+
