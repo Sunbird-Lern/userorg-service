@@ -1,0 +1,652 @@
+openapi: 3.0.1
+info:
+  title: System Setting Api
+  description: The system setting api will manage multiple system related configuration. The system setting can be configured using set api, specific data can be fetched by get api and all system configuration can be listed out using list api.
+  contact: {}
+  version: '1.0'
+  termsOfService: 'https://github.com/project-sunbird/sunbird-commons/blob/master/LICENSE'
+externalDocs:
+ description: "Testcases"
+ url: "https://www.getpostman.com/collections/79866c2d3e8b8d002d39"
+servers:
+- url: https://staging.sunbirded.org/api
+paths:
+  /data/v1/system/settings/set:
+    post:
+      tags:
+      - System Settings Api's
+      summary: set
+      operationId: set
+      parameters:
+        - name: ts
+          in: header
+          required: false
+          description: Timestamp at which given API request is sent.
+          schema:
+            type: string
+        - name: X-msgid
+          in: header
+          required: false
+          description: This ID uniquely identifies a request if the same API is executed
+            multiple times.
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          description: To make use of any System API, you require authorization. Raise a
+            request to the administrator for the use of the API. You will
+            receive the authorization key. Specify the key received, here.
+          schema:
+            type: string
+        - name: x-authenticated-user-token
+          in: header
+          required: true
+          description: It is a unique token/key to authenticate the user each time an API
+            is called. For corresponding sessions this token is used, not your
+            actual username/password
+          schema:
+            type: string
+        - name: x-authenticated-for
+          in: header
+          required: false
+          description: Managed User token of registered MUA user performing given API
+            request.
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/systemsettingssetrequest'
+            example:
+              request:
+                id: userTnc
+                field: userTnc
+                value: '{"latestVersion":"3.5.0"}'
+        required: true
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsSuccessResponse'
+              example:
+                id: api.system.settings.set
+                ver: v1
+                ts: "2020-12-01 10:47:16:629+0000"
+                params:
+                  resmsgid: 
+                  msgid: 340d4ef3f113f5db5e81859e18663214
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response: SUCCESS
+                  id: userTnc
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsResourceDoesnotExist'
+              example:
+                id: api.system.settings.set
+                ver: v1
+                ts: 2020-12-01 10:49:34:336+0000
+                params:
+                  resmsgid: 
+                  msgid: d68cb65b27ce91530705b18c0ddbe20f
+                  err: MANDATORY_PARAMETER_MISSING
+                  status: MANDATORY_PARAMETER_MISSING
+                  errmsg: Mandatory parameter field is missing.
+                responseCode: CLIENT_ERROR
+                result: {}
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsUserNotAuthorized'
+              example:
+                id: api.system.settings.set
+                ver: v1
+                ts: 2020-12-01 10:47:49:724+0000
+                params:
+                  resmsgid: 
+                  msgid: d94a07319efbfe76cf139a0702d5a83a
+                  err: UNAUTHORIZED_USER
+                  status: SERVER_ERROR
+                  errmsg: You are not authorized.
+                responseCode: CLIENT_ERROR
+                result: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsResourceDoesnotExist'
+              example:
+                id: api.system.settings.set
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: INTERNAL_ERROR
+                  status: INTERNAL_ERROR
+                  errmsg: Process failed,please try again later.
+                responseCode: SERVER_ERROR
+                result: {}
+      deprecated: false
+
+  /data/v1/system/settings/get/{configName}:
+    get:
+      tags:
+      - System Settings Api's
+      summary: get
+      operationId: get
+      parameters:
+        - in: path
+          name: configName
+          schema:
+            type: string
+          required: true
+          description: Field config Name 
+          example: userTnc
+        - name: ts
+          in: header
+          required: false
+          description: Timestamp at which given API request is sent.
+          schema:
+            type: string
+        - name: X-msgid
+          in: header
+          required: false
+          description: This ID uniquely identifies a request if the same API is executed
+            multiple times.
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          description: To make use of any System API, you require authorization. Raise a
+            request to the administrator for the use of the API. You will
+            receive the authorization key. Specify the key received, here.
+          schema:
+            type: string
+        - name: x-authenticated-user-token
+          in: header
+          required: false
+          description: It is a unique token/key to authenticate the user each time an API
+            is called. For corresponding sessions this token is used, not your
+            actual username/password
+          schema:
+            type: string
+        - name: x-authenticated-for
+          in: header
+          required: false
+          description: Managed User token of registered MUA user performing given API
+            request.
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsSuccessResponse1'
+              example:
+                id: api.system.settings.get.userTnc
+                ver: v1
+                ts: 2020-12-01 17:46:36:645+0530
+                params:
+                  resmsgid: 
+                  msgid: 62c78ba7-b0e1-408d-8dfe-7cc3c4e652cc
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response:
+                    id: userTnc
+                    field: userTnc
+                    value: '{"latestVersion":"3.4.0"}'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsm401'
+              example:
+                message: Unauthorized
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsResourceDoesnotExist'
+              example:
+                id: api.system.settings.get.orgc
+                ver: v1
+                ts: 2020-12-01 10:59:25:693+0000
+                params:
+                  resmsgid: 
+                  msgid: 285ccd358d2e1a244919f4c5a1d8a2f7
+                  err: RESOURCE_NOT_FOUND
+                  status: RESOURCE_NOT_FOUND
+                  errmsg: Requested resource not found
+                responseCode: RESOURCE_NOT_FOUND
+                result: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsResourceDoesnotExist'
+              example:
+                id: api.system.settings.userTnc
+                ver: v1
+                ts: 2020-12-01 10:49:01:948+0000
+                params:
+                  resmsgid: 
+                  msgid: 12eb0ca45ce4c776fab994d120bedd41
+                  err: INTERNAL_ERROR
+                  status: INTERNAL_ERROR
+                  errmsg: Process failed,please try again later.
+                responseCode: SERVER_ERROR
+                result: {}
+      deprecated: false
+      
+  /data/v1/system/settings/list:
+    get:
+      tags:
+      - System Settings Api's
+      summary: list
+      operationId: list
+      parameters: 
+        - name: ts
+          in: header
+          required: false
+          description: Timestamp at which given API request is sent.
+          schema:
+            type: string
+        - name: X-msgid
+          in: header
+          required: false
+          description: This ID uniquely identifies a request if the same API is executed
+            multiple times.
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          description: To make use of any System API, you require authorization. Raise a
+            request to the administrator for the use of the API. You will
+            receive the authorization key. Specify the key received, here.
+          schema:
+            type: string
+        - name: x-authenticated-user-token
+          in: header
+          required: false
+          description: It is a unique token/key to authenticate the user each time an API
+            is called. For corresponding sessions this token is used, not your
+            actual username/password
+          schema:
+            type: string
+        - name: x-authenticated-for
+          in: header
+          required: false
+          description: Managed User token of registered MUA user performing given API
+            request.
+          schema:
+            type: string
+      responses:
+        200:
+          description: 'Success Response'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsm200'
+              example:
+                id: api.system.settings.list
+                ver: v1
+                ts: 2020-12-01 12:21:46:829+0000
+                params:
+                  resmsgid: 
+                  msgid: f11acda288889cf47ecdf8812e623387
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response:
+                  - id: uniqueField
+                    field: uniqueField
+                    value: false
+                  - id: custodianRootOrgId
+                    field: custodianRootOrgId
+                    value: 01285019302823526477
+                  - id: tncConfigtest
+                    field: tncConfigtest
+                    value: test
+                  - id: userTnc
+                    field: userTnc
+                    value: '{"latestVersion":"3.5.0"}'
+                  - id: test
+                    field: test
+                    value: '@test'
+                  - id: userTnc
+                    field: userTnc
+                    value: '{"latestVersion":"3.5.0"}'
+                  - id: channelRegStatus
+                    field: channelRegStatus
+                    value: false
+
+                  - id: phoneUnique
+                    field: phoneUnique
+                    value: true
+                  - id: systemInitialisationStatus
+                    field: systemInitialisationStatus
+                    value: CUSTODIAN_ORG_CREATED
+                  - id: courseFrameworkId
+                    field: courseFrameworkId
+                    value: tpd
+                  - id: consumptionFaqs
+                    field: consumptionFaqs
+                    value: https://dev.sunbirded.org/faq.html
+                  - id: ssoCourseSection
+                    field: ssoCourseSection
+                    value: 0129795520637419527
+                  - id: emailUnique
+                    field: emailUnique
+                    value: true
+                  - id: tn
+                    field: tn
+                    value: "{'helpdeskEmail':'abc@abc.com','playstoreLink':'play.google.com/appid=123'}"
+                  - id: emailUniqueAndPhone
+                    field: emailUniqueAndPhone
+                    value: true
+
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsm401'
+              
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/systemsettingsm500'
+              
+      deprecated: false
+components:
+  schemas:
+    systemsettingssetrequest:
+      title: setrequest
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/systemsettingsRequest'
+      example:
+        request:
+          id: userTnc
+          field: userTnc
+          value: '{"latestVersion":"3.5.0"}'
+    systemsettingsRequest:
+      title: Request
+      required:
+      - id
+      - field
+      - value
+      type: object
+      properties:
+        id:
+          type: string
+        field:
+          type: string
+        value:
+          type: string
+
+    systemsettingssystemsettingsParams:
+      title: Params
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+        status:
+          type: string
+        errmsg:
+          type: string
+    systemsettingsSuccessResponse:
+      title: SuccessResponse
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/systemsettingssystemsettingsParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/systemsettingssystemsettingsResult'
+      example:
+        id: api.system.settings.set
+        ver: v1
+        ts: 2020-12-01 10:47:16:629+0000
+        params:
+          resmsgid: 
+          msgid: 340d4ef3f113f5db5e81859e18663214
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response: SUCCESS
+          id: userTnc
+    systemsettingssystemsettingsResult:
+      title: Result
+      required:
+      - response
+      - id
+      type: object
+      properties:
+        response:
+          type: string
+        id:
+          type: string
+      
+    systemsettingsResourceDoesnotExist:
+      title: ResourceDoesnotExist
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/systemsettingssystemsettingsParams'
+        responseCode:
+          type: string
+        result:
+          type: object
+    systemsettingsUserNotAuthorized:
+      title: UserNotAuthorized
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/systemsettingssystemsettingsParams'
+        responseCode:
+          type: string
+        result:
+          type: object
+      
+    systemsettingsSuccessResponse1:
+      title: SuccessResponse1
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/systemsettingssystemsettingsParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/systemsettingssystemsettingsResult'
+
+      
+    systemsettingssystemsettingsResponse:
+      title: Response
+      required:
+      - id
+      - field
+      - value
+      type: object
+      properties:
+        id:
+          type: string
+        field:
+          type: string
+        value:
+          type: string
+     
+    systemsettingsm401:
+      title: m401
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    systemsettingsm500:
+      title: m500
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/systemsettingssystemsettingsParams'
+        responseCode:
+          type: string
+        result:
+          type: object
+    systemsettingsm200:
+      title: m200
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/systemsettingssystemsettingsParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/systemsettingsResults'
+      
+    systemsettingsResults:
+      title: Results
+      required:
+      - response
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/systemsettingssystemsettingsResponse'
+          description: ''
+  securitySchemes:
+    httpBearer:
+      type: http
+      scheme: bearer
+security:
+- httpBearer: []
+tags:
+- name: System Settings Api's
+  description: ''
