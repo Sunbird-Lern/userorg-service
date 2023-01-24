@@ -1,0 +1,919 @@
+{
+  "info": {
+    "name": "Org. API(s)",
+    "_postman_id": "19b3181e-7a2a-42dc-ad8b-3a80fd52b550",
+    "description": "\nThe Organisation Management API resources perform operations related to management of Organisation on the Sunbird Platform. The basic operations include Creation, Updation,joining ,approving.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/"
+  },
+  "item": [
+    {
+      "name": "Org. APIs",
+      "item": [
+        {
+          "id": "40594452-ed2c-4f2f-9833-1b7d38bbeb50",
+          "name": "Organization-Create",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/create",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Organization-Create** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User Id to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All User APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Organization-Create\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Organization-Create\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with creation of a new Organisation on the Sunbird Platform.\n\n  - The **_/create/_** endpoint executes the \"Organization-Create\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "572ad6de-7f90-4b1f-b16a-aede3306eb82",
+          "name": "http://{{host}}/v1/user/org/join",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/join",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "Accept",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "Content-Type",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "ts",
+                "description": {
+                  "content": "Time Stamp at which **Organization-Create** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "X-msgid",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "X-Authenticated-Userid",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Join Organization\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Join Organization\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with creation of a new Organisation on the Sunbird Platform.\n\n  - Format of the URL is : *http://{{host}}/v1/user/org/join* \n\n  - The **_/join/_** endpoint executes the \"joining organisation\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "7c3c2d64-f6e8-4f37-b8e8-17c95ddb49f6",
+          "name": "Organization-Update",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/update",
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Organization-Update** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkMTc1MDIwNDdlODc0ODZjOTM0ZDQ1ODdlYTQ4MmM3MyJ9.7LWocwCn5rrCScFQYOne8_Op2EOo-xTCK5JCFarHKSs",
+                "description": {
+                  "content": "All User APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Organization Update \" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Organization Update\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with creation of a new Organisation on the Sunbird Platform.\n\n  - The **_/update/_** endpoint executes the \"Organization-Update\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "3e76b56a-9762-46a4-82cf-b5fa2394ccc0",
+          "name": "Remove Member from Org",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/member/remove",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Remove Member from Org** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Remove Member from Org\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Remove Member from Org\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with removal of member from an organization on the Sunbird Platform.\n\n  - The **_/member/remove/_** endpoint executes the \"Organization-Update\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "22199d23-bf28-4739-bae5-62bb4b029054",
+          "name": "Organization-Approve",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/org/approve",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Organization-Approve** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Organization-Approve\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Organization-Approve\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with grant of approval to a newly added Organisation on the Sunbird Platform.\n\n  - The **_/org/approve/_** endpoint executes the \"Organization-Approve\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "9bca8358-1541-46a8-9aa1-e3ee45be566f",
+          "name": "Add Member To Org",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/member/add",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Add Member To Org** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJkMTc1MDIwNDdlODc0ODZjOTM0ZDQ1ODdlYTQ4MmM3MyJ9.7LWocwCn5rrCScFQYOne8_Op2EOo-xTCK5JCFarHKSs",
+                "description": {
+                  "content": "All User APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Add Member To Org\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Add Member To Org\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with adding members to an existing organisation on the Sunbird Platform.\n\n  - The **_/member/add/_** endpoint executes the \"Add Member To Org\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "57ddf02c-81d3-4e35-9514-0a045d534d93",
+          "name": "Organisation -Get",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/read",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Get Organization** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{api-key}}",
+                "description": {
+                  "content": "All User APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Get Organization\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Get Organization\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with fetching a specific Organization , It fetches and displays the appropriate org based on the Id provided on the Sunbird Platform.\n\n  - The **_/read/_** endpoint executes the \"Get Organization\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "eb82e5b9-9e8a-42f5-b502-85dee385461d",
+          "name": "http://{{host}}/v1/user/org/v1/user/org/approve",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/approve",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "Accept",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "Content-Type",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "ts",
+                "description": {
+                  "content": "Time Stamp at which **Approve user membership for an org.** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "X-msgid",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "X-Authenticated-Userid",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"Approve User membership for an Org.\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"Approve User membership for an Org.\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with approving user a membership for  specific Organisation on the Sunbird Platform.\n\n  - Format of the URL is : http://{{host}}/v1/user/org/v1/user/org/approve \n\n  - The **_/approve/_** endpoint executes the \"approving user membership for an org.\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "9a380f26-cea4-44a5-9780-5b58b2633009",
+          "name": "http://{{host}}/v1/user/org/reject",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/reject",
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "Accept",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "Content-Type",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "ts",
+                "description": {
+                  "content": "Time Stamp at which **rejecting user request for membership of a specific Organisation**"
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "X-msgid",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "X-Authenticated-Userid",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"rejecting user request for membership of a specific Organisation\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"rejecting user request for membership of a specific Organisation\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with rejecting user a membership for  specific Organisation on the Sunbird Platform.\n\n  - Format of the URL is : http://{{host}}/v1/user/org/reject\n\n  - The **_/reject/_** endpoint executes the \"rejecting user a membership for a specific Organisation\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        },
+        {
+          "id": "3db5c810-2706-4e4e-8a44-938dd7833807",
+          "name": "Organization-Update status",
+          "request": {
+            "url": "https://staging.open-sunbird.org/api/org/v1/update/status",
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "description": {
+                  "content": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+                },
+                "disabled": false
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": {
+                  "content": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+                },
+                "disabled": false
+              },
+              {
+                "key": "ts",
+                "value": "2017-05-25 10:18:56:578+0530",
+                "description": {
+                  "content": "Time Stamp at which **Organization-Create** request was sent."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-msgid",
+                "value": "8e27cbf5-e299-43b0-bca7-8347f7e5abcf",
+                "description": {
+                  "content": "This Id Uniquely identifies a request if the same API is executed multiple times."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Device-ID",
+                "value": "X-Device-ID",
+                "description": {
+                  "content": "This Id Uniquely identifies the type of device (Mobile)(desktop) used to access Sunbird."
+                },
+                "disabled": false
+              },
+              {
+                "key": "X-Authenticated-Userid",
+                "value": "e9280b815c0e41972bf754e9409b66d778b8e11bb91844892869a1e828d7d2f2a",
+                "description": {
+                  "content": "The Registered User ID to execute the API."
+                },
+                "disabled": false
+              },
+              {
+                "key": "api_key",
+                "value": "api_key",
+                "description": {
+                  "content": ""
+                },
+                "disabled": false
+              }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            }
+          },
+          "response": [
+            {
+              "status": "OK ! Successful operation.\"fetching update status of an organisation\" operation was successfully executed.",
+              "code": 200
+            },
+            {
+              "status": "BAD REQUEST. The \"fetch update status of an organisation\" operation failed ! The possible reason for failure is that you may have missed providing input for a mandatory parameter.",
+              "code": 400
+            },
+            {
+              "status": "INTERNAL SERVER ERROR ! Looks like something went wrong! We track these errors automatically, but if the problem persists feel free to contact us. In the meantime, try refreshing.",
+              "code": 500
+            }
+          ],
+          "description": {
+            "content": "\nThis API is associated with fetching update status of an organisation on the Sunbird Platform.\n\n  - The **_/update/status_** endpoint executes the \"fetch update status of an organisation\" request based on parameters provided as metadata in the request body.\n\n  - It is mandatory to provide values for parameters marked with *. \n\n  - Mandatory fields cannot be null or empty.",
+            "type": "text/markdown"
+          }
+        }
+      ]
+    }
+  ]
+}
