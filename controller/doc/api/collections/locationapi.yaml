@@ -1,0 +1,1289 @@
+openapi: 3.0.1
+info:
+  title: Location Management API(s)
+  description: |-
+    The Location management API resource is used to manage the the physical location data of the following: 
+      
+      - Users
+      - Organization
+ 
+    On the basis of the data captured using this API resource, the location data helps in grouping the users based on the location attribute.
+
+    The URL for Location Management API(s) is `data/v1/location`
+
+    **Note:** The parent location entity used as parent code parameter represents the physical location (X) of a large physical area, and incorporates locations of other smaller areas (Y). Similarly location entity (Y) may incorporate futher smaller areas(Z) in each location entity of (Y).   
+       
+       - You can say entity (X) is superset of location entities in (Y). The (Y) location entity is the superset of location entities in (Z). Also that (X), (Y) may have "n" number of "Y","Z" entities respectively.  
+     
+     The location management API resources enables you to perform the following operations:
+      - create
+      - update
+      - search
+      - delete
+  contact: {}
+  version: '1.0'
+servers:
+- url: https://staging.open-sunbird.org/api
+paths:
+  /data/v1/location/create:
+    post:
+      tags:
+      - Location  API(s)
+      summary: Create-Location
+      description: >- 
+        This API is used to create a physical location of a user or an organization, depending upon the usecase
+          
+          - The endpoint for **Create location** is `/data/v1/location/create`
+          - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: Create-Location
+      parameters:
+      - name: Authorization
+        in: header
+        description: 'To make use of any Location API, you require authorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      requestBody:
+        description: |-
+            The body refers to the format of the request.
+              - It represents the set of parameters to be passed for creating a location
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/locationapiCreate-Location-Request'
+            examples:
+             a:
+              summary: "Create location"
+              value:
+               request:
+                code: APCODE
+                name: APSTATE1
+                type: state
+             b:
+              summary: "Create location with 400 error"
+              value:
+               request:
+                code: APCODE
+                name: APSTATE2
+                type: state
+        required: true
+      responses:
+        200:
+          description: 'SUCCESS. The **Create location** operation was successful!'
+          headers:
+            Server:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nginx/1.15.8
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 20 Nov 2020 07:09:36 GMT
+            Content-Length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 289
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 66
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 8763
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 119
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiCreate_Location_With_Success_Response'
+              example:
+                id: api.location.create
+                ver: v1
+                ts: 2020-11-20 07:09:36:098+0000
+                params:
+                  resmsgid: 
+                  msgid: f794b084-d4e9-4ce3-9795-82c88ada6b66
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response: SUCCESS
+                  id: 6824e3d3-5512-4344-a481-7bac011edaa8
+        400:
+          description: >-
+            BAD REQUEST,**Create location** operation failed !The possible
+            reason for failure is that you may have missed providing input for a
+            mandatory parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiDelete-Location_With_Invalid_locationId_Error'
+              example:
+                id: api.location.create
+                ver: v1
+                ts: 2020-11-20 11:58:42:438+0000
+                params:
+                  resmsgid: 
+                  msgid: 80755429-318c-47df-82a6-282a72e52a7b
+                  err: ALREADY_EXISTS
+                  status: ALREADY_EXISTS
+                  errmsg: A code with APCODE already exists. Please retry with a unique value.
+                responseCode: CLIENT_ERROR
+                result: {}
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try to set it right at the earliest. Try refreshing the page. If the problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapi500_Server_Error'
+              example:
+                id: api.location.create
+                ver: v1
+                ts: 2020-11-19 15:58:19:713+0530
+                params:
+                  resmsgid: 
+                  msgid: c9bd2899-0c46-4bec-8ef0-759e352d9363
+                  err: 
+                  status: SERVER_ERROR
+                  errmsg: 
+                responseCode: SERVER_ERROR
+                result: {}         
+      deprecated: false
+      security: []
+  /data/v1/location/search:
+    post:
+      tags:
+      - Location  API(s)
+      summary: Search-Location
+      description: >-
+        This API is associated with fetching the location data based on the criterias specified in the request body.
+           - The endpoint for **Search location** is `/data/v1/location/search`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: Search-Location
+      parameters:
+      - name: Authorization
+        in: header
+        description: 'To make use of any Location API, you require authorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      requestBody:
+        description: |-
+            The body refers to the format of the request.
+              - The body contains metadata about the location to be searched
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/locationapiSearch-Location-Request'
+            examples:
+             a:
+              summary: 'Search with location code'
+              value:
+               request:
+                filters:
+                  code: APCODE1
+             b:
+              summary: 'Search with location type and limits'
+              value:
+               request:
+                filters:
+                  type: state
+                limit: 5  
+        required: true
+      responses:
+        200:
+          description: 'SUCCESS. The **Search location** operation was successful!'
+          headers:
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 20 Nov 2020 07:20:43 GMT
+            Content-Length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 393
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29995
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 170
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 18
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 36
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+            X-Proxy-Cache:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: MISS
+            X-Proxy-Cache-Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 20 Nov 2020 07:20:43 GMT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiSearch_Location_With_Success_Response'
+              example:
+                id: api.location.search
+                ver: v1
+                ts: 2020-11-20 07:20:43:770+0000
+                params:
+                  resmsgid: 
+                  msgid: 2d12c998-96c4-43d6-8937-4ebbb8b68d02
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response:
+                  - identifier: 6824e3d3-5512-4344-a481-7bac011edaa8
+                    code: APCODE
+                    name: APSTATE
+                    id: 6824e3d3-5512-4344-a481-7bac011edaa8
+                    type: state
+                  count: 1
+        400:
+          description: >-
+            RESOURCE NOT FOUND.**Search Location ** operation failed !The possible reason for the failure is that requested resource could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiDelete-Location_With_Invalid_locationId_Error'
+              example:
+                id: api.location.search
+                ver: v1
+                ts: 2020-11-20 11:58:42:438+0000
+                params:
+                  resmsgid: 
+                  msgid: 80755429-318c-47df-82a6-282a72e52a7b
+                  err: RESOURCE_NOT_FOUND
+                  status: RESOURCE_NOT_FOUND
+                  errmsg:
+                responseCode: CLIENT_ERROR
+                result: {}          
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try to set it right at the earliest. Try refreshing the page. If the problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapi500_Server_Error'
+              example:
+                id: api.location.search
+                ver: v1
+                ts: 2020-11-19 15:58:19:713+0530
+                params:
+                  resmsgid: 
+                  msgid: c9bd2899-0c46-4bec-8ef0-759e352d9363
+                  err: 
+                  status: SERVER_ERROR
+                  errmsg: 
+                responseCode: SERVER_ERROR
+                result: {}        
+      deprecated: false
+      security: []
+  /data/v1/location/update:
+    patch:
+      tags:
+      - Location  API(s)
+      summary: Update-Location
+      description: >-
+        This API is associated with updating the location data based on the location id,
+           - The endpoint for **Update location** is `/data/v1/location/update`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: Update-Location
+      parameters:
+      - name: Authorization
+        in: header
+        description: 'To make use of any Location API, you require authorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      requestBody:
+        description: |-
+            The body refers to the format of the request.
+              - It represents the set of parameters to be passed for updating a location
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/locationapiUpdate-Location-Request'
+            example:
+              request:
+                name: APSTATE1
+                id: e4e60956-277c-439e-bbf7-5c99730341f3
+        required: true
+      responses:
+        200:
+          description: 'SUCCESS. The **Update location** operation was successful!'
+          headers:
+            Server:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nginx/1.15.8
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 20 Nov 2020 12:58:11 GMT
+            Content-Length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 245
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 22
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 25
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 71
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiUpdate_Location_With_Success'
+              example:
+                id: api.location.update
+                ver: v1
+                ts: 2020-11-20 12:58:11:871+0000
+                params:
+                  resmsgid: 
+                  msgid: 9e447000-03f7-43ee-9e3e-342c4a6d5acf
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response: SUCCESS
+        400:
+          description: >-
+            RESOURCE NOT FOUND.**Update Location ** operation failed !The possible reason for the failure is that requested resource could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiDelete-Location_With_Invalid_locationId_Error'
+              example:
+                id: api.location.update
+                ver: v1
+                ts: 2020-11-20 12:12:44:963+0000
+                params:
+                  resmsgid: 
+                  msgid: a48334fc-fa63-4920-869f-9b6d64962a46
+                  err: UPDATE_NOT_ALLOWED
+                  status: UPDATE_NOT_ALLOWED
+                  errmsg: Update of type is not allowed.
+                responseCode: CLIENT_ERROR
+                result: {}
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try to set it right at the earliest. Try refreshing the page. If the problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapi500_Server_Error'
+              example:
+                id: api.location.update
+                ver: v1
+                ts: 2020-11-19 15:58:19:713+0530
+                params:
+                  resmsgid: 
+                  msgid: c9bd2899-0c46-4bec-8ef0-759e352d9363
+                  err: 
+                  status: SERVER_ERROR
+                  errmsg: 
+                responseCode: SERVER_ERROR
+                result: {}        
+      deprecated: false
+      security: []
+  /data/v1/location/delete/{locationId}:
+    delete:
+      tags:
+      - Location  API(s)
+      summary: Delete-Location
+      description: >-
+        This API is associated with deleting the location data based on the location id.
+           - The endpoint for **Search location** is `/data/v1/location/delete`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: Delete-Location
+      parameters:
+      - name: Authorization
+        in: header
+        description: 'To make use of any Location API, you require authorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here.'
+        required: true
+        style: simple
+        schema:
+          type: string
+          example: '{{authorization}}'
+      - name: locationId
+        in: path
+        description: 'Location id of location'
+        required: true
+        style: simple
+        schema:
+          type: string
+      responses:
+        200:
+          description: 'SUCCESS. The **Delete location** operation was successful!'
+          headers:
+            Server:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nginx/1.15.8
+            Date:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: Fri, 20 Nov 2020 13:17:44 GMT
+            Content-Length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 245
+            Connection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: keep-alive
+            X-RateLimit-Limit-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 30000
+            X-RateLimit-Remaining-hour:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 29999
+            Referrer-Policy:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: origin-when-cross-origin, strict-origin-when-cross-origin
+            X-Frame-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: DENY
+            X-XSS-Protection:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 1; mode=block
+            x-response-length:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 22
+            X-Content-Type-Options:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: nosniff
+            Access-Control-Allow-Origin:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: '*'
+            X-Permitted-Cross-Domain-Policies:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: master-only
+            X-Kong-Upstream-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 728
+            X-Kong-Proxy-Latency:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: 90
+            Via:
+              content:
+                text/plain:
+                  schema:
+                    type: string
+                  example: kong/0.14.1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiDelete_Location_With_Success_Response'
+              example:
+                id: api.location.delete
+                ver: v1
+                ts: 2020-11-20 13:17:44:741+0000
+                params:
+                  resmsgid: 
+                  msgid: c549ef41-faa8-4db2-9136-3490a6ee2607
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response: SUCCESS
+        400:
+          description: >-
+             - Bad Request
+             - RESOURCE NOT FOUND.**Delete location** operation failed !The possible reason for the failure is that requested resource could not be found 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapiDelete-Location_With_Invalid_locationId_Error'
+              example:
+                id: api.location.delete
+                ver: v1
+                ts: 2020-11-20 13:18:24:671+0000
+                params:
+                  resmsgid: 
+                  msgid: 134c9776-641a-48be-9e36-102cf18e3175
+                  err: INVALID_PARAMETER
+                  status: INVALID_PARAMETER
+                  errmsg: Please provide valid locationId.
+                responseCode: CLIENT_ERROR
+                result: {}
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try to set it right at the earliest. Try refreshing the page. If the problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locationapi500_Server_Error'
+              example:
+                id: api.location.delete
+                ver: v1
+                ts: 2020-11-19 15:58:19:713+0530
+                params:
+                  resmsgid: 
+                  msgid: c9bd2899-0c46-4bec-8ef0-759e352d9363
+                  err: 
+                  status: SERVER_ERROR
+                  errmsg: 
+                responseCode: SERVER_ERROR
+                result: {}        
+      deprecated: false
+      security: []
+components:
+  schemas:
+    locationapiCreate-Location-Request:
+      title: Create-Location-Request
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/locationapiLocationCreateRequest'
+      example:
+        request:
+          code: APCODE1
+          name: APSTATE
+          type: state
+    locationapiLocationCreateRequest:
+      title: LocationCreateRequest
+      required:
+      - code
+      - name
+      - type
+      type: object
+      properties:
+        code:
+          type: string
+          description: >- 
+                  The alphanumeric string to represent a unique code of the location and the code can be either the code of state , district or any location type and it must be unique. for system AP, ap ,Ap,aP all four will be treated as some code.
+        name:
+          type: string
+          description: The name of the location
+        type:
+          type: string
+          description: 'type refer to valid location types: state,district,block,cluster '
+      example:
+        code: APCODE1
+        name: APSTATE
+        type: state
+    locationapilocationapiParams:
+      title: Params
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+          description: The ID uniquely identifies the response Message
+        msgid:
+          type: string
+          description: The ID uniquely identifies the message in reponse
+        err:
+          type: string
+          description: Represents the Error Code in case an errors occurs
+        status:
+          type: string
+          description: Represents the response status of the request sent
+        errmsg:
+          type: string
+          description: Represent the error message which comes as the API is executed
+      example:
+        resmsgid: 
+        msgid: 80755429-318c-47df-82a6-282a72e52a7b
+        err: ALREADY_EXISTS
+        status: ALREADY_EXISTS
+        errmsg: A code with APCODE already exists. Please retry with a unique value.
+    locationapiCreate_Location_With_Success_Response:
+      title: Create_Location_With_Success_Response
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/locationapiLocationParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/locationapilocationapiResult'
+      example:
+        id: api.location.create
+        ver: v1
+        ts: 2020-11-20 07:09:36:098+0000
+        params:
+          resmsgid: 
+          msgid: f794b084-d4e9-4ce3-9795-82c88ada6b66
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response: SUCCESS
+          id: 6824e3d3-5512-4344-a481-7bac011edaa8
+    locationapiLocationParams:
+      title: LocationParams
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+          description: The ID uniquely identifies the response Message
+        msgid:
+          type: string
+          description: The ID uniquely identifies the message in reponse
+        err:
+          type: string
+          nullable: true
+          description: Represents the Error Code in case an errors occurs
+        status:
+          type: string
+          description: Represents the response status of the request sent
+        errmsg:
+          type: string
+          nullable: true
+          description: Represent the error message which comes as the API is executed
+      example:
+        resmsgid: 
+        msgid: f794b084-d4e9-4ce3-9795-82c88ada6b66
+        err: 
+        status: success
+        errmsg: 
+    locationapilocationapiResult:
+      title: Result
+      required:
+      - response
+      - id
+      type: object
+      properties:
+        response:
+          type: string
+        id:
+          type: string
+      example:
+        response: SUCCESS
+        id: 6824e3d3-5512-4344-a481-7bac011edaa8
+    locationapiSearch-Location-Request:
+      title: Search-Location-Request
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/locationapiLocationSearchRequest'
+      example:
+        request:
+          filters:
+            code: APCODE1
+    locationapiLocationSearchRequest:
+      title: LocationSearchRequest
+      required:
+      - filters
+      type: object
+      properties:
+        filters:
+          $ref: '#/components/schemas/locationapilocationapiFilters'
+        limit:
+         description: 'Used to set the limit of the result'
+         type: integer
+         format: int32 
+        offset:
+         type: integer
+         description: The offset after which user want to read the records 
+      example:
+        filters:
+          code: APCODE1
+    locationapilocationapiFilters:
+      title: Filters
+      type: object
+      properties:
+        code:
+          type: string
+          description: >- 
+                  The alphanumeric string to represent a unique code of the location and the code can be either the code of state , district or any location type
+        parentId:
+          type: string
+          description: >-
+                  This is a system generated ID that uniquely identifies the parent organization (location) for example: For a district, state ID will be the parent ID
+        type:
+          type: string
+          description: >-
+                  Represents any valid key, value that can be passed as single string or an array 
+      example:
+        code: APCODE1
+    locationapiSearch_Location_With_Success_Response:
+      title: Search_Location_With_Success_Response
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/locationapiLocationParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/locationapiSearchResult'
+      example:
+        id: api.location.search
+        ver: v1
+        ts: 2020-11-20 07:20:43:770+0000
+        params:
+          resmsgid: 
+          msgid: 2d12c998-96c4-43d6-8937-4ebbb8b68d02
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response:
+          - identifier: 6824e3d3-5512-4344-a481-7bac011edaa8
+            code: APCODE
+            name: APSTATE
+            id: 6824e3d3-5512-4344-a481-7bac011edaa8
+            type: state
+          count: 1
+    locationapiSearchResult:
+      title: SearchResult
+      required:
+      - response
+      - count
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: '#/components/schemas/locationapilocationapiResponse'
+          description: ''
+        count:
+          type: integer
+          format: int32
+      example:
+        response:
+        - identifier: 6824e3d3-5512-4344-a481-7bac011edaa8
+          code: APCODE
+          name: APSTATE
+          id: 6824e3d3-5512-4344-a481-7bac011edaa8
+          type: state
+        count: 1
+    locationapilocationapiResponse:
+      title: Response
+      required:
+      - identifier
+      - code
+      - name
+      - id
+      - type
+      type: object
+      properties:
+        identifier:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        id:
+          type: string
+        type:
+          type: string
+      example:
+        identifier: 6824e3d3-5512-4344-a481-7bac011edaa8
+        code: APCODE
+        name: APSTATE
+        id: 6824e3d3-5512-4344-a481-7bac011edaa8
+        type: state
+    locationapiUpdate-Location-Request:
+      title: Update-Location-Request
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/locationapiLocationUpdateRequest'
+      example:
+        request:
+          name: APSTATE1
+          id: e4e60956-277c-439e-bbf7-5c99730341f3
+    locationapiLocationUpdateRequest:
+      title: LocationUpdateRequest
+      required:
+      - name
+      - id
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+      example:
+        name: APSTATE1
+        id: e4e60956-277c-439e-bbf7-5c99730341f3
+    locationapiUpdate_Location_With_Success:
+      title: Update_Location_With_Success
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/locationapiLocationParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/locationapiLocationResult'
+      example:
+        id: api.location.update
+        ver: v1
+        ts: 2020-11-20 12:58:11:871+0000
+        params:
+          resmsgid: 
+          msgid: 9e447000-03f7-43ee-9e3e-342c4a6d5acf
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response: SUCCESS
+    locationapiLocationResult:
+      title: LocationResult
+      required:
+      - response
+      type: object
+      properties:
+        response:
+          type: string
+      example:
+        response: SUCCESS
+    locationapiDelete_Location_With_Success_Response:
+      title: Delete_Location_With_Success_Response
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/locationapiLocationParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/locationapiLocationResult'
+      example:
+        id: api.location.delete
+        ver: v1
+        ts: 2020-11-20 13:17:44:741+0000
+        params:
+          resmsgid: 
+          msgid: c549ef41-faa8-4db2-9136-3490a6ee2607
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response: SUCCESS
+    locationapiDelete-Location_With_Invalid_locationId_Error:
+      title: Delete-Location_With_Invalid_locationId_Error
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/locationapilocationapiParams'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.location.delete
+        ver: v1
+        ts: 2020-11-20 13:18:24:671+0000
+        params:
+          resmsgid: 
+          msgid: 134c9776-641a-48be-9e36-102cf18e3175
+          err: INVALID_PARAMETER
+          status: INVALID_PARAMETER
+          errmsg: Please provide valid locationId.
+        responseCode: CLIENT_ERROR
+        result: {}
+    locationapi500_Server_Error:
+      title: 500_Server_Error
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/locationapilocationapiParams'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.location.create
+        ver: v1
+        ts: 2020-11-20 13:18:24:671+0000
+        params:
+          resmsgid: 
+          msgid: 134c9776-641a-48be-9e36-102cf18e3175
+          err:
+          status: SERVER_ERROR
+          errmsg:
+        responseCode: SERVER_ERROR
+        result: {}
+tags:
+- name: Location  API(s)
+  description: ''
