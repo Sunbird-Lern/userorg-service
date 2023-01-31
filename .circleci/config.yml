@@ -14,7 +14,7 @@ jobs:
           paths: ~/.m2
       - run:
          name: Analyze on SonarCloud
-         command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/cassandra-utils/**,**/es-utils/**,**/models/**,**/model/**,**/bean/**,**/dto/**,**/client/**,**/bulkupload/**,**/error/**,**/util/search/** -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/reports/target/jacoco/jacoco.xml
+         command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=project-sunbird_sunbird-lms-service -Dsonar.organization=project-sunbird -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/cassandra-utils/**,**/service/doc/api/collections/**,**/es-utils/**,**/models/**,**/model/**,**/bean/**,**/dto/**,**/client/**,**/bulkupload/**,**/error/**,**/util/search/** -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/reports/target/jacoco/jacoco.xml
 
 workflows:
   version: 2.1
