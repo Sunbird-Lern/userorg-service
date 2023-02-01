@@ -25,6 +25,7 @@ import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.impl.UserServiceImpl;
@@ -46,7 +47,6 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 public class UserServiceImplTest {
 
   private static CassandraOperation cassandraOperationImpl = null;
-
   @Before
   public void setUp() throws JsonProcessingException {
     PowerMockito.mockStatic(ServiceFactory.class);
@@ -154,5 +154,14 @@ public class UserServiceImplTest {
     Map<String, Object> userDetailsForEs =
         userService.getUserDetailsForES("3422-324-2342", new RequestContext());
     Assert.assertNotNull(userDetailsForEs);
+  }
+
+  @Test(expected = ProjectCommonException.class)
+  public void testValidateUserIdFailure() {
+    UserService userService = UserServiceImpl.getInstance();
+    Request request = new Request();
+    request.getContext().put(JsonKey.USER_ID, "userId");
+    request.getContext().put(JsonKey.MANAGED_FOR, "managedFor");
+    userService.validateUserId(request, "123456", new RequestContext());
   }
 }

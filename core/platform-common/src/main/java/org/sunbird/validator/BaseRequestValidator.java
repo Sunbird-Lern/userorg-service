@@ -4,6 +4,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import com.typesafe.config.ConfigFactory;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
@@ -183,17 +185,17 @@ public class BaseRequestValidator {
    * @param userIdKey Attribute name for user ID in API request
    */
   public static void validateUserId(Request request, String userIdKey) {
-    if (!(request
-        .getRequest()
-        .get(userIdKey)
-        .equals(request.getContext().get(JsonKey.REQUESTED_BY)))) {
-      throw new ProjectCommonException(
-          ResponseCode.invalidParameterValue,
-          ResponseCode.invalidParameterValue.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode(),
-          (String) request.getRequest().get(JsonKey.USER_ID),
-          JsonKey.USER_ID);
-    }
+      if (ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED) && !(request
+              .getRequest()
+              .get(userIdKey)
+              .equals(request.getContext().get(JsonKey.REQUESTED_BY)))) {
+        throw new ProjectCommonException(
+                ResponseCode.invalidParameterValue,
+                ResponseCode.invalidParameterValue.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode(),
+                (String) request.getRequest().get(JsonKey.USER_ID),
+                JsonKey.USER_ID);
+      }
   }
 
   public void validateSearchRequest(Request request) {

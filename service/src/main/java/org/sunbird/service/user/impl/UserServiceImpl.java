@@ -8,6 +8,8 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import com.typesafe.config.ConfigFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -123,12 +125,14 @@ public class UserServiceImpl implements UserService {
             + managedForId);
     // LIUA token is validated when LIUA is updating own account details or LIUA token is validated
     // when updating MUA details
-    if ((StringUtils.isNotEmpty(managedForId) && !managedForId.equals(userId))
-        || (StringUtils.isEmpty(managedById)
-            && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
-        || (StringUtils.isNotEmpty(managedById)
-            && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
-    ProjectCommonException.throwUnauthorizedErrorException();
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)) {
+      if ((StringUtils.isNotEmpty(managedForId) && !managedForId.equals(userId))
+              || (StringUtils.isEmpty(managedById)
+              && (!StringUtils.isBlank(userId) && !userId.equals(ctxtUserId))) // UPDATE
+              || (StringUtils.isNotEmpty(managedById)
+              && !(ctxtUserId.equals(managedById)))) // CREATE NEW USER/ UPDATE MUA {
+        ProjectCommonException.throwUnauthorizedErrorException();
+    }
   }
 
   @Override
@@ -145,9 +149,12 @@ public class UserServiceImpl implements UserService {
     String uploaderUserId = (String) userMap.get(JsonKey.UPDATED_BY);
     User uploader = getUserById(uploaderUserId, context);
     User user = getUserById(userId, context);
-    if (!user.getRootOrgId().equalsIgnoreCase(uploader.getRootOrgId())) {
-      ProjectCommonException.throwUnauthorizedErrorException();
+    if(ConfigFactory.load().getBoolean(JsonKey.AUTH_ENABLED)) {
+      if (!user.getRootOrgId().equalsIgnoreCase(uploader.getRootOrgId())) {
+        ProjectCommonException.throwUnauthorizedErrorException();
+      }
     }
+
   }
 
   @Override

@@ -1,6 +1,7 @@
 package org.sunbird.validator;
 
 import static org.junit.Assert.assertEquals;
+import static org.sunbird.validator.BaseRequestValidator.validateUserId;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -159,5 +160,14 @@ public class BaseRequestValidatorTest {
               ResponseCode.invalidParameterValue.getErrorMessage(), null, JsonKey.FIRST_NAME),
           e.getMessage());
     }
+  }
+
+  @Test(expected = ProjectCommonException.class)
+  public void testValidateUserIdFailure() {
+    Request request = new Request();
+    Map<String, Object> reqmap = new HashMap<>();
+    reqmap.put(JsonKey.USER_ID, "userId");
+    request.setRequest(reqmap);
+    validateUserId(request, JsonKey.USER_ID);
   }
 }
