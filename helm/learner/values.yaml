@@ -1,5 +1,5 @@
-## This section has variables with empty values
-## It is mandatory to provide values for these
+## This section has mandatory variables
+## You must provide a value for these
 ## If you don't provide a value for these variables, the chart installation will not proceed
 
 ## The domain name or Public IP address
@@ -8,19 +8,18 @@
 domain: ""
 
 ## Can be one of - azure, aws, gcloud
-sunbird_cloud_service_provider: ""
+cloud_service_provider: ""
 
-## Public Storage Bucket Details
-sunbird_account_name: ""
-sunbird_account_key: ""
+## Public storage bucket details
+cloud_public_storage_accountname: ""
+cloud_public_storage_secret: ""
 
-## Private Storage Bucket Details
-sunbird_analytics_blob_account_name: ""
-sunbird_analytics_blob_account_key: ""
+## Private storage bucket details
+cloud_private_storage_accountname: ""
+cloud_private_storage_secret: ""
 
-
-## This section has variables with empty values
-## It is strongly recommended to provide values for these
+## This section has optional variables
+## It is strongly recommended to provide a value for these
 ## If you don't provide a value for these variables, they will default to empty values
 ## If these variables are empty, some features on the application might not work as expected 
 google_captcha_mobile_private_key: ""
@@ -33,18 +32,24 @@ sunbird_mail_server_username: ""
 sunbird_msg_91_auth: ""
 sunbird_msg_sender: ""
 sunbird_url_shortner_access_token: ""
+
+## The merge domain name or Public IP address
+## The merge domain name should start with http or https
+## For example https://merge.example.com
 merge_domain: ""
 
 
-## This section has variables with empty values
-## If you provide a value to the variable, then that will take the highest precedence
-## If you don't provide a value to the variable, then one of the following will occur
-## - Auto generate the value for the variable
-## - Fetch the value from another kubernetes configuration like secret or configmap
-## For exact details on on the behavior, refer to the comments section above the variable
+## This section has optional variables
+## If you provide a value to the variable, then that will have the highest precedence
+## If you don't provide a value, then it's auto generated
+sunbird_encryption_key: ""
+
+
+## This section has optional variables
+## If you provide a value to the variable, then that will have the highest precedence
+## If you don't provide a value, then it's fetched from another object
 ekstep_authorization: ""
 sunbird_authorization: ""
-sunbird_encryption_key: ""
 sunbird_keycloak_user_federation_provider_id: ""
 sunbird_pg_user: ""
 sunbird_pg_password: ""
@@ -52,10 +57,10 @@ sunbird_sso_publickey: ""
 sunbird_sso_username: ""
 sunbird_sso_password: ""
 sunbird_sso_client_secret: ""
-sunbird_sso_lb_ip: ""
 
 ## Storage bucket name where the contents are stores
 sunbird_content_azure_storage_container: ""
+
 
 ## This section has variables with default values
 ## These are standard defaults that work well
@@ -110,7 +115,7 @@ sunbird_installation_display_name: sunbirddev
 sunbird_installation_display_name_for_sms: sunbird
 sunbird_installation_email: info@sunbird.org
 sunbird_instance: sunbird
-sunbird_keycloak_required_action_link_expiration_seconds: 2592000
+sunbird_keycloak_required_action_link_expiration_seconds: "2592000"
 sunbird_mw_system_host: learner-service
 sunbird_mw_system_port: 8088
 sunbird_open_saber_bridge_enable: false
@@ -129,10 +134,11 @@ sunbird_remote_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/us
 sunbird_reset_pass_msg: 'You have requested to reset password. Click on the link to set a password: {0}'
 sunbird_search_service_api_base_url: http://search-service.knowlg.svc.cluster.local:9000
 sunbird_sso_client_id: lms
+sunbird_sso_lb_ip: http://keycloak.lern.svc.cluster.local:8080
 sunbird_sso_realm: sunbird
 sunbird_telemetry_base_url: http://telemetry-service.obsrv.svc.cluster.local:9001
 sunbird_time_zone: Asia/Kolkata
-sunbird_url_shortner_enable: true
+sunbird_url_shortner_enable: false
 sunbird_user_bulk_upload_size: 1001
 sunbird_user_cert_kafka_topic: cert
 sunbird_user_profile_field_default_visibility: private
@@ -147,9 +153,24 @@ user_index_alias: user_alias
 ## If you provide a value to the variable, then that will take the highest precedence
 ## It's recommended to leave these blanks unless you have a strong use case to override them
 sunbird_sso_url: ""
-sunbird_subdomain_keycloak_base_url: "merge + /auth/"
+sunbird_subdomain_keycloak_base_url: ""
 sunbird_web_url: ""
+## Refers to cloud_service_provider
+sunbird_cloud_service_provider: ""
+## Refers to public storage bucket details
+sunbird_account_name: ""
+sunbird_account_key: ""
+## Refers to private storage bucket details
+sunbird_analytics_blob_account_name: ""
+sunbird_analytics_blob_account_key: ""
 
 
 ## Helper variables which are used to construct other variables
 keycloak_auth_endpoint: "/auth/"
+sunbird_encryption_key_length: 10
+learner_authorization_secret:
+  name: kong-authorization-tokens
+  key: learner-api-token
+
+## Set this value to true when developing the chart
+local_chart_development: false

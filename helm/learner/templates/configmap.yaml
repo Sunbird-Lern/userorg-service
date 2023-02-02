@@ -4,6 +4,84 @@ metadata:
   name: {{ .Chart.Name }}-config
   namespace: {{ .Release.Namespace | quote }}
 data:
+  {{/* This section has variables whose value is read from another object */}}
+  ekstep_authorization: {{ if .Values.ekstep_authorization }}
+  {{- .Values.ekstep_authorization }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.learner_authorization_secret.name "Key" .Values.learner_authorization_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
+  sunbird_authorization: {{ if .Values.sunbird_authorization }}
+  {{- .Values.sunbird_authorization }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.learner_authorization_secret.name "Key" .Values.learner_authorization_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
+  {{/* This section has variables whose value is auto generated if empty */}}
+  sunbird_encryption_key: {{ if .Values.sunbird_encryption_key }}
+  {{- .Values.sunbird_encryption_key }}
+  {{- else -}}
+  {{- template "common.randomize" .Values.sunbird_encryption_key_length | int }}
+  {{- end }}
+
+  {{/* This section has variables which in turn contain one or more mandatory variables */}}
+  sunbird_sso_url: {{ if .Values.domain }}
+  {{- .Values.domain }}{{ .Values.keycloak_auth_endpoint }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a value for \"domain\"" .Chart.Name | fail }}
+  {{- end }}
+
+  sunbird_account_name: {{ if .Values.cloud_public_storage_accountname }}
+  {{- .Values.cloud_public_storage_accountname }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a value for \"cloud_public_storage_accountname\"" .Chart.Name | fail }}
+  {{- end }}
+
+  sunbird_account_key: {{ if .Values.cloud_public_storage_secret }}
+  {{- .Values.cloud_public_storage_secret }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a value for \"cloud_public_storage_secret\"" .Chart.Name | fail }}
+  {{- end }}
+
+  sunbird_analytics_blob_account_name: {{ if .Values.cloud_private_storage_accountname }}
+  {{- .Values.cloud_private_storage_accountname }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a value for \"cloud_private_storage_accountname\"" .Chart.Name | fail }}
+  {{- end }}
+
+  sunbird_analytics_blob_account_key: {{ if .Values.cloud_private_storage_secret }}
+  {{- .Values.cloud_private_storage_secret }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a value for \"cloud_private_storage_secret\"" .Chart.Name | fail }}
+  {{- end }}
+  sunbird_cloud_service_provider: {{ if eq (include "common.csp.validation" .Values.cloud_service_provider) "true" }}
+  {{- .Values.cloud_service_provider }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a valid value for \"cloud_service_provider\". Accepted values are \"%s\"" .Chart.Name (include "common.valid.csps" .) | fail }}
+  {{- end }}
+
+  sunbird_content_azure_storage_container: {{ .Values.sunbird_content_azure_storage_container }}
+  sunbird_keycloak_user_federation_provider_id: {{ .Values.sunbird_keycloak_user_federation_provider_id }}
+  sunbird_pg_password: {{ .Values.sunbird_pg_password }}
+  sunbird_pg_user: {{ .Values.sunbird_pg_user }}
+  sunbird_sso_client_secret: {{ .Values.sunbird_sso_client_secret }}
+  sunbird_sso_password: {{ .Values.sunbird_sso_password }}
+  sunbird_sso_publickey: {{ .Values.sunbird_sso_publickey }}
+  {{/* This section has optional variables */}}
+  sunbird_subdomain_keycloak_base_url: {{ if .Values.merge_domain }}
+  {{- .Values.merge_domain }}{{ .Values.keycloak_auth_endpoint }}
+  {{- end }}
+  google_captcha_mobile_private_key: {{ .Values.google_captcha_mobile_private_key | quote }}
+  google_captcha_private_key: {{ .Values.google_captcha_private_key | quote }}
+  sunbird_mail_server_from_email: {{ .Values.sunbird_mail_server_from_email | quote }}
+  sunbird_mail_server_host: {{ .Values.sunbird_mail_server_host | quote }}
+  sunbird_mail_server_password: {{ .Values.sunbird_mail_server_password | quote }}
+  sunbird_mail_server_port: {{ .Values.sunbird_mail_server_port | quote }}
+  sunbird_mail_server_username: {{ .Values.sunbird_mail_server_username | quote }}
+  sunbird_msg_91_auth: {{ .Values.sunbird_msg_91_auth | quote }}
+  sunbird_msg_sender: {{ .Values.sunbird_msg_sender | quote }}
+  sunbird_url_shortner_access_token: {{ .Values.sunbird_url_shortner_access_token | quote }}
+  {{/* This section has variables with default values */}}
   ENV_NAME: {{ .Values.ENV_NAME }}
   PORTAL_SERVICE_PORT: {{ .Values.PORTAL_SERVICE_PORT }}
   SUNBIRD_KAFKA_URL: {{ .Values.SUNBIRD_KAFKA_URL }}
@@ -13,102 +91,75 @@ data:
   background_actor_provider: {{ .Values.background_actor_provider }}
   bind_hostname: {{ .Values.bind_hostname }}
   ekstep_api_base_url: {{ .Values.ekstep_api_base_url }}
-  ekstep_authorization: {{ .Values.ekstep_authorization }}
-  feed_limit: {{ .Values.feed_limit }}
+  feed_limit: {{ .Values.feed_limit | quote }}
   form_api_endpoint: {{ .Values.form_api_endpoint }}
-  google_captcha_mobile_private_key: {{ .Values.google_captcha_mobile_private_key }}
-  google_captcha_private_key: {{ .Values.google_captcha_private_key }}
-  isMultiDCEnabled: {{ .Values.isMultiDCEnabled }}
+  isMultiDCEnabled: {{ .Values.isMultiDCEnabled | quote }}
   kafka_urls: {{ .Values.kafka_urls }}
-  learner_in_memory_cache_ttl: {{ .Values.learner_in_memory_cache_ttl }}
+  learner_in_memory_cache_ttl: {{ .Values.learner_in_memory_cache_ttl | quote }}
   notification_service_base_url: {{ .Values.notification_service_base_url }}
   org_index_alias: {{ .Values.org_index_alias }}
   quartz_shadow_user_migration_timer: {{ .Values.quartz_shadow_user_migration_timer }}
-  sunbird_account_key: {{ .Values.sunbird_account_key }}
-  sunbird_account_name: {{ .Values.sunbird_account_name }}
   sunbird_analytics_api_base_url: {{ .Values.sunbird_analytics_api_base_url }}
-  sunbird_analytics_blob_account_key: {{ .Values.sunbird_analytics_blob_account_key }}
-  sunbird_analytics_blob_account_name: {{ .Values.sunbird_analytics_blob_account_name }}
   sunbird_api_base_url: {{ .Values.sunbird_api_base_url }}
   sunbird_api_mgr_base_url: {{ .Values.sunbird_api_mgr_base_url }}
   sunbird_app_name: {{ .Values.sunbird_app_name }}
-  sunbird_authorization: {{ .Values.sunbird_authorization }}
-  sunbird_cache_enable: {{ .Values.sunbird_cache_enable }}
+  sunbird_cache_enable: {{ .Values.sunbird_cache_enable | quote }}
   sunbird_cassandra_consistency_level: {{ .Values.sunbird_cassandra_consistency_level }}
   sunbird_cassandra_host: {{ .Values.sunbird_cassandra_host }}
   sunbird_cassandra_password: {{ .Values.sunbird_cassandra_password }}
-  sunbird_cassandra_port: {{ .Values.sunbird_cassandra_port }}
+  sunbird_cassandra_port: {{ .Values.sunbird_cassandra_port | quote }}
   sunbird_cassandra_username: {{ .Values.sunbird_cassandra_username }}
   sunbird_cert_service_base_url: {{ .Values.sunbird_cert_service_base_url }}
-  sunbird_cloud_service_provider: {{ .Values.sunbird_cloud_service_provider }}
-  sunbird_content_azure_storage_container: {{ .Values.sunbird_content_azure_storage_container }}
-  sunbird_course_batch_notification_enabled: {{ .Values.sunbird_course_batch_notification_enabled }}
+  sunbird_course_batch_notification_enabled: {{ .Values.sunbird_course_batch_notification_enabled | quote }}
   sunbird_course_batch_notification_signature: {{ .Values.sunbird_course_batch_notification_signature }}
   sunbird_cs_base_url: {{ .Values.sunbird_cs_base_url }}
   sunbird_cs_search_path: {{ .Values.sunbird_cs_search_path }}
   sunbird_default_channel: {{ .Values.sunbird_default_channel }}
-  sunbird_email_max_recipients_limit: {{ .Values.sunbird_email_max_recipients_limit }}
-  sunbird_encryption_key: {{ .Values.sunbird_encryption_key }}
+  sunbird_email_max_recipients_limit: {{ .Values.sunbird_email_max_recipients_limit | quote }}
   sunbird_encryption_mode: {{ .Values.sunbird_encryption_mode }}
   sunbird_env_logo_url: {{ .Values.sunbird_env_logo_url }}
   sunbird_environment: {{ .Values.sunbird_environment }}
   sunbird_es_host: {{ .Values.sunbird_es_host }}
-  sunbird_es_port: {{ .Values.sunbird_es_port }}
-  sunbird_fuzzy_search_threshold: {{ .Values.sunbird_fuzzy_search_threshold }}
-  sunbird_gzip_enable: {{ .Values.sunbird_gzip_enable }}
-  sunbird_gzip_size_threshold: {{ .Values.sunbird_gzip_size_threshold }}
-  sunbird_health_check_enable: {{ .Values.sunbird_health_check_enable }}
+  sunbird_es_port: {{ .Values.sunbird_es_port | quote }}
+  sunbird_fuzzy_search_threshold: {{ .Values.sunbird_fuzzy_search_threshold |quote }}
+  sunbird_gzip_enable: {{ .Values.sunbird_gzip_enable | quote }}
+  sunbird_gzip_size_threshold: {{ .Values.sunbird_gzip_size_threshold | quote }}
+  sunbird_health_check_enable: {{ .Values.sunbird_health_check_enable | quote }}
   sunbird_installation: {{ .Values.sunbird_installation }}
   sunbird_installation_display_name: {{ .Values.sunbird_installation_display_name }}
   sunbird_installation_display_name_for_sms: {{ .Values.sunbird_installation_display_name_for_sms }}
   sunbird_installation_email: {{ .Values.sunbird_installation_email }}
   sunbird_instance: {{ .Values.sunbird_instance }}
-  sunbird_keycloak_required_action_link_expiration_seconds: {{ .Values.sunbird_keycloak_required_action_link_expiration_seconds }}
-  sunbird_keycloak_user_federation_provider_id: {{ .Values.sunbird_keycloak_user_federation_provider_id }}
-  sunbird_mail_server_from_email: {{ .Values.sunbird_mail_server_from_email }}
-  sunbird_mail_server_host: {{ .Values.sunbird_mail_server_host }}
-  sunbird_mail_server_password: {{ .Values.sunbird_mail_server_password }}
-  sunbird_mail_server_port: {{ .Values.sunbird_mail_server_port }}
-  sunbird_mail_server_username: {{ .Values.sunbird_mail_server_username }}
-  sunbird_msg_91_auth: {{ .Values.sunbird_msg_91_auth }}
-  sunbird_msg_sender: {{ .Values.sunbird_msg_sender }}
+  sunbird_keycloak_required_action_link_expiration_seconds: {{ .Values.sunbird_keycloak_required_action_link_expiration_seconds | quote }}
   sunbird_mw_system_host: {{ .Values.sunbird_mw_system_host }}
-  sunbird_mw_system_port: {{ .Values.sunbird_mw_system_port }}
-  sunbird_open_saber_bridge_enable: {{ .Values.sunbird_open_saber_bridge_enable }}
-  sunbird_otp_allowed_attempt: {{ .Values.sunbird_otp_allowed_attempt }}
-  sunbird_otp_expiration: {{ .Values.sunbird_otp_expiration }}
-  sunbird_otp_length: {{ .Values.sunbird_otp_length }}
+  sunbird_mw_system_port: {{ .Values.sunbird_mw_system_port | quote }}
+  sunbird_open_saber_bridge_enable: {{ .Values.sunbird_open_saber_bridge_enable | quote }}
+  sunbird_otp_allowed_attempt: {{ .Values.sunbird_otp_allowed_attempt | quote }}
+  sunbird_otp_expiration: {{ .Values.sunbird_otp_expiration | quote }}
+  sunbird_otp_length: {{ .Values.sunbird_otp_length | quote }}
   sunbird_pg_db: {{ .Values.sunbird_pg_db }}
   sunbird_pg_host: {{ .Values.sunbird_pg_host }}
-  sunbird_pg_password: {{ .Values.sunbird_pg_password }}
-  sunbird_pg_port: {{ .Values.sunbird_pg_port }}
-  sunbird_pg_user: {{ .Values.sunbird_pg_user }}
+  sunbird_pg_port: {{ .Values.sunbird_pg_port | quote }}
   sunbird_quartz_mode: {{ .Values.sunbird_quartz_mode }}
   sunbird_redis_host: {{ .Values.sunbird_redis_host }}
-  sunbird_redis_port: {{ .Values.sunbird_redis_port }}
+  sunbird_redis_port: {{ .Values.sunbird_redis_port | quote }}
   sunbird_registry_service_baseurl: {{ .Values.sunbird_registry_service_baseurl }}
   sunbird_remote_bg_req_router_path: {{ .Values.sunbird_remote_bg_req_router_path }}
   sunbird_remote_req_router_path: {{ .Values.sunbird_remote_req_router_path }}
   sunbird_reset_pass_msg: {{ .Values.sunbird_reset_pass_msg | quote }}
   sunbird_search_service_api_base_url: {{ .Values.sunbird_search_service_api_base_url }}
   sunbird_sso_client_id: {{ .Values.sunbird_sso_client_id }}
-  sunbird_sso_client_secret: {{ .Values.sunbird_sso_client_secret }}
   sunbird_sso_lb_ip: {{ .Values.sunbird_sso_lb_ip }}
-  sunbird_sso_password: {{ .Values.sunbird_sso_password }}
-  sunbird_sso_publickey: {{ .Values.sunbird_sso_publickey }}
   sunbird_sso_realm: {{ .Values.sunbird_sso_realm }}
-  sunbird_sso_url: {{ required "Chart Error | Learner | Please provide a value for domain" .Values.domain }}{{ .Values.keycloak_auth_endpoint }}
   sunbird_sso_username: {{ .Values.sunbird_sso_username }}
-  sunbird_subdomain_keycloak_base_url: {{ .Values.sunbird_subdomain_keycloak_base_url }}
   sunbird_telemetry_base_url: {{ .Values.sunbird_telemetry_base_url }}
   sunbird_time_zone: {{ .Values.sunbird_time_zone }}
-  sunbird_url_shortner_access_token: {{ .Values.sunbird_url_shortner_access_token }}
-  sunbird_url_shortner_enable: {{ .Values.sunbird_url_shortner_enable }}
-  sunbird_user_bulk_upload_size: {{ .Values.sunbird_user_bulk_upload_size }}
+  sunbird_url_shortner_enable: {{ .Values.sunbird_url_shortner_enable | quote }}
+  sunbird_user_bulk_upload_size: {{ .Values.sunbird_user_bulk_upload_size | quote }}
   sunbird_user_cert_kafka_topic: {{ .Values.sunbird_user_cert_kafka_topic }}
   sunbird_user_profile_field_default_visibility: {{ .Values.sunbird_user_profile_field_default_visibility }}
   sunbird_web_url: {{ .Values.sunbird_web_url }}
   telemetry_pdata_id: {{ .Values.telemetry_pdata_id }}
   telemetry_pdata_pid: {{ .Values.telemetry_pdata_pid }}
-  telemetry_queue_threshold_value: {{ .Values.telemetry_queue_threshold_value }}
+  telemetry_queue_threshold_value: {{ .Values.telemetry_queue_threshold_value | quote }}
   user_index_alias: {{ .Values.user_index_alias }}
