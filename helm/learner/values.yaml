@@ -42,7 +42,6 @@ merge_domain: ""
 ## This section has optional variables
 ## If you provide a value to the variable, then that will have the highest precedence
 ## If you don't provide a value, then it's auto generated
-sunbird_encryption_key: ""
 
 
 ## This section has optional variables
@@ -101,6 +100,7 @@ sunbird_cs_base_url: http://knowledge-mw-service.knowlg.svc.cluster.local:5000
 sunbird_cs_search_path: /v1/content/search
 sunbird_default_channel: sunbird
 sunbird_email_max_recipients_limit: 100
+sunbird_encryption_key: encryptionkey
 sunbird_encryption_mode: local
 sunbird_env_logo_url: ""
 sunbird_environment: dev

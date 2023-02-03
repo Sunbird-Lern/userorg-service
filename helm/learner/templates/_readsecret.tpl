@@ -18,3 +18,14 @@
   {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "common.secret.exists" -}}
+{{ $secret := (lookup "v1" "Secret" .Namespace .Name).data}}
+{{- if $secret -}}
+  {{- if hasKey $secret .Key -}}
+    {{- true -}}
+  {{- else -}}
+    {{- false -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}

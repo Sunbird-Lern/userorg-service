@@ -1,0 +1,6 @@
+domain: "https://abc.com"
+cloud_public_storage_accountname: "public"
+cloud_public_storage_secret: "publicsecret"
+cloud_private_storage_accountname: "private"
+cloud_private_storage_secret: "privatesecret"
+cloud_service_provider: "aws"

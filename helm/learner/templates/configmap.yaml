@@ -17,13 +17,6 @@ data:
   {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.learner_authorization_secret.name "Key" .Values.learner_authorization_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
   {{- end }}
 
-  {{/* This section has variables whose value is auto generated if empty */}}
-  sunbird_encryption_key: {{ if .Values.sunbird_encryption_key }}
-  {{- .Values.sunbird_encryption_key }}
-  {{- else -}}
-  {{- template "common.randomize" .Values.sunbird_encryption_key_length | int }}
-  {{- end }}
-
   {{/* This section has variables which in turn contain one or more mandatory variables */}}
   sunbird_sso_url: {{ if .Values.domain }}
   {{- .Values.domain }}{{ .Values.keycloak_auth_endpoint }}
@@ -116,6 +109,7 @@ data:
   sunbird_cs_search_path: {{ .Values.sunbird_cs_search_path }}
   sunbird_default_channel: {{ .Values.sunbird_default_channel }}
   sunbird_email_max_recipients_limit: {{ .Values.sunbird_email_max_recipients_limit | quote }}
+  sunbird_encryption_key: {{ .Values.sunbird_encryption_key }}
   sunbird_encryption_mode: {{ .Values.sunbird_encryption_mode }}
   sunbird_env_logo_url: {{ .Values.sunbird_env_logo_url }}
   sunbird_environment: {{ .Values.sunbird_environment }}
