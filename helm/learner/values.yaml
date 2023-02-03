@@ -18,6 +18,7 @@ cloud_public_storage_secret: ""
 cloud_private_storage_accountname: ""
 cloud_private_storage_secret: ""
 
+
 ## This section has optional variables
 ## It is strongly recommended to provide a value for these
 ## If you don't provide a value for these variables, they will default to empty values
@@ -32,6 +33,7 @@ sunbird_mail_server_username: ""
 sunbird_msg_91_auth: ""
 sunbird_msg_sender: ""
 sunbird_url_shortner_access_token: ""
+
 
 ## The merge domain name or Public IP address
 ## The merge domain name should start with http or https
@@ -53,13 +55,7 @@ sunbird_keycloak_user_federation_provider_id: ""
 sunbird_pg_user: ""
 sunbird_pg_password: ""
 sunbird_sso_publickey: ""
-sunbird_sso_username: ""
-sunbird_sso_password: ""
 sunbird_sso_client_secret: ""
-
-## Storage bucket name where the contents are stores
-sunbird_content_azure_storage_container: ""
-
 
 ## This section has variables with default values
 ## These are standard defaults that work well
@@ -94,6 +90,8 @@ sunbird_cassandra_password: passwod
 sunbird_cassandra_port: 9042
 sunbird_cassandra_username: admin
 sunbird_cert_service_base_url: http://cert-service.lern.svc.cluster.local:9000
+## Storage bucket name where the contents are stores
+sunbird_content_azure_storage_container: contents
 sunbird_course_batch_notification_enabled: true
 sunbird_course_batch_notification_signature: sunbird
 sunbird_cs_base_url: http://knowledge-mw-service.knowlg.svc.cluster.local:5000
@@ -165,12 +163,33 @@ sunbird_analytics_blob_account_name: ""
 sunbird_analytics_blob_account_key: ""
 
 
+## Variables that can be deprecated
+## Need a reviewe with the team
+sunbird_sso_username: ""
+sunbird_sso_password: ""
+
 ## Helper variables which are used to construct other variables
 keycloak_auth_endpoint: "/auth/"
 sunbird_encryption_key_length: 10
-learner_authorization_secret:
-  name: kong-authorization-tokens
-  key: learner-api-token
+external_secrets:
+  kong:
+    name: kong-api-tokens
+    key: learner-api-token
+  keycloak_federation:
+    name: keycloak-federation
+    key: cassandra-storage-provider
+  keycloak_client_secret:
+    name: keycloak-clients
+    key: lms
+  keycloak_public_key:
+    name: keycloak-realms
+    key: sunbird
+  postgresql_user:
+    name: postgresql
+    key: postgres-user
+  postgresql_password:
+    name: postgresql
+    key: postgresql-password
 
 ## Set this value to true when developing the chart
 local_chart_development: false

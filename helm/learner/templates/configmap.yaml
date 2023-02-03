@@ -8,13 +8,13 @@ data:
   ekstep_authorization: {{ if .Values.ekstep_authorization }}
   {{- .Values.ekstep_authorization }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.learner_authorization_secret.name "Key" .Values.learner_authorization_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key "LocalDevelopment" .Values.local_chart_development) -}}
   {{- end }}
 
   sunbird_authorization: {{ if .Values.sunbird_authorization }}
   {{- .Values.sunbird_authorization }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.learner_authorization_secret.name "Key" .Values.learner_authorization_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key "LocalDevelopment" .Values.local_chart_development) -}}
   {{- end }}
 
   {{/* This section has variables which in turn contain one or more mandatory variables */}}
@@ -53,13 +53,36 @@ data:
   {{- printf "ERROR | %s | Please provide a valid value for \"cloud_service_provider\". Accepted values are \"%s\"" .Chart.Name (include "common.valid.csps" .) | fail }}
   {{- end }}
 
-  sunbird_content_azure_storage_container: {{ .Values.sunbird_content_azure_storage_container }}
-  sunbird_keycloak_user_federation_provider_id: {{ .Values.sunbird_keycloak_user_federation_provider_id }}
-  sunbird_pg_password: {{ .Values.sunbird_pg_password }}
-  sunbird_pg_user: {{ .Values.sunbird_pg_user }}
-  sunbird_sso_client_secret: {{ .Values.sunbird_sso_client_secret }}
-  sunbird_sso_password: {{ .Values.sunbird_sso_password }}
-  sunbird_sso_publickey: {{ .Values.sunbird_sso_publickey }}
+  sunbird_keycloak_user_federation_provider_id: {{ if .Values.sunbird_keycloak_user_federation_provider_id }}
+  {{- .Values.sunbird_keycloak_user_federation_provider_id }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_federation.name "Key" .Values.external_secrets.keycloak_federation.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
+  sunbird_pg_user: {{ if .Values.sunbird_pg_user }}
+  {{- .Values.sunbird_pg_user }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_user.name "Key" .Values.external_secrets.postgresql_user.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
+  sunbird_pg_password: {{ if .Values.sunbird_pg_password }}
+  {{- .Values.sunbird_pg_password }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_password.name "Key" .Values.external_secrets.postgresql_password.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
+  sunbird_sso_client_secret: {{ if .Values.sunbird_sso_client_secret }}
+  {{- .Values.sunbird_sso_client_secret }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_client_secret.name "Key" .Values.external_secrets.keycloak_client_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
+  sunbird_sso_publickey: {{ if .Values.sunbird_sso_publickey }}
+  {{- .Values.sunbird_sso_publickey }}
+  {{- else -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_public_key.name "Key" .Values.external_secrets.keycloak_public_key.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- end }}
+
   {{/* This section has optional variables */}}
   sunbird_subdomain_keycloak_base_url: {{ if .Values.merge_domain }}
   {{- .Values.merge_domain }}{{ .Values.keycloak_auth_endpoint }}
@@ -74,6 +97,7 @@ data:
   sunbird_msg_91_auth: {{ .Values.sunbird_msg_91_auth | quote }}
   sunbird_msg_sender: {{ .Values.sunbird_msg_sender | quote }}
   sunbird_url_shortner_access_token: {{ .Values.sunbird_url_shortner_access_token | quote }}
+
   {{/* This section has variables with default values */}}
   ENV_NAME: {{ .Values.ENV_NAME }}
   PORTAL_SERVICE_PORT: {{ .Values.PORTAL_SERVICE_PORT }}
@@ -103,6 +127,7 @@ data:
   sunbird_cassandra_port: {{ .Values.sunbird_cassandra_port | quote }}
   sunbird_cassandra_username: {{ .Values.sunbird_cassandra_username }}
   sunbird_cert_service_base_url: {{ .Values.sunbird_cert_service_base_url }}
+  sunbird_content_azure_storage_container: {{ .Values.sunbird_content_azure_storage_container }}
   sunbird_course_batch_notification_enabled: {{ .Values.sunbird_course_batch_notification_enabled | quote }}
   sunbird_course_batch_notification_signature: {{ .Values.sunbird_course_batch_notification_signature }}
   sunbird_cs_base_url: {{ .Values.sunbird_cs_base_url }}
@@ -146,6 +171,7 @@ data:
   sunbird_sso_lb_ip: {{ .Values.sunbird_sso_lb_ip }}
   sunbird_sso_realm: {{ .Values.sunbird_sso_realm }}
   sunbird_sso_username: {{ .Values.sunbird_sso_username }}
+  sunbird_sso_password: {{ .Values.sunbird_sso_password }}
   sunbird_telemetry_base_url: {{ .Values.sunbird_telemetry_base_url }}
   sunbird_time_zone: {{ .Values.sunbird_time_zone }}
   sunbird_url_shortner_enable: {{ .Values.sunbird_url_shortner_enable | quote }}
