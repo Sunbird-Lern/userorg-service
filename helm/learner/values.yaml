@@ -192,4 +192,117 @@ external_secrets:
     key: postgresql-password
 
 ## Set this value to true when developing the chart
-local_chart_development: false
+local_chart_development: true
+
+
+## Other kubernetes variables
+image:
+  registry: docker.io
+  repository: keshavprasad/learner
+  tag: release-5.0.0
+
+replicaCount: 1
+
+strategy:
+  maxSurge: 25%
+  maxUnavailable: 25%
+
+imagePullSecrets: ""
+
+javaOptions: -Xmx600m
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 100M
+  limits:
+    cpu: 1
+    memory: 1G
+
+port: 9000
+
+targetPort: 9000
+
+livenessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /service/health
+      port: 9000
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+readinessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /service/health
+      port: 9000
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+opa_sidecar: true
+
+envoy_livenessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /ready
+      port: 10000
+      scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+envoy_readinessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /ready
+      port: 10000
+      scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+opa_livenessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /health?plugins
+      port: 8282
+      scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+opa_readinessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /health?bundle=true
+      port: 8282
+      scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+envoy_resources:
+  requests:
+    cpu: 100m
+    memory: 100M
+  limits:
+    cpu: 1
+    memory: 1G
+
+opa_resources:
+  requests:
+    cpu: 100m
+    memory: 100M
+  limits:
+    cpu: 1
+    memory: 1G
+
+initcontainer_resources:
+  requests:
+    cpu: 100m
+    memory: 100M
+  limits:
+    cpu: 100m
+    memory: 100M
