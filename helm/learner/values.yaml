@@ -194,6 +194,8 @@ external_secrets:
 external_configmaps:
   common_opa_policies:
     name: common-opa-policies
+  common_opa_policies_keys:
+    name: common-opa-policies-public-keys
   access_public_keys:
     name: user-access-public-keys
 

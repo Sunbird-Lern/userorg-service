@@ -93,7 +93,7 @@ spec:
 {{ toYaml .Values.opa_resources | indent 10 }}
         volumeMounts:
         - mountPath: /policies
-          name: {{ .Chart.Name }}-opa-policies
+          name: opa-policies
           readOnly: true
         # - mountPath: /policies
         #   name: {{ .Values.external_configmaps.common_opa_policies.name }}
@@ -128,17 +128,17 @@ spec:
       - name: {{ .Values.external_configmaps.access_public_keys.name }}
         configMap:
           name: {{ .Values.external_configmaps.access_public_keys.name }}
-      - name: {{ .Chart.Name }}-opa-policies
+{{- if .Values.opa_sidecar }}
+      - name: {{ .Chart.Name }}-envoy-config
+        configMap:
+          name: {{ .Chart.Name }}-envoy-config
+      - name: opa-policies
         projected:
           sources:
           - configMap:
-              name: {{ .Values.external_configmaps.access_public_keys.name }}
-{{- if .Values.opa_sidecar }}
-          - configMap:
-              name: {{ .Chart.Name }}-opa-policies
+              name: {{ .Values.external_configmaps.common_opa_policies_keys.name }}
           - configMap:
               name: {{ .Values.external_configmaps.common_opa_policies.name }}
-      - name: {{ .Chart.Name }}-envoy-config
-        configMap:
-          name: {{ .Chart.Name }}-envoy-config    
+          - configMap:
+              name: {{ .Chart.Name }}-opa-policies
 {{- end }}
