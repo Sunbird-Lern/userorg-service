@@ -22,3 +22,4 @@
 *.tmproj
 .vscode/
 *_test.rego
+policies.rego

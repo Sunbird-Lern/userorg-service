@@ -29,3 +29,12 @@
   {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "common.secret.as.map" -}}
+{{ $secret := (lookup "v1" "Secret" .Namespace .Name).data}}  
+{{- if $secret -}}
+  {{- $secret -}}
+{{- else -}}
+  {{- false -}}
+{{- end -}}
+{{- end -}}

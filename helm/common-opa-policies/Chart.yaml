@@ -1,6 +1,6 @@
 apiVersion: v2
-name: learner
-description: A helm chart for learner service
+name: common-opa-policies
+description: A helm chart for common opa policies
 
 # A chart can be either an 'application' or a 'library' chart.
 #

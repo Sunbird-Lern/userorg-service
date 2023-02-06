@@ -131,9 +131,9 @@ sunbird_remote_bg_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088
 sunbird_remote_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
 sunbird_reset_pass_msg: 'You have requested to reset password. Click on the link to set a password: {0}'
 sunbird_search_service_api_base_url: http://search-service.knowlg.svc.cluster.local:9000
-sunbird_sso_client_id: lms
+#sunbird_sso_client_id: lms
 sunbird_sso_lb_ip: http://keycloak.lern.svc.cluster.local:8080
-sunbird_sso_realm: sunbird
+#sunbird_sso_realm: sunbird
 sunbird_telemetry_base_url: http://telemetry-service.obsrv.svc.cluster.local:9001
 sunbird_time_zone: Asia/Kolkata
 sunbird_url_shortner_enable: false
@@ -181,7 +181,7 @@ external_secrets:
   keycloak_client_secret:
     name: keycloak-clients
     key: lms
-  keycloak_public_key:
+  keycloak_realm_public_key:
     name: keycloak-realms
     key: sunbird
   postgresql_user:
@@ -191,11 +191,19 @@ external_secrets:
     name: postgresql
     key: postgresql-password
 
+external_configmaps:
+  common_opa_policies:
+    name: common-opa-policies
+  access_public_keys:
+    name: user-access-public-keys
+
 ## Set this value to true when developing the chart
 local_chart_development: true
 
 
-## Other kubernetes variables
+## This section has other kubernetes variables
+## These are standard defaults that work well
+## You can override these if you have a use case for it
 image:
   registry: docker.io
   repository: keshavprasad/learner

@@ -48,7 +48,7 @@ spec:
         - name: {{ .Chart.Name }}-logback-config
           mountPath: /home/sunbird/learner/learning-service-1.0-SNAPSHOT/config
         - mountPath: {{ .Values.accesstoken.publickey.basepath }}
-          name: access-keys
+          name: {{ .Values.external_configmaps.access_public_keys.name }}
 {{- if .Values.opa_sidecar }}
       - args:
         - envoy
@@ -68,12 +68,12 @@ spec:
 {{ toYaml .Values.envoy_resources | indent 10 }}
         volumeMounts:
         - mountPath: /config
-          name: envoy-config
+          name: {{ .Chart.Name }}-envoy-config
           readOnly: true
       - args:
         - run
         - --server
-        - /bundle
+        - /policies
         - --addr=localhost:8181
         - --diagnostic-addr=0.0.0.0:8282
         - --set=plugins.envoy_ext_authz_grpc.addr=:9191
@@ -92,9 +92,15 @@ spec:
         resources:
 {{ toYaml .Values.opa_resources | indent 10 }}
         volumeMounts:
-        - mountPath: /bundle
-          name: opa-policy
+        - mountPath: /policies
+          name: {{ .Chart.Name }}-opa-policies
           readOnly: true
+        # - mountPath: /policies
+        #   name: {{ .Values.external_configmaps.common_opa_policies.name }}
+        #   readOnly: true
+        # - mountPath: /policies
+        #   name: {{ .Values.external_configmaps.access_public_keys.name }}
+        #   readOnly: true
       initContainers:
       - args:
         - -p
@@ -119,14 +125,20 @@ spec:
       - name: {{ .Chart.Name }}-logback-config
         configMap:
           name: {{ .Chart.Name }}-logback-config
-      - name: access-keys
-        secret:
-          secretName: access-keys
+      - name: {{ .Values.external_configmaps.access_public_keys.name }}
+        configMap:
+          name: {{ .Values.external_configmaps.access_public_keys.name }}
+      - name: {{ .Chart.Name }}-opa-policies
+        projected:
+          sources:
+          - configMap:
+              name: {{ .Values.external_configmaps.access_public_keys.name }}
 {{- if .Values.opa_sidecar }}
-      - name: envoy-config
+          - configMap:
+              name: {{ .Chart.Name }}-opa-policies
+          - configMap:
+              name: {{ .Values.external_configmaps.common_opa_policies.name }}
+      - name: {{ .Chart.Name }}-envoy-config
         configMap:
-          name: {{ .Chart.Name }}-envoy-config
-      - name: opa-policy
-        configMap:
-          name: {{ .Chart.Name }}-opa-policy
+          name: {{ .Chart.Name }}-envoy-config    
 {{- end }}

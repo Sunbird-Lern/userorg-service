@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+data:
+{{- $publickeys := .Files.Glob "publickeys/*" }}
+{{- if $publickeys }}
+{{ (.Files.Glob "publickeys/*").AsConfig | indent 2 }}
+{{ else }}
+{{ printf "ERROR | %s | The \"publickeys\" folder is either missing or empty in the chart directory" .Chart.Name | fail }}
+{{ end }}

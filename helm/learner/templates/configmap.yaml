@@ -1,8 +1,9 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Chart.Name }}-config
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ .Release.Namespace }}
 data:
   {{/* This section has variables whose value is read from another object */}}
   ekstep_authorization: {{ if .Values.ekstep_authorization }}
@@ -80,7 +81,7 @@ data:
   sunbird_sso_publickey: {{ if .Values.sunbird_sso_publickey }}
   {{- .Values.sunbird_sso_publickey }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_public_key.name "Key" .Values.external_secrets.keycloak_public_key.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_realm_public_key.name "Key" .Values.external_secrets.keycloak_realm_public_key.key "LocalDevelopment" .Values.local_chart_development) -}}
   {{- end }}
 
   {{/* This section has optional variables */}}
@@ -167,9 +168,9 @@ data:
   sunbird_remote_req_router_path: {{ .Values.sunbird_remote_req_router_path }}
   sunbird_reset_pass_msg: {{ .Values.sunbird_reset_pass_msg | quote }}
   sunbird_search_service_api_base_url: {{ .Values.sunbird_search_service_api_base_url }}
-  sunbird_sso_client_id: {{ .Values.sunbird_sso_client_id }}
+  sunbird_sso_client_id: {{ .Values.external_secrets.keycloak_client_secret.key }}
   sunbird_sso_lb_ip: {{ .Values.sunbird_sso_lb_ip }}
-  sunbird_sso_realm: {{ .Values.sunbird_sso_realm }}
+  sunbird_sso_realm: {{ .Values.external_secrets.keycloak_realm_public_key.key }}
   sunbird_sso_username: {{ .Values.sunbird_sso_username }}
   sunbird_sso_password: {{ .Values.sunbird_sso_password }}
   sunbird_telemetry_base_url: {{ .Values.sunbird_telemetry_base_url }}
@@ -183,3 +184,129 @@ data:
   telemetry_pdata_pid: {{ .Values.telemetry_pdata_pid }}
   telemetry_queue_threshold_value: {{ .Values.telemetry_queue_threshold_value | quote }}
   user_index_alias: {{ .Values.user_index_alias }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-logback-config
+  namespace: {{ .Release.Namespace }}
+data:
+  logback.xml: |-
+    <configuration>
+
+      <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
+      <!-- transaction-event-trigger START -->
+      <timestamp key="timestamp" datePattern="yyyy-MM-dd"/>
+      <!-- common transactions logs -->
+      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+          <layout class="net.logstash.logback.layout.LogstashLayout">
+            <fieldNames>
+              <timestamp>timestamp</timestamp>
+              <message>msg</message>
+              <logger>lname</logger>
+              <thread>tname</thread>
+              <levelValue>[ignore]</levelValue>
+              <version>[ignore]</version>
+              <stack_trace>exception</stack_trace>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+              <maxDepthPerThrowable>30</maxDepthPerThrowable>
+              <maxLength>2048</maxLength>
+              <exclude>sun\.reflect\..*\.invoke.*</exclude>
+              <rootCauseFirst>true</rootCauseFirst>
+              <inlineHash>true</inlineHash>
+            </throwableConverter>
+          </layout>
+        </encoder>
+      </appender>
+
+      <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT" />
+      </appender>
+
+      <appender name="queryLoggerAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+          <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+            <timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SSSX</timestampFormat>
+            <timestampFormatTimezoneId>Etc/UTC</timestampFormatTimezoneId>
+            <fieldNames>
+              <timestamp>timestamp</timestamp>
+              <message>msg</message>
+              <logger>lname</logger>
+              <thread>tname</thread>
+              <levelValue>[ignore]</levelValue>
+              <version>[ignore]</version>
+            </fieldNames>
+          </layout>
+        </encoder>
+      </appender>
+
+      <appender name="defaultLoggerAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+          <layout class="net.logstash.logback.layout.LogstashLayout">
+            <fieldNames>
+              <timestamp>timestamp</timestamp>
+              <message>msg</message>
+              <logger>lname</logger>
+              <thread>tname</thread>
+              <levelValue>[ignore]</levelValue>
+              <version>[ignore]</version>
+              <stack_trace>exception</stack_trace>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+              <maxDepthPerThrowable>30</maxDepthPerThrowable>
+              <maxLength>2048</maxLength>
+              <exclude>sun\.reflect\..*\.invoke.*</exclude>
+              <rootCauseFirst>true</rootCauseFirst>
+              <inlineHash>true</inlineHash>
+            </throwableConverter>
+          </layout>
+        </encoder>
+      </appender>
+
+      <appender name="kafka-appender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+          <pattern>%msg</pattern>
+        </encoder>
+
+        <topic>${ENV_NAME}.telemetry.raw</topic>
+        <!-- ensure that every message sent by the executing host is partitioned to the same partition strategy -->
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
+        <!-- block the logging application thread if the kafka appender cannot keep up with sending the log messages -->
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+
+        <!-- each <producerConfig> translates to regular kafka-client config (format: key=value) -->
+        <!-- producer configs are documented here: https://kafka.apache.org/documentation.html#newproducerconfigs -->
+        <!-- bootstrap.servers is the only mandatory producerConfig -->
+        <producerConfig>bootstrap.servers=${SUNBIRD_KAFKA_URL}</producerConfig>
+        <!-- don't wait for a broker to ack the reception of a batch.  -->
+        <producerConfig>acks=0</producerConfig>
+        <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
+        <producerConfig>linger.ms=15000</producerConfig>
+        <!-- even if the producer buffer runs full, do not block the application but start to drop messages -->
+        <producerConfig>max.block.ms=0</producerConfig>
+        <!-- define a client-id that you use to identify yourself against the kafka broker -->
+        <producerConfig>client.id=${HOSTNAME}-${CONTEXT_NAME}-logback-relaxed</producerConfig>
+
+        <!-- there is no fallback <appender-ref>. If this appender cannot deliver, it will drop its messages. -->
+
+      </appender>
+
+      <logger name="defaultLoggerAppender" level="INFO" />
+      <!-- Telemetry Loggers-->
+      <logger name="TelemetryEventLogger" level="INFO">
+        <appender-ref ref="kafka-appender" />
+      </logger>
+
+      <logger name="queryLogger" level="DEBUG">
+        <appender-ref ref="defaultLoggerAppender" />
+      </logger>
+
+      <root level="INFO">
+        <appender-ref ref="ASYNCSTDOUT" />
+      </root>
+
+    </configuration>
