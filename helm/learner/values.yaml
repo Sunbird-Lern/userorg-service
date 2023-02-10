@@ -131,9 +131,7 @@ sunbird_remote_bg_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088
 sunbird_remote_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
 sunbird_reset_pass_msg: 'You have requested to reset password. Click on the link to set a password: {0}'
 sunbird_search_service_api_base_url: http://search-service.knowlg.svc.cluster.local:9000
-#sunbird_sso_client_id: lms
 sunbird_sso_lb_ip: http://keycloak.lern.svc.cluster.local:8080
-#sunbird_sso_realm: sunbird
 sunbird_telemetry_base_url: http://telemetry-service.obsrv.svc.cluster.local:9001
 sunbird_time_zone: Asia/Kolkata
 sunbird_url_shortner_enable: false
@@ -146,25 +144,8 @@ telemetry_queue_threshold_value: 100
 user_index_alias: user_alias
 
 
-## Variables with empty values
-## The value for these variables will be contstucted using other variables
-## If you provide a value to the variable, then that will take the highest precedence
-## It's recommended to leave these blanks unless you have a strong use case to override them
-sunbird_sso_url: ""
-sunbird_subdomain_keycloak_base_url: ""
-sunbird_web_url: ""
-## Refers to cloud_service_provider
-sunbird_cloud_service_provider: ""
-## Refers to public storage bucket details
-sunbird_account_name: ""
-sunbird_account_key: ""
-## Refers to private storage bucket details
-sunbird_analytics_blob_account_name: ""
-sunbird_analytics_blob_account_key: ""
-
-
 ## Variables that can be deprecated
-## Need a reviewe with the team
+## Need a review with the team
 sunbird_sso_username: ""
 sunbird_sso_password: ""
 
@@ -197,7 +178,7 @@ external_configmaps:
   common_opa_policies_keys:
     name: common-opa-policies-public-keys
   access_public_keys:
-    name: user-access-public-keys
+    name: user-access-keys-public
 
 ## Set this value to true when developing the chart
 local_chart_development: true
@@ -316,3 +297,31 @@ initcontainer_resources:
   limits:
     cpu: 100m
     memory: 100M
+
+
+## List of variables that are accepted by the service but not being referenced in configmap
+## The value for these variables will be constructed using other variables, so you cannot pass a value to these
+## If you want to provide values to them and override, you will need to change the configmap to reference these vars
+## This list is shown here only for reference
+
+# Refers to domain/auth
+# sunbird_sso_url: ""
+# sunbird_subdomain_keycloak_base_url: ""
+
+# Refers to domain
+# sunbird_web_url: ""
+
+## Refers to cloud_service_provider
+# sunbird_cloud_service_provider: ""
+
+## Refers to public storage bucket details
+# sunbird_account_name: ""
+# sunbird_account_key: ""
+
+## Refers to private storage bucket details
+# sunbird_analytics_blob_account_name: ""
+# sunbird_analytics_blob_account_key: ""
+
+## Uses the keycloak lms client from sunbird realm
+#sunbird_sso_client_id: lms
+#sunbird_sso_realm: sunbird

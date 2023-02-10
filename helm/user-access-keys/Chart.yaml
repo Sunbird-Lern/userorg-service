@@ -1,6 +1,6 @@
 apiVersion: v2
-name: user-access-public-keys
-description: A helm chart for containing the user access public keys
+name: user-access-keys
+description: A helm chart for creating th user access public and private keys
 
 # A chart can be either an 'application' or a 'library' chart.
 #

@@ -25,6 +25,12 @@ data:
   {{- printf "ERROR | %s | Please provide a value for \"domain\"" .Chart.Name | fail }}
   {{- end }}
 
+  sunbird_web_url: {{ if .Values.domain }}
+  {{- .Values.domain }}
+  {{- else -}}
+  {{- printf "ERROR | %s | Please provide a value for \"domain\"" .Chart.Name | fail }}
+  {{- end }}
+
   sunbird_account_name: {{ if .Values.cloud_public_storage_accountname }}
   {{- .Values.cloud_public_storage_accountname }}
   {{- else -}}
@@ -179,7 +185,6 @@ data:
   sunbird_user_bulk_upload_size: {{ .Values.sunbird_user_bulk_upload_size | quote }}
   sunbird_user_cert_kafka_topic: {{ .Values.sunbird_user_cert_kafka_topic }}
   sunbird_user_profile_field_default_visibility: {{ .Values.sunbird_user_profile_field_default_visibility }}
-  sunbird_web_url: {{ .Values.sunbird_web_url }}
   telemetry_pdata_id: {{ .Values.telemetry_pdata_id }}
   telemetry_pdata_pid: {{ .Values.telemetry_pdata_pid }}
   telemetry_queue_threshold_value: {{ .Values.telemetry_queue_threshold_value | quote }}
