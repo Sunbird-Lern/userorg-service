@@ -180,9 +180,6 @@ external_configmaps:
   access_public_keys:
     name: user-access-keys-public
 
-## Set this value to true when developing the chart
-local_chart_development: true
-
 
 ## This section has other kubernetes variables
 ## These are standard defaults that work well

@@ -9,13 +9,13 @@ data:
   ekstep_authorization: {{ if .Values.ekstep_authorization }}
   {{- .Values.ekstep_authorization }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key) -}}
   {{- end }}
 
   sunbird_authorization: {{ if .Values.sunbird_authorization }}
   {{- .Values.sunbird_authorization }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key) -}}
   {{- end }}
 
   {{/* This section has variables which in turn contain one or more mandatory variables */}}
@@ -63,31 +63,31 @@ data:
   sunbird_keycloak_user_federation_provider_id: {{ if .Values.sunbird_keycloak_user_federation_provider_id }}
   {{- .Values.sunbird_keycloak_user_federation_provider_id }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_federation.name "Key" .Values.external_secrets.keycloak_federation.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_federation.name "Key" .Values.external_secrets.keycloak_federation.key) -}}
   {{- end }}
 
   sunbird_pg_user: {{ if .Values.sunbird_pg_user }}
   {{- .Values.sunbird_pg_user }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_user.name "Key" .Values.external_secrets.postgresql_user.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_user.name "Key" .Values.external_secrets.postgresql_user.key) -}}
   {{- end }}
 
   sunbird_pg_password: {{ if .Values.sunbird_pg_password }}
   {{- .Values.sunbird_pg_password }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_password.name "Key" .Values.external_secrets.postgresql_password.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_password.name "Key" .Values.external_secrets.postgresql_password.key) -}}
   {{- end }}
 
   sunbird_sso_client_secret: {{ if .Values.sunbird_sso_client_secret }}
   {{- .Values.sunbird_sso_client_secret }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_client_secret.name "Key" .Values.external_secrets.keycloak_client_secret.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_client_secret.name "Key" .Values.external_secrets.keycloak_client_secret.key) -}}
   {{- end }}
 
   sunbird_sso_publickey: {{ if .Values.sunbird_sso_publickey }}
   {{- .Values.sunbird_sso_publickey }}
   {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_realm_public_key.name "Key" .Values.external_secrets.keycloak_realm_public_key.key "LocalDevelopment" .Values.local_chart_development) -}}
+  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_realm_public_key.name "Key" .Values.external_secrets.keycloak_realm_public_key.key) -}}
   {{- end }}
 
   {{/* This section has optional variables */}}

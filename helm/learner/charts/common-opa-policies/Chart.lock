@@ -1,9 +1,0 @@
-dependencies:
-- name: common
-  repository: https://keshavprasadms.github.io/sunbird-helm-repo
-  version: 0.1.0
-- name: user-access-keys
-  repository: https://keshavprasadms.github.io/sunbird-helm-repo
-  version: 0.1.0
-digest: sha256:c7cd1cc2810facfaf05e4e06c06f52c91391b526667045e1e655122775b44923
-generated: "2023-02-10T18:52:20.638623+05:30"

@@ -25,11 +25,11 @@ appVersion: "5.0.0"
 
 dependencies:
   - name: common
-    repository: https://keshavprasadms.github.io/sunbird-helm-repo
+    repository: https://keshavprasadms.github.io/sunbird-helmchart-templates
     version: 0.1.0
   - name: common-opa-policies
-    repository: https://keshavprasadms.github.io/sunbird-helm-repo
+    repository: https://keshavprasadms.github.io/sunbird-helmchart-templates
     version: 0.1.0
   - name: learner-opa-policies
-    repository: https://keshavprasadms.github.io/sunbird-helm-repo
+    repository: https://keshavprasadms.github.io/sunbird-lms-service
     version: 0.1.0
