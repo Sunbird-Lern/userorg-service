@@ -58,7 +58,7 @@
 #     S/euzu2m6qX8poTQAo+NoUp2
 #     -----END PRIVATE KEY-----
 
-user_access_private_keys: ""
+user_access_private_keys:
 
 # Public keys used to verify the user access tokens
 # Define the dictionary of key value pairs as shown below
@@ -84,4 +84,4 @@ user_access_private_keys: ""
 #     ZwIDAQAB
 #     -----END PUBLIC KEY-----
 
-user_access_public_keys: ""
+user_access_public_keys:

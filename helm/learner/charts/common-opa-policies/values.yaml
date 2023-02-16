@@ -1,7 +1,7 @@
 ## Common policies chart
 external_configmaps:
-  access_public_keys:
-    name: user-access-public-keys
+  user_access_public_keys:
+    name: user-access-keys-public
 
 external_secrets:
   keycloak_realm_public_key:
@@ -12,4 +12,4 @@ external_secrets:
     key: subird
 
 ## Set this value to true when developing the chart
-local_chart_development: true
+local_chart_development: false

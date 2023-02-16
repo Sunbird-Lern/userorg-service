@@ -95,12 +95,6 @@ spec:
         - mountPath: /policies
           name: opa-policies
           readOnly: true
-        # - mountPath: /policies
-        #   name: {{ .Values.external_configmaps.common_opa_policies.name }}
-        #   readOnly: true
-        # - mountPath: /policies
-        #   name: {{ .Values.external_configmaps.access_public_keys.name }}
-        #   readOnly: true
       initContainers:
       - args:
         - -p
@@ -126,8 +120,8 @@ spec:
         configMap:
           name: {{ .Chart.Name }}-logback-config
       - name: {{ .Values.external_configmaps.access_public_keys.name }}
-        configMap:
-          name: {{ .Values.external_configmaps.access_public_keys.name }}
+        secret:
+          secretName: {{ .Values.external_configmaps.access_public_keys.name }}
 {{- if .Values.opa_sidecar }}
       - name: {{ .Chart.Name }}-envoy-config
         configMap:
