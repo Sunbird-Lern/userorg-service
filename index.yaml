@@ -1,20 +1,9 @@
 apiVersion: v1
 entries:
-  learner-opa-policies:
-  - apiVersion: v2
-    appVersion: 5.0.0
-    created: "2023-02-17T12:32:37.88286+05:30"
-    description: A helm chart for learner opa policies
-    digest: 7c33f3eb97fce3c97cd9dc29e534a8c7d7aa2a7720d0975b010d5490d53ad041
-    name: learner-opa-policies
-    type: application
-    urls:
-    - https://keshavprasadms.github.io/sunbird-lms-service/learner-opa-policies-0.1.0.tgz
-    version: 0.1.0
   learner_opa_policies:
   - apiVersion: v2
     appVersion: 5.0.0
-    created: "2023-02-17T12:32:37.883227+05:30"
+    created: "2023-02-17T12:37:21.527966+05:30"
     description: A helm chart for learner opa policies
     digest: 929dbbe76e53388411b44be79d0eff8b67a9c1f133abbf04e978f898e7471026
     name: learner_opa_policies
@@ -22,4 +11,4 @@ entries:
     urls:
     - https://keshavprasadms.github.io/sunbird-lms-service/learner_opa_policies-0.1.0.tgz
     version: 0.1.0
-generated: "2023-02-17T12:32:37.882366+05:30"
+generated: "2023-02-17T12:37:21.527403+05:30"
