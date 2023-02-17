@@ -14,7 +14,7 @@
     9. sunbird_sso_client_secret : keycloak client secret (not mandatory)
    10. sunbird_valid_badge_subtypes: list of valid badge subtypes (comma separated)
    11. sunbird_valid_badge_roles: list of valid badge roles (comma separated)
-   12. sunbird_learner_service_url: url for learner service
+   12. sunbird_learner_service_url: url for user-org service
 ## Do the below env setup , if you are planing to run actor as local mode.
     1. sunbird_cassandra_host: host running the cassandra server
     2. sunbird_cassandra_port: port on which cassandra server is running
@@ -80,7 +80,7 @@
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
 2. Run "mvn clean install" to build the services.
 2. Go to "controller" and run the command "mvn play2:dist" to generate the dist file for controller.
-3. The build file "controller-1.0-SNAPSHOT-dist.zip" is generated in "sunbird-lms-service/controller/target" folder.
+3. The build file "controller-1.0-SNAPSHOT-dist.zip" is generated in "user-org-service/controller/target" folder.
 
 ## Run
 1. Unzip the dist file "controller-1.0-SNAPSHOT-dist.zip".
