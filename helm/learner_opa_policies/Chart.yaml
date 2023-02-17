@@ -1,5 +1,5 @@
 apiVersion: v2
-name: learner-opa-policies
+name: learner_opa_policies
 description: A helm chart for learner opa policies
 
 # A chart can be either an 'application' or a 'library' chart.
