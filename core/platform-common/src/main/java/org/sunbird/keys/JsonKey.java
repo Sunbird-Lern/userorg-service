@@ -132,7 +132,7 @@ public final class JsonKey {
   public static final String LANGUAGE = "language";
   public static final String LAST_LOGIN_TIME = "lastLoginTime";
   public static final String LAST_NAME = "lastName";
-  public static final String LEARNER_SERVICE = "Learner service";
+  public static final String LEARNER_SERVICE = "UserOrg service";
   public static final String LEVEL = "level";
   public static final String LIMIT = "limit";
   public static final String LIST = "List";

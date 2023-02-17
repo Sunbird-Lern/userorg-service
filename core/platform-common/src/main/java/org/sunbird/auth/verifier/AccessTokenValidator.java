@@ -100,7 +100,7 @@ public class AccessTokenValidator {
     try {
       Map<String, Object> payload = validateToken(token, requestContext);
       logger.debug(
-          "learner access token validateToken() :"
+          "user org access token validateToken() :"
               + payload.toString()
               + ", request context data : "
               + requestContext);
@@ -135,7 +135,7 @@ public class AccessTokenValidator {
     try {
       Map<String, Object> payload = validateToken(token, requestContext);
       logger.debug(
-          "learner source access token validateToken() :"
+          "user org source access token validateToken() :"
               + payload.toString()
               + ", request context data : "
               + requestContext);

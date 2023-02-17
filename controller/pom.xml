@@ -249,7 +249,7 @@
         </dependency>
     </dependencies>
 	<build>
-		<finalName>learning-service-${version}</finalName>
+		<finalName>user-org-service-${version}</finalName>
 		<sourceDirectory>${basedir}/app</sourceDirectory>
 		<testSourceDirectory>${basedir}/test</testSourceDirectory>
 		<resources>

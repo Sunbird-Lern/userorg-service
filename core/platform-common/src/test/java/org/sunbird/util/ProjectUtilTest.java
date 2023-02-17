@@ -108,7 +108,7 @@ public class ProjectUtilTest extends BaseHttpTest {
   @Test
   public void testCreateCheckResponseSuccess() {
     Map<String, Object> responseMap =
-        ProjectUtil.createCheckResponse("LearnerService", false, null);
+        ProjectUtil.createCheckResponse("UserOrgService", false, null);
     assertEquals(true, responseMap.get(JsonKey.Healthy));
   }
 
@@ -116,7 +116,7 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testCreateCheckResponseFailureWithException() {
     Map<String, Object> responseMap =
         ProjectUtil.createCheckResponse(
-            "LearnerService",
+            "UserOrgService",
             true,
             new ProjectCommonException(
                 ResponseCode.invalidObjectType,

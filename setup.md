@@ -23,8 +23,8 @@
     5. sunbird_es_host: host running the elasticsearch server
     6. sunbird_es_port: port on which elasticsearch server is running
     7. sunbird_es_cluster (optional): name of the elasticsearch cluster
-    8. sunbird_learner_actor_host: host running for learner actor
-    9. sunbird_learner_actor_port: port on which learner actor is running.
+    8. sunbird_learner_actor_host: host running for user org actor
+    9. sunbird_learner_actor_port: port on which user org actor is running.
     10. ekstep_content_search_base_url : provide base url for EkStep content search
     11. ekstep_authorization : provide authorization for value for content search
     12. sunbird_pg_host: postgres host name or ip
@@ -69,8 +69,8 @@
     51.telemetry_pdata_ver=1.5
     
 ## Do the below env setup , if you are planing to run background actor in remote mode.
-	1. sunbird_background_actor_host: host running for learner background actor
-    2. sunbird_background_actor_port: port on which learner background actor is running.
+	1. sunbird_background_actor_host: host running for user org background actor
+    2. sunbird_background_actor_port: port on which user org background actor is running.
 	
 ## Do the below env setup , to start a actor system on a machine {"RemoteMiddlewareActorSystem" it will start Normal Actor System on that machine,             ##"BackGroundRemoteMiddlewareActorSystem" , it will start background actor}.
 

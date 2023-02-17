@@ -8,10 +8,12 @@ POST    /v1/user/create                         @controllers.usermanagement.User
 POST	/v2/user/create				            @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
 POST	/v3/user/create				            @controllers.usermanagement.UserController.createUser(request: play.mvc.Http.Request)
 POST	/v1/ssouser/create                      @controllers.usermanagement.UserController.createSSOUser(request: play.mvc.Http.Request)
+
 # Managed-User creation, this is not for regular user creation.
 POST    /v4/user/create                         @controllers.usermanagement.UserController.createUserV4(request: play.mvc.Http.Request)
 POST    /v1/manageduser/create		            @controllers.usermanagement.UserController.createManagedUser(request: play.mvc.Http.Request)
 POST    /v2/manageduser/create		            @controllers.usermanagement.UserController.createManagedUser(request: play.mvc.Http.Request)
+
 # SSU user creation
 POST    /v1/user/signup                         @controllers.usermanagement.UserController.createUserV3(request: play.mvc.Http.Request)
 POST    /v2/user/signup                         @controllers.usermanagement.UserController.createSSUUser(request: play.mvc.Http.Request)
@@ -45,7 +47,7 @@ POST    /v1/user/block                          @controllers.usermanagement.User
 POST    /v1/user/unblock			            @controllers.usermanagement.UserStatusController.unblockUser(request: play.mvc.Http.Request)
 
 GET     /v1/role/read						    @controllers.usermanagement.UserRoleController.getRoles(request: play.mvc.Http.Request)
-GET     /v1/user/role/read/:uid             @controllers.usermanagement.UserRoleController.getUserRolesById(uid:String, request: play.mvc.Http.Request)
+GET     /v1/user/role/read/:uid                 @controllers.usermanagement.UserRoleController.getUserRolesById(uid:String, request: play.mvc.Http.Request)
 POST    /v1/user/assign/role			        @controllers.usermanagement.UserRoleController.assignRoles(request: play.mvc.Http.Request)
 POST    /private/user/v1/assign/role	        @controllers.usermanagement.UserRoleController.assignRoles(request: play.mvc.Http.Request)
 POST    /v2/user/assign/role			        @controllers.usermanagement.UserRoleController.assignRolesV2(request: play.mvc.Http.Request)
@@ -107,8 +109,8 @@ POST    /v2/org/search		                    @controllers.organisationmanagement.
 PATCH   /v1/org/assign/key                      @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
 
 #Health check
-GET     /health                                 @controllers.healthmanager.HealthController.getHealth(request: play.mvc.Http.Request)
-GET     /:service/health                        @controllers.healthmanager.HealthController.getLearnerServiceHealth(service:String, request: play.mvc.Http.Request)
+GET     /health                                 @controllers.healthmanager.HealthController.health(request: play.mvc.Http.Request)
+GET     /:service/health                        @controllers.healthmanager.HealthController.serviceHealth(service:String, request: play.mvc.Http.Request)
 
 #Notes API
 POST    /v1/note/create                         @controllers.notesmanagement.NotesController.createNote(request: play.mvc.Http.Request)
