@@ -24,9 +24,6 @@ version: 0.1.0
 appVersion: "5.0.0"
 
 dependencies:
-  - name: common
-    repository: https://keshavprasadms.github.io/sunbird-helmchart-templates
-    version: 0.1.0
   - name: common_opa_policies
     repository: https://keshavprasadms.github.io/sunbird-helmchart-templates
     version: 0.1.0

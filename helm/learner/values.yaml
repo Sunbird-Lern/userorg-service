@@ -48,7 +48,8 @@ merge_domain: ""
 
 ## This section has optional variables
 ## If you provide a value to the variable, then that will have the highest precedence
-## If you don't provide a value, then it's fetched from another object
+## If you don't provide a value, then it's fetched from kubernetes secret or subchart template
+## If the value is empty or nil, installation will be halted
 ekstep_authorization: ""
 sunbird_authorization: ""
 sunbird_keycloak_user_federation_provider_id: ""

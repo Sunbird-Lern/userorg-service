@@ -5,20 +5,44 @@ metadata:
   name: {{ .Chart.Name }}-config
   namespace: {{ .Release.Namespace }}
 data:
-  {{/* This section has variables whose value is read from another object */}}
-  ekstep_authorization: {{ if .Values.ekstep_authorization }}
-  {{- .Values.ekstep_authorization }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key) -}}
+  {{- $ekstep_authorization := .Values.ekstep_authorization }}
+
+  {{- if empty $ekstep_authorization }}
+    {{- $ekstep_authorization = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding kong chart
+  {{- if empty $ekstep_authorization }}
+    {{- $ekstep_authorization = fromYaml (include (print .Subcharts.kong.Template.BasePath "/configmap.yaml") .Subcharts.kong) }}
+    {{- $ekstep_authorization = get $ekstep_authorization.data .Values.external_secrets.kong.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $ekstep_authorization }}
+    {{- printf  "ERROR | %s | The ekstep_authorization value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  sunbird_authorization: {{ if .Values.sunbird_authorization }}
-  {{- .Values.sunbird_authorization }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key) -}}
+  ekstep_authorization: {{ $ekstep_authorization }}
+
+  {{- $sunbird_authorization := .Values.sunbird_authorization }}
+
+  {{- if empty $sunbird_authorization }}
+    {{- $sunbird_authorization = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.kong.name "Key" .Values.external_secrets.kong.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding kong chart
+  {{- if empty $sunbird_authorization }}
+    {{- $sunbird_authorization = fromYaml (include (print .Subcharts.kong.Template.BasePath "/configmap.yaml") .Subcharts.kong) }}
+    {{- $sunbird_authorization = get $sunbird_authorization.data .Values.external_secrets.kong.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $sunbird_authorization }}
+    {{- printf  "ERROR | %s | The sunbird_authorization value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  {{/* This section has variables which in turn contain one or more mandatory variables */}}
+  sunbird_authorization: {{ $sunbird_authorization  }}
+
   sunbird_sso_url: {{ if .Values.domain }}
   {{- .Values.domain }}{{ .Values.keycloak_auth_endpoint }}
   {{- else -}}
@@ -54,43 +78,108 @@ data:
   {{- else -}}
   {{- printf "ERROR | %s | Please provide a value for \"cloud_private_storage_secret\"" .Chart.Name | fail }}
   {{- end }}
+
   sunbird_cloud_service_provider: {{ if eq (include "common.csp.validation" .Values.cloud_service_provider) "true" }}
   {{- .Values.cloud_service_provider }}
   {{- else -}}
   {{- printf "ERROR | %s | Please provide a valid value for \"cloud_service_provider\". Accepted values are \"%s\"" .Chart.Name (include "common.valid.csps" .) | fail }}
   {{- end }}
 
-  sunbird_keycloak_user_federation_provider_id: {{ if .Values.sunbird_keycloak_user_federation_provider_id }}
-  {{- .Values.sunbird_keycloak_user_federation_provider_id }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_federation.name "Key" .Values.external_secrets.keycloak_federation.key) -}}
+  {{- $sunbird_keycloak_user_federation_provider_id := .Values.sunbird_keycloak_user_federation_provider_id }}
+
+  {{- if empty $sunbird_keycloak_user_federation_provider_id }}
+    {{- $sunbird_keycloak_user_federation_provider_id = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_federation.name "Key" .Values.external_secrets.keycloak_federation.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding keycloak chart
+  {{- if empty $sunbird_keycloak_user_federation_provider_id }}
+    {{- $sunbird_keycloak_user_federation_provider_id = fromYaml (include (print .Subcharts.keycloak.Template.BasePath "/configmap.yaml") .Subcharts.keycloak) }}
+    {{- $sunbird_keycloak_user_federation_provider_id = get $sunbird_keycloak_user_federation_provider_id.data .Values.external_secrets.keycloak_federation.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $sunbird_keycloak_user_federation_provider_id }}
+    {{- printf  "ERROR | %s | The sunbird_keycloak_user_federation_provider_id value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  sunbird_pg_user: {{ if .Values.sunbird_pg_user }}
-  {{- .Values.sunbird_pg_user }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_user.name "Key" .Values.external_secrets.postgresql_user.key) -}}
+  sunbird_keycloak_user_federation_provider_id: {{ $sunbird_keycloak_user_federation_provider_id }}
+
+  {{- $sunbird_pg_user := .Values.sunbird_pg_user }}
+
+  {{- if empty $sunbird_pg_user }}
+    {{- $sunbird_pg_user = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_user.name "Key" .Values.external_secrets.postgresql_user.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding postgresql chart
+  {{- if empty $sunbird_pg_user }}
+    {{- $sunbird_pg_user = fromYaml (include (print .Subcharts.postgresql.Template.BasePath "/configmap.yaml") .Subcharts.postgresql) }}
+    {{- $sunbird_pg_user = get $sunbird_pg_user.data .Values.external_secrets.postgresql_user.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $sunbird_pg_user }}
+    {{- printf  "ERROR | %s | The sunbird_pg_user value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  sunbird_pg_password: {{ if .Values.sunbird_pg_password }}
-  {{- .Values.sunbird_pg_password }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_password.name "Key" .Values.external_secrets.postgresql_password.key) -}}
+  sunbird_pg_user: {{ $sunbird_pg_user }}
+
+  {{- $sunbird_pg_password := .Values.sunbird_pg_password }}
+
+  {{- if empty $sunbird_pg_password }}
+    {{- $sunbird_pg_password = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.postgresql_password.name "Key" .Values.external_secrets.postgresql_password.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding postgresql chart
+  {{- if empty $sunbird_pg_password }}
+    {{- $sunbird_pg_password = fromYaml (include (print .Subcharts.postgresql.Template.BasePath "/configmap.yaml") .Subcharts.postgresql) }}
+    {{- $sunbird_pg_password = get $sunbird_pg_password.data .Values.external_secrets.postgresql_password.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $sunbird_pg_password }}
+    {{- printf  "ERROR | %s | The sunbird_pg_password value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  sunbird_sso_client_secret: {{ if .Values.sunbird_sso_client_secret }}
-  {{- .Values.sunbird_sso_client_secret }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_client_secret.name "Key" .Values.external_secrets.keycloak_client_secret.key) -}}
+  sunbird_pg_password: {{ $sunbird_pg_password }}
+
+  {{- $sunbird_sso_client_secret := .Values.sunbird_sso_client_secret }}
+
+  {{- if empty $sunbird_sso_client_secret }}
+    {{- $sunbird_sso_client_secret = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_client_secret.name "Key" .Values.external_secrets.keycloak_client_secret.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding keycloak chart
+  {{- if empty $sunbird_sso_client_secret }}
+    {{- $sunbird_sso_client_secret = fromYaml (include (print .Subcharts.keycloak.Template.BasePath "/configmap.yaml") .Subcharts.keycloak) }}
+    {{- $sunbird_sso_client_secret = get $sunbird_sso_client_secret.data .Values.external_secrets.keycloak_client_secret.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $sunbird_sso_client_secret }}
+    {{- printf  "ERROR | %s | The sunbird_sso_client_secret value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  sunbird_sso_publickey: {{ if .Values.sunbird_sso_publickey }}
-  {{- .Values.sunbird_sso_publickey }}
-  {{- else -}}
-  {{- include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_realm_public_key.name "Key" .Values.external_secrets.keycloak_realm_public_key.key) -}}
+  sunbird_sso_client_secret: {{ $sunbird_sso_client_secret }}
+
+  {{- $sunbird_sso_publickey := .Values.sunbird_sso_publickey }}
+
+  {{- if empty $sunbird_sso_publickey }}
+    {{- $sunbird_sso_publickey = include "common.read.secret" (dict "ChartName" .Chart.Name "Namespace" .Release.Namespace "Name" .Values.external_secrets.keycloak_realm_public_key.name "Key" .Values.external_secrets.keycloak_realm_public_key.key) -}}
+  {{- end -}}
+
+{{/* Uncomment this after adding keycloak chart
+  {{- if empty $sunbird_sso_publickey }}
+    {{- $sunbird_sso_publickey = fromYaml (include (print .Subcharts.keycloak.Template.BasePath "/configmap.yaml") .Subcharts.keycloak) }}
+    {{- $sunbird_sso_publickey = get $sunbird_sso_publickey.data .Values.external_secrets.keycloak_realm_public_key.key }}
+  {{- end }}
+*/}}
+
+  {{- if empty $sunbird_sso_publickey }}
+    {{- printf  "ERROR | %s | The sunbird_sso_publickey value could not be found in values.yaml or in secrets or in subcharts" .Chart.Name | fail }}
   {{- end }}
 
-  {{/* This section has optional variables */}}
+  sunbird_sso_publickey: {{ $sunbird_sso_publickey }}
+
   sunbird_subdomain_keycloak_base_url: {{ if .Values.merge_domain }}
   {{- .Values.merge_domain }}{{ .Values.keycloak_auth_endpoint }}
   {{- end }}
@@ -104,8 +193,6 @@ data:
   sunbird_msg_91_auth: {{ .Values.sunbird_msg_91_auth | quote }}
   sunbird_msg_sender: {{ .Values.sunbird_msg_sender | quote }}
   sunbird_url_shortner_access_token: {{ .Values.sunbird_url_shortner_access_token | quote }}
-
-  {{/* This section has variables with default values */}}
   ENV_NAME: {{ .Values.ENV_NAME }}
   PORTAL_SERVICE_PORT: {{ .Values.PORTAL_SERVICE_PORT }}
   SUNBIRD_KAFKA_URL: {{ .Values.SUNBIRD_KAFKA_URL }}
