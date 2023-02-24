@@ -75,6 +75,7 @@ public class KeyCloakServiceImpl implements SSOManager {
       ur.resetPassword(cr);
       return true;
     } catch (Exception e) {
+    	e.printStackTrace();
       logger.error(context, "updatePassword: Exception occurred: ", e);
     }
     return false;
