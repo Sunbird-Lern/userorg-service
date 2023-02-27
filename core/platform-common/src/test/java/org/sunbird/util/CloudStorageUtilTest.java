@@ -29,7 +29,7 @@ public class CloudStorageUtilTest {
 
   private static final String SIGNED_URL = "singedUrl";
   private static final String UPLOAD_URL = "uploadUrl";
-  private static String PUT_SIGNED_URL = "gcpSignedUrl";
+  private static final String PUT_SIGNED_URL = "gcpSignedUrl";
 
   @Before
   public void initTest() {
