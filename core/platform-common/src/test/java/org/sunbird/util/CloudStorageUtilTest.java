@@ -94,9 +94,11 @@ public class CloudStorageUtilTest {
   }
 
   @Test
-  public void testGetSignedUrlAZURESuccess() {
-    String signedUrl = CloudStorageUtil.getSignedUrl("azure", "azurecontainer", "key");
-    assertTrue(SIGNED_URL.equals(signedUrl));
+  // @Ignore
+  public void testUploadSuccess() {
+    String result =
+        CloudStorageUtil.upload("azure", "container", "key", "/file/path");
+    assertTrue(UPLOAD_URL.equals(result));
   }
 
   @Test
