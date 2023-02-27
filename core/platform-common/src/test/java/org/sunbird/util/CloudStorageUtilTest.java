@@ -19,10 +19,10 @@ import scala.Option;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
-  "javax.management.*",
-  "javax.net.ssl.*",
-  "javax.security.*",
-  "jdk.internal.reflect.*"
+        "javax.management.*",
+        "javax.net.ssl.*",
+        "javax.security.*",
+        "jdk.internal.reflect.*"
 })
 @PrepareForTest({StorageServiceFactory.class, CloudStorageUtil.class, PropertiesCache.class})
 public class CloudStorageUtilTest {
@@ -47,14 +47,14 @@ public class CloudStorageUtilTest {
               Mockito.any(Option.class),
               Mockito.any(Option.class),
               Mockito.any(Option.class)))
-          .thenReturn(UPLOAD_URL);
+              .thenReturn(UPLOAD_URL);
 
       when(service.getSignedURL(
               Mockito.anyString(),
               Mockito.anyString(),
               Mockito.any(Option.class),
               Mockito.any(Option.class)))
-          .thenReturn(SIGNED_URL);
+              .thenReturn(SIGNED_URL);
 
       when(service.getPutSignedURL(
               Mockito.anyString(),
@@ -94,11 +94,16 @@ public class CloudStorageUtilTest {
   }
 
   @Test
-  // @Ignore
   public void testUploadSuccess() {
     String result =
-        CloudStorageUtil.upload("azure", "container", "key", "/file/path");
+            CloudStorageUtil.upload("azure", "container", "key", "/file/path");
     assertTrue(UPLOAD_URL.equals(result));
+  }
+
+  @Test
+  public void testGetSignedUrlAZURESuccess() {
+    String signedUrl = CloudStorageUtil.getSignedUrl("azure", "azurecontainer", "key");
+    assertTrue(SIGNED_URL.equals(signedUrl));
   }
 
   @Test
