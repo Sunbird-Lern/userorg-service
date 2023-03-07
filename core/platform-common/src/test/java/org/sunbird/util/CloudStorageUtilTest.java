@@ -108,13 +108,13 @@ public class CloudStorageUtilTest {
 
   @Test
   public void testGetSignedUrlGCPSuccess() {
-    String signedUrl = CloudStorageUtil.getSignedUrl(JsonKey.GCP, "gcpcontainer", "key");
+    String signedUrl = CloudStorageUtil.getSignedUrl("gcloud", "gcpcontainer", "key");
     assertTrue(PUT_SIGNED_URL.equals(signedUrl));
   }
 
   @Test
   public void testGetSignedUrlAWSSuccess() {
-    String signedUrl = CloudStorageUtil.getSignedUrl(JsonKey.AWS_STR, "awscontainer", "key");
+    String signedUrl = CloudStorageUtil.getSignedUrl("aws", "awscontainer", "key");
     assertTrue(SIGNED_URL.equals(signedUrl));
   }
 }
