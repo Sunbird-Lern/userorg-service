@@ -120,7 +120,7 @@ public class NotesManagementActor extends BaseActor {
     request.put(JsonKey.FILTERS, filters);
     Response response = new Response();
     Map<String, Object> result = notesService.searchNotes(request, context);
-    if (!result.isEmpty() && ((Integer) result.get(JsonKey.COUNT) == 0)) {
+    if (!result.isEmpty() && (result.get(JsonKey.COUNT).equals(0))) {
       ProjectCommonException.throwResourceNotFoundException(
           ResponseCode.resourceNotFound,
           MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.NOTE));
