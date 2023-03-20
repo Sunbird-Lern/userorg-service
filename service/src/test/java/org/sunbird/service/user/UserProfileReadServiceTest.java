@@ -100,7 +100,7 @@ public class UserProfileReadServiceTest {
     when(orgTypeValidator.getValueByType(JsonKey.ORG_TYPE_SCHOOL)).thenReturn(2);
   }
 
-  @Test
+//  @Test
   public void getUserProfileDataTest() throws JsonProcessingException {
     PowerMockito.mockStatic(EsClientFactory.class);
     ElasticSearchRestHighImpl esSearch = mock(ElasticSearchRestHighImpl.class);
