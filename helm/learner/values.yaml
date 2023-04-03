@@ -86,7 +86,7 @@ sunbird_api_mgr_base_url: http://knowledge-mw-service.knowlg.svc.cluster.local:5
 sunbird_app_name: sunbird
 sunbird_cache_enable: true
 sunbird_cassandra_consistency_level: local_quorum
-sunbird_cassandra_host: http://cassandra.lern.svc.cluster.local
+sunbird_cassandra_host: cassandra.lern.svc.cluster.local
 sunbird_cassandra_password: passwod
 sunbird_cassandra_port: 9042
 sunbird_cassandra_username: admin
