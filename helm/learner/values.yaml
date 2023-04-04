@@ -323,3 +323,7 @@ initcontainer_resources:
 ## Uses the keycloak lms client from sunbird realm
 #sunbird_sso_client_id: lms
 #sunbird_sso_realm: sunbird
+
+## dependency charts - change enabled: true  if you plan to use standalone chart only
+common_opa_policies:
+  enabled: false

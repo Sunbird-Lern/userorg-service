@@ -27,6 +27,7 @@ dependencies:
   - name: common_opa_policies
     repository: https://keshavprasadms.github.io/sunbird-helmchart-templates
     version: 0.1.0
-  - name: learner_opa_policies
-    repository: https://keshavprasadms.github.io/sunbird-lms-service
+    condition: common_opa_policies.enabled
+  - name: common
+    repository: https://keshavprasadms.github.io/sunbird-helmchart-templates
     version: 0.1.0
