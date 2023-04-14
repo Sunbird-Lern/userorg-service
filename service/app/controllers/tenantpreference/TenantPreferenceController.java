@@ -54,4 +54,19 @@ public class TenantPreferenceController extends BaseController {
         true,
         httpRequest);
   }
+
+  public CompletionStage<Result> deleteTenantPreference(Http.Request httpRequest) {
+    return handleRequest(
+        ActorOperations.DELETE_TENANT_PREFERENCE.getValue(),
+        httpRequest.body().asJson(),
+        req -> {
+          Request request = (Request) req;
+          new TenantPreferenceValidator().validateGetPreferenceRequest(request);
+          return null;
+        },
+        null,
+        null,
+        true,
+        httpRequest);
+  }
 }

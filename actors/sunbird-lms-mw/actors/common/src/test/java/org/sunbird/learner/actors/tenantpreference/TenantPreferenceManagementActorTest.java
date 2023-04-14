@@ -70,6 +70,7 @@ public class TenantPreferenceManagementActorTest {
     when(cassandraOperation.insertRecord(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
+    cassandraOperation.deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap());
     try {
       when(cassandraOperation.updateRecord(
               Mockito.anyString(),
@@ -205,6 +206,44 @@ public class TenantPreferenceManagementActorTest {
     subject.tell(actorMessage, probe.getRef());
     Response res = probe.expectMsgClass(duration("10 second"), Response.class);
     Assert.assertTrue(null != res);
+  }
+
+  @Test
+  public void testDeleteTenantPreferenceSuccess() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request actorMessage = new Request();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, "anyKey");
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
+    actorMessage.setOperation(ActorOperations.DELETE_TENANT_PREFERENCE.getValue());
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByProperty());
+    subject.tell(actorMessage, probe.getRef());
+    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Assert.assertTrue(null != res);
+  }
+
+  @Test
+  public void testDeleteTenantPreferenceFailure() {
+    TestKit probe = new TestKit(system);
+    ActorRef subject = system.actorOf(props);
+    Request actorMessage = new Request();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, "anyKey");
+    map.put(JsonKey.ORG_ID, orgId);
+    actorMessage.setRequest(map);
+    actorMessage.setOperation(ActorOperations.DELETE_TENANT_PREFERENCE.getValue());
+    when(cassandraOperation.getRecordsByProperties(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
+    subject.tell(actorMessage, probe.getRef());
+    ProjectCommonException exception =
+        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    Assert.assertTrue(null != exception);
+    Assert.assertEquals(ResponseCode.preferenceNotFound.getErrorCode(), exception.getCode());
   }
 
   @Test

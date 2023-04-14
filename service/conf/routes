@@ -93,6 +93,7 @@ DELETE /v1/note/delete/:noteId                 @controllers.notesmanagement.Note
 POST  /v2/org/preferences/create 						@controllers.tenantpreference.TenantPreferenceController.createTenantPreference(request: play.mvc.Http.Request)
 PATCH  /v2/org/preferences/update 						@controllers.tenantpreference.TenantPreferenceController.updateTenantPreference(request: play.mvc.Http.Request)
 POST  /v2/org/preferences/read					@controllers.tenantpreference.TenantPreferenceController.getTenantPreference(request: play.mvc.Http.Request)
+DELETE /v1/org/preferences/delete               @controllers.tenantpreference.TenantPreferenceController.deleteTenantPreference(request: play.mvc.Http.Request)
 
 #GEO LOCATION API
 POST /v1/notification/location/create                @controllers.geolocation.GeoLocationController.createGeoLocation(request: play.mvc.Http.Request)

@@ -13,6 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.router.ActorConfig;
 import org.sunbird.cassandra.CassandraOperation;
+import org.sunbird.common.Constants;
 import org.sunbird.common.exception.ProjectCommonException;
 import org.sunbird.common.models.response.Response;
 import org.sunbird.common.models.util.ActorOperations;
@@ -29,6 +30,7 @@ import org.sunbird.learner.util.Util;
     "createTanentPreference",
     "updateTenantPreference",
     "getTenantPreference",
+    "deleteTenantPreference"
   },
   asyncTasks = {}
 )
@@ -53,6 +55,10 @@ public class TenantPreferenceManagementActor extends BaseActor {
         .getOperation()
         .equalsIgnoreCase(ActorOperations.GET_TENANT_PREFERENCE.getValue())) {
       getTenantPreference(request);
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.DELETE_TENANT_PREFERENCE.getValue())) {
+      deleteTenantPreference(request);
     } else {
       onReceiveUnsupportedOperation(request.getOperation());
     }
@@ -213,5 +219,41 @@ public class TenantPreferenceManagementActor extends BaseActor {
 
   private <T> T deserialize(String value, TypeReference<T> valueTypeRef) throws Exception {
     return mapper.readValue(value, valueTypeRef);
+  }
+
+  /**
+   * Method to delete Tenant preference of the given org id and key .
+   *
+   * @param actorMessage
+   */
+  private void deleteTenantPreference(Request actorMessage) {
+    String orgId = (String) actorMessage.getRequest().get(JsonKey.ORG_ID);
+    String key = (String) actorMessage.getRequest().get(JsonKey.KEY);
+    ProjectLogger.log(
+        "TenantPreferenceManagementActor-deleteTenantPreference called for org:  "
+            + orgId
+            + "key "
+            + key);
+    List<Map<String, Object>> orgPrefMap = getTenantPreferencesFromDB(orgId, key);
+    Response finalResponse = new Response();
+    if (CollectionUtils.isNotEmpty(orgPrefMap)) {
+      Map<String, String> properties = new HashMap<>();
+      properties.put(JsonKey.ORG_ID, orgId);
+      properties.put(JsonKey.KEY, key);
+      cassandraOperation.deleteRecord(
+          tenantPreferenceDbInfo.getKeySpace(), tenantPreferenceDbInfo.getTableName(), properties);
+      finalResponse.put(Constants.RESPONSE, Constants.SUCCESS);
+    } else {
+      ProjectLogger.log(
+          "TenantPreferenceManagementActor-deleteTenantPreference key "
+              + key
+              + "not exits in the org "
+              + orgId);
+      throw new ProjectCommonException(
+          ResponseCode.preferenceNotFound.getErrorCode(),
+          MessageFormat.format(ResponseCode.preferenceNotFound.getErrorMessage(), key, orgId),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+    sender().tell(finalResponse, self());
   }
 }

@@ -67,6 +67,7 @@ public enum ActorOperations {
   CREATE_TENANT_PREFERENCE("createTanentPreference"),
   UPDATE_TENANT_PREFERENCE("updateTenantPreference"),
   GET_TENANT_PREFERENCE("getTenantPreference"),
+  DELETE_TENANT_PREFERENCE("deleteTenantPreference"),
   CREATE_GEO_LOCATION("createGeoLocation"),
   GET_GEO_LOCATION("getGeoLocation"),
   UPDATE_GEO_LOCATION("updateGeoLocation"),
