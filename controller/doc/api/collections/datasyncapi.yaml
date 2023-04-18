@@ -1,0 +1,201 @@
+openapi: 3.0.1
+info:
+  title: Data Sync API(s)
+  description: |-
+    The  Data synchronization API resources perform operations related to data on the Sunbird Platform. Data synchronization API(s) establish consistency among data from a source to a target data storage. The source data storage is Cassandra and the target storage is Elasticsearch
+    The URL for Data Sync API(s) is `/data/v1/index`
+  termsOfService: https://github.com/project-sunbird/sunbird-commons/blob/master/LICENSE
+  contact:
+    email: admin@open-sunbird.org
+  version: "1.0"
+externalDocs:
+ description: "Testcases"
+ url: "https://www.getpostman.com/collections/d02f9fb1ff56b74ba35a"    
+servers:
+- url: https://staging.open-sunbird.org/api
+paths:
+  /data/v1/index/sync:
+    post:
+      tags:
+      - Data Sync API(s)
+      summary: Syncs data
+      description: |-
+        This API is associated with synchnorization of data on the Sunbird Platform.
+           - The endpoint for **Syncs data** is `/sync`
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      operationId: dataSync
+      parameters:
+      - name: Content-Type
+        in: header
+        description: "The Content Type entity is the media type of the resource.Possible\
+          \ media types can be:- \n  - Application/json\n  - Multipart/form-data\n\
+          \  - Application/x-www-form-urlencoded"
+        required: true
+        schema:
+          type: string
+      - name: ts
+        in: header
+        description: 'Time Stamp at which **data sync** request was sent. '
+        required: true
+        schema:
+          type: string
+      - name: X-msgid
+        in: header
+        description: This Id Uniquely identifies a request if the same API is executed
+          multiple times.
+        required: true
+        schema:
+          type: string
+      - name: X-Device-ID
+        in: header
+        description: This Id Uniquely identifies the type of device (Mobile)(desktop)
+          used to access Sunbird. 'The Registered User ID to execute the API.
+        required: true
+        schema:
+          type: string
+      - name: Authorization
+        in: header
+        description: All content APIs require authorization for use. Specify the authorization
+          key received from the administrator when placing the request for use of
+          the API.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: |-
+          The body refers to the format of the request.
+            - The body contains metadata about synchronization of data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/datasyncapisyncrequest'
+        required: true
+      responses:
+        200:
+          description: OK ! Successful operation."Data sync" operation was successfully
+            executed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/datasyncapiContentCreateResponse'
+        400:
+          description: BAD REQUEST,"Data sync" operation failed ! The possible reason
+            for failure is that you may have missed providing input for a mandatory
+            parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/datasyncapiContentCreateErrorResponse'
+        500:
+          description: INTERNAL SERVER ERROR ! Looks like something went wrong! We
+            track these errors automatically, but if the problem persists feel free
+            to contact us. In the meantime, try refreshing.
+          content: {}
+      x-codegen-request-body-name: Body
+components:
+  schemas:
+    datasyncapisyncrequest:
+      title: Data sync request
+      required:
+      - params
+      - request
+      type: object
+      properties:
+        params:
+          type: object
+          properties: {}
+          description: ""
+        request:
+          $ref: '#/components/schemas/datasyncapiRequest'
+    datasyncapiRequest:
+      title: Request
+      required:
+      - objectType
+      type: object
+      properties:
+        objectType:
+          type: string
+          description: Object type that we need to sync,possible object types are
+            {user,organisation,batch,user_course}.Object will be sync from cassandra
+            to elasticsearch
+        objectIds:
+          type: array
+          description: 'provide list of those ids that need to be sync.This is optional,
+            if not provided then it will sync all stored ids of provided object.incase
+            if data volumn is huge, better to pass objectIds. '
+          items:
+            type: string
+    datasyncapiContentCreateResponse:
+      description: Data sync response
+      allOf:
+      - $ref: '#/components/schemas/datasyncapiResultWithNodeId'
+      - $ref: '#/components/schemas/datasyncapiResponseHeader'
+    datasyncapiResultWithNodeId:
+      title: Result Containing Node Id
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/datasyncapiNodeId'
+    datasyncapiResponseHeader:
+      title: ResponseHeader
+      type: object
+      properties:
+        id:
+          type: string
+          description: API Identifier
+        ver:
+          type: string
+          description: API version information
+        ts:
+          type: string
+          description: API execution timespan
+        params:
+          $ref: '#/components/schemas/datasyncapiResponseParams'
+        responseCode:
+          type: object
+          properties: {}
+          description: 'API response code '
+    datasyncapiNodeId:
+      title: Node Id
+      type: object
+      properties:
+        node_id:
+          type: string
+          description: Node Identifier
+    datasyncapiResponseParams:
+      title: Response Parameter
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          description: Response Message Id
+        msgid:
+          type: string
+          description: Message Id
+        err:
+          type: string
+          description: Error Code
+        status:
+          type: string
+          description: Response Status
+        errmsg:
+          type: string
+          description: Error Message
+    datasyncapiContentCreateErrorResponse:
+      title: Create Content Error Response
+      allOf:
+      - $ref: '#/components/schemas/datasyncapiEmptyResult'
+      - $ref: '#/components/schemas/datasyncapiResponseHeader'
+    datasyncapiEmptyResult:
+      title: Empty Result
+      type: object
+      properties:
+        result:
+          type: object
+          properties: {}
+          description: Empty Result
+  securitySchemes:
+    bearer:
+      type: apiKey
+      name: Authorization
+      in: header

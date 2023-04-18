@@ -1,0 +1,1186 @@
+openapi: 3.0.0
+info:
+  title: TenantPreferenceAPIs
+  contact: {}
+  version: '1.0'
+  description:
+    The TenantPreference API resources are used to save, update and retrieve tenant preference data for an organisation.
+externalDocs:
+ description: "Testcases"
+ url: "https://www.getpostman.com/collections/7fae5c53d3953241be1e"    
+servers:
+- url: https://staging.sunbirded.org/api
+paths:
+  /org/v2/preferences/read:
+    post:
+      tags:
+      - TenantPreferenceAPIs
+      summary: TenantPreferenceRead
+      operationId: TenantPreferenceRead
+      description: |-
+        This API is used to get data that is saved as tenant preference for an organisation
+           - The endpoint for **Update Consent** is `/org/v2/preferences/read`  
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      parameters:
+        - name: ts
+          in: header
+          required: false
+          description: Timestamp at which given API request is sent.
+          schema:
+            type: string
+        - name: X-msgid
+          in: header
+          required: false
+          description: >-
+            This ID uniquely identifies a request if the same API is executed
+            multiple times.
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          description: >-
+            To make use of this API, you require authorization. Raise a
+            request to the administrator for the use of the API. You will
+            receive the authorization key. Specify the key received, here.
+          schema:
+            type: string
+        - name: x-authenticated-user-token
+          in: header
+          required: true
+          description: >-
+            It is a unique token/key to authenticate the user each time an API
+            is called. For corresponding sessions this token is used, not your
+            actual username/password
+          schema:
+            type: string
+        - name: x-authenticated-for
+          in: header
+          required: false
+          description: >-
+            Managed User token of registered MUA user performing given API
+            request.
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tenantpreferenceapiTenantPreferenceReadRequest'
+            example:
+              request:
+                orgId: all
+                key: selfdeclarations
+        required: true
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiTenantPreferenceReadSuccess'
+              example:
+                id: api.org.preferences.read
+                ver: v2
+                ts: 2020-11-25 19:32:15:113+0000
+                params:
+                  resmsgid: 
+                  msgid: cb39f64aeb15c9ac0afdb5d2a8bc634b
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response:
+                    updatedBy: 
+                    data: Tenant preference data
+                    createdBy: 95e4942d-cbe8-477d-aebd-ad8e6de4bfc8
+                    updatedOn: 
+                    createdOn: 1597330354157
+                    key: selfdeclarations
+                    orgId: all
+        401:
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiUnauthorizedRead'
+              example:
+                id: api.org.preferences.read
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: UNAUTHORIZED_USER
+                  status: SERVER_ERROR
+                  errmsg: You are not authorized.
+                responseCode: CLIENT_ERROR
+                result: {}
+        400:
+          description: >-
+            BAD REQUEST. The possible reason for failure is that you may have missed providing input for a mandatory parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiBadRequest'
+              example:
+                id: api.org.preferences.read
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: BAD_REQUEST
+                  status: BAD_REQUEST
+                  errmsg: Bad Request.
+                responseCode: BAD_REQUEST
+                result: {}
+        404:
+          description: >-
+            RESOURSE NOT FOUND. The possible reason for failure is the requested resource is not
+            available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiResourceNotFoundRead'
+              example:
+                id: api.org.preferences.read
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: PREFERENCE_NOT_FOUND
+                  status: PREFERENCE_NOT_FOUND
+                  errmsg: preference selfdeclarations not found in the org all.
+                responseCode: RESOURCE_NOT_FOUND
+                result: {}
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try
+            to set it right at the earliest. Try refreshing the page. If the
+            problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiServerErrorRead'
+              example:
+                id: api.org.preferences.read
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: INTERNAL_SERVER_ERROR
+                  status: INTERNAL_SERVER_ERROR
+                  errmsg: INTERNAL_SERVER_ERROR
+                responseCode: SERVER_ERROR
+                result: {}
+      deprecated: false
+  /org/v2/preferences/create:
+    post:
+      tags:
+      - TenantPreferenceAPIs
+      summary: TenantPreferenceCreate
+      operationId: TenantPreferenceCreate
+      description: |-
+        This API is used to save data as per the tenant preference for an organisation
+           - The endpoint for **Update Consent** is `/org/v2/preferences/create`  
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      parameters:
+        - name: ts
+          in: header
+          required: false
+          description: Timestamp at which given API request is sent.
+          schema:
+            type: string
+        - name: X-msgid
+          in: header
+          required: false
+          description: >-
+            This ID uniquely identifies a request if the same API is executed
+            multiple times.
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          description: >-
+            To make use of this API, you require authorization. Raise a
+            request to the administrator for the use of the API. You will
+            receive the authorization key. Specify the key received, here.
+          schema:
+            type: string
+        - name: x-authenticated-user-token
+          in: header
+          required: true
+          description: >-
+            It is a unique token/key to authenticate the user each time an API
+            is called. For corresponding sessions this token is used, not your
+            actual username/password
+          schema:
+            type: string
+        - name: x-authenticated-for
+          in: header
+          required: false
+          description: >-
+            Managed User token of registered MUA user performing given API
+            request.
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tenantpreferenceapiTenantPreferenceCreateRequest'
+            example:
+              request:
+                orgId: all
+                key: selfdeclarations
+                data: Tenant preference data
+        required: true
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiTenantPreferenceCreateSuccess'
+              example:
+                id: api.org.preferences.create
+                ver: v2
+                ts: 2020-11-26 17:49:14:722+0000
+                params:
+                  resmsgid: 
+                  msgid: cc4678bef11ed973caae3760385a3af0
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response: SUCCESS
+                  orgId: all
+                  key: selfdeclarations
+        401:
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiUnauthorizedRead'
+              example:
+                id: api.org.preferences.create
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: UNAUTHORIZED_USER
+                  status: SERVER_ERROR
+                  errmsg: You are not authorized.
+                responseCode: CLIENT_ERROR
+                result: {}
+        400:
+          description: >-
+            BAD REQUEST. The possible reason for failure is that you may have missed providing input for a mandatory parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiBadRequest'
+              example:
+                id: api.org.preferences.create
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: BAD_REQUEST
+                  status: BAD_REQUEST
+                  errmsg: Bad Request.
+                responseCode: BAD_REQUEST
+                result: {}
+        404:
+          description: >-
+            RESOURSE NOT FOUND. The possible reason for failure is the requested resource is not
+            available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiResourceNotFoundRead'
+              example:
+                id: api.org.preferences.create
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: PREFERENCE_NOT_FOUND
+                  status: PREFERENCE_NOT_FOUND
+                  errmsg: preference selfdeclarations not found in the org all.
+                responseCode: RESOURCE_NOT_FOUND
+                result: {}
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try
+            to set it right at the earliest. Try refreshing the page. If the
+            problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiServerErrorRead'
+              example:
+                id: api.org.preferences.create
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: INTERNAL_SERVER_ERROR
+                  status: INTERNAL_SERVER_ERROR
+                  errmsg: INTERNAL_SERVER_ERROR
+                responseCode: SERVER_ERROR
+                result: {}
+      deprecated: false
+  /org/v2/preferences/update:
+    patch:
+      tags:
+      - TenantPreferenceAPIs
+      summary: TenantPreferenceUpdate
+      operationId: TenantPreferenceUpdate
+      description: |-
+        This API is used to update data as per the tenant preference for an organisation
+           - The endpoint for **Update Consent** is `/org/v2/preferences/update`  
+           - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.
+      parameters:
+        - name: ts
+          in: header
+          required: false
+          description: Timestamp at which given API request is sent.
+          schema:
+            type: string
+        - name: X-msgid
+          in: header
+          required: false
+          description: >-
+            This ID uniquely identifies a request if the same API is executed
+            multiple times.
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          required: true
+          description: >-
+            To make use of this API, you require authorization. Raise a
+            request to the administrator for the use of the API. You will
+            receive the authorization key. Specify the key received, here.
+          schema:
+            type: string
+        - name: x-authenticated-user-token
+          in: header
+          required: true
+          description: >-
+            It is a unique token/key to authenticate the user each time an API
+            is called. For corresponding sessions this token is used, not your
+            actual username/password
+          schema:
+            type: string
+        - name: x-authenticated-for
+          in: header
+          required: false
+          description: >-
+            Managed User token of registered MUA user performing given API
+            request.
+          schema:
+            type: string
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/tenantpreferenceapiTenantPreferenceUpdateRequest'
+            example:
+              request:
+                orgId: all
+                key: selfdeclarations
+                data: Tenant preference data
+        required: true
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiTenantPreferenceUpdateSuccess'
+              example:
+                id: api.org.preferences.update
+                ver: v2
+                ts: 2020-11-25 19:33:57:441+0000
+                params:
+                  resmsgid: 
+                  msgid: 8980371bc3521fe2a154e13e4772e493
+                  err: 
+                  status: success
+                  errmsg: 
+                responseCode: OK
+                result:
+                  response: SUCCESS
+        401:
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiUnauthorized'
+              example:
+                id: api.org.preferences.update
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: UNAUTHORIZED_USER
+                  status: SERVER_ERROR
+                  errmsg: You are not authorized.
+                responseCode: CLIENT_ERROR
+                result: {}
+        400:
+          description: >-
+            BAD REQUEST. The possible reason for failure is that you may have missed providing input for a
+            mandatory parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiBadRequest'
+              example:
+                id: api.org.preferences.update
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: BAD_REQUEST
+                  status: BAD_REQUEST
+                  errmsg: Bad Request.
+                responseCode: BAD_REQUEST
+                result: {}
+        404:
+          description: >-
+            RESOURSE NOT FOUND. The possible reason for failure is the requested resource is not
+            available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiResourceNotFound'
+              example:
+                id: api.org.preferences.update
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: PREFERENCE_NOT_FOUND
+                  status: PREFERENCE_NOT_FOUND
+                  errmsg: preference selfdeclarations not found in the org all.
+                responseCode: RESOURCE_NOT_FOUND
+                result: {}
+        500:
+          description: >-
+            'INTERNAL SERVER ERROR. We track these errors automatically and try
+            to set it right at the earliest. Try refreshing the page. If the
+            problem persists contact us at info@sunbird.org.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tenantpreferenceapiServerError'
+              example:
+                id: api.org.preferences.update
+                ver: v1
+                ts: 2020-11-25 03:47:00:682+0000
+                params:
+                  resmsgid: 
+                  msgid: 3714a8e54fc515c1e8dccf06449cf677
+                  err: INTERNAL_SERVER_ERROR
+                  status: INTERNAL_SERVER_ERROR
+                  errmsg: INTERNAL_SERVER_ERROR
+                responseCode: SERVER_ERROR
+                result: {}  
+      deprecated: false
+components:
+  schemas:
+    tenantpreferenceapiTenantPreferenceReadRequest:
+      title: TenantPreferenceReadRequest
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/tenantpreferenceapiRequest'
+      example:
+        request:
+          orgId: all
+          key: selfdeclarations
+    tenantpreferenceapiRequest:
+      title: TenantPreferenceReadRequestObj
+      required:
+      - orgId
+      - key
+      type: object
+      properties:
+        orgId:
+          type: string
+          description: Organisation id/channel id of the tenant to which preference is set or 'all' to apply for all tenants.
+        key:
+          type: string
+          description: Preference key to identify the preference.
+      example:
+        orgId: all
+        key: selfdeclarations
+    tenantpreferenceapiTenantPreferenceReadSuccess:
+      title: TenantPreferenceReadSuccess
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/tenantpreferenceapiResult'
+      example:
+        id: api.org.preferences.read
+        ver: v2
+        ts: 2020-11-25 19:32:15:113+0000
+        params:
+          resmsgid: 
+          msgid: cb39f64aeb15c9ac0afdb5d2a8bc634b
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response:
+            updatedBy: 
+            data: Tenant preference data
+            createdBy: 95e4942d-cbe8-477d-aebd-ad8e6de4bfc8
+            updatedOn: 
+            createdOn: 1597330354157
+            key: selfdeclarations
+            orgId: all
+    tenantpreferenceapiParams:
+      title: TenantPreferenceReadSuccessParams
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+          nullable: true
+        status:
+          type: string
+        errmsg:
+          type: string
+          nullable: true
+      example:
+        resmsgid: 
+        msgid: cb39f64aeb15c9ac0afdb5d2a8bc634b
+        err: 
+        status: success
+        errmsg: 
+    tenantpreferenceapiResult:
+      title: TenantPreferenceReadSuccessResult
+      required:
+      - response
+      type: object
+      properties:
+        response:
+          $ref: '#/components/schemas/tenantpreferenceapiResponse'
+      example:
+        response:
+          updatedBy: 
+          data: Tenant preference data
+          createdBy: 95e4942d-cbe8-477d-aebd-ad8e6de4bfc8
+          updatedOn: 
+          createdOn: 1597330354157
+          key: selfdeclarations
+          orgId: all
+    tenantpreferenceapiResponse:
+      title: TenantPreferenceReadSuccessResponse
+      required:
+      - updatedBy
+      - data
+      - createdBy
+      - updatedOn
+      - createdOn
+      - key
+      - orgId
+      type: object
+      properties:
+        updatedBy:
+          type: string
+          nullable: true
+          description: Uuid of the user who is updating preference.
+        data:
+          type: string
+          description: Tenant specific preference data that need to be set.
+        createdBy:
+          type: string
+          description: Uuid of the user who is creating preference.
+        updatedOn:
+          type: string
+          nullable: true
+          description: Preference updated date.
+        createdOn:
+          type: integer
+          format: int64
+          description: Preference create date.
+        key:
+          type: string
+          description: Preference key to identify the preference.
+        orgId:
+          type: string
+          description: Organisation id/channel id of the tenant to which preference is set.
+      example:
+        updatedBy: 
+        data: Tenant preference data
+        createdBy: 95e4942d-cbe8-477d-aebd-ad8e6de4bfc8
+        updatedOn: 
+        createdOn: 1597330354157
+        key: selfdeclarations
+        orgId: all
+
+    tenantpreferenceapiTenantPreferenceCreateRequest:
+      title: TenantPreferenceCreateRequest
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/tenantpreferenceapiRequest1'
+      example:
+        request:
+          orgId: all
+          key: selfdeclarations
+          data: Tenant preference data
+    tenantpreferenceapiRequest1:
+      title: TenantPreferenceCreateRequestObj
+      required:
+      - orgId
+      - key
+      - data
+      type: object
+      properties:
+        orgId:
+          type: string
+          description: Organisation id/channel id of the tenant to which preference is set or 'all' to apply for all tenants.
+        key:
+          type: string
+          description: Preference key to identify the preference.
+        data:
+          type: string
+          description: Tenant specific preference data that need to be set.
+      example:
+        orgId: all
+        key: selfdeclarations
+        data: Tenant Preference Data
+
+    tenantpreferenceapiTenantPreferenceCreateSuccess:
+      title: TenantPreferenceCreateSuccess
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/tenantpreferenceapiResult1'
+      example:
+        id: api.org.preferences.create
+        ver: v2
+        ts: 2020-11-26 17:49:14:722+0000
+        params:
+          resmsgid: 
+          msgid: cc4678bef11ed973caae3760385a3af0
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response: SUCCESS
+          orgId: all
+          key: selfdeclarations
+    tenantpreferenceapiResult1:
+      title: TenantPreferenceCreateSuccessResult
+      required:
+      - response
+      - orgId
+      - key
+      type: object
+      properties:
+        response:
+          type: string
+        orgId:
+          type: string
+          description: Organisation id/channel id of the tenant to which preference is set or 'all' to apply for all tenants.
+        key:
+          type: string
+          description: Preference key to identify the preference.
+      example:
+        response: SUCCESS
+        orgId: all
+        key: selfdeclarations
+    tenantpreferenceapiTenantPreferenceUpdateRequest:
+      title: TenantPreferenceUpdateRequest
+      required:
+      - request
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/tenantpreferenceapiRequest1'
+      example:
+        request:
+          orgId: all
+          key: selfdeclarations
+          data: Tenant preference data
+    tenantpreferenceapiTenantPreferenceUpdateSuccess:
+      title: TenantPreferenceUpdateSuccess
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams'
+        responseCode:
+          type: string
+        result:
+          $ref: '#/components/schemas/tenantpreferenceapiResult2'
+      example:
+        id: api.org.preferences.update
+        ver: v2
+        ts: 2020-11-25 19:33:57:441+0000
+        params:
+          resmsgid: 
+          msgid: 8980371bc3521fe2a154e13e4772e493
+          err: 
+          status: success
+          errmsg: 
+        responseCode: OK
+        result:
+          response: SUCCESS
+    tenantpreferenceapiResult2:
+      title: TenantPreferenceUpdateSuccessResult
+      required:
+      - response
+      type: object
+      properties:
+        response:
+          type: string
+      example:
+        response: SUCCESS
+    tenantpreferenceapiUnauthorized:
+      title: UnauthorizedinUpdateConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.update
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: UNAUTHORIZED_USER
+          status: SERVER_ERROR
+          errmsg: You are not authorized.
+        responseCode: CLIENT_ERROR
+        result: {}
+    tenantpreferenceapiUnauthorizedRead:
+      title: UnauthorizedinReadConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.read
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: UNAUTHORIZED_USER
+          status: SERVER_ERROR
+          errmsg: You are not authorized.
+        responseCode: CLIENT_ERROR
+        result: {}
+    tenantpreferenceapiParams1:
+      title: ParamsinUnauthorized
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+        status:
+          type: string
+        errmsg:
+          type: string
+      example:
+        resmsgid: 
+        msgid: 3714a8e54fc515c1e8dccf06449cf677
+        err: UNAUTHORIZED_USER
+        status: SERVER_ERROR
+        errmsg: You are not authorized.
+    tenantpreferenceapiServerError:
+      title: ServerErrorinUpdateConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1ServerError'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.update
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: INTERNAL_SERVER_ERROR
+          status: INTERNAL_SERVER_ERROR
+          errmsg: INTERNAL_SERVER_ERROR
+        responseCode: SERVER_ERROR
+        result: {}
+    tenantpreferenceapiServerErrorRead:
+      title: ServerErrorinReadConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1ServerError'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.read
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: INTERNAL_SERVER_ERROR
+          status: INTERNAL_SERVER_ERROR
+          errmsg: INTERNAL_SERVER_ERROR
+        responseCode: SERVER_ERROR
+        result: {}
+    tenantpreferenceapiParams1ServerError:
+      title: ParamsinServerError
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+        status:
+          type: string
+        errmsg:
+          type: string
+      example:
+        resmsgid: 
+        msgid: 3714a8e54fc515c1e8dccf06449cf677
+        err: INTERNAL_SERVER_ERROR
+        status: INTERNAL_SERVER_ERROR
+        errmsg: INTERNAL_SERVER_ERROR
+    tenantpreferenceapiBadRequest:
+      title: BadRequestinUpdateConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1BadRequest'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.update
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: BAD_REQUEST
+          status: BAD_REQUEST
+          errmsg: Bad Request
+        responseCode: BAD_REQUEST
+        result: {}
+    tenantpreferenceapiResourceNotFound:
+      title: ResourceNotFoundinUpdateConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1ResourceNotFound'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.update
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: INVALID_ORG_ID
+          status: INVALID_ORG_ID
+          errmsg: INVALID_ORG_ID
+        responseCode: RESOURCE_NOT_FOUND
+        result: {}
+    tenantpreferenceapiResourceNotFoundRead:
+      title: ResourceNotFoundinReadConsent
+      required:
+      - id
+      - ver
+      - ts
+      - params
+      - responseCode
+      - result
+      type: object
+      properties:
+        id:
+          type: string
+        ver:
+          type: string
+        ts:
+          type: string
+        params:
+          $ref: '#/components/schemas/tenantpreferenceapiParams1ResourceNotFound'
+        responseCode:
+          type: string
+        result:
+          type: object
+      example:
+        id: api.org.preferences.read
+        ver: v1
+        ts: 2020-11-25 03:47:00:682+0000
+        params:
+          resmsgid: 
+          msgid: 3714a8e54fc515c1e8dccf06449cf677
+          err: USER_CONSENT_NOT_FOUND
+          status: USER_CONSENT_NOT_FOUND
+          errmsg: User consent not found.
+        responseCode: RESOURCE_NOT_FOUND
+        result: {}
+    tenantpreferenceapiParams1BadRequest:
+      title: ParamsinBadRequest
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+        status:
+          type: string
+        errmsg:
+          type: string
+      example:
+        resmsgid: 
+        msgid: 3714a8e54fc515c1e8dccf06449cf677
+        err: BAD_REQUEST
+        status: BAD_REQUEST
+        errmsg: Bad Request 
+    tenantpreferenceapiParams1ResourceNotFound:
+      title: ParamsinResourceNotFound
+      required:
+      - resmsgid
+      - msgid
+      - err
+      - status
+      - errmsg
+      type: object
+      properties:
+        resmsgid:
+          type: string
+          nullable: true
+        msgid:
+          type: string
+        err:
+          type: string
+        status:
+          type: string
+        errmsg:
+          type: string
+      example:
+        resmsgid: 
+        msgid: 3714a8e54fc515c1e8dccf06449cf677
+        err: USER_CONSENT_NOT_FOUND
+        status: USER_CONSENT_NOT_FOUND
+        errmsg: User consent not found.      
+  securitySchemes:
+    httpBearer:
+      type: http
+      scheme: bearer
+security:
+- httpBearer: []
+tags:
+- name: tenant Preference Misc
+  description: ''
