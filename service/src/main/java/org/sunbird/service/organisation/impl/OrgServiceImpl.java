@@ -222,25 +222,16 @@ public class OrgServiceImpl implements OrgService {
       return true;
 
     Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
+    String authorizationKey = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_AUTHORIZATION);
+    headerMap.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + authorizationKey);
     headerMap.put("Content-Type", contentType);
     headerMap.put("user-id", "");
     ProjectUtil.setTraceIdInHeader(headerMap, context);
     String reqString = "";
     String regStatus = "";
     try {
-      logger.info(
-          context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
+      logger.info(context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
+      String contentServiceBaseUrl = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_CONTENT_SERVICE_API_BASE_URL);
       Map<String, Object> map = new HashMap<>();
       Map<String, Object> reqMap = new HashMap<>();
       Map<String, Object> channelMap = new HashMap<>();
@@ -257,35 +248,27 @@ public class OrgServiceImpl implements OrgService {
       reqMap.put(JsonKey.CHANNEL, channelMap);
       map.put(JsonKey.REQUEST, reqMap);
       reqString = mapper.writeValueAsString(map);
-      logger.info(
-          context, "Channel request data = " + reqString + " for operation : " + operationType);
+      logger.info(context, "Channel request data = " + reqString + " for operation : " + operationType);
       if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
         regStatus =
             HttpClientUtil.post(
-                (ekStepBaseUrl
-                    + PropertiesCache.getInstance()
-                        .getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
+                (contentServiceBaseUrl + PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_CHANNEL_CREATE_API_URL)),
                 reqString,
                 headerMap,
                 context);
       } else if (JsonKey.UPDATE.equalsIgnoreCase(operationType)) {
         regStatus =
             HttpClientUtil.patch(
-                (ekStepBaseUrl
-                        + PropertiesCache.getInstance()
-                            .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
+                (contentServiceBaseUrl + PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_CHANNEL_UPDATE_API_URL))
                     + "/"
                     + req.get(JsonKey.ID),
                 reqString,
                 headerMap,
                 context);
       }
-      logger.info(
-          context,
-          "Call end for channel registration/update for org id ==" + req.get(JsonKey.HASHTAGID));
+      logger.info(context, "Call end for channel registration/update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while registering/update channel." + e.getMessage(), e);
+      logger.error(context, "Exception occurred while registering/update channel." + e.getMessage(), e);
     }
     return regStatus.contains("OK");
   }

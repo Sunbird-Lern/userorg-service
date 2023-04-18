@@ -71,7 +71,7 @@ actor_hostname: actor-service
 api_actor_provider: local
 background_actor_provider: local
 bind_hostname: 0.0.0.0
-ekstep_api_base_url: http://learning.knowlg.svc.cluster.local:8080/learning-service
+sunbird_content_service_api_base_url: http://content-service.knowlg.svc.cluster.local:9000
 feed_limit: 30
 form_api_endpoint: /plugin/v1/form/read
 isMultiDCEnabled: false

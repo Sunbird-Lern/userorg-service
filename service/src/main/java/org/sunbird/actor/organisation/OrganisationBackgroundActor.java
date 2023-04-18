@@ -39,12 +39,10 @@ public class OrganisationBackgroundActor extends BaseActor {
     // making call to register tag
     if (((String) request.getRequest().get(JsonKey.OPERATION_TYPE)).equals(JsonKey.INSERT)) {
       Map<String, String> headerMap = new HashMap<>();
-      String header = ProjectUtil.getConfigValue(JsonKey.EKSTEP_AUTHORIZATION);
-      header = JsonKey.BEARER + header;
-      headerMap.put(JsonKey.AUTHORIZATION, header);
+      String authorizationKey = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_AUTHORIZATION);
+      headerMap.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + authorizationKey);
       headerMap.put("Content-Type", "application/json");
-      registerTag(
-          (String) organisation.get(JsonKey.ID), "{}", headerMap, request.getRequestContext());
+      registerTag((String) organisation.get(JsonKey.ID), "{}", headerMap, request.getRequestContext());
     }
     organisation.remove(JsonKey.CONTACT_DETAILS);
     String orgLocation = (String) organisation.get(JsonKey.ORG_LOCATION);

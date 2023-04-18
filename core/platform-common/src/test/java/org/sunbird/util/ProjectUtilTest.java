@@ -29,11 +29,8 @@ public class ProjectUtilTest extends BaseHttpTest {
     headers.put("content-type", "application/json");
     headers.put("accept", "application/json");
     headers.put("user-id", "mahesh");
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    }
-    headers.put("authorization", "Bearer " + header);
+    String authorizationKey = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_AUTHORIZATION);
+    headers.put("authorization", JsonKey.BEARER + authorizationKey);
   }
 
   @Ignore

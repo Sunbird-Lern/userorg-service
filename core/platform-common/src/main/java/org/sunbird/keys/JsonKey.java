@@ -75,10 +75,9 @@ public final class JsonKey {
   public static final String DOB = "dob";
   public static final String EDUCATION = "education";
   public static final String ANALYTICS_API_BASE_URL = "sunbird_analytics_api_base_url";
-  public static final String EKSTEP_AUTHORIZATION = "ekstep_authorization";
-  public static final String EKSTEP_BASE_URL = "ekstep_api_base_url";
-  public static final String EKSTEP_CHANNEL_REG_API_URL = "ekstep.channel.reg.api.url";
-  public static final String EKSTEP_CHANNEL_UPDATE_API_URL = "ekstep.channel.update.api.url";
+  public static final String SUNBIRD_CONTENT_SERVICE_API_BASE_URL = "sunbird_content_service_api_base_url";
+  public static final String SUNBIRD_CHANNEL_CREATE_API_URL = "sunbird.channel.create.api.url";
+  public static final String SUNBIRD_CHANNEL_UPDATE_API_URL = "sunbird.channel.update.api.url";
   public static final String EKSTEP_TAG_API_URL = "ekstep.tag.api.url";
   public static final String EMAIL = "email";
   public static final String EMAIL_REQUEST = "emailReq";
