@@ -52,83 +52,11 @@ docker run -p 9042:9042 --name sunbird_cassandra -v $sunbird_dbs_path/cassandra/
 docker ps -a | grep cassandra
 ```
 
-## To Seed data to Cassandra
-
-Fork the below projects and clone it from git,
+## To create/load data to Cassandra
 
 ```shell
-git clone https://github.com/Sunbird-Lern/sunbird-utils/<latest-branch>
+https://github.com/Sunbird-Lern/sunbird-utils/tree/release-5.3.0#readme
 ```
-
-Open a new Terminal In the path,
-
-#### (Project base path)/sunbird-utils
-
-Run the below command,
-
-```shell
-mvn clean install -DskipTests
-``` 
-
-Make sure the build is success and then,
-open a new Terminal In the path,
-
-#### (Project base path)/sunbird-utils/sunbird-cassandra-migration/cassandra-migration,
-
-Run below command,
-
-```shell
-mvn clean install -DskipTests
-``` 
-
-## One should execute only one of the commands listed below.
-
-### Command 1:
-
-```shell
-java -jar \
--Dcassandra.migration.scripts.locations=filesystem:<absolute or relative path>/db/migration/cassandra/<keyspace_name> \
--Dcassandra.migration.cluster.contactpoints=localhost \
--Dcassandra.migration.cluster.port=9042 \
--Dcassandra.migration.cluster.username=username \
--Dcassandra.migration.cluster.password=password \
--Dcassandra.migration.keyspace.name=keyspace_name \
-target/*-jar-with-dependencies.jar migrate
-``` 
-
-cluster.port - specify the port number where cassandra is running
-cluster.username - specify username of your cassandra cluster
-cluster.password - specify password of your cassandra cluster
-keyspace.name - specify keyspace for which you have to perform migration
-
-#### Sample Command:
-
-```shell
-java -jar \
--Dcassandra.migration.scripts.locations=filesystem:src/main/resources/db/migration/cassandra/sunbird \
--Dcassandra.migration.cluster.contactpoints=localhost \
--Dcassandra.migration.cluster.port=9042 \
--Dcassandra.migration.cluster.username=cassandra \
--Dcassandra.migration.cluster.password=cassandra \
--Dcassandra.migration.keyspace.name=sunbird \
-target/*-jar-with-dependencies.jar migrate
-``` 
-
-### Command 2:
-
-```shell
-java -cp "cassandra-migration-0.0.1-SNAPSHOT-jar-with-dependencies.jar" com.contrastsecurity.cassandra.migration.utils.MigrationScriptEntryPoint
-```
-
-The system environment listed below is required for command 2.
-
-### System Env
-
-```shell
-sunbird_cassandra_keyspace=<keyspace_name>
-sunbird_cassandra_migration_location="filesystem:<absolute or relative path>/db/migration/cassandra"
-``` 
-
 ### The system environment listed below is required for cassandra connectivity with user org service.
 
 #### System Env variables for cassandra
@@ -154,6 +82,16 @@ docker pull elasticsearch:6.8.11
 ```shell
 docker run -p 9200:9200 --name sunbird_es -v $sunbird_dbs_path/es/data:/usr/share/elasticsearch/data -v $sunbird_dbs_path/es/logs://usr/share/elasticsearch/logs -v $sunbird_dbs_path/es/backups:/opt/elasticsearch/backup -e "discovery.type=single-node" --network sunbird_db_network -d docker.elastic.co/elasticsearch/elasticsearch:6.8.11
 ```
+
+--name - Name your container (avoids generic id)
+
+-p - Specify container ports to expose
+
+Using the -p option with ports 7474 and 7687 allows us to expose and listen for traffic on both the HTTP and Bolt ports. Having the HTTP port means we can connect to our database with Neo4j Browser, and the Bolt port means efficient and type-safe communication requests between other layers and the database.
+
+-d - This detaches the container to run in the background, meaning we can access the container separately and see into all of its processes.
+
+-v - The next several lines start with the -v option. These lines define volumes we want to bind in our local directory structure so we can access certain files locally.
 
 3. We can verify the setup by running the below command, which will show the status of elastic search as up and running
 
