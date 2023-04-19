@@ -9,15 +9,14 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 
 public class ContentStoreUtil {
   private static final LoggerUtil logger = new LoggerUtil(ContentStoreUtil.class);
 
   private static Map<String, String> getHeaders() {
     Map<String, String> headers = new HashMap<>();
-    headers.put(
-        HttpHeaders.AUTHORIZATION,
-        JsonKey.BEARER + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_AUTHORIZATION));
+    headers.put(HttpHeaders.AUTHORIZATION, JsonKey.BEARER + PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_AUTHORIZATION));
     return headers;
   }
 
@@ -27,8 +26,7 @@ public class ContentStoreUtil {
   }
 
   @SuppressWarnings("unchecked")
-  private static Map<String, Object> handleReadRequest(
-      String id, String urlPath, RequestContext context) {
+  private static Map<String, Object> handleReadRequest(String id, String urlPath, RequestContext context) {
     Map<String, String> headers = getHeaders();
     ProjectUtil.setTraceIdInHeader(headers, context);
     ObjectMapper mapper = new ObjectMapper();
