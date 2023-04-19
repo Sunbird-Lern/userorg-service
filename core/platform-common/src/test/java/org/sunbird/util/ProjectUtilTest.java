@@ -1,13 +1,8 @@
 package org.sunbird.util;
 
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.sunbird.exception.ProjectCommonException;
@@ -17,37 +12,28 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.sso.impl.BaseHttpTest;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.*;
+
 /** Created by arvind on 6/10/17. */
 public class ProjectUtilTest extends BaseHttpTest {
 
-  private PropertiesCache propertiesCache = ProjectUtil.propertiesCache;
-
-  private static Map<String, String> headers = new HashMap<String, String>();
-
-  @BeforeClass
-  public static void init() {
-    headers.put("content-type", "application/json");
-    headers.put("accept", "application/json");
-    headers.put("user-id", "mahesh");
-    String authorizationKey = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_AUTHORIZATION);
-    headers.put("authorization", JsonKey.BEARER + authorizationKey);
-  }
+  private final PropertiesCache propertiesCache = ProjectUtil.propertiesCache;
 
   @Ignore
   public void testGetContextFailureWithNameAbsent() {
-
     Map<String, Object> templateMap = new HashMap<>();
     templateMap.put(JsonKey.ACTION_URL, "googli.com");
 
     VelocityContext context = ProjectUtil.getContext(templateMap);
-    assertEquals(false, context.internalContainsKey(JsonKey.NAME));
+    assertFalse(context.internalContainsKey(JsonKey.NAME));
   }
 
   @Test
   public void testGetContextFailureWithoutActionUrl() {
-
     Map<String, Object> templateMap = new HashMap<>();
-    templateMap.put(JsonKey.NAME, "userName");
     templateMap.put(JsonKey.ORG_NAME, "orgName");
     templateMap.put(JsonKey.COURSE_NAME, "courseName");
     templateMap.put(JsonKey.BATCH_START_DATE, "2020");
@@ -57,12 +43,11 @@ public class ProjectUtilTest extends BaseHttpTest {
     templateMap.put(JsonKey.SIGNATURE, "signature");
     templateMap.put(JsonKey.COURSE_BATCH_URL, "url");
     VelocityContext context = ProjectUtil.getContext(templateMap);
-    assertEquals(false, context.internalContainsKey(JsonKey.ACTION_URL));
+    assertFalse(context.internalContainsKey(JsonKey.ACTION_URL));
   }
 
   @Test
   public void testGetContextSuccessWithFromMail() {
-
     Map<String, Object> templateMap = new HashMap<>();
     templateMap.put(JsonKey.ACTION_URL, "googli.com");
     templateMap.put(JsonKey.NAME, "userName");
@@ -72,18 +57,14 @@ public class ProjectUtilTest extends BaseHttpTest {
 
     VelocityContext context = ProjectUtil.getContext(templateMap);
     if (envVal) {
-      assertEquals(
-          System.getenv(JsonKey.EMAIL_SERVER_FROM), context.internalGet(JsonKey.FROM_EMAIL));
+      assertEquals(System.getenv(JsonKey.EMAIL_SERVER_FROM), context.internalGet(JsonKey.FROM_EMAIL));
     } else if (cacheVal) {
-      assertEquals(
-          propertiesCache.getProperty(JsonKey.EMAIL_SERVER_FROM),
-          context.internalGet(JsonKey.FROM_EMAIL));
+      assertEquals(propertiesCache.getProperty(JsonKey.EMAIL_SERVER_FROM), context.internalGet(JsonKey.FROM_EMAIL));
     }
   }
 
   @Test
   public void testGetContextSuccessWithOrgImageUrl() {
-
     Map<String, Object> templateMap = new HashMap<>();
     templateMap.put(JsonKey.ACTION_URL, "googli.com");
     templateMap.put(JsonKey.NAME, "userName");
@@ -93,19 +74,15 @@ public class ProjectUtilTest extends BaseHttpTest {
 
     VelocityContext context = ProjectUtil.getContext(templateMap);
     if (envVal) {
-      assertEquals(
-          System.getenv(JsonKey.SUNBIRD_ENV_LOGO_URL), context.internalGet(JsonKey.ORG_IMAGE_URL));
+      assertEquals(System.getenv(JsonKey.SUNBIRD_ENV_LOGO_URL), context.internalGet(JsonKey.ORG_IMAGE_URL));
     } else if (cacheVal) {
-      assertEquals(
-          propertiesCache.getProperty(JsonKey.SUNBIRD_ENV_LOGO_URL),
-          context.internalGet(JsonKey.ORG_IMAGE_URL));
+      assertEquals(propertiesCache.getProperty(JsonKey.SUNBIRD_ENV_LOGO_URL), context.internalGet(JsonKey.ORG_IMAGE_URL));
     }
   }
 
   @Test
   public void testCreateCheckResponseSuccess() {
-    Map<String, Object> responseMap =
-        ProjectUtil.createCheckResponse("LearnerService", false, null);
+    Map<String, Object> responseMap = ProjectUtil.createCheckResponse("LearnerService", false, null);
     assertEquals(true, responseMap.get(JsonKey.Healthy));
   }
 
@@ -121,8 +98,7 @@ public class ProjectUtilTest extends BaseHttpTest {
                 ResponseCode.CLIENT_ERROR.getResponseCode()));
     assertEquals(false, responseMap.get(JsonKey.Healthy));
     assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), responseMap.get(JsonKey.ERROR));
-    assertEquals(
-        ResponseCode.invalidObjectType.getErrorMessage(), responseMap.get(JsonKey.ERRORMSG));
+    assertEquals(ResponseCode.invalidObjectType.getErrorMessage(), responseMap.get(JsonKey.ERRORMSG));
   }
 
   @Ignore
@@ -173,7 +149,7 @@ public class ProjectUtilTest extends BaseHttpTest {
   @Test
   public void testValidatePhone() {
     boolean bool = ProjectUtil.validatePhone("9742500121", "91");
-    assertTrue(true);
+    assertTrue(bool);
   }
 
   @Test
@@ -218,11 +194,8 @@ public class ProjectUtilTest extends BaseHttpTest {
 
   @Test
   public void testEsTypeSuccess() {
-    assertEquals(
-        ProjectUtil.getConfigValue("user_index_alias"), ProjectUtil.EsType.user.getTypeName());
-    assertEquals(
-        ProjectUtil.getConfigValue("org_index_alias"),
-        ProjectUtil.EsType.organisation.getTypeName());
+    assertEquals(ProjectUtil.getConfigValue("user_index_alias"), ProjectUtil.EsType.user.getTypeName());
+    assertEquals(ProjectUtil.getConfigValue("org_index_alias"), ProjectUtil.EsType.organisation.getTypeName());
     assertEquals("usernotes", ProjectUtil.EsType.usernotes.getTypeName());
   }
 
@@ -242,10 +215,10 @@ public class ProjectUtilTest extends BaseHttpTest {
 
   @Test
   public void testOrgStatusSuccess() {
-    assertEquals(new Integer(0), ProjectUtil.OrgStatus.INACTIVE.getValue());
-    assertEquals(new Integer(1), ProjectUtil.OrgStatus.ACTIVE.getValue());
-    assertEquals(new Integer(2), ProjectUtil.OrgStatus.BLOCKED.getValue());
-    assertEquals(new Integer(3), ProjectUtil.OrgStatus.RETIRED.getValue());
+    assertEquals(Integer.valueOf(0), ProjectUtil.OrgStatus.INACTIVE.getValue());
+    assertEquals(Integer.valueOf(1), ProjectUtil.OrgStatus.ACTIVE.getValue());
+    assertEquals(Integer.valueOf(2), ProjectUtil.OrgStatus.BLOCKED.getValue());
+    assertEquals(Integer.valueOf(3), ProjectUtil.OrgStatus.RETIRED.getValue());
   }
 
   @Test
@@ -266,8 +239,8 @@ public class ProjectUtilTest extends BaseHttpTest {
   public void testStatusSuccess() {
     assertEquals(1, ProjectUtil.Status.ACTIVE.getValue());
     assertEquals(0, ProjectUtil.Status.INACTIVE.getValue());
-    assertEquals(false, ProjectUtil.ActiveStatus.INACTIVE.getValue());
-    assertEquals(true, ProjectUtil.ActiveStatus.ACTIVE.getValue());
+    assertFalse(ProjectUtil.ActiveStatus.INACTIVE.getValue());
+    assertTrue(ProjectUtil.ActiveStatus.ACTIVE.getValue());
     assertEquals("orgimg", ProjectUtil.AzureContainer.orgImage.getName());
     assertEquals("userprofileimg", ProjectUtil.AzureContainer.userProfileImg.getName());
 
