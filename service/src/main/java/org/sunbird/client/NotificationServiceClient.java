@@ -132,9 +132,9 @@ public class NotificationServiceClient {
   }
 
   private String getServiceApiUrl(String serviceUrlKey) {
-    String NOTIFICATION_SERVICE_BASE_URL = PropertiesCache.getInstance().getProperty(JsonKey.NOTIFICATION_SERVICE_BASE_URL);
-    String NOTIFICATION_SERVICE_URL = PropertiesCache.getInstance().getProperty(serviceUrlKey);
-    return NOTIFICATION_SERVICE_BASE_URL + NOTIFICATION_SERVICE_URL;
+    String baseUrl = PropertiesCache.getInstance().getProperty(JsonKey.NOTIFICATION_SERVICE_BASE_URL);
+    String serviceUrl = PropertiesCache.getInstance().getProperty(serviceUrlKey);
+    return baseUrl + serviceUrl;
   }
 
   private Response callCreateOrDeleteNotificationService(Request reqObj, RequestContext context, String serviceUrl) throws JsonProcessingException {
