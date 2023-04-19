@@ -43,7 +43,11 @@ docker network create sunbird_db_network
 2. We need to create the cassandra instance, By using the below command we can create the same and run in a container.
 
 ```shell
-docker run -p 9042:9042 --name sunbird_cassandra -v $sunbird_dbs_path/cassandra/data:/var/lib/cassandra -v $sunbird_dbs_path/cassandra/logs:/opt/cassandra/logs -v $sunbird_dbs_path/cassandra/backups:/mnt/backups --network sunbird_db_network -d cassandra:3.11.6 
+docker run -p 9042:9042 --name sunbird_cassandra \
+ -v $sunbird_dbs_path/cassandra/data:/var/lib/cassandra \
+ -v $sunbird_dbs_path/cassandra/logs:/opt/cassandra/logs \
+ -v $sunbird_dbs_path/cassandra/backups:/mnt/backups \
+ --network sunbird_db_network -d cassandra:3.11.6 
 ```
 
 3. We can verify the setup by running the below command, which will show the status of cassandra as up and running
@@ -57,6 +61,12 @@ docker ps -a | grep cassandra
 ```shell
 https://github.com/Sunbird-Lern/sunbird-utils/tree/release-5.3.0#readme
 ```
+4. To ssh to cassandra docker container and check whether the tables got created, 
+run the below command.
+```shell
+docker exec -it sunbird_cassandra /bin/bash
+```
+
 ### The system environment listed below is required for cassandra connectivity with user org service.
 
 #### System Env variables for cassandra
@@ -80,18 +90,23 @@ docker pull elasticsearch:6.8.11
    container.
 
 ```shell
-docker run -p 9200:9200 --name sunbird_es -v $sunbird_dbs_path/es/data:/usr/share/elasticsearch/data -v $sunbird_dbs_path/es/logs://usr/share/elasticsearch/logs -v $sunbird_dbs_path/es/backups:/opt/elasticsearch/backup -e "discovery.type=single-node" --network sunbird_db_network -d docker.elastic.co/elasticsearch/elasticsearch:6.8.11
+docker run -p 9200:9200 --name sunbird_es \
+ -v $sunbird_dbs_path/es/data:/usr/share/elasticsearch/data \
+ -v $sunbird_dbs_path/es/logs://usr/share/elasticsearch/logs \
+ -v $sunbird_dbs_path/es/backups:/opt/elasticsearch/backup \
+ -e "discovery.type=single-node" --network sunbird_db_network \
+ -d docker.elastic.co/elasticsearch/elasticsearch:6.8.11
 ```
 
---name - Name your container (avoids generic id)
-
--p - Specify container ports to expose
-
-Using the -p option with ports 7474 and 7687 allows us to expose and listen for traffic on both the HTTP and Bolt ports. Having the HTTP port means we can connect to our database with Neo4j Browser, and the Bolt port means efficient and type-safe communication requests between other layers and the database.
-
--d - This detaches the container to run in the background, meaning we can access the container separately and see into all of its processes.
-
--v - The next several lines start with the -v option. These lines define volumes we want to bind in our local directory structure so we can access certain files locally.
+> --name -  Name your container (avoids generic id)
+>
+> -p - Specify container ports to expose
+>
+> Using the -p option with ports 7474 and 7687 allows us to expose and listen for traffic on both the HTTP and Bolt ports. Having the HTTP port means we can connect to our database with Neo4j Browser, and the Bolt port means efficient and type-safe communication requests between other layers and the database.
+>
+> -d - This detaches the container to run in the background, meaning we can access the container separately and see into all of its processes.
+>
+> -v - The next several lines start with the -v option. These lines define volumes we want to bind in our local directory structure so we can access certain files locally.
 
 3. We can verify the setup by running the below command, which will show the status of elastic search as up and running
 
@@ -118,33 +133,322 @@ git clone https://github.com/Sunbird-Lern/sunbird-utils/<latest-branch>
 2. then navigate to,
    <project_base_path>/sunbird-utils/sunbird-es-utils/src/main/resources folder, for getting the index and mappings.
    We have to use postman to create index and mappings.
-   Create index and mappings mainly for user, userfeed, usernotes, org, and location JSON files.
+
+Create indices for,
+1. [user](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/indices/user.json)
+2. [userfeed](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/indices/userfeed.json)
+3. [usernotes](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/indices/usernotes.json)
+4. [org](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/indices/org.json)
+5. [location](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/indices/location.json)
 
 #### PUT {{es_host}}/<indices_name> Body : <respective_index_json_content>
 
 For example,
 
 ```shell
-curl --location --request PUT '{{es_host}}/<indices_name>/_mapping/_doc'
---header 'Content-Type: application/json'
---data '<respective_index_json_content>'
+curl --location --globoff --request PUT 'localhost:9200/location' \
+--header 'Content-Type: application/json' \
+--data '{
+    "settings": {
+        "index": {
+            "number_of_shards": "5",
+            "number_of_replicas": "1",
+            "analysis": {
+                "filter": {
+                    "mynGram": {
+                        "token_chars": [
+                            "letter",
+                            "digit",
+                            "whitespace",
+                            "punctuation",
+                            "symbol"
+                        ],
+                        "min_gram": "1",
+                        "type": "ngram",
+                        "max_gram": "20"
+                    }
+                },
+                "analyzer": {
+                    "cs_index_analyzer": {
+                        "filter": [
+                            "lowercase",
+                            "mynGram"
+                        ],
+                        "type": "custom",
+                        "tokenizer": "standard"
+                    },
+                    "keylower": {
+                        "filter": "lowercase",
+                        "type": "custom",
+                        "tokenizer": "keyword"
+                    },
+                    "cs_search_analyzer": {
+                        "filter": [
+                            "lowercase",
+                            "standard"
+                        ],
+                        "type": "custom",
+                        "tokenizer": "standard"
+                    }
+                }
+            }
+        }
+    },
+    "mappings": {
+        "_doc": {
+            "dynamic": false,
+            "properties": {
+                "all_fields": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower"
+                        }
+                    },
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer"
+                },
+                "code": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower",
+                            "fielddata": true
+                        }
+                    },
+                    "copy_to": [
+                        "all_fields"
+                    ],
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer",
+                    "fielddata": true
+                },
+                "id": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower",
+                            "fielddata": true
+                        }
+                    },
+                    "copy_to": [
+                        "all_fields"
+                    ],
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer",
+                    "fielddata": true
+                },
+                "name": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower",
+                            "fielddata": true
+                        }
+                    },
+                    "copy_to": [
+                        "all_fields"
+                    ],
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer",
+                    "fielddata": true
+                },
+                "parentId": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower",
+                            "fielddata": true
+                        }
+                    },
+                    "copy_to": [
+                        "all_fields"
+                    ],
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer",
+                    "fielddata": true
+                },
+                "type": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower",
+                            "fielddata": true
+                        }
+                    },
+                    "copy_to": [
+                        "all_fields"
+                    ],
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer",
+                    "fielddata": true
+                },
+                "value": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "text",
+                            "analyzer": "keylower",
+                            "fielddata": true
+                        }
+                    },
+                    "copy_to": [
+                        "all_fields"
+                    ],
+                    "analyzer": "cs_index_analyzer",
+                    "search_analyzer": "cs_search_analyzer",
+                    "fielddata": true
+                }
+            }
+        }
+    }
+}'
 ```
 
-replace <respective_index_name> with user,userfeed,usernotes,org and location one by one along with '<
-respective_index_json_content> in the body.
+replace <respective_index_name> with
+##### user,userfeed,usernotes,org and location 
+one by one along with copying
+<respective_index_json_content> provided in previous step in the body.
+
+Create mappings for,
+1. [user](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/mappings/user-mapping.json)
+2. [userfeed](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/mappings/userfeed-mapping.json)
+3. [usernotes](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/mappings/usernotes-mapping.json)
+4. [org](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/mappings/org-mapping.json)
+5. [location](https://github.com/Sunbird-Lern/sunbird-utils/blob/master/sunbird-es-utils/src/main/resources/mappings/location-mapping.json)
+
 
 #### PUT {{es_host}}/<indices_name>/_mapping/_doc Body : <respective_mapping_json_content>
 
 For example,
 
 ```shell
-curl --location --request PUT '{{es_host}}/<indices_name>/_mapping/_doc'
---header 'Content-Type: application/json'
---data '<respective_mapping_json_content>'
+curl --location --request PUT 'localhost:9200/location/_mapping/_doc' \
+--header 'Content-Type: application/json' \
+--data '{
+    "dynamic": false,
+    "properties": {
+        "all_fields": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower"
+                }
+            },
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer"
+        },
+        "code": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                }
+            },
+            "copy_to": [
+                "all_fields"
+            ],
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer",
+            "fielddata": true
+        },
+        "id": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                }
+            },
+            "copy_to": [
+                "all_fields"
+            ],
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer",
+            "fielddata": true
+        },
+        "name": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                }
+            },
+            "copy_to": [
+                "all_fields"
+            ],
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer",
+            "fielddata": true
+        },
+        "parentId": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                }
+            },
+            "copy_to": [
+                "all_fields"
+            ],
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer",
+            "fielddata": true
+        },
+        "type": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                }
+            },
+            "copy_to": [
+                "all_fields"
+            ],
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer",
+            "fielddata": true
+        },
+        "value": {
+            "type": "text",
+            "fields": {
+                "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                }
+            },
+            "copy_to": [
+                "all_fields"
+            ],
+            "analyzer": "cs_index_analyzer",
+            "search_analyzer": "cs_search_analyzer",
+            "fielddata": true
+        }
+    }
+}'
 ```
 
-replace <respective_index_name> with user,userfeed,usernotes,org and location one by one along with '<
-respective_mapping_json_content> in the body.
+replace <respective_index_name> with
+##### user,userfeed,usernotes,org and location
+one by one along with copying
+<respective_mapping_json_content> provided in previous step in the body.
 
 ### The system environment listed below is required for elastic search connectivity with user org service.
 
@@ -324,7 +628,7 @@ curl --location '{{host}}/v1/system/settings/set' \
 ### User Profile Configuration
 
 ```shell
-curl --location --request POST 'localhost:9000/v1/system/settings/set' \
+curl --location --request POST '{{host}}/v1/system/settings/set' \
 --header 'Content-Type: application/json' \
 --data-raw '{
 "request": {
