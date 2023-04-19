@@ -222,10 +222,7 @@ public class OrgServiceImpl implements OrgService {
       return true;
 
     Map<String, String> headerMap = new HashMap<>();
-    String authorizationKey = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_AUTHORIZATION);
-    headerMap.put(JsonKey.AUTHORIZATION, JsonKey.BEARER + authorizationKey);
     headerMap.put("Content-Type", contentType);
-    headerMap.put("user-id", "");
     ProjectUtil.setTraceIdInHeader(headerMap, context);
     String reqString = "";
     String regStatus = "";
