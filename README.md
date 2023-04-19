@@ -58,9 +58,7 @@ docker ps -a | grep cassandra
 
 ## To create/load data to Cassandra
 
-```shell
-https://github.com/Sunbird-Lern/sunbird-utils/tree/release-5.3.0#readme
-```
+[sunbird-utils-cassandra-setup] https://github.com/Sunbird-Lern/sunbird-utils/tree/release-5.3.0#readme
 4. To ssh to cassandra docker container and check whether the tables got created, 
 run the below command.
 ```shell
