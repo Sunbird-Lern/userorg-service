@@ -1,15 +1,16 @@
 package org.sunbird.sso;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.MediaType;
 import org.apache.http.HttpHeaders;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
+
+import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 public class KeycloakBruteForceAttackUtil {
   private static final LoggerUtil logger = new LoggerUtil(KeycloakBruteForceAttackUtil.class);
@@ -65,9 +66,7 @@ public class KeycloakBruteForceAttackUtil {
   private static Map<String, String> getHeaders(RequestContext context) throws Exception {
     Map<String, String> headers = new HashMap<>();
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    headers.put(
-        JsonKey.AUTHORIZATION,
-        JsonKey.BEARER + KeycloakUtil.getAdminAccessTokenWithoutDomain(context));
+    headers.put(HttpHeaders.AUTHORIZATION, JsonKey.BEARER + KeycloakUtil.getAdminAccessTokenWithoutDomain(context));
     return headers;
   }
 }

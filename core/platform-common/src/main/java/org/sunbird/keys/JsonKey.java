@@ -34,7 +34,6 @@ public final class JsonKey {
   public static final String ASSOCIATION_TYPE = "associationType";
   public static final String ATTEMPTED_COUNT = "attemptedCount";
   public static final String AUTH_WITH_MASTER_KEY = "authWithMasterKey";
-  public static final String AUTHORIZATION = "Authorization";
   public static final String BEARER = "Bearer ";
   public static final String BODY = "body";
   public static final String BULK_OP_DB = "BulkOpDb";

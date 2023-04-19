@@ -2,6 +2,7 @@ package org.sunbird.actor.organisation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.common.factory.EsClientFactory;
@@ -14,6 +15,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 
+import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,7 @@ public class OrganisationBackgroundActor extends BaseActor {
     // making call to register tag
     if (((String) request.getRequest().get(JsonKey.OPERATION_TYPE)).equals(JsonKey.INSERT)) {
       Map<String, String> headerMap = new HashMap<>();
-      headerMap.put("Content-Type", "application/json");
+      headerMap.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
       registerTag((String) organisation.get(JsonKey.ID), "{}", headerMap, request.getRequestContext());
     }
     organisation.remove(JsonKey.CONTACT_DETAILS);
