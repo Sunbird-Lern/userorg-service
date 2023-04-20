@@ -174,7 +174,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
         X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
         publicKeyFactory.generatePublic(keySpecX509);
       } catch (Exception se) {
-        se.printStackTrace();
         throw new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ERROR_CODE);
       }
   }
