@@ -201,8 +201,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
-            .thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap())).thenReturn(userAuthentication);
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     File samplePublicPem = new File(Paths.get("").toAbsolutePath()+ File.separator + "test/resources/samplepublic.pem");
