@@ -122,7 +122,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
     }
   }
 
-  public void validateEncryptionKeyRequest(Request reqObj, MultipartFormData body, Map<String, String[]> formUrlEncodeddata, JsonNode requestData) {
+  public void validateEncryptionKeyRequest(Request reqObj, MultipartFormData body, JsonNode requestData) {
 
     try {
       Map<String, Object> map = new HashMap<>();
@@ -146,15 +146,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
 
         reqObj.getRequest().putAll(map);
         map.put(JsonKey.FILE_NAME, fileName);
-      } else if (null != formUrlEncodeddata) {
-        // read data as string from request
-        for (Map.Entry<String, String[]> entry : formUrlEncodeddata.entrySet()) {
-          map.put(entry.getKey(), entry.getValue()[0]);
-        }
-        InputStream is = new ByteArrayInputStream(((String) map.get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
-        byteArray = IOUtils.toByteArray(is);
-        validatePublicKey(byteArray);
-        reqObj.getRequest().putAll(map);
       } else if (null != requestData) {
         reqObj = (Request) mapRequest(requestData, Request.class);
         InputStream is = new ByteArrayInputStream(((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));

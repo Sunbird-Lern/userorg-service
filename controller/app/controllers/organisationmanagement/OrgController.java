@@ -118,13 +118,12 @@ public class OrgController extends BaseController {
      */
     public CompletionStage<Result> addKey(Http.Request httpRequest) {
         Http.MultipartFormData body = httpRequest.body().asMultipartFormData();
-        Map<String, String[]> formUrlEncodeddata = httpRequest.body().asFormUrlEncoded();
         JsonNode requestData = httpRequest.body().asJson();
         return handleRequest(
                 organisationManagementActor,
                 ActorOperations.ADD_ENCRYPTION_KEY.getValue(),
                 orgRequest -> {
-                    new OrgRequestValidator().validateEncryptionKeyRequest((Request) orgRequest, body, formUrlEncodeddata, requestData);
+                    new OrgRequestValidator().validateEncryptionKeyRequest((Request) orgRequest, body, requestData);
                     return null;
                 },
                 getAllRequestHeaders(httpRequest),
