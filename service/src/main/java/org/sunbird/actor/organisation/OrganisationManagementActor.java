@@ -543,7 +543,7 @@ public class OrganisationManagementActor extends BaseActor {
         ProjectCommonException exception = new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
       }
-      String container = ProjectUtil.getConfigValue(JsonKey.CONTAINER);
+      String container = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_CONTAINER);
       avatarUrl = CloudStorageUtil.upload(cspProvider,container,JsonKey.ORGANISATION + File.separator + req.get(JsonKey.ORGANISATION_ID) +  File.separator + fileName,file.getAbsolutePath());
       if(fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY) != null && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
           String oldKey = fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).substring(fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).indexOf(container)+container.length()+1);

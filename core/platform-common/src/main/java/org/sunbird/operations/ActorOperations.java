@@ -149,6 +149,7 @@ public enum ActorOperations {
   ADD_ENCRYPTION_KEY("addEncryptionKey", "ADENCKEY"),
   USER_CURRENT_LOGIN("userCurrentLogin", "USRLOG");
 
+
   private String value;
 
   private String operationCode;

@@ -638,6 +638,7 @@ public final class JsonKey {
   public static final String PASSWORD_RESET_LOGIN_PAGE_URL = "sunbird_password_reset_login_page_url";
   public static final String CLOUD_SERVICE_PROVIDER = "sunbird_cloud_service_provider";
   public static final String EXHAUST_ENCRYPTION_KEY = "exhaustEncryptionKey";
+  public static final String CLOUD_SERVICE_CONTAINER = "sunbird_content_cloud_storage_container";
 
   private JsonKey() {}
 }
