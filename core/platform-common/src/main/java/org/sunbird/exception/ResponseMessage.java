@@ -112,6 +112,7 @@ public interface ResponseMessage {
         "Failed to load extendedProfileSchemaConfig from System_Settings table";
     String ROLE_PROCESSING_INVALID_ORG =
         "Error while processing assign role. Invalid Organisation Id";
+    String INVALID_FILE_EXTENSION = "Please provide a valid file. File expected of format: {0}";
   }
 
   interface Key {
@@ -190,5 +191,6 @@ public interface ResponseMessage {
     String INVALID_CSV_FILE = "0074";
     String EXTENDED_USER_PROFILE_NOT_LOADED = "0075";
     String ROLE_PROCESSING_INVALID_ORG = "0076";
+    String INVALID_FILE_EXTENSION = "0077";
   }
 }

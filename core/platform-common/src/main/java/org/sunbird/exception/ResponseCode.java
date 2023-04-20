@@ -163,6 +163,7 @@ public enum ResponseCode {
   invalidConsentStatus(
       ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
   serverError(ResponseMessage.Key.SERVER_ERROR, ResponseMessage.Message.SERVER_ERROR),
+  invalidFileExtension(ResponseMessage.Key.INVALID_FILE_EXTENSION, ResponseMessage.Message.INVALID_FILE_EXTENSION),
   OK(200),
   SUCCESS(200),
   CLIENT_ERROR(400),
