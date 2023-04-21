@@ -491,7 +491,6 @@ public class OrganisationManagementActor extends BaseActor {
     keys.put(JsonKey.SIGN_KEYS, signKeys);
 
     String orgId = (String) request.get(JsonKey.ID);
-
     Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
 
     if (fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)) {
