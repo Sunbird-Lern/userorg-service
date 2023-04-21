@@ -2,6 +2,16 @@ package org.sunbird.actor.organisation;
 
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -25,17 +35,6 @@ import org.sunbird.util.Slug;
 import org.sunbird.util.Util;
 import org.sunbird.validator.EmailValidator;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class OrganisationManagementActor extends BaseActor {
   private final OrgService orgService = OrgServiceImpl.getInstance();
   private final OrganisationRequestValidator orgValidator = new OrganisationRequestValidator();
@@ -51,15 +50,21 @@ public class OrganisationManagementActor extends BaseActor {
       createOrg(request);
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_ORG.getValue())) {
       updateOrgData(request);
-    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.UPDATE_ORG_STATUS.getValue())) {
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.UPDATE_ORG_STATUS.getValue())) {
       updateOrgStatus(request);
-    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.GET_ORG_DETAILS.getValue())) {
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.GET_ORG_DETAILS.getValue())) {
       getOrgDetails(request);
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ASSIGN_KEYS.getValue())) {
       assignKey(request);
-    } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ADD_ENCRYPTION_KEY.getValue())) {
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.ADD_ENCRYPTION_KEY.getValue())) {
       addEncryptionKey(request);
-  } else {
+    } else {
       onReceiveUnsupportedOperation();
     }
   }
@@ -113,7 +118,8 @@ public class OrganisationManagementActor extends BaseActor {
     }
 
     if (null != isTenant && isTenant) {
-      boolean bool = true;
+      boolean bool =
+          orgService.registerChannel(request, JsonKey.CREATE, actorMessage.getRequestContext());
       request.put(
           JsonKey.IS_SSO_ROOTORG_ENABLED,
           request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)
@@ -371,7 +377,8 @@ public class OrganisationManagementActor extends BaseActor {
           tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.ID));
           tempMap.put(JsonKey.DESCRIPTION, dbOrgDetails.get(JsonKey.DESCRIPTION));
           tempMap.put(JsonKey.LICENSE, license);
-          boolean bool = true;
+          boolean bool =
+              orgService.registerChannel(request, JsonKey.UPDATE, actorMessage.getRequestContext());
           if (!bool) {
             ProjectCommonException.throwClientErrorException(ResponseCode.channelRegFailed);
             return;
@@ -461,7 +468,8 @@ public class OrganisationManagementActor extends BaseActor {
     addKeysToRequestMap(request);
     removeUnusedField(request);
     orgValidator.isTenantIdValid((String) request.get(JsonKey.ID), request.getRequestContext());
-    Response response = orgService.updateOrganisation(request.getRequest(), request.getRequestContext());
+    Response response =
+        orgService.updateOrganisation(request.getRequest(), request.getRequestContext());
     sender().tell(response, self());
     saveDataToES(request.getRequest(), JsonKey.UPDATE, request.getRequestContext());
   }
@@ -483,18 +491,12 @@ public class OrganisationManagementActor extends BaseActor {
     keys.put(JsonKey.SIGN_KEYS, signKeys);
 
     String orgId = (String) request.get(JsonKey.ID);
-    Map<String, Object> dbOrgDetails = orgService.getOrgById(orgId, request.getRequestContext());
-    if (MapUtils.isEmpty(dbOrgDetails)) {
-      logger.info(request.getRequestContext(), "OrganisationManagementActor: addEncryptionKey:: invalid orgId");
-      throw new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
 
-    if(dbOrgDetails.containsKey("keys")) {
-      Map<String, List<String>> fetchedKeys = (Map<String, List<String>>) dbOrgDetails.get("keys");
-      if(fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)) {
-        exhaustKeys = (List<String>) fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY);
-        keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
-      }
+    Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
+
+    if (fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)) {
+      exhaustKeys = fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY);
+      keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
     }
     request.getRequest().put(JsonKey.KEYS, keys);
   }
@@ -503,20 +505,21 @@ public class OrganisationManagementActor extends BaseActor {
     RequestContext context = request.getRequestContext();
     String processId = ProjectUtil.getUniqueIdFromTimestamp(1);
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
-
     String orgId = (String) req.get(JsonKey.ORGANISATION_ID);
 
-    Map<String, Object> dbOrgDetails = orgService.getOrgById(orgId, request.getRequestContext());
-    if (MapUtils.isEmpty(dbOrgDetails)) {
-        logger.info(request.getRequestContext(), "OrganisationManagementActor: addEncryptionKey:: invalid orgId");
-        throw new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
-    }
+    Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
+    String publicKeyUrl = uploadEncryptionFile(req, context, processId, fetchedKeys);
+    Response response = updateEncryptionKey(request, orgId, fetchedKeys, publicKeyUrl);
 
-    Map<String, List<String>> fetchedKeys = null;
-    if(dbOrgDetails.containsKey("keys")) {
-       fetchedKeys = (Map<String, List<String>>) dbOrgDetails.get("keys");
-    }
+    sender().tell(response, self());
+  }
 
+  private String uploadEncryptionFile(
+      Map<String, Object> req,
+      RequestContext context,
+      String processId,
+      Map<String, List<String>> fetchedKeys)
+      throws IOException {
     String fileExtension = "";
     String fileName = (String) req.get(JsonKey.FILE_NAME);
     if (!StringUtils.isBlank(fileName)) {
@@ -533,24 +536,47 @@ public class OrganisationManagementActor extends BaseActor {
 
     File file = new File(fName);
     FileOutputStream fos = null;
-    String avatarUrl = null;
+    String publicKeyUrl = null;
     try {
       fos = new FileOutputStream(file);
       fos.write((byte[]) req.get(JsonKey.FILE));
       String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
       if (null == cspProvider || cspProvider.isEmpty() || cspProvider.isBlank()) {
         logger.info(context, "OrganisationManagementActor:: The cloud service is not available");
-        ProjectCommonException exception = new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ResponseCode.CLIENT_ERROR.getResponseCode());
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                ResponseCode.invalidRequestData,
+                ResponseCode.invalidRequestData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
       }
       String container = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_CONTAINER);
-      avatarUrl = CloudStorageUtil.upload(cspProvider,container,JsonKey.ORGANISATION + File.separator + req.get(JsonKey.ORGANISATION_ID) +  File.separator + fileName,file.getAbsolutePath());
-      if(fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY) != null && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
-          String oldKey = fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).substring(fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).indexOf(container)+container.length()+1);
-          CloudStorageUtil.deleteFile(cspProvider,container,oldKey);
+      publicKeyUrl =
+          CloudStorageUtil.upload(
+              cspProvider,
+              container,
+              JsonKey.ORGANISATION
+                  + File.separator
+                  + req.get(JsonKey.ORGANISATION_ID)
+                  + File.separator
+                  + fileName,
+              file.getAbsolutePath());
+      if (fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY) != null
+          && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
+        String oldKey =
+            fetchedKeys
+                .get(JsonKey.EXHAUST_ENCRYPTION_KEY)
+                .get(0)
+                .substring(
+                    fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).indexOf(container)
+                        + container.length()
+                        + 1);
+        CloudStorageUtil.deleteFile(cspProvider, container, oldKey);
       }
+      return publicKeyUrl;
     } catch (IOException e) {
-      logger.error(context, "Exception Occurred while reading file in OrganisationManagementActor", e);
+      logger.error(
+          context, "Exception Occurred while reading file in OrganisationManagementActor", e);
       throw e;
     } finally {
       try {
@@ -560,28 +586,49 @@ public class OrganisationManagementActor extends BaseActor {
         file.delete();
       } catch (IOException e) {
         logger.error(
-                context,
-                "Exception Occurred while closing fileInputStream in OrganisationManagementActor",
-                e);
+            context,
+            "Exception Occurred while closing fileInputStream in OrganisationManagementActor",
+            e);
       }
     }
+  }
 
-    List<String> exhaustKeys = new ArrayList<String>();
-    exhaustKeys.add(avatarUrl);
-    Map<String, List<String>> updateKeys = null;
-
-
-    if(fetchedKeys != null) {
-        fetchedKeys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
-        updateKeys = fetchedKeys;
+  private Map<String, List<String>> getKeysInDB(Request request, String orgId) {
+    Map<String, List<String>> fetchedKeys = null;
+    Map<String, Object> dbOrgDetails = orgService.getOrgById(orgId, request.getRequestContext());
+    if (MapUtils.isEmpty(dbOrgDetails)) {
+      logger.info(
+          request.getRequestContext(),
+          "OrganisationManagementActor: addEncryptionKey:: invalid orgId");
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    if(updateKeys == null ) {
-        Map<String, List<String>> keys = new HashMap<>();
-        keys.put(JsonKey.ENC_KEYS, new ArrayList<String>());
-        keys.put(JsonKey.SIGN_KEYS, new ArrayList<String>());
-        keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
-        updateKeys = keys;
+    if (dbOrgDetails.containsKey("keys")) {
+      fetchedKeys = (Map<String, List<String>>) dbOrgDetails.get("keys");
+    }
+    return fetchedKeys;
+  }
+
+  private Response updateEncryptionKey(
+      Request request, String orgId, Map<String, List<String>> fetchedKeys, String publicKeyUrl) {
+    List<String> exhaustKeys = new ArrayList<String>();
+    exhaustKeys.add(publicKeyUrl);
+    Map<String, List<String>> updateKeys = null;
+
+    if (fetchedKeys != null) {
+      fetchedKeys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
+      updateKeys = fetchedKeys;
+    }
+
+    if (updateKeys == null) {
+      Map<String, List<String>> keys = new HashMap<>();
+      keys.put(JsonKey.ENC_KEYS, new ArrayList<String>());
+      keys.put(JsonKey.SIGN_KEYS, new ArrayList<String>());
+      keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
+      updateKeys = keys;
     }
 
     HashMap<String, Object> updateOrgMap = new HashMap<>();
@@ -589,11 +636,11 @@ public class OrganisationManagementActor extends BaseActor {
     updateOrgMap.put(JsonKey.KEYS, updateKeys);
 
     Request updateRequest = new Request();
-    updateRequest.setRequestContext(context);
+    updateRequest.setRequestContext(request.getRequestContext());
     updateRequest.setRequest(updateOrgMap);
-    Response response = orgService.updateOrganisation(updateRequest.getRequest(), request.getRequestContext());
+    Response response =
+        orgService.updateOrganisation(updateRequest.getRequest(), request.getRequestContext());
     saveDataToES(updateRequest.getRequest(), JsonKey.UPDATE, request.getRequestContext());
-    sender().tell(response, self());
+    return response;
   }
-
 }

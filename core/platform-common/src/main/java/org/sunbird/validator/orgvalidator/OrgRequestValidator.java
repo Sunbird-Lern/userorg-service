@@ -1,6 +1,15 @@
 package org.sunbird.validator.orgvalidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.spec.X509EncodedKeySpec;
+import java.text.MessageFormat;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
@@ -11,22 +20,8 @@ import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 import play.libs.Files;
 import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.spec.X509EncodedKeySpec;
-import java.text.MessageFormat;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class OrgRequestValidator extends BaseOrgRequestValidator {
 
@@ -122,12 +117,13 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
     }
   }
 
-  public void validateEncryptionKeyRequest(Request reqObj, MultipartFormData body, JsonNode requestData) {
+  public void validateEncryptionKeyRequest(
+      Request reqObj, MultipartFormData body, JsonNode requestData) {
 
+    Map<String, Object> map = new HashMap<>();
+    byte[] byteArray = null;
+    InputStream is = null;
     try {
-      Map<String, Object> map = new HashMap<>();
-      byte[] byteArray = null;
-
       if (body != null) {
         Map<String, String[]> data = body.asFormUrlEncoded();
         for (Map.Entry<String, String[]> entry : data.entrySet()) {
@@ -136,7 +132,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
         List<FilePart<Files.TemporaryFile>> filePart = body.getFiles();
         File f = filePart.get(0).getRef().path().toFile();
 
-        InputStream is = new FileInputStream(f);
+        is = new FileInputStream(f);
         byteArray = is.readAllBytes();
 
         String fileName = filePart.get(0).getFilename();
@@ -146,36 +142,60 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
 
         reqObj.getRequest().putAll(map);
         map.put(JsonKey.FILE_NAME, fileName);
+        is.close();
       } else if (null != requestData) {
         reqObj = (Request) mapRequest(requestData, Request.class);
-        InputStream is = new ByteArrayInputStream(((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
+        is =
+            new ByteArrayInputStream(
+                ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
         validatePublicKey(byteArray);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
       } else {
-        throw new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ERROR_CODE);
+        throw new ProjectCommonException(
+            ResponseCode.invalidRequestData,
+            ResponseCode.invalidRequestData.getErrorMessage(),
+            ERROR_CODE);
       }
       map.put(JsonKey.FILE, byteArray);
       HashMap<String, Object> innerMap = new HashMap<>();
       innerMap.put(JsonKey.DATA, map);
       reqObj.setRequest(innerMap);
     } catch (Exception e) {
-      ProjectCommonException exception =  new ProjectCommonException((ProjectCommonException) e, ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              (ProjectCommonException) e,
+              ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
       throw exception;
+    } finally {
+      if (is != null) {
+        try {
+          is.close();
+        } catch (IOException e) {
+        }
+      }
     }
   }
 
   private void validatePublicKey(byte[] publicKeyBytes) {
-      try {
-        KeyFactory publicKeyFactory = KeyFactory.getInstance("RSA");
-        String publicKeyContent = new String(publicKeyBytes);
-        publicKeyContent = publicKeyContent.replaceAll("\\n", "").replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "");
-        X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
-        publicKeyFactory.generatePublic(keySpecX509);
-      } catch (Exception se) {
-        throw new ProjectCommonException(ResponseCode.invalidRequestData, ResponseCode.invalidRequestData.getErrorMessage(), ERROR_CODE);
-      }
+    try {
+      KeyFactory publicKeyFactory = KeyFactory.getInstance("RSA");
+      String publicKeyContent = new String(publicKeyBytes);
+      publicKeyContent =
+          publicKeyContent
+              .replaceAll("\\n", "")
+              .replace("-----BEGIN PUBLIC KEY-----", "")
+              .replace("-----END PUBLIC KEY-----", "");
+      X509EncodedKeySpec keySpecX509 =
+          new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
+      publicKeyFactory.generatePublic(keySpecX509);
+    } catch (Exception se) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ERROR_CODE);
+    }
   }
 
   private void validateFileExtension(String fileName) {
@@ -186,11 +206,20 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
       if (split.length > 1) {
         fileExtension = split[split.length - 1];
       }
-      if(fileExtension == null || fileExtension.isBlank() || fileExtension.isEmpty() || !fileExtension.equalsIgnoreCase("pem")) {
-        throw new ProjectCommonException(ResponseCode.invalidFileExtension, MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"), ERROR_CODE);
+      if (fileExtension == null
+          || fileExtension.isBlank()
+          || fileExtension.isEmpty()
+          || !fileExtension.equalsIgnoreCase("pem")) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidFileExtension,
+            MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"),
+            ERROR_CODE);
       }
     } else {
-      throw new ProjectCommonException(ResponseCode.invalidFileExtension, MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"), ERROR_CODE);
+      throw new ProjectCommonException(
+          ResponseCode.invalidFileExtension,
+          MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"),
+          ERROR_CODE);
     }
   }
 
@@ -205,10 +234,11 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
   private static <T> Object mapRequest(JsonNode requestData, Class<T> obj) throws RuntimeException {
 
     if (requestData == null)
-      throw ProjectUtil.createClientException(ResponseCode.mandatoryHeaderParamsMissing,
-              MessageFormat.format(
-                      ResponseCode.mandatoryHeaderParamsMissing.getErrorMessage(), "Content-Type with value application/json"
-              ));
+      throw ProjectUtil.createClientException(
+          ResponseCode.mandatoryHeaderParamsMissing,
+          MessageFormat.format(
+              ResponseCode.mandatoryHeaderParamsMissing.getErrorMessage(),
+              "Content-Type with value application/json"));
 
     try {
       return Json.fromJson(requestData, obj);
@@ -216,5 +246,4 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
       throw ProjectUtil.createClientException(ResponseCode.invalidRequestData);
     }
   }
-
 }

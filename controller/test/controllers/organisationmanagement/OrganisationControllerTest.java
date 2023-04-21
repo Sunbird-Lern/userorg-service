@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +18,6 @@ import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -38,7 +36,7 @@ import util.RequestInterceptor;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
-//@Ignore
+// @Ignore
 public class OrganisationControllerTest extends BaseApplicationTest {
 
   private static String orgName = "someOrgName";
@@ -183,7 +181,8 @@ public class OrganisationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testSearchOrgV2Success() {
-    Result result = performTest("/v2/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
+    Result result =
+        performTest("/v2/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
     assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
     assertTrue(getResponseStatus(result) == 200);
   }
@@ -195,27 +194,54 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-
   @Test
   public void testAddEncryptionKey() throws IOException {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap())).thenReturn(userAuthentication);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
+
+    File samplePublicPem =
+        new File(
+            Paths.get("").toAbsolutePath() + File.separator + "test/resources/samplepublic.pem");
+
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
-    File samplePublicPem = new File(Paths.get("").toAbsolutePath()+ File.separator + "test/resources/samplepublic.pem");
-    innerMap.put(JsonKey.DATA,Files.readString(samplePublicPem.toPath()));
+    innerMap.put(JsonKey.DATA, Files.readString(samplePublicPem.toPath()));
     innerMap.put(JsonKey.ORGANISATION_ID, orgId);
     innerMap.put(JsonKey.ID, orgId);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 
     JsonNode json = Json.parse(data);
-    Http.RequestBuilder req = new Http.RequestBuilder().bodyJson(json).uri("/v1/org/update/encryptionkey").method("PATCH");
+    Http.RequestBuilder req =
+        new Http.RequestBuilder()
+            .bodyJson(json)
+            .uri("/v1/org/update/encryptionkey")
+            .method("PATCH");
     // req.headers(headerMap);
     Result result = Helpers.route(application, req);
     assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testAddEncryptionKeyException() throws IOException {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
+
+    JsonNode json = null;
+    Http.RequestBuilder req =
+        new Http.RequestBuilder()
+            .bodyJson(json)
+            .uri("/v1/org/update/encryptionkey")
+            .method("PATCH");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(400, result.status());
   }
 
   private Map createOrUpdateOrganisationRequest(
