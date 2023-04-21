@@ -2,9 +2,7 @@ package org.sunbird.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.http.HttpHeaders;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.http.HttpClientUtil;
@@ -16,6 +14,11 @@ import org.sunbird.response.Response;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 
+import javax.ws.rs.core.MediaType;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 public class NotificationServiceClient {
 
   private final LoggerUtil logger = new LoggerUtil(NotificationServiceClient.class);
@@ -23,8 +26,8 @@ public class NotificationServiceClient {
 
   private Map<String, String> getHeader(RequestContext context) {
     Map<String, String> headers = new HashMap<>();
-    headers.put("Accept", "application/json");
-    headers.put("Content-type", "application/json");
+    headers.put(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+    headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
     ProjectUtil.setTraceIdInHeader(headers, context);
     return headers;
   }
@@ -46,15 +49,11 @@ public class NotificationServiceClient {
     logger.debug(context, "NotificationServiceClient:sendSyncV2Notification method called : ");
 
     String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V2_SEND_URL);
-    logger.debug(
-        context,
-        "NotificationServiceClient:sendSyncV2Notification :: calling notification service URL :"
-            + serviceUrl);
+    logger.debug(context, "NotificationServiceClient:sendSyncV2Notification :: calling notification service URL :" + serviceUrl);
     try {
       return callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
     } catch (Exception ex) {
-      logger.error(
-          context, "FeedServiceImpl:sendSyncV2Notification Exception occurred while mapping.", ex);
+      logger.error(context, "FeedServiceImpl:sendSyncV2Notification Exception occurred while mapping.", ex);
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
 
@@ -72,17 +71,13 @@ public class NotificationServiceClient {
     logger.debug(context, "NotificationServiceClient:updateV1Notification method called : ");
 
     String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V1_UPDATE_URL);
-    logger.debug(
-        context,
-        "NotificationServiceClient:updateV1Notification :: calling notification service URL :"
-            + serviceUrl);
+    logger.debug(context, "NotificationServiceClient:updateV1Notification :: calling notification service URL :" + serviceUrl);
     try {
       String json = getJsonString(reqObj);
       String responseStr = HttpClientUtil.patch(serviceUrl, json, getHeader(context), context);
       return mapper.readValue(responseStr, Response.class);
     } catch (Exception ex) {
-      logger.error(
-          context, "FeedServiceImpl:updateV1Notification Exception occurred while mapping.", ex);
+      logger.error(context, "FeedServiceImpl:updateV1Notification Exception occurred while mapping.", ex);
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
 
@@ -99,20 +94,15 @@ public class NotificationServiceClient {
   public Response readV1Notification(Request reqObj, RequestContext context) {
     logger.debug(context, "NotificationServiceClient:readV1Notification method called : ");
     String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V1_READ_URL);
-    logger.debug(
-        context,
-        "NotificationServiceClient:readV1Notification :: calling notification service URL :"
-            + serviceUrl);
+    logger.debug(context, "NotificationServiceClient:readV1Notification :: calling notification service URL :" + serviceUrl);
     try {
-      String responseStr =
-          HttpClientUtil.get(
+      String responseStr = HttpClientUtil.get(
               serviceUrl + "/" + reqObj.getRequest().get(JsonKey.USER_ID),
               getHeader(context),
               context);
       return mapper.readValue(responseStr, Response.class);
     } catch (Exception ex) {
-      logger.error(
-          context, "FeedServiceImpl:readV1Notification Exception occurred while mapping.", ex);
+      logger.error(context, "FeedServiceImpl:readV1Notification Exception occurred while mapping.", ex);
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
 
@@ -130,15 +120,11 @@ public class NotificationServiceClient {
     logger.debug(context, "NotificationServiceClient:deleteV1Notification method called : ");
 
     String serviceUrl = getServiceApiUrl(JsonKey.NOTIFICATION_SERVICE_V1_DELETE_URL);
-    logger.debug(
-        context,
-        "NotificationServiceClient:deleteV1Notification :: calling notification service URL :"
-            + serviceUrl);
+    logger.debug(context, "NotificationServiceClient:deleteV1Notification :: calling notification service URL :" + serviceUrl);
     try {
       return callCreateOrDeleteNotificationService(reqObj, context, serviceUrl);
     } catch (Exception ex) {
-      logger.error(
-          context, "FeedServiceImpl:deleteV1Notification Exception occurred while mapping.", ex);
+      logger.error(context, "FeedServiceImpl:deleteV1Notification Exception occurred while mapping.", ex);
       ProjectCommonException.throwServerErrorException(ResponseCode.SERVER_ERROR);
     }
 
@@ -146,14 +132,12 @@ public class NotificationServiceClient {
   }
 
   private String getServiceApiUrl(String serviceUrlKey) {
-    String NOTIFICATION_SERVICE_BASE_URL =
-        PropertiesCache.getInstance().getProperty(JsonKey.NOTIFICATION_SERVICE_BASE_URL);
-    String NOTIFICATION_SERVICE_URL = PropertiesCache.getInstance().getProperty(serviceUrlKey);
-    return NOTIFICATION_SERVICE_BASE_URL + NOTIFICATION_SERVICE_URL;
+    String baseUrl = PropertiesCache.getInstance().getProperty(JsonKey.NOTIFICATION_SERVICE_BASE_URL);
+    String serviceUrl = PropertiesCache.getInstance().getProperty(serviceUrlKey);
+    return baseUrl + serviceUrl;
   }
 
-  private Response callCreateOrDeleteNotificationService(
-      Request reqObj, RequestContext context, String serviceUrl) throws JsonProcessingException {
+  private Response callCreateOrDeleteNotificationService(Request reqObj, RequestContext context, String serviceUrl) throws JsonProcessingException {
     String json = getJsonString(reqObj);
     String responseStr = HttpClientUtil.post(serviceUrl, json, getHeader(context), context);
     return mapper.readValue(responseStr, Response.class);
