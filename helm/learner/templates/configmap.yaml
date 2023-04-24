@@ -201,7 +201,7 @@ data:
   api_actor_provider: {{ .Values.api_actor_provider }}
   background_actor_provider: {{ .Values.background_actor_provider }}
   bind_hostname: {{ .Values.bind_hostname }}
-  ekstep_api_base_url: {{ .Values.ekstep_api_base_url }}
+  sunbird_content_service_api_base_url: {{ .Values.sunbird_content_service_api_base_url }}
   feed_limit: {{ .Values.feed_limit | quote }}
   form_api_endpoint: {{ .Values.form_api_endpoint }}
   isMultiDCEnabled: {{ .Values.isMultiDCEnabled | quote }}
@@ -212,7 +212,6 @@ data:
   quartz_shadow_user_migration_timer: {{ .Values.quartz_shadow_user_migration_timer }}
   sunbird_analytics_api_base_url: {{ .Values.sunbird_analytics_api_base_url }}
   sunbird_api_base_url: {{ .Values.sunbird_api_base_url }}
-  sunbird_api_mgr_base_url: {{ .Values.sunbird_api_mgr_base_url }}
   sunbird_app_name: {{ .Values.sunbird_app_name }}
   sunbird_cache_enable: {{ .Values.sunbird_cache_enable | quote }}
   sunbird_cassandra_consistency_level: {{ .Values.sunbird_cassandra_consistency_level }}
@@ -224,7 +223,6 @@ data:
   sunbird_content_azure_storage_container: {{ .Values.sunbird_content_azure_storage_container }}
   sunbird_course_batch_notification_enabled: {{ .Values.sunbird_course_batch_notification_enabled | quote }}
   sunbird_course_batch_notification_signature: {{ .Values.sunbird_course_batch_notification_signature }}
-  sunbird_cs_base_url: {{ .Values.sunbird_cs_base_url }}
   sunbird_cs_search_path: {{ .Values.sunbird_cs_search_path }}
   sunbird_default_channel: {{ .Values.sunbird_default_channel }}
   sunbird_email_max_recipients_limit: {{ .Values.sunbird_email_max_recipients_limit | quote }}
