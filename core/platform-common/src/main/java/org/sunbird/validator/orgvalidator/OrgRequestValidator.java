@@ -20,7 +20,6 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 import play.libs.Files;
-import play.libs.Json;
 import play.mvc.Http.MultipartFormData;
 import play.mvc.Http.MultipartFormData.FilePart;
 
@@ -207,28 +206,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
           ResponseCode.invalidFileExtension,
           MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"),
           ERROR_CODE);
-    }
-  }
-
-  /**
-   * Method to map request
-   *
-   * @param requestData JsonNode
-   * @param obj Class<T>
-   * @return <T>
-   */
-  private static <T> Object mapRequest(JsonNode requestData, Class<T> obj) {
-    if (requestData == null)
-      throw ProjectUtil.createClientException(
-          ResponseCode.mandatoryHeaderParamsMissing,
-          MessageFormat.format(
-              ResponseCode.mandatoryHeaderParamsMissing.getErrorMessage(),
-              "Content-Type with value application/json"));
-
-    try {
-      return Json.fromJson(requestData, obj);
-    } catch (Exception e) {
-      throw ProjectUtil.createClientException(ResponseCode.invalidRequestData);
     }
   }
 }
