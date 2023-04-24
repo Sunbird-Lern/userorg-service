@@ -1,8 +1,10 @@
 package org.sunbird.validator.orgvalidator;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.MessageFormat;
@@ -10,7 +12,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
@@ -143,17 +144,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
         reqObj.getRequest().putAll(map);
         map.put(JsonKey.FILE_NAME, fileName);
         is.close();
-      } else if (null != requestData) {
-        reqObj = (Request) mapRequest(requestData, Request.class);
-        is =
-            new ByteArrayInputStream(
-                ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
-        byteArray = IOUtils.toByteArray(is);
-        String fileName = (String) reqObj.getRequest().get(JsonKey.FILE_NAME);
-        validateFileExtension(fileName);
-        validatePublicKey(byteArray);
-        reqObj.getRequest().putAll(map);
-        map.putAll(reqObj.getRequest());
       } else {
         throw new ProjectCommonException(
             ResponseCode.invalidRequestData,

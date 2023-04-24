@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.stream.javadsl.FileIO;
+import akka.stream.javadsl.Source;
+import akka.util.ByteString;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
@@ -39,6 +43,7 @@ import util.RequestInterceptor;
 // @Ignore
 public class OrganisationControllerTest extends BaseApplicationTest {
 
+  private static final String PATCH = "PATCH";
   private static String orgName = "someOrgName";
   private static String orgId = "someOrgOId";
   private static String rootOrgId = "someRootOrgId";
@@ -195,39 +200,35 @@ public class OrganisationControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testAddEncryptionKey() throws IOException {
-    Map userAuthentication = new HashMap<String, String>();
-    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
-    PowerMockito.mockStatic(RequestInterceptor.class);
-    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
-        .thenReturn(userAuthentication);
-
-    File samplePublicPem =
+  public void testFileUpload() throws IOException {
+    File file =
         new File(
             Paths.get("").toAbsolutePath() + File.separator + "test/resources/samplepublic.pem");
+    Http.MultipartFormData.Part<Source<ByteString, ?>> part =
+        new Http.MultipartFormData.FilePart<>(
+            "fileName",
+            "samplepublic.pem",
+            "application/text",
+            FileIO.fromPath(file.toPath()),
+            Files.size(file.toPath()));
 
-    Map<String, Object> requestMap = new HashMap<>();
-    Map<String, Object> innerMap = new HashMap<>();
-    innerMap.put(JsonKey.DATA, Files.readString(samplePublicPem.toPath()));
-    innerMap.put(JsonKey.ORGANISATION_ID, orgId);
-    innerMap.put(JsonKey.FILE_NAME, "publicKey.pem");
-    innerMap.put(JsonKey.ID, orgId);
-    requestMap.put(JsonKey.REQUEST, innerMap);
-    String data = mapToJson(requestMap);
-
-    JsonNode json = Json.parse(data);
-    Http.RequestBuilder req =
-        new Http.RequestBuilder()
-            .bodyJson(json)
+    Http.RequestBuilder request =
+        Helpers.fakeRequest()
             .uri("/v1/org/update/encryptionkey")
-            .method("PATCH");
-    // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
+            .method("PATCH")
+            .bodyRaw(
+                Collections.singletonList(part),
+                play.libs.Files.singletonTemporaryFileCreator(),
+                application.asScala().materializer());
+
+    Result result = Helpers.route(application, request);
+    String content = Helpers.contentAsString(result);
+    System.out.println("content:: " + content);
     assertEquals(200, result.status());
   }
 
   @Test
-  public void testAddEncryptionKeyException() throws IOException {
+  public void testAddEncryptionKeyException() {
     Map userAuthentication = new HashMap<String, String>();
     userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
     PowerMockito.mockStatic(RequestInterceptor.class);
