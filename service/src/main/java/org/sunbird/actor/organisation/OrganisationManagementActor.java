@@ -540,7 +540,7 @@ public class OrganisationManagementActor extends BaseActor {
       fos = new FileOutputStream(file);
       fos.write((byte[]) req.get(JsonKey.FILE));
       String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
-      if (null == cspProvider || cspProvider.isEmpty() || cspProvider.isBlank()) {
+      if (StringUtils.isEmpty(cspProvider.trim())) {
         logger.info(context, "OrganisationManagementActor:: The cloud service is not available");
         ProjectCommonException exception =
             new ProjectCommonException(
