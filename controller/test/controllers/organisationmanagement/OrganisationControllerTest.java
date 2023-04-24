@@ -210,6 +210,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.DATA, Files.readString(samplePublicPem.toPath()));
     innerMap.put(JsonKey.ORGANISATION_ID, orgId);
+    innerMap.put(JsonKey.FILE_NAME, "publicKey.pem");
     innerMap.put(JsonKey.ID, orgId);
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);

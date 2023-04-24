@@ -149,6 +149,8 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
             new ByteArrayInputStream(
                 ((String) reqObj.getRequest().get(JsonKey.DATA)).getBytes(StandardCharsets.UTF_8));
         byteArray = IOUtils.toByteArray(is);
+        String fileName = (String) reqObj.getRequest().get(JsonKey.FILE_NAME);
+        validateFileExtension(fileName);
         validatePublicKey(byteArray);
         reqObj.getRequest().putAll(map);
         map.putAll(reqObj.getRequest());
