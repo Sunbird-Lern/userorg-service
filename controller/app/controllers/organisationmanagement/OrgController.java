@@ -1,7 +1,6 @@
 package controllers.organisationmanagement;
 
 import akka.actor.ActorRef;
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
@@ -115,13 +114,11 @@ public class OrgController extends BaseController {
    */
   public CompletionStage<Result> addKey(Http.Request httpRequest) {
     Http.MultipartFormData body = httpRequest.body().asMultipartFormData();
-    JsonNode requestData = httpRequest.body().asJson();
     return handleRequest(
         organisationManagementActor,
         ActorOperations.ADD_ENCRYPTION_KEY.getValue(),
         orgRequest -> {
-          new OrgRequestValidator()
-              .validateEncryptionKeyRequest((Request) orgRequest, body, requestData);
+          new OrgRequestValidator().validateEncryptionKeyRequest((Request) orgRequest, body);
           return null;
         },
         getAllRequestHeaders(httpRequest),

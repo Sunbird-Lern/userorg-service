@@ -1,6 +1,5 @@
 package org.sunbird.validator.orgvalidator;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -117,8 +116,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
     }
   }
 
-  public void validateEncryptionKeyRequest(
-      Request reqObj, MultipartFormData body, JsonNode requestData) {
+  public void validateEncryptionKeyRequest(Request reqObj, MultipartFormData body) {
 
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
