@@ -667,5 +667,4 @@ curl --location '{{host}}/v1/user/create' \
 
 {{host}} has to be replaced with respective local host url and <user_create_data> has to be replaced with the latest
 payload of USER_CREATE_API
-
 If you are able to create an user successfully then the local setup is working normal.
