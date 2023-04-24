@@ -517,8 +517,7 @@ public class OrganisationManagementActor extends BaseActor {
       Map<String, Object> req,
       RequestContext context,
       String processId,
-      Map<String, List<String>> fetchedKeys)
-      throws IOException {
+      Map<String, List<String>> fetchedKeys) {
     String fileExtension = "";
     String fileName = (String) req.get(JsonKey.FILE_NAME);
     if (!StringUtils.isBlank(fileName)) {
@@ -540,7 +539,7 @@ public class OrganisationManagementActor extends BaseActor {
       fos = new FileOutputStream(file);
       fos.write((byte[]) req.get(JsonKey.FILE));
       String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
-      if (StringUtils.isEmpty(cspProvider.trim())) {
+      if (StringUtils.isBlank(cspProvider)) {
         logger.info(context, "OrganisationManagementActor:: The cloud service is not available");
         ProjectCommonException exception =
             new ProjectCommonException(
@@ -574,9 +573,12 @@ public class OrganisationManagementActor extends BaseActor {
       }
       return publicKeyUrl;
     } catch (IOException e) {
-      logger.error(
-          context, "Exception Occurred while reading file in OrganisationManagementActor", e);
-      throw e;
+      ProjectCommonException exception =
+          new ProjectCommonException(
+              ResponseCode.invalidRequestData,
+              ResponseCode.invalidRequestData.getErrorMessage(),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+      throw exception;
     } finally {
       try {
         if (null != (fos)) {
