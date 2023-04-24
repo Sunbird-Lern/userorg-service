@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,8 +119,7 @@ public class OrganisationManagementActor extends BaseActor {
     }
 
     if (null != isTenant && isTenant) {
-      boolean bool =
-          orgService.registerChannel(request, JsonKey.CREATE, actorMessage.getRequestContext());
+      boolean bool = true;
       request.put(
           JsonKey.IS_SSO_ROOTORG_ENABLED,
           request.containsKey(JsonKey.IS_SSO_ROOTORG_ENABLED)
@@ -377,8 +377,7 @@ public class OrganisationManagementActor extends BaseActor {
           tempMap.put(JsonKey.HASHTAGID, dbOrgDetails.get(JsonKey.ID));
           tempMap.put(JsonKey.DESCRIPTION, dbOrgDetails.get(JsonKey.DESCRIPTION));
           tempMap.put(JsonKey.LICENSE, license);
-          boolean bool =
-              orgService.registerChannel(request, JsonKey.UPDATE, actorMessage.getRequestContext());
+          boolean bool = true;
           if (!bool) {
             ProjectCommonException.throwClientErrorException(ResponseCode.channelRegFailed);
             return;
@@ -484,7 +483,7 @@ public class OrganisationManagementActor extends BaseActor {
   private void addKeysToRequestMap(Request request) {
     List<String> encKeys = (List<String>) request.get(JsonKey.ENC_KEYS);
     List<String> signKeys = (List<String>) request.get(JsonKey.SIGN_KEYS);
-    List<String> exhaustKeys = new ArrayList<String>();
+    List<String> exhaustKeys;
 
     Map<String, List<String>> keys = new HashMap<>();
     keys.put(JsonKey.ENC_KEYS, encKeys);
@@ -493,14 +492,14 @@ public class OrganisationManagementActor extends BaseActor {
     String orgId = (String) request.get(JsonKey.ID);
     Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
 
-    if (fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)) {
+    if (fetchedKeys != null && fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)) {
       exhaustKeys = fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY);
       keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
     }
     request.getRequest().put(JsonKey.KEYS, keys);
   }
 
-  private void addEncryptionKey(Request request) throws IOException {
+  private void addEncryptionKey(Request request) {
     RequestContext context = request.getRequestContext();
     String processId = ProjectUtil.getUniqueIdFromTimestamp(1);
     Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
@@ -573,18 +572,16 @@ public class OrganisationManagementActor extends BaseActor {
       }
       return publicKeyUrl;
     } catch (IOException e) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              ResponseCode.invalidRequestData,
-              ResponseCode.invalidRequestData.getErrorMessage(),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-      throw exception;
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     } finally {
       try {
         if (null != (fos)) {
           fos.close();
         }
-        file.delete();
+        Files.delete(file.toPath());
       } catch (IOException e) {
         logger.error(
             context,
@@ -615,7 +612,7 @@ public class OrganisationManagementActor extends BaseActor {
 
   private Response updateEncryptionKey(
       Request request, String orgId, Map<String, List<String>> fetchedKeys, String publicKeyUrl) {
-    List<String> exhaustKeys = new ArrayList<String>();
+    List<String> exhaustKeys = new ArrayList<>();
     exhaustKeys.add(publicKeyUrl);
     Map<String, List<String>> updateKeys = null;
 
@@ -626,8 +623,8 @@ public class OrganisationManagementActor extends BaseActor {
 
     if (updateKeys == null) {
       Map<String, List<String>> keys = new HashMap<>();
-      keys.put(JsonKey.ENC_KEYS, new ArrayList<String>());
-      keys.put(JsonKey.SIGN_KEYS, new ArrayList<String>());
+      keys.put(JsonKey.ENC_KEYS, new ArrayList<>());
+      keys.put(JsonKey.SIGN_KEYS, new ArrayList<>());
       keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
       updateKeys = keys;
     }

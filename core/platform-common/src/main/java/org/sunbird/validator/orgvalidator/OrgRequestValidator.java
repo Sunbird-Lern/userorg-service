@@ -163,16 +163,14 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
       innerMap.put(JsonKey.DATA, map);
       reqObj.setRequest(innerMap);
     } catch (Exception e) {
-      ProjectCommonException exception =
-          new ProjectCommonException(
-              (ProjectCommonException) e,
-              ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
-      throw exception;
+      throw new ProjectCommonException(
+          (ProjectCommonException) e,
+          ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
     } finally {
       if (is != null) {
         try {
           is.close();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
       }
     }
@@ -206,10 +204,7 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
       if (split.length > 1) {
         fileExtension = split[split.length - 1];
       }
-      if (fileExtension == null
-          || fileExtension.isBlank()
-          || fileExtension.isEmpty()
-          || !fileExtension.equalsIgnoreCase("pem")) {
+      if (StringUtils.isBlank(fileExtension) || !fileExtension.equalsIgnoreCase("pem")) {
         throw new ProjectCommonException(
             ResponseCode.invalidFileExtension,
             MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"),
@@ -228,11 +223,9 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
    *
    * @param requestData JsonNode
    * @param obj Class<T>
-   * @exception RuntimeException
    * @return <T>
    */
-  private static <T> Object mapRequest(JsonNode requestData, Class<T> obj) throws RuntimeException {
-
+  private static <T> Object mapRequest(JsonNode requestData, Class<T> obj) {
     if (requestData == null)
       throw ProjectUtil.createClientException(
           ResponseCode.mandatoryHeaderParamsMissing,

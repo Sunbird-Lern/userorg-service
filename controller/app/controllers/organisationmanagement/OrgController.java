@@ -3,6 +3,9 @@ package controllers.organisationmanagement;
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.BaseController;
+import java.util.concurrent.CompletionStage;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
@@ -10,11 +13,6 @@ import org.sunbird.validator.BaseRequestValidator;
 import org.sunbird.validator.orgvalidator.OrgRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Map;
-import java.util.concurrent.CompletionStage;
 
 public class OrgController extends BaseController {
 
@@ -25,7 +23,6 @@ public class OrgController extends BaseController {
   @Inject
   @Named("search_handler_actor")
   private ActorRef searchHandlerActor;
-
 
   public CompletionStage<Result> createOrg(Http.Request httpRequest) {
     return handleRequest(
@@ -111,23 +108,23 @@ public class OrgController extends BaseController {
         httpRequest);
   }
 
-    /**
-     * This method to upload the encryption keys on cloud storage and save the same in Org metadata.
-     *
-     * @return CompletionStage<Result>
-     */
-    public CompletionStage<Result> addKey(Http.Request httpRequest) {
-        Http.MultipartFormData body = httpRequest.body().asMultipartFormData();
-        JsonNode requestData = httpRequest.body().asJson();
-        return handleRequest(
-                organisationManagementActor,
-                ActorOperations.ADD_ENCRYPTION_KEY.getValue(),
-                orgRequest -> {
-                    new OrgRequestValidator().validateEncryptionKeyRequest((Request) orgRequest, body, requestData);
-                    return null;
-                },
-                getAllRequestHeaders(httpRequest),
-                httpRequest);
-    }
-
+  /**
+   * This method to upload the encryption keys on cloud storage and save the same in Org metadata.
+   *
+   * @return CompletionStage<Result>
+   */
+  public CompletionStage<Result> addKey(Http.Request httpRequest) {
+    Http.MultipartFormData body = httpRequest.body().asMultipartFormData();
+    JsonNode requestData = httpRequest.body().asJson();
+    return handleRequest(
+        organisationManagementActor,
+        ActorOperations.ADD_ENCRYPTION_KEY.getValue(),
+        orgRequest -> {
+          new OrgRequestValidator()
+              .validateEncryptionKeyRequest((Request) orgRequest, body, requestData);
+          return null;
+        },
+        getAllRequestHeaders(httpRequest),
+        httpRequest);
+  }
 }
