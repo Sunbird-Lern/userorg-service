@@ -200,7 +200,7 @@ public class OrganisationControllerTest extends BaseApplicationTest {
   }
 
   @Test
-  public void testFileUpload() throws IOException {
+  public void testAddEncyptionKeyPublicPem() throws IOException {
     File file =
         new File(
             Paths.get("").toAbsolutePath() + File.separator + "test/resources/samplepublic.pem");
@@ -222,9 +222,32 @@ public class OrganisationControllerTest extends BaseApplicationTest {
                 application.asScala().materializer());
 
     Result result = Helpers.route(application, request);
-    String content = Helpers.contentAsString(result);
-    System.out.println("content:: " + content);
     assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testAddEncyptionKeyPDF() throws IOException {
+    File file =
+        new File(Paths.get("").toAbsolutePath() + File.separator + "test/resources/sample.pdf");
+    Http.MultipartFormData.Part<Source<ByteString, ?>> part =
+        new Http.MultipartFormData.FilePart<>(
+            "fileName",
+            "sample.pdf",
+            "application/pdf",
+            FileIO.fromPath(file.toPath()),
+            Files.size(file.toPath()));
+
+    Http.RequestBuilder request =
+        Helpers.fakeRequest()
+            .uri("/v1/org/update/encryptionkey")
+            .method("PATCH")
+            .bodyRaw(
+                Collections.singletonList(part),
+                play.libs.Files.singletonTemporaryFileCreator(),
+                application.asScala().materializer());
+
+    Result result = Helpers.route(application, request);
+    assertEquals(400, result.status());
   }
 
   @Test

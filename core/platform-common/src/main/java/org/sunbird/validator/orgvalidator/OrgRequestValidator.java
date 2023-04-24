@@ -117,7 +117,6 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
   }
 
   public void validateEncryptionKeyRequest(Request reqObj, MultipartFormData body) {
-
     Map<String, Object> map = new HashMap<>();
     byte[] byteArray = null;
     InputStream is = null;
