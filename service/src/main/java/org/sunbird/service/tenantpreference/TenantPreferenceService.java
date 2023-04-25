@@ -1,5 +1,6 @@
 package org.sunbird.service.tenantpreference;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -22,6 +23,7 @@ public class TenantPreferenceService {
   private final LoggerUtil logger = new LoggerUtil(TenantPreferenceService.class);
   private final ObjectMapper mapper = new ObjectMapper();
   private final TenantPreferenceDao preferenceDao = TenantPreferenceDaoImpl.getInstance();
+  private final List<String> dataSecurityLevels = Arrays.asList("L1", "L2", "L3", "L4");
 
   public Map<String, Object> validateAndGetTenantPreferencesById(
       String orgId, String key, String operationType, RequestContext context) {
@@ -106,5 +108,75 @@ public class TenantPreferenceService {
           e);
     }
     return null;
+  }
+
+  public boolean validateDataSecurityPolicy(
+      String orgId, String key, Map<String, Object> data, RequestContext context) {
+    boolean validation = false;
+    List<Map<String, Object>> defaultDataSecurityPolicy =
+        preferenceDao.getTenantPreferenceById(JsonKey.DEFAULT, key, context);
+    if (defaultDataSecurityPolicy == null || defaultDataSecurityPolicy.isEmpty()) {
+      throw new ProjectCommonException(
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(),
+              (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    }
+
+    String defaultDataString = (String) defaultDataSecurityPolicy.get(0).get(JsonKey.DATA);
+    Map<String, Object> defaultData = null;
+    try {
+      defaultData = mapper.readValue(defaultDataString, new TypeReference<>() {});
+    } catch (JsonProcessingException e) {
+      logger.error(
+          context,
+          "TenantPreferenceService:Exception while parsing default dataSecurityPolicy preferences "
+              + e.getMessage(),
+          e);
+    }
+    Map<String, Object> defaultJobsConfig = (Map<String, Object>) defaultData.get(JsonKey.JOB);
+    Map<String, Integer> defaultJobsLevelConfig = new HashMap<>();
+    Iterator defaultJobsKeyItr = defaultJobsConfig.keySet().iterator();
+    while (defaultJobsKeyItr.hasNext()) {
+      String jobName = (String) defaultJobsKeyItr.next();
+      Map<String, String> jobConfig = (Map<String, String>) defaultJobsConfig.get(jobName);
+      defaultJobsLevelConfig.put(
+          jobName, Integer.parseInt(jobConfig.getOrDefault("level", "L0").replace("L", "")));
+    }
+
+    Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
+    Iterator inputJobsKeyItr = inputJobsConfig.keySet().iterator();
+    while (inputJobsKeyItr.hasNext()) {
+      String jobName = (String) inputJobsKeyItr.next();
+      if (defaultJobsLevelConfig.containsKey(jobName)) {
+        Map<String, String> jobConfig = (Map<String, String>) inputJobsConfig.get(jobName);
+        String ipJobSecurityLevel = jobConfig.getOrDefault("level", "L0");
+        if (!dataSecurityLevels.contains(ipJobSecurityLevel)) {
+          // throw invalid Level configured error
+          throw new ProjectCommonException(
+              ResponseCode.invalidSecurityLevel,
+              MessageFormat.format(
+                  ResponseCode.invalidSecurityLevel.getErrorMessage(), ipJobSecurityLevel, jobName),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
+        int inputJobSecurityLevel = Integer.parseInt(ipJobSecurityLevel.replace("L", ""));
+        int defaultJobSecurityLevel = defaultJobsLevelConfig.get(jobName);
+
+        if (inputJobSecurityLevel < defaultJobSecurityLevel) {
+          // throw inputJobSecurityLevel less than defaultJobSecurityLevel error
+          throw new ProjectCommonException(
+              ResponseCode.invalidSecurityLevelLower,
+              MessageFormat.format(
+                  ResponseCode.invalidSecurityLevelLower.getErrorMessage(),
+                  ipJobSecurityLevel,
+                  jobName,
+                  "L" + defaultJobSecurityLevel),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
+      }
+    }
+    validation = true;
+    return validation;
   }
 }

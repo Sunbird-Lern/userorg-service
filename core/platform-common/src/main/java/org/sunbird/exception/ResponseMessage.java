@@ -114,6 +114,10 @@ public interface ResponseMessage {
         "Error while processing assign role. Invalid Organisation Id";
     String INVALID_FILE_EXTENSION = "Please provide a valid file. File expected of format: {0}";
     String INVALID_ENCRYPTION_FILE = "Please provide valid public key file.";
+    String INVALID_SECURITY_LEVEL =
+        "Invalid data security level {0} provided for job {1}. Please provide a valid data security level.";
+    String INVALID_SECURITY_LEVEL_LOWER =
+        "Invalid data security level {0} provided for job {1}. Cannot be set lower than the default security level: {2}";
   }
 
   interface Key {
@@ -194,5 +198,7 @@ public interface ResponseMessage {
     String ROLE_PROCESSING_INVALID_ORG = "0076";
     String INVALID_FILE_EXTENSION = "0077";
     String INVALID_ENCRYPTION_FILE = "0078";
+    String INVALID_SECURITY_LEVEL = "0079";
+    String INVALID_SECURITY_LEVEL_LOWER = "0080";
   }
 }

@@ -68,6 +68,11 @@ public class TenantPreferenceManagementActor extends BaseActor {
     Response finalResponse = new Response();
     preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.UPDATE, context);
     Map<String, Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
+
+    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)
+        && !orgId.equalsIgnoreCase(JsonKey.DEFAULT))
+      preferenceService.validateDataSecurityPolicy(orgId, key, data, context);
+
     String updatedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
     preferenceService.updatePreference(orgId, key, data, updatedBy, context);
 
@@ -89,6 +94,11 @@ public class TenantPreferenceManagementActor extends BaseActor {
         context, "TenantPreferenceManagementActor:createTenantPreference called for org: " + orgId);
     preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.CREATE, context);
     Map<String, Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
+
+    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)
+        && !orgId.equalsIgnoreCase(JsonKey.DEFAULT))
+      preferenceService.validateDataSecurityPolicy(orgId, key, data, context);
+
     String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
     preferenceService.createPreference(orgId, key, data, requestedBy, context);
 
