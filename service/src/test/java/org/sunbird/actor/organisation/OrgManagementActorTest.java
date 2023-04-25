@@ -2,9 +2,7 @@ package org.sunbird.actor.organisation;
 
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -12,10 +10,15 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,6 +31,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
 import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
+import org.sunbird.cloud.storage.BaseStorageService;
+import org.sunbird.cloud.storage.factory.StorageServiceFactory;
 import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
@@ -43,7 +48,10 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
+import org.sunbird.util.CloudStorageUtil;
+import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
+import scala.Option;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -57,7 +65,10 @@ import scala.concurrent.Promise;
   OrgExternalServiceImpl.class,
   HttpClientUtil.class,
   LocationServiceImpl.class,
-  OrgTypeValidator.class
+  OrgTypeValidator.class,
+  StorageServiceFactory.class,
+  CloudStorageUtil.class,
+  PropertiesCache.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -80,6 +91,31 @@ public class OrgManagementActorTest {
   private static LocationServiceImpl locationService;
   private static LocationRequestValidator locationRequestValidator;
   private static OrgExternalServiceImpl externalService;
+  private static final String refOrgId = "id34fy";
+
+  private static final String UPLOAD_URL = "uploadUrl";
+
+  @Before
+  public void initTest() {
+    BaseStorageService service = mock(BaseStorageService.class);
+    mockStatic(StorageServiceFactory.class);
+
+    try {
+      when(StorageServiceFactory.class, "getStorageService", Mockito.any()).thenReturn(service);
+
+      when(service.upload(
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.any(Option.class),
+              Mockito.any(Option.class),
+              Mockito.any(Option.class),
+              Mockito.any(Option.class)))
+          .thenReturn(UPLOAD_URL);
+    } catch (Exception e) {
+      Assert.fail(e.getMessage());
+    }
+  }
 
   @Before
   public void beforeEachTest() throws Exception {
@@ -295,9 +331,8 @@ public class OrgManagementActorTest {
     Map<String, Object> req = getRequestDataForOrgUpdate();
     req.put(JsonKey.ORG_SUB_TYPE, "invalid");
     boolean result =
-            testScenario(
-                    getRequest(req, ActorOperations.UPDATE_ORG.getValue()),
-                    ResponseCode.invalidValue);
+        testScenario(
+            getRequest(req, ActorOperations.UPDATE_ORG.getValue()), ResponseCode.invalidValue);
     assertTrue(result);
   }
 
@@ -340,6 +375,30 @@ public class OrgManagementActorTest {
     boolean result =
         testScenario(
             getRequest(map, ActorOperations.UPDATE_ORG.getValue()), ResponseCode.dataFormatError);
+    assertTrue(result);
+  }
+
+  @Test
+  public void testAddEncryptionKey() {
+    byte[] bytes = getFileAsBytes();
+
+    Response response = createCassandraInsertSuccessResponse();
+    when(cassandraOperation.insertRecord(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
+        .thenReturn(response);
+    when(cassandraOperation.getRecordById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(getCassandraRecordByIdForOrgResponse());
+
+    HashMap<String, Object> innerMap = new HashMap<>();
+    HashMap<String, Object> dataMap = new HashMap<>();
+    innerMap.put(JsonKey.ORGANISATION_ID, "0137815693126451201");
+    innerMap.put(JsonKey.FILE, bytes);
+    innerMap.put(JsonKey.FILE_NAME, "samplepublic.pem");
+    dataMap.put(JsonKey.DATA, innerMap);
+
+    boolean result =
+        testScenario(getRequest(dataMap, ActorOperations.ADD_ENCRYPTION_KEY.getValue()), null);
     assertTrue(result);
   }
 
@@ -498,5 +557,44 @@ public class OrgManagementActorTest {
     map.put(JsonKey.USER_PROVIDER, "userProvider");
     map.put(JsonKey.USER_ID_TYPE, "userIdType");
     return map;
+  }
+
+  private byte[] getFileAsBytes() {
+    File file = null;
+    byte[] bytes = null;
+    try {
+      file =
+          new File(
+              Paths.get("").toAbsolutePath()
+                  + File.separator
+                  + "src/test/resources/samplepublic.pem");
+      Path path = Paths.get(file.getPath());
+      bytes = Files.readAllBytes(path);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return bytes;
+  }
+
+  private Response createCassandraInsertSuccessResponse() {
+    Response response = new Response();
+    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
+    return response;
+  }
+
+  private Response getCassandraRecordByIdForOrgResponse() {
+
+    Response response = new Response();
+    List<Map<String, Object>> list = new ArrayList<>();
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ORGANISATION_ID, refOrgId);
+    orgMap.put(JsonKey.IS_TENANT, true);
+    orgMap.put(JsonKey.EXTERNAL_ID, "externalId");
+    orgMap.put(JsonKey.PROVIDER, "provider");
+    orgMap.put(JsonKey.ID, refOrgId);
+    orgMap.put(JsonKey.CHANNEL, "channel");
+    list.add(orgMap);
+    response.put(JsonKey.RESPONSE, list);
+    return response;
   }
 }

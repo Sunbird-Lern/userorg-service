@@ -560,7 +560,8 @@ public class OrganisationManagementActor extends BaseActor {
                   + File.separator
                   + fileName,
               file.getAbsolutePath());
-      if (fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY) != null
+      if (fetchedKeys != null
+          && fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)
           && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
         String oldKey =
             fetchedKeys
