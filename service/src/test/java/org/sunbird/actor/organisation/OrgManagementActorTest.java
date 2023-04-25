@@ -47,7 +47,9 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationServiceImpl;
+import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.util.CloudStorageUtil;
 import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
@@ -63,6 +65,7 @@ import scala.concurrent.Promise;
   EsClientFactory.class,
   ActorSelection.class,
   OrgExternalServiceImpl.class,
+  OrgServiceImpl.class,
   HttpClientUtil.class,
   LocationServiceImpl.class,
   OrgTypeValidator.class,
@@ -357,7 +360,7 @@ public class OrgManagementActorTest {
   }
 
   @Test
-  public void testAddEncryptionKey() {
+  public void testAddEncryptionKey() throws Exception {
     BaseStorageService service = mock(BaseStorageService.class);
     mockStatic(StorageServiceFactory.class);
 
@@ -379,25 +382,31 @@ public class OrgManagementActorTest {
 
     byte[] bytes = getFileAsBytes();
 
-    Response response = createCassandraInsertSuccessResponse();
-    when(cassandraOperation.insertRecord(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
-        .thenReturn(response);
-    when(cassandraOperation.getRecordById(
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ORGANISATION_ID, refOrgId);
+    orgMap.put(JsonKey.IS_TENANT, true);
+    orgMap.put(JsonKey.EXTERNAL_ID, "externalId");
+    orgMap.put(JsonKey.PROVIDER, "provider");
+    orgMap.put(JsonKey.ID, refOrgId);
+    orgMap.put(JsonKey.CHANNEL, "channel");
+    orgMap.put(JsonKey.SLUG, "slug");
+
+    PowerMockito.mockStatic(OrgServiceImpl.class);
+    OrgService orgService = mock(OrgServiceImpl.class);
+    when(OrgServiceImpl.getInstance()).thenReturn(orgService);
+    when(orgService.getOrgById(Mockito.anyString(), Mockito.any())).thenReturn(orgMap);
+    when(orgService.updateOrganisation(Mockito.any(), Mockito.any()))
         .thenReturn(getCassandraRecordByIdForOrgResponse());
 
     HashMap<String, Object> innerMap = new HashMap<>();
     HashMap<String, Object> dataMap = new HashMap<>();
-    innerMap.put(JsonKey.ORGANISATION_ID, "0137815693126451201");
+    innerMap.put(JsonKey.ORGANISATION_ID, refOrgId);
     innerMap.put(JsonKey.FILE, bytes);
     innerMap.put(JsonKey.FILE_NAME, "samplepublic.pem");
     dataMap.put(JsonKey.DATA, innerMap);
 
     boolean result =
-        testScenario(
-            getRequest(dataMap, ActorOperations.ADD_ENCRYPTION_KEY.getValue()),
-            ResponseCode.invalidRequestData);
+        testScenario(getRequest(dataMap, ActorOperations.ADD_ENCRYPTION_KEY.getValue()), null);
     assertTrue(result);
   }
 
@@ -456,21 +465,6 @@ public class OrgManagementActorTest {
     return res;
   }
 
-  private Response getRecordsById(boolean empty) {
-    Response res = new Response();
-    List<Map<String, Object>> list = new ArrayList<>();
-    if (!empty) {
-      Map<String, Object> map = new HashMap<>();
-      map.put(JsonKey.ID, "orgId");
-      map.put(JsonKey.IS_DELETED, true);
-      map.put(JsonKey.CHANNEL, "channel1");
-      map.put(JsonKey.IS_TENANT, true);
-      list.add(map);
-    }
-    res.put(JsonKey.RESPONSE, list);
-    return res;
-  }
-
   private Response getUpsertRecords() {
     Response res = new Response();
     res.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
@@ -500,17 +494,6 @@ public class OrgManagementActorTest {
       contentList.add(content);
     }
     response.put(JsonKey.CONTENT, contentList);
-    return response;
-  }
-
-  private Map<String, Object> getByIdEsResponse(boolean empty) {
-    Map<String, Object> response = new HashMap<>();
-    if (!empty) {
-      response.put(JsonKey.ORGANISATION_ID, "orgId");
-      response.put(JsonKey.HASHTAGID, "hashtagId");
-      response.put(JsonKey.ID, "id");
-      response.put(JsonKey.ORGANISATION_TYPE, 2);
-    }
     return response;
   }
 
@@ -575,14 +558,7 @@ public class OrgManagementActorTest {
     return bytes;
   }
 
-  private Response createCassandraInsertSuccessResponse() {
-    Response response = new Response();
-    response.put(JsonKey.RESPONSE, JsonKey.SUCCESS);
-    return response;
-  }
-
   private Response getCassandraRecordByIdForOrgResponse() {
-
     Response response = new Response();
     List<Map<String, Object>> list = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();

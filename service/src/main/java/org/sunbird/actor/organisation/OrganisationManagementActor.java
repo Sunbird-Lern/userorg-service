@@ -510,7 +510,6 @@ public class OrganisationManagementActor extends BaseActor {
     Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
     String publicKeyUrl = uploadEncryptionFile(req, context, processId, fetchedKeys);
     Response response = updateEncryptionKey(request, orgId, fetchedKeys, publicKeyUrl);
-
     sender().tell(response, self());
   }
 
@@ -544,8 +543,9 @@ public class OrganisationManagementActor extends BaseActor {
         logger.info(context, "OrganisationManagementActor:: The cloud service is not available");
         ProjectCommonException exception =
             new ProjectCommonException(
-                ResponseCode.invalidRequestData,
-                ResponseCode.invalidRequestData.getErrorMessage(),
+                ResponseCode.errorUnsupportedCloudStorage,
+                ProjectUtil.formatMessage(
+                    ResponseCode.errorUnsupportedCloudStorage.getErrorMessage(), cspProvider),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
         sender().tell(exception, self());
       }
@@ -576,8 +576,8 @@ public class OrganisationManagementActor extends BaseActor {
       return publicKeyUrl;
     } catch (IOException e) {
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData,
-          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.invalidEncryptionFile,
+          ResponseCode.invalidEncryptionFile.getErrorMessage(),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     } finally {
       try {
@@ -597,13 +597,14 @@ public class OrganisationManagementActor extends BaseActor {
   private Map<String, List<String>> getKeysInDB(Request request, String orgId) {
     Map<String, List<String>> fetchedKeys = null;
     Map<String, Object> dbOrgDetails = orgService.getOrgById(orgId, request.getRequestContext());
+
     if (MapUtils.isEmpty(dbOrgDetails)) {
       logger.info(
           request.getRequestContext(),
           "OrganisationManagementActor: addEncryptionKey:: invalid orgId");
       throw new ProjectCommonException(
-          ResponseCode.invalidRequestData,
-          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.rootOrgAssociationError,
+          ProjectUtil.formatMessage(ResponseCode.rootOrgAssociationError.getErrorMessage(), orgId),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
