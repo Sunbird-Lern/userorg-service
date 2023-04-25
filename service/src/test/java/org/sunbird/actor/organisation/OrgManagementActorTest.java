@@ -96,28 +96,6 @@ public class OrgManagementActorTest {
   private static final String UPLOAD_URL = "uploadUrl";
 
   @Before
-  public void initTest() {
-    BaseStorageService service = mock(BaseStorageService.class);
-    mockStatic(StorageServiceFactory.class);
-
-    try {
-      when(StorageServiceFactory.class, "getStorageService", Mockito.any()).thenReturn(service);
-
-      when(service.upload(
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.anyString(),
-              Mockito.any(Option.class),
-              Mockito.any(Option.class),
-              Mockito.any(Option.class),
-              Mockito.any(Option.class)))
-          .thenReturn(UPLOAD_URL);
-    } catch (Exception e) {
-      Assert.fail(e.getMessage());
-    }
-  }
-
-  @Before
   public void beforeEachTest() throws Exception {
     PowerMockito.mockStatic(ServiceFactory.class);
     PowerMockito.mockStatic(Util.class);
@@ -380,6 +358,25 @@ public class OrgManagementActorTest {
 
   @Test
   public void testAddEncryptionKey() {
+    BaseStorageService service = mock(BaseStorageService.class);
+    mockStatic(StorageServiceFactory.class);
+
+    try {
+      when(StorageServiceFactory.class, "getStorageService", Mockito.any()).thenReturn(service);
+
+      when(service.upload(
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.anyString(),
+              Mockito.any(Option.class),
+              Mockito.any(Option.class),
+              Mockito.any(Option.class),
+              Mockito.any(Option.class)))
+          .thenReturn(UPLOAD_URL);
+    } catch (Exception e) {
+      Assert.fail(e.getMessage());
+    }
+
     byte[] bytes = getFileAsBytes();
 
     Response response = createCassandraInsertSuccessResponse();
