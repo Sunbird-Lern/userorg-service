@@ -105,6 +105,7 @@ POST    /v1/org/read                            @controllers.organisationmanagem
 POST    /v1/org/search		                    @controllers.organisationmanagement.OrgController.search(request: play.mvc.Http.Request)
 POST    /v2/org/search		                    @controllers.organisationmanagement.OrgController.searchV2(request: play.mvc.Http.Request)
 PATCH   /v1/org/assign/key                      @controllers.organisationmanagement.KeyManagementController.assignKeys(request: play.mvc.Http.Request)
+PATCH   /v1/org/update/encryptionkey            @controllers.organisationmanagement.OrgController.addKey(request: play.mvc.Http.Request)
 
 #Health check
 GET     /health                                 @controllers.healthmanager.HealthController.getHealth(request: play.mvc.Http.Request)

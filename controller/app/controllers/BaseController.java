@@ -187,6 +187,24 @@ public class BaseController extends Controller {
   }
 
   protected CompletionStage<Result> handleRequest(
+          ActorRef actorRef,
+          String operation,
+          Function requestValidatorFn,
+          Map<String, String> headers,
+          Request httpRequest) {
+    return handleRequest(
+            actorRef,
+            operation,
+            null,
+            requestValidatorFn,
+            null,
+            null,
+            headers,
+            false,
+            httpRequest);
+  }
+
+  protected CompletionStage<Result> handleRequest(
       ActorRef actorRef,
       String operation,
       Function requestValidatorFn,
