@@ -395,7 +395,9 @@ public class OrgManagementActorTest {
     dataMap.put(JsonKey.DATA, innerMap);
 
     boolean result =
-        testScenario(getRequest(dataMap, ActorOperations.ADD_ENCRYPTION_KEY.getValue()), null);
+        testScenario(
+            getRequest(dataMap, ActorOperations.ADD_ENCRYPTION_KEY.getValue()),
+            ResponseCode.invalidRequestData);
     assertTrue(result);
   }
 
