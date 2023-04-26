@@ -118,6 +118,8 @@ public interface ResponseMessage {
         "Invalid data security level {0} provided for job {1}. Please provide a valid data security level.";
     String INVALID_SECURITY_LEVEL_LOWER =
         "Invalid data security level {0} provided for job {1}. Cannot be set lower than the default security level: {2}";
+    String MISSING_DEFAULT_SECURITY_LEVEL =
+        "Default data security policy settings is missing for the job: {0}";
   }
 
   interface Key {
@@ -200,5 +202,6 @@ public interface ResponseMessage {
     String INVALID_ENCRYPTION_FILE = "0078";
     String INVALID_SECURITY_LEVEL = "0079";
     String INVALID_SECURITY_LEVEL_LOWER = "0080";
+    String MISSING_DEFAULT_SECURITY_LEVEL = "0081";
   }
 }

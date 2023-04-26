@@ -172,6 +172,9 @@ public enum ResponseCode {
   invalidSecurityLevelLower(
       ResponseMessage.Key.INVALID_SECURITY_LEVEL_LOWER,
       ResponseMessage.Message.INVALID_SECURITY_LEVEL_LOWER),
+  defaultSecurityLevelConfigMissing(
+      ResponseMessage.Key.MISSING_DEFAULT_SECURITY_LEVEL,
+      ResponseMessage.Message.MISSING_DEFAULT_SECURITY_LEVEL),
   OK(200),
   SUCCESS(200),
   CLIENT_ERROR(400),

@@ -125,58 +125,74 @@ public class TenantPreferenceService {
     }
 
     String defaultDataString = (String) defaultDataSecurityPolicy.get(0).get(JsonKey.DATA);
-    Map<String, Object> defaultData = null;
     try {
-      defaultData = mapper.readValue(defaultDataString, new TypeReference<>() {});
+      Map<String, Object> defaultData =
+          mapper.readValue(defaultDataString, new TypeReference<>() {});
+
+      Map<String, Object> defaultJobsConfig = (Map<String, Object>) defaultData.get(JsonKey.JOB);
+      Map<String, Integer> defaultJobsLevelConfig = new HashMap<>();
+      Iterator defaultJobsKeyItr = defaultJobsConfig.keySet().iterator();
+      while (defaultJobsKeyItr.hasNext()) {
+        String jobName = (String) defaultJobsKeyItr.next();
+        Map<String, String> jobConfig = (Map<String, String>) defaultJobsConfig.get(jobName);
+        defaultJobsLevelConfig.put(
+            jobName, Integer.parseInt(jobConfig.getOrDefault("level", "L0").replace("L", "")));
+      }
+
+      Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
+      Iterator inputJobsKeyItr = inputJobsConfig.keySet().iterator();
+      while (inputJobsKeyItr.hasNext()) {
+        String jobName = (String) inputJobsKeyItr.next();
+        if (defaultJobsLevelConfig.containsKey(jobName)) {
+          Map<String, String> jobConfig = (Map<String, String>) inputJobsConfig.get(jobName);
+          String ipJobSecurityLevel = jobConfig.getOrDefault("level", "L0");
+          if (!dataSecurityLevels.contains(ipJobSecurityLevel)) {
+            // throw invalid Level configured error
+            throw new ProjectCommonException(
+                ResponseCode.invalidSecurityLevel,
+                MessageFormat.format(
+                    ResponseCode.invalidSecurityLevel.getErrorMessage(),
+                    ipJobSecurityLevel,
+                    jobName),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+
+          int inputJobSecurityLevel = Integer.parseInt(ipJobSecurityLevel.replace("L", ""));
+          int defaultJobSecurityLevel = defaultJobsLevelConfig.get(jobName);
+
+          if (inputJobSecurityLevel < defaultJobSecurityLevel) {
+            // throw inputJobSecurityLevel less than defaultJobSecurityLevel error
+            throw new ProjectCommonException(
+                ResponseCode.invalidSecurityLevelLower,
+                MessageFormat.format(
+                    ResponseCode.invalidSecurityLevelLower.getErrorMessage(),
+                    ipJobSecurityLevel,
+                    jobName,
+                    "L" + defaultJobSecurityLevel),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+        } else {
+          throw new ProjectCommonException(
+              ResponseCode.defaultSecurityLevelConfigMissing,
+              MessageFormat.format(
+                  ResponseCode.defaultSecurityLevelConfigMissing.getErrorMessage(), jobName),
+              ResponseCode.CLIENT_ERROR.getResponseCode());
+        }
+      }
+      validation = true;
     } catch (JsonProcessingException e) {
       logger.error(
           context,
           "TenantPreferenceService:Exception while parsing default dataSecurityPolicy preferences "
               + e.getMessage(),
           e);
+      throw new ProjectCommonException(
+          ResponseCode.resourceNotFound,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(),
+              (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
+          ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
-    Map<String, Object> defaultJobsConfig = (Map<String, Object>) defaultData.get(JsonKey.JOB);
-    Map<String, Integer> defaultJobsLevelConfig = new HashMap<>();
-    Iterator defaultJobsKeyItr = defaultJobsConfig.keySet().iterator();
-    while (defaultJobsKeyItr.hasNext()) {
-      String jobName = (String) defaultJobsKeyItr.next();
-      Map<String, String> jobConfig = (Map<String, String>) defaultJobsConfig.get(jobName);
-      defaultJobsLevelConfig.put(
-          jobName, Integer.parseInt(jobConfig.getOrDefault("level", "L0").replace("L", "")));
-    }
-
-    Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
-    Iterator inputJobsKeyItr = inputJobsConfig.keySet().iterator();
-    while (inputJobsKeyItr.hasNext()) {
-      String jobName = (String) inputJobsKeyItr.next();
-      if (defaultJobsLevelConfig.containsKey(jobName)) {
-        Map<String, String> jobConfig = (Map<String, String>) inputJobsConfig.get(jobName);
-        String ipJobSecurityLevel = jobConfig.getOrDefault("level", "L0");
-        if (!dataSecurityLevels.contains(ipJobSecurityLevel)) {
-          // throw invalid Level configured error
-          throw new ProjectCommonException(
-              ResponseCode.invalidSecurityLevel,
-              MessageFormat.format(
-                  ResponseCode.invalidSecurityLevel.getErrorMessage(), ipJobSecurityLevel, jobName),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
-        int inputJobSecurityLevel = Integer.parseInt(ipJobSecurityLevel.replace("L", ""));
-        int defaultJobSecurityLevel = defaultJobsLevelConfig.get(jobName);
-
-        if (inputJobSecurityLevel < defaultJobSecurityLevel) {
-          // throw inputJobSecurityLevel less than defaultJobSecurityLevel error
-          throw new ProjectCommonException(
-              ResponseCode.invalidSecurityLevelLower,
-              MessageFormat.format(
-                  ResponseCode.invalidSecurityLevelLower.getErrorMessage(),
-                  ipJobSecurityLevel,
-                  jobName,
-                  "L" + defaultJobSecurityLevel),
-              ResponseCode.CLIENT_ERROR.getResponseCode());
-        }
-      }
-    }
-    validation = true;
     return validation;
   }
 }
