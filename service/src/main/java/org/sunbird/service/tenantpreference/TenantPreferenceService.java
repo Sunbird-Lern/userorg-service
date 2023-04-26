@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
@@ -110,12 +111,11 @@ public class TenantPreferenceService {
     return null;
   }
 
-  public boolean validateDataSecurityPolicy(
+  public boolean validateTenantDataSecurityPolicy(
       String orgId, String key, Map<String, Object> data, RequestContext context) {
-    boolean validation = false;
     List<Map<String, Object>> defaultDataSecurityPolicy =
         preferenceDao.getTenantPreferenceById(JsonKey.DEFAULT, key, context);
-    if (defaultDataSecurityPolicy == null || defaultDataSecurityPolicy.isEmpty()) {
+    if (CollectionUtils.isEmpty(defaultDataSecurityPolicy)) {
       throw new ProjectCommonException(
           ResponseCode.resourceNotFound,
           MessageFormat.format(
@@ -129,25 +129,36 @@ public class TenantPreferenceService {
       Map<String, Object> defaultData =
           mapper.readValue(defaultDataString, new TypeReference<>() {});
 
+      String strSystemSecurityLevel = (String) defaultData.get(JsonKey.LEVEL);
       Map<String, Object> defaultJobsConfig = (Map<String, Object>) defaultData.get(JsonKey.JOB);
-      Map<String, Integer> defaultJobsLevelConfig = new HashMap<>();
-      Iterator defaultJobsKeyItr = defaultJobsConfig.keySet().iterator();
-      while (defaultJobsKeyItr.hasNext()) {
-        String jobName = (String) defaultJobsKeyItr.next();
-        Map<String, String> jobConfig = (Map<String, String>) defaultJobsConfig.get(jobName);
-        defaultJobsLevelConfig.put(
-            jobName, Integer.parseInt(jobConfig.getOrDefault("level", "L0").replace("L", "")));
-      }
+      Map<String, Integer> defaultJobsLevelConfig =
+          defaultJobsConfig
+              .entrySet()
+              .stream()
+              .collect(
+                  Collectors.toMap(
+                      p -> p.getKey(),
+                      p ->
+                          Integer.parseInt(
+                              ((Map<String, String>) p.getValue()).get("level").replace("L", ""))));
 
+      String strTenantSecurityLevel = (String) data.get(JsonKey.LEVEL);
       Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
       Iterator inputJobsKeyItr = inputJobsConfig.keySet().iterator();
       while (inputJobsKeyItr.hasNext()) {
         String jobName = (String) inputJobsKeyItr.next();
         if (defaultJobsLevelConfig.containsKey(jobName)) {
           Map<String, String> jobConfig = (Map<String, String>) inputJobsConfig.get(jobName);
-          String ipJobSecurityLevel = jobConfig.getOrDefault("level", "L0");
+
+          if (!jobConfig.containsKey(JsonKey.LEVEL)) {
+            throw new ProjectCommonException(
+                ResponseCode.invalidRequestData,
+                ResponseCode.invalidRequestData.getErrorMessage(),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+          }
+
+          String ipJobSecurityLevel = jobConfig.get(JsonKey.LEVEL);
           if (!dataSecurityLevels.contains(ipJobSecurityLevel)) {
-            // throw invalid Level configured error
             throw new ProjectCommonException(
                 ResponseCode.invalidSecurityLevel,
                 MessageFormat.format(
@@ -157,18 +168,18 @@ public class TenantPreferenceService {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
 
-          int inputJobSecurityLevel = Integer.parseInt(ipJobSecurityLevel.replace("L", ""));
+          int inputJobSecurityLevel =
+              Integer.parseInt(ipJobSecurityLevel.replace(JsonKey.LEVEL_CHAR, ""));
           int defaultJobSecurityLevel = defaultJobsLevelConfig.get(jobName);
 
           if (inputJobSecurityLevel < defaultJobSecurityLevel) {
-            // throw inputJobSecurityLevel less than defaultJobSecurityLevel error
             throw new ProjectCommonException(
                 ResponseCode.invalidSecurityLevelLower,
                 MessageFormat.format(
                     ResponseCode.invalidSecurityLevelLower.getErrorMessage(),
                     ipJobSecurityLevel,
                     jobName,
-                    "L" + defaultJobSecurityLevel),
+                    JsonKey.LEVEL_CHAR + defaultJobSecurityLevel),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
         } else {
@@ -179,7 +190,6 @@ public class TenantPreferenceService {
               ResponseCode.CLIENT_ERROR.getResponseCode());
         }
       }
-      validation = true;
     } catch (JsonProcessingException e) {
       logger.error(
           context,
@@ -192,7 +202,98 @@ public class TenantPreferenceService {
               ResponseCode.resourceNotFound.getErrorMessage(),
               (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
+    } catch (NullPointerException npe) {
+      logger.error(
+          context,
+          "TenantPreferenceService:Exception while parsing default dataSecurityPolicy preferences "
+              + npe.getMessage(),
+          npe);
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    return validation;
+
+    return true;
+  }
+
+  public boolean validateDataSecurityPolicyConfig(Map<String, Object> data) {
+    Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
+
+    if (!data.containsKey(JsonKey.LEVEL)) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
+    String strTenantLevel = (String) data.get(JsonKey.LEVEL);
+    Iterator<String> inputJobsKeyItr = inputJobsConfig.keySet().iterator();
+    while (inputJobsKeyItr.hasNext()) {
+      String jobName = inputJobsKeyItr.next();
+      Map<String, String> jobConfig = (Map<String, String>) inputJobsConfig.get(jobName);
+
+      if (!jobConfig.containsKey(JsonKey.LEVEL)) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidRequestData,
+            ResponseCode.invalidRequestData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+
+      String strJobLevel = jobConfig.get(JsonKey.LEVEL);
+
+      if (!dataSecurityLevels.contains(strJobLevel)) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidSecurityLevel,
+            MessageFormat.format(
+                ResponseCode.invalidSecurityLevel.getErrorMessage(), strJobLevel, jobName),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+
+      int iJobLevel = Integer.parseInt(strJobLevel.replace(JsonKey.LEVEL_CHAR, ""));
+      int iTenantLevel = Integer.parseInt(strTenantLevel.replace(JsonKey.LEVEL_CHAR, ""));
+      if (iJobLevel < iTenantLevel) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidSecurityLevelLower,
+            MessageFormat.format(
+                ResponseCode.invalidSecurityLevelLower.getErrorMessage(),
+                strJobLevel,
+                jobName,
+                strTenantLevel),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
+    }
+    return true;
+  }
+
+  public Map<String, Object> getDataSecurityPolicyPref(
+      String orgId, String key, RequestContext context) {
+    List<Map<String, Object>> orgPreference =
+        preferenceDao.getTenantPreferenceById(orgId, key, context);
+
+    if (!orgId.equalsIgnoreCase(JsonKey.DEFAULT) && CollectionUtils.isEmpty(orgPreference))
+      orgPreference = preferenceDao.getTenantPreferenceById(JsonKey.DEFAULT, key, context);
+
+    if (CollectionUtils.isNotEmpty(orgPreference)) {
+      try {
+        String data = (String) orgPreference.get(0).get(JsonKey.DATA);
+        Map<String, Object> map = mapper.readValue(data, new TypeReference<>() {});
+        orgPreference.get(0).put(JsonKey.DATA, map);
+        return orgPreference.get(0);
+      } catch (Exception e) {
+        logger.error(
+            context,
+            "TenantPreferenceService:Exception while reading preferences " + e.getMessage(),
+            e);
+      }
+    } else
+      throw new ProjectCommonException(
+          ResponseCode.errorParamExists,
+          MessageFormat.format(
+              ResponseCode.resourceNotFound.getErrorMessage(),
+              (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+
+    return Collections.emptyMap();
   }
 }

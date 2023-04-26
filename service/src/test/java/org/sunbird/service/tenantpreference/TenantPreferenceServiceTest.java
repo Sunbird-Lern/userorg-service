@@ -119,6 +119,9 @@ public class TenantPreferenceServiceTest {
     ObjectMapper mapper = new ObjectMapper();
     String inputDataStr =
         "{\n"
+            + "           \"level\": \"L1\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
             + "            \"job\": {\n"
             + "                    \"admin-geo-reports\": {\n"
             + "                        \"level\": \"L2\",\n"
@@ -146,7 +149,7 @@ public class TenantPreferenceServiceTest {
       e.printStackTrace();
     }
     boolean validationResult =
-        preferenceService.validateDataSecurityPolicy(
+        preferenceService.validateTenantDataSecurityPolicy(
             "45456464682", "dataSecurityPolicy", inputData, new RequestContext());
     Assert.assertTrue(validationResult);
   }
@@ -163,6 +166,9 @@ public class TenantPreferenceServiceTest {
     ObjectMapper mapper = new ObjectMapper();
     String inputDataStr =
         "{\n"
+            + "           \"level\": \"L2\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
             + "            \"job\": {\n"
             + "                    \"admin-geo-reports\": {\n"
             + "                        \"level\": \"L2\",\n"
@@ -191,7 +197,7 @@ public class TenantPreferenceServiceTest {
     }
 
     try {
-      preferenceService.validateDataSecurityPolicy(
+      preferenceService.validateTenantDataSecurityPolicy(
           "45456464682", "dataSecurityPolicy", inputData, new RequestContext());
     } catch (ProjectCommonException pe) {
       Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0080"));
@@ -210,6 +216,9 @@ public class TenantPreferenceServiceTest {
     ObjectMapper mapper = new ObjectMapper();
     String inputDataStr =
         "{\n"
+            + "           \"level\": \"L2\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
             + "            \"job\": {\n"
             + "                    \"admin-geo-reports\": {\n"
             + "                        \"level\": \"L0\",\n"
@@ -238,7 +247,7 @@ public class TenantPreferenceServiceTest {
     }
 
     try {
-      preferenceService.validateDataSecurityPolicy(
+      preferenceService.validateTenantDataSecurityPolicy(
           "45456464682", "dataSecurityPolicy", inputData, new RequestContext());
     } catch (ProjectCommonException pe) {
       Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0079"));

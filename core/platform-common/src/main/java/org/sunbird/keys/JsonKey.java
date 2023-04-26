@@ -643,6 +643,7 @@ public final class JsonKey {
   public static final String DEFAULT = "default";
   public static final String DATA_SECURITY_POLICY = "dataSecurityPolicy";
   public static final String JOB = "job";
+  public static final String LEVEL_CHAR = "L";
 
   private JsonKey() {}
 }

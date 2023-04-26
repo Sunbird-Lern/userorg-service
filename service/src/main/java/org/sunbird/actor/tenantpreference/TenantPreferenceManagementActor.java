@@ -43,8 +43,13 @@ public class TenantPreferenceManagementActor extends BaseActor {
     logger.debug(
         context, "TenantPreferenceManagementActor:getTenantPreference called for org: " + orgId);
     String key = (String) actorMessage.getRequest().get(JsonKey.KEY);
-    Map<String, Object> orgPref =
-        preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.GET, context);
+    Map<String, Object> orgPref = null;
+    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY))
+      orgPref = preferenceService.getDataSecurityPolicyPref(orgId, key, context);
+    else
+      orgPref =
+          preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.GET, context);
+
     Response finalResponse = new Response();
     finalResponse.getResult().put(JsonKey.RESPONSE, orgPref);
     sender().tell(finalResponse, self());
@@ -69,9 +74,11 @@ public class TenantPreferenceManagementActor extends BaseActor {
     preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.UPDATE, context);
     Map<String, Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
 
-    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)
-        && !orgId.equalsIgnoreCase(JsonKey.DEFAULT))
-      preferenceService.validateDataSecurityPolicy(orgId, key, data, context);
+    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)) {
+      preferenceService.validateDataSecurityPolicyConfig(data);
+      if (!orgId.equalsIgnoreCase(JsonKey.DEFAULT))
+        preferenceService.validateTenantDataSecurityPolicy(orgId, key, data, context);
+    }
 
     String updatedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
     preferenceService.updatePreference(orgId, key, data, updatedBy, context);
@@ -95,9 +102,11 @@ public class TenantPreferenceManagementActor extends BaseActor {
     preferenceService.validateAndGetTenantPreferencesById(orgId, key, JsonKey.CREATE, context);
     Map<String, Object> data = (Map<String, Object>) req.get(JsonKey.DATA);
 
-    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)
-        && !orgId.equalsIgnoreCase(JsonKey.DEFAULT))
-      preferenceService.validateDataSecurityPolicy(orgId, key, data, context);
+    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)) {
+      preferenceService.validateDataSecurityPolicyConfig(data);
+      if (!orgId.equalsIgnoreCase(JsonKey.DEFAULT))
+        preferenceService.validateTenantDataSecurityPolicy(orgId, key, data, context);
+    }
 
     String requestedBy = (String) actorMessage.getContext().get(JsonKey.REQUESTED_BY);
     preferenceService.createPreference(orgId, key, data, requestedBy, context);
