@@ -50,17 +50,7 @@ public class TenantPreferenceService {
           ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
     }
     if (CollectionUtils.isNotEmpty(orgPreference)) {
-      try {
-        String data = (String) orgPreference.get(0).get(JsonKey.DATA);
-        Map<String, Object> map = mapper.readValue(data, new TypeReference<>() {});
-        orgPreference.get(0).put(JsonKey.DATA, map);
-        return orgPreference.get(0);
-      } catch (Exception e) {
-        logger.error(
-            context,
-            "TenantPreferenceService:Exception while reading preferences " + e.getMessage(),
-            e);
-      }
+      return getOrgPreference(orgPreference, context);
     }
     return Collections.emptyMap();
   }
@@ -278,21 +268,7 @@ public class TenantPreferenceService {
       orgPreference = preferenceDao.getTenantPreferenceById(JsonKey.DEFAULT, key, context);
 
     if (CollectionUtils.isNotEmpty(orgPreference)) {
-      try {
-        String data = (String) orgPreference.get(0).get(JsonKey.DATA);
-        Map<String, Object> map = mapper.readValue(data, new TypeReference<>() {});
-        orgPreference.get(0).put(JsonKey.DATA, map);
-        return orgPreference.get(0);
-      } catch (Exception e) {
-        logger.error(
-            context,
-            "TenantPreferenceService:Exception while reading preferences " + e.getMessage(),
-            e);
-        throw new ProjectCommonException(
-            ResponseCode.invalidRequestData,
-            ResponseCode.invalidRequestData.getErrorMessage(),
-            ResponseCode.CLIENT_ERROR.getResponseCode());
-      }
+      return getOrgPreference(orgPreference, context);
     } else
       throw new ProjectCommonException(
           ResponseCode.errorParamExists,
@@ -306,5 +282,24 @@ public class TenantPreferenceService {
     int iFromLevel = Integer.parseInt(strFromLevel.replace(JsonKey.LEVEL_CHAR, ""));
     int iToLevel = Integer.parseInt(strToLevel.replace(JsonKey.LEVEL_CHAR, ""));
     return iFromLevel < iToLevel;
+  }
+
+  private Map<String, Object> getOrgPreference(
+      List<Map<String, Object>> orgPreference, RequestContext context) {
+    try {
+      String data = (String) orgPreference.get(0).get(JsonKey.DATA);
+      Map<String, Object> map = mapper.readValue(data, new TypeReference<>() {});
+      orgPreference.get(0).put(JsonKey.DATA, map);
+      return orgPreference.get(0);
+    } catch (Exception e) {
+      logger.error(
+          context,
+          "TenantPreferenceService:Exception while reading preferences " + e.getMessage(),
+          e);
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
   }
 }
