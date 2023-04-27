@@ -138,7 +138,7 @@ public class TenantPreferenceService {
               .stream()
               .collect(
                   Collectors.toMap(
-                      p -> p.getKey(),
+                      Map.Entry::getKey,
                       p -> ((Map<String, String>) p.getValue()).get(JsonKey.LEVEL)));
 
       String strTenantSecurityLevel = (String) data.get(JsonKey.LEVEL);
@@ -153,9 +153,9 @@ public class TenantPreferenceService {
             ResponseCode.CLIENT_ERROR.getResponseCode());
 
       Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
-      Iterator inputJobsKeyItr = inputJobsConfig.keySet().iterator();
+      Iterator<String> inputJobsKeyItr = inputJobsConfig.keySet().iterator();
       while (inputJobsKeyItr.hasNext()) {
-        String jobName = (String) inputJobsKeyItr.next();
+        String jobName = inputJobsKeyItr.next();
         if (defaultJobsLevelConfig.containsKey(jobName)) {
           Map<String, String> jobConfig = (Map<String, String>) inputJobsConfig.get(jobName);
 
