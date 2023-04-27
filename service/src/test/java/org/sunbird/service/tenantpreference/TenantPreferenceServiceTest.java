@@ -347,6 +347,9 @@ public class TenantPreferenceServiceTest {
     map.put(
         JsonKey.DATA,
         "{\n"
+            + "           \"level\": \"L1\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
             + "            \"job\": {\n"
             + "                    \"admin-geo-reports\": {\n"
             + "                        \"level\": \"L1\",\n"
