@@ -24,7 +24,8 @@ public class TenantPreferenceService {
   private final LoggerUtil logger = new LoggerUtil(TenantPreferenceService.class);
   private final ObjectMapper mapper = new ObjectMapper();
   private final TenantPreferenceDao preferenceDao = TenantPreferenceDaoImpl.getInstance();
-  private final List<String> dataSecurityLevels = Arrays.asList("L1", "L2", "L3", "L4");
+  private final List<String> dataSecurityLevels =
+      Arrays.asList(JsonKey.LEVEL_1, JsonKey.LEVEL_2, JsonKey.LEVEL_3, JsonKey.LEVEL_4);
 
   public Map<String, Object> validateAndGetTenantPreferencesById(
       String orgId, String key, String operationType, RequestContext context) {
@@ -131,18 +132,26 @@ public class TenantPreferenceService {
 
       String strSystemSecurityLevel = (String) defaultData.get(JsonKey.LEVEL);
       Map<String, Object> defaultJobsConfig = (Map<String, Object>) defaultData.get(JsonKey.JOB);
-      Map<String, Integer> defaultJobsLevelConfig =
+      Map<String, String> defaultJobsLevelConfig =
           defaultJobsConfig
               .entrySet()
               .stream()
               .collect(
                   Collectors.toMap(
                       p -> p.getKey(),
-                      p ->
-                          Integer.parseInt(
-                              ((Map<String, String>) p.getValue()).get("level").replace("L", ""))));
+                      p -> ((Map<String, String>) p.getValue()).get(JsonKey.LEVEL)));
 
       String strTenantSecurityLevel = (String) data.get(JsonKey.LEVEL);
+
+      if (compareSecurityLevel(strTenantSecurityLevel, strSystemSecurityLevel))
+        throw new ProjectCommonException(
+            ResponseCode.invalidTenantSecurityLevelLower,
+            MessageFormat.format(
+                ResponseCode.invalidTenantSecurityLevelLower.getErrorMessage(),
+                strTenantSecurityLevel,
+                strSystemSecurityLevel),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+
       Map<String, Object> inputJobsConfig = (Map<String, Object>) data.get(JsonKey.JOB);
       Iterator inputJobsKeyItr = inputJobsConfig.keySet().iterator();
       while (inputJobsKeyItr.hasNext()) {
@@ -168,18 +177,14 @@ public class TenantPreferenceService {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
 
-          int inputJobSecurityLevel =
-              Integer.parseInt(ipJobSecurityLevel.replace(JsonKey.LEVEL_CHAR, ""));
-          int defaultJobSecurityLevel = defaultJobsLevelConfig.get(jobName);
-
-          if (inputJobSecurityLevel < defaultJobSecurityLevel) {
+          if (compareSecurityLevel(ipJobSecurityLevel, defaultJobsLevelConfig.get(jobName))) {
             throw new ProjectCommonException(
                 ResponseCode.invalidSecurityLevelLower,
                 MessageFormat.format(
                     ResponseCode.invalidSecurityLevelLower.getErrorMessage(),
                     ipJobSecurityLevel,
                     jobName,
-                    JsonKey.LEVEL_CHAR + defaultJobSecurityLevel),
+                    defaultJobsLevelConfig.get(jobName)),
                 ResponseCode.CLIENT_ERROR.getResponseCode());
           }
         } else {
@@ -250,9 +255,7 @@ public class TenantPreferenceService {
             ResponseCode.CLIENT_ERROR.getResponseCode());
       }
 
-      int iJobLevel = Integer.parseInt(strJobLevel.replace(JsonKey.LEVEL_CHAR, ""));
-      int iTenantLevel = Integer.parseInt(strTenantLevel.replace(JsonKey.LEVEL_CHAR, ""));
-      if (iJobLevel < iTenantLevel) {
+      if (compareSecurityLevel(strJobLevel, strTenantLevel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidSecurityLevelLower,
             MessageFormat.format(
@@ -285,6 +288,10 @@ public class TenantPreferenceService {
             context,
             "TenantPreferenceService:Exception while reading preferences " + e.getMessage(),
             e);
+        throw new ProjectCommonException(
+            ResponseCode.invalidRequestData,
+            ResponseCode.invalidRequestData.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
       }
     } else
       throw new ProjectCommonException(
@@ -293,7 +300,11 @@ public class TenantPreferenceService {
               ResponseCode.resourceNotFound.getErrorMessage(),
               (ProjectUtil.formatMessage(ResponseMessage.Message.AND_FORMAT, key, orgId))),
           ResponseCode.CLIENT_ERROR.getResponseCode());
+  }
 
-    return Collections.emptyMap();
+  private boolean compareSecurityLevel(String strFromLevel, String strToLevel) {
+    int iFromLevel = Integer.parseInt(strFromLevel.replace(JsonKey.LEVEL_CHAR, ""));
+    int iToLevel = Integer.parseInt(strToLevel.replace(JsonKey.LEVEL_CHAR, ""));
+    return iFromLevel < iToLevel;
   }
 }
