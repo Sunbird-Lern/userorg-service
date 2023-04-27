@@ -25,6 +25,7 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
@@ -227,7 +228,7 @@ public class TenantPreferenceServiceTest {
       preferenceService.getDataSecurityPolicyPref(
           "34234234", JsonKey.DATA_SECURITY_POLICY, new RequestContext());
     } catch (ProjectCommonException pe) {
-      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0002"));
+      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.ERROR_PARAM_EXISTS));
     }
   }
 
@@ -245,7 +246,7 @@ public class TenantPreferenceServiceTest {
       preferenceService.validateTenantDataSecurityPolicy(
           "34234234", JsonKey.DATA_SECURITY_POLICY, getInputData(), new RequestContext());
     } catch (ProjectCommonException pe) {
-      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0013"));
+      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.RESOURCE_NOT_FOUND));
     }
   }
 
@@ -294,7 +295,153 @@ public class TenantPreferenceServiceTest {
       preferenceService.validateTenantDataSecurityPolicy(
           "34234234", JsonKey.DATA_SECURITY_POLICY, inputData, new RequestContext());
     } catch (ProjectCommonException pe) {
-      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0082"));
+      Assert.assertTrue(
+          pe.getErrorCode()
+              .equalsIgnoreCase(ResponseMessage.Key.INVALID_TENANT_SECURITY_LEVEL_LOWER));
+    }
+  }
+
+  @Test
+  public void validateTenantDataSecurityPolicyException3() {
+    PowerMockito.mockStatic(TenantPreferenceDaoImpl.class);
+    TenantPreferenceDao daoService = mock(TenantPreferenceDaoImpl.class);
+    when(TenantPreferenceDaoImpl.getInstance()).thenReturn(daoService);
+    when(daoService.getTenantPreferenceById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(defaultDataSecurityPrefL2());
+    TenantPreferenceService preferenceService = new TenantPreferenceService();
+    ObjectMapper mapper = new ObjectMapper();
+    String inputDataStr =
+        "{\n"
+            + "           \"level\": \"L2\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
+            + "            \"job\": {\n"
+            + "                    \"admin-geo-reports\": {\n"
+            + "                        \"dataEncrypted\": \"No\",\n"
+            + "                        \"comments\": \"Unprotected file.\"\n"
+            + "                    },\n"
+            + "                    \"userinfo-exhaust\": {\n"
+            + "                        \"level\": \"L4\",\n"
+            + "                        \"dataEncrypted\": \"Yes\",\n"
+            + "                        \"comments\": \"Decryption tool link need to be downloaded to decrypt the encrypted file.\"\n"
+            + "                    }\n"
+            + "                },\n"
+            + "            \"securityLevels\": {\n"
+            + "                \"L1\": \"Data is present in plain text/zip. Generally applicable to open datasets.\",\n"
+            + "                \"L2\": \"Password protected zip file. Generally applicable to non PII data sets but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L3\": \"Data encrypted with a user provided encryption key. Generally applicable to non PII data but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L4\": \"Data encrypted via an org provided public/private key. Generally applicable to all PII data exhaust.\"\n"
+            + "            }\n"
+            + "        }";
+
+    Map<String, Object> inputData = null;
+    try {
+      inputData = mapper.readValue(inputDataStr, new TypeReference<>() {});
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    try {
+      preferenceService.validateTenantDataSecurityPolicy(
+          "34234234", JsonKey.DATA_SECURITY_POLICY, inputData, new RequestContext());
+    } catch (ProjectCommonException pe) {
+      Assert.assertTrue(
+          pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.INVALID_REQUESTED_DATA));
+    }
+  }
+
+  @Test
+  public void validateTenantDataSecurityPolicyException4() {
+    PowerMockito.mockStatic(TenantPreferenceDaoImpl.class);
+    TenantPreferenceDao daoService = mock(TenantPreferenceDaoImpl.class);
+    when(TenantPreferenceDaoImpl.getInstance()).thenReturn(daoService);
+    when(daoService.getTenantPreferenceById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(defaultDataSecurityPrefL2());
+    TenantPreferenceService preferenceService = new TenantPreferenceService();
+    ObjectMapper mapper = new ObjectMapper();
+    String inputDataStr =
+        "{\n"
+            + "           \"level\": \"L2\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
+            + "            \"job\": {\n"
+            + "                    \"admin-geo-reports\": {\n"
+            + "                        \"level\": \"L1\",\n"
+            + "                        \"dataEncrypted\": \"No\",\n"
+            + "                        \"comments\": \"Unprotected file.\"\n"
+            + "                    },\n"
+            + "                    \"userinfo-exhaust\": {\n"
+            + "                        \"level\": \"L4\",\n"
+            + "                        \"dataEncrypted\": \"Yes\",\n"
+            + "                        \"comments\": \"Decryption tool link need to be downloaded to decrypt the encrypted file.\"\n"
+            + "                    }\n"
+            + "                },\n"
+            + "            \"securityLevels\": {\n"
+            + "                \"L1\": \"Data is present in plain text/zip. Generally applicable to open datasets.\",\n"
+            + "                \"L2\": \"Password protected zip file. Generally applicable to non PII data sets but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L3\": \"Data encrypted with a user provided encryption key. Generally applicable to non PII data but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L4\": \"Data encrypted via an org provided public/private key. Generally applicable to all PII data exhaust.\"\n"
+            + "            }\n"
+            + "        }";
+
+    Map<String, Object> inputData = null;
+    try {
+      inputData = mapper.readValue(inputDataStr, new TypeReference<>() {});
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    try {
+      preferenceService.validateTenantDataSecurityPolicy(
+          "34234234", JsonKey.DATA_SECURITY_POLICY, inputData, new RequestContext());
+    } catch (ProjectCommonException pe) {
+      Assert.assertTrue(
+          pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.INVALID_SECURITY_LEVEL_LOWER));
+    }
+  }
+
+  @Test
+  public void validateTenantDataSecurityPolicyException5() {
+    PowerMockito.mockStatic(TenantPreferenceDaoImpl.class);
+    TenantPreferenceDao daoService = mock(TenantPreferenceDaoImpl.class);
+    when(TenantPreferenceDaoImpl.getInstance()).thenReturn(daoService);
+    when(daoService.getTenantPreferenceById(
+            Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn(missingSystemSecurityLevelPref());
+    TenantPreferenceService preferenceService = new TenantPreferenceService();
+    ObjectMapper mapper = new ObjectMapper();
+    String inputDataStr =
+        "{\n"
+            + "           \"level\": \"L2\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
+            + "            \"job\": {\n"
+            + "                    \"userinfo-exhaust\": {\n"
+            + "                        \"level\": \"L4\",\n"
+            + "                        \"dataEncrypted\": \"Yes\",\n"
+            + "                        \"comments\": \"Decryption tool link need to be downloaded to decrypt the encrypted file.\"\n"
+            + "                    }\n"
+            + "                },\n"
+            + "            \"securityLevels\": {\n"
+            + "                \"L1\": \"Data is present in plain text/zip. Generally applicable to open datasets.\",\n"
+            + "                \"L2\": \"Password protected zip file. Generally applicable to non PII data sets but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L3\": \"Data encrypted with a user provided encryption key. Generally applicable to non PII data but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L4\": \"Data encrypted via an org provided public/private key. Generally applicable to all PII data exhaust.\"\n"
+            + "            }\n"
+            + "        }";
+
+    Map<String, Object> inputData = null;
+    try {
+      inputData = mapper.readValue(inputDataStr, new TypeReference<>() {});
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
+    try {
+      preferenceService.validateTenantDataSecurityPolicy(
+          "34234234", JsonKey.DATA_SECURITY_POLICY, inputData, new RequestContext());
+    } catch (ProjectCommonException pe) {
+      Assert.assertTrue(
+          pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.MISSING_DEFAULT_SECURITY_LEVEL));
     }
   }
 
@@ -312,8 +459,8 @@ public class TenantPreferenceServiceTest {
       preferenceService.validateTenantDataSecurityPolicy(
           "45456464682", "dataSecurityPolicy", getInputData(), new RequestContext());
     } catch (ProjectCommonException pe) {
-      System.out.println(pe.getErrorCode());
-      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0079"));
+      Assert.assertTrue(
+          pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.INVALID_SECURITY_LEVEL));
     }
   }
 
@@ -363,7 +510,8 @@ public class TenantPreferenceServiceTest {
       preferenceService.validateTenantDataSecurityPolicy(
           "45456464682", "dataSecurityPolicy", inputData, new RequestContext());
     } catch (ProjectCommonException pe) {
-      Assert.assertTrue(pe.getErrorCode().equalsIgnoreCase("0079"));
+      Assert.assertTrue(
+          pe.getErrorCode().equalsIgnoreCase(ResponseMessage.Key.INVALID_SECURITY_LEVEL));
     }
   }
 
@@ -444,6 +592,36 @@ public class TenantPreferenceServiceTest {
             + "                        \"level\": \"L4\",\n"
             + "                        \"dataEncrypted\": \"Yes\",\n"
             + "                        \"comments\": \"Decryption tool link need to be downloaded to decrypt the encrypted file.\"\n"
+            + "                    }\n"
+            + "                },\n"
+            + "            \"securityLevels\": {\n"
+            + "                \"L1\": \"Data is present in plain text/zip. Generally applicable to open datasets.\",\n"
+            + "                \"L2\": \"Password protected zip file. Generally applicable to non PII data sets but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L3\": \"Data encrypted with a user provided encryption key. Generally applicable to non PII data but can contain sensitive information which may not be considered open.\",\n"
+            + "                \"L4\": \"Data encrypted via an org provided public/private key. Generally applicable to all PII data exhaust.\"\n"
+            + "            }\n"
+            + "        }");
+    list.add(map);
+
+    return list;
+  }
+
+  private static List<Map<String, Object>> missingSystemSecurityLevelPref() {
+    List<Map<String, Object>> list = new ArrayList();
+    Map<String, Object> map = new HashMap<>();
+    map.put(JsonKey.KEY, "anyKey");
+    map.put(JsonKey.ORG_ID, "default");
+    map.put(
+        JsonKey.DATA,
+        "{\n"
+            + "           \"level\": \"L2\",\n"
+            + "           \"dataEncrypted\": \"No\",\n"
+            + "           \"comments\": \"Data is not encrypted\",\n"
+            + "            \"job\": {\n"
+            + "                    \"admin-geo-reports\": {\n"
+            + "                        \"level\": \"L2\",\n"
+            + "                        \"dataEncrypted\": \"No\",\n"
+            + "                        \"comments\": \"Unprotected file.\"\n"
             + "                    }\n"
             + "                },\n"
             + "            \"securityLevels\": {\n"
