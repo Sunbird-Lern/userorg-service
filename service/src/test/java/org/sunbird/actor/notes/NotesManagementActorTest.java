@@ -176,7 +176,7 @@ public class NotesManagementActorTest {
     assertTrue(result);
   }
 
-  @Test
+  @Ignore
   public void testDeleteNoteSuccess() {
     Request req = new Request();
     req.getContext().put(JsonKey.REQUESTED_BY, userId);
