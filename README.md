@@ -133,11 +133,11 @@ git clone https://github.com/Sunbird-Lern/sunbird-utils/<latest-branch>
    We have to use postman to create index and mappings.
 
 Create indices for,
-1. [user](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/indices/userv3.json)
-2. [userfeed](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/indices/userfeed.json)
-3. [usernotes](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/indices/usernotes.json)
-4. [org](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/indices/orgv3.json)
-5. [location](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/indices/location.json)
+1. [user](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/userv3.json)
+2. [userfeed](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/userfeed.json)
+3. [usernotes](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/usernotes.json)
+4. [org](https://github.com/project-sunbird/sunbird-devops/blob/master/release-5.3.0-lern/roles/es-mapping/files/indices/orgv3.json)
+5. [location](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/location.json)
 
 #### PUT {{es_host}}/<indices_name> Body : <respective_index_json_content>
 
@@ -315,11 +315,11 @@ one by one along with copying
 <respective_index_json_content> provided in previous step in the body.
 
 Create mappings for,
-1. [user](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/mappings/userv3-mapping.json)
-2. [userfeed](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/mappings/userfeed-mapping.json)
-3. [usernotes](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/mappings/usernotes-mapping.json)
-4. [org](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/mappings/orgv3-mapping.json)
-5. [location](https://github.com/project-sunbird/sunbird-devops/blob/master/ansible/roles/es-mapping/files/mappings/location-mapping.json)
+1. [user](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/mappings/userv3-mapping.json)
+2. [userfeed](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/mappings/userfeed-mapping.json)
+3. [usernotes](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/mappings/usernotes-mapping.json)
+4. [org](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/mappings/orgv3-mapping.json)
+5. [location](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/mappings/location-mapping.json)
 
 
 #### PUT {{es_host}}/<indices_name>/_mapping/_doc Body : <respective_mapping_json_content>
