@@ -652,9 +652,9 @@ curl --location 'localhost:9000/v1/system/settings/set' \
 #### System Env variables for sms template configuration
 
 ```shell
-export sunbird_msg_91_auth=238002A6JiGbmIm3X5b9f5d72
-export sunbird_msg_sender=DKSAPP
-export  sunbird_installation_display_name_for_sms=DIKSHA
+export sunbird_msg_91_auth=
+export sunbird_msg_sender=
+export  sunbird_installation_display_name_for_sms=
 ```
 
 ### Once the setup done, create user using below APIs
