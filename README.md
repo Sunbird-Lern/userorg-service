@@ -119,19 +119,19 @@ To create indices, follow these steps:
 2. Replace `<indices_name>` with the name of the index for which you want to create the mapping.
 3. Replace `<respective_index_json_content>` with the JSON content you copied in step 1.
 
-Use the following command to create each mapping:
+Use the following api to create each index:
 
 ```
-PUT {{es_host}}/<indices_name>/_mapping/_doc 
-Body: <respective_index_json_content>
+PUT {{es_host}}/<indices_name>
+Body : <respective_index_json_content>
 ```
 
-Here's an example command for creating the mapping for the `location` index:
+Here's an example curl command for creating the `location` index:
 
 ```
-curl --location --request PUT 'localhost:9200/location/_mapping/_doc' \
+curl --location --request PUT 'localhost:9200/location' \
 --header 'Content-Type: application/json' \
---data '@location.json'
+--data '<location_json_content>'
 ```
 
 Make sure to replace `location.json` with the name of the index JSON file for the corresponding index.
@@ -150,14 +150,14 @@ To create mappings for the listed indices, follow these steps:
 2. Replace `<indices_name>` with the name of the index for which you want to create the mapping.
 3. Replace `<respective_mapping_json_content>` with the JSON content you copied in step 1.
 
-Use the following command to create each mapping:
+Use the following api to create each mapping:
 
 ```
 PUT {{es_host}}/<indices_name>/_mapping/_doc 
 Body: <respective_mapping_json_content>
 ```
 
-Here's an example command for creating the mapping for the `location` index:
+Here's an example curl command for creating the mapping for the `location` index:
 
 ```
 curl --location --request PUT 'localhost:9200/location/_mapping/_doc' \
@@ -181,7 +181,7 @@ To set up the User Org service, follow the steps below:
 
 1. Clone the latest branch of the user-org service using the following command:
 ```shell
-git clone https://github.com/<YOUR_FORK>/sunbird-lms-service.git
+git clone https://github.com/Sunbird-Lern/sunbird-lms-service.git
 ```
 
 2. Set up the necessary environment variables by running the following script in the path `<project-base-path>/sunbird-lms-service`:
