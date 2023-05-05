@@ -1,4 +1,4 @@
-# Sunbird LMS Service
+# Sunbird User Org Service
 
 This repository contains the code for the User Org micro-service, providing the APIs for User and Org functionality of Sunbird. The code in this repository is licensed under the MIT License unless otherwise noted. Please see the [LICENSE](https://github.com/project-sunbird/sunbird-lms-service/blob/master/LICENSE) file for details.
 
@@ -136,13 +136,13 @@ curl --location --request PUT 'localhost:9200/location/_mapping/_doc' \
 
 Make sure to replace `location.json` with the name of the index JSON file for the corresponding index.
 
-   Here's the list of indices to create and their corresponding links:
+Here's the list of indices to create and their corresponding links:
 
-   - [user](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/userv3.json)
-   - [userfeed](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/userfeed.json)
-   - [usernotes](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/usernotes.json)
-   - [org](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/orgv3.json)
-   - [location](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/location.json)
+- [user](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/userv3.json)
+- [userfeed](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/userfeed.json)
+- [usernotes](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/usernotes.json)
+- [org](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/orgv3.json)
+- [location](https://github.com/project-sunbird/sunbird-devops/blob/release-5.3.0-lern/ansible/roles/es-mapping/files/indices/location.json)
 
 To create mappings for the listed indices, follow these steps:
 
@@ -193,7 +193,7 @@ git clone https://github.com/<YOUR_FORK>/sunbird-lms-service.git
 ```shell
 mvn clean install -DskipTests
 ```
-Make sure the build is successful before proceeding to the next step. If the build is not successful, 
+Make sure the build is successful before proceeding to the next step. If the build is not successful,
 fix any configuration issues and rebuild the application.
 
 4. Run the netty server using the following maven command in the path `<project-base-path>/sunbird-lms-service/controller`:
@@ -207,5 +207,5 @@ curl --location --request GET 'http://localhost:9000/health’
 ```
 If all connections are established successfully, the health status will be shown as 'true', otherwise it will be 'false'.
 
-To make the User/Org service completely working, some pre-required configuration setup is mandatory. 
+To make the User/Org service completely working, some pre-required configuration setup is mandatory.
 Follow the steps given in the link [pre-required configuration setup](https://github.com/Sunbird-Lern/sunbird-lms-service/blob/release-5.3.0/lernsetup.md) to complete the setup.
