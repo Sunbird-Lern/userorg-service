@@ -83,12 +83,12 @@ docker pull elasticsearch:6.8.11
 2. Create an Elastic Search instance by executing the following command to run it in a container:
 
 ```shell
-docker run -p 9200:9200 --name <container_name> \
- -v <host_directory_path>/es/data:/usr/share/elasticsearch/data \
- -v <host_directory_path>/es/logs://usr/share/elasticsearch/logs \
- -v <host_directory_path>/es/backups:/opt/elasticsearch/backup \
- -e "discovery.type=single-node" --network <network_name> \
- -d docker.elastic.co/elasticsearch/elasticsearch:6.8.11
+docker run -p 9200:9200 --name sunbird_es -v 
+$sunbird_dbs_path/es/data:/usr/share/elasticsearch/data -v 
+$sunbird_dbs_path/es/logs://usr/share/elasticsearch/logs -v 
+$sunbird_dbs_path/es/backups:/opt/elasticsearch/backup 
+-e "discovery.type=single-node" --network sunbird_db_network 
+-d docker.elastic.co/elasticsearch/elasticsearch:6.8.11
 ```
 
 The above command performs the following actions:
