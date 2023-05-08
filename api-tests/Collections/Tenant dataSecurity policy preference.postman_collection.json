@@ -1,0 +1,169 @@
+{
+	"info": {
+		"_postman_id": "9c690637-418e-4678-a2aa-afd951d00278",
+		"name": "Tenant dataSecurity policy preference",
+		"description": "Collection contains APIs used for setting up data security policy.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "read",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"description": "The Content Type entity is the media type of the resource. Possible media types can be application/json."
+					},
+					{
+						"key": "X-Authenticated-User-token",
+						"value": "{{keycloak_access_token}}",
+						"type": "text",
+						"description": "Represents the authorized User ID to execute the API."
+					},
+					{
+						"key": "Authorization",
+						"value": "{{kong_api_key}}",
+						"type": "text",
+						"description": "To make use of the API, you require authorization. Raise a request to the administrator for the use of the API. You will receive the authorization key. Specify the key received, here."
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"request\": {\n        \"orgId\": \"0137815693126451201\",\n        \"key\": \"dataSecurityPolicy\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/org/v2/preferences/read",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"org",
+						"v2",
+						"preferences",
+						"read"
+					]
+				},
+				"description": "API will return tenant specific data policy security settings if available else will return default (orgId: default) data policy security settings."
+			},
+			"response": []
+		},
+		{
+			"name": "update ",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Authenticated-User-token",
+						"value": "{{keycloak_access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{kong_api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"request\": {\n        \"orgId\": \"0137815693126451201\",\n        \"key\": \"dataSecurityPolicy\",\n        \"data\": {\n            \"level\": \"L1\",\n            \"dataEncrypted\": \"No\",\n            \"comments\": \"Data is not encrypted\",\n            \"job\": {\n                    \"progress-exhaust\": {\n                        \"level\": \"L1\",\n                        \"dataEncrypted\": \"No\",\n                        \"comments\": \"Password protected file.\"\n                    },\n                    \"response-exhaust\": {\n                        \"level\": \"L3\",\n                        \"dataEncrypted\": \"No\",\n                        \"comments\": \"Password protected file.\"\n                    },\n                    \"userinfo-exhaust\": {\n                        \"level\": \"L2\",\n                        \"dataEncrypted\": \"No\",\n                        \"comments\": \"Password protected file.\"\n                    }\n                },\n            \"securityLevels\": {\n                \"L1\": \"Data is present in plain text/zip. Generally applicable to open datasets.\",\n                \"L2\": \"Password protected zip file. Generally applicable to non PII data sets but can contain sensitive information which may not be considered open.\",\n                \"L3\": \"Data encrypted with a user provided encryption key. Generally applicable to non PII data but can contain sensitive information which may not be considered open.\",\n                \"L4\": \"Data encrypted via an org provided public/private key. Generally applicable to all PII data exhaust.\"\n            }\n        }\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api/org/v2/preferences/update",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"org",
+						"v2",
+						"preferences",
+						"update"
+					]
+				},
+				"description": "API used to update data security policy settings"
+			},
+			"response": []
+		},
+		{
+			"name": "create",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-Authenticated-User-token",
+						"value": "{{keycloak_access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{kong_api_key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"request\": {\n        \"orgId\": \"default\",\n        \"key\": \"dataSecurityPolicy\",\n        \"data\": {\n            \"level\": \"L1\",\n            \"dataEncrypted\": \"No\",\n            \"comments\": \"Data is not encrypted\",\n            \"job\": {\n                    \"progress-exhaust\": {\n                        \"level\": \"L2\",\n                        \"dataEncrypted\": \"No\",\n                        \"comments\": \"Password protected file.\"\n                    },\n                    \"response-exhaust\": {\n                        \"level\": \"L2\",\n                        \"dataEncrypted\": \"No\",\n                        \"comments\": \"Password protected file.\"\n                    },\n                    \"userinfo-exhaust\": {\n                        \"level\": \"L2\",\n                        \"dataEncrypted\": \"No\",\n                        \"comments\": \"Password protected file.\"\n                    }\n                },\n            \"securityLevels\": {\n                \"L1\": \"Data is present in plain text/zip. Generally applicable to open datasets.\",\n                \"L2\": \"Password protected zip file. Generally applicable to non PII data sets but can contain sensitive information which may not be considered open.\",\n                \"L3\": \"Data encrypted with a user provided encryption key. Generally applicable to non PII data but can contain sensitive information which may not be considered open.\",\n                \"L4\": \"Data encrypted via an org provided public/private key. Generally applicable to all PII data exhaust.\"\n            }\n        }\n    }\n}"
+				},
+				"url": {
+					"raw": "{{host}}/api/org/v2/preferences/create",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api",
+						"org",
+						"v2",
+						"preferences",
+						"create"
+					]
+				},
+				"description": "API used to create data security policy settings"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
