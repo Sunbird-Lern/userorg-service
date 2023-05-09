@@ -62,8 +62,8 @@ sunbird_sso_client_secret: ""
 ## These are standard defaults that work well
 ## You can override these if you have a use case for it
 ENV_NAME: dev
-PORTAL_SERVICE_PORT: http://player.ed.svc.cluster.local:3000
-SUNBIRD_KAFKA_URL: http://kafka.lern.svc.cluster.local:9092
+PORTAL_SERVICE_PORT: http://player.dev.svc.cluster.local:3000
+SUNBIRD_KAFKA_URL: http://kafka.dev.svc.cluster.local:9092
 accesstoken:
   publickey:
     basepath: /keys/
@@ -71,31 +71,31 @@ actor_hostname: actor-service
 api_actor_provider: local
 background_actor_provider: local
 bind_hostname: 0.0.0.0
-ekstep_api_base_url: http://learning.knowlg.svc.cluster.local:8080/learning-service
+ekstep_api_base_url: http://learning.dev.svc.cluster.local:8080/learning-service
 feed_limit: 30
 form_api_endpoint: /plugin/v1/form/read
 isMultiDCEnabled: false
-kafka_urls: http://kafka.lern.svc.cluster.local:9092
+kafka_urls: http://kafka.dev.svc.cluster.local:9092
 learner_in_memory_cache_ttl: 600
-notification_service_base_url: http://notification-service.lern.svc.cluster.local:9000
+notification_service_base_url: http://notification-service.dev.svc.cluster.local:9000
 org_index_alias: org_alias
 quartz_shadow_user_migration_timer: 0 0 1 1/1 * ? *
-sunbird_analytics_api_base_url: http://analytics-service.obsrv.svc.cluster.local:9000
-sunbird_api_base_url: http://knowledge-mw-service.knowlg.svc.cluster.local:5000
-sunbird_api_mgr_base_url: http://knowledge-mw-service.knowlg.svc.cluster.local:5000
+sunbird_analytics_api_base_url: http://analytics-service.dev.svc.cluster.local:9000
+sunbird_api_base_url: http://knowledge-mw-service.dev.svc.cluster.local:5000
+sunbird_api_mgr_base_url: http://knowledge-mw-service.dev.svc.cluster.local:5000
 sunbird_app_name: sunbird
 sunbird_cache_enable: true
 sunbird_cassandra_consistency_level: local_quorum
-sunbird_cassandra_host: cassandra.lern.svc.cluster.local
+sunbird_cassandra_host: cassandra.dev.svc.cluster.local
 sunbird_cassandra_password: passwod
 sunbird_cassandra_port: 9042
 sunbird_cassandra_username: admin
-sunbird_cert_service_base_url: http://cert-service.lern.svc.cluster.local:9000
+sunbird_cert_service_base_url: http://cert-service.dev.svc.cluster.local:9000
 ## Storage bucket name where the contents are stores
 sunbird_content_azure_storage_container: contents
 sunbird_course_batch_notification_enabled: true
 sunbird_course_batch_notification_signature: sunbird
-sunbird_cs_base_url: http://knowledge-mw-service.knowlg.svc.cluster.local:5000
+sunbird_cs_base_url: http://knowledge-mw-service.dev.svc.cluster.local:5000
 sunbird_cs_search_path: /v1/content/search
 sunbird_default_channel: sunbird
 sunbird_email_max_recipients_limit: 100
@@ -103,7 +103,7 @@ sunbird_encryption_key: encryptionkey
 sunbird_encryption_mode: local
 sunbird_env_logo_url: ""
 sunbird_environment: dev
-sunbird_es_host: http://elasticsearch.lern.svc.cluster.local
+sunbird_es_host: http://elasticsearch.dev.svc.cluster.local
 sunbird_es_port: 9300
 sunbird_fuzzy_search_threshold: 0.5
 sunbird_gzip_enable: true
@@ -122,18 +122,18 @@ sunbird_otp_allowed_attempt: 2
 sunbird_otp_expiration: 1800
 sunbird_otp_length: 6
 sunbird_pg_db: quartz
-sunbird_pg_host: postgresql.lern.svc.cluster.local
+sunbird_pg_host: postgresql.dev.svc.cluster.local
 sunbird_pg_port: 5432
 sunbird_quartz_mode: cluster
-sunbird_redis_host: redis.lern.svc.cluster.local
+sunbird_redis_host: redis.dev.svc.cluster.local
 sunbird_redis_port: 6379
-sunbird_registry_service_baseurl: http://registry-service.registry.svc.cluster.local:8081/
+sunbird_registry_service_baseurl: http://registry-service.dev.svc.cluster.local:8081/
 sunbird_remote_bg_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/user/BackgroundRequestRouter
 sunbird_remote_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
 sunbird_reset_pass_msg: 'You have requested to reset password. Click on the link to set a password: {0}'
-sunbird_search_service_api_base_url: http://search-service.knowlg.svc.cluster.local:9000
-sunbird_sso_lb_ip: http://keycloak.lern.svc.cluster.local:8080
-sunbird_telemetry_base_url: http://telemetry-service.obsrv.svc.cluster.local:9001
+sunbird_search_service_api_base_url: http://search-service.dev.svc.cluster.local:9000
+sunbird_sso_lb_ip: http://keycloak.dev.svc.cluster.local:8080
+sunbird_telemetry_base_url: http://telemetry-service.dev.svc.cluster.local:9001
 sunbird_time_zone: Asia/Kolkata
 sunbird_url_shortner_enable: false
 sunbird_user_bulk_upload_size: 1001

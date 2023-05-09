@@ -120,8 +120,12 @@ spec:
         configMap:
           name: {{ .Chart.Name }}-logback-config
       - name: {{ .Values.external_configmaps.access_public_keys.name }}
-        secret:
-          secretName: {{ .Values.external_configmaps.access_public_keys.name }}
+        projected:
+          sources:
+          - secret:
+              name: {{ .Values.external_configmaps.access_public_keys.name }}
+          - secret:
+              name: keycloak-public-key    
 {{- if .Values.opa_sidecar }}
       - name: {{ .Chart.Name }}-envoy-config
         configMap:
@@ -134,5 +138,5 @@ spec:
           - configMap:
               name: {{ .Values.external_configmaps.common_opa_policies.name }}
           - configMap:
-              name: {{ .Chart.Name }}-opa-policies
+              name: {{ .Chart.Name }}-opa-policies   
 {{- end }}
