@@ -103,7 +103,7 @@ sunbird_encryption_key: encryptionkey
 sunbird_encryption_mode: local
 sunbird_env_logo_url: ""
 sunbird_environment: dev
-sunbird_es_host: http://elasticsearch.dev.svc.cluster.local
+sunbird_es_host: elasticsearch.dev.svc.cluster.local
 sunbird_es_port: 9300
 sunbird_fuzzy_search_threshold: 0.5
 sunbird_gzip_enable: true
