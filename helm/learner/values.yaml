@@ -87,7 +87,7 @@ sunbird_app_name: sunbird
 sunbird_cache_enable: true
 sunbird_cassandra_consistency_level: local_quorum
 sunbird_cassandra_host: cassandra.dev.svc.cluster.local
-sunbird_cassandra_password: passwod
+sunbird_cassandra_password: password
 sunbird_cassandra_port: 9042
 sunbird_cassandra_username: admin
 sunbird_cert_service_base_url: http://cert-service.dev.svc.cluster.local:9000

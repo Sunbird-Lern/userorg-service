@@ -43,7 +43,7 @@ data:
 
   sunbird_authorization: {{ $sunbird_authorization  }}
 
- sunbird_sso_url: {{ if .Values.domain }}
+  sunbird_sso_url: {{ if .Values.domain }}
   {{- printf "https://%s" .Values.domain }}{{ .Values.keycloak_auth_endpoint }}
   {{- else -}}
   {{- printf "ERROR | %s | Please provide a value for \"domain\"" .Chart.Name | fail }}
