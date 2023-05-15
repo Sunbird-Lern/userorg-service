@@ -643,11 +643,11 @@ public final class JsonKey {
   public static final String DEFAULT = "default";
   public static final String DATA_SECURITY_POLICY = "dataSecurityPolicy";
   public static final String JOB = "job";
-  public static final String LEVEL_CHAR = "L";
-  public static final String LEVEL_1 = "L1";
-  public static final String LEVEL_2 = "L2";
-  public static final String LEVEL_3 = "L3";
-  public static final String LEVEL_4 = "L4";
+  public static final String PLAIN_DATASET = "PLAIN_DATASET";
+  public static final String PASSWORD_PROTECTED_DATASET = "PASSWORD_PROTECTED_DATASET";
+  public static final String PASSWORD_PROTECTED_ENCRYPTED_DATASET =
+      "PASSWORD_PROTECTED_ENCRYPTED_DATASET";
+  public static final String KEY_PROTECTED_ENCRYPTED_DATASET = "KEY_PROTECTED_ENCRYPTED_DATASET";
 
   private JsonKey() {}
 }
