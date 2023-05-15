@@ -36,6 +36,10 @@ echo $sunbird_dbs_path
 ```shell
 docker pull cassandra:3.11.6 
 ```
+For Mac M1 users follow the bellow command:
+```shell
+docker pull --platform=linux/amd64 cassandra:3.11.6 
+```
 
 For the network, you can either use an existing network or create a new one by executing the following command:
 ```shell
@@ -46,6 +50,14 @@ docker network create sunbird_db_network
 
 ```shell
 docker run -p 9042:9042 --name sunbird_cassandra \
+ -v $sunbird_dbs_path/cassandra/data:/var/lib/cassandra \
+ -v $sunbird_dbs_path/cassandra/logs:/opt/cassandra/logs \
+ -v $sunbird_dbs_path/cassandra/backups:/mnt/backups \
+ --network sunbird_db_network -d cassandra:3.11.6 
+```
+For Mac M1 users follow the below command:
+```shell
+docker run --platform=linux/amd64 -p 9042:9042 --name sunbird_cassandra \
  -v $sunbird_dbs_path/cassandra/data:/var/lib/cassandra \
  -v $sunbird_dbs_path/cassandra/logs:/opt/cassandra/logs \
  -v $sunbird_dbs_path/cassandra/backups:/mnt/backups \
@@ -80,10 +92,25 @@ To set up Elastic Search in Docker, follow the below steps:
 docker pull elasticsearch:6.8.11
 ```
 
+For Mac M1 users follow the bellow command:
+```shell
+docker pull --platform=linux/amd64 elasticsearch:6.8.11
+```
+
 2. Create an Elastic Search instance by executing the following command to run it in a container:
 
 ```shell
 docker run -p 9200:9200 --name sunbird_es -v 
+$sunbird_dbs_path/es/data:/usr/share/elasticsearch/data -v 
+$sunbird_dbs_path/es/logs://usr/share/elasticsearch/logs -v 
+$sunbird_dbs_path/es/backups:/opt/elasticsearch/backup 
+-e "discovery.type=single-node" --network sunbird_db_network 
+-d docker.elastic.co/elasticsearch/elasticsearch:6.8.11
+```
+
+For Mac M1 users follow the bellow command::
+```shell
+docker run --platform=linux/amd64 -p 9200:9200 --name sunbird_es -v 
 $sunbird_dbs_path/es/data:/usr/share/elasticsearch/data -v 
 $sunbird_dbs_path/es/logs://usr/share/elasticsearch/logs -v 
 $sunbird_dbs_path/es/backups:/opt/elasticsearch/backup 
