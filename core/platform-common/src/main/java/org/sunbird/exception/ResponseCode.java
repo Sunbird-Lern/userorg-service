@@ -167,6 +167,17 @@ public enum ResponseCode {
       ResponseMessage.Key.INVALID_FILE_EXTENSION, ResponseMessage.Message.INVALID_FILE_EXTENSION),
   invalidEncryptionFile(
       ResponseMessage.Key.INVALID_ENCRYPTION_FILE, ResponseMessage.Message.INVALID_ENCRYPTION_FILE),
+  invalidSecurityLevel(
+      ResponseMessage.Key.INVALID_SECURITY_LEVEL, ResponseMessage.Message.INVALID_SECURITY_LEVEL),
+  invalidSecurityLevelLower(
+      ResponseMessage.Key.INVALID_SECURITY_LEVEL_LOWER,
+      ResponseMessage.Message.INVALID_SECURITY_LEVEL_LOWER),
+  defaultSecurityLevelConfigMissing(
+      ResponseMessage.Key.MISSING_DEFAULT_SECURITY_LEVEL,
+      ResponseMessage.Message.MISSING_DEFAULT_SECURITY_LEVEL),
+  invalidTenantSecurityLevelLower(
+      ResponseMessage.Key.INVALID_TENANT_SECURITY_LEVEL_LOWER,
+      ResponseMessage.Message.INVALID_TENANT_SECURITY_LEVEL_LOWER),
   OK(200),
   SUCCESS(200),
   CLIENT_ERROR(400),
