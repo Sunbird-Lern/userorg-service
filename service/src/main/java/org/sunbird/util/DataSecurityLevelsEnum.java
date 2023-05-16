@@ -1,12 +1,11 @@
 package org.sunbird.util;
 
-
 /** DataSecurityLevelsEnum provides all the levels of data security */
 public enum DataSecurityLevelsEnum {
-  L1(1),
-  L2(2),
-  L3(3),
-  L4(4);
+  PLAIN_DATASET(1),
+  PASSWORD_PROTECTED_DATASET(2),
+  TEXT_KEY_ENCRYPTED_DATASET(3),
+  PUBLIC_KEY_ENCRYPTED_DATASET(4);
 
   private int dataSecurityLevelValue;
 
