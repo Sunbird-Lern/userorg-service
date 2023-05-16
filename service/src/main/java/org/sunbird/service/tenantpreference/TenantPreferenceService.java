@@ -239,7 +239,7 @@ public class TenantPreferenceService {
 
       String strJobLevel = jobConfig.get(JsonKey.LEVEL);
 
-      if (!!dataSecurityLevels.contains(strJobLevel)) {
+      if (!dataSecurityLevels.contains(strJobLevel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidSecurityLevel,
             MessageFormat.format(
