@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
@@ -17,6 +18,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataSecurityLevelsEnum;
 import org.sunbird.util.ProjectUtil;
 
 public class TenantPreferenceService {
@@ -25,7 +27,7 @@ public class TenantPreferenceService {
   private final ObjectMapper mapper = new ObjectMapper();
   private final TenantPreferenceDao preferenceDao = TenantPreferenceDaoImpl.getInstance();
   private final List<String> dataSecurityLevels =
-      Arrays.asList(JsonKey.LEVEL_1, JsonKey.LEVEL_2, JsonKey.LEVEL_3, JsonKey.LEVEL_4);
+      Stream.of(DataSecurityLevelsEnum.values()).map(Enum::name).collect(Collectors.toList());
 
   public Map<String, Object> validateAndGetTenantPreferencesById(
       String orgId, String key, String operationType, RequestContext context) {
@@ -279,8 +281,8 @@ public class TenantPreferenceService {
   }
 
   private boolean compareSecurityLevel(String strFromLevel, String strToLevel) {
-    int iFromLevel = Integer.parseInt(strFromLevel.replace(JsonKey.LEVEL_CHAR, ""));
-    int iToLevel = Integer.parseInt(strToLevel.replace(JsonKey.LEVEL_CHAR, ""));
+    int iFromLevel = DataSecurityLevelsEnum.valueOf(strFromLevel).getDataSecurityLevelValue();
+    int iToLevel = DataSecurityLevelsEnum.valueOf(strToLevel).getDataSecurityLevelValue();
     return iFromLevel < iToLevel;
   }
 
