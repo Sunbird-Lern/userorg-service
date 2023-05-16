@@ -44,7 +44,8 @@ public class TenantPreferenceManagementActor extends BaseActor {
         context, "TenantPreferenceManagementActor:getTenantPreference called for org: " + orgId);
     String key = (String) actorMessage.getRequest().get(JsonKey.KEY);
     Map<String, Object> orgPref = null;
-    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY))
+    if (key.equalsIgnoreCase(JsonKey.DATA_SECURITY_POLICY)
+        || key.equalsIgnoreCase(JsonKey.USER_PRIVATE_FIELDS))
       orgPref = preferenceService.getDataSecurityPolicyPref(orgId, key, context);
     else
       orgPref =
