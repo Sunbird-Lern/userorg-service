@@ -17,6 +17,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.DataSecurityLevelsEnum;
 import org.sunbird.util.ProjectUtil;
 
 public class TenantPreferenceService {
@@ -24,15 +25,6 @@ public class TenantPreferenceService {
   private final LoggerUtil logger = new LoggerUtil(TenantPreferenceService.class);
   private final ObjectMapper mapper = new ObjectMapper();
   private final TenantPreferenceDao preferenceDao = TenantPreferenceDaoImpl.getInstance();
-  private final Map<String, Integer> dataSecurityLevelsMap =
-      new HashMap<>() {
-        {
-          put(JsonKey.PLAIN_DATASET, 1);
-          put(JsonKey.PASSWORD_PROTECTED_DATASET, 2);
-          put(JsonKey.PASSWORD_PROTECTED_ENCRYPTED_DATASET, 3);
-          put(JsonKey.KEY_PROTECTED_ENCRYPTED_DATASET, 4);
-        }
-      };
 
   public Map<String, Object> validateAndGetTenantPreferencesById(
       String orgId, String key, String operationType, RequestContext context) {
@@ -164,7 +156,7 @@ public class TenantPreferenceService {
           }
 
           String ipJobSecurityLevel = jobConfig.get(JsonKey.LEVEL);
-          if (!dataSecurityLevelsMap.keySet().contains(ipJobSecurityLevel)) {
+          if (!Arrays.asList(DataSecurityLevelsEnum.values()).contains(ipJobSecurityLevel)) {
             throw new ProjectCommonException(
                 ResponseCode.invalidSecurityLevel,
                 MessageFormat.format(
@@ -244,7 +236,7 @@ public class TenantPreferenceService {
 
       String strJobLevel = jobConfig.get(JsonKey.LEVEL);
 
-      if (!dataSecurityLevelsMap.keySet().contains(strJobLevel)) {
+      if (!!Arrays.asList(DataSecurityLevelsEnum.values()).contains(strJobLevel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidSecurityLevel,
             MessageFormat.format(
@@ -286,8 +278,8 @@ public class TenantPreferenceService {
   }
 
   private boolean compareSecurityLevel(String strFromLevel, String strToLevel) {
-    int iFromLevel = dataSecurityLevelsMap.get(strFromLevel);
-    int iToLevel = dataSecurityLevelsMap.get(strToLevel);
+    int iFromLevel = DataSecurityLevelsEnum.valueOf(strFromLevel).getDataSecurityLevelValue();
+    int iToLevel = DataSecurityLevelsEnum.valueOf(strToLevel).getDataSecurityLevelValue();
     return iFromLevel < iToLevel;
   }
 
