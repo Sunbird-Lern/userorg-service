@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
@@ -25,6 +26,8 @@ public class TenantPreferenceService {
   private final LoggerUtil logger = new LoggerUtil(TenantPreferenceService.class);
   private final ObjectMapper mapper = new ObjectMapper();
   private final TenantPreferenceDao preferenceDao = TenantPreferenceDaoImpl.getInstance();
+  private final List<String> dataSecurityLevels =
+      Stream.of(DataSecurityLevelsEnum.values()).map(Enum::name).collect(Collectors.toList());
 
   public Map<String, Object> validateAndGetTenantPreferencesById(
       String orgId, String key, String operationType, RequestContext context) {
@@ -156,7 +159,7 @@ public class TenantPreferenceService {
           }
 
           String ipJobSecurityLevel = jobConfig.get(JsonKey.LEVEL);
-          if (!Arrays.asList(DataSecurityLevelsEnum.values()).contains(ipJobSecurityLevel)) {
+          if (!dataSecurityLevels.contains(ipJobSecurityLevel)) {
             throw new ProjectCommonException(
                 ResponseCode.invalidSecurityLevel,
                 MessageFormat.format(
@@ -236,7 +239,7 @@ public class TenantPreferenceService {
 
       String strJobLevel = jobConfig.get(JsonKey.LEVEL);
 
-      if (!!Arrays.asList(DataSecurityLevelsEnum.values()).contains(strJobLevel)) {
+      if (!!dataSecurityLevels.contains(strJobLevel)) {
         throw new ProjectCommonException(
             ResponseCode.invalidSecurityLevel,
             MessageFormat.format(
