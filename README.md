@@ -13,6 +13,7 @@ This readme file provides instructions for installing and starting the User Org 
 - Java 11
 - Latest Docker
 - Latest Maven
+  (Only For Mac m1 users use 3.8.8 Maven version)
 
 ### Prepare folders for database data and logs
 
