@@ -46,8 +46,16 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/create", var);
     apiHeaderIgnoreMap.put("/v2/user/create", var);
     apiHeaderIgnoreMap.put("/v2/org/search", var);
+    apiHeaderIgnoreMap.put("/v2/org/preferences/read", var);
     apiHeaderIgnoreMap.put("/v3/user/create", var);
     apiHeaderIgnoreMap.put("/v1/user/signup", var);
+    apiHeaderIgnoreMap.put("/v1/org/create", var);
+    apiHeaderIgnoreMap.put("/v1/system/settings/set", var);
+    apiHeaderIgnoreMap.put("/v1/org/update/encryptionkey", var);
+    apiHeaderIgnoreMap.put("/v2/org/preferences/create", var);
+    apiHeaderIgnoreMap.put("/v2/org/preferences/update", var);
+
+    apiHeaderIgnoreMap.put("/v1/org/assign/key", var);
     apiHeaderIgnoreMap.put("/v2/user/signup", var);
     apiHeaderIgnoreMap.put("/v1/ssouser/create", var);
     apiHeaderIgnoreMap.put("/v1/org/search", var);
@@ -83,6 +91,8 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/user/role/read", var);
     apiHeaderIgnoreMap.put("/private/user/v1/lookup", var);
     apiHeaderIgnoreMap.put("/private/user/feed/v1/create", var);
+    apiHeaderIgnoreMap.put("/private/v2/org/search", var);
+    apiHeaderIgnoreMap.put("/private/v2/org/preferences/read", var);
   }
 
   private static String getUserRequestedFor(Http.Request request) {

@@ -163,6 +163,21 @@ public enum ResponseCode {
   invalidConsentStatus(
       ResponseMessage.Key.INVALID_CONSENT_STATUS, ResponseMessage.Message.INVALID_CONSENT_STATUS),
   serverError(ResponseMessage.Key.SERVER_ERROR, ResponseMessage.Message.SERVER_ERROR),
+  invalidFileExtension(
+      ResponseMessage.Key.INVALID_FILE_EXTENSION, ResponseMessage.Message.INVALID_FILE_EXTENSION),
+  invalidEncryptionFile(
+      ResponseMessage.Key.INVALID_ENCRYPTION_FILE, ResponseMessage.Message.INVALID_ENCRYPTION_FILE),
+  invalidSecurityLevel(
+      ResponseMessage.Key.INVALID_SECURITY_LEVEL, ResponseMessage.Message.INVALID_SECURITY_LEVEL),
+  invalidSecurityLevelLower(
+      ResponseMessage.Key.INVALID_SECURITY_LEVEL_LOWER,
+      ResponseMessage.Message.INVALID_SECURITY_LEVEL_LOWER),
+  defaultSecurityLevelConfigMissing(
+      ResponseMessage.Key.MISSING_DEFAULT_SECURITY_LEVEL,
+      ResponseMessage.Message.MISSING_DEFAULT_SECURITY_LEVEL),
+  invalidTenantSecurityLevelLower(
+      ResponseMessage.Key.INVALID_TENANT_SECURITY_LEVEL_LOWER,
+      ResponseMessage.Message.INVALID_TENANT_SECURITY_LEVEL_LOWER),
   OK(200),
   SUCCESS(200),
   CLIENT_ERROR(400),
@@ -175,9 +190,12 @@ public enum ResponseCode {
   SERVICE_UNAVAILABLE(503),
   PARTIAL_SUCCESS_RESPONSE(206),
   IM_A_TEAPOT(418),
-  extendUserProfileNotLoaded(ResponseMessage.Key.EXTENDED_USER_PROFILE_NOT_LOADED,
-                             ResponseMessage.Message.EXTENDED_USER_PROFILE_NOT_LOADED),
-  roleProcessingInvalidOrgError(ResponseMessage.Key.ROLE_PROCESSING_INVALID_ORG, ResponseMessage.Message.ROLE_PROCESSING_INVALID_ORG);
+  extendUserProfileNotLoaded(
+      ResponseMessage.Key.EXTENDED_USER_PROFILE_NOT_LOADED,
+      ResponseMessage.Message.EXTENDED_USER_PROFILE_NOT_LOADED),
+  roleProcessingInvalidOrgError(
+      ResponseMessage.Key.ROLE_PROCESSING_INVALID_ORG,
+      ResponseMessage.Message.ROLE_PROCESSING_INVALID_ORG);
   private int responseCode;
   /** error code contains String value */
   private String errorCode;
