@@ -63,7 +63,7 @@ sunbird_sso_client_secret: ""
 ## You can override these if you have a use case for it
 ENV_NAME: dev
 PORTAL_SERVICE_PORT: http://player.dev.svc.cluster.local:3000
-SUNBIRD_KAFKA_URL: http://kafka.dev.svc.cluster.local:9092
+SUNBIRD_KAFKA_URL: kafka.dev.svc.cluster.local:9092
 accesstoken:
   publickey:
     basepath: /keys/
@@ -75,11 +75,11 @@ ekstep_api_base_url: http://learning-service.dev.svc.cluster.local:8080/learning
 feed_limit: 30
 form_api_endpoint: /plugin/v1/form/read
 isMultiDCEnabled: false
-kafka_urls: http://kafka.dev.svc.cluster.local:9092
+kafka_urls: kafka.dev.svc.cluster.local:9092
 learner_in_memory_cache_ttl: 600
 notification_service_base_url: http://notification-service.dev.svc.cluster.local:9000
 org_index_alias: org_alias
-quartz_shadow_user_migration_timer: 0 0 1 1/1 * ? *
+quartz_shadow_user_migration_timer: 0 0/10 * 1/1 * ? *
 sunbird_analytics_api_base_url: http://analytics-service.dev.svc.cluster.local:9000
 sunbird_api_base_url: http://knowledge-mw-service.dev.svc.cluster.local:5000
 sunbird_api_mgr_base_url: http://knowledge-mw-service.dev.svc.cluster.local:5000
@@ -92,7 +92,7 @@ sunbird_cassandra_port: 9042
 sunbird_cassandra_username: admin
 sunbird_cert_service_base_url: http://cert-service.dev.svc.cluster.local:9000
 ## Storage bucket name where the contents are stores
-sunbird_content_azure_storage_container: contents
+sunbird_content_azure_storage_container: sunbird-contents-dev
 sunbird_course_batch_notification_enabled: true
 sunbird_course_batch_notification_signature: sunbird
 sunbird_cs_base_url: http://knowledge-mw-service.dev.svc.cluster.local:5000
@@ -137,12 +137,13 @@ sunbird_telemetry_base_url: http://telemetry-service.dev.svc.cluster.local:9001
 sunbird_time_zone: Asia/Kolkata
 sunbird_url_shortner_enable: false
 sunbird_user_bulk_upload_size: 1001
-sunbird_user_cert_kafka_topic: cert
+sunbird_user_cert_kafka_topic: lms.user.account.merge
 sunbird_user_profile_field_default_visibility: private
 telemetry_pdata_id: learner
 telemetry_pdata_pid: learner-service
 telemetry_queue_threshold_value: 100
 user_index_alias: user_alias
+sunbird_badger_baseurl: http://badger-service:8004
 
 
 ## Variables that can be deprecated

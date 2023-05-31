@@ -50,7 +50,7 @@ data:
   {{- end }}
 
   sunbird_web_url: {{ if .Values.domain }}
-  {{- .Values.domain }}
+  {{- printf "https://%s" .Values.domain }}
   {{- else -}}
   {{- printf "ERROR | %s | Please provide a value for \"domain\"" .Chart.Name | fail }}
   {{- end }}
@@ -181,7 +181,7 @@ data:
   sunbird_sso_publickey: {{ $sunbird_sso_publickey }}
 
   sunbird_subdomain_keycloak_base_url: {{ if .Values.domain }}
-  {{- .Values.merge_domain }}{{ .Values.keycloak_auth_endpoint }}
+  {{- printf "https://%s" .Values.merge_domain }}{{ .Values.keycloak_auth_endpoint }}
   {{- end }}
   google_captcha_mobile_private_key: {{ .Values.google_captcha_mobile_private_key | quote }}
   google_captcha_private_key: {{ .Values.google_captcha_private_key | quote }}
@@ -276,7 +276,7 @@ data:
   telemetry_pdata_pid: {{ .Values.telemetry_pdata_pid }}
   telemetry_queue_threshold_value: {{ .Values.telemetry_queue_threshold_value | quote }}
   user_index_alias: {{ .Values.user_index_alias }}
-
+  sunbird_badger_baseurl: {{ .Values.sunbird_badger_baseurl}}
 ---
 apiVersion: v1
 kind: ConfigMap
