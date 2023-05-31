@@ -231,7 +231,7 @@ readinessProbe:
   periodSeconds: 15
   timeoutSeconds: 5
 
-opa_sidecar: true
+opa_sidecar: false
 
 envoy_livenessProbe:
   failureThreshold: 2
