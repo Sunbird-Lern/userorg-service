@@ -33,7 +33,7 @@
     15. sunbird_pg_user: postgres db user name
     16. sunbird_pg_password: postgress db password 
     17. sunbird_installation
-    18. ekstep_api_base_url
+    18. sunbird_content_service_api_base_url
     19. sunbird_mail_server_host
     20. sunbird_mail_server_port
     21. sunbird_mail_server_username

@@ -12,34 +12,25 @@ import scala.Some;
 public class CloudStorageUtil {
   private static final int STORAGE_SERVICE_API_RETRY_COUNT = 3;
   private static final Map<String, IStorageService> storageServiceMap = new HashMap<>();
-  public static String upload(
-      String storageType, String container, String objectKey, String filePath) {
 
+  public static String upload(String storageType, String container, String objectKey, String filePath) {
     IStorageService storageService = getStorageService(storageType);
-
-    return storageService.upload(
-        container,
-        filePath,
-        objectKey,
-        Option.apply(false),
-        Option.apply(1),
-        Option.apply(STORAGE_SERVICE_API_RETRY_COUNT),
-        Option.empty());
+    return storageService.upload(container, filePath, objectKey, Option.apply(false), Option.apply(1), Option.apply(STORAGE_SERVICE_API_RETRY_COUNT), Option.empty());
   }
 
-  public static String getSignedUrl(
-          String storageType, String container, String objectKey) {
+  public static String getSignedUrl(String storageType, String container, String objectKey) {
     IStorageService storageService = getStorageService(storageType);
     return getSignedUrl(storageService, container, objectKey,storageType);
   }
 
-  public static String getSignedUrl(
-      IStorageService storageService,
-      String container,
-      String objectKey,String cloudType) {
+  public static String getSignedUrl(IStorageService storageService, String container, String objectKey,String cloudType) {
     int timeoutInSeconds = getTimeoutInSeconds();
-    return storageService.getSignedURLV2(
-        container, objectKey, Some.apply(timeoutInSeconds), Some.apply("r"), Some.apply("application/pdf"));
+    return storageService.getSignedURLV2(container, objectKey, Some.apply(timeoutInSeconds), Some.apply("r"), Some.apply("application/pdf"));
+  }
+
+  public static void deleteFile(String storageType, String container, String objectKey) {
+    IStorageService storageService = getStorageService(storageType);
+    storageService.deleteObject(container, objectKey, Option.apply(false));
   }
 
   private static IStorageService getStorageService(String storageType) {
@@ -48,15 +39,13 @@ public class CloudStorageUtil {
     return getStorageService(storageType, storageKey, storageSecret);
   }
 
-  private static IStorageService getStorageService(
-      String storageType, String storageKey, String storageSecret) {
+  private static IStorageService getStorageService(String storageType, String storageKey, String storageSecret) {
     String compositeKey = storageType + "-" + storageKey;
     if (storageServiceMap.containsKey(compositeKey)) {
       return storageServiceMap.get(compositeKey);
     }
     synchronized (CloudStorageUtil.class) {
-      StorageConfig storageConfig =
-          new StorageConfig(storageType, storageKey, storageSecret);
+      StorageConfig storageConfig =  new StorageConfig(storageType, storageKey, storageSecret);
       IStorageService storageService = StorageServiceFactory.getStorageService(storageConfig);
       storageServiceMap.put(compositeKey, storageService);
     }

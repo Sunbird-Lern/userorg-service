@@ -106,4 +106,22 @@ public class OrgController extends BaseController {
         ProjectUtil.EsType.organisation.getTypeName(),
         httpRequest);
   }
+
+  /**
+   * This method to upload the encryption keys on cloud storage and save the same in Org metadata.
+   *
+   * @return CompletionStage<Result>
+   */
+  public CompletionStage<Result> addKey(Http.Request httpRequest) {
+    Http.MultipartFormData body = httpRequest.body().asMultipartFormData();
+    return handleRequest(
+        organisationManagementActor,
+        ActorOperations.ADD_ENCRYPTION_KEY.getValue(),
+        orgRequest -> {
+          new OrgRequestValidator().validateEncryptionKeyRequest((Request) orgRequest, body);
+          return null;
+        },
+        getAllRequestHeaders(httpRequest),
+        httpRequest);
+  }
 }

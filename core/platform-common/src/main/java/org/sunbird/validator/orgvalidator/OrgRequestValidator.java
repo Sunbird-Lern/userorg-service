@@ -1,12 +1,26 @@
 package org.sunbird.validator.orgvalidator;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.spec.X509EncodedKeySpec;
 import java.text.MessageFormat;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
+import play.libs.Files;
+import play.mvc.Http.MultipartFormData;
+import play.mvc.Http.MultipartFormData.FilePart;
 
 public class OrgRequestValidator extends BaseOrgRequestValidator {
 
@@ -99,6 +113,96 @@ public class OrgRequestValidator extends BaseOrgRequestValidator {
               ResponseCode.errorAttributeConflict.getErrorMessage(),
               JsonKey.LOCATION_CODE,
               JsonKey.LOCATION_IDS));
+    }
+  }
+
+  public void validateEncryptionKeyRequest(Request reqObj, MultipartFormData body) {
+    Map<String, Object> map = new HashMap<>();
+    byte[] byteArray = null;
+    InputStream is = null;
+    try {
+      if (body != null) {
+        Map<String, String[]> data = body.asFormUrlEncoded();
+        for (Map.Entry<String, String[]> entry : data.entrySet()) {
+          map.put(entry.getKey(), entry.getValue()[0]);
+        }
+        List<FilePart<Files.TemporaryFile>> filePart = body.getFiles();
+        File f = filePart.get(0).getRef().path().toFile();
+
+        is = new FileInputStream(f);
+        byteArray = is.readAllBytes();
+
+        String fileName = filePart.get(0).getFilename();
+
+        validateFileExtension(fileName);
+        validatePublicKey(byteArray);
+
+        reqObj.getRequest().putAll(map);
+        map.put(JsonKey.FILE_NAME, fileName);
+        is.close();
+      } else {
+        throw new ProjectCommonException(
+            ResponseCode.invalidRequestData,
+            ResponseCode.invalidRequestData.getErrorMessage(),
+            ERROR_CODE);
+      }
+      map.put(JsonKey.FILE, byteArray);
+      HashMap<String, Object> innerMap = new HashMap<>();
+      innerMap.put(JsonKey.DATA, map);
+      reqObj.setRequest(innerMap);
+    } catch (Exception e) {
+      throw new ProjectCommonException(
+          (ProjectCommonException) e,
+          ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation()));
+    } finally {
+      if (is != null) {
+        try {
+          is.close();
+        } catch (IOException ignored) {
+        }
+      }
+    }
+  }
+
+  private void validatePublicKey(byte[] publicKeyBytes) {
+    try {
+      KeyFactory publicKeyFactory = KeyFactory.getInstance("RSA");
+      String publicKeyContent = new String(publicKeyBytes);
+      publicKeyContent =
+          publicKeyContent
+              .replaceAll("\\n", "")
+              .replace("-----BEGIN PUBLIC KEY-----", "")
+              .replace("-----END PUBLIC KEY-----", "");
+      X509EncodedKeySpec keySpecX509 =
+          new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyContent));
+      publicKeyFactory.generatePublic(keySpecX509);
+    } catch (Exception se) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidRequestData,
+          ResponseCode.invalidRequestData.getErrorMessage(),
+          ERROR_CODE);
+    }
+  }
+
+  private void validateFileExtension(String fileName) {
+    String fileExtension = "";
+
+    if (!StringUtils.isBlank(fileName)) {
+      String[] split = fileName.split("\\.");
+      if (split.length > 1) {
+        fileExtension = split[split.length - 1];
+      }
+      if (StringUtils.isBlank(fileExtension) || !fileExtension.equalsIgnoreCase("pem")) {
+        throw new ProjectCommonException(
+            ResponseCode.invalidFileExtension,
+            MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"),
+            ERROR_CODE);
+      }
+    } else {
+      throw new ProjectCommonException(
+          ResponseCode.invalidFileExtension,
+          MessageFormat.format(ResponseCode.invalidFileExtension.getErrorMessage(), "pem"),
+          ERROR_CODE);
     }
   }
 }

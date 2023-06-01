@@ -30,6 +30,7 @@ import modules.ApplicationStart;
 import modules.OnRequestHandler;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
@@ -183,6 +184,24 @@ public class BaseController extends Controller {
         headers,
         true,
         httpRequest);
+  }
+
+  protected CompletionStage<Result> handleRequest(
+          ActorRef actorRef,
+          String operation,
+          Function requestValidatorFn,
+          Map<String, String> headers,
+          Request httpRequest) {
+    return handleRequest(
+            actorRef,
+            operation,
+            null,
+            requestValidatorFn,
+            null,
+            null,
+            headers,
+            false,
+            httpRequest);
   }
 
   protected CompletionStage<Result> handleRequest(
@@ -534,7 +553,7 @@ public class BaseController extends Controller {
    */
   public Result createFileDownloadResponse(File file) {
     return Results.ok(file)
-        .withHeader("Content-Type", "application/x-download")
+        .withHeader(HttpHeaders.CONTENT_TYPE, "application/x-download")
         .withHeader("Content-disposition", "attachment; filename=" + file.getName());
   }
 

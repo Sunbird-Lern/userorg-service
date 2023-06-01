@@ -1,16 +1,19 @@
 package util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.client.utils.URIBuilder;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.util.ProjectUtil;
+
+import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CaptchaHelper {
   private static LoggerUtil logger = new LoggerUtil(CaptchaHelper.class);
@@ -34,8 +37,8 @@ public class CaptchaHelper {
     requestMap.put(JsonKey.RESPONSE, captcha);
     requestMap.put("secret", secret);
     Map<String, String> headers = new HashMap<>();
-    headers.put("Accept", "application/json");
-    headers.put("Content-type", "application/json");
+    headers.put(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+    headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
     try {
 
       url =
