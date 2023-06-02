@@ -18,8 +18,8 @@ cp -r spi $sunbird_dbs_path/keycloak
 
 echo "ls $sunbird_dbs_path/keycloak"
 
-docker network create keycloak-postgres-network
-docker run --name=kc_postgres \
+sudo docker network create keycloak-postgres-network
+sudo docker run --name=kc_postgres \
   --net keycloak-postgres-network \
   -e POSTGRES_PASSWORD=kcpgpassword \
   -e POSTGRES_USER=kcpgadmin \
@@ -30,7 +30,7 @@ docker run --name=kc_postgres \
 
 echo "postgres container created."
 
-docker run --name kc_local -p 8080:8080 \
+sudo docker run --name kc_local -p 8080:8080 \
         -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=sunbird \
         -v $sunbird_dbs_path/keycloak/tmp:/tmp \
         -v $sunbird_dbs_path/keycloak/realm:/opt/jboss/keycloak/imports \
@@ -43,19 +43,19 @@ docker run --name kc_local -p 8080:8080 \
 
 echo "keycloak container created."
 
-docker container restart kc_local
+sudo docker container restart kc_local
 
 echo "keycloak container restarted."
 
-docker cp themes/sunbird kc_local:/opt/jboss/keycloak/themes/sunbird
+sudo docker cp themes/sunbird kc_local:/opt/jboss/keycloak/themes/sunbird
 
 echo "sunbird themes copied to container."
 
-docker cp configuration/standalone-ha.xml kc_local:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+sudo docker cp configuration/standalone-ha.xml kc_local:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
 
 echo "sunbird configuration copied to container."
 
-docker container restart kc_local
+sudo docker container restart kc_local
 
 echo "keycloak container restarted after integrating sunbird realm, spi provider and themes."
 
