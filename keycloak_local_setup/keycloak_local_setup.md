@@ -50,19 +50,18 @@ psql postgresql://kcpgadmin:kcpgpassword@kc_postgres:5432/quartz
 CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_name varchar(200) NOT NULL, ping_data BYTEA, PRIMARY KEY (own_addr, cluster_name));
 ```
 
-7. To verify keycloak is running fine, login to keycloak using below url in browser. Use keycloak credentials mentioned in 'keycloak_docker.sh'.
+7. To verify if keycloak for sunbird is configured,
+   - login to keycloak ( http://localhost:8080/auth - use keycloak credentials mentioned in 'keycloak_docker.sh').
    - Check if 'Sunbird' realm is selected.
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
    - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu.
-```shell
-http://localhost:8080/auth
-```
+
 
 
 ### Shell script docker commands description
 
+Shell script contains docker commands to create postgres v11.2 database container and keycloak v7.0.1 container. It also has commands to copy sunbird keycloak artifacts viz SPI provider jar, themes, postgres driver module, realm and configuration changes to keycloak.
 
-The above command performs the following actions:
 - "-p 32769:5432" maps the host's port 32769 to the container's port 5432, allowing access to the postgres database.
 - "-p 8080:8080" maps the host's port 8080 to the container's port 8080, allowing access to the keycloak application. Update the host's port to unused port number if the '8080' port is already used by another application.
 - "--name <container_name>" assigns a name to the container, which can be used to reference it in other Docker commands.
@@ -74,4 +73,14 @@ The above command performs the following actions:
 - "-d" runs the container in detached mode, which allows it to run in the background.
 
 
+### Latest sunbird keycloak artifacts repositories
 
+- Themes: https://github.com/project-sunbird/sunbird-devops/tree/release-5.2.0/ansible/artifacts/sunbird
+- Module xml: https://github.com/project-sunbird/sunbird-devops/blob/release-5.2.0/ansible/roles/keycloak-deploy/templates/module.xml.j2
+- Standalone-ha.xml Configuration file: https://github.com/project-sunbird/sunbird-devops/blob/release-5.2.0/ansible/roles/keycloak-deploy/templates/standalone-ha.xml
+- SPI Provider: https://github.com/Sunbird-Lern/sunbird-auth/tree/release-3.8.0/keycloak/sms-provider
+- Realm: https://github.com/project-sunbird/sunbird-devops/blob/release-5.2.0/ansible/roles/keycloak-deploy/templates/keycloak-realm.j2
+
+
+### Understanding keycloak on Sunbird
+Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understanding keycloak on sunbird and user authentication flows.
