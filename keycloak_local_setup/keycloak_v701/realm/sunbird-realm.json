@@ -396,7 +396,7 @@
     {
       "id": "7d86da86-b107-4ec7-bfe7-84f202d4030c",
       "clientId": "trampoline-desktop",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -404,10 +404,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/*"
+        "https://localhost:8080/*"
       ],
       "webOrigins": [
-        "https://rituparnamajhi.online"
+        "https://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -532,7 +532,7 @@
     {
       "id": "647aa742-d849-41d2-b174-c06b59e6d5b6",
       "clientId": "google-auth",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -540,7 +540,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/*"
+        "https://localhost:8080/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -666,20 +666,20 @@
     {
       "id": "26320feb-8a5d-49e4-80c5-20eb7428a11e",
       "clientId": "nodebb",
-      "rootUrl": "https://rituparnamajhi.online/discussions",
-      "adminUrl": "https://rituparnamajhi.online/discussions",
-      "baseUrl": "https://rituparnamajhi.online/discussions",
+      "rootUrl": "https://localhost:8080/discussions",
+      "adminUrl": "https://localhost:8080/discussions",
+      "baseUrl": "https://localhost:8080/discussions",
       "surrogateAuthRequired": false,
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/auth/fusionauth-oidc/callback",
-        "https://rituparnamajhi.online/discussions/*",
-        "https://rituparnamajhi.online/discussions/auth/fusionauth-oidc/callback"
+        "https://localhost:8080/auth/fusionauth-oidc/callback",
+        "https://localhost:8080/discussions/*",
+        "https://localhost:8080/discussions/auth/fusionauth-oidc/callback"
       ],
       "webOrigins": [
-        "https://rituparnamajhi.online"
+        "https://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -804,14 +804,14 @@
     {
       "id": "da893beb-6ac7-420d-b51b-f05dadf56bbc",
       "clientId": "android",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/oauth2callback",
+        "https://localhost:8080/oauth2callback",
         "dev.sunbird.app://mobile"
       ],
       "webOrigins": [],
@@ -938,7 +938,7 @@
     {
       "id": "349dad8b-6e03-4f22-8368-50a43ba08f6f",
       "clientId": "google-auth-android",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -946,7 +946,7 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/*"
+        "https://localhost:8080/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1072,7 +1072,7 @@
     {
       "id": "4e8f751d-5caa-489f-a281-636b56576cee",
       "clientId": "google-auth-desktop",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -1080,10 +1080,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/*"
+        "https://localhost:8080/*"
       ],
       "webOrigins": [
-        "https://rituparnamajhi.online"
+        "https://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1208,15 +1208,15 @@
     {
       "id": "21529800-33dd-11eb-adc1-0242ac120002",
       "clientId": "desktop",
-      "rootUrl": "https://rituparnamajhi.online",
-      "adminUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
+      "adminUrl": "https://localhost:8080",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/oauth2callback"
+        "https://localhost:8080/oauth2callback"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1387,19 +1387,19 @@
     {
       "id": "f1e29715-91d7-4f2a-b11f-c10786f737e5",
       "clientId": "lms",
-      "rootUrl": "https://rituparnamajhi.online",
-      "adminUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
+      "adminUrl": "https://localhost:8080",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/resources",
-        "https://rituparnamajhi.online/*"
+        "https://localhost:8080/resources",
+        "https://localhost:8080/*"
       ],
       "webOrigins": [
-        "https://rituparnamajhi.online"
+        "https://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1742,7 +1742,7 @@
     {
       "id": "9a901d18-377b-4615-9b89-677b544be3c5",
       "clientId": "trampoline",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -1874,7 +1874,7 @@
     {
       "id": "8c12290d-d62f-48ce-913b-c93bf995ca59",
       "clientId": "portal",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "/oauth2callback",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -1882,9 +1882,9 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/*",
-        "https://rituparnamajhi.online/private/*",
-        "https://rituparnamajhi.online/"
+        "https://localhost:8080/*",
+        "https://localhost:8080/private/*",
+        "https://localhost:8080/"
       ],
       "webOrigins": [
         ""
@@ -2751,7 +2751,7 @@
     {
       "id": "586ad4d3-c063-4df0-91c1-9d4ab64da7ca",
       "clientId": "trampoline-android",
-      "rootUrl": "https://rituparnamajhi.online",
+      "rootUrl": "https://localhost:8080",
       "adminUrl": "",
       "baseUrl": "/",
       "surrogateAuthRequired": false,
@@ -2759,10 +2759,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "https://rituparnamajhi.online/*"
+        "https://localhost:8080/*"
       ],
       "webOrigins": [
-        "https://rituparnamajhi.online"
+        "https://localhost:8080"
       ],
       "notBefore": 0,
       "bearerOnly": false,
