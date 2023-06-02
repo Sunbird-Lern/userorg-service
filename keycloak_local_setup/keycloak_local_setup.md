@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
    - Check if 'Sunbird' realm is selected.
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
    - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu.
+   - Check if clients (portal, lms, android, etc.) are available
 
 
 
