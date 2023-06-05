@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 7. To verify if keycloak for sunbird is configured,
    - login to keycloak ( http://localhost:8080/auth - use keycloak credentials mentioned in 'keycloak_docker.sh').
    - Check if 'Sunbird' realm is selected.
+
    ![img_1.png](img_1.png)
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
    ![img_2.png](img_2.png)
@@ -65,6 +66,7 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
    ![img_5.png](img_5.png)
 9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
    ![img_6.png](img_6.png)
+
 
 ### Shell script docker commands description
 
