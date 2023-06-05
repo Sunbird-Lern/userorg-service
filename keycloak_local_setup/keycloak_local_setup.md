@@ -53,20 +53,18 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 7. To verify if keycloak for sunbird is configured,
    - login to keycloak ( http://localhost:8080/auth - use keycloak credentials mentioned in 'keycloak_docker.sh').
    - Check if 'Sunbird' realm is selected.
-
-   ![img_1.png](img_1.png)
+   ![img_1.jpg](./img_1.jpg)
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
-   ![img_2.png](img_2.png)
+   ![img_2.jpg](./img_2.jpg)
    - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu.
-   ![img_3.png](img_3.png)
+   ![img_3.jpg](./img_3.jpg)
    - Check if clients (portal, lms, android, etc.) are available
-   ![img_4.png](img_4.png)
+   ![img_4.jpg](./img_4.jpg)
 
 8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add admin role in Realm Role Box as shown
-   ![img_5.png](img_5.png)
+   ![img_5.jpg](./img_5.jpg)
 9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
-   ![img_6.png](img_6.png)
-
+   ![img_6.jpg](./img_6.jpg)
 
 ### Shell script docker commands description
 
