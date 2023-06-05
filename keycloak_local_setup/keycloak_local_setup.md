@@ -53,9 +53,13 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 7. To verify if keycloak for sunbird is configured,
    - login to keycloak ( http://localhost:8080/auth - use keycloak credentials mentioned in 'keycloak_docker.sh').
    - Check if 'Sunbird' realm is selected.
+   ![img_1.png](img_1.png)
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
+   ![img_2.png](img_2.png)
    - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu.
+   ![img_3.png](img_3.png)
    - Check if clients (portal, lms, android, etc.) are available
+   ![img_4.png](img_4.png)
 
 
 
