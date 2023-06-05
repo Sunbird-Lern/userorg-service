@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
    - Check if clients (portal, lms, android, etc.) are available
    ![img_4.png](img_4.png)
 
-
+8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add admin role in Realm Role Box as shown
+   ![img_5.png](img_5.png)
 
 ### Shell script docker commands description
 
