@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 
 8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add admin role in Realm Role Box as shown
    ![img_5.png](img_5.png)
+9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
+   ![img_6.png](img_6.png)
 
 ### Shell script docker commands description
 
