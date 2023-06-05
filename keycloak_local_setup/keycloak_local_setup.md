@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
    - Check if clients (portal, lms, android, etc.) are available
    ![img_4.jpg](./img_4.jpg)
 
-8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add admin role in Realm Role Box as shown
+8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add 'admin' role in 'Realm Roles' as shown
    ![img_5.jpg](./img_5.jpg)
 9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
    ![img_6.jpg](./img_6.jpg)
