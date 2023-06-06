@@ -69,6 +69,17 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 
 10. In 'Credentials' tab of 'LMS' client, click on 'Regenerate Secret' button with 'Client Authenticator' as 'Client Id and Secret'. This is the value to be saved for 'sunbird_sso_client_secret' config variable while integration with user-org service. (sunbird_sso_client_id = lms, sunbird_sso_client_secret = newly generated secret)
 
+11. Local LMS setup keycloak related configurations will be as follows:
+```shell
+sunbird_keycloak_user_federation_provider_id = cassandra-storage-provider
+sunbird_sso_username = admin
+sunbird_sso_password = sunbird
+sunbird_sso_url = http://localhost:8080/auth/
+sunbird_sso_realm = sunbird
+sunbird_sso_client_id = lms
+sunbird_sso_client_secret = newly generated secret of 'lms' client
+```
+
 
 ### Shell script docker commands description
 
