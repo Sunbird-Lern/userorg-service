@@ -56,15 +56,19 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
    ![img_1.jpg](./img_1.jpg)
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
    ![img_2.jpg](./img_2.jpg)
-   - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu.
+   - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu. This is the value to be saved for 'sunbird_keycloak_user_federation_provider_id' config variable while integration with user-org service. (sunbird_keycloak_user_federation_provider_id = cassandra-storage-provider)
    ![img_3.jpg](./img_3.jpg)
    - Check if clients (portal, lms, android, etc.) are available
    ![img_4.jpg](./img_4.jpg)
 
 8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add 'admin' role in 'Realm Roles' as shown
    ![img_5.jpg](./img_5.jpg)
+
 9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
    ![img_6.jpg](./img_6.jpg)
+
+10. In 'Credentials' tab of 'LMS' client, click on 'Regenerate Secret' button with 'Client Authenticator' as 'Client Id and Secret'. This is the value to be saved for 'sunbird_sso_client_secret' config variable while integration with user-org service. (sunbird_sso_client_id = lms, sunbird_sso_client_secret = newly generated secret)
+
 
 ### Shell script docker commands description
 
