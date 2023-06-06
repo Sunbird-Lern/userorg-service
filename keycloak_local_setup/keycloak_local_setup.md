@@ -67,9 +67,12 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
    ![img_6.jpg](./img_6.jpg)
 
-10. In 'Credentials' tab of 'LMS' client, click on 'Regenerate Secret' button with 'Client Authenticator' as 'Client Id and Secret'. This is the value to be saved for 'sunbird_sso_client_secret' config variable while integration with user-org service. (sunbird_sso_client_id = lms, sunbird_sso_client_secret = newly generated secret)
+10. In 'Settings' tab of 'LMS' client, enable 'Direct Access Grants Enabled'
+![img.png](img.png)
 
-11. Local LMS setup keycloak related configurations will be as follows:
+12. In 'Credentials' tab of 'LMS' client, click on 'Regenerate Secret' button with 'Client Authenticator' as 'Client Id and Secret'. This is the value to be saved for 'sunbird_sso_client_secret' config variable while integration with user-org service. (sunbird_sso_client_id = lms, sunbird_sso_client_secret = newly generated secret)
+
+13. Local LMS setup keycloak related configurations will be as follows:
 ```shell
 sunbird_keycloak_user_federation_provider_id = cassandra-storage-provider
 sunbird_sso_username = admin
