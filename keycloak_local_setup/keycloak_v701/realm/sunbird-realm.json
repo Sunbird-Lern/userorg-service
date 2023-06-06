@@ -3524,23 +3524,6 @@
     ],
     "org.keycloak.storage.UserStorageProvider": [
       {
-        "id": "",
-        "name": "cassandra-storage-provider",
-        "providerId": "cassandra-storage-provider",
-        "subComponents": {},
-        "config": {
-          "host": [
-            "localhost"
-          ],
-          "cachePolicy": [
-            "DEFAULT"
-          ],
-          "priority": [
-            "0"
-          ]
-        }
-      },
-      {
         "id": "03a14f73-54bf-4749-be16-8e91f775bb35",
         "name": "cassandra-storage-provider",
         "providerId": "cassandra-storage-provider",
