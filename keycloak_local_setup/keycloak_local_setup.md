@@ -75,8 +75,6 @@ CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_
 13. Local LMS setup keycloak related configurations will be as follows:
 ```shell
 sunbird_keycloak_user_federation_provider_id = cassandra-storage-provider
-sunbird_sso_username = admin
-sunbird_sso_password = sunbird
 sunbird_sso_url = http://localhost:8080/auth/
 sunbird_sso_realm = sunbird
 sunbird_sso_client_id = lms
