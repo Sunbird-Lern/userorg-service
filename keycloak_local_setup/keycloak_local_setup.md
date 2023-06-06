@@ -81,7 +81,6 @@ sunbird_sso_client_id = lms
 sunbird_sso_client_secret = newly generated secret of 'lms' client
 ```
 
-
 ### Shell script docker commands description
 
 Shell script contains docker commands to create postgres v11.2 database container and keycloak v7.0.1 container. It also has commands to copy sunbird keycloak artifacts viz SPI provider jar, themes, postgres driver module, realm and configuration changes to keycloak.
