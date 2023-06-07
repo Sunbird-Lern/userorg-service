@@ -14,7 +14,7 @@
     9. sunbird_sso_client_secret : keycloak client secret (not mandatory)
    10. sunbird_valid_badge_subtypes: list of valid badge subtypes (comma separated)
    11. sunbird_valid_badge_roles: list of valid badge roles (comma separated)
-   12. sunbird_learner_service_url: url for user-org service
+   12. sunbird_learner_service_url: url for userorg service
 ## Do the below env setup , if you are planing to run actor as local mode.
     1. sunbird_cassandra_host: host running the cassandra server
     2. sunbird_cassandra_port: port on which cassandra server is running
@@ -23,8 +23,8 @@
     5. sunbird_es_host: host running the elasticsearch server
     6. sunbird_es_port: port on which elasticsearch server is running
     7. sunbird_es_cluster (optional): name of the elasticsearch cluster
-    8. sunbird_learner_actor_host: host running for user org actor
-    9. sunbird_learner_actor_port: port on which user org actor is running.
+    8. sunbird_learner_actor_host: host running for userorg actor
+    9. sunbird_learner_actor_port: port on which userorg actor is running.
     10. ekstep_content_search_base_url : provide base url for EkStep content search
     11. ekstep_authorization : provide authorization for value for content search
     12. sunbird_pg_host: postgres host name or ip
@@ -69,8 +69,8 @@
     51.telemetry_pdata_ver=1.5
     
 ## Do the below env setup , if you are planing to run background actor in remote mode.
-	1. sunbird_background_actor_host: host running for user org background actor
-    2. sunbird_background_actor_port: port on which user org background actor is running.
+	1. sunbird_background_actor_host: host running for userorg background actor
+    2. sunbird_background_actor_port: port on which userorg background actor is running.
 	
 ## Do the below env setup , to start a actor system on a machine {"RemoteMiddlewareActorSystem" it will start Normal Actor System on that machine,             ##"BackGroundRemoteMiddlewareActorSystem" , it will start background actor}.
 
@@ -80,7 +80,7 @@
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
 2. Run "mvn clean install" to build the services.
 2. Go to "controller" and run the command "mvn play2:dist" to generate the dist file for controller.
-3. The build file "controller-1.0-SNAPSHOT-dist.zip" is generated in "user-org-service/controller/target" folder.
+3. The build file "controller-1.0-SNAPSHOT-dist.zip" is generated in "userorg-service/controller/target" folder.
 
 ## Run
 1. Unzip the dist file "controller-1.0-SNAPSHOT-dist.zip".

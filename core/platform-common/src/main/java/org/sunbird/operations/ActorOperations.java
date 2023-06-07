@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This enum will contain different operation for a user-org {addCourse, getCourse, update ,
+ * This enum will contain different operation for a userorg {addCourse, getCourse, update ,
  * getContent}
  *
  * @author Manzarul

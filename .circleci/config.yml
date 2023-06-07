@@ -6,15 +6,15 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: user-rg-dependency-cache-{{ checksum "pom.xml" }}
+          key: userorg-dependency-cache-{{ checksum "pom.xml" }}
       - run: mvn clean install
       - run: cd controller && mvn play2:dist
       - save_cache:
-          key: user-org-dependency-cache-{{ checksum "pom.xml" }}
+          key: userorg-dependency-cache-{{ checksum "pom.xml" }}
           paths: ~/.m2
       - run:
          name: Analyze on SonarCloud
-         command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=Sunbird-Lern_user-org-service -Dsonar.organization=sunbird-lern -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/cassandra-utils/**,**/es-utils/**,**/models/**,**/model/**,**/bean/**,**/dto/**,**/bulkupload/**,**/error/**,**/exception/**,**/util/search/** -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/reports/target/jacoco/jacoco.xml
+         command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=Sunbird-Lern_userorg-service -Dsonar.organization=sunbird-lern -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/cassandra-utils/**,**/es-utils/**,**/models/**,**/model/**,**/bean/**,**/dto/**,**/bulkupload/**,**/error/**,**/exception/**,**/util/search/** -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/reports/target/jacoco/jacoco.xml
 
 workflows:
   version: 2.1
