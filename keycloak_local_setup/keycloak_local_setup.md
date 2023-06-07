@@ -35,50 +35,45 @@ Note: Prepend 'sudo ' to above command if you don't have root user permissions.
 
 Verify docker containers exists with names 'kc_local' and 'kc_postgres' and are running.
 
-4. Login to postgres docker container bastion using following command:
+4. Command to connect to postgres database:
 ```shell
 docker exec -it kc_postgres sh
-```
-
-5. Connect to postgres database using below command:
-```shell
 psql postgresql://kcpgadmin:kcpgpassword@kc_postgres:5432/quartz
 ```
 
-6. Execute below command to create table in postgres database:
-```shell
-CREATE TABLE IF NOT EXISTS JGROUPSPING (own_addr varchar(200) NOT NULL, cluster_name varchar(200) NOT NULL, ping_data BYTEA, PRIMARY KEY (own_addr, cluster_name));
-```
-
-7. To verify if keycloak for sunbird is configured,
+5. To verify if keycloak for sunbird is configured,
    - login to keycloak ( http://localhost:8080/auth - use keycloak credentials mentioned in 'keycloak_docker.sh').
    - Check if 'Sunbird' realm is selected.
    ![img_1.jpg](./img_1.jpg)
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
    ![img_2.jpg](./img_2.jpg)
-   - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu. This is the value to be saved for 'sunbird_keycloak_user_federation_provider_id' config variable while integration with user-org service. (sunbird_keycloak_user_federation_provider_id = cassandra-storage-provider)
+   - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu. Open 'Cassandra-storage-provide' and copy the 'Provider ID' value. This is the value to be saved for 'sunbird_keycloak_user_federation_provider_id' config variable while integration with user-org service. 
    ![img_3.jpg](./img_3.jpg)
+   ![spi_provider_id.png](./spi_provider_id.png)
    - Check if clients (portal, lms, android, etc.) are available
    ![img_4.jpg](./img_4.jpg)
 
-8. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add 'admin' role in 'Realm Roles' as shown
+6. Open 'LMS' client from 'Clients' Menu. Go to 'Service Account Roles' tab  and add 'admin' role in 'Realm Roles' as shown
    ![img_5.jpg](./img_5.jpg)
 
-9. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
+7. In 'Client Roles' drop down of 'LMS' client, select 'realm-management' and add 'manage-users' role as shown
    ![img_6.jpg](./img_6.jpg)
 
-10. In 'Settings' tab of 'LMS' client, enable 'Direct Access Grants Enabled'
+8. In 'Settings' tab of 'LMS' client, enable 'Direct Access Grants Enabled'
 ![img.png](img.png)
 
-11. In 'Credentials' tab of 'LMS' client, click on 'Regenerate Secret' button with 'Client Authenticator' as 'Client Id and Secret'. This is the value to be saved for 'sunbird_sso_client_secret' config variable while integration with user-org service. (sunbird_sso_client_id = lms, sunbird_sso_client_secret = newly generated secret)
+9. In 'Credentials' tab of 'LMS' client, click on 'Regenerate Secret' button with 'Client Authenticator' as 'Client Id and Secret'. This is the value to be saved for 'sunbird_sso_client_secret' config variable while integration with user-org service. (sunbird_sso_client_id = lms, sunbird_sso_client_secret = newly generated secret)
 
-12. Local LMS setup keycloak related configurations will be as follows:
+10. Local user-org setup keycloak related configurations will be as follows:
 ```shell
-sunbird_keycloak_user_federation_provider_id = cassandra-storage-provider
-sunbird_sso_url = http://localhost:8080/auth/
+sunbird_keycloak_user_federation_provider_id = #Cassandra-storage-provider - Provider Id value. 
+sunbird_sso_url = http://localhost:8080/auth/admin/sunbird/console/index.html
 sunbird_sso_realm = sunbird
 sunbird_sso_client_id = lms
-sunbird_sso_client_secret = newly generated secret of 'lms' client
+sunbird_sso_client_secret = #newly generated secret of 'lms' client
+sunbird_sso_publickey = #publickey value from Sunbird realm, 'Keys' tab RS256 algorithm
+sunbird_sso_username = admin
+sunbird_sso_password = sunbird
 ```
 
 ### Shell script docker commands description
@@ -107,3 +102,4 @@ Shell script contains docker commands to create postgres v11.2 database containe
 
 ### Understanding keycloak on Sunbird
 Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understanding keycloak on sunbird and user authentication flows.
+
