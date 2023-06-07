@@ -76,7 +76,6 @@ sunbird_sso_username = admin
 sunbird_sso_password = sunbird
 ```
 
-
 ### Shell script docker commands description
 
 Shell script contains docker commands to create postgres v11.2 database container and keycloak v7.0.1 container. It also has commands to copy sunbird keycloak artifacts viz SPI provider jar, themes, postgres driver module, realm and configuration changes to keycloak.
@@ -104,5 +103,3 @@ Shell script contains docker commands to create postgres v11.2 database containe
 ### Understanding keycloak on Sunbird
 Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understanding keycloak on sunbird and user authentication flows.
 
-
-### Steps to perform token validation is LMS microservices
