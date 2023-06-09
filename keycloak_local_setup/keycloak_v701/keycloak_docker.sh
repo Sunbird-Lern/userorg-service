@@ -2,8 +2,8 @@ mkdir $HOME/sunbird-dbs
 export sunbird_dbs_path=$HOME/sunbird-dbs
 echo $sunbird_dbs_path
 
-sudo docker network create keycloak-postgres-network
-sudo docker run --name=kc_postgres \
+docker network create keycloak-postgres-network
+docker run --name=kc_postgres \
   --net keycloak-postgres-network \
   -e POSTGRES_PASSWORD=kcpgpassword \
   -e POSTGRES_USER=kcpgadmin \
@@ -20,18 +20,17 @@ mkdir $sunbird_dbs_path/nginx/data
 
 cp nginx/nginx.conf $sunbird_dbs_path/nginx/data/nginx.conf
 
-sudo sudo docker run --name nginx_local -p 80:80 \
-	-v $sunbird_dbs_path/nginx/data/certs:/etc/nginx/certs:ro \
-  	-v $sunbird_dbs_path/nginx/data/conf.d:/etc/nginx/conf.d \
-  	-v $sunbird_dbs_path/nginx/data/nginx:/etc/nginx \
-  	-v $sunbird_dbs_path/nginx/data/vhost.d:/etc/nginx/vhost.d \
-  	-v $sunbird_dbs_path/nginx/data/html:/usr/share/nginx/html \
-  	-v $sunbird_dbs_path/var/run/docker.sock:/tmp/docker.sock:ro \
-  	-d nginx
+echo "nginx conf copied."
 
-sudo docker cp $sunbird_dbs_path/nginx/data/nginx.conf nginx_local:/etc/nginx/
+docker run --name nginx_local -p 80:80 -d nginx
 
 echo "nginx container created."
+
+docker cp $sunbird_dbs_path/nginx/data/nginx.conf nginx_local:/etc/nginx/
+
+docker container restart nginx_local
+
+echo "nginx container restarted."
 
 mkdir $sunbird_dbs_path/keycloak
 
@@ -47,9 +46,7 @@ cp -r realm $sunbird_dbs_path/keycloak
 
 cp -r spi $sunbird_dbs_path/keycloak
 
-echo "ls $sunbird_dbs_path/keycloak"
-
-sudo docker run --name kc_local -p 8080:8080 \
+docker run --name kc_local -p 8080:8080 \
         -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=sunbird \
         -v $sunbird_dbs_path/keycloak/tmp:/tmp \
         -v $sunbird_dbs_path/keycloak/realm:/opt/jboss/keycloak/imports \
@@ -63,19 +60,19 @@ sudo docker run --name kc_local -p 8080:8080 \
 
 echo "keycloak container created."
 
-sudo docker container restart kc_local
+docker container restart kc_local
 
 echo "keycloak container restarted."
 
-sudo docker cp themes/sunbird kc_local:/opt/jboss/keycloak/themes/sunbird
+docker cp themes/sunbird kc_local:/opt/jboss/keycloak/themes/sunbird
 
 echo "sunbird themes copied to container."
 
-sudo docker cp configuration/standalone-ha.xml kc_local:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+docker cp configuration/standalone-ha.xml kc_local:/opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
 
 echo "sunbird configuration copied to container."
 
-sudo docker container restart kc_local
+docker container restart kc_local
 
 echo "keycloak container restarted after integrating sunbird realm, spi provider and themes."
 
