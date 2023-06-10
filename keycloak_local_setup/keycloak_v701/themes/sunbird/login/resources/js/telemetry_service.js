@@ -2522,7 +2522,7 @@ if(client_id.toLowerCase() === 'android'){
   function getOrgInfo(id) {
     return $.ajax({
       method: "POST",
-      url: hostURL + "/api/org/v2/search",
+      url: "http://localhost:9000/v2/org/search",
       data: JSON.stringify({
         request: {
           filters: {
