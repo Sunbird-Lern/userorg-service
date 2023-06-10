@@ -4191,7 +4191,7 @@
     "_browser_header.xContentTypeOptions": "nosniff",
     "actionTokenGeneratedByAdminLifespan": "43200",
     "offlineSessionMaxLifespan": "5184000",
-    "_browser_header.contentSecurityPolicyReportOnly": "",
+    "_browser_header.entSecurityPolicyReportOnly": "",
     "bruteForceProtected": "true",
     "_browser_header.contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
     "offlineSessionMaxLifespanEnabled": "false",
