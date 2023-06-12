@@ -105,11 +105,11 @@ Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understa
 
 ### Steps for integrating local keycloak setup with local user-org service setup
 1. Ensure postgres, nginx and keycloak containers are up and running.
-2. Ensure environment variables are exported with values from keycloak as mentioned above in 'Step 10'.
-3. Ensure public key from 'sunbird' realm is copied as file under 'keys' folder with 'kid' as file name in user-org service.
+2. Ensure environment variables are exported with values from keycloak as mentioned above in 'Step 10'
+3. Ensure public key from 'sunbird' realm with 'kid' is copied as file name under 'keys' folder in user-org service
 ![img_10.png](img_10.png)
-4. Ensure local user-org service is restarted after above steps.
-5. Create a default org 'sunbird' in your local setup. (with property 'channel_registration_disabled=true' in externalresource.properties).
+4. Ensure local user-org service is restarted after above steps
+5. Create a default org 'sunbird' in your local setup. (with property 'channel_registration_disabled=true' in externalresource.properties)
 6. Use local application login url: http://localhost:8080/auth/admin/sunbird/console/index.html
 
 ### Steps to perform token validation is LMS microservices
