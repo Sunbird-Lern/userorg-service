@@ -32,6 +32,9 @@ cp -r realm $sunbird_dbs_path/keycloak
 
 cp -r spi $sunbird_dbs_path/keycloak
 
+# command to disable ubuntu-firewall for ubuntu machines
+ufw disable
+
 export docker_network_gateway=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.Gateway}}{{end}}' kc_postgres)
 
 docker run --name kc_local -p 8080:8080 \
