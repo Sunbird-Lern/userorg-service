@@ -48,7 +48,7 @@ psql postgresql://kcpgadmin:kcpgpassword@kc_postgres:5432/quartz
    - Check if 'sunbird' is available as an option under 'Themes' realm sub-menu for 'Login Theme' and 'Email Theme'.
    ![img_2.jpg](./img_2.jpg)
    - Check if 'cassandra-storage-provider' is present under 'User Federation' configuration menu. Open 'Cassandra-storage-provide' and copy the 'Provider ID' value. This is the value to be saved for 'sunbird_keycloak_user_federation_provider_id' config variable while integration with user-org service. 
-   ![img_3.jpg](./img_3.jpg)
+   ![img_11.png](img_11.png)
    ![spi_provider_id.png](./spi_provider_id.png)
    - Check if clients (portal, lms, android, etc.) are available
    ![img_4.jpg](./img_4.jpg)
@@ -103,3 +103,13 @@ Shell script contains docker commands to create postgres v11.2 database containe
 ### Understanding keycloak on Sunbird
 Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understanding keycloak on sunbird and user authentication flows.
 
+### Steps for integrating local keycloak setup with local user-org service setup
+1. Ensure postgres, nginx and keycloak containers are up and running.
+2. Ensure environment variables are exported with values from keycloak as mentioned above in 'Step 10'
+3. Ensure public key from 'sunbird' realm is copied as file under 'keys' folder with 'kid' as file name.
+![img_10.png](img_10.png)
+4. Ensure local user-org service is restarted after above steps
+5. Create a default org 'sunbird' in your local setup. (with property 'channel_registration_disabled=true' in externalresource.properties)
+6. Use local application login url: http://localhost:8080/auth/admin/sunbird/console/index.html
+
+### Steps to perform token validation is LMS microservices
