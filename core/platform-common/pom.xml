@@ -21,13 +21,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <learner.akka.version>2.5.19</learner.akka.version>
     </properties>
-    <!-- Enable the below repository for temporary testing -->
-	<!-- <repositories>
-		    <repository>
-            <id>cloud-store</id>
-            <url>https://oss.sonatype.org/content/repositories/orgsunbird-1144/</url>
-            </repository>
-	</repositories> -->
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
