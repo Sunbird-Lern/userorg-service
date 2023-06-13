@@ -74,6 +74,9 @@ sunbird_sso_client_secret = #newly generated secret of 'lms' client
 sunbird_sso_publickey = #publickey value from Sunbird realm, 'Keys' tab RS256 algorithm
 sunbird_sso_username = admin
 sunbird_sso_password = sunbird
+sunbird_pg_db=quartz
+sunbird_pg_user=kcpgadmin
+sunbird_pg_password=kcpgpassword
 ```
 
 ### Shell script docker commands description
@@ -104,12 +107,48 @@ Shell script contains docker commands to create postgres v11.2 database containe
 Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understanding keycloak on sunbird and user authentication flows.
 
 ### Steps for integrating local keycloak setup with local user-org service setup
-1. Ensure postgres, nginx and keycloak containers are up and running.
+1. Ensure postgres and keycloak containers are up and running.
 2. Ensure environment variables are exported with values from keycloak as mentioned above in 'Step 10'
 3. Ensure public key from 'sunbird' realm is copied as file under 'keys' folder with 'kid' as file name.
-![img_10.png](img_10.png)
-4. Ensure local user-org service is restarted after above steps
-5. Create a default org 'sunbird' in your local setup. (with property 'channel_registration_disabled=true' in externalresource.properties)
-6. Use local application login url: http://localhost:8080/auth/admin/sunbird/console/index.html
-
-### Steps to perform token validation is LMS microservices
+![img_13.png](img_13.png)![img_12.png](img_12.png)
+4. Add CORS filter to 'application.conf' in controller folder of user-org service.
+```shell
+  enabled += "play.filters.cors.CORSFilter"
+```
+![img_7.png](img_7.png)
+5. Ensure local user-org service is restarted after above steps
+6. Create a default organisations 'custodian' and 'sunbird' in your local setup. (with property 'channel_registration_disabled=true' in externalresource.properties). Save organisation Ids from response.
+7. export 'custodian' organisation id value from response to 'custodianRootOrgId' and 'custodianOrgId' environment variables.
+8. Restart user-org service
+9. Create user using below curl. Ensure you get success response 
+```shell
+curl --location --request POST 'localhost:9000/v1/user/create' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "request": {
+        "firstName": "Test",
+        "lastName": "user",
+        "channel": "sunbird",
+        "userName": "testuser",
+        "email":"testuser@test.com",
+        "emailVerified": true,
+        "password": "Test@123",
+        "userType": "teacher"
+    }
+}'
+```
+![img_15.png](img_15.png)
+10. login to keycloak. Go to user's menu and search for the user using username
+![img_14.png](img_14.png)
+![img_16.png](img_16.png)
+11. Ensure you are able to generate user token for the newly created user
+```shell
+curl --location --request POST 'localhost:8080/auth/realms/sunbird/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_id=lms' \
+--data-urlencode 'client_secret= #newly generated secret of 'lms' client' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'username=testuser' \
+--data-urlencode 'password=Test@123'
+```
+![img_17.png](img_17.png)

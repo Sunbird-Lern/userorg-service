@@ -2526,6 +2526,7 @@ if(client_id.toLowerCase() === 'android'){
       data: JSON.stringify({
         request: {
           filters: {
+            isTenant: true,
             slug: id || 'sunbird'
           }
         }
