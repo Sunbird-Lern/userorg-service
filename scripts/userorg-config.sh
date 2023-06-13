@@ -246,4 +246,3 @@ export user_enrolments_response_cache_enable=True
 export user_enrolments_response_cache_ttl=300
 export accesstoken_publickey_basepath='/keys/'
 export sunbird_msg_sender=DKSAPP
-export sunbird_user_service_base_url="http://127.0.0.1:8080/"
