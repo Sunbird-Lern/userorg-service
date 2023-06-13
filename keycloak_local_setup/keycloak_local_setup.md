@@ -152,5 +152,3 @@ curl --location --request POST 'localhost:8080/auth/realms/sunbird/protocol/open
 --data-urlencode 'password=Test@123'
 ```
 ![img_17.png](img_17.png)
-
-### Steps to perform token validation is LMS microservices
