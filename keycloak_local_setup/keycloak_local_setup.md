@@ -67,7 +67,7 @@ psql postgresql://kcpgadmin:kcpgpassword@kc_postgres:5432/quartz
 10. Local user-org setup keycloak related configurations will be as follows:
 ```shell
 sunbird_keycloak_user_federation_provider_id = #Cassandra-storage-provider - Provider Id value. 
-sunbird_sso_url = http://localhost:8080/auth/admin/sunbird/console/index.html
+sunbird_sso_url = http://localhost:8080/auth
 sunbird_sso_realm = sunbird
 sunbird_sso_client_id = lms
 sunbird_sso_client_secret = #newly generated secret of 'lms' client
