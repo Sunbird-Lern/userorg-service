@@ -2,6 +2,22 @@ mkdir $HOME/sunbird-dbs
 export sunbird_dbs_path=$HOME/sunbird-dbs
 echo $sunbird_dbs_path
 
+docker network create keycloak-postgres-network
+docker run --name=kc_postgres \
+  --net keycloak-postgres-network \
+  -e POSTGRES_PASSWORD=kcpgpassword \
+  -e POSTGRES_USER=kcpgadmin \
+  -e POSTGRES_DB=quartz \
+  -e JDBC_PARAMS="useSSL=false" \
+  -p 32769:5432 \
+  -d postgres:11.2
+
+echo "postgres container created."
+
+mkdir $sunbird_dbs_path/nginx
+
+mkdir $sunbird_dbs_path/nginx/data
+
 mkdir $sunbird_dbs_path/keycloak
 
 mkdir $sunbird_dbs_path/keycloak/tmp
@@ -16,19 +32,10 @@ cp -r realm $sunbird_dbs_path/keycloak
 
 cp -r spi $sunbird_dbs_path/keycloak
 
-echo "ls $sunbird_dbs_path/keycloak"
+# command to disable ubuntu-firewall for ubuntu machines
+ufw disable
 
-docker network create keycloak-postgres-network
-docker run --name=kc_postgres \
-  --net keycloak-postgres-network \
-  -e POSTGRES_PASSWORD=kcpgpassword \
-  -e POSTGRES_USER=kcpgadmin \
-  -e POSTGRES_DB=quartz \
-  -e JDBC_PARAMS="useSSL=false" \
-  -p 32769:5432 \
-  -d postgres:11.2
-
-echo "postgres container created."
+export docker_network_gateway=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.Gateway}}{{end}}' kc_postgres)
 
 docker run --name kc_local -p 8080:8080 \
         -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=sunbird \
@@ -38,14 +45,11 @@ docker run --name kc_local -p 8080:8080 \
         -v $sunbird_dbs_path/keycloak/modules:/opt/jboss/keycloak/modules/system/layers/keycloak/org/postgresql/main \
         --net keycloak-postgres-network \
         -e KEYCLOAK_IMPORT="/opt/jboss/keycloak/imports/sunbird-realm.json -Dkeycloak.profile.feature.upload_scripts=enabled" \
+        -e sunbird_user_service_base_url="http://$docker_network_gateway:9000" \
         -d jboss/keycloak:7.0.1
 
 
 echo "keycloak container created."
-
-docker container restart kc_local
-
-echo "keycloak container restarted."
 
 docker cp themes/sunbird kc_local:/opt/jboss/keycloak/themes/sunbird
 
