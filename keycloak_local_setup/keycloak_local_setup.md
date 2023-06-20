@@ -182,7 +182,7 @@ curl --location --request POST 'localhost:8080/auth/realms/sunbird/protocol/open
 ![img_17.png](img_17.png)
 
 
-
+Note: Always create an admin user belonging to a tenant and assign 'ORG_ADMIN' role. Org Admin has ability to create other users via application.
 
 
 ### Steps to perform token validation
