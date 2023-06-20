@@ -2,6 +2,10 @@ package org.sunbird.actor.organisation;
 
 import akka.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +30,7 @@ import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.CloudStorageUtil;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Slug;
 import org.sunbird.util.Util;
@@ -56,6 +61,10 @@ public class OrganisationManagementActor extends BaseActor {
       getOrgDetails(request);
     } else if (request.getOperation().equalsIgnoreCase(ActorOperations.ASSIGN_KEYS.getValue())) {
       assignKey(request);
+    } else if (request
+        .getOperation()
+        .equalsIgnoreCase(ActorOperations.ADD_ENCRYPTION_KEY.getValue())) {
+      addEncryptionKey(request);
     } else {
       onReceiveUnsupportedOperation();
     }
@@ -469,15 +478,171 @@ public class OrganisationManagementActor extends BaseActor {
   private void removeUnusedField(Request request) {
     request.getRequest().remove(JsonKey.ENC_KEYS);
     request.getRequest().remove(JsonKey.SIGN_KEYS);
+    request.getRequest().remove(JsonKey.EXHAUST_ENCRYPTION_KEY);
     request.getRequest().remove(JsonKey.USER_ID);
   }
 
   private void addKeysToRequestMap(Request request) {
     List<String> encKeys = (List<String>) request.get(JsonKey.ENC_KEYS);
     List<String> signKeys = (List<String>) request.get(JsonKey.SIGN_KEYS);
+    List<String> exhaustKeys;
+
     Map<String, List<String>> keys = new HashMap<>();
     keys.put(JsonKey.ENC_KEYS, encKeys);
     keys.put(JsonKey.SIGN_KEYS, signKeys);
+
+    String orgId = (String) request.get(JsonKey.ID);
+    Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
+
+    if (fetchedKeys != null && fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)) {
+      exhaustKeys = fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY);
+      keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
+    }
     request.getRequest().put(JsonKey.KEYS, keys);
+  }
+
+  private void addEncryptionKey(Request request) {
+    RequestContext context = request.getRequestContext();
+    String processId = ProjectUtil.getUniqueIdFromTimestamp(1);
+    Map<String, Object> req = (Map<String, Object>) request.getRequest().get(JsonKey.DATA);
+    String orgId = (String) req.get(JsonKey.ORGANISATION_ID);
+
+    Map<String, List<String>> fetchedKeys = getKeysInDB(request, orgId);
+    String publicKeyUrl = uploadEncryptionFile(req, context, processId, fetchedKeys);
+    Response response = updateEncryptionKey(request, orgId, fetchedKeys, publicKeyUrl);
+    sender().tell(response, self());
+  }
+
+  private String uploadEncryptionFile(
+      Map<String, Object> req,
+      RequestContext context,
+      String processId,
+      Map<String, List<String>> fetchedKeys) {
+    String fileExtension = "";
+    String fileName = (String) req.get(JsonKey.FILE_NAME);
+    if (!StringUtils.isBlank(fileName)) {
+      String[] split = fileName.split("\\.");
+      if (split.length > 1) {
+        fileExtension = split[split.length - 1];
+      }
+    }
+    String fName = "File-" + processId;
+    if (!StringUtils.isBlank(fileExtension)) {
+      fName = fName + "." + fileExtension.toLowerCase();
+      logger.info(context, "File - " + fName + " Extension is " + fileExtension);
+    }
+
+    File file = new File(fName);
+    FileOutputStream fos = null;
+    String publicKeyUrl = null;
+    try {
+      fos = new FileOutputStream(file);
+      fos.write((byte[]) req.get(JsonKey.FILE));
+      String cspProvider = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_PROVIDER);
+      if (StringUtils.isBlank(cspProvider)) {
+        logger.info(context, "OrganisationManagementActor:: The cloud service is not available");
+        ProjectCommonException exception =
+            new ProjectCommonException(
+                ResponseCode.errorUnsupportedCloudStorage,
+                ProjectUtil.formatMessage(
+                    ResponseCode.errorUnsupportedCloudStorage.getErrorMessage(), cspProvider),
+                ResponseCode.CLIENT_ERROR.getResponseCode());
+        sender().tell(exception, self());
+      }
+      String container = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_CONTAINER);
+      publicKeyUrl =
+          CloudStorageUtil.upload(
+              cspProvider,
+              container,
+              JsonKey.ORGANISATION
+                  + File.separator
+                  + req.get(JsonKey.ORGANISATION_ID)
+                  + File.separator
+                  + fileName,
+              file.getAbsolutePath());
+      if (fetchedKeys != null
+          && fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)
+          && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
+        String oldKey =
+            fetchedKeys
+                .get(JsonKey.EXHAUST_ENCRYPTION_KEY)
+                .get(0)
+                .substring(
+                    fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).indexOf(container)
+                        + container.length()
+                        + 1);
+        CloudStorageUtil.deleteFile(cspProvider, container, oldKey);
+      }
+      return publicKeyUrl;
+    } catch (IOException e) {
+      throw new ProjectCommonException(
+          ResponseCode.invalidEncryptionFile,
+          ResponseCode.invalidEncryptionFile.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    } finally {
+      try {
+        if (null != (fos)) {
+          fos.close();
+        }
+        Files.delete(file.toPath());
+      } catch (IOException e) {
+        logger.error(
+            context,
+            "Exception Occurred while closing fileInputStream in OrganisationManagementActor",
+            e);
+      }
+    }
+  }
+
+  private Map<String, List<String>> getKeysInDB(Request request, String orgId) {
+    Map<String, List<String>> fetchedKeys = null;
+    Map<String, Object> dbOrgDetails = orgService.getOrgById(orgId, request.getRequestContext());
+
+    if (MapUtils.isEmpty(dbOrgDetails)) {
+      logger.info(
+          request.getRequestContext(),
+          "OrganisationManagementActor: addEncryptionKey:: invalid orgId");
+      throw new ProjectCommonException(
+          ResponseCode.rootOrgAssociationError,
+          ProjectUtil.formatMessage(ResponseCode.rootOrgAssociationError.getErrorMessage(), orgId),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
+    if (dbOrgDetails.containsKey("keys")) {
+      fetchedKeys = (Map<String, List<String>>) dbOrgDetails.get("keys");
+    }
+    return fetchedKeys;
+  }
+
+  private Response updateEncryptionKey(
+      Request request, String orgId, Map<String, List<String>> fetchedKeys, String publicKeyUrl) {
+    List<String> exhaustKeys = new ArrayList<>();
+    exhaustKeys.add(publicKeyUrl);
+    Map<String, List<String>> updateKeys = null;
+
+    if (fetchedKeys != null) {
+      fetchedKeys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
+      updateKeys = fetchedKeys;
+    }
+
+    if (updateKeys == null) {
+      Map<String, List<String>> keys = new HashMap<>();
+      keys.put(JsonKey.ENC_KEYS, new ArrayList<>());
+      keys.put(JsonKey.SIGN_KEYS, new ArrayList<>());
+      keys.put(JsonKey.EXHAUST_ENCRYPTION_KEY, exhaustKeys);
+      updateKeys = keys;
+    }
+
+    HashMap<String, Object> updateOrgMap = new HashMap<>();
+    updateOrgMap.put(JsonKey.ID, orgId);
+    updateOrgMap.put(JsonKey.KEYS, updateKeys);
+
+    Request updateRequest = new Request();
+    updateRequest.setRequestContext(request.getRequestContext());
+    updateRequest.setRequest(updateOrgMap);
+    Response response =
+        orgService.updateOrganisation(updateRequest.getRequest(), request.getRequestContext());
+    saveDataToES(updateRequest.getRequest(), JsonKey.UPDATE, request.getRequestContext());
+    return response;
   }
 }

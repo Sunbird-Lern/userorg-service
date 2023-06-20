@@ -1,9 +1,6 @@
 package org.sunbird.sso;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Map;
-import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.sunbird.http.HttpClientUtil;
@@ -11,6 +8,10 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.util.ProjectUtil;
+
+import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Keycloak utility to create required action links.
@@ -74,9 +75,7 @@ public class KeycloakRequiredActionLinkUtil {
     Map<String, String> headers = new HashMap<>();
 
     headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    headers.put(
-        JsonKey.AUTHORIZATION,
-        JsonKey.BEARER + KeycloakUtil.getAdminAccessTokenWithDomain(context));
+    headers.put(HttpHeaders.AUTHORIZATION, JsonKey.BEARER + KeycloakUtil.getAdminAccessTokenWithDomain(context));
 
     logger.info(
         context,
@@ -85,17 +84,13 @@ public class KeycloakRequiredActionLinkUtil {
             + "realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK);
-    logger.info(
-        context,
-        "KeycloakRequiredActionLinkUtil:generateLink: request body "
-            + mapper.writeValueAsString(request));
+    logger.info(context, "KeycloakRequiredActionLinkUtil:generateLink: request body " + mapper.writeValueAsString(request));
     String url =
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_URL)
             + "realms/"
             + ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SSO_RELAM)
             + SUNBIRD_KEYCLOAK_REQD_ACTION_LINK;
-    String response =
-        HttpClientUtil.post(url, mapper.writeValueAsString(request), headers, context);
+    String response = HttpClientUtil.post(url, mapper.writeValueAsString(request), headers, context);
 
     logger.info(context, "KeycloakRequiredActionLinkUtil:generateLink: Response = " + response);
 

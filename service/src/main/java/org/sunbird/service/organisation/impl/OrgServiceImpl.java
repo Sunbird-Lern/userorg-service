@@ -5,6 +5,7 @@ import java.util.*;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dao.organisation.OrgDao;
 import org.sunbird.dao.organisation.impl.OrgDaoImpl;
@@ -23,6 +24,8 @@ import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
+import javax.ws.rs.core.MediaType;
+
 public class OrgServiceImpl implements OrgService {
 
   private final LoggerUtil logger = new LoggerUtil(this.getClass());
@@ -30,8 +33,7 @@ public class OrgServiceImpl implements OrgService {
   private final ObjectMapper mapper = new ObjectMapper();
   private final OrgDao orgDao = OrgDaoImpl.getInstance();
   private static OrgService orgService;
-  private final OrgExternalService orgExternalService = new OrgExternalServiceImpl();;
-  private final String contentType = "application/json";
+  private final OrgExternalService orgExternalService = new OrgExternalServiceImpl();
 
   public static OrgService getInstance() {
     if (orgService == null) {
@@ -191,15 +193,13 @@ public class OrgServiceImpl implements OrgService {
       if (null == esContent.get(JsonKey.STATUS) || (1 != (int) esContent.get(JsonKey.STATUS))) {
         ProjectCommonException.throwClientErrorException(
             ResponseCode.errorInactiveOrg,
-            ProjectUtil.formatMessage(
-                ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
+            ProjectUtil.formatMessage(ResponseCode.errorInactiveOrg.getErrorMessage(), JsonKey.CHANNEL, channel));
       }
       return (String) esContent.get(JsonKey.ID);
     } else {
       throw new ProjectCommonException(
           ResponseCode.invalidParameterValue,
-          ProjectUtil.formatMessage(
-              ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
+          ProjectUtil.formatMessage(ResponseCode.invalidParameterValue.getErrorMessage(), channel, JsonKey.CHANNEL),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
   }
@@ -222,25 +222,13 @@ public class OrgServiceImpl implements OrgService {
       return true;
 
     Map<String, String> headerMap = new HashMap<>();
-    String header = System.getenv(JsonKey.EKSTEP_AUTHORIZATION);
-    if (StringUtils.isBlank(header)) {
-      header = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_AUTHORIZATION);
-    } else {
-      header = JsonKey.BEARER + header;
-    }
-    headerMap.put(JsonKey.AUTHORIZATION, header);
-    headerMap.put("Content-Type", contentType);
-    headerMap.put("user-id", "");
+    headerMap.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
     ProjectUtil.setTraceIdInHeader(headerMap, context);
     String reqString = "";
     String regStatus = "";
     try {
-      logger.info(
-          context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
-      String ekStepBaseUrl = System.getenv(JsonKey.EKSTEP_BASE_URL);
-      if (StringUtils.isBlank(ekStepBaseUrl)) {
-        ekStepBaseUrl = PropertiesCache.getInstance().getProperty(JsonKey.EKSTEP_BASE_URL);
-      }
+      logger.info(context, "start call for registering the channel for org id ==" + req.get(JsonKey.ID));
+      String contentServiceBaseUrl = PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_CONTENT_SERVICE_API_BASE_URL);
       Map<String, Object> map = new HashMap<>();
       Map<String, Object> reqMap = new HashMap<>();
       Map<String, Object> channelMap = new HashMap<>();
@@ -257,35 +245,27 @@ public class OrgServiceImpl implements OrgService {
       reqMap.put(JsonKey.CHANNEL, channelMap);
       map.put(JsonKey.REQUEST, reqMap);
       reqString = mapper.writeValueAsString(map);
-      logger.info(
-          context, "Channel request data = " + reqString + " for operation : " + operationType);
+      logger.info(context, "Channel request data = " + reqString + " for operation : " + operationType);
       if (JsonKey.CREATE.equalsIgnoreCase(operationType)) {
         regStatus =
             HttpClientUtil.post(
-                (ekStepBaseUrl
-                    + PropertiesCache.getInstance()
-                        .getProperty(JsonKey.EKSTEP_CHANNEL_REG_API_URL)),
+                (contentServiceBaseUrl + PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_CHANNEL_CREATE_API_URL)),
                 reqString,
                 headerMap,
                 context);
       } else if (JsonKey.UPDATE.equalsIgnoreCase(operationType)) {
         regStatus =
             HttpClientUtil.patch(
-                (ekStepBaseUrl
-                        + PropertiesCache.getInstance()
-                            .getProperty(JsonKey.EKSTEP_CHANNEL_UPDATE_API_URL))
+                (contentServiceBaseUrl + PropertiesCache.getInstance().readProperty(JsonKey.SUNBIRD_CHANNEL_UPDATE_API_URL))
                     + "/"
                     + req.get(JsonKey.ID),
                 reqString,
                 headerMap,
                 context);
       }
-      logger.info(
-          context,
-          "Call end for channel registration/update for org id ==" + req.get(JsonKey.HASHTAGID));
+      logger.info(context, "Call end for channel registration/update for org id ==" + req.get(JsonKey.HASHTAGID));
     } catch (Exception e) {
-      logger.error(
-          context, "Exception occurred while registering/update channel." + e.getMessage(), e);
+      logger.error(context, "Exception occurred while registering/update channel." + e.getMessage(), e);
     }
     return regStatus.contains("OK");
   }
@@ -325,8 +305,7 @@ public class OrgServiceImpl implements OrgService {
             ProjectUtil.OrgStatus.RETIRED.getValue()));
     orgStatusTransition.put(
         ProjectUtil.OrgStatus.INACTIVE.getValue(),
-        Arrays.asList(
-            ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
+        Arrays.asList(ProjectUtil.OrgStatus.ACTIVE.getValue(), ProjectUtil.OrgStatus.INACTIVE.getValue()));
     orgStatusTransition.put(
         ProjectUtil.OrgStatus.BLOCKED.getValue(),
         Arrays.asList(

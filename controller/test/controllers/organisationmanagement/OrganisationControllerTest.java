@@ -2,20 +2,29 @@ package controllers.organisationmanagement;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.when;
 
+import akka.stream.javadsl.FileIO;
+import akka.stream.javadsl.Source;
+import akka.util.ByteString;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import modules.OnRequestHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.exception.ResponseCode;
@@ -27,12 +36,14 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
 import util.ACTORS;
+import util.RequestInterceptor;
 
 @PrepareForTest(OnRequestHandler.class)
 @PowerMockIgnore({"javax.management.*", "jdk.internal.reflect.*", "javax.crypto.*"})
-@Ignore
+// @Ignore
 public class OrganisationControllerTest extends BaseApplicationTest {
 
+  private static final String PATCH = "PATCH";
   private static String orgName = "someOrgName";
   private static String orgId = "someOrgOId";
   private static String rootOrgId = "someRootOrgId";
@@ -186,6 +197,76 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     Result result = performTest("/v1/org/search", "POST", searchOrganisationRequest(status, null));
     assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
     assertTrue(getResponseStatus(result) == 400);
+  }
+
+  @Test
+  public void testAddEncyptionKeyPublicPem() throws IOException {
+    File file =
+        new File(
+            Paths.get("").toAbsolutePath() + File.separator + "test/resources/samplepublic.pem");
+    Http.MultipartFormData.Part<Source<ByteString, ?>> part =
+        new Http.MultipartFormData.FilePart<>(
+            "fileName",
+            "samplepublic.pem",
+            "application/text",
+            FileIO.fromPath(file.toPath()),
+            Files.size(file.toPath()));
+
+    Http.RequestBuilder request =
+        Helpers.fakeRequest()
+            .uri("/v1/org/update/encryptionkey")
+            .method("PATCH")
+            .bodyRaw(
+                Collections.singletonList(part),
+                play.libs.Files.singletonTemporaryFileCreator(),
+                application.asScala().materializer());
+
+    Result result = Helpers.route(application, request);
+    assertEquals(200, result.status());
+  }
+
+  @Test
+  public void testAddEncyptionKeyPDF() throws IOException {
+    File file =
+        new File(Paths.get("").toAbsolutePath() + File.separator + "test/resources/sample.pdf");
+    Http.MultipartFormData.Part<Source<ByteString, ?>> part =
+        new Http.MultipartFormData.FilePart<>(
+            "fileName",
+            "sample.pdf",
+            "application/pdf",
+            FileIO.fromPath(file.toPath()),
+            Files.size(file.toPath()));
+
+    Http.RequestBuilder request =
+        Helpers.fakeRequest()
+            .uri("/v1/org/update/encryptionkey")
+            .method("PATCH")
+            .bodyRaw(
+                Collections.singletonList(part),
+                play.libs.Files.singletonTemporaryFileCreator(),
+                application.asScala().materializer());
+
+    Result result = Helpers.route(application, request);
+    assertEquals(400, result.status());
+  }
+
+  @Test
+  public void testAddEncryptionKeyException() {
+    Map userAuthentication = new HashMap<String, String>();
+    userAuthentication.put(JsonKey.USER_ID, "uuiuhcf784508 8y8c79-fhh");
+    PowerMockito.mockStatic(RequestInterceptor.class);
+    when(RequestInterceptor.verifyRequestData(Mockito.anyObject(), Mockito.anyMap()))
+        .thenReturn(userAuthentication);
+
+    JsonNode json = null;
+    Http.RequestBuilder req =
+        new Http.RequestBuilder()
+            .bodyJson(json)
+            .uri("/v1/org/update/encryptionkey")
+            .method("PATCH");
+    // req.headers(headerMap);
+    Result result = Helpers.route(application, req);
+    assertEquals(400, result.status());
   }
 
   private Map createOrUpdateOrganisationRequest(

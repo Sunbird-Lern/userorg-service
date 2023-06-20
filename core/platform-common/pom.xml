@@ -192,5 +192,11 @@
             <artifactId>json</artifactId>
             <version>20200518</version>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play_2.11</artifactId>
+            <version>2.7.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>
