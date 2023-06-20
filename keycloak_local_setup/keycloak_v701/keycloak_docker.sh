@@ -18,20 +18,6 @@ mkdir $sunbird_dbs_path/nginx
 
 mkdir $sunbird_dbs_path/nginx/data
 
-cp nginx/nginx.conf $sunbird_dbs_path/nginx/data/nginx.conf
-
-echo "nginx conf copied."
-
-docker run --name nginx_local -p 80:80 -d nginx
-
-echo "nginx container created."
-
-docker cp $sunbird_dbs_path/nginx/data/nginx.conf nginx_local:/etc/nginx/
-
-docker container restart nginx_local
-
-echo "nginx container restarted."
-
 mkdir $sunbird_dbs_path/keycloak
 
 mkdir $sunbird_dbs_path/keycloak/tmp
@@ -46,6 +32,11 @@ cp -r realm $sunbird_dbs_path/keycloak
 
 cp -r spi $sunbird_dbs_path/keycloak
 
+# command to disable ubuntu-firewall for ubuntu machines
+ufw disable
+
+export docker_network_gateway=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.Gateway}}{{end}}' kc_postgres)
+
 docker run --name kc_local -p 8080:8080 \
         -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=sunbird \
         -v $sunbird_dbs_path/keycloak/tmp:/tmp \
@@ -53,16 +44,12 @@ docker run --name kc_local -p 8080:8080 \
         -v $sunbird_dbs_path/keycloak/spi:/opt/jboss/keycloak/providers \
         -v $sunbird_dbs_path/keycloak/modules:/opt/jboss/keycloak/modules/system/layers/keycloak/org/postgresql/main \
         --net keycloak-postgres-network \
-        -e PROXY_ADDRESS_FORWARDING=true \
         -e KEYCLOAK_IMPORT="/opt/jboss/keycloak/imports/sunbird-realm.json -Dkeycloak.profile.feature.upload_scripts=enabled" \
+        -e sunbird_user_service_base_url="http://$docker_network_gateway:9000" \
         -d jboss/keycloak:7.0.1
 
 
 echo "keycloak container created."
-
-docker container restart kc_local
-
-echo "keycloak container restarted."
 
 docker cp themes/sunbird kc_local:/opt/jboss/keycloak/themes/sunbird
 
