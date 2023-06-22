@@ -67,7 +67,7 @@ psql postgresql://kcpgadmin:kcpgpassword@kc_postgres:5432/quartz
 10. Local user-org setup keycloak related configurations will be as follows:
 ```shell
 sunbird_keycloak_user_federation_provider_id = #Cassandra-storage-provider - Provider Id value. 
-sunbird_sso_url = http://localhost:8080/auth
+sunbird_sso_url = http://localhost:8080/auth/
 sunbird_sso_realm = sunbird
 sunbird_sso_client_id = lms
 sunbird_sso_client_secret = #newly generated secret of 'lms' client
@@ -109,7 +109,10 @@ Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understa
 ### Steps for integrating local keycloak setup with local user-org service setup
 1. Ensure postgres and keycloak containers are up and running.
 2. Ensure environment variables are exported with values from keycloak as mentioned above in 'Step 10'
-3. Ensure public key from 'sunbird' realm is copied as file under 'keys' folder with 'kid' as file name.
+3. Ensure public key from 'sunbird' realm is copied as file under 'keys' folder with 'kid' as file name. Run below command after updating '$PATH_TO_WORKSPACE' value in the command.
+```shell
+env "accesstoken.publickey.basepath=$PATH_TO_WORKSPACE/keys/" bash
+```
 ![img_13.png](img_13.png)![img_12.png](img_12.png)
 4. Add CORS filter to 'application.conf' in controller folder of user-org service.
 ```shell
@@ -119,11 +122,36 @@ Please refer to https://project-sunbird.atlassian.net/l/cp/St3y353z for understa
 5. Ensure local user-org service is restarted after above steps
 6. Create a default organisations 'custodian' and 'sunbird' in your local setup. (with property 'channel_registration_disabled=true' in externalresource.properties). Save organisation Ids from response.
 7. export 'custodian' organisation id value from response to 'custodianRootOrgId' and 'custodianOrgId' environment variables.
-8. Restart user-org service
-9. Create user using below curl. Ensure you get success response 
+8. Restart user-org service.
+
+
+### Steps to create default system admin user and other tenant users
+1. Login to keycloak and go to 'Users' menu. Click 'Add user' button. Enter user details and 'Save'.
+![img_8.png](img_8.png) ![img_9.png](img_9.png)
+2. As default user gets created, go to 'Role Mappings' sub menu of the user. Add 'admin' to 'Assigned Roles'.
+![img_18.png](img_18.png)
+3. Under 'Client Roles', select 'realm management' and add 'manage-users' to 'Assigned Roles'.
+![img_19.png](img_19.png)
+4. Go to 'Credentials' menu and set password for the default user.
+![img_20.png](img_20.png)
+5. Now you can generate token for creating users via below CURL with default system admin user token.
+   - CURL TO GENERATE USER TOKEN. Copy "access_token" value from the response and use as create user CURL 'x-authenticated-user-token' header's value.
+![img_21.png](img_21.png)
 ```shell
-curl --location --request POST 'localhost:9000/v1/user/create' \
+curl --location --request POST 'localhost:8080/auth/realms/sunbird/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_id=lms' \
+--data-urlencode 'client_secret=#newly generated secret of 'lms' client' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'username=Systemadminuser' \
+--data-urlencode 'password=Test@123'
+```
+  - CURL TO CREATE USER.  
+![img_22.png](img_22.png)
+```shell
+curl --location --request POST 'localhost:9000/v1/ssouser/create' \
 --header 'Content-Type: application/json' \
+--header 'x-authenticated-user-token: #'access_token' value from above CURL response' \
 --data-raw '{
     "request": {
         "firstName": "Test",
@@ -138,10 +166,10 @@ curl --location --request POST 'localhost:9000/v1/user/create' \
 }'
 ```
 ![img_15.png](img_15.png)
-10. login to keycloak. Go to user's menu and search for the user using username
-![img_14.png](img_14.png)
-![img_16.png](img_16.png)
-11. Ensure you are able to generate user token for the newly created user
+6. login to keycloak. Go to user's menu and search for the user using username
+   ![img_14.png](img_14.png)
+   ![img_16.png](img_16.png)
+7. Ensure you are able to generate user token for the newly created user
 ```shell
 curl --location --request POST 'localhost:8080/auth/realms/sunbird/protocol/openid-connect/token' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -152,3 +180,12 @@ curl --location --request POST 'localhost:8080/auth/realms/sunbird/protocol/open
 --data-urlencode 'password=Test@123'
 ```
 ![img_17.png](img_17.png)
+
+
+Note: Always create an admin user belonging to a tenant and assign 'ORG_ADMIN' role. Org Admin has ability to create other users via application.
+
+
+### Steps to perform token validation
+
+
+For server side token validation, please refer to https://project-sunbird.atlassian.net/wiki/spaces/DevOps/pages/3274276929/Adminutils+on+Sunbird

@@ -165,14 +165,11 @@ export sunbird_msg_sender=
 export  sunbird_installation_display_name_for_sms=
 ```
 
-### Once the setup done, create user using below APIs
+### Post configuration step
 
-```shell
-curl --location '{{host}}/v1/user/create' \
---header 'Content-Type: application/json' \
---data-raw '<user_create_data>'
-```
+Once setup is complete, please refer to [keycloak_local_setup](keycloak_local_setup/keycloak_local_setup.md)
 
+**Note:** 
 {{host}} has to be replaced with respective local host url and <user_create_data> has to be replaced with the latest
 payload of USER_CREATE_API
 If you are able to create an user successfully then the local setup is working normal.
