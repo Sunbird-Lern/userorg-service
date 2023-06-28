@@ -35,6 +35,7 @@ import org.sunbird.sso.KeycloakBruteForceAttackUtil;
 import org.sunbird.sso.KeycloakUtil;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserUtility;
 
 @RunWith(PowerMockRunner.class)
@@ -60,6 +61,7 @@ public class ResetPasswordActorTest {
   private CassandraOperation cassandraOperation = null;
   Props props = Props.create(ResetPasswordActor.class);
   ActorSystem system = ActorSystem.create("ResetPasswordActor");
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   private void getRecordByIdNonEmptyResponse() {
     Response response = new Response();
@@ -78,7 +80,7 @@ public class ResetPasswordActorTest {
     userList.add(user);
     response.getResult().put(JsonKey.RESPONSE, userList);
     PowerMockito.when(
-            cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USER, "ValidUserId", null))
+            cassandraOperation.getRecordById(KEYSPACE_NAME, JsonKey.USER, "ValidUserId", null))
         .thenReturn(response);
   }
 
@@ -86,7 +88,7 @@ public class ResetPasswordActorTest {
     Response response = new Response();
     PowerMockito.when(
             cassandraOperation.getRecordById(
-                JsonKey.SUNBIRD, JsonKey.USER, "invalidParameter", null))
+                    KEYSPACE_NAME, JsonKey.USER, "invalidParameter", null))
         .thenReturn(response);
   }
 

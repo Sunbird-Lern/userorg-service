@@ -35,7 +35,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
 
   @Override
   public Response assignUserRole(List<Map<String, Object>> userRoleMap, RequestContext context) {
-    return cassandraOperation.batchInsert(JsonKey.SUNBIRD, TABLE_NAME, userRoleMap, context);
+    return cassandraOperation.batchInsert(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, userRoleMap, context);
   }
 
   @Override
@@ -47,7 +47,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
       compositeKey.put(JsonKey.ROLE, dataMap.remove(JsonKey.ROLE));
       result =
           cassandraOperation.updateRecord(
-              JsonKey.SUNBIRD, TABLE_NAME, dataMap, compositeKey, context);
+                  ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, dataMap, compositeKey, context);
     }
     return result;
   }
@@ -55,7 +55,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
   @Override
   public void deleteUserRole(List<Map<String, String>> userRoleMap, RequestContext context) {
     for (Map<String, String> dataMap : userRoleMap) {
-      cassandraOperation.deleteRecord(JsonKey.SUNBIRD, TABLE_NAME, dataMap, context);
+      cassandraOperation.deleteRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, dataMap, context);
     }
   }
 
@@ -68,7 +68,7 @@ public final class UserRoleDaoImpl implements UserRoleDao {
       compositeKeyMap.put(JsonKey.ROLE, role);
     }
     Response existingRecord =
-        cassandraOperation.getRecordById(JsonKey.SUNBIRD, TABLE_NAME, compositeKeyMap, context);
+        cassandraOperation.getRecordById(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, compositeKeyMap, context);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) existingRecord.get(JsonKey.RESPONSE);
 

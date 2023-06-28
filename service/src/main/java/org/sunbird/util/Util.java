@@ -19,7 +19,7 @@ import org.sunbird.response.Response;
 public final class Util {
 
   public static final Map<String, DbInfo> dbInfoMap = new HashMap<>();
-  private static final String KEY_SPACE_NAME = "sunbird";
+  private static final String KEY_SPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static final DecryptionService decService =
       org.sunbird.datasecurity.impl.ServiceFactory.getDecryptionServiceInstance();

@@ -31,7 +31,7 @@ public class OrgDaoImpl implements OrgDao {
   private final ObjectMapper mapper = new ObjectMapper();
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private static OrgDao orgDao;
-  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final String ORG_TABLE_NAME = JsonKey.ORGANISATION;
 
   public static OrgDao getInstance() {
@@ -68,7 +68,7 @@ public class OrgDaoImpl implements OrgDao {
     if (CollectionUtils.isNotEmpty(orgIds)) {
       Response response =
           cassandraOperation.getPropertiesValueById(
-              KEYSPACE_NAME, ORG_TABLE_NAME, orgIds, fields, context);
+                  KEYSPACE_NAME, ORG_TABLE_NAME, orgIds, fields, context);
       List<Map<String, Object>> responseList =
           (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
       if (CollectionUtils.isNotEmpty(responseList)) {

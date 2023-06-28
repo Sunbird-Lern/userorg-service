@@ -44,7 +44,7 @@ public class DataCacheHandler implements Runnable {
   private static Map<String, Map<String, Object>> formApiDataConfigMap = new ConcurrentHashMap<>();
   private static List<Map<String, String>> roleList = new CopyOnWriteArrayList<>();
   private CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static final String KEY_SPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEY_SPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static Response roleCacheResponse;
   private static Map<String, Integer> orderMap;
   public static String[] bulkUserAllowedFields = {

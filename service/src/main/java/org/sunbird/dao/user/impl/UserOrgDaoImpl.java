@@ -12,6 +12,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public final class UserOrgDaoImpl implements UserOrgDao {
 
@@ -42,20 +43,20 @@ public final class UserOrgDaoImpl implements UserOrgDao {
     compositeKey.put(JsonKey.USER_ID, request.remove(JsonKey.USER_ID));
     compositeKey.put(JsonKey.ORGANISATION_ID, request.remove(JsonKey.ORGANISATION_ID));
     return cassandraOperation.updateRecord(
-        JsonKey.SUNBIRD, TABLE_NAME, request, compositeKey, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, request, compositeKey, context);
   }
 
   @Override
   public Response createUserOrg(UserOrg userOrg, RequestContext context) {
     return cassandraOperation.insertRecord(
-        JsonKey.SUNBIRD, TABLE_NAME, mapper.convertValue(userOrg, Map.class), context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, mapper.convertValue(userOrg, Map.class), context);
   }
 
   @Override
   public Response getUserOrgListByUserId(String userId, RequestContext context) {
     Map<String, Object> compositeKey = new LinkedHashMap<>(2);
     compositeKey.put(JsonKey.USER_ID, userId);
-    return cassandraOperation.getRecordById(JsonKey.SUNBIRD, TABLE_NAME, compositeKey, context);
+    return cassandraOperation.getRecordById(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, compositeKey, context);
   }
 
   @Override
@@ -66,12 +67,12 @@ public final class UserOrgDaoImpl implements UserOrgDao {
       searchMap.put(JsonKey.ORGANISATION_ID, organisationId);
     }
     return cassandraOperation.getRecordsByCompositeKey(
-        JsonKey.SUNBIRD, JsonKey.USER_ORG, searchMap, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_ORG, searchMap, context);
   }
 
   @Override
   public Response insertRecord(Map reqMap, RequestContext context) {
-    return cassandraOperation.insertRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, reqMap, context);
+    return cassandraOperation.insertRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_ORG, reqMap, context);
   }
 
   public void deleteUserOrgMapping(List<Map<String, Object>> userOrgList, RequestContext context) {
@@ -79,7 +80,7 @@ public final class UserOrgDaoImpl implements UserOrgDao {
       Map<String, String> compositeKey = new LinkedHashMap<>(2);
       compositeKey.put(JsonKey.USER_ID, (String) userOrg.get(JsonKey.USER_ID));
       compositeKey.put(JsonKey.ORGANISATION_ID, (String) userOrg.get(JsonKey.ORGANISATION_ID));
-      cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USER_ORG, compositeKey, context);
+      cassandraOperation.deleteRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_ORG, compositeKey, context);
     }
   }
 }

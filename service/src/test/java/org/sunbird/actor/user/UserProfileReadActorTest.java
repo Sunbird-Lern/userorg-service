@@ -49,6 +49,7 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.sso.impl.KeyCloakServiceImpl;
 import org.sunbird.util.DataCacheHandler;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.UserUtility;
 import org.sunbird.util.Util;
 import org.sunbird.util.user.UserUtil;
@@ -100,6 +101,7 @@ public class UserProfileReadActorTest {
   private static final String INVALID_PHONE = "000";
   private static final String VALID_USERNAME = "USERNAME";
   private static ElasticSearchService esService;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   @Before
   public void beforeEachTest() {
@@ -389,7 +391,7 @@ public class UserProfileReadActorTest {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
+            KEYSPACE_NAME, JsonKey.USR_DECLARATION_TABLE, req, null))
         .thenReturn(getUserDeclarationResponse(true));
     boolean result = testScenario(reqObj, null);
     assertTrue(result);
@@ -489,7 +491,7 @@ public class UserProfileReadActorTest {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, VALID_USER_ID);
     when(cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USR_DECLARATION_TABLE, req, null))
+            KEYSPACE_NAME, JsonKey.USR_DECLARATION_TABLE, req, null))
         .thenReturn(getUserDeclarationResponse(true));
     reqMap = getUserProfileByKeyRequest(JsonKey.EMAIL, INVALID_EMAIL);
     setCassandraResponse(getCassandraResponse(false));

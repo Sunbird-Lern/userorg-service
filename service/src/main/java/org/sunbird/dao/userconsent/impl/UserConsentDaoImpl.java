@@ -8,6 +8,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class UserConsentDaoImpl implements UserConsentDao {
   private final String TABLE_NAME = "user_consent";
@@ -24,7 +25,7 @@ public class UserConsentDaoImpl implements UserConsentDao {
 
   @Override
   public Response updateConsent(Map<String, Object> consent, RequestContext context) {
-    return cassandraOperation.upsertRecord(JsonKey.SUNBIRD, TABLE_NAME, consent, context);
+    return cassandraOperation.upsertRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, consent, context);
   }
 
   @Override
@@ -32,7 +33,7 @@ public class UserConsentDaoImpl implements UserConsentDao {
       Map<String, Object> consentReq, RequestContext context) {
     Response response =
         cassandraOperation.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, TABLE_NAME, consentReq, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, consentReq, context);
     return (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
   }
 }
