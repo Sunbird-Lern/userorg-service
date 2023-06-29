@@ -261,8 +261,8 @@ public class ProjectUtil {
    * @author Manzarul
    */
   public enum EsType {
-    user(getConfigValue(JsonKey.ES_USER_INDEX)),
-    organisation(getConfigValue(JsonKey.ES_ORG_INDEX)),
+    user(getConfigValue(JsonKey.ES_USER_INDEX_ALIAS)),
+    organisation(getConfigValue(JsonKey.ES_ORG_INDEX_INDEX)),
     usernotes(getConfigValue(JsonKey.ES_USER_NOTES_INDEX)),
     location(getConfigValue(JsonKey.ES_LOCATION_INDEX)),
     userfeed(getConfigValue(JsonKey.ES_USER_FEED_INDEX));
