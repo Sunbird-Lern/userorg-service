@@ -649,8 +649,8 @@ public final class JsonKey {
   public static final String ES_LOCATION_INDEX = "es_location_index";
   public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
   public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
-  public static final String ES_USER_INDEX = "es_user_index";
-  public static final String ES_ORG_INDEX = "es_org_index";
+  public static final String ES_USER_INDEX = "user_index_alias";
+  public static final String ES_ORG_INDEX = "org_index_alias";
 
   private JsonKey() {}
 }
