@@ -76,6 +76,7 @@ public class EmailServiceActorTest {
     when(cassandraOperation.getRecordById(
             Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
         .thenReturn(cassandraGetRecordById());
+    when(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE)).thenReturn("sunbird");
   }
 
   private static Response cassandraGetRecordById() {

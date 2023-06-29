@@ -32,6 +32,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.duration.FiniteDuration;
 
 @RunWith(PowerMockRunner.class)
@@ -60,7 +61,7 @@ public class SystemSettingsActorTest {
   private static String FIELD = "someField";
   private static String VALUE = "someValue";
   private ElasticSearchRestHighImpl esUtil;
-  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final String TABLE_NAME = JsonKey.SYSTEM_SETTINGS_DB;
 
   @Before

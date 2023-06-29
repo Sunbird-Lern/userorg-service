@@ -22,6 +22,7 @@ import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -42,6 +43,7 @@ public class EmailTemplateDaoImplTest {
   private static final String DEFAULT_EMAIL_TEMPLATE_NAME = "default";
   private static final String TEMPLATE = "template";
   private EmailTemplateDao emailTemplateDao = new EmailTemplateDaoImpl();
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   @Before
   public void setUp() throws Exception {
@@ -61,7 +63,7 @@ public class EmailTemplateDaoImplTest {
     orgList.add(map);
     response.put(JsonKey.RESPONSE, orgList);
     when(cassandraOperation.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME, null))
+            KEYSPACE_NAME, EMAIL_TEMPLATE, idList, JsonKey.NAME, null))
         .thenReturn(response);
     String resp = emailTemplateDao.getTemplate(StringUtils.EMPTY, null);
     Assert.assertEquals(null, resp);
@@ -78,7 +80,7 @@ public class EmailTemplateDaoImplTest {
     orgList.add(map);
     response.put(JsonKey.RESPONSE, orgList);
     when(cassandraOperation.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, EMAIL_TEMPLATE, idList, JsonKey.NAME, null))
+            KEYSPACE_NAME, EMAIL_TEMPLATE, idList, JsonKey.NAME, null))
         .thenReturn(response);
     String resp = emailTemplateDao.getTemplate("Sunbird_email_template", null);
     Assert.assertEquals("Course is Been completed", resp);

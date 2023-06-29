@@ -11,6 +11,7 @@ import org.sunbird.model.ClaimStatus;
 import org.sunbird.model.ShadowUser;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class ShadowUserMigrationService {
   private static final LoggerUtil logger = new LoggerUtil(ShadowUserMigrationService.class);
@@ -29,7 +30,7 @@ public class ShadowUserMigrationService {
     ShadowUser shadowUser = null;
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, context);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       shadowUser =
           mapper.convertValue(
@@ -53,7 +54,7 @@ public class ShadowUserMigrationService {
     compositeKeysMap.put(JsonKey.CHANNEL, channel);
     Response response =
         cassandraOperation.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.SHADOW_USER, propertiesMap, compositeKeysMap, context);
     logger.info(
         context,
         "MigrationUtils:updateRecord:update in cassandra  with userExtId"
@@ -116,7 +117,7 @@ public class ShadowUserMigrationService {
     List<ShadowUser> shadowUsersList = new ArrayList<>();
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, propsMap, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, propsMap, context);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       ((List) response.getResult().get(JsonKey.RESPONSE))
           .stream()
@@ -142,7 +143,7 @@ public class ShadowUserMigrationService {
     List<ShadowUser> shadowUsersList = new ArrayList<>();
     Response response =
         cassandraOperation.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.SHADOW_USER, JsonKey.USERIDS, userId, context);
     if (!((List) response.getResult().get(JsonKey.RESPONSE)).isEmpty()) {
       ((List) response.getResult().get(JsonKey.RESPONSE))
           .stream()

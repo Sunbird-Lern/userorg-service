@@ -16,6 +16,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 /**
  * Data access implementation for BulkUploadProcessTask entity.
@@ -26,7 +27,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
   private final LoggerUtil logger = new LoggerUtil(BulkUploadProcessTaskDaoImpl.class);
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();
-  private final String KEYSPACE_NAME = "sunbird";
+  private final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private final String TABLE_NAME = "bulk_upload_process_task";
 
   public static BulkUploadProcessTaskDao bulkUploadProcessTaskDao = null;
@@ -49,7 +50,7 @@ public class BulkUploadProcessTaskDaoImpl implements BulkUploadProcessTaskDao {
     Map<String, Map<String, Object>> map = CassandraUtil.batchUpdateQuery(bulkUploadProcessTask);
     Response response =
         cassandraOperation.updateRecord(
-            KEYSPACE_NAME,
+                KEYSPACE_NAME,
             TABLE_NAME,
             map.get(JsonKey.NON_PRIMARY_KEY),
             map.get(JsonKey.PRIMARY_KEY),
