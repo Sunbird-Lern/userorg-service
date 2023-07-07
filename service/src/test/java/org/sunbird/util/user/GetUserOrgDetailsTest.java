@@ -17,6 +17,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 import org.sunbird.response.Response;
 
@@ -30,6 +31,7 @@ import org.sunbird.response.Response;
   "javax.crypto.*"
 })
 public class GetUserOrgDetailsTest {
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   @Test
   public void testGetUserOrgDetails() {
@@ -49,7 +51,7 @@ public class GetUserOrgDetailsTest {
     ids.add("123-456-789");
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.getRecordsByPrimaryKeys(
-            JsonKey.SUNBIRD, "user_organisation", ids, JsonKey.USER_ID, null))
+            KEYSPACE_NAME, "user_organisation", ids, JsonKey.USER_ID, null))
         .thenReturn(response1);
     List<Map<String, Object>> res = UserUtil.getActiveUserOrgDetails("123-456-789", null);
     Assert.assertNotNull(res);

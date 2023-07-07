@@ -14,6 +14,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
@@ -29,7 +30,7 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
   public void insertSelfDeclaredFields(Map<String, Object> extIdMap, RequestContext context) {
 
     cassandraOperation.insertRecord(
-        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, extIdMap, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, extIdMap, context);
   }
 
   public List<Map<String, Object>> getUserSelfDeclaredFields(
@@ -41,7 +42,7 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
     properties.put(JsonKey.PERSONA, userDeclareEntity.getPersona());
     Response response =
         cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, properties, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -64,7 +65,7 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
     updateFieldsMap.put(
         JsonKey.UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     cassandraOperation.updateRecord(
-        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
     return userDeclareEntity;
   }
 
@@ -75,7 +76,7 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
     properties.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, properties, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -89,7 +90,7 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
     properties.put(JsonKey.ORG_ID, orgId);
     properties.put(JsonKey.PERSONA, persona);
     cassandraOperation.deleteRecord(
-        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, properties, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, properties, context);
   }
 
   public Response updateUserSelfDeclaredFields(
@@ -97,6 +98,6 @@ public class UserSelfDeclarationDaoImpl implements UserSelfDeclarationDao {
       Map<String, Object> compositeKey,
       RequestContext context) {
     return cassandraOperation.updateRecord(
-        JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, updateFieldsMap, compositeKey, context);
   }
 }

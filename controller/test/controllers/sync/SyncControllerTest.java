@@ -61,7 +61,7 @@ public class SyncControllerTest extends BaseApplicationTest {
     Map<String, Object> requestMap = new HashMap<>();
     Map<String, Object> innerMap = new HashMap<>();
     innerMap.put(JsonKey.OBJECT_TYPE, JsonKey.ORGANISATION);
-    innerMap.put(JsonKey.OPERATION_FOR, "learner");
+    innerMap.put(JsonKey.OPERATION_FOR, "userorg");
     requestMap.put(JsonKey.REQUEST, innerMap);
     String data = mapToJson(requestMap);
 

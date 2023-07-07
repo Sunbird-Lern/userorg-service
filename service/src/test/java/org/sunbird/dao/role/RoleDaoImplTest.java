@@ -22,6 +22,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.Role;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -41,6 +42,7 @@ public class RoleDaoImplTest {
   private CassandraOperation cassandraOperation;
   private Response response;
   private RoleDao roleDao;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   @Before
   public void setUp() throws Exception {
@@ -59,7 +61,7 @@ public class RoleDaoImplTest {
       cassandraOperation = PowerMockito.mock(CassandraOperation.class);
       PowerMockito.mockStatic(ServiceFactory.class);
       when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-      when(cassandraOperation.getAllRecords(JsonKey.SUNBIRD, TABLE_NAME, null))
+      when(cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, null))
           .thenReturn(response);
       List<Role> roleList = roleDao.getRoles(null);
       Assert.assertEquals("TEACHER", roleList.get(0).getName());

@@ -14,6 +14,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
 
@@ -49,7 +50,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, userId);
     Response response =
-        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, context);
+        cassandraOperation.getRecordById(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USR_EXT_IDNT_TABLE, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -64,7 +65,7 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     req.put(JsonKey.USER_ID, userId);
     Response response =
         cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.USER_DECLARATION_DB, req, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USER_DECLARATION_DB, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, Object>>) response.getResult().get(JsonKey.RESPONSE);
     }

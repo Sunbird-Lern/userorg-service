@@ -21,7 +21,7 @@ public class NotesDaoImpl implements NotesDao {
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
 
-  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final String TABLE_NAME = "user_notes";
 
   private static NotesDao notesDao;

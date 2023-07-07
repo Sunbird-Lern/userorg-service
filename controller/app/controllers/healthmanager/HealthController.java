@@ -45,7 +45,7 @@ public class HealthController extends BaseController {
    *
    * @return CompletionStage<Result>
    */
-  public CompletionStage<Result> getHealth(Http.Request httpRequest) {
+  public CompletionStage<Result> health(Http.Request httpRequest) {
     Request reqObj = new Request();
     try {
       handleSigTerm();
@@ -72,7 +72,7 @@ public class HealthController extends BaseController {
    *
    * @return CompletionStage<Result>
    */
-  public CompletionStage<Result> getLearnerServiceHealth(String val, Http.Request httpRequest) {
+  public CompletionStage<Result> serviceHealth(String val, Http.Request httpRequest) {
     Map<String, Object> finalResponseMap = new HashMap<>();
     List<Map<String, Object>> responseList = new ArrayList<>();
     Request reqObj = new Request();
@@ -99,11 +99,11 @@ public class HealthController extends BaseController {
         handleSigTerm();
         responseList.add(ProjectUtil.createCheckResponse(JsonKey.LEARNER_SERVICE, false, null));
         finalResponseMap.put(JsonKey.CHECKS, responseList);
-        finalResponseMap.put(JsonKey.NAME, "Learner service health");
+        finalResponseMap.put(JsonKey.NAME, "UserOrg service health");
         finalResponseMap.put(JsonKey.Healthy, true);
         Response response = new Response();
         response.getResult().put(JsonKey.RESPONSE, finalResponseMap);
-        response.setId("learner.service.health.api");
+        response.setId("api.userorg.service.health");
         response.setVer(getApiVersion(httpRequest.path()));
         response.setTs(Common.getFromRequest(httpRequest, Attrs.X_REQUEST_ID));
         return CompletableFuture.completedFuture(ok(play.libs.Json.toJson(response)));

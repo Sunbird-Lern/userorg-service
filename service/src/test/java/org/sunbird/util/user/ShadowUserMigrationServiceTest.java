@@ -25,6 +25,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.ShadowUserMigrationService;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -40,6 +41,7 @@ public class ShadowUserMigrationServiceTest {
 
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   @Before
   public void beforeEachTest() {
@@ -48,16 +50,16 @@ public class ShadowUserMigrationServiceTest {
     cassandraOperationImpl = mock(CassandraOperationImpl.class);
     when(ServiceFactory.getInstance()).thenReturn(cassandraOperationImpl);
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "EFG", null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "EFG", null))
         .thenReturn(getRecordsById(false));
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "DEF", null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "DEF", null))
         .thenReturn(getRecordsById(true));
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "ABC", new HashMap<>(), null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "ABC", new HashMap<>(), null))
         .thenReturn(getRecordsById(false));
     when(cassandraOperationImpl.searchValueInList(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "XYZ", new HashMap<>(), null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, JsonKey.USER_IDs, "XYZ", new HashMap<>(), null))
         .thenReturn(getRecordsById(true));
   }
 
@@ -79,7 +81,7 @@ public class ShadowUserMigrationServiceTest {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     compositeKeysMap.put(JsonKey.CHANNEL, "anyChannel");
     when(cassandraOperationImpl.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
         .thenReturn(response);
     boolean isRecordUpdated =
         ShadowUserMigrationService.updateRecord(new HashMap<>(), "anyChannel", "anyUserExtId", null);
@@ -97,7 +99,7 @@ public class ShadowUserMigrationServiceTest {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     compositeKeysMap.put(JsonKey.CHANNEL, "anyChannel");
     when(cassandraOperationImpl.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
         .thenReturn(response);
     boolean isRecordUpdated = ShadowUserMigrationService.markUserAsRejected(shadowUser, null);
     Assert.assertEquals(true, isRecordUpdated);
@@ -114,7 +116,7 @@ public class ShadowUserMigrationServiceTest {
     compositeKeysMap.put(JsonKey.USER_EXT_ID, "anyUserExtId");
     compositeKeysMap.put(JsonKey.CHANNEL, "anyChannel");
     when(cassandraOperationImpl.updateRecord(
-            JsonKey.SUNBIRD, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
+            KEYSPACE_NAME, JsonKey.SHADOW_USER, new HashMap<>(), compositeKeysMap, null))
         .thenReturn(response);
     boolean isRecordUpdated =
         ShadowUserMigrationService.updateClaimStatus(shadowUser, ClaimStatus.ELIGIBLE.getValue(), null);

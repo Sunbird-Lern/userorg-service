@@ -131,7 +131,7 @@ public final class JsonKey {
   public static final String LANGUAGE = "language";
   public static final String LAST_LOGIN_TIME = "lastLoginTime";
   public static final String LAST_NAME = "lastName";
-  public static final String LEARNER_SERVICE = "Learner service";
+  public static final String LEARNER_SERVICE = "UserOrg service";
   public static final String LEVEL = "level";
   public static final String LIMIT = "limit";
   public static final String LIST = "List";
@@ -644,6 +644,13 @@ public final class JsonKey {
   public static final String DATA_SECURITY_POLICY = "dataSecurityPolicy";
   public static final String JOB = "job";
   public static final String USER_PRIVATE_FIELDS = "userPrivateFields";
+  //Release 5.4.0 LR-102
+  public static final String SUNBIRD_KEYSPACE = "sunbird_keyspace";
+  public static final String ES_LOCATION_INDEX = "es_location_index";
+  public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
+  public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
+  public static final String ES_USER_INDEX_ALIAS = "user_index_alias";
+  public static final String ES_ORG_INDEX_INDEX = "org_index_alias";
 
   private JsonKey() {}
 }

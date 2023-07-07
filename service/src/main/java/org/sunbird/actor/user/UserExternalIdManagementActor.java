@@ -161,7 +161,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     Map<String, Object> req = new HashMap<>();
     req.put(JsonKey.USER_ID, requestMap.get(JsonKey.USER_ID));
     Response response =
-        cassandraOperation.getRecordById(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, req, context);
+        cassandraOperation.getRecordById(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USR_EXT_IDNT_TABLE, req, context);
     if (null != response && null != response.getResult()) {
       dbResExternalIds = (List<Map<String, String>>) response.getResult().get(JsonKey.RESPONSE);
     }
@@ -178,7 +178,7 @@ public class UserExternalIdManagementActor extends BaseActor {
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
     // map.remove(JsonKey.STATUS);
-    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map, context);
+    cassandraOperation.deleteRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USR_EXT_IDNT_TABLE, map, context);
   }
 
   private void throwExternalIDNotFoundException(String externalId, String idType, String provider) {
@@ -210,7 +210,7 @@ public class UserExternalIdManagementActor extends BaseActor {
       map.put(JsonKey.LAST_UPDATED_BY, requestMap.get(JsonKey.UPDATED_BY));
       map.put(JsonKey.LAST_UPDATED_ON, new Timestamp(Calendar.getInstance().getTime().getTime()));
     }
-    cassandraOperation.upsertRecord(JsonKey.SUNBIRD, JsonKey.USR_EXT_IDNT_TABLE, map, context);
+    cassandraOperation.upsertRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.USR_EXT_IDNT_TABLE, map, context);
     return map;
   }
 }

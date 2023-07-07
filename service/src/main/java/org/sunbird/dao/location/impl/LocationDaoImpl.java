@@ -26,7 +26,7 @@ public class LocationDaoImpl implements LocationDao {
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ElasticSearchService esUtil = EsClientFactory.getInstance(JsonKey.REST);
   private final ObjectMapper mapper = new ObjectMapper();
-  private static final String KEYSPACE_NAME = "sunbird";
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final String LOCATION_TABLE_NAME = "location";
 
   @Override
@@ -73,14 +73,14 @@ public class LocationDaoImpl implements LocationDao {
   @Override
   public Response read(String locationId, RequestContext context) {
     return cassandraOperation.getRecordById(
-        KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, context);
+            KEYSPACE_NAME, LOCATION_TABLE_NAME, locationId, context);
   }
 
   @Override
   public Response getLocationsByIds(
       List<String> locationIds, List<String> locationFields, RequestContext context) {
     return cassandraOperation.getPropertiesValueById(
-        KEYSPACE_NAME, LOCATION_TABLE_NAME, locationIds, locationFields, context);
+            KEYSPACE_NAME, LOCATION_TABLE_NAME, locationIds, locationFields, context);
   }
 
   @Override

@@ -32,7 +32,7 @@ public class UserDaoImpl implements UserDao {
 
   private final LoggerUtil logger = new LoggerUtil(UserDaoImpl.class);
   private static final String TABLE_NAME = JsonKey.USER;
-  private static final String KEY_SPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEY_SPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private final ElasticSearchService esService = EsClientFactory.getInstance(JsonKey.REST);
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();

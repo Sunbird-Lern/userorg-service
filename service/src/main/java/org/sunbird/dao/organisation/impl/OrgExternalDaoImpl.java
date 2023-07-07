@@ -11,11 +11,12 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class OrgExternalDaoImpl implements OrgExternalDao {
 
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
-  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final String ORG_EXT_TABLE_NAME = JsonKey.ORG_EXT_ID_DB;
 
   @Override

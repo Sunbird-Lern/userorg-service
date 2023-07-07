@@ -11,6 +11,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.RoleGroup;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class RoleGroupDaoImpl implements RoleGroupDao {
 
@@ -27,7 +28,7 @@ public class RoleGroupDaoImpl implements RoleGroupDao {
   @SuppressWarnings("unchecked")
   @Override
   public List<RoleGroup> getRoleGroups(RequestContext context) {
-    String KEYSPACE_NAME = "sunbird";
+    String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
     String TABLE_NAME = "role_group";
     Response roleGroupResults =
         getCassandraOperation().getAllRecords(KEYSPACE_NAME, TABLE_NAME, context);
