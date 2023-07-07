@@ -550,6 +550,19 @@ public class OrganisationManagementActor extends BaseActor {
         sender().tell(exception, self());
       }
       String container = ProjectUtil.getConfigValue(JsonKey.CLOUD_SERVICE_CONTAINER);
+      if (fetchedKeys != null
+              && fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)
+              && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
+        String oldKey =
+                fetchedKeys
+                        .get(JsonKey.EXHAUST_ENCRYPTION_KEY)
+                        .get(0)
+                        .substring(
+                                fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).indexOf(container)
+                                        + container.length()
+                                        + 1);
+        CloudStorageUtil.deleteFile(cspProvider, container, oldKey);
+      }
       publicKeyUrl =
           CloudStorageUtil.upload(
               cspProvider,
@@ -560,19 +573,6 @@ public class OrganisationManagementActor extends BaseActor {
                   + File.separator
                   + fileName,
               file.getAbsolutePath());
-      if (fetchedKeys != null
-          && fetchedKeys.containsKey(JsonKey.EXHAUST_ENCRYPTION_KEY)
-          && !fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).isEmpty()) {
-        String oldKey =
-            fetchedKeys
-                .get(JsonKey.EXHAUST_ENCRYPTION_KEY)
-                .get(0)
-                .substring(
-                    fetchedKeys.get(JsonKey.EXHAUST_ENCRYPTION_KEY).get(0).indexOf(container)
-                        + container.length()
-                        + 1);
-        CloudStorageUtil.deleteFile(cspProvider, container, oldKey);
-      }
       return publicKeyUrl;
     } catch (IOException e) {
       throw new ProjectCommonException(
