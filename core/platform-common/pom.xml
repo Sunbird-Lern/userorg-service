@@ -21,7 +21,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <learner.akka.version>2.5.19</learner.akka.version>
     </properties>
-
+    
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>org.sunbird</groupId>
             <artifactId>cloud-store-sdk</artifactId>
-            <version>1.4.4</version>
+            <version>1.4.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.sun.jersey</groupId>

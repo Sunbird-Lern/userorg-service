@@ -16,6 +16,8 @@ public final class JsonKey {
   public static final String IS_FORM_VALIDATION_REQUIRED = "isFormValidationRequired";
   public static final String USER_PROFILE_CONFIG_MAP = "userProfileConfigMap";
   public static final String ACCOUNT_NAME = "sunbird_account_name";
+
+  public static final String ACCOUNT_ENDPOINT = "sunbird_account_endpoint";
   public static final String DOWNLOAD_LINK_EXPIRY_TIMEOUT = "download_link_expiry_timeout";
   public static final String ACTION_GROUP = "action_group";
   public static final String ACTION_GROUPS = "actionGroups";
