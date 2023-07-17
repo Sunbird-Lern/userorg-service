@@ -241,8 +241,6 @@ public class ProjectUtilTest extends BaseHttpTest {
     assertEquals(0, ProjectUtil.Status.INACTIVE.getValue());
     assertFalse(ProjectUtil.ActiveStatus.INACTIVE.getValue());
     assertTrue(ProjectUtil.ActiveStatus.ACTIVE.getValue());
-    assertEquals("orgimg", ProjectUtil.AzureContainer.orgImage.getName());
-    assertEquals("userprofileimg", ProjectUtil.AzureContainer.userProfileImg.getName());
 
     assertEquals("username", ProjectUtil.UserLookupType.USERNAME.getType());
     assertEquals("email", ProjectUtil.UserLookupType.EMAIL.getType());
