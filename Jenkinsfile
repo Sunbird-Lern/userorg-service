@@ -26,11 +26,11 @@ node('build-slave') {
                     env.NODE_ENV = "build"
                     print "Environment will be : ${env.NODE_ENV}"
                     sh 'git log -1'
-                    sh 'mvn clean install -U -DskipTests=true '
+                    sh 'mvn clean install -U -DskipTests=true -DCLOUD_STORAGE_GROUP_ID=org.sunbird -DCLOUD_STORAGE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORAGE_VERSION=1.4.6-DCLOUD_STORAGE_GROUP_ID=org.sunbird -DCLOUD_STORAGE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORAGE_VERSION=1.4.6 '
                 }
 
                 stage('Unit Tests') {
-                    sh "mvn clean install '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false"
+                    sh "mvn clean install '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false -DCLOUD_STORAGE_GROUP_ID=org.sunbird -DCLOUD_STORAGE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORAGE_VERSION=1.4.6"
                 }
                 stage('Package') {
                     dir('controller') {

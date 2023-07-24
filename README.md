@@ -219,7 +219,7 @@ git clone https://github.com/Sunbird-Lern/sunbird-lms-service.git
 
 3. Build the application using the following maven command in the path `<project-base-path>/sunbird-lms-service`:
 ```shell
-mvn clean install -DskipTests
+mvn clean install -DskipTests -DCLOUD_STORAGE_GROUP_ID=org.sunbird -DCLOUD_STORAGE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORAGE_VERSION=1.4.6
 ```
 Make sure the build is successful before proceeding to the next step. If the build is not successful,
 fix any configuration issues and rebuild the application.
