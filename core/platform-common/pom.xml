@@ -20,6 +20,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <learner.akka.version>2.5.19</learner.akka.version>
+        <play2.version>2.7.2</play2.version>
         <CLOUD_STORE_GROUP_ID>org.sunbird</CLOUD_STORE_GROUP_ID>
         <CLOUD_STORE_ARTIFACT_ID>cloud-store-sdk</CLOUD_STORE_ARTIFACT_ID>
         <CLOUD_STORE_VERSION>1.4.6</CLOUD_STORE_VERSION>
@@ -198,7 +199,7 @@
         <dependency>
             <groupId>com.typesafe.play</groupId>
             <artifactId>play_2.11</artifactId>
-            <version>2.7.9</version>
+            <version>${play2.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
