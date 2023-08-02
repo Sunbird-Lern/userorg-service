@@ -516,11 +516,11 @@ public class OrgManagementActorTest {
     subject.tell(request, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("5 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+          probe.expectMsgClass(ProjectCommonException.class);
       return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
@@ -549,7 +549,7 @@ public class OrgManagementActorTest {
           new File(
               Paths.get("").toAbsolutePath()
                   + File.separator
-                  + "src/test/resources/samplepublic.pem");
+                  + "service/src/test/resources/samplepublic.pem");
       Path path = Paths.get(file.getPath());
       bytes = Files.readAllBytes(path);
     } catch (Exception e) {

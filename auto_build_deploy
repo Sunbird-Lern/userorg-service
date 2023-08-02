@@ -28,7 +28,7 @@ node('build-slave') {
 
             //    stage Build
                     env.NODE_ENV = "build"
-                    sh 'mvn clean install -U -DskipTests=false '
+                    sh 'mvn clean install -U -DskipTests=false -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORE_VERSION=1.4.6'
 
            //     stage Package
                     dir('controller') {
