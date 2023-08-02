@@ -72,40 +72,40 @@
     </encoder>
   </appender>
 
-  <!--<appender name="kafka-appender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+  <appender name="kafka-appender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
       <pattern>%msg</pattern>
     </encoder>
 
     <topic>${ENV_NAME}.telemetry.raw</topic>
-    &lt;!&ndash; ensure that every message sent by the executing host is partitioned to the same partition strategy &ndash;&gt;
+    <!-- ensure that every message sent by the executing host is partitioned to the same partition strategy -->
     <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
-    &lt;!&ndash; block the logging application thread if the kafka appender cannot keep up with sending the log messages &ndash;&gt;
+    <!-- block the logging application thread if the kafka appender cannot keep up with sending the log messages -->
     <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
 
-    &lt;!&ndash; each <producerConfig> translates to regular kafka-client config (format: key=value) &ndash;&gt;
-    &lt;!&ndash; producer configs are documented here: https://kafka.apache.org/documentation.html#newproducerconfigs &ndash;&gt;
-    &lt;!&ndash; bootstrap.servers is the only mandatory producerConfig &ndash;&gt;
+    <!-- each <producerConfig> translates to regular kafka-client config (format: key=value) -->
+    <!-- producer configs are documented here: https://kafka.apache.org/documentation.html#newproducerconfigs -->
+    <!-- bootstrap.servers is the only mandatory producerConfig -->
     <producerConfig>bootstrap.servers=${SUNBIRD_KAFKA_URL}</producerConfig>
-    &lt;!&ndash; don't wait for a broker to ack the reception of a batch.  &ndash;&gt;
+    <!-- don't wait for a broker to ack the reception of a batch.  -->
     <producerConfig>acks=0</producerConfig>
-    &lt;!&ndash; wait up to 1000ms and collect log messages before sending them as a batch &ndash;&gt;
+    <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
     <producerConfig>linger.ms=15000</producerConfig>
-    &lt;!&ndash; even if the producer buffer runs full, do not block the application but start to drop messages &ndash;&gt;
+    <!-- even if the producer buffer runs full, do not block the application but start to drop messages -->
     <producerConfig>max.block.ms=0</producerConfig>
-    &lt;!&ndash; define a client-id that you use to identify yourself against the kafka broker &ndash;&gt;
+    <!-- define a client-id that you use to identify yourself against the kafka broker -->
     <producerConfig>client.id=${HOSTNAME}-${CONTEXT_NAME}-logback-relaxed</producerConfig>
 
-    &lt;!&ndash; there is no fallback <appender-ref>. If this appender cannot deliver, it will drop its messages. &ndash;&gt;
+    <!-- there is no fallback <appender-ref>. If this appender cannot deliver, it will drop its messages. -->
 
-  </appender>-->
+  </appender>
 
   <logger name="play" level="INFO" />
   <logger name="defaultLoggerAppender" level="INFO" />
   <!-- Telemetry Loggers-->
- <!-- <logger name="TelemetryEventLogger" level="INFO">
+  <logger name="TelemetryEventLogger" level="INFO">
     <appender-ref ref="kafka-appender" />
-  </logger>-->
+  </logger>
 
   <logger name="queryLogger" level="DEBUG">
     <appender-ref ref="defaultLoggerAppender" />
