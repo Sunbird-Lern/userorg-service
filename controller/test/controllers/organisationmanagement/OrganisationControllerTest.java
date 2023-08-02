@@ -196,9 +196,10 @@ public class OrganisationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testAddEncyptionKeyPublicPem() throws IOException {
+    String controllerPath = (Paths.get("").toAbsolutePath().toString().endsWith("controller"))?Paths.get("").toAbsolutePath().toString():Paths.get("").toAbsolutePath().toString()+File.separator +"controller";
     File file =
         new File(
-            Paths.get("").toAbsolutePath() + File.separator + "test/resources/samplepublic.pem");
+                controllerPath + File.separator + "test/resources/samplepublic.pem");
     Http.MultipartFormData.Part<Source<ByteString, ?>> part =
         new Http.MultipartFormData.FilePart<>(
             "fileName",
@@ -222,8 +223,9 @@ public class OrganisationControllerTest extends BaseApplicationTest {
 
   @Test
   public void testAddEncyptionKeyPDF() throws IOException {
+    String controllerPath = (Paths.get("").toAbsolutePath().toString().endsWith("controller"))?Paths.get("").toAbsolutePath().toString():Paths.get("").toAbsolutePath().toString()+File.separator +"controller";
     File file =
-        new File(Paths.get("").toAbsolutePath() + File.separator + "test/resources/sample.pdf");
+        new File(controllerPath + File.separator + "test/resources/sample.pdf");
     Http.MultipartFormData.Part<Source<ByteString, ?>> part =
         new Http.MultipartFormData.FilePart<>(
             "fileName",
