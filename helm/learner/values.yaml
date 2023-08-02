@@ -91,7 +91,6 @@ sunbird_cassandra_port: 9042
 sunbird_cassandra_username: admin
 sunbird_cert_service_base_url: http://cert-service.lern.svc.cluster.local:9000
 ## Storage bucket name where the contents are stores
-sunbird_content_azure_storage_container: contents
 sunbird_course_batch_notification_enabled: true
 sunbird_course_batch_notification_signature: sunbird
 sunbird_cs_search_path: /v1/content/search
@@ -313,10 +312,6 @@ initcontainer_resources:
 ## Refers to public storage bucket details
 # sunbird_account_name: ""
 # sunbird_account_key: ""
-
-## Refers to private storage bucket details
-# sunbird_analytics_blob_account_name: ""
-# sunbird_analytics_blob_account_key: ""
 
 ## Uses the keycloak lms client from sunbird realm
 #sunbird_sso_client_id: lms

@@ -414,8 +414,6 @@ public final class JsonKey {
   public static final String SUNBIRD_GZIP_ENABLE = "sunbird_gzip_enable";
   public static final String SUNBIRD_SYNC_READ_WAIT_TIME = "sunbird_sync_read_wait_time";
   public static final String SUNBIRD_GZIP_SIZE_THRESHOLD = "sunbird_gzip_size_threshold";
-  public static final String ANALYTICS_ACCOUNT_NAME = "sunbird_analytics_blob_account_name";
-  public static final String ANALYTICS_ACCOUNT_KEY = "sunbird_analytics_blob_account_key";
   public static final String SIGNUP_TYPE = "signupType";
   public static final String REQUEST_SOURCE = "source";
 
