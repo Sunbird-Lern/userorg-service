@@ -549,7 +549,7 @@ public class OrgManagementActorTest {
           new File(
               Paths.get("").toAbsolutePath()
                   + File.separator
-                  + "service/src/test/resources/samplepublic.pem");
+                  + "/src/test/resources/samplepublic.pem");
       Path path = Paths.get(file.getPath());
       bytes = Files.readAllBytes(path);
     } catch (Exception e) {
