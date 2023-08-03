@@ -20,6 +20,9 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <learner.akka.version>2.5.19</learner.akka.version>
+        <CLOUD_STORE_GROUP_ID>org.sunbird</CLOUD_STORE_GROUP_ID>
+        <CLOUD_STORE_ARTIFACT_ID>cloud-store-sdk</CLOUD_STORE_ARTIFACT_ID>
+        <CLOUD_STORE_VERSION>1.4.6</CLOUD_STORE_VERSION>
     </properties>
 
     <dependencies>
@@ -112,9 +115,9 @@
             <version>7.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.sunbird</groupId>
-            <artifactId>cloud-store-sdk</artifactId>
-            <version>1.4.4</version>
+            <groupId>${CLOUD_STORE_GROUP_ID}</groupId>
+            <artifactId>${CLOUD_STORE_ARTIFACT_ID}</artifactId>
+            <version>${CLOUD_STORE_VERSION}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.sun.jersey</groupId>
@@ -145,7 +148,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>0.10.0.1</version>
+            <version>0.10.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
