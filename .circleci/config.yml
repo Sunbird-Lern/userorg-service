@@ -7,7 +7,7 @@ jobs:
       - checkout
       - restore_cache:
           key: userorg-dependency-cache-{{ checksum "pom.xml" }}
-      - run: mvn clean install -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORE_VERSION=1.4.6
+      - run: mvn clean install -DCLOUD_STORE_GROUP_ID=$CLOUD_STORE_GROUP_ID -DCLOUD_STORE_ARTIFACT_ID=$CLOUD_STORE_ARTIFACT_ID -DCLOUD_STORE_VERSION=$CLOUD_STORE_VERSION
       - run: cd controller && mvn play2:dist
       - save_cache:
           key: userorg-dependency-cache-{{ checksum "pom.xml" }}
