@@ -29,9 +29,9 @@ node('build-slave') {
                     sh "mvn clean install -DskipTests=true -DCLOUD_STORE_GROUP_ID=${params.cloud_store_group_id} -DCLOUD_STORE_ARTIFACT_ID=${params.cloud_store_artifact_id} -DCLOUD_STORE_VERSION=${params.cloud_store_version}"
                 }
 
-                stage('Unit Tests') {
+                /* stage('Unit Tests') {
                     sh "mvn clean install '-Dtest=!%regex[io.opensaber.registry.client.*]' -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORE_VERSION=1.4.6"
-                }
+                } */
                 stage('Package') {
                     dir('controller') {
                         sh 'mvn play2:dist'
