@@ -1,17 +1,10 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +35,13 @@ import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -216,11 +216,10 @@ public class TenantMigrationActorTest {
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Response res = probe.expectMsgClass(Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
-      ProjectCommonException res =
-          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+      ProjectCommonException res = probe.expectMsgClass(ProjectCommonException.class);
       return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
@@ -284,8 +283,7 @@ public class TenantMigrationActorTest {
     Request request = new Request();
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
-    ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+    ProjectCommonException exception = probe.expectMsgClass(ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
