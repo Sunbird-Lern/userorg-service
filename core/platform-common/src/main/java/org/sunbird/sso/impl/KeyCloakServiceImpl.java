@@ -154,8 +154,15 @@ public class KeyCloakServiceImpl implements SSOManager {
               + keycloak.toString()
               + " || "
               + keycloak.serverInfo());
+      logger.info(
+          context,
+          "makeUserActiveOrInactive: keycloak: "
+              + keycloak.toString()
+              + " || "
+              + keycloak.serverInfo());
       UserResource resource =
           keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
+      logger.info("makeUserActiveOrInactive: resource: " + resource.toString());
       UserRepresentation ur = resource.toRepresentation();
       ur.setEnabled(status);
       resource.update(ur);
