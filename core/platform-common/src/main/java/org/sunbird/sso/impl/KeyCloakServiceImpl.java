@@ -148,12 +148,19 @@ public class KeyCloakServiceImpl implements SSOManager {
       logger.info(context, "makeUserActiveOrInactive: fedration id formed: " + fedUserId);
       validateUserId(fedUserId);
       Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
+      logger.info(
+          context,
+          "makeUserActiveOrInactive: keycloak: "
+              + keycloak.toString()
+              + " || "
+              + keycloak.serverInfo());
       UserResource resource =
           keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
       UserRepresentation ur = resource.toRepresentation();
       ur.setEnabled(status);
       resource.update(ur);
     } catch (Exception e) {
+      e.printStackTrace();
       logger.error(
           context,
           "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ",
