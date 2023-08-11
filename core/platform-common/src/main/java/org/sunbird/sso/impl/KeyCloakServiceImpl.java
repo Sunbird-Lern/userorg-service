@@ -145,15 +145,11 @@ public class KeyCloakServiceImpl implements SSOManager {
   private void makeUserActiveOrInactive(String userId, boolean status, RequestContext context) {
     try {
       String fedUserId = getFederatedUserId(userId);
-      logger.info(context, "makeUserActiveOrInactive: fedration id formed: " + fedUserId);
+      logger.info(context, "makeUserActiveOrInactive: federation id formed: " + fedUserId);
       validateUserId(fedUserId);
+      logger.info(context, "makeUserActiveOrInactive: user validated: ");
       Keycloak keycloak = KeyCloakConnectionProvider.getConnection();
-      logger.info(
-          context,
-          "makeUserActiveOrInactive: keycloak: "
-              + keycloak.toString()
-              + " || "
-              + keycloak.serverInfo());
+
       logger.info(
           context,
           "makeUserActiveOrInactive: keycloak: "
@@ -168,7 +164,11 @@ public class KeyCloakServiceImpl implements SSOManager {
       ur.setEnabled(status);
       resource.update(ur);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.info(
+          "makeUserActiveOrInactive:error occurred while blocking or unblocking user: "
+              + e.getCause()
+              + " || "
+              + e.getMessage());
       logger.error(
           context,
           "makeUserActiveOrInactive:error occurred while blocking or unblocking user: ",
