@@ -68,9 +68,10 @@ public class KeyCloakServiceImpl implements SSOManager {
   public boolean updatePassword(String userId, String password, RequestContext context) {
     try {
       String fedUserId = getFederatedUserId(userId);
-      logger.info(context, "makeUserActiveOrInactive: fedration id formed: " + fedUserId);
+      logger.info(context, "updatePassword: fedration id formed: " + fedUserId);
+      logger.info(context, "updatePassword: keycloak instance: " + keycloak.toString());
       UserResource ur = keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
-      logger.info(context, "UserResource: " + ur);
+      logger.info(context, "UserResource: " + ur.toString());
       CredentialRepresentation cr = new CredentialRepresentation();
       cr.setType(CredentialRepresentation.PASSWORD);
       cr.setValue(password);
@@ -78,6 +79,7 @@ public class KeyCloakServiceImpl implements SSOManager {
       return true;
     } catch (Exception e) {
       logger.error(context, "updatePassword: Exception occurred message: "+e.getMessage() , e);
+      logger.error(context, "updatePassword: Exception occurred cause: "+e.getCause() , e);
       logger.error(context, "updatePassword: Exception occurred: ", e);
     }
     return false;
