@@ -1,0 +1,2674 @@
+{
+	"info": {
+		"_postman_id": "b3270121-69ca-422c-a273-17edf98135fd",
+		"name": "UserOrg_APIs",
+		"description": "The User ORG API is a collection of API's for creation and management of User and Org in sunbird platform.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "4875988",
+		"_collection_link": "https://dark-star-147860.postman.co/workspace/LernBBAPIs~32e17cc4-6806-407e-b8ef-485ad4d0b712/collection/4875988-b3270121-69ca-422c-a273-17edf98135fd?action=share&source=collection_link&creator=4875988"
+	},
+	"item": [
+		{
+			"name": "HealthCheck",
+			"item": [
+				{
+					"name": "HealthCheck",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{host}}/health"
+					},
+					"response": [
+						{
+							"name": "HealthCheck",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": "{{host}}/health"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Wed, 09 Aug 2023 10:50:09 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "X-DNS-Prefetch-Control",
+									"value": "off"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "SAMEORIGIN"
+								},
+								{
+									"key": "Strict-Transport-Security",
+									"value": "max-age=15552000; includeSubDomains"
+								},
+								{
+									"key": "X-Download-Options",
+									"value": "noopen"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"238-OxhKjUO4k6XX0x1zBzEClai2NUU\""
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"portal.Health.API\",\n    \"ver\": \"1.0\",\n    \"ts\": \"2023-08-09T10:50:09.985Z\",\n    \"params\": {\n        \"resmsgid\": \"82aa1310-36a2-11ee-9ee4-71580f83d754\",\n        \"msgid\": \"82a61b70-36a2-11ee-9ee4-71580f83d754\",\n        \"status\": \"successful\",\n        \"err\": null,\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"name\": \"PortalHealthCheckService\",\n        \"version\": \"1.0\",\n        \"healthy\": false,\n        \"check\": [\n            {\n                \"name\": \"contentservice.api\",\n                \"err\": \"CONTENT_SERVICE_HEALTH_FAILED\",\n                \"errmsg\": \"content service is not healthy\"\n            },\n            {\n                \"name\": \"learnerservice.api\",\n                \"healthy\": true,\n                \"err\": \"\",\n                \"errmsg\": \"\"\n            },\n            {\n                \"name\": \"cassandra.db\",\n                \"healthy\": true,\n                \"err\": \"\",\n                \"errmsg\": \"\"\n            }\n        ]\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "UserAPIs",
+			"item": [
+				{
+					"name": "CreateUser",
+					"item": [
+						{
+							"name": "CreateUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Extract the locationId from the response and set it to the environment variable",
+											"pm.test(\"Set userId in environment variable\", function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.environment.set(\"user_id\", responseJson.result.userId);",
+											"});",
+											"",
+											"// Parse the request JSON body",
+											"const requestBody = JSON.parse(pm.request.body.raw);",
+											"const email = requestBody.request.email;",
+											"const password = requestBody.request.password;",
+											"",
+											"// Set the user name and password as environment variables",
+											"pm.environment.set('username', email);",
+											"pm.environment.set('password', password);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"{{random_last_name}}\",\n        \"userName\": \"{{random_user_name}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true,\n        \"password\": \"{{random_password}}\",\n        \"userType\": \"teacher\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/create"
+							},
+							"response": []
+						},
+						{
+							"name": "CreateUserV2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"lastName\": \"{{random_last_name}}\",\n        \"emailVerified\": true\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v2/create"
+							},
+							"response": []
+						},
+						{
+							"name": "CreateUserV3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"lastName\": \"{{random_last_name}}\",\n        \"userName\": \"{{random_user_name}}\",\n        \"emailVerified\": true\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v2/create"
+							},
+							"response": []
+						},
+						{
+							"name": "CreateUserV4",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "x-authenticated-user-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"managedBy\": \"{{user_id}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v4/create"
+							},
+							"response": []
+						},
+						{
+							"name": "CreateManagedUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "x-authenticated-user-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"userName\": \"{{random_user_name}}\",\n        \"managedBy\": \"{{user_id}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/managed/create"
+							},
+							"response": []
+						},
+						{
+							"name": "CreateSSOUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"email\": \"{{random_email}}\",\n        \"lastname\": \"{{random_last_name}}\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v1/sso/create"
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "SignupUser",
+					"item": [
+						{
+							"name": "SignUpUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"firstName\": \"{{random_first_name}}\",\n    \"password\": \"{{random_password}}\",\n    \"email\": \"{{random_email}}\",\n    \"lastname\": \"{{random_last_name}}\",\n    \"userName\": \"{{random_user_name}}\",\n    \"emailVerified\": true\n  }\n}"
+								},
+								"url": "{{host}}/api/user/v1/signup"
+							},
+							"response": []
+						},
+						{
+							"name": "SignUpUserV2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"lastname\": \"{{random_last_name}}\",\n        \"userName\": \"{{random_user_name}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v2/signup"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AuthToken",
+					"item": [
+						{
+							"name": "UserToken",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Set global variable",
+											"// pm.variables.set('refresh_token', jsonResponse.refresh_token);",
+											"// pm.globals.set(\"refresh_token\", jsonResponse.result.identifier);",
+											"pm.collectionVariables.set(\"refresh_token\", jsonResponse.refresh_token);",
+											"// pm.collectionVariables.set(\"variable_key\", \"variable_value\");",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/x-www-form-urlencoded"
+									},
+									{
+										"key": "Cookie",
+										"value": "connect.sid=s%3Ad3chYLP8OfuB2bWgfEFohiWpDxM7GFol.gOPmzH3d2nP9enZ5qSHlVx1e%2BozTleCjXtfz7LUycCk",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "client_id",
+											"value": "{{client_id}}",
+											"type": "text"
+										},
+										{
+											"key": "client_secret",
+											"value": "{{client_secret}}",
+											"type": "text"
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "{{userName}}",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "{{password}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": "{{host}}/auth/realms/sunbird/protocol/openid-connect/token"
+							},
+							"response": []
+						},
+						{
+							"name": "RefreshToken",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Extract the locationId from the response and set it to the environment variable",
+											"pm.test(\"Set access_token in environment variable\", function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.environment.set(\"keycloak_access_token\", responseJson.result.access_token);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/x-www-form-urlencoded"
+									},
+									{
+										"key": "Cookie",
+										"value": "connect.sid=s%3Ad3chYLP8OfuB2bWgfEFohiWpDxM7GFol.gOPmzH3d2nP9enZ5qSHlVx1e%2BozTleCjXtfz7LUycCk"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "refresh_token",
+											"value": "{{refresh_token}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": "{{host}}/auth/v1/refresh/token"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "ReadUser",
+					"item": [
+						{
+							"name": "ReadUserV1",
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": "{{host}}/api/user/v1/read/{{user_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "ReadUserV2",
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": "{{host}}/api/user/v2/read/{{user_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "ReadUserV3",
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": "{{host}}/api/user/v3/read/{{user_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "ReadUserV4",
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": "{{host}}/api/user/v4/read/{{user_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "ReadUserV5",
+							"protocolProfileBehavior": {
+								"disableCookies": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": "{{host}}/api/user/v5/read/{{user_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "GetUserIdByTypeV1",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": "{{host}}/api/user/v1/get/email/{{user_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "GetManagedUserV1",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": "{{host}}/api/user/v1/managed/{{managed_user_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "SearchUser",
+					"item": [
+						{
+							"name": "SearchUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{email_id}}\"\n        }\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/search"
+							},
+							"response": []
+						},
+						{
+							"name": "SearchUserV2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{email_id}}\"\n        }\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v2/search"
+							},
+							"response": []
+						},
+						{
+							"name": "SearchUserV3",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{email_id}}\"\n        }\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v3/search"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "UpdateUser",
+					"item": [
+						{
+							"name": "UpdateUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"phone\": \"{{random_phone_number}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/update"
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateUserV2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"phone\": \"{{random_phone_number}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v2/update"
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateUserV3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"phone\": \"{{random_phone_number}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v3/update"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "RoleAPIs",
+					"item": [
+						{
+							"name": "RoleAssignV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"organisationId\": \"{{org_id}}\",\n        \"roles\": [\n            \"CONTENT_CREATOR\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v1/role/assign"
+							},
+							"response": []
+						},
+						{
+							"name": "RoleAssignV2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"roles\": [\n            {\n                \"role\": \"CONTENT_CREATOR\",\n                \"scope\": [\n                    {\n                        \"organisationId\": \"{{org_id}}\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v2/role/assign"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "BlockUnblockUser",
+					"item": [
+						{
+							"name": "BlockUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/block"
+							},
+							"response": []
+						},
+						{
+							"name": "UnBlockUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/unblock"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "MergeUser",
+					"item": [
+						{
+							"name": "MergeUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"fromAccountId\": \"{{user_id}}\",\n        \"toAccountId\": \"{{to_user_id}}\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v1/account/merge"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "MigrateUser",
+					"item": [
+						{
+							"name": "MigrateUserV2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{to_user_id}}\",\n        \"channel\": \"sunbird\",\n        \"externalIds\": [\n            {\n                \"id\": \"stag1-1\",\n                \"idType\": \"No Data\",\n                \"provider\": \"No Data\"\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v1/migrate"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "UpdateUserDeclaration",
+					"item": [
+						{
+							"name": "UpdateUserDeclarationsV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"params\": {},\n    \"request\": {\n        \"declarations\": [\n            {\n                \"operation\": \"add\",\n                \"userId\": \"{{user_id}}\",\n                \"orgId\": \"{{org_id}}\",\n                \"persona\": \"teacher\",\n                \"info\": {\n                    \"declared-school-name\": \"mgm21\",\n                    \"declared-email\": \"abc@gmail.com\",\n                    \"declared-phone\": \"99999999\",\n                    \"declared-school-udise-code\": 190923\n                }\n            }\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v1/declarations"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "ExistNotExistUser",
+					"item": [
+						{
+							"name": "UserExistCheckV1",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": "{{host}}/api/user/v1/exists/email/{{email_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "UserExistCheckV2",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": "{{host}}/api/user/v2/exists/email/{{email_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TncUser",
+					"item": [
+						{
+							"name": "AcceptUserTncV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"tncType\": \"reportViewerTnc\",\n        \"version\": \"4.0.0\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/tnc/accept"
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "OrganisationAPIs",
+			"item": [
+				{
+					"name": "CreateOrganisation",
+					"item": [
+						{
+							"name": "CreateOrganisationV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Set organisationId in environment variable\", function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.environment.set(\"org_id\", responseJson.result.organisationId);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"orgName\": \"{{random_org_name}}\",\n    \"channel\": \"{{random_channel_name}}\",\n    \"description\": \"Description\",\n    \"externalId\": \"ExtId\",\n    \"email\": \"{{random_email}}\",\n    \"isSSOEnabled\": true,\n    \"organisationType\": \"school\",\n    \"isTenant\": true\n  }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/org/v1/create",
+								"description": "This API is for creation of a new Organisation on the Sunbird Platform.\n  - The endpoint for **Create a new Organisation** is `/org/v1/create`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "ReadOrganisation",
+					"item": [
+						{
+							"name": "ReadOrganisationV1",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"organisationId\": \"{{org_id}}\"\n  }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/org/v1/read",
+								"description": "This API is for viewing details of an existing Organisation on the Sunbird Platform.\n  - The endpoint for **Read Organisation details** is `/org/v1/read`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "SearchOrganisation",
+					"item": [
+						{
+							"name": "SearchOrganisationV1",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"filters\": {}\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/org/v1/search",
+								"description": "This API is for searching for Organisations on the Sunbird Platform.\n  - The endpoint for **Search for an Organisation** is `/org/v1/search`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "UpdateOrganisation",
+					"item": [
+						{
+							"name": "UpdateOrganisationV1",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text",
+										"description": "(Required) Access token of registered user performing given API request."
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"organisationId\": \"{{org_id}}\",\n        \"description\": \"updated description\",\n        \"orgName\": \"Updated Org Name\"\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/org/v1/update",
+								"description": "This API is for updating details of an existing Organisation on the Sunbird Platform.\n  - The endpoint for **Update particulars of an existing Organisation** is `/org/v1/update`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "StatusUpdateOrganisation",
+					"item": [
+						{
+							"name": "StatusUpdateOrganisationV1",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text",
+										"description": "(Required) Access token of registered user performing given API request."
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"organisationId\": \"{{org_id}}\",\n    \"status\": 3\n  }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/org/v1/status/update",
+								"description": "This API is for updating status of an existing Organisation on the Sunbird Platform.\n  - The endpoint for **Organisation update status** is `/org/v1/status/update`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AssignKeyOrganisation",
+					"item": [
+						{
+							"name": "AssignKeyOrganisationV1",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text",
+										"description": "(Required) Access token of registered user performing given API request."
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"id\": \"{{org_id}}\",\n        \"signKeys\": [\n            \"S1\",\n            \"S2\"\n        ],\n        \"encKeys\": [\n            \"E1\",\n            \"E2\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/org/v1/assign/key",
+								"description": "This API is for creation/addition of keys to an Organisation"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "UpdateEncryptionKeyOrganisation",
+					"item": [
+						{
+							"name": "UpdateEncryptionKeyOrganisationV1",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "organisationId",
+											"value": "{{org_id}}",
+											"type": "text"
+										},
+										{
+											"key": "encryptionKey",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": "{{host}}/api/org/v1/update/encryptionkey"
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "LocationAPIs",
+			"item": [
+				{
+					"name": "CreateLocation",
+					"item": [
+						{
+							"name": "CreateLocationV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Extract the locationId from the response and set it to the environment variable",
+											"pm.test(\"Set locationId in environment variable\", function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.environment.set(\"location_id\", responseJson.result.id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"code\": \"{{random_code}}\",\n        \"name\": \"{{random_location_name}}\",\n        \"type\": \"state\"\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/location/v1/create",
+								"description": "This API is used to create a physical location of a user or an organization, depending upon the usecase\n  \n  - The endpoint for **Create location** is `/data/v1/location/create`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "SearchLocation",
+					"item": [
+						{
+							"name": "SearchLocationV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"filters\": {}\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/location/v1/search",
+								"description": "This API is associated with fetching the location data based on the criterias specified in the request body.\n   - The endpoint for **Search location** is `/data/v1/location/search`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "UpdateLocation",
+					"item": [
+						{
+							"name": "UpdateLocationV1",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"name\": \"{{random_location_name}}\",\n        \"id\": \"{{location_id}}\"\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/location/v1/update",
+								"description": "This API is associated with updating the location data based on the location id,\n   - The endpoint for **Update location** is `/data/v1/location/update`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "DeleteLocation",
+					"item": [
+						{
+							"name": "DeleteLocationV1",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": "{{host}}/api/location/v1/delete/{{location_id}}",
+								"description": "This API is associated with deleting the location data based on the location id.\n   - The endpoint for **Search location** is `/data/v1/location/delete`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "DataSyncAPIs",
+			"item": [
+				{
+					"name": "DataSyncV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"operationFor\": \"ES\",\n        \"objectIds\": [\n            \"{{org_id}}\"\n        ],\n        \"objectType\": \"organisation\"\n    }\n}"
+						},
+						"url": "{{host}}/api/data/v1/index/sync"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "ConsentAPIs",
+			"item": [
+				{
+					"name": "ConsentUpdateV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text",
+								"description": "Timestamp at which given API request is sent."
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text",
+								"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"consent\": {\n            \"status\": \"ACTIVE\",\n            \"userId\": \"{{user_id}}\",\n            \"consumerId\": \"{{org_id}}\",\n            \"objectId\": \"{{object_id}}\",\n            \"objectType\": \"Collection\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/consent/v1/update",
+						"description": "This API is used to update user consent for sharing the PII to an organisation, course or collection\n   - The endpoint for **Update Consent** is `/user/v1/consent/update`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+					},
+					"response": []
+				},
+				{
+					"name": "UserConsentReadV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text",
+								"description": "Timestamp at which given API request is sent."
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text",
+								"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"consent\": {\n            \"filters\": {\n                \"userId\": \"{{user_id}}\",\n                \"consumerId\": \"{{org_id}}\",\n                \"objectId\": \"{{object_id}}\"\n            }\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/consent/v1/read"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "OtpAPIs",
+			"item": [
+				{
+					"name": "GenerateOTPV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"userId\": \"{{user_id}}\",\n    \"key\": \"{{random_email}}\",\n    \"type\": \"email\"\n  }\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/otp/v1/generate",
+						"description": "This API is associated with sending OTP to user on the Sunbird Platform.\n   - The endpoint for **Generate OTP** is `otp/v1/generate`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+					},
+					"response": []
+				},
+				{
+					"name": "VerifyOTPV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"key\": \"{{email_id}}\",\n    \"otp\": \"\",\n    \"type\": \"email\",\n    \"userId\": \"{{user_id}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/otp/v1/verify",
+						"description": "This API is associated with verifying the OTP of the user on the Sunbird Platform.\n   - The endpoint for **Verifiy OTP** is `otp/v1/verify`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty.\n   - The Otp provided in the request is verified with the available otp generated for the user within the sunbird system."
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "TenantPreferenceAPIs",
+			"item": [
+				{
+					"name": "TenantPreferenceCreate",
+					"item": [
+						{
+							"name": "TenantPreferenceCreateV2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"orgId\": \"all\",\n        \"key\": \"selfdeclarations\",\n        \"data\": \"Tenant preference data\"\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/tenant/v2/preferences/create",
+								"description": "This API is used to save data as per the tenant preference for an organisation\n   - The endpoint for **Update Consent** is `/org/v2/preferences/create`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TenantPreferenceRead",
+					"item": [
+						{
+							"name": "TenantPreferenceReadV2",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"orgId\": \"all\",\n    \"key\": \"selfdeclarations\"\n  }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/tenant/v2/preferences/read",
+								"description": "This API is used to get data that is saved as tenant preference for an organisation\n   - The endpoint for **Update Consent** is `/org/v2/preferences/read`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TenantPreferenceUpdate",
+					"item": [
+						{
+							"name": "TenantPreferenceUpdate V2",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text",
+										"description": "Timestamp at which given API request is sent."
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text",
+										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text",
+										"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"orgId\": \"all\",\n        \"key\": \"selfdeclarations\",\n        \"data\": \"Tenant preference data\"\n    }\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/tenant/v2/preferences/update",
+								"description": "This API is used to update data as per the tenant preference for an organisation\n   - The endpoint for **Update Consent** is `/org/v2/preferences/update`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "SystemSettingsAPIs",
+			"item": [
+				{
+					"name": "SystemSettingsSetV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"id\": \"userTnc\",\n        \"field\": \"userTnc\",\n        \"value\": \"{\\\"latestVersion\\\":\\\"3.5.0\\\"}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/system/v1/settings/set"
+					},
+					"response": []
+				},
+				{
+					"name": "SystemSettingsGetV1",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "{{host}}/api/system/v1/settings/get/userTnc"
+					},
+					"response": []
+				},
+				{
+					"name": "SystemSettingsListV1",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": "{{host}}/api/system/v1/settings/list"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "BulkUploadAPIs",
+			"item": [
+				{
+					"name": "BulkUploadGetStatusV1",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text",
+								"description": "**Accept** relates to content-Type such as **\"MIME\"**, Its used in response body for executing different multi purpose operations.Therefore, its important that the server is correctly set up, so that the MIME types transmitted are recognised and correct to determine what action to do when a resource is fetched."
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text",
+								"description": "The Content Type entity is the media type of the resource.Possible media types can be:- \n\n  - Application/json\n\n  - Multipart/form-data\n\n  - Application/x-www-form-urlencoded"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"description": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+							}
+						],
+						"url": {
+							"raw": "{{host}}/api/v1/upload/status/:Job_Id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"upload",
+								"status",
+								":Job_Id"
+							],
+							"variable": [
+								{
+									"key": "Job_Id",
+									"value": "01233701572763648024"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "BulkOrgUploadV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "x-authenticated-user-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							},
+							{
+								"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "org",
+									"description": "This is a .csv file.\n\n  - Each line of the file is a data record. Each record consists of one or more fields, separated by commas.\n\n  \n\nThis format of this file is as :\n\n  - orgName,\n\n  - isRootOrg,\n\n  - channel,\n\n  - externalId,\n\n  - provider,\n\n  - description,\n\n  - homeUrl,\n\n  - orgCode,\n\n  - orgType,\n\n  - preferredLanguage,\n\n  - theme,\n\n  - contactDetail",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{host}}/api/org/v1/upload"
+					},
+					"response": []
+				},
+				{
+					"name": "BulkUserUploadV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text",
+								"description": "All content APIs require authorization for use. Specify the authorization key received from the administrator when placing the request for use of the API."
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							},
+							{
+								"warning": "This is a duplicate header and will be overridden by the Content-Type header generated by Postman.",
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "organisationId",
+									"value": "{{org_id}}",
+									"description": "The Id identifies an Organisation uniquely. This Id is provided at the time of organisational registration"
+								},
+								{
+									"key": "user",
+									"description": "This is a .csv file.\n\n  - Each line of the file is a data record. Each record consists of one or more fields, separated by commas.\n\n  \n\nThis format of this file is as :\n\n  - firstName,\n\n  - lastName,\n\n  - phone,\n\n  - email,\n\n  - userName,\n\n  - password,\n\n  - phoneVerified, \n\n  - roles,\n\n  - position,\n\n  - grade,\n\n  - location,\n\n  - dob,\n\n  - gender,\n\n  - language,\n\n  - profileSummary,\n\n  - subject,'",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": "{{host}}/api/v1/bulk/user/upload"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "NotificationAPIs",
+			"item": [
+				{
+					"name": "Notification Email V1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"mode\": \"email\",\n        \"body\": \"hi this is the body\",\n        \"TraningName\": \"Test-Course-Cert\",\n        \"fromEmail\": \"support@diksha-ncte.freshdesk.com\",\n        \"orgName\": \"Test-NCERT\",\n        \"orgImageUrl\": \"https://diksha.gov.in/ncert/logoLandingPage.png\",\n        \"emailTemplateType\": \"courseCertTemp\",\n        \"subject\": \"Testing - The Constitution Quiz Participation Certificate\",\n        \"recipientUserIds\": [\n            \"{{user_id}}\"\n        ]\n    }\n}"
+						},
+						"url": "{{host}}/api/user/v1/notification/email"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const getRandomName = () => {",
+					"  const firstNames = [\"John\", \"Alice\", \"Bob\", \"Emma\", \"James\", \"Olivia\", \"Michael\", \"Sophia\", \"David\", \"Isabella\"];",
+					"  const lastNames = [\"Smith\", \"Johnson\", \"Brown\", \"Williams\", \"Jones\", \"Miller\", \"Davis\", \"Garcia\", \"Martinez\", \"Anderson\"];",
+					"  ",
+					"    if (pm.environment.get(\"environment\") === \"local\") {",
+					"        var baseURL = pm.environment.get(\"host\")",
+					"        pm.variables.set(\"baseURL\", baseURL);",
+					"    } else {",
+					"        var baseURL = pm.environment.get(\"host\") + pm.variables.get(\"basePath\");",
+					"        pm.variables.set(\"baseURL\", baseURL);",
+					"    }",
+					"",
+					"  const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
+					"  const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
+					"",
+					"  return { randomFirstName, randomLastName };",
+					"};",
+					"",
+					"const generateUniqueUsername = () => {",
+					"  const randomString = Math.random().toString(36).substring(2, 8);",
+					"  const randomUserName = `testuser_${randomString.toLowerCase()}`;",
+					"  return randomUserName;",
+					"};",
+					"",
+					"const generateUniqueOrgname = () => {",
+					"  const randomString = Math.random().toString(36).substring(2, 8);",
+					"  const randomOrgName = `testorg_${randomString.toLowerCase()}`;",
+					"  return randomOrgName;",
+					"};",
+					"",
+					"const generateUniqueChannelname = () => {",
+					"const randomString = Math.random().toString(36).substring(2, 8);",
+					"const randomChannelName = `testchannel_${randomString.toLowerCase()}`;",
+					"return randomChannelName;",
+					"}",
+					"",
+					"const generateUniqueEmail = () => {",
+					"  const randomString = Math.random().toString(36).substring(2, 8);",
+					"  return `testuser_${randomString}@yopmail.com`;",
+					"};",
+					"",
+					"const generateRandomPassword = () => {",
+					"  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?';",
+					"  let password = '';",
+					"  ",
+					"  let hasUpperCase = false;",
+					"  let hasLowerCase = false;",
+					"  let hasNumber = false;",
+					"  let hasSpecialChar = false;",
+					"",
+					"  while (password.length < 8 || !hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {",
+					"    password = '';",
+					"    for (let i = 0; i < 8; i++) {",
+					"      password += chars.charAt(Math.floor(Math.random() * chars.length));",
+					"    }",
+					"",
+					"    hasUpperCase = /[A-Z]/.test(password);",
+					"    hasLowerCase = /[a-z]/.test(password);",
+					"    hasNumber = /[0-9]/.test(password);",
+					"    hasSpecialChar = /[!@#$%^&*()-_=+[]{}|;:,.<>?]/.test(password);",
+					"  }",
+					"  return password;",
+					"};",
+					"",
+					"const generateRandomCode = () => {",
+					"  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';",
+					"  let code = '';",
+					"  for (let i = 0; i < 6; i++) {",
+					"    code += chars.charAt(Math.floor(Math.random() * chars.length));",
+					"  }",
+					"  return code;",
+					"};",
+					"",
+					"const generateRandomLocationName = () => {",
+					"  const firstNames = [\"Andhra\", \"Telangana\", \"Karnataka\", \"Tamil Nadu\", \"Kerala\", \"Maharashtra\", \"Gujarat\", \"Rajasthan\", \"Uttar Pradesh\", \"Madhya Pradesh\"];",
+					"  const lastNames = [\"State\", \"Region\", \"Province\", \"Territory\", \"District\", \"Zone\", \"Area\"];",
+					"",
+					"  const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
+					"  const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
+					"",
+					"  return `${randomFirstName} ${randomLastName}`;",
+					"};",
+					"",
+					"const isCodeUsed = (code) => {",
+					"  const usedCodes = pm.environment.get(\"used_codes\") || [];",
+					"  return usedCodes.includes(code);",
+					"};",
+					"",
+					"const isLocationNameUsed = (locationName) => {",
+					"  const usedLocationNames = pm.environment.get(\"used_location_names\") || [];",
+					"  return usedLocationNames.includes(locationName);",
+					"};",
+					"",
+					"const generateUniqueCode = () => {",
+					"  let code = generateRandomCode();",
+					"  while (isCodeUsed(code)) {",
+					"    code = generateRandomCode();",
+					"  }",
+					"  return code;",
+					"};",
+					"",
+					"const generateUniqueLocationName = () => {",
+					"  let locationName = generateRandomLocationName();",
+					"  while (isLocationNameUsed(locationName)) {",
+					"    locationName = generateRandomLocationName();",
+					"  }",
+					"  return locationName;",
+					"};",
+					"",
+					"// Function to generate a random 10-digit Indian phone number",
+					"function generateRandomPhoneNumber() {",
+					"    var phoneNumber = \"9\"; // Start with 9 (common for Indian mobile numbers)",
+					"    for (var i = 1; i < 10; i++) {",
+					"        phoneNumber += Math.floor(Math.random() * 10);",
+					"    }",
+					"    return phoneNumber;",
+					"}",
+					"",
+					"// Check if the used phone numbers array exists in environment variables",
+					"if (!pm.environment.get(\"used_phone_numbers\")) {",
+					"    pm.environment.set(\"used_phone_numbers\", JSON.stringify([]));",
+					"}",
+					"",
+					"// Retrieve the used phone numbers array",
+					"var usedPhoneNumbers = JSON.parse(pm.environment.get(\"used_phone_numbers\"));",
+					"",
+					"// Generate a new random phone number and ensure it's not a duplicate",
+					"var newPhoneNumber;",
+					"do {",
+					"    newPhoneNumber = generateRandomPhoneNumber();",
+					"} while (usedPhoneNumbers.includes(newPhoneNumber));",
+					"",
+					"// Store the new phone number in the used numbers array",
+					"usedPhoneNumbers.push(newPhoneNumber);",
+					"",
+					"// Update the environment variable with the updated used phone numbers array",
+					"pm.environment.set(\"used_phone_numbers\", JSON.stringify(usedPhoneNumbers));",
+					"",
+					"// Set the generated phone number as a variable for the request",
+					"pm.variables.set(\"random_phone_number\", newPhoneNumber);",
+					"",
+					"",
+					"",
+					"const usedUsernames = pm.environment.get(\"used_usernames\") || [];",
+					"const usedOrgnames = pm.environment.get(\"used_orgnames\") || [];",
+					"const usedChannelnames = pm.environment.get(\"used_channelnames\") || [];",
+					"const usedEmails = pm.environment.get(\"used_emails\") || [];",
+					"const usedCodes = pm.environment.get(\"used_codes\") || [];",
+					"const usedLocationNames = pm.environment.get(\"used_location_names\") || [];",
+					"",
+					"let randomName = getRandomName();",
+					"let randomUserName = generateUniqueUsername();",
+					"let randomOrgName = generateUniqueOrgname();",
+					"let randomChannelName = generateUniqueChannelname();",
+					"let randomEmail = generateUniqueEmail();",
+					"let randomCode = generateUniqueCode();",
+					"let randomLocationName = generateUniqueLocationName();",
+					"",
+					"// Ensure the username and email are unique",
+					"while (usedUsernames.includes(randomUserName)) {",
+					"  randomUserName = generateUniqueUsername();",
+					"}",
+					"",
+					"while (usedOrgnames.includes(randomOrgName)) {",
+					"  randomOrgName = generateUniqueOrgname();",
+					"}",
+					"",
+					"while (usedChannelnames.includes(randomChannelName)) {",
+					"  randomChannelName = generateUniqueChannelname();",
+					"}",
+					"",
+					"while (usedEmails.includes(randomEmail)) {",
+					"  randomEmail = generateUniqueEmail();",
+					"}",
+					"",
+					"while (usedCodes.includes(randomCode)) {",
+					"  randomCode = generateUniqueCode();",
+					"}",
+					"",
+					"while (usedLocationNames.includes(randomLocationName)) {",
+					"  randomLocationName = generateUniqueLocationName();",
+					"}",
+					"",
+					"usedUsernames.push(randomUserName);",
+					"usedEmails.push(randomEmail);",
+					"usedCodes.push(randomCode);",
+					"usedLocationNames.push(randomLocationName);",
+					"",
+					"const randomPassword = generateRandomPassword();",
+					"// Update environment variables",
+					"pm.environment.set(\"random_first_name\", randomName.randomFirstName);",
+					"pm.environment.set(\"random_last_name\", randomName.randomLastName);",
+					"pm.environment.set(\"random_user_name\", randomUserName);",
+					"pm.environment.set(\"random_org_name\",randomOrgName);",
+					"pm.environment.set(\"random_channel_name\",randomChannelName);",
+					"pm.environment.set(\"random_email\", randomEmail);",
+					"pm.environment.set(\"random_password\", randomPassword);",
+					"pm.environment.set(\"random_code\", randomCode);",
+					"pm.environment.set(\"random_location_name\", randomLocationName);",
+					"pm.environment.set(\"used_usernames\", usedUsernames);",
+					"pm.environment.set(\"used_emails\", usedEmails);",
+					"pm.environment.set(\"used_channelnames\",usedChannelnames);",
+					"pm.environment.set(\"used_orgnames\",usedOrgnames);",
+					"pm.environment.set(\"used_codes\", usedCodes);",
+					"pm.environment.set(\"used_location_names\", usedLocationNames);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "refresh_token",
+			"value": ""
+		}
+	]
+}
