@@ -22,11 +22,15 @@ public class UserStatusActor extends UserBaseActor {
     String operation = request.getOperation();
     switch (operation) {
       case "blockUser":
-        updateStatus(request, true);
+        updateStatus(request, true, false);
         break;
 
       case "unblockUser":
-        updateStatus(request, false);
+        updateStatus(request, false, false);
+        break;
+
+      case "deleteUser":
+        updateStatus(request, true, true);
         break;
 
       default:
@@ -34,11 +38,12 @@ public class UserStatusActor extends UserBaseActor {
     }
   }
 
-  private void updateStatus(Request request, boolean blockUser) {
+  private void updateStatus(Request request, boolean blockUser, boolean deleteUser) {
     String userId = (String) request.getRequest().get(JsonKey.USER_ID);
     String operation = request.getOperation();
     String requestedBy = (String) request.getContext().get(JsonKey.REQUESTED_BY);
-    Map<String, Object> userMap = userStatusService.getUserMap(userId, requestedBy, blockUser);
+    Map<String, Object> userMap =
+        userStatusService.getUserMap(userId, requestedBy, blockUser, deleteUser);
     Response response =
         userStatusService.updateUserStatus(userMap, operation, request.getRequestContext());
     sender().tell(response, self());

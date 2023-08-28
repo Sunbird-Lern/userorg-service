@@ -1,11 +1,9 @@
 package org.sunbird.actor.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
@@ -109,7 +107,7 @@ public class IdentifierFreeUpActor extends BaseActor {
     Map<String, Object> userDbMap = mapper.convertValue(user, Map.class);
     Map<String, Object> userLookUpData = new HashMap<>(userDbMap);
     Response response = processUserAttribute(userDbMap, identifiers, context);
-    removeEntryFromUserLookUp(userLookUpData, identifiers, context);
+    userLookUp.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
     Map<String, Object> updatedUserMap =
         (Map<String, Object>) response.getResult().remove(JsonKey.USER);
     if (MapUtils.isNotEmpty(updatedUserMap)) {
@@ -121,38 +119,5 @@ public class IdentifierFreeUpActor extends BaseActor {
         String.format(
             "%s:%s:USER SUCCESSFULLY UPDATED IN CASSANDRA. WITH ID  %s",
             this.getClass().getSimpleName(), "freeUpUserIdentifier", userDbMap.get(JsonKey.ID)));
-  }
-
-  /**
-   * removing entry from user_lookup table
-   *
-   * @param userDbMap
-   * @param identifiers
-   * @param context
-   */
-  private void removeEntryFromUserLookUp(
-      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
-    logger.debug(
-        context,
-        "IdentifierFreeUpActor:removeEntryFromUserLookUp remove following identifiers from lookUp table "
-            + identifiers);
-    List<Map<String, String>> reqMap = new ArrayList<>();
-    Map<String, String> deleteLookUp = new HashMap<>();
-    if (identifiers.contains(JsonKey.EMAIL)
-        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
-      deleteLookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
-      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.EMAIL));
-      reqMap.add(deleteLookUp);
-    }
-    if (identifiers.contains(JsonKey.PHONE)
-        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.PHONE))) {
-      deleteLookUp = new HashMap<>();
-      deleteLookUp.put(JsonKey.TYPE, JsonKey.PHONE);
-      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.PHONE));
-      reqMap.add(deleteLookUp);
-    }
-    if (CollectionUtils.isNotEmpty(reqMap)) {
-      userLookUp.deleteRecords(reqMap, context);
-    }
   }
 }

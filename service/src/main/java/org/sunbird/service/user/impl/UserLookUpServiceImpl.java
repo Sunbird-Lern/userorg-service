@@ -254,4 +254,37 @@ public class UserLookUpServiceImpl implements UserLookupService {
             ResponseMessage.Message.EXTERNALID_NOT_FOUND, externalId, idType, provider),
         ResponseCode.RESOURCE_NOT_FOUND.getResponseCode());
   }
+
+  /**
+   * removing entry from user_lookup table
+   *
+   * @param userDbMap
+   * @param identifiers
+   * @param context
+   */
+  public void removeEntryFromUserLookUp(
+      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
+    logger.debug(
+        context,
+        "IdentifierFreeUpActor:removeEntryFromUserLookUp remove following identifiers from lookUp table "
+            + identifiers);
+    List<Map<String, String>> reqMap = new ArrayList<>();
+    Map<String, String> deleteLookUp = new HashMap<>();
+    if (identifiers.contains(JsonKey.EMAIL)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EMAIL))) {
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.EMAIL);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.EMAIL));
+      reqMap.add(deleteLookUp);
+    }
+    if (identifiers.contains(JsonKey.PHONE)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.PHONE))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.PHONE);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.PHONE));
+      reqMap.add(deleteLookUp);
+    }
+    if (CollectionUtils.isNotEmpty(reqMap)) {
+      deleteRecords(reqMap, context);
+    }
+  }
 }

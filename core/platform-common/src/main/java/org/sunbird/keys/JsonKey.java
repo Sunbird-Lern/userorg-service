@@ -128,6 +128,7 @@ public final class JsonKey {
   public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
   public static final String IS_SYSTEM_UPLOAD = "isSystemUpload";
   public static final String IS_AUTH_REQ = "isAuthReq";
+  public static final String IS_BLOCKED = "isBlocked";
   public static final String IS_DELETED = "isDeleted";
   public static final String JOB_PROFILE = "jobProfile";
   public static final String LANGUAGE = "language";
@@ -644,7 +645,7 @@ public final class JsonKey {
   public static final String DATA_SECURITY_POLICY = "dataSecurityPolicy";
   public static final String JOB = "job";
   public static final String USER_PRIVATE_FIELDS = "userPrivateFields";
-  //Release 5.4.0 LR-102
+  // Release 5.4.0 LR-102
   public static final String SUNBIRD_KEYSPACE = "sunbird_keyspace";
   public static final String ES_LOCATION_INDEX = "es_location_index";
   public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
