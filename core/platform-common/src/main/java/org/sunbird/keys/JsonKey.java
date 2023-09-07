@@ -297,6 +297,7 @@ public final class JsonKey {
   public static final String URL_ACTION = "url_action";
   public static final String URL_ACTION_ID = "url_action_ids";
   public static final String USER = "user";
+  public static final String USER_OWNERSHIP_TRANSFER = "user_ownership_transfer";
   public static final String USER_ACTION_ROLE = "user_action_role";
   public static final String USER_DB = "user_db";
   public static final String USER_ID = "userId";
@@ -592,6 +593,7 @@ public final class JsonKey {
   public static final String STATE_ID = "stateId";
   public static final String BLOCK_USER = "BlockUser";
   public static final String UNBLOCK_USER = "UnblockUser";
+  public static final String DELETE_USER = "DeleteUser";
   public static final String ROLE_OPERATION = "roleOperation";
   public static final String SCOPE_STR = "scopeString";
   public static final String SUNBIRD_SSO_LB_IP = "sunbird_sso_lb_ip";

@@ -83,6 +83,10 @@ public abstract class UserBaseActor extends BaseActor {
         telemetryAction.put(JsonKey.UNBLOCK_USER, "user unblocked");
         TelemetryUtil.telemetryProcessingCall(
             JsonKey.UNBLOCK_USER, telemetryAction, targetObject, correlatedObject, context);
+      case "deleteUser":
+        telemetryAction.put(JsonKey.DELETE_USER, "user deleted");
+        TelemetryUtil.telemetryProcessingCall(
+            JsonKey.DELETE_USER, telemetryAction, targetObject, correlatedObject, context);
         break;
       default:
         // Do Nothing
