@@ -18,4 +18,4 @@ RUNNING_PID
 /.target/
 /bin/
 /logs
-.vscode
+.vscode/**
