@@ -594,6 +594,7 @@ public final class JsonKey {
   public static final String BLOCK_USER = "BlockUser";
   public static final String UNBLOCK_USER = "UnblockUser";
   public static final String DELETE_USER = "DeleteUser";
+  public static final String DELETE_USER_STATUS = "DeleteUserStatus";
   public static final String ROLE_OPERATION = "roleOperation";
   public static final String SCOPE_STR = "scopeString";
   public static final String SUNBIRD_SSO_LB_IP = "sunbird_sso_lb_ip";
