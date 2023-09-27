@@ -33,7 +33,7 @@ public class UserDeletionService {
       RequestContext context) {
     ObjectMapper mapper = new ObjectMapper();
 
-    Response updateUserResponse = null;
+    Response updateUserResponse;
     Map<String, Object> deletionStatus = new HashMap<>();
     deletionStatus.put(JsonKey.CREDENTIALS_STATUS, false);
     deletionStatus.put(JsonKey.USER_LOOK_UP_STATUS, false);
@@ -44,7 +44,7 @@ public class UserDeletionService {
       ssoManager.removeUser(userMapES, context);
       deletionStatus.put(JsonKey.CREDENTIALS_STATUS, true);
 
-      Map<String, Object> userLookUpData = mapper.convertValue(user, Map.class);
+      Map userLookUpData = mapper.convertValue(user, Map.class);
       List<String> identifiers = new ArrayList<>();
       identifiers.add(JsonKey.EMAIL);
       identifiers.add(JsonKey.PHONE);
