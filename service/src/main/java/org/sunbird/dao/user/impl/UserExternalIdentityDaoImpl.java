@@ -85,7 +85,6 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     map.remove(JsonKey.CREATED_BY);
     map.remove(JsonKey.LAST_UPDATED_ON);
     map.remove(JsonKey.CREATED_ON);
-    map.remove(JsonKey.EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
