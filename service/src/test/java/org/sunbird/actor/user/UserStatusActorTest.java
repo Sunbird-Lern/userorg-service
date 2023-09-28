@@ -122,6 +122,7 @@ public class UserStatusActorTest {
       user.put(JsonKey.ID, "46545665465465");
       user.put(JsonKey.IS_DELETED, false);
       user.put(JsonKey.FIRST_NAME, "firstName");
+      user.put(JsonKey.STATUS, 1);
       List<Map<String, Object>> userList = new ArrayList<>();
       userList.add(user);
       response2.getResult().put(JsonKey.RESPONSE, userList);
@@ -148,6 +149,7 @@ public class UserStatusActorTest {
     user.put(JsonKey.ID, "46545665465465");
     user.put(JsonKey.IS_DELETED, true);
     user.put(JsonKey.FIRST_NAME, "firstName");
+    user.put(JsonKey.STATUS, 0);
     List<Map<String, Object>> userList = new ArrayList<>();
     userList.add(user);
     response2.getResult().put(JsonKey.RESPONSE, userList);
@@ -167,6 +169,7 @@ public class UserStatusActorTest {
     user.put(JsonKey.ID, "46545665465465");
     user.put(JsonKey.IS_DELETED, true);
     user.put(JsonKey.FIRST_NAME, "firstName");
+    user.put(JsonKey.STATUS, 0);
     List<Map<String, Object>> userList = new ArrayList<>();
     userList.add(user);
     response2.getResult().put(JsonKey.RESPONSE, userList);
@@ -190,6 +193,7 @@ public class UserStatusActorTest {
     user.put(JsonKey.ID, "46545665465465");
     user.put(JsonKey.IS_DELETED, false);
     user.put(JsonKey.FIRST_NAME, "firstName");
+    user.put(JsonKey.STATUS, 1);
     List<Map<String, Object>> userList = new ArrayList<>();
     userList.add(user);
     response2.getResult().put(JsonKey.RESPONSE, userList);
@@ -240,6 +244,7 @@ public class UserStatusActorTest {
     ActorRef subject = system.actorOf(props);
 
     when(user.getIsDeleted()).thenReturn(isDeleted);
+
     subject.tell(getRequestObject(operation.getValue()), probe.getRef());
 
     Response res;

@@ -73,11 +73,7 @@ public class UserDeletionService {
 
     generateTelemetryEvent(deletionStatus, userId, context.getContextMap());
 
-    /* TRIGGER BACKGROUND ACTOR
-       2. send notification to tenant org_admin users via background actor
-       3. trigger kafka events for user-cache-updater
-        - to remove consent entry in consent tables
-    */
+    // Trigger the delete user kafka event {{env_name}}.delete.user using Background actor
 
     return updateUserResponse;
   }
