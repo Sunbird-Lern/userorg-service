@@ -13,6 +13,73 @@
 			"item": [
 				{
 					"name": "HealthCheck",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", () => {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+									"});",
+									"",
+									"pm.test(\"Test data type of the response and keys\", () => {",
+									"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+									"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+									"",
+									"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+									"        'resmsgid', 'msgid', 'status', 'err', 'errmsg'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.err).to.be.null;",
+									"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+									"",
+									"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+									"        'name', 'version', 'healthy', 'check'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.result.name).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.result.version).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.result.healthy).to.be.a(\"boolean\");",
+									"    pm.expect(jsonResponse.result.check).to.be.an(\"array\");",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"id should be portal.Health.API\", function () {",
+									"    pm.expect(jsonResponse.id).to.eql(\"portal.Health.API\");",
+									"});",
+									"",
+									"pm.test(\"ver should be 1.0\", function () {",
+									"    pm.expect(jsonResponse.ver).to.eql(\"1.0\");",
+									"});",
+									"",
+									"pm.test(\"responseCode should be OK\", function () {",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -103,12 +170,6 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"// Extract the locationId from the response and set it to the environment variable",
-											"pm.test(\"Set userId in environment variable\", function () {",
-											"    const responseJson = pm.response.json();",
-											"    pm.environment.set(\"user_id\", responseJson.result.userId);",
-											"});",
-											"",
 											"// Parse the request JSON body",
 											"const requestBody = JSON.parse(pm.request.body.raw);",
 											"const email = requestBody.request.email;",
@@ -116,7 +177,75 @@
 											"",
 											"// Set the user name and password as environment variables",
 											"pm.environment.set('username', email);",
-											"pm.environment.set('password', password);"
+											"pm.environment.set('password', password);",
+											"",
+											"// Extract the user_id from the response and set it to the environment variable",
+											"pm.test(\"Set user_id in environment variable\", function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.environment.set(\"user_id\", responseJson.result.userId);",
+											"});",
+											"",
+											"// Parse the response JSON body",
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+											"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"",
+											"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+											"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.err).to.be.null;",
+											"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"",
+											"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+											"        'userId', 'response', 'errors'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.result.errors).to.be.a(\"array\");",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"    pm.expect(jsonResponse.id).to.eql(\"api.user.create\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -149,7 +278,51 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response', 'errors');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.errors).to.be.a(\"array\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.create\");",
+											"});",
+											"pm.test(\"ver should be v2\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v2\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -191,7 +364,51 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response', 'errors');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.errors).to.be.a(\"array\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.create\");",
+											"});",
+											"pm.test(\"ver should be v3\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v3\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -217,12 +434,66 @@
 									"mode": "raw",
 									"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"lastName\": \"{{random_last_name}}\",\n        \"userName\": \"{{random_user_name}}\",\n        \"emailVerified\": true\n    }\n}"
 								},
-								"url": "{{host}}/api/user/v2/create"
+								"url": "{{host}}/api/user/v3/create"
 							},
 							"response": []
 						},
 						{
 							"name": "CreateUserV4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.create\");",
+											"});",
+											"pm.test(\"ver should be v4\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v4\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -249,6 +520,65 @@
 						},
 						{
 							"name": "CreateManagedUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.manageduser.create\");",
+											"});",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"pm.test(\"Set user_id in environment variable\", function () {",
+											"    const responseJson = pm.response.json();",
+											"    pm.environment.set(\"managed_user_id\", responseJson.result.userId);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -275,6 +605,61 @@
 						},
 						{
 							"name": "CreateSSOUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response','errors');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.errors).to.be.a(\"array\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.ssouser.create\");",
+											"});",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -334,6 +719,60 @@
 					"item": [
 						{
 							"name": "SignUpUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.signup\");",
+											"});",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -356,6 +795,60 @@
 						},
 						{
 							"name": "SignUpUserV2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json()",
+											"",
+											"//Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200)",
+											"});",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"  pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"  pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys('id', 'ver', 'ts', 'params', 'responseCode', 'result');",
+											"  pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys('resmsgid', 'msgid', 'err', 'status', 'errmsg');",
+											"  pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.err).to.be.null;",
+											"  pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"  pm.expect(jsonResponse.result).to.be.an(\"object\");",
+											"  pm.expect(jsonResponse.result).to.have.all.keys('userId', 'response');",
+											"  pm.expect(jsonResponse.result.userId).to.be.a(\"string\");",
+											"  pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"});",
+											"",
+											"//Validation",
+											"pm.test(\"id should be api.user.create\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.signup\");",
+											"});",
+											"pm.test(\"ver should be v2\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v2\");",
+											"});",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -395,7 +888,23 @@
 											"// pm.globals.set(\"refresh_token\", jsonResponse.result.identifier);",
 											"pm.collectionVariables.set(\"refresh_token\", jsonResponse.refresh_token);",
 											"// pm.collectionVariables.set(\"variable_key\", \"variable_value\");",
-											""
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Access token is present\", () => {",
+											"    pm.expect(jsonResponse).to.have.property('access_token');",
+											"});",
+											"",
+											"pm.test(\"Token type is bearer\", () => {",
+											"    pm.expect(jsonResponse.token_type).to.eql('bearer');",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -407,11 +916,6 @@
 									{
 										"key": "Content-Type",
 										"value": "application/x-www-form-urlencoded"
-									},
-									{
-										"key": "Cookie",
-										"value": "connect.sid=s%3Ad3chYLP8OfuB2bWgfEFohiWpDxM7GFol.gOPmzH3d2nP9enZ5qSHlVx1e%2BozTleCjXtfz7LUycCk",
-										"disabled": true
 									}
 								],
 								"body": {
@@ -419,12 +923,12 @@
 									"urlencoded": [
 										{
 											"key": "client_id",
-											"value": "{{client_id}}",
+											"value": "{{auth_client_id}}",
 											"type": "text"
 										},
 										{
 											"key": "client_secret",
-											"value": "{{client_secret}}",
+											"value": "{{auth_client_secret}}",
 											"type": "text"
 										},
 										{
@@ -434,12 +938,12 @@
 										},
 										{
 											"key": "username",
-											"value": "{{userName}}",
+											"value": "orgadmin",
 											"type": "text"
 										},
 										{
 											"key": "password",
-											"value": "{{password}}",
+											"value": "Admin@123",
 											"type": "text"
 										}
 									]
@@ -459,7 +963,57 @@
 											"pm.test(\"Set access_token in environment variable\", function () {",
 											"    const responseJson = pm.response.json();",
 											"    pm.environment.set(\"keycloak_access_token\", responseJson.result.access_token);",
-											"});"
+											"});",
+											"",
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should be api.refresh.token\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.refresh.token\");",
+											"});",
+											"",
+											"pm.test(\"ver should be 1.0\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"1.0\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be successful\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"successful\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"access_token\");",
+											"    pm.expect(jsonResponse.result).to.have.property(\"expires_in\");",
+											"    pm.expect(jsonResponse.result).to.have.property(\"refresh_expires_in\");",
+											"    pm.expect(jsonResponse.result).to.have.property(\"refresh_token\");",
+											"});",
+											"",
+											"// Additional validation for specific properties",
+											"pm.test(\"access_token should be a non-empty string\", function () {",
+											"    pm.expect(jsonResponse.result.access_token).to.be.a(\"string\").and.not.empty;",
+											"});",
+											"",
+											"pm.test(\"expires_in should be a positive number\", function () {",
+											"    pm.expect(jsonResponse.result.expires_in).to.be.a(\"number\").and.above(0);",
+											"});",
+											"",
+											"pm.test(\"refresh_expires_in should be a positive number\", function () {",
+											"    pm.expect(jsonResponse.result.refresh_expires_in).to.be.a(\"number\").and.above(0);",
+											"});",
+											"",
+											"pm.test(\"refresh_token should be a non-empty string\", function () {",
+											"    pm.expect(jsonResponse.result.refresh_token).to.be.a(\"string\").and.not.empty;",
+											"});",
+											""
 										],
 										"type": "text/javascript"
 									}
@@ -502,6 +1056,46 @@
 					"item": [
 						{
 							"name": "ReadUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"pm.test(\"id should start with api.user.read\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.read/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableCookies": true
 							},
@@ -521,12 +1115,52 @@
 										"value": "application/json"
 									}
 								],
-								"url": "{{host}}/api/user/v1/read/{{user_id}}"
+								"url": "{{host}}/api/user/v1/read/40db1ee1-206c-48f5-8e48-a38554eaeafd"
 							},
 							"response": []
 						},
 						{
 							"name": "ReadUserV2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"pm.test(\"id should start with api.user.read\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.read/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v2\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v2\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableCookies": true
 							},
@@ -552,6 +1186,46 @@
 						},
 						{
 							"name": "ReadUserV3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"pm.test(\"id should start with api.user.read\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.read/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v3\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v3\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableCookies": true
 							},
@@ -577,6 +1251,46 @@
 						},
 						{
 							"name": "ReadUserV4",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"pm.test(\"id should start with api.user.read\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.read/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v4\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v4\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableCookies": true
 							},
@@ -602,6 +1316,46 @@
 						},
 						{
 							"name": "ReadUserV5",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"pm.test(\"id should start with api.user.read\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.read/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v5\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v5\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"protocolProfileBehavior": {
 								"disableCookies": true
 							},
@@ -627,6 +1381,48 @@
 						},
 						{
 							"name": "GetUserIdByTypeV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.get.email\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.get\\.email/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [
@@ -639,7 +1435,7 @@
 										"value": "application/json"
 									}
 								],
-								"url": "{{host}}/api/user/v1/get/email/{{user_id}}"
+								"url": "{{host}}/api/user/v1/get/email/{{username}}"
 							},
 							"response": []
 						},
@@ -675,6 +1471,51 @@
 					"item": [
 						{
 							"name": "SearchUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.search\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.search/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"    pm.expect(jsonResponse.result.response).to.have.property(\"count\").and.eql(1);",
+											"    pm.expect(jsonResponse.result.response).to.have.property(\"content\").and.be.an('array');",
+											"    pm.expect(jsonResponse.result.response.content).to.have.length(1);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -693,7 +1534,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{email_id}}\"\n        }\n    }\n}"
+									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{username}}\"\n        }\n    }\n}"
 								},
 								"url": "{{host}}/api/user/v1/search"
 							},
@@ -701,6 +1542,51 @@
 						},
 						{
 							"name": "SearchUserV2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.search\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.search/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v2\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v2\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"    pm.expect(jsonResponse.result.response).to.have.property(\"count\").and.eql(1);",
+											"    pm.expect(jsonResponse.result.response).to.have.property(\"content\").and.be.an('array');",
+											"    pm.expect(jsonResponse.result.response.content).to.have.length(1);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -719,7 +1605,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{email_id}}\"\n        }\n    }\n}"
+									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{username}}\"\n        }\n    }\n}"
 								},
 								"url": "{{host}}/api/user/v2/search"
 							},
@@ -727,6 +1613,51 @@
 						},
 						{
 							"name": "SearchUserV3",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.search\", function () {",
+											"   pm.expect(jsonResponse.id).to.match(/^api\\.user\\.search/);",
+											"});",
+											"",
+											"pm.test(\"ver should be v3\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v3\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\");",
+											"    pm.expect(jsonResponse.result.response).to.have.property(\"count\").and.eql(1);",
+											"    pm.expect(jsonResponse.result.response).to.have.property(\"content\").and.be.an('array');",
+											"    pm.expect(jsonResponse.result.response.content).to.have.length(1);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -745,7 +1676,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"email\": \"{{email_id}}\"\n        }\n    }\n}"
+									"raw": "{\n    \"request\": {\n        \"filters\": {\n            \"roles.role\": [\n                \"BOOK_REVIEWER\"\n            ]\n        },\n        \"fields\":[\"roles\".\"role\"]\n    }\n}"
 								},
 								"url": "{{host}}/api/user/v3/search"
 							},
@@ -763,6 +1694,41 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.update\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.update\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\").and.eql(\"SUCCESS\");",
+											"    pm.expect(jsonResponse.result).to.have.property(\"errors\").and.be.an('array');",
+											"});",
+											"",
+											"// Additional validation as needed",
 											""
 										],
 										"type": "text/javascript"
@@ -800,6 +1766,41 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.update\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.update\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v2\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v2\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\").and.eql(\"SUCCESS\");",
+											"    pm.expect(jsonResponse.result).to.have.property(\"errors\").and.be.an('array');",
+											"});",
+											"",
+											"// Additional validation as needed",
 											""
 										],
 										"type": "text/javascript"
@@ -837,7 +1838,39 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.update\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.update\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v3\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v3\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\").and.eql(\"SUCCESS\");",
+											"    pm.expect(jsonResponse.result).to.have.property(\"errors\").and.be.an('array');",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -895,7 +1928,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"organisationId\": \"{{org_id}}\",\n        \"roles\": [\n            \"CONTENT_CREATOR\"\n        ]\n    }\n}",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"organisationId\": \"{{org_id}}\",\n        \"roles\": [\n            \"ADMIN\"\n        ]\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -947,6 +1980,49 @@
 					"item": [
 						{
 							"name": "BlockUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.block\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.block\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\").and.eql(\"SUCCESS\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -973,6 +2049,49 @@
 						},
 						{
 							"name": "UnBlockUserV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should start with api.user.unblock\", function () {",
+											"   pm.expect(jsonResponse.id).to.eql(\"api.user.unblock\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"   pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											"",
+											"// Validate result properties",
+											"pm.test(\"result should have necessary properties\", function () {",
+											"    pm.expect(jsonResponse.result).to.have.property(\"response\").and.eql(\"SUCCESS\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -1121,6 +2240,45 @@
 					"item": [
 						{
 							"name": "UserExistCheckV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Parse the response body JSON",
+											"var responseBody = pm.response.json();",
+											"",
+											"// Verify the response properties",
+											"pm.test(\"Response has the correct ID\", function () {",
+											"    pm.expect(jsonResponse.id).to.match(/^api\\.user\\.exists/);",
+											"});",
+											"",
+											"pm.test(\"Response has the correct version\", function () {",
+											"    pm.expect(responseBody.ver).to.equal(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"Response has a timestamp\", function () {",
+											"    pm.expect(responseBody.ts).to.be.a('string');",
+											"});",
+											"",
+											"pm.test(\"Response status is SUCCESS\", function () {",
+											"    pm.expect(responseBody.status).to.equal(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"Response has a responseCode of OK\", function () {",
+											"    pm.expect(responseBody.responseCode).to.equal(\"OK\");",
+											"});",
+											"",
+											"// Verify the result property",
+											"pm.test(\"Result exists and is true\", function () {",
+											"    pm.expect(responseBody.result.exists).to.be.true;",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [
@@ -1140,12 +2298,51 @@
 										"type": "text"
 									}
 								],
-								"url": "{{host}}/api/user/v1/exists/email/{{email_id}}"
+								"url": "{{host}}/api/user/v1/exists/email/{{username}}"
 							},
 							"response": []
 						},
 						{
 							"name": "UserExistCheckV2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Parse the response body JSON",
+											"var responseBody = pm.response.json();",
+											"",
+											"// Verify the response properties",
+											"pm.test(\"Response has the correct ID\", function () {",
+											"    pm.expect(jsonResponse.id).to.match(/^api\\.user\\.exists/);",
+											"});",
+											"",
+											"pm.test(\"Response has the correct version\", function () {",
+											"    pm.expect(responseBody.ver).to.equal(\"v2\");",
+											"});",
+											"",
+											"pm.test(\"Response has a timestamp\", function () {",
+											"    pm.expect(responseBody.ts).to.be.a('string');",
+											"});",
+											"",
+											"pm.test(\"Response status is SUCCESS\", function () {",
+											"    pm.expect(responseBody.status).to.equal(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"Response has a responseCode of OK\", function () {",
+											"    pm.expect(responseBody.responseCode).to.equal(\"OK\");",
+											"});",
+											"",
+											"// Verify the result property",
+											"pm.test(\"Result exists and is true\", function () {",
+											"    pm.expect(responseBody.result.exists).to.be.true;",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [
@@ -1165,7 +2362,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{host}}/api/user/v2/exists/email/{{email_id}}"
+								"url": "{{host}}/api/user/v2/exists/email/{{username}}"
 							},
 							"response": []
 						}
@@ -1240,7 +2437,68 @@
 											"pm.test(\"Set organisationId in environment variable\", function () {",
 											"    const responseJson = pm.response.json();",
 											"    pm.environment.set(\"org_id\", responseJson.result.organisationId);",
-											"});"
+											"});",
+											"",
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+											"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"",
+											"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+											"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.err).to.be.null;",
+											"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"",
+											"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+											"        'organisationId', 'response'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.result.organisationId).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should be api.org.create\", function () {",
+											"    pm.expect(jsonResponse.id).to.eql(\"api.org.create\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											""
 										],
 										"type": "text/javascript"
 									}
@@ -1285,6 +2543,73 @@
 					"item": [
 						{
 							"name": "ReadOrganisationV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+											"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"",
+											"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+											"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.err).to.be.null;",
+											"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"",
+											"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+											"        'response'",
+											"    );",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should be api.org.read\", function () {",
+											"    pm.expect(jsonResponse.id).to.eql(\"api.org.read\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"auth": {
 									"type": "noauth"
@@ -1324,6 +2649,80 @@
 					"item": [
 						{
 							"name": "SearchOrganisationV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+											"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"",
+											"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+											"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.err).to.be.null;",
+											"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"",
+											"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+											"        'response'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.result.response).to.be.an(\"object\").that.has.all.keys(",
+											"        'count', 'content'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.result.response.content).to.be.an(\"array\");",
+											"    // Additional validation checks can be added for specific keys if needed",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should be api.org.search\", function () {",
+											"    pm.expect(jsonResponse.id).to.eql(\"api.org.search\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"auth": {
 									"type": "noauth"
@@ -1590,6 +2989,11 @@
 										"type": "text"
 									},
 									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
 										"key": "Content-Type",
 										"value": "application/json",
 										"type": "text"
@@ -1605,7 +3009,7 @@
 										}
 									}
 								},
-								"url": "{{host}}/api/location/v1/create",
+								"url": "{{host}}/api/data/v1/location/create",
 								"description": "This API is used to create a physical location of a user or an organization, depending upon the usecase\n  \n  - The endpoint for **Create location** is `/data/v1/location/create`\n  - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -1617,6 +3021,79 @@
 					"item": [
 						{
 							"name": "SearchLocationV1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let jsonResponse = pm.response.json();",
+											"",
+											"// Verification",
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is present\", () => {",
+											"    pm.response.to.have.header(\"Content-Type\");",
+											"});",
+											"",
+											"pm.test(\"Content-Type header is application/json\", () => {",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+											"});",
+											"",
+											"pm.test(\"Test data type of the response and keys\", () => {",
+											"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+											"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+											"",
+											"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+											"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.err).to.be.null;",
+											"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+											"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+											"",
+											"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+											"        'response', 'count'",
+											"    );",
+											"",
+											"    pm.expect(jsonResponse.result.response[0]).to.be.an(\"object\").that.has.all.keys(",
+											"        'identifier', 'code', 'name', 'id', 'type', 'parentId'",
+											"    );",
+											"",
+											"    // Additional validation checks can be added for specific keys if needed",
+											"});",
+											"",
+											"// Validation",
+											"pm.test(\"id should be api.location.search\", function () {",
+											"    pm.expect(jsonResponse.id).to.eql(\"api.location.search\");",
+											"});",
+											"",
+											"pm.test(\"ver should be v1\", function () {",
+											"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+											"});",
+											"",
+											"pm.test(\"params.status should be SUCCESS\", function () {",
+											"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+											"});",
+											"",
+											"pm.test(\"responseCode should be OK\", function () {",
+											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [
@@ -1641,7 +3118,7 @@
 										}
 									}
 								},
-								"url": "{{host}}/api/location/v1/search",
+								"url": "{{host}}/api/data/v1/location/search",
 								"description": "This API is associated with fetching the location data based on the criterias specified in the request body.\n   - The endpoint for **Search location** is `/data/v1/location/search`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -1682,7 +3159,7 @@
 										}
 									}
 								},
-								"url": "{{host}}/api/location/v1/update",
+								"url": "{{host}}/api/data/v1/location/update",
 								"description": "This API is associated with updating the location data based on the location id,\n   - The endpoint for **Update location** is `/data/v1/location/update`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -1724,7 +3201,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{host}}/api/location/v1/delete/{{location_id}}",
+								"url": "{{host}}/api/data/v1/location/delete/{{location_id}}",
 								"description": "This API is associated with deleting the location data based on the location id.\n   - The endpoint for **Search location** is `/data/v1/location/delete`\n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -1758,6 +3235,75 @@
 			"item": [
 				{
 					"name": "DataSyncV1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"",
+									"pm.test(\"Test data type of the response and keys\", () => {",
+									"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+									"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+									"",
+									"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+									"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.err).to.be.null;",
+									"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+									"",
+									"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+									"        'response'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.result.response).to.eql(\"SUCCESS\");",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"id should be api.data.sync\", function () {",
+									"    pm.expect(jsonResponse.id).to.eql(\"api.data.sync\");",
+									"});",
+									"",
+									"pm.test(\"ver should be v1\", function () {",
+									"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+									"});",
+									"",
+									"pm.test(\"params.status should be SUCCESS\", function () {",
+									"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+									"});",
+									"",
+									"pm.test(\"responseCode should be OK\", function () {",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1804,45 +3350,6 @@
 			"name": "ConsentAPIs",
 			"item": [
 				{
-					"name": "ConsentUpdateV1",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{kong_api_key}}",
-								"type": "text",
-								"description": "Timestamp at which given API request is sent."
-							},
-							{
-								"key": "X-Authenticated-User-token",
-								"value": "{{keycloak_access_token}}",
-								"type": "text",
-								"description": "This ID uniquely identifies a request if the same API is executed multiple times."
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text",
-								"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"request\": {\n        \"consent\": {\n            \"status\": \"ACTIVE\",\n            \"userId\": \"{{user_id}}\",\n            \"consumerId\": \"{{org_id}}\",\n            \"objectId\": \"{{object_id}}\",\n            \"objectType\": \"Collection\"\n        }\n    }\n}",
-							"options": {
-								"raw": {
-									"headerFamily": "json",
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{host}}/api/consent/v1/update",
-						"description": "This API is used to update user consent for sharing the PII to an organisation, course or collection\n   - The endpoint for **Update Consent** is `/user/v1/consent/update`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
-					},
-					"response": []
-				},
-				{
 					"name": "UserConsentReadV1",
 					"request": {
 						"method": "POST",
@@ -1868,7 +3375,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"request\": {\n        \"consent\": {\n            \"filters\": {\n                \"userId\": \"{{user_id}}\",\n                \"consumerId\": \"{{org_id}}\",\n                \"objectId\": \"{{object_id}}\"\n            }\n        }\n    }\n}",
+							"raw": "{\n    \"request\": {\n        \"consent\": {\n            \"filters\": {\n                \"userId\": \"{{user_id}}\",\n                \"consumerId\": \"{{org_id}}\",\n                \"objectId\": \"{{course_id}}\"\n            }\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"headerFamily": "json",
@@ -1876,7 +3383,46 @@
 								}
 							}
 						},
-						"url": "{{host}}/api/consent/v1/read"
+						"url": "{{host}}/api/user/v1/consent/read"
+					},
+					"response": []
+				},
+				{
+					"name": "ConsentUpdateV1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text",
+								"description": "Timestamp at which given API request is sent."
+							},
+							{
+								"key": "X-Authenticated-User-token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text",
+								"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"consent\": {\n            \"status\": \"ACTIVE\",\n            \"userId\": \"{{user_id}}\",\n            \"consumerId\": \"{{org_id}}\",\n            \"objectId\": \"{{course_id}}\",\n            \"objectType\": \"Collection\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/user/v1/consent/update",
+						"description": "This API is used to update user consent for sharing the PII to an organisation, course or collection\n   - The endpoint for **Update Consent** is `/user/v1/consent/update`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 					},
 					"response": []
 				}
@@ -1907,6 +3453,75 @@
 			"item": [
 				{
 					"name": "GenerateOTPV1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"",
+									"pm.test(\"Test data type of the response and keys\", () => {",
+									"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+									"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+									"",
+									"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+									"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.err).to.be.null;",
+									"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+									"",
+									"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+									"        'response'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.result.response).to.eql(\"SUCCESS\");",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"id should be api.otp.generate\", function () {",
+									"    pm.expect(jsonResponse.id).to.eql(\"api.otp.generate\");",
+									"});",
+									"",
+									"pm.test(\"ver should be v1\", function () {",
+									"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+									"});",
+									"",
+									"pm.test(\"params.status should be SUCCESS\", function () {",
+									"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+									"});",
+									"",
+									"pm.test(\"responseCode should be OK\", function () {",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2006,25 +3621,22 @@
 									{
 										"key": "Authorization",
 										"value": "{{kong_api_key}}",
-										"type": "text",
-										"description": "Timestamp at which given API request is sent."
+										"type": "text"
 									},
 									{
 										"key": "X-Authenticated-User-token",
 										"value": "{{keycloak_access_token}}",
-										"type": "text",
-										"description": "This ID uniquely identifies a request if the same API is executed multiple times."
+										"type": "text"
 									},
 									{
 										"key": "Content-Type",
 										"value": "application/json",
-										"type": "text",
-										"description": "(Required) It is a unique token/key to authenticate the user each time an API is called. For corresponding sessions this token is used, not your actual username/password"
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"orgId\": \"all\",\n        \"key\": \"selfdeclarations\",\n        \"data\": \"Tenant preference data\"\n    }\n}",
+									"raw": "{\n    \"request\": {\n        \"orgId\": \"all\",\n        \"key\": \"{{random_code}}\",\n        \"data\": {\n            \"privateFields\": [\n                \"35@yopmail.com\"\n            ]\n            }\n    }\n}",
 									"options": {
 										"raw": {
 											"headerFamily": "json",
@@ -2032,7 +3644,7 @@
 										}
 									}
 								},
-								"url": "{{host}}/api/tenant/v2/preferences/create",
+								"url": "{{host}}/api/org/v2/preferences/create",
 								"description": "This API is used to save data as per the tenant preference for an organisation\n   - The endpoint for **Update Consent** is `/org/v2/preferences/create`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -2076,7 +3688,7 @@
 										}
 									}
 								},
-								"url": "{{host}}/api/tenant/v2/preferences/read",
+								"url": "{{host}}/api/org/v2/preferences/read",
 								"description": "This API is used to get data that is saved as tenant preference for an organisation\n   - The endpoint for **Update Consent** is `/org/v2/preferences/read`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -2112,7 +3724,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"orgId\": \"all\",\n        \"key\": \"selfdeclarations\",\n        \"data\": \"Tenant preference data\"\n    }\n}",
+									"raw": "{\n    \"request\": {\n        \"orgId\": \"all\",\n        \"key\": \"selfdeclarations\",\n        \"data\": {\n            \"privateFields\": [\n                \"tn20@yopmail.com\"\n            ]\n    }\n  }\n}\n",
 									"options": {
 										"raw": {
 											"headerFamily": "json",
@@ -2120,7 +3732,7 @@
 										}
 									}
 								},
-								"url": "{{host}}/api/tenant/v2/preferences/update",
+								"url": "{{host}}/api/org/v2/preferences/update",
 								"description": "This API is used to update data as per the tenant preference for an organisation\n   - The endpoint for **Update Consent** is `/org/v2/preferences/update`  \n   - The fields marked with an asterisk (*) are mandatory. They cannot be null or empty."
 							},
 							"response": []
@@ -2182,7 +3794,7 @@
 								}
 							}
 						},
-						"url": "{{host}}/api/system/v1/settings/set"
+						"url": "{{host}}/api/data/v1/system/settings/set"
 					},
 					"response": []
 				},
@@ -2207,7 +3819,7 @@
 								"type": "text"
 							}
 						],
-						"url": "{{host}}/api/system/v1/settings/get/userTnc"
+						"url": "{{host}}/api/data/v1/system/settings/get/userProfileConfig"
 					},
 					"response": []
 				},
@@ -2232,7 +3844,7 @@
 								"type": "text"
 							}
 						],
-						"url": "{{host}}/api/system/v1/settings/list"
+						"url": "{{host}}/api/data/v1/system/settings/list"
 					},
 					"response": []
 				}
@@ -2439,6 +4051,750 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "UserFeedAPIs",
+			"item": [
+				{
+					"name": "Create-Feed",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response JSON body",
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"Validate specific field values\", function () {",
+									"    pm.expect(jsonResponse.id).to.eql(\"api.user.feed.create\");",
+									"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"",
+									"    // Additional validation can be added if needed",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"connection": true,
+							"accept-encoding": true,
+							"user-agent": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"category\": \"user-feed\",\n        \"priority\": 1,\n        \"data\": {\n            \"dataValue\": \"yes\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/user/v1/feed/create",
+						"description": "Creates feed for the user."
+					},
+					"response": [
+						{
+							"name": "Create-Feed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-Token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n        \"category\": \"user-feed\",\n        \"priority\": 1,\n        \"data\": {\n            \"dataValue\": \"yes\"\n        }\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/v1/feed/create"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 08 Sep 2023 11:24:29 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "272"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "X-RateLimit-Limit-hour",
+									"value": "30000"
+								},
+								{
+									"key": "X-RateLimit-Remaining-hour",
+									"value": "29994"
+								},
+								{
+									"key": "referrer-policy",
+									"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+								},
+								{
+									"key": "x-frame-options",
+									"value": "DENY"
+								},
+								{
+									"key": "x-xss-protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "x-response-length",
+									"value": "22"
+								},
+								{
+									"key": "x-content-type-options",
+									"value": "nosniff"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "x-permitted-cross-domain-policies",
+									"value": "master-only"
+								},
+								{
+									"key": "x-envoy-upstream-service-time",
+									"value": "22"
+								},
+								{
+									"key": "X-Kong-Upstream-Latency",
+									"value": "24"
+								},
+								{
+									"key": "X-Kong-Proxy-Latency",
+									"value": "16"
+								},
+								{
+									"key": "Via",
+									"value": "kong/0.14.1"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"api.user.feed.create\",\n    \"ver\": \"v1\",\n    \"ts\": \"2023-09-08 11:24:29:371+0000\",\n    \"params\": {\n        \"resmsgid\": \"7fde6a4c77df4e19e78792a3624ab6a5\",\n        \"msgid\": \"7fde6a4c77df4e19e78792a3624ab6a5\",\n        \"err\": null,\n        \"status\": \"SUCCESS\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"response\": \"SUCCESS\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "UpdateFeedV1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response JSON body",
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"Validate specific field values\", function () {",
+									"    pm.expect(jsonResponse.id).to.eql(\"api.user.feed.update\");",
+									"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"",
+									"    // Additional validation can be added if needed",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"connection": true,
+							"accept-encoding": true,
+							"user-agent": true
+						}
+					},
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"category\": \"user-feed\",\n        \"feedId\": \"{{feed_id}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/user/feed/v1/update",
+						"description": "Update the user-feed"
+					},
+					"response": [
+						{
+							"name": "Update-Feed",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-Token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n        \"category\": \"user-feed\",\n        \"feedId\": \"23b7b644-8fa7-4218-a19c-68f05e93e423\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/feed/v1/update"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 08 Sep 2023 11:32:39 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "272"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "X-RateLimit-Limit-hour",
+									"value": "30000"
+								},
+								{
+									"key": "X-RateLimit-Remaining-hour",
+									"value": "29997"
+								},
+								{
+									"key": "referrer-policy",
+									"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+								},
+								{
+									"key": "x-frame-options",
+									"value": "DENY"
+								},
+								{
+									"key": "x-xss-protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "x-response-length",
+									"value": "22"
+								},
+								{
+									"key": "x-content-type-options",
+									"value": "nosniff"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "x-permitted-cross-domain-policies",
+									"value": "master-only"
+								},
+								{
+									"key": "x-envoy-upstream-service-time",
+									"value": "25"
+								},
+								{
+									"key": "X-Kong-Upstream-Latency",
+									"value": "27"
+								},
+								{
+									"key": "X-Kong-Proxy-Latency",
+									"value": "16"
+								},
+								{
+									"key": "Via",
+									"value": "kong/0.14.1"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"api.user.feed.update\",\n    \"ver\": \"v1\",\n    \"ts\": \"2023-09-08 11:32:39:796+0000\",\n    \"params\": {\n        \"resmsgid\": \"4615224c010b6d9de925f6f3471bf105\",\n        \"msgid\": \"4615224c010b6d9de925f6f3471bf105\",\n        \"err\": null,\n        \"status\": \"SUCCESS\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"response\": \"SUCCESS\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "ReadFeedV1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response JSON body",
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"Validate specific field values\", function () {",
+									"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"});",
+									"",
+									"let userFeedId = jsonResponse.result.response.userFeed.length > 0 ? jsonResponse.result.response.userFeed[0].id : null;",
+									"pm.environment.set('feed_id', userFeedId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							}
+						],
+						"url": "{{host}}/api/user/v1/feed/{{user_id}}",
+						"description": "Get the feed details based on user-id"
+					},
+					"response": [
+						{
+							"name": "ReadFeedV1",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-Token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									}
+								],
+								"url": "{{host}}/api/user/v1/feed/{{user_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 08 Sep 2023 11:30:06 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "X-RateLimit-Limit-hour",
+									"value": "30000"
+								},
+								{
+									"key": "X-RateLimit-Remaining-hour",
+									"value": "29986"
+								},
+								{
+									"key": "referrer-policy",
+									"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+								},
+								{
+									"key": "x-frame-options",
+									"value": "DENY"
+								},
+								{
+									"key": "x-xss-protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "x-response-length",
+									"value": "531"
+								},
+								{
+									"key": "x-content-type-options",
+									"value": "nosniff"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "x-permitted-cross-domain-policies",
+									"value": "master-only"
+								},
+								{
+									"key": "x-envoy-upstream-service-time",
+									"value": "15"
+								},
+								{
+									"key": "X-Kong-Upstream-Latency",
+									"value": "18"
+								},
+								{
+									"key": "X-Kong-Proxy-Latency",
+									"value": "10"
+								},
+								{
+									"key": "Via",
+									"value": "kong/0.14.1"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"api.user.feed.155ce3c5-713e-4749-bc1c-95d09c640914\",\n    \"ver\": \"v1\",\n    \"ts\": \"2023-09-08 11:30:06:795+0000\",\n    \"params\": {\n        \"resmsgid\": \"45575c8d0515fcd1852f32502e01d4d1\",\n        \"msgid\": \"45575c8d0515fcd1852f32502e01d4d1\",\n        \"err\": null,\n        \"status\": \"SUCCESS\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"response\": {\n            \"userFeed\": [\n                {\n                    \"id\": \"03154548-1525-4258-a6cf-3f7b62040c66\",\n                    \"userId\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n                    \"category\": \"user-feed\",\n                    \"priority\": 1,\n                    \"createdBy\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n                    \"status\": \"unread\",\n                    \"data\": {\n                        \"dataValue\": \"yes\"\n                    },\n                    \"createdOn\": 1694172269364\n                },\n                {\n                    \"id\": \"23b7b644-8fa7-4218-a19c-68f05e93e423\",\n                    \"userId\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n                    \"category\": \"user-feed\",\n                    \"priority\": 1,\n                    \"createdBy\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n                    \"status\": \"unread\",\n                    \"data\": {\n                        \"dataValue\": \"yes\"\n                    },\n                    \"createdOn\": 1694172208796\n                }\n            ]\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "DeleteFeedV1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response JSON body",
+									"let jsonResponse = pm.response.json();",
+									"",
+									"// Verification",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is present\", () => {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type header is application/json\", () => {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+									"});",
+									"",
+									"pm.test(\"Test data type of the response and keys\", () => {",
+									"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(",
+									"        'id', 'ver', 'ts', 'params', 'responseCode', 'result'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.id).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ver).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.ts).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.responseCode).to.be.a(\"string\");",
+									"",
+									"    pm.expect(jsonResponse.params).to.be.an(\"object\").that.has.all.keys(",
+									"        'resmsgid', 'msgid', 'err', 'status', 'errmsg'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.params.resmsgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.msgid).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.err).to.be.null;",
+									"    pm.expect(jsonResponse.params.status).to.be.a(\"string\");",
+									"    pm.expect(jsonResponse.params.errmsg).to.be.null;",
+									"",
+									"    pm.expect(jsonResponse.result).to.be.an(\"object\").that.has.all.keys(",
+									"        'response'",
+									"    );",
+									"",
+									"    pm.expect(jsonResponse.result.response).to.be.a(\"string\");",
+									"});",
+									"",
+									"// Validation",
+									"pm.test(\"id should be api.user.feed.delete\", function () {",
+									"    pm.expect(jsonResponse.id).to.eql(\"api.user.feed.delete\");",
+									"});",
+									"",
+									"pm.test(\"ver should be v1\", function () {",
+									"    pm.expect(jsonResponse.ver).to.eql(\"v1\");",
+									"});",
+									"",
+									"pm.test(\"params.status should be SUCCESS\", function () {",
+									"    pm.expect(jsonResponse.params.status).to.eql(\"SUCCESS\");",
+									"});",
+									"",
+									"pm.test(\"responseCode should be OK\", function () {",
+									"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{kong_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{keycloak_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"category\": \"user-feed\",\n        \"feedId\": \"{{feed_id}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{host}}/api/user/feed/v1/delete",
+						"description": "Delete-Feed api to delete the user-related feed based on the feed-id"
+					},
+					"response": [
+						{
+							"name": "Delete-Feed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-Token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"155ce3c5-713e-4749-bc1c-95d09c640914\",\n        \"category\": \"user-feed\",\n        \"feedId\": \"03154548-1525-4258-a6cf-3f7b62040c66\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/api/user/feed/v1/delete"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Fri, 08 Sep 2023 11:40:44 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Vary",
+									"value": "Accept-Encoding"
+								},
+								{
+									"key": "X-RateLimit-Limit-hour",
+									"value": "30000"
+								},
+								{
+									"key": "X-RateLimit-Remaining-hour",
+									"value": "29998"
+								},
+								{
+									"key": "referrer-policy",
+									"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+								},
+								{
+									"key": "x-frame-options",
+									"value": "DENY"
+								},
+								{
+									"key": "x-xss-protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "x-response-length",
+									"value": "22"
+								},
+								{
+									"key": "x-content-type-options",
+									"value": "nosniff"
+								},
+								{
+									"key": "access-control-allow-origin",
+									"value": "*"
+								},
+								{
+									"key": "x-permitted-cross-domain-policies",
+									"value": "master-only"
+								},
+								{
+									"key": "x-envoy-upstream-service-time",
+									"value": "18"
+								},
+								{
+									"key": "X-Kong-Upstream-Latency",
+									"value": "20"
+								},
+								{
+									"key": "X-Kong-Proxy-Latency",
+									"value": "13"
+								},
+								{
+									"key": "Via",
+									"value": "kong/0.14.1"
+								},
+								{
+									"key": "Content-Encoding",
+									"value": "gzip"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"api.user.feed.delete\",\n    \"ver\": \"v1\",\n    \"ts\": \"2023-09-08 11:40:44:947+0000\",\n    \"params\": {\n        \"resmsgid\": \"17620fe6fe5608d1cd9caf3b3782f442\",\n        \"msgid\": \"17620fe6fe5608d1cd9caf3b3782f442\",\n        \"err\": null,\n        \"status\": \"SUCCESS\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"response\": \"SUCCESS\"\n    }\n}"
+						}
+					]
+				}
+			]
 		}
 	],
 	"event": [
@@ -2448,16 +4804,9 @@
 				"type": "text/javascript",
 				"exec": [
 					"const getRandomName = () => {",
-					"  const firstNames = [\"John\", \"Alice\", \"Bob\", \"Emma\", \"James\", \"Olivia\", \"Michael\", \"Sophia\", \"David\", \"Isabella\"];",
-					"  const lastNames = [\"Smith\", \"Johnson\", \"Brown\", \"Williams\", \"Jones\", \"Miller\", \"Davis\", \"Garcia\", \"Martinez\", \"Anderson\"];",
-					"  ",
-					"    if (pm.environment.get(\"environment\") === \"local\") {",
-					"        var baseURL = pm.environment.get(\"host\")",
-					"        pm.variables.set(\"baseURL\", baseURL);",
-					"    } else {",
-					"        var baseURL = pm.environment.get(\"host\") + pm.variables.get(\"basePath\");",
-					"        pm.variables.set(\"baseURL\", baseURL);",
-					"    }",
+					"const firstNames = [\"Aarav\", \"Aarya\", \"Advait\", \"Aishwarya\", \"Akshay\", \"Ananya\", \"Aaradhya\", \"Ayush\", \"Deepika\", \"Ishaan\"];",
+					"const lastNames = [\"Sharma\", \"Verma\", \"Singh\", \"Patel\", \"Gupta\", \"Kumar\", \"Joshi\", \"Shah\", \"Chopra\", \"Mehra\"];",
+					"",
 					"",
 					"  const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
 					"  const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
@@ -2527,8 +4876,12 @@
 					"  const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];",
 					"  const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];",
 					"",
-					"  return `${randomFirstName} ${randomLastName}`;",
+					"  // Add a timestamp to make the name more unique",
+					"  const timestamp = new Date().getTime();",
+					"",
+					"  return `${randomFirstName}_${randomLastName}_${timestamp}`;",
 					"};",
+					"",
 					"",
 					"const isCodeUsed = (code) => {",
 					"  const usedCodes = pm.environment.get(\"used_codes\") || [];",
@@ -2555,19 +4908,55 @@
 					"  }",
 					"  return locationName;",
 					"};",
+					"// Initialize environment variables as empty arrays if they don't exist",
+					"const initializeArrayVariable = (variableName) => {",
+					"  if (!pm.environment.get(variableName)) {",
+					"    pm.environment.set(variableName, JSON.stringify([]));",
+					"  }",
+					"};",
+					"",
+					"initializeArrayVariable(\"used_user_names\");",
+					"initializeArrayVariable(\"used_org_names\");",
+					"initializeArrayVariable(\"used_channel_names\");",
+					"initializeArrayVariable(\"used_emails\");",
+					"initializeArrayVariable(\"used_codes\");",
+					"initializeArrayVariable(\"used_location_names\");",
+					"// Function to safely parse a comma-separated list as an array",
+					"const safeParseCommaSeparatedList = (variableName) => {",
+					"  try {",
+					"    const commaSeparatedStr = pm.environment.get(variableName);",
+					"    if (typeof commaSeparatedStr === 'string' && commaSeparatedStr.trim() !== '') {",
+					"      // Split the comma-separated string into an array",
+					"      return commaSeparatedStr.split(\",\");",
+					"    }",
+					"  } catch (error) {",
+					"    console.error(`Error parsing ${variableName}: ${error}`);",
+					"  }",
+					"  return [];",
+					"};",
+					"",
+					"// Initialize or retrieve environment variables",
+					"let usedUsernames = safeParseCommaSeparatedList(\"used_user_names\");",
+					"let usedOrgnames = safeParseCommaSeparatedList(\"used_org_names\");",
+					"let usedChannelnames = safeParseCommaSeparatedList(\"used_channel_names\");",
+					"let usedEmails = safeParseCommaSeparatedList(\"used_emails\");",
+					"let usedCodes = safeParseCommaSeparatedList(\"used_codes\");",
+					"let usedLocationNames = safeParseCommaSeparatedList(\"used_location_names\");",
+					"",
+					"",
 					"",
 					"// Function to generate a random 10-digit Indian phone number",
 					"function generateRandomPhoneNumber() {",
-					"    var phoneNumber = \"9\"; // Start with 9 (common for Indian mobile numbers)",
-					"    for (var i = 1; i < 10; i++) {",
-					"        phoneNumber += Math.floor(Math.random() * 10);",
-					"    }",
-					"    return phoneNumber;",
+					"  var phoneNumber = \"9\"; // Start with 9 (common for Indian mobile numbers)",
+					"  for (var i = 1; i < 10; i++) {",
+					"    phoneNumber += Math.floor(Math.random() * 10);",
+					"  }",
+					"  return phoneNumber;",
 					"}",
 					"",
 					"// Check if the used phone numbers array exists in environment variables",
 					"if (!pm.environment.get(\"used_phone_numbers\")) {",
-					"    pm.environment.set(\"used_phone_numbers\", JSON.stringify([]));",
+					"  pm.environment.set(\"used_phone_numbers\", JSON.stringify([]));",
 					"}",
 					"",
 					"// Retrieve the used phone numbers array",
@@ -2576,7 +4965,7 @@
 					"// Generate a new random phone number and ensure it's not a duplicate",
 					"var newPhoneNumber;",
 					"do {",
-					"    newPhoneNumber = generateRandomPhoneNumber();",
+					"  newPhoneNumber = generateRandomPhoneNumber();",
 					"} while (usedPhoneNumbers.includes(newPhoneNumber));",
 					"",
 					"// Store the new phone number in the used numbers array",
@@ -2584,18 +4973,8 @@
 					"",
 					"// Update the environment variable with the updated used phone numbers array",
 					"pm.environment.set(\"used_phone_numbers\", JSON.stringify(usedPhoneNumbers));",
-					"",
 					"// Set the generated phone number as a variable for the request",
 					"pm.variables.set(\"random_phone_number\", newPhoneNumber);",
-					"",
-					"",
-					"",
-					"const usedUsernames = pm.environment.get(\"used_usernames\") || [];",
-					"const usedOrgnames = pm.environment.get(\"used_orgnames\") || [];",
-					"const usedChannelnames = pm.environment.get(\"used_channelnames\") || [];",
-					"const usedEmails = pm.environment.get(\"used_emails\") || [];",
-					"const usedCodes = pm.environment.get(\"used_codes\") || [];",
-					"const usedLocationNames = pm.environment.get(\"used_location_names\") || [];",
 					"",
 					"let randomName = getRandomName();",
 					"let randomUserName = generateUniqueUsername();",
@@ -2646,10 +5025,10 @@
 					"pm.environment.set(\"random_password\", randomPassword);",
 					"pm.environment.set(\"random_code\", randomCode);",
 					"pm.environment.set(\"random_location_name\", randomLocationName);",
-					"pm.environment.set(\"used_usernames\", usedUsernames);",
+					"pm.environment.set(\"used_user_names\", usedUsernames);",
 					"pm.environment.set(\"used_emails\", usedEmails);",
-					"pm.environment.set(\"used_channelnames\",usedChannelnames);",
-					"pm.environment.set(\"used_orgnames\",usedOrgnames);",
+					"pm.environment.set(\"used_channel_names\",usedChannelnames);",
+					"pm.environment.set(\"used_org_names\",usedOrgnames);",
 					"pm.environment.set(\"used_codes\", usedCodes);",
 					"pm.environment.set(\"used_location_names\", usedLocationNames);"
 				]
