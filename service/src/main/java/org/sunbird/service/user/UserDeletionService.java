@@ -73,8 +73,6 @@ public class UserDeletionService {
 
     generateTelemetryEvent(deletionStatus, userId, context.getContextMap());
 
-    // Trigger the delete user kafka event {{env_name}}.delete.user using Background actor
-
     return updateUserResponse;
   }
 
