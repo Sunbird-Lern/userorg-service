@@ -655,13 +655,16 @@ public final class JsonKey {
   public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
   public static final String ES_USER_INDEX_ALIAS = "user_index_alias";
   public static final String ES_ORG_INDEX_INDEX = "org_index_alias";
-  public static final String DELETION_STAGE_STATUS = "deletionStageStatus";
   public static final String USER_DELETION_STATUS = "user_deletion_status";
   public static final String CREDENTIALS_STATUS = "keycloakCredentials";
   public static final String USER_LOOK_UP_STATUS = "userLookUpTable";
   public static final String USER_EXTERNAL_ID_STATUS = "userExternalIdTable";
-  public static final String USER_OWNERSHIP_TRANSFER_STATUS = "userOwnershipTransferTable";
+  public static final String USERS = "users";
   public static final String USER_TABLE_STATUS = "userTable";
+  public static final String SUGGESTED_USERS = "suggested_users";
+  public static final String DELETE_USER_ACTON = "delete-user";
+  public static final String OBJECT = "object";
+  public static final String EDATA = "eData";
 
   private JsonKey() {}
 }

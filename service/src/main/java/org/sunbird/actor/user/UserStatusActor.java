@@ -2,20 +2,15 @@ package org.sunbird.actor.user;
 
 import akka.actor.ActorRef;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
-import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.UserStatusService;
-import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.Util;
@@ -28,7 +23,6 @@ public class UserStatusActor extends UserBaseActor {
 
   private final UserStatusService userStatusService = new UserStatusService();
   private final UserService userService = UserServiceImpl.getInstance();
-  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
 
   @Override
   public void onReceive(Request request) throws Throwable {
@@ -62,20 +56,8 @@ public class UserStatusActor extends UserBaseActor {
         userStatusService.updateUserStatus(userMap, operation, request.getRequestContext());
 
     if (deleteUser) {
-      List<Map<String, Object>> userRoles =
-          userRoleService.getUserRoles(userId, request.getRequestContext());
       Map<String, Object> userData = new HashMap<>();
       userData.put(JsonKey.USER_ID, userId);
-      List<String> userRolesList = new ArrayList<String>();
-      if (CollectionUtils.isNotEmpty(userRoles)) {
-        userRoles
-            .stream()
-            .forEach(
-                role -> {
-                  userRolesList.add((String) role.get(JsonKey.ROLE));
-                });
-      }
-      userData.put(JsonKey.ROLES, userRolesList);
 
       Request bgRequest = new Request();
       bgRequest.setRequestContext(request.getRequestContext());
