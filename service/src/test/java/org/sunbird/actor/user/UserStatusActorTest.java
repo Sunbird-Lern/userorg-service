@@ -3,8 +3,7 @@ package org.sunbird.actor.user;
 import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -43,6 +42,8 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserExternalIdentityService;
+import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
@@ -58,7 +59,9 @@ import scala.concurrent.Promise;
   ElasticSearchService.class,
   EsClientFactory.class,
   ServiceFactory.class,
-  CassandraOperationImpl.class
+  CassandraOperationImpl.class,
+  UserExternalIdentityService.class,
+  UserExternalIdentityServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -221,11 +224,70 @@ public class UserStatusActorTest {
     Assert.assertNotNull(exception);
   }
 
+  @Test
+  public void testDeleteUserSuccess() {
+    try {
+      Response userDetailsById = new Response();
+      Map<String, Object> user = new HashMap<>();
+      user.put(JsonKey.ID, "46545665465465");
+      user.put(JsonKey.IS_DELETED, false);
+      user.put(JsonKey.FIRST_NAME, "firstName");
+      user.put(JsonKey.STATUS, 1);
+      user.put(JsonKey.EMAIL, "test@test.com");
+      user.put(JsonKey.PHONE, "9876543210");
+      user.put(JsonKey.EXTERNAL_ID, "9876");
+      List<Map<String, Object>> userList = new ArrayList<>();
+      userList.add(user);
+      userDetailsById.getResult().put(JsonKey.RESPONSE, userList);
+      when(cassandraOperation.getRecordById(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+          .thenReturn(userDetailsById);
+
+      PowerMockito.mockStatic(SSOServiceFactory.class);
+      SSOManager ssoManager = PowerMockito.mock(SSOManager.class);
+      PowerMockito.when(SSOServiceFactory.getInstance()).thenReturn(ssoManager);
+      PowerMockito.when(ssoManager.removeUser(Mockito.anyMap(), Mockito.any()))
+          .thenReturn(JsonKey.SUCCESS);
+
+      when(cassandraOperation.deleteRecord(
+              Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+          .thenReturn(userDetailsById);
+
+      Map<String, String> userExtIdMap = new HashMap<>();
+      userExtIdMap.put("provider", "0132818330295992324");
+      userExtIdMap.put("idtype", "teacherId");
+      userExtIdMap.put("externalid", "cedd456");
+      userExtIdMap.put("userid", "46545665465465");
+
+      List<Map<String, String>> userExtIdRespList = new ArrayList<>();
+      userExtIdRespList.add(userExtIdMap);
+
+      UserExternalIdentityServiceImpl externalIdentityService =
+          PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+      PowerMockito.whenNew(UserExternalIdentityServiceImpl.class)
+          .withNoArguments()
+          .thenReturn(externalIdentityService);
+
+      when(externalIdentityService.getUserExternalIds(Mockito.anyString(), Mockito.any()))
+          .thenReturn(userExtIdRespList);
+
+      doNothing()
+          .when(externalIdentityService, "deleteUserExternalIds", Mockito.any(), Mockito.any());
+
+      boolean result = testScenario(false, ActorOperations.DELETE_USER, true, null);
+      assertTrue(result);
+    } catch (Exception ex) {
+      assertNotNull(ex);
+    }
+  }
+
   private Request getRequestObject(String operation) {
     Request reqObj = new Request();
     String userId = "someUserId";
     reqObj.setOperation(operation);
     reqObj.put(JsonKey.USER_ID, userId);
+    reqObj.setContext(new HashMap<>());
+    reqObj.setRequestContext(new RequestContext());
     return reqObj;
   }
 
@@ -244,9 +306,7 @@ public class UserStatusActorTest {
     ActorRef subject = system.actorOf(props);
 
     when(user.getIsDeleted()).thenReturn(isDeleted);
-
     subject.tell(getRequestObject(operation.getValue()), probe.getRef());
-
     Response res;
     if (isSuccess) {
       res = probe.expectMsgClass(duration("100 second"), Response.class);

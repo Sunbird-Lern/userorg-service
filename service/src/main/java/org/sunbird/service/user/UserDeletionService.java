@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
@@ -21,7 +22,7 @@ import org.sunbird.telemetry.util.TelemetryUtil;
 
 public class UserDeletionService {
 
-  private final UserLookUpServiceImpl userLookUpService = new UserLookUpServiceImpl();
+  private final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private final UserExternalIdentityService userExternalIdentityService =
       UserExternalIdentityServiceImpl.getInstance();
 
@@ -46,10 +47,15 @@ public class UserDeletionService {
 
       Map userLookUpData = mapper.convertValue(user, Map.class);
       List<String> identifiers = new ArrayList<>();
-      identifiers.add(JsonKey.EMAIL);
-      identifiers.add(JsonKey.PHONE);
-      identifiers.add(JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
-      userLookUpService.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
+      if (StringUtils.isNotBlank((String) userLookUpData.get(JsonKey.EMAIL)))
+        identifiers.add(JsonKey.EMAIL);
+      if (StringUtils.isNotBlank((String) userLookUpData.get(JsonKey.PHONE)))
+        identifiers.add(JsonKey.PHONE);
+      if (StringUtils.isNotBlank((String) userLookUpData.get(JsonKey.EXTERNAL_ID)))
+        identifiers.add(JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
+
+      if (!identifiers.isEmpty())
+        userLookupService.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
       deletionStatus.put(JsonKey.USER_LOOK_UP_STATUS, true);
 
       List<Map<String, String>> dbUserExternalIds =
@@ -64,19 +70,19 @@ public class UserDeletionService {
       updateUserResponse = userDao.updateUser(updatedUser, context);
       deletionStatus.put(JsonKey.USER_TABLE_STATUS, true);
     } catch (Exception ex) {
-      generateTelemetryEvent(deletionStatus, userId, context.getContextMap());
+      generateAuditTelemetryEvent(deletionStatus, userId, context.getContextMap());
       throw new ProjectCommonException(
           ResponseCode.userStatusError,
           MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "delete"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    generateTelemetryEvent(deletionStatus, userId, context.getContextMap());
+    generateAuditTelemetryEvent(deletionStatus, userId, context.getContextMap());
 
     return updateUserResponse;
   }
 
-  private void generateTelemetryEvent(
+  private void generateAuditTelemetryEvent(
       Map<String, Object> requestMap, String userId, Map<String, Object> context) {
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> targetObject =
