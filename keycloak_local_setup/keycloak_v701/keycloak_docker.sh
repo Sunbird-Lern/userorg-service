@@ -46,7 +46,7 @@ docker run --name kc_local -p 8080:8080 \
         --net keycloak-postgres-network \
         -e KEYCLOAK_IMPORT="/opt/jboss/keycloak/imports/sunbird-realm.json -Dkeycloak.profile.feature.upload_scripts=enabled" \
         -e sunbird_user_service_base_url="http://$docker_network_gateway:9000" \
-        -d jboss/keycloak:8.0.1
+        -d jboss/keycloak:7.0.1
 
 
 echo "keycloak container created."
