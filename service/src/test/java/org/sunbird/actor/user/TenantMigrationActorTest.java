@@ -210,6 +210,7 @@ public class TenantMigrationActorTest {
   }
 
   public boolean testScenario(Request reqObj, ResponseCode errorCode, Props props) {
+
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
