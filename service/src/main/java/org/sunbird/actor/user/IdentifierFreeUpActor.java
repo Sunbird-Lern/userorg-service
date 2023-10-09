@@ -14,10 +14,10 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.sso.SSOServiceFactory;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.user.UserUtil;
 
 /**
  * this Actor class is being used to free Up used User Identifier for now it only free Up user
@@ -26,7 +26,6 @@ import org.sunbird.util.ProjectUtil;
 public class IdentifierFreeUpActor extends BaseActor {
 
   private final UserService userService = UserServiceImpl.getInstance();
-  private final UserLookUpServiceImpl userLookUp = new UserLookUpServiceImpl();
 
   @Override
   public void onReceive(Request request) {
@@ -107,7 +106,7 @@ public class IdentifierFreeUpActor extends BaseActor {
     Map<String, Object> userDbMap = mapper.convertValue(user, Map.class);
     Map<String, Object> userLookUpData = new HashMap<>(userDbMap);
     Response response = processUserAttribute(userDbMap, identifiers, context);
-    userLookUp.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
+    UserUtil.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
     Map<String, Object> updatedUserMap =
         (Map<String, Object>) response.getResult().remove(JsonKey.USER);
     if (MapUtils.isNotEmpty(updatedUserMap)) {

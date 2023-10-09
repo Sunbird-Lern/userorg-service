@@ -27,7 +27,4 @@ public interface UserLookupService {
 
   void insertExternalIdIntoUserLookup(
       List<Map<String, Object>> reqMap, String s, RequestContext requestContext);
-
-  void removeEntryFromUserLookUp(
-      Map<String, Object> userDbMap, List<String> identifiers, RequestContext context);
 }
