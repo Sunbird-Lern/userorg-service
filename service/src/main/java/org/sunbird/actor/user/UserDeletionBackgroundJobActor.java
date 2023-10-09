@@ -92,7 +92,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     /* Fetch Managed Users - END */
 
     PropertiesCache propertiesCache = PropertiesCache.getInstance();
-    String userDeletionTopic = propertiesCache.getProperty("user-deletion-broadcast-topic");
+    String userDeletionTopic = propertiesCache.getProperty(JsonKey.USER_DELETION_TOPIC);
 
     // data to be passed to event
     Map<String, Object> data = new HashMap<>();

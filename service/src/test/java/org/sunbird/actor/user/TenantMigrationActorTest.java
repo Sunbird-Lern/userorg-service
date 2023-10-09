@@ -13,7 +13,6 @@ import akka.testkit.javadsl.TestKit;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -247,8 +246,7 @@ public class TenantMigrationActorTest {
     return fMap;
   }
 
-  //  @Test
-  @Ignore
+  @Test
   public void testUserMigration() {
     try {
       PowerMockito.mockStatic(DataCacheHandler.class);

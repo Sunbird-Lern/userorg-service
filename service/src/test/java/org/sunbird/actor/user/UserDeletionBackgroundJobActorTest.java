@@ -23,13 +23,15 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.util.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   UserService.class,
   UserServiceImpl.class,
   UserRoleService.class,
-  UserRoleServiceImpl.class
+  UserRoleServiceImpl.class,
+  PropertiesCache.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -41,9 +43,10 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 public class UserDeletionBackgroundJobActorTest {
   private static final Props props = Props.create(UserDeletionBackgroundJobActor.class);
   private ActorSystem system = ActorSystem.create("system");
+  private PropertiesCache propertiesCache;
 
   @Before
-  public void beforeEachTest() {
+  public void beforeEachTest() throws Exception {
     UserRoleService userRoleService = PowerMockito.mock(UserRoleService.class);
     PowerMockito.mockStatic(UserRoleServiceImpl.class);
     PowerMockito.when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
@@ -63,6 +66,11 @@ public class UserDeletionBackgroundJobActorTest {
     user.setRootOrgId("rootOrg");
 
     PowerMockito.when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
+
+    Map<String, Object> searchResult = new HashMap<>();
+    searchResult.put(JsonKey.CONTENT, new ArrayList<>());
+    PowerMockito.when(userService.searchUser(Mockito.any(), Mockito.any()))
+        .thenReturn(searchResult);
   }
 
   @Test
