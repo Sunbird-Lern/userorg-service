@@ -665,6 +665,7 @@ public final class JsonKey {
   public static final String DELETE_USER_ACTON = "delete-user";
   public static final String OBJECT = "object";
   public static final String EDATA = "eData";
+  public static final String MANAGED_USERS = "managed_users";
 
   private JsonKey() {}
 }

@@ -74,6 +74,23 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
           }
         });
 
+    /* Fetch Managed Users - START */
+    List<String> managedUsersList = new ArrayList<>();
+    Map<String, Object> managedUsersSearchFilter = new HashMap<>();
+    managedUsersSearchFilter.put(JsonKey.ROOT_ORG_ID, rootOrgId);
+    managedUsersSearchFilter.put(JsonKey.MANAGED_BY, userId);
+    searchQueryMap.put(JsonKey.FILTERS, managedUsersSearchFilter);
+    SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
+    Map<String, Object> result = userService.searchUser(searchDto, request.getRequestContext());
+    List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+
+    if (userMapList.size() != 0) {
+      for (Map<String, Object> userMap : userMapList) {
+        managedUsersList.add((String) userMap.get(JsonKey.USER_ID));
+      }
+    }
+    /* Fetch Managed Users - END */
+
     PropertiesCache propertiesCache = PropertiesCache.getInstance();
     String userDeletionTopic = propertiesCache.getProperty("user-deletion-broadcast-topic");
 
@@ -89,6 +106,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     eData.put(JsonKey.ORGANISATION_ID, rootOrgId);
     eData.put(JsonKey.USER_ID, userId);
     eData.put(JsonKey.SUGGESTED_USERS, suggestedUsersList);
+    eData.put(JsonKey.MANAGED_USERS, managedUsersList);
     eData.put(JsonKey.ACTION, JsonKey.DELETE_USER_ACTON);
     eData.put(JsonKey.ITERATION, 1);
 
