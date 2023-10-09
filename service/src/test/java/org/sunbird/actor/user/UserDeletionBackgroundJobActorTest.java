@@ -61,6 +61,7 @@ public class UserDeletionBackgroundJobActorTest {
     user.setFirstName("firstName");
     user.setStatus(2);
     user.setRootOrgId("rootOrg");
+
     PowerMockito.when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
   }
 
