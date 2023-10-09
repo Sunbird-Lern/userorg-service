@@ -266,7 +266,7 @@ public class UserLookUpServiceImpl implements UserLookupService {
       Map<String, Object> userDbMap, List<String> identifiers, RequestContext context) {
     logger.debug(
         context,
-        "IdentifierFreeUpActor:removeEntryFromUserLookUp remove following identifiers from lookUp table "
+        "UserLookUpServiceImpl:removeEntryFromUserLookUp remove following identifiers from lookUp table "
             + identifiers);
     List<Map<String, String>> reqMap = new ArrayList<>();
     Map<String, String> deleteLookUp = new HashMap<>();
