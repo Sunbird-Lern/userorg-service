@@ -247,7 +247,7 @@ public class TenantMigrationActorTest {
     return fMap;
   }
 
-  @Test
+  //  @Test
   @Ignore
   public void testUserMigration() {
     try {
