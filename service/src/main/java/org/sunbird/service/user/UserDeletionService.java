@@ -19,6 +19,7 @@ import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.telemetry.util.TelemetryUtil;
+import org.sunbird.util.user.UserUtil;
 
 public class UserDeletionService {
 
@@ -47,6 +48,7 @@ public class UserDeletionService {
 
       Map userLookUpData = mapper.convertValue(user, Map.class);
       List<String> identifiers = new ArrayList<>();
+      identifiers.add(JsonKey.USERNAME);
       if (StringUtils.isNotBlank((String) userLookUpData.get(JsonKey.EMAIL)))
         identifiers.add(JsonKey.EMAIL);
       if (StringUtils.isNotBlank((String) userLookUpData.get(JsonKey.PHONE)))
@@ -55,7 +57,7 @@ public class UserDeletionService {
         identifiers.add(JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
 
       if (!identifiers.isEmpty())
-        userLookupService.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
+        UserUtil.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
       deletionStatus.put(JsonKey.USER_LOOK_UP_STATUS, true);
 
       List<Map<String, String>> dbUserExternalIds =
