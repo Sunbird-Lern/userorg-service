@@ -37,10 +37,6 @@ public class UserDeletionService {
 
     Response updateUserResponse;
     Map<String, Object> deletionStatus = new HashMap<>();
-    deletionStatus.put(JsonKey.CREDENTIALS_STATUS, false);
-    deletionStatus.put(JsonKey.USER_LOOK_UP_STATUS, false);
-    deletionStatus.put(JsonKey.USER_EXTERNAL_ID_STATUS, false);
-    deletionStatus.put(JsonKey.USER_TABLE_STATUS, false);
 
     try {
       logger.info(
