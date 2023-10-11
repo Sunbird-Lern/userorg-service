@@ -12,20 +12,20 @@ import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.user.UserUtil;
 
 public class UserDeletionService {
 
-  private final UserLookupService userLookupService = UserLookUpServiceImpl.getInstance();
   private final UserExternalIdentityService userExternalIdentityService =
       UserExternalIdentityServiceImpl.getInstance();
+  private final LoggerUtil logger = new LoggerUtil(UserDeletionService.class);
 
   public Response deleteUser(
       String userId,
@@ -43,6 +43,7 @@ public class UserDeletionService {
     deletionStatus.put(JsonKey.USER_TABLE_STATUS, false);
 
     try {
+      logger.info("UserDeletionService::deleteUser:: invoking ssoManager.removeUser");
       ssoManager.removeUser(userMapES, context);
       deletionStatus.put(JsonKey.CREDENTIALS_STATUS, true);
 
@@ -55,20 +56,24 @@ public class UserDeletionService {
         identifiers.add(JsonKey.PHONE);
       if (StringUtils.isNotBlank((String) userLookUpData.get(JsonKey.EXTERNAL_ID)))
         identifiers.add(JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
-
-      if (!identifiers.isEmpty())
-        UserUtil.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
+      logger.info("UserDeletionService::deleteUser:: invoking UserUtil.removeEntryFromUserLookUp");
+      UserUtil.removeEntryFromUserLookUp(userLookUpData, identifiers, context);
       deletionStatus.put(JsonKey.USER_LOOK_UP_STATUS, true);
 
       List<Map<String, String>> dbUserExternalIds =
           userExternalIdentityService.getUserExternalIds(userId, context);
+      logger.info(
+          "UserDeletionService::deleteUser:: dbUserExternalIds:: " + dbUserExternalIds.size());
       if (dbUserExternalIds != null && !dbUserExternalIds.isEmpty()) {
+        logger.info(
+            "UserDeletionService::deleteUser:: invoking userExternalIdentityService.deleteUserExternalIds");
         userExternalIdentityService.deleteUserExternalIds(dbUserExternalIds, context);
       }
       deletionStatus.put(JsonKey.USER_EXTERNAL_ID_STATUS, true);
 
       User updatedUser = mapper.convertValue(userMapES, User.class);
       UserDao userDao = UserDaoImpl.getInstance();
+      logger.info("UserDeletionService::deleteUser:: invoking userDao.updateUser");
       updateUserResponse = userDao.updateUser(updatedUser, context);
       deletionStatus.put(JsonKey.USER_TABLE_STATUS, true);
     } catch (Exception ex) {
@@ -78,7 +83,7 @@ public class UserDeletionService {
           MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "delete"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-
+    logger.info("UserDeletionService::deleteUser:: invoking generateAuditTelemetryEvent");
     generateAuditTelemetryEvent(deletionStatus, userId, context.getContextMap());
 
     return updateUserResponse;

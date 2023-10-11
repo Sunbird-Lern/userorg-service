@@ -9,6 +9,7 @@ import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.RequestContext;
@@ -20,6 +21,7 @@ import org.sunbird.util.ProjectUtil;
 
 public class UserStatusService {
 
+  private final LoggerUtil logger = new LoggerUtil(UserStatusService.class);
   private final UserService userService = UserServiceImpl.getInstance();
   private final UserDeletionService userDeletionService = new UserDeletionService();
 
@@ -29,8 +31,13 @@ public class UserStatusService {
     boolean isBlocked = (Boolean) userMapES.get(JsonKey.IS_BLOCKED);
     boolean isDeleted =
         ((int) userMapES.get(JsonKey.STATUS) == ProjectUtil.Status.DELETED.getValue());
+    logger.info("UserStatusService:: userId from request:: " + userId);
     User user = userService.getUserById(userId, context);
-
+    logger.info(
+        "UserStatusService:: user status details from DB:: "
+            + user.getStatus()
+            + " || isDeleted:: "
+            + user.getIsDeleted());
     if (operation.equals(ActorOperations.BLOCK_USER.getValue())
         && ProjectUtil.Status.DELETED.getValue() != user.getStatus()
         && Boolean.TRUE.equals(user.getIsDeleted())) {
@@ -55,6 +62,7 @@ public class UserStatusService {
     Response updateUserResponse = null;
 
     if (isDeleted) {
+      logger.info("UserStatusService:: invoking userDeletionService.deleteUser");
       updateUserResponse =
           userDeletionService.deleteUser(userId, ssoManager, user, userMapES, context);
     } else {
