@@ -37,6 +37,10 @@ public class UserDeletionService {
 
     Response updateUserResponse;
     Map<String, Object> deletionStatus = new HashMap<>();
+    deletionStatus.put(JsonKey.CREDENTIALS_STATUS, false);
+    deletionStatus.put(JsonKey.USER_LOOK_UP_STATUS, false);
+    deletionStatus.put(JsonKey.USER_EXTERNAL_ID_STATUS, false);
+    deletionStatus.put(JsonKey.USER_TABLE_STATUS, false);
 
     try {
       logger.info(
@@ -101,6 +105,8 @@ public class UserDeletionService {
             + context.getTelemetryContext().get(JsonKey.CONTEXT));
 
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
+    Map<String, Object> telemetryAction = new HashMap<>();
+    telemetryAction.put(JsonKey.DELETE_USER_STATUS, convertWithIteration(requestMap));
     Map<String, Object> targetObject =
         TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.DELETE, null);
     TelemetryUtil.telemetryProcessingCall(
@@ -109,5 +115,14 @@ public class UserDeletionService {
         targetObject,
         correlatedObject,
         (Map<String, Object>) context.getTelemetryContext().get(JsonKey.CONTEXT));
+  }
+
+  private String convertWithIteration(Map<String, Object> map) {
+    StringBuilder mapAsString = new StringBuilder("{");
+    for (String key : map.keySet()) {
+      mapAsString.append(key + ":" + map.get(key) + ", ");
+    }
+    mapAsString.delete(mapAsString.length() - 2, mapAsString.length()).append("}");
+    return mapAsString.toString();
   }
 }
