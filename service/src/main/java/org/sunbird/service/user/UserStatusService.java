@@ -102,6 +102,7 @@ public class UserStatusService {
       esUserMap.put(JsonKey.RECOVERY_EMAIL, "");
       esUserMap.put(JsonKey.RECOVERY_PHONE, "");
       esUserMap.put(JsonKey.USER_NAME, "");
+      esUserMap.put(JsonKey.IS_DELETED, true);
     } else {
       esUserMap.put(
           JsonKey.STATUS,
