@@ -102,9 +102,7 @@ public class UserDeletionService {
       Map<String, Object> requestMap, String userId, RequestContext context) {
     logger.info(
         "UserDeletionService::deleteUser:: generateAuditTelemetryEvent:: env: "
-            + context.getTelemetryContext().get(JsonKey.ENV)
-            + "|| channel:: "
-            + context.getTelemetryContext().get(JsonKey.CHANNEL));
+            + context.getTelemetryContext().get(JsonKey.CONTEXT));
 
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> targetObject =
@@ -116,6 +114,6 @@ public class UserDeletionService {
         telemetryAction,
         targetObject,
         correlatedObject,
-        context.getTelemetryContext());
+        (Map<String, Object>) context.getTelemetryContext().get(JsonKey.CONTEXT));
   }
 }
