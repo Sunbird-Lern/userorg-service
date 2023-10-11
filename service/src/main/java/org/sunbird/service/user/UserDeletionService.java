@@ -102,7 +102,7 @@ public class UserDeletionService {
 
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> targetObject =
-        TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.UPDATE, null);
+        TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.DELETE, null);
     TelemetryUtil.telemetryProcessingCall(
         JsonKey.DELETE_USER_STATUS,
         requestMap,
