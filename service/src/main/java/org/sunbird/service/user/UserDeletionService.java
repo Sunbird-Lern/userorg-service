@@ -111,7 +111,7 @@ public class UserDeletionService {
         TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.DELETE, null);
     TelemetryUtil.telemetryProcessingCall(
         JsonKey.DELETE_USER_STATUS,
-        requestMap,
+        telemetryAction,
         targetObject,
         correlatedObject,
         (Map<String, Object>) context.getTelemetryContext().get(JsonKey.CONTEXT));
