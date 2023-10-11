@@ -73,7 +73,7 @@ public class UserDeletionService {
           userExternalIdentityService.getUserExternalIds(userId, context);
       logger.info(
           "UserDeletionService::deleteUser:: dbUserExternalIds:: " + dbUserExternalIds.size());
-      if (dbUserExternalIds != null && !dbUserExternalIds.isEmpty()) {
+      if (!dbUserExternalIds.isEmpty()) {
         logger.info(
             "UserDeletionService::deleteUser:: invoking userExternalIdentityService.deleteUserExternalIds");
         userExternalIdentityService.deleteUserExternalIds(dbUserExternalIds, context);
@@ -86,14 +86,16 @@ public class UserDeletionService {
       updateUserResponse = userDao.updateUser(updatedUser, context);
       deletionStatus.put(JsonKey.USER_TABLE_STATUS, true);
     } catch (Exception ex) {
-      generateAuditTelemetryEvent(deletionStatus, userId, context.getContextMap());
+      generateAuditTelemetryEvent(deletionStatus, userId, context.getTelemetryContext());
       throw new ProjectCommonException(
           ResponseCode.userStatusError,
           MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "delete"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    logger.info("UserDeletionService::deleteUser:: invoking generateAuditTelemetryEvent");
-    generateAuditTelemetryEvent(deletionStatus, userId, context.getContextMap());
+    logger.info(
+        "UserDeletionService::deleteUser:: invoking generateAuditTelemetryEvent:: "
+            + context.getTelemetryContext());
+    generateAuditTelemetryEvent(deletionStatus, userId, context.getTelemetryContext());
 
     return updateUserResponse;
   }

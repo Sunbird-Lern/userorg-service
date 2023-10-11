@@ -31,7 +31,13 @@ public class UserStatusService {
     boolean isBlocked = (Boolean) userMapES.get(JsonKey.IS_BLOCKED);
     boolean isDeleted =
         ((int) userMapES.get(JsonKey.STATUS) == ProjectUtil.Status.DELETED.getValue());
-    logger.info("UserStatusService:: userId from request:: " + userId);
+    logger.info(
+        "UserStatusService:: userId from request:: "
+            + userId
+            + " || contextMap:: "
+            + context.getContextMap().size()
+            + " || TelemetryContextMap:: "
+            + context.getTelemetryContext().size());
     User user = userService.getUserById(userId, context);
     logger.info(
         "UserStatusService:: user status details from DB:: "
