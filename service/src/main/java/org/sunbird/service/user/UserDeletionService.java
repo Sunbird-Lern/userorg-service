@@ -100,6 +100,16 @@ public class UserDeletionService {
 
   private void generateAuditTelemetryEvent(
       Map<String, Object> requestMap, String userId, Map<String, Object> context) {
+    logger.info(
+        "UserDeletionService::deleteUser:: generateAuditTelemetryEvent:: env: "
+            + context.get(JsonKey.ENV)
+            + "|| channel:: "
+            + context.get(JsonKey.CHANNEL));
+    context.put(JsonKey.ACTOR_ID, userId);
+    context.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
+    context.put(JsonKey.ENV, context.get(JsonKey.ENV));
+    context.put(JsonKey.CHANNEL, context.get(JsonKey.CHANNEL));
+
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> targetObject =
         TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.UPDATE, null);
