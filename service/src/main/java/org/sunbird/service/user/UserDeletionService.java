@@ -43,9 +43,18 @@ public class UserDeletionService {
     deletionStatus.put(JsonKey.USER_TABLE_STATUS, false);
 
     try {
-      logger.info("UserDeletionService::deleteUser:: invoking ssoManager.removeUser");
-      ssoManager.removeUser(userMapES, context);
-      deletionStatus.put(JsonKey.CREDENTIALS_STATUS, true);
+      logger.info(
+          "UserDeletionService::deleteUser:: invoking ssoManager.removeUser:: "
+              + userMapES.getOrDefault(JsonKey.USER_ID, ""));
+      try {
+        ssoManager.removeUser(userMapES, context);
+        deletionStatus.put(JsonKey.CREDENTIALS_STATUS, true);
+      } catch (Exception ex) {
+        logger.error(
+            "UserDeletionService::deleteUser:: Exception in ssoManager.removeUser:: "
+                + ex.getMessage(),
+            ex);
+      }
 
       Map userLookUpData = mapper.convertValue(user, Map.class);
       List<String> identifiers = new ArrayList<>();
