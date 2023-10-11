@@ -86,31 +86,25 @@ public class UserDeletionService {
       updateUserResponse = userDao.updateUser(updatedUser, context);
       deletionStatus.put(JsonKey.USER_TABLE_STATUS, true);
     } catch (Exception ex) {
-      generateAuditTelemetryEvent(deletionStatus, userId, context.getTelemetryContext());
+      generateAuditTelemetryEvent(deletionStatus, userId, context);
       throw new ProjectCommonException(
           ResponseCode.userStatusError,
           MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "delete"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
-    logger.info(
-        "UserDeletionService::deleteUser:: invoking generateAuditTelemetryEvent:: "
-            + context.getTelemetryContext());
-    generateAuditTelemetryEvent(deletionStatus, userId, context.getTelemetryContext());
+    logger.info("UserDeletionService::deleteUser:: invoking generateAuditTelemetryEvent:: ");
+    generateAuditTelemetryEvent(deletionStatus, userId, context);
 
     return updateUserResponse;
   }
 
   private void generateAuditTelemetryEvent(
-      Map<String, Object> requestMap, String userId, Map<String, Object> context) {
+      Map<String, Object> requestMap, String userId, RequestContext context) {
     logger.info(
         "UserDeletionService::deleteUser:: generateAuditTelemetryEvent:: env: "
-            + context.get(JsonKey.ENV)
+            + context.getTelemetryContext().get(JsonKey.ENV)
             + "|| channel:: "
-            + context.get(JsonKey.CHANNEL));
-    context.put(JsonKey.ACTOR_ID, userId);
-    context.put(JsonKey.ACTOR_TYPE, JsonKey.USER);
-    context.put(JsonKey.ENV, context.get(JsonKey.ENV));
-    context.put(JsonKey.CHANNEL, context.get(JsonKey.CHANNEL));
+            + context.getTelemetryContext().get(JsonKey.CHANNEL));
 
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> targetObject =
@@ -118,6 +112,10 @@ public class UserDeletionService {
     Map<String, Object> telemetryAction = new HashMap<>();
     telemetryAction.put(JsonKey.DELETE_USER_STATUS, requestMap);
     TelemetryUtil.telemetryProcessingCall(
-        JsonKey.DELETE_USER_STATUS, telemetryAction, targetObject, correlatedObject, context);
+        JsonKey.DELETE_USER_STATUS,
+        telemetryAction,
+        targetObject,
+        correlatedObject,
+        context.getTelemetryContext());
   }
 }
