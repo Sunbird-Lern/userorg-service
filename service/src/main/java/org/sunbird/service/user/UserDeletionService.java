@@ -110,7 +110,7 @@ public class UserDeletionService {
     logger.info(
         "UserDeletionService::deleteUser:: generateAuditTelemetryEvent:: strTelemetryAction: "
             + strTelemetryAction);
-    telemetryAction.put(JsonKey.DELETE_USER_STATUS, strTelemetryAction);
+    telemetryAction.put(strTelemetryAction, strTelemetryAction);
     Map<String, Object> targetObject =
         TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.DELETE, null);
     TelemetryUtil.telemetryProcessingCall(
