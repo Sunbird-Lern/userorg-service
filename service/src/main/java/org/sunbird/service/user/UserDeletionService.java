@@ -106,7 +106,11 @@ public class UserDeletionService {
 
     List<Map<String, Object>> correlatedObject = new ArrayList<>();
     Map<String, Object> telemetryAction = new HashMap<>();
-    telemetryAction.put(JsonKey.DELETE_USER_STATUS, convertWithIteration(requestMap));
+    String strTelemetryAction = convertWithIteration(requestMap);
+    logger.info(
+        "UserDeletionService::deleteUser:: generateAuditTelemetryEvent:: strTelemetryAction: "
+            + strTelemetryAction);
+    telemetryAction.put(JsonKey.DELETE_USER_STATUS, strTelemetryAction);
     Map<String, Object> targetObject =
         TelemetryUtil.generateTargetObject(userId, JsonKey.USER, JsonKey.DELETE, null);
     TelemetryUtil.telemetryProcessingCall(

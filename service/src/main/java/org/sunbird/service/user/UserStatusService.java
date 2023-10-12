@@ -65,7 +65,7 @@ public class UserStatusService {
     ObjectMapper mapper = new ObjectMapper();
     User updatedUser = mapper.convertValue(userMapES, User.class);
     SSOManager ssoManager = SSOServiceFactory.getInstance();
-    Response updateUserResponse = null;
+    Response updateUserResponse;
 
     if (isDeleted) {
       logger.info("UserStatusService:: invoking userDeletionService.deleteUser");
