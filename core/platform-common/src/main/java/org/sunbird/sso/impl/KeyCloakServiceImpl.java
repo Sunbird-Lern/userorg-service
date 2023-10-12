@@ -102,6 +102,7 @@ public class KeyCloakServiceImpl implements SSOManager {
         resource.remove();
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       logger.error(context, "Error occurred : ", ex);
       String exMsg =
           String.format(ResponseMessage.Message.INVALID_PARAMETER_VALUE, userId, JsonKey.USER_ID);
