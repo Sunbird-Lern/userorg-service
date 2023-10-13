@@ -68,7 +68,7 @@ public class UserStatusService {
         && Boolean.TRUE.equals(user.getIsDeleted())) {
       throw new ProjectCommonException(
           ResponseCode.userStatusError,
-          MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "delete"),
+          MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "deleted"),
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
