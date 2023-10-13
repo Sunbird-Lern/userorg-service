@@ -2,6 +2,7 @@ package org.sunbird.service.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.dao.user.UserDao;
@@ -98,6 +99,7 @@ public class UserStatusService {
       esUserMap.put(JsonKey.PHONE, "");
       esUserMap.put(JsonKey.PREV_USED_EMAIL, "");
       esUserMap.put(JsonKey.PREV_USED_PHONE, "");
+      esUserMap.put(JsonKey.PROFILE_LOCATION, new ArrayList<>());
       esUserMap.put(JsonKey.RECOVERY_EMAIL, "");
       esUserMap.put(JsonKey.RECOVERY_PHONE, "");
       esUserMap.put(JsonKey.USER_NAME, "");
