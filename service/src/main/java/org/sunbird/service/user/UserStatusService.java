@@ -95,7 +95,6 @@ public class UserStatusService {
       esUserMap.put(JsonKey.MASKED_PHONE, "");
       esUserMap.put(JsonKey.FIRST_NAME, "");
       esUserMap.put(JsonKey.LAST_NAME, "");
-      esUserMap.put(JsonKey.DOB, "");
       esUserMap.put(JsonKey.PHONE, "");
       esUserMap.put(JsonKey.PREV_USED_EMAIL, "");
       esUserMap.put(JsonKey.PREV_USED_PHONE, "");
