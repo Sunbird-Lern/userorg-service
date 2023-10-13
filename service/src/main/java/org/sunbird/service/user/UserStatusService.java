@@ -63,6 +63,15 @@ public class UserStatusService {
           ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
+    if (operation.equals(ActorOperations.DELETE_USER.getValue())
+        && ProjectUtil.Status.DELETED.getValue() == user.getStatus()
+        && Boolean.TRUE.equals(user.getIsDeleted())) {
+      throw new ProjectCommonException(
+          ResponseCode.userStatusError,
+          MessageFormat.format(ResponseCode.userStatusError.getErrorMessage(), "delete"),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
     ObjectMapper mapper = new ObjectMapper();
     User updatedUser = mapper.convertValue(userMapES, User.class);
     SSOManager ssoManager = SSOServiceFactory.getInstance();
