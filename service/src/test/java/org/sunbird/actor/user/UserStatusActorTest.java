@@ -10,10 +10,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,7 +40,9 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserExternalIdentityService;
+import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
@@ -227,6 +226,22 @@ public class UserStatusActorTest {
   @Test
   public void testDeleteUserSuccess() {
     try {
+      UserRoleService userRoleService = PowerMockito.mock(UserRoleService.class);
+      PowerMockito.mockStatic(UserRoleServiceImpl.class);
+      PowerMockito.when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
+
+      List<Map<String, Object>> roleList = new ArrayList<>();
+      Map<String, Object> orgMap = new HashMap<>();
+      orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+      orgMap.put(JsonKey.USER_ID, "USER_ID");
+      orgMap.put(JsonKey.ROLE, "public");
+      orgMap.put(
+          JsonKey.SCOPE,
+          "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
+      roleList.add(orgMap);
+
+      when(userRoleService.getUserRoles(Mockito.anyString(), Mockito.any())).thenReturn(roleList);
+
       Response userDetailsById = new Response();
       Map<String, Object> user = new HashMap<>();
       user.put(JsonKey.ID, "46545665465465");

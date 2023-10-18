@@ -122,7 +122,7 @@ public interface ResponseMessage {
         "Default data security policy settings is missing for the job: {0}";
     String INVALID_TENANT_SECURITY_LEVEL_LOWER =
         "Tenant level's security {0} cannot be lower than system level's security {1}. Please provide a valid data security level.";
-    String CANNOT_DELETE_USER = "User is restricted from deleting account!";
+    String CANNOT_DELETE_USER = "User is restricted from deleting account based on roles!";
   }
 
   interface Key {

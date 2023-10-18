@@ -59,24 +59,29 @@ public class UserStatusActor extends UserBaseActor {
     Map<String, Object> userMap =
         userStatusService.getUserMap(userId, requestedBy, blockUser, deleteUser);
 
-    List<Map<String, Object>> userRoles =
-        userRoleService.getUserRoles(userId, request.getRequestContext());
-    logger.info(
-        "UserDeletionBackgroundJobActor::inputKafkaTopic:: userRoles size:: " + userRoles.size());
+    List<String> userRolesList = new ArrayList<>();
+    if (deleteUser) {
+      List<Map<String, Object>> userRoles =
+          userRoleService.getUserRoles(userId, request.getRequestContext());
+      logger.info("UserStatusActor::updateStatus:: userRoles size:: " + userRoles.size());
 
-    List<String> roles = new ArrayList<>();
-    if (CollectionUtils.isNotEmpty(userRoles)) {
-      userRoles.forEach(role -> roles.add((String) role.get(JsonKey.ROLE)));
-    }
+      List<String> roles = new ArrayList<>();
+      if (CollectionUtils.isNotEmpty(userRoles)) {
+        userRoles.forEach(role -> roles.add((String) role.get(JsonKey.ROLE)));
+      }
 
-    List<String> allowedRoles =
-        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).split(","));
-    roles.removeAll(allowedRoles);
-    if (deleteUser && roles.size() > 1) {
-      throw new ProjectCommonException(
-          ResponseCode.cannotDeleteUser,
-          ResponseCode.cannotDeleteUser.getErrorMessage(),
-          ResponseCode.CLIENT_ERROR.getResponseCode());
+      userRolesList.addAll(roles);
+      logger.info("UserStatusActor::updateStatus:: userRolesList size:: " + userRolesList.size());
+      List<String> allowedRoles =
+          Arrays.asList(ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).split(","));
+      roles.removeAll(allowedRoles);
+
+      if (roles.size() > 1) {
+        throw new ProjectCommonException(
+            ResponseCode.cannotDeleteUser,
+            ResponseCode.cannotDeleteUser.getErrorMessage(),
+            ResponseCode.CLIENT_ERROR.getResponseCode());
+      }
     }
 
     Response response =
@@ -85,7 +90,7 @@ public class UserStatusActor extends UserBaseActor {
     if (deleteUser) {
       Map<String, Object> userData = new HashMap<>();
       userData.put(JsonKey.USER_ID, userId);
-      userData.put(JsonKey.USER_ROLES, roles);
+      userData.put(JsonKey.USER_ROLES, userRolesList);
 
       Request bgRequest = new Request();
       bgRequest.setRequestContext(request.getRequestContext());
