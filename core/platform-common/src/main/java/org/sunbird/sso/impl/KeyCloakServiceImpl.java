@@ -92,7 +92,7 @@ public class KeyCloakServiceImpl implements SSOManager {
       user.setFirstName("");
       user.setLastName("");
       user.setEnabled(false);
-      System.out.println("KeyCloakServiceImpl::removePII:: userId:: " + fedUserId);
+      logger.info("KeyCloakServiceImpl::removePII:: userId:: " + fedUserId);
       userResource.update(user);
       return true;
     } catch (Exception e) {
