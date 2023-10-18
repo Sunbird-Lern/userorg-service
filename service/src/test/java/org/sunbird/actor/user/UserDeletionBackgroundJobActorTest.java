@@ -4,9 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.testkit.javadsl.TestKit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,6 +75,9 @@ public class UserDeletionBackgroundJobActorTest {
   public void callUserDeletionTest() {
     Map<String, Object> userData = new HashMap<>();
     userData.put(JsonKey.USER_ID, "userId");
+    List<String> userRoles = new ArrayList<>();
+    userRoles.add(JsonKey.PUBLIC);
+    userData.put(JsonKey.USER_ROLES, userRoles);
 
     TestKit probe = new TestKit(system);
     ActorRef subject = system.actorOf(props);

@@ -29,8 +29,9 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
   private void inputKafkaTopic(Request request) throws Exception {
     Map<String, Object> userDetails = request.getRequest();
     String userId = (String) userDetails.get(JsonKey.USER_ID);
-    List<String> roles = (ArrayList) userDetails.get(JsonKey.USER_ROLES);
+    ArrayList<String> roles = (ArrayList) userDetails.get(JsonKey.USER_ROLES);
     logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: userId:: " + userId);
+    logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
     User user = userService.getUserById(userId, request.getRequestContext());
     String rootOrgId = user.getRootOrgId();
 
