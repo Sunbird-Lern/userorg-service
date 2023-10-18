@@ -2,17 +2,22 @@ package org.sunbird.actor.user;
 
 import akka.actor.ActorRef;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.apache.commons.collections4.CollectionUtils;
+import org.sunbird.exception.ProjectCommonException;
+import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.UserStatusService;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.Util;
 
 public class UserStatusActor extends UserBaseActor {
@@ -21,6 +26,7 @@ public class UserStatusActor extends UserBaseActor {
   @Named("user_deletion_background_job_actor")
   private ActorRef userDeletionBackgroundJobActor;
 
+  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private final UserStatusService userStatusService = new UserStatusService();
   private final UserService userService = UserServiceImpl.getInstance();
 
@@ -52,12 +58,34 @@ public class UserStatusActor extends UserBaseActor {
     String requestedBy = (String) request.getContext().get(JsonKey.REQUESTED_BY);
     Map<String, Object> userMap =
         userStatusService.getUserMap(userId, requestedBy, blockUser, deleteUser);
+
+    List<Map<String, Object>> userRoles =
+        userRoleService.getUserRoles(userId, request.getRequestContext());
+    logger.info(
+        "UserDeletionBackgroundJobActor::inputKafkaTopic:: userRoles size:: " + userRoles.size());
+
+    List<String> roles = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(userRoles)) {
+      userRoles.forEach(role -> roles.add((String) role.get(JsonKey.ROLE)));
+    }
+
+    List<String> allowedRoles =
+        Arrays.asList(ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).split(","));
+    roles.removeAll(allowedRoles);
+    if (deleteUser && roles.size() > 1) {
+      throw new ProjectCommonException(
+          ResponseCode.cannotDeleteUser,
+          ResponseCode.cannotDeleteUser.getErrorMessage(),
+          ResponseCode.CLIENT_ERROR.getResponseCode());
+    }
+
     Response response =
         userStatusService.updateUserStatus(userMap, operation, request.getRequestContext());
 
     if (deleteUser) {
       Map<String, Object> userData = new HashMap<>();
       userData.put(JsonKey.USER_ID, userId);
+      userData.put(JsonKey.USER_ROLES, roles);
 
       Request bgRequest = new Request();
       bgRequest.setRequestContext(request.getRequestContext());

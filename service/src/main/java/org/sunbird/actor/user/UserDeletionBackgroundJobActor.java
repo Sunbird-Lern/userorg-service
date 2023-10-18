@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dto.SearchDTO;
@@ -13,15 +12,12 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
-import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
-import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.PropertiesCache;
 
 public class UserDeletionBackgroundJobActor extends BaseActor {
 
-  private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
   private final UserService userService = UserServiceImpl.getInstance();
   private final LoggerUtil logger = new LoggerUtil(UserDeletionBackgroundJobActor.class);
 
@@ -33,19 +29,10 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
   private void inputKafkaTopic(Request request) throws Exception {
     Map<String, Object> userDetails = request.getRequest();
     String userId = (String) userDetails.get(JsonKey.USER_ID);
+    List<String> roles = (ArrayList) userDetails.get(JsonKey.USER_ROLES);
     logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: userId:: " + userId);
     User user = userService.getUserById(userId, request.getRequestContext());
     String rootOrgId = user.getRootOrgId();
-
-    List<Map<String, Object>> userRoles =
-        userRoleService.getUserRoles(userId, request.getRequestContext());
-    logger.info(
-        "UserDeletionBackgroundJobActor::inputKafkaTopic:: userRoles size:: " + userRoles.size());
-
-    List<String> roles = new ArrayList<>();
-    if (CollectionUtils.isNotEmpty(userRoles)) {
-      userRoles.forEach(role -> roles.add((String) role.get(JsonKey.ROLE)));
-    }
 
     List<Map<String, Object>> suggestedUsersList = new ArrayList<>();
     Map<String, Object> searchQueryMap = new HashMap<>();
@@ -57,8 +44,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
       List<String> queryFields = new ArrayList<>();
       queryFields.add(JsonKey.USER_ID);
       searchQueryMap.put(JsonKey.FIELDS, queryFields);
-      logger.info(
-          "UserDeletionBackgroundJobActor::inputKafkaTopic:: userRoles size:: " + userRoles.size());
+      logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
       roles.forEach(
           role -> {
             searchFilter.put(JsonKey.ROLES + "." + JsonKey.ROLE, role);

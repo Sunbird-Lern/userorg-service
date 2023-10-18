@@ -54,6 +54,7 @@ public class UserDeletionService {
             "UserDeletionService::deleteUser:: Exception in ssoManager.removeUser:: "
                 + ex.getMessage(),
             ex);
+        ssoManager.removePII(userId, context);
       }
 
       Map userLookUpData = mapper.convertValue(user, Map.class);

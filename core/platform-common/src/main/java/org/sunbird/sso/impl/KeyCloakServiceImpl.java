@@ -80,6 +80,27 @@ public class KeyCloakServiceImpl implements SSOManager {
     return false;
   }
 
+  @Override
+  public boolean removePII(String userId, RequestContext context) {
+    try {
+      String fedUserId = getFederatedUserId(userId);
+      UserResource userResource =
+          keycloak.realm(KeyCloakConnectionProvider.SSO_REALM).users().get(fedUserId);
+      UserRepresentation user = userResource.toRepresentation();
+      user.setEmailVerified(false);
+      user.setEmail("");
+      user.setFirstName("");
+      user.setLastName("");
+      user.setEnabled(false);
+      System.out.println("KeyCloakServiceImpl::removePII:: userId:: " + fedUserId);
+      userResource.update(user);
+      return true;
+    } catch (Exception e) {
+      logger.error(context, "removePII: Exception occurred: ", e);
+    }
+    return false;
+  }
+
   /**
    * Method to remove the user on basis of user id.
    *

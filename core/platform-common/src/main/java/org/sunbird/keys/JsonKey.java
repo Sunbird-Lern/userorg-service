@@ -667,6 +667,7 @@ public final class JsonKey {
   public static final String EDATA = "eData";
   public static final String MANAGED_USERS = "managed_users";
   public static final String USER_DELETION_TOPIC = "user-deletion-broadcast-topic";
+  public static final String USER_DELETION_ROLES = "user-deletion-roles";
 
   private JsonKey() {}
 }

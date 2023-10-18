@@ -178,6 +178,8 @@ public enum ResponseCode {
   invalidTenantSecurityLevelLower(
       ResponseMessage.Key.INVALID_TENANT_SECURITY_LEVEL_LOWER,
       ResponseMessage.Message.INVALID_TENANT_SECURITY_LEVEL_LOWER),
+  cannotDeleteUser(
+      ResponseMessage.Key.CANNOT_DELETE_USER, ResponseMessage.Message.CANNOT_DELETE_USER),
   OK(200),
   SUCCESS(200),
   CLIENT_ERROR(400),
