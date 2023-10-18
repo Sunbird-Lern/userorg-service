@@ -72,8 +72,12 @@ public class UserStatusActor extends UserBaseActor {
 
       userRolesList.addAll(roles);
       logger.info("UserStatusActor::updateStatus:: userRolesList size:: " + userRolesList.size());
-      List<String> allowedRoles =
-          Arrays.asList(ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).split(","));
+      List<String> allowedRoles = new ArrayList<>();
+      if (ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES) != null)
+        allowedRoles =
+            Arrays.asList(ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).split(","));
+      else allowedRoles.add(JsonKey.PUBLIC);
+
       roles.removeAll(allowedRoles);
 
       if (roles.size() > 1) {
