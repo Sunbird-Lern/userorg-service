@@ -164,1091 +164,6 @@
 					"name": "CreateUser",
 					"item": [
 						{
-							"name": "Negative",
-							"item": [
-								{
-									"name": "400 - Create user with empty access token Copy",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"// Parse the response JSON body\r",
-													"let jsonResponse = pm.response.json();\r",
-													"\r",
-													"// Verification\r",
-													"pm.test(\"Status code is 401\", function () {\r",
-													"    pm.response.to.have.status(401);\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Content-Type header is present\", () => {\r",
-													"    pm.response.to.have.header(\"Content-Type\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Content-Type header is application/json\", () => {\r",
-													"    pm.expect(pm.response.headers.get('Content-Type')).includes('application/json');\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Test data type of the response and keys\", () => {\r",
-													"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(\r",
-													"        'message'\r",
-													"    );\r",
-													"\r",
-													"    pm.expect(jsonResponse.message).to.be.a(\"string\");\r",
-													"});\r",
-													"\r",
-													"// Validation\r",
-													"pm.test(\"message should be 'Unauthorized'\", function () {\r",
-													"    pm.expect(jsonResponse.message).to.eql(\"Unauthorized\");\r",
-													"});\r",
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": ""
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - Create user with empty access token Copy",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": ""
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Unauthorized",
-											"code": 401,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:07:54 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json; charset=utf-8"
-												},
-												{
-													"key": "Content-Length",
-													"value": "27"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "Access-Control-Allow-Origin",
-													"value": "*"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"message\": \"Unauthorized\"\n}"
-										}
-									]
-								},
-								{
-									"name": "400 - FirstName missing Copy",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let jsonResponse = pm.response.json()\r",
-													"\r",
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
-													"});\r",
-													"pm.test(\"Body matches string\", function () {\r",
-													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
-													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Status\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
-													"});\r",
-													"pm.test(\"errmsg\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.errmsg).to.eql(\"Mandatory parameter firstName is missing.\");\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "{{kong_api_key}}"
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - FirstName missing Copy",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": "{{kong_api_key}}"
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Bad Request",
-											"code": 400,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:16:22 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "307"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "X-RateLimit-Limit-hour",
-													"value": "30000"
-												},
-												{
-													"key": "X-RateLimit-Remaining-hour",
-													"value": "29999"
-												},
-												{
-													"key": "referrer-policy",
-													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
-												},
-												{
-													"key": "x-frame-options",
-													"value": "DENY"
-												},
-												{
-													"key": "x-xss-protection",
-													"value": "1; mode=block"
-												},
-												{
-													"key": "x-content-type-options",
-													"value": "nosniff"
-												},
-												{
-													"key": "access-control-allow-origin",
-													"value": "*"
-												},
-												{
-													"key": "x-permitted-cross-domain-policies",
-													"value": "master-only"
-												},
-												{
-													"key": "x-envoy-upstream-service-time",
-													"value": "3"
-												},
-												{
-													"key": "X-Kong-Upstream-Latency",
-													"value": "6"
-												},
-												{
-													"key": "X-Kong-Proxy-Latency",
-													"value": "9"
-												},
-												{
-													"key": "Via",
-													"value": "kong/0.14.1"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:22:266+0000\",\n    \"params\": {\n        \"resmsgid\": \"7fd156eb39be6bfbe0ac63ce6e533f55\",\n        \"msgid\": \"7fd156eb39be6bfbe0ac63ce6e533f55\",\n        \"err\": \"UOS_USRCRT0030\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Mandatory parameter firstName is missing.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
-										}
-									]
-								},
-								{
-									"name": "400 - Email missing",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let jsonResponse = pm.response.json()\r",
-													"\r",
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
-													"});\r",
-													"pm.test(\"Body matches string\", function () {\r",
-													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
-													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Status\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
-													"});\r",
-													"pm.test(\"errmsg\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.errmsg).to.eql(\"Please provide valid email or phone.\");\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "{{kong_api_key}}"
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - Email missing",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": "{{kong_api_key}}"
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Bad Request",
-											"code": 400,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:16:28 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "302"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "X-RateLimit-Limit-hour",
-													"value": "30000"
-												},
-												{
-													"key": "X-RateLimit-Remaining-hour",
-													"value": "29998"
-												},
-												{
-													"key": "referrer-policy",
-													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
-												},
-												{
-													"key": "x-frame-options",
-													"value": "DENY"
-												},
-												{
-													"key": "x-xss-protection",
-													"value": "1; mode=block"
-												},
-												{
-													"key": "x-content-type-options",
-													"value": "nosniff"
-												},
-												{
-													"key": "access-control-allow-origin",
-													"value": "*"
-												},
-												{
-													"key": "x-permitted-cross-domain-policies",
-													"value": "master-only"
-												},
-												{
-													"key": "x-envoy-upstream-service-time",
-													"value": "3"
-												},
-												{
-													"key": "X-Kong-Upstream-Latency",
-													"value": "5"
-												},
-												{
-													"key": "X-Kong-Proxy-Latency",
-													"value": "6"
-												},
-												{
-													"key": "Via",
-													"value": "kong/0.14.1"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:28:203+0000\",\n    \"params\": {\n        \"resmsgid\": \"4257fab1cb32b2e1448f725fc0cb0bd8\",\n        \"msgid\": \"4257fab1cb32b2e1448f725fc0cb0bd8\",\n        \"err\": \"UOS_USRCRT0019\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Please provide valid email or phone.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
-										}
-									]
-								},
-								{
-									"name": "400 - invalid email",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let jsonResponse = pm.response.json()\r",
-													"\r",
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
-													"});\r",
-													"pm.test(\"Body matches string\", function () {\r",
-													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
-													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Status\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
-													"});\r",
-													"pm.test(\"errmsg\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.errmsg).to.eql(\"Invalid format for given email.\");\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "{{kong_api_key}}"
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"&*^*\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - invalid email",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": "{{kong_api_key}}"
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"&*^*\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Bad Request",
-											"code": 400,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:16:33 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "297"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "X-RateLimit-Limit-hour",
-													"value": "30000"
-												},
-												{
-													"key": "X-RateLimit-Remaining-hour",
-													"value": "29997"
-												},
-												{
-													"key": "referrer-policy",
-													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
-												},
-												{
-													"key": "x-frame-options",
-													"value": "DENY"
-												},
-												{
-													"key": "x-xss-protection",
-													"value": "1; mode=block"
-												},
-												{
-													"key": "x-content-type-options",
-													"value": "nosniff"
-												},
-												{
-													"key": "access-control-allow-origin",
-													"value": "*"
-												},
-												{
-													"key": "x-permitted-cross-domain-policies",
-													"value": "master-only"
-												},
-												{
-													"key": "x-envoy-upstream-service-time",
-													"value": "3"
-												},
-												{
-													"key": "X-Kong-Upstream-Latency",
-													"value": "8"
-												},
-												{
-													"key": "X-Kong-Proxy-Latency",
-													"value": "7"
-												},
-												{
-													"key": "Via",
-													"value": "kong/0.14.1"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:33:282+0000\",\n    \"params\": {\n        \"resmsgid\": \"e5ceaf8ed94dd200385610794f3ec685\",\n        \"msgid\": \"e5ceaf8ed94dd200385610794f3ec685\",\n        \"err\": \"UOS_USRCRT0009\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Invalid format for given email.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
-										}
-									]
-								},
-								{
-									"name": "400 - PhoneNumber Missing",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let jsonResponse = pm.response.json()\r",
-													"\r",
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
-													"});\r",
-													"pm.test(\"Body matches string\", function () {\r",
-													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
-													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Status\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
-													"});\r",
-													"pm.test(\"errmsg\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.errmsg).to.eql(\"Please provide valid email or phone.\");\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "{{kong_api_key}}"
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - PhoneNumber Missing",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": "{{kong_api_key}}"
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Bad Request",
-											"code": 400,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:16:38 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "302"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "X-RateLimit-Limit-hour",
-													"value": "30000"
-												},
-												{
-													"key": "X-RateLimit-Remaining-hour",
-													"value": "29996"
-												},
-												{
-													"key": "referrer-policy",
-													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
-												},
-												{
-													"key": "x-frame-options",
-													"value": "DENY"
-												},
-												{
-													"key": "x-xss-protection",
-													"value": "1; mode=block"
-												},
-												{
-													"key": "x-content-type-options",
-													"value": "nosniff"
-												},
-												{
-													"key": "access-control-allow-origin",
-													"value": "*"
-												},
-												{
-													"key": "x-permitted-cross-domain-policies",
-													"value": "master-only"
-												},
-												{
-													"key": "x-envoy-upstream-service-time",
-													"value": "3"
-												},
-												{
-													"key": "X-Kong-Upstream-Latency",
-													"value": "5"
-												},
-												{
-													"key": "X-Kong-Proxy-Latency",
-													"value": "0"
-												},
-												{
-													"key": "Via",
-													"value": "kong/0.14.1"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:38:050+0000\",\n    \"params\": {\n        \"resmsgid\": \"7262dd16c6f21ac1eb9e22ffd2967c90\",\n        \"msgid\": \"7262dd16c6f21ac1eb9e22ffd2967c90\",\n        \"err\": \"UOS_USRCRT0019\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Please provide valid email or phone.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
-										}
-									]
-								},
-								{
-									"name": "400 - Invalid phone number",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let jsonResponse = pm.response.json()\r",
-													"\r",
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
-													"});\r",
-													"pm.test(\"Body matches string\", function () {\r",
-													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
-													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Status\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
-													"});\r",
-													"pm.test(\"errmsg\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.errmsg).to.eql(\"Invalid format for given phone.\");\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "{{kong_api_key}}"
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"819813^&\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - Invalid phone number",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": "{{kong_api_key}}"
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"819813^&\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Bad Request",
-											"code": 400,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:16:42 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "297"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "X-RateLimit-Limit-hour",
-													"value": "30000"
-												},
-												{
-													"key": "X-RateLimit-Remaining-hour",
-													"value": "29995"
-												},
-												{
-													"key": "referrer-policy",
-													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
-												},
-												{
-													"key": "x-frame-options",
-													"value": "DENY"
-												},
-												{
-													"key": "x-xss-protection",
-													"value": "1; mode=block"
-												},
-												{
-													"key": "x-content-type-options",
-													"value": "nosniff"
-												},
-												{
-													"key": "access-control-allow-origin",
-													"value": "*"
-												},
-												{
-													"key": "x-permitted-cross-domain-policies",
-													"value": "master-only"
-												},
-												{
-													"key": "x-envoy-upstream-service-time",
-													"value": "3"
-												},
-												{
-													"key": "X-Kong-Upstream-Latency",
-													"value": "5"
-												},
-												{
-													"key": "X-Kong-Proxy-Latency",
-													"value": "4"
-												},
-												{
-													"key": "Via",
-													"value": "kong/0.14.1"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:42:178+0000\",\n    \"params\": {\n        \"resmsgid\": \"bd2e57a8c5080832ceb15f14cf86045a\",\n        \"msgid\": \"bd2e57a8c5080832ceb15f14cf86045a\",\n        \"err\": \"UOS_USRCRT0009\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Invalid format for given phone.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
-										}
-									]
-								},
-								{
-									"name": "400 - Invalid password",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let jsonResponse = pm.response.json()\r",
-													"\r",
-													"pm.test(\"Status code is 400\", function () {\r",
-													"    pm.response.to.have.status(400);\r",
-													"});\r",
-													"pm.test(\"Body matches string\", function () {\r",
-													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
-													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
-													"});\r",
-													"\r",
-													"pm.test(\"Status\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
-													"});\r",
-													"pm.test(\"errmsg\", function () {\r",
-													"    var jsonData = pm.response.json();\r",
-													"    pm.expect(jsonData.params.errmsg).to.eql(\"Password must contain a minimum of 8 characters including numerals, lower and upper case alphabets and special characters\");\r",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Accept",
-												"value": "application/json"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "{{kong_api_key}}"
-											},
-											{
-												"key": "x-authenticated-user-token",
-												"value": "{{keycloak_access_token}}"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"test1234\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
-										},
-										"url": "{{host}}/api/user/v2/create"
-									},
-									"response": [
-										{
-											"name": "400 - Invalid password",
-											"originalRequest": {
-												"method": "POST",
-												"header": [
-													{
-														"key": "Accept",
-														"value": "application/json"
-													},
-													{
-														"key": "Content-Type",
-														"value": "application/json"
-													},
-													{
-														"key": "Authorization",
-														"value": "{{kong_api_key}}"
-													},
-													{
-														"key": "x-authenticated-user-token",
-														"value": "{{keycloak_access_token}}"
-													}
-												],
-												"body": {
-													"mode": "raw",
-													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"test1234\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
-												},
-												"url": "{{host}}/api/user/v2/create"
-											},
-											"status": "Bad Request",
-											"code": 400,
-											"_postman_previewlanguage": "json",
-											"header": [
-												{
-													"key": "Date",
-													"value": "Tue, 12 Sep 2023 10:16:47 GMT"
-												},
-												{
-													"key": "Content-Type",
-													"value": "application/json"
-												},
-												{
-													"key": "Content-Length",
-													"value": "387"
-												},
-												{
-													"key": "Connection",
-													"value": "keep-alive"
-												},
-												{
-													"key": "X-RateLimit-Limit-hour",
-													"value": "30000"
-												},
-												{
-													"key": "X-RateLimit-Remaining-hour",
-													"value": "29994"
-												},
-												{
-													"key": "referrer-policy",
-													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
-												},
-												{
-													"key": "x-frame-options",
-													"value": "DENY"
-												},
-												{
-													"key": "x-xss-protection",
-													"value": "1; mode=block"
-												},
-												{
-													"key": "x-content-type-options",
-													"value": "nosniff"
-												},
-												{
-													"key": "access-control-allow-origin",
-													"value": "*"
-												},
-												{
-													"key": "x-permitted-cross-domain-policies",
-													"value": "master-only"
-												},
-												{
-													"key": "x-envoy-upstream-service-time",
-													"value": "2"
-												},
-												{
-													"key": "X-Kong-Upstream-Latency",
-													"value": "5"
-												},
-												{
-													"key": "X-Kong-Proxy-Latency",
-													"value": "1"
-												},
-												{
-													"key": "Via",
-													"value": "kong/0.14.1"
-												}
-											],
-											"cookie": [],
-											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:47:074+0000\",\n    \"params\": {\n        \"resmsgid\": \"65d725d6e03f6f290b70ffc9db33e85d\",\n        \"msgid\": \"65d725d6e03f6f290b70ffc9db33e85d\",\n        \"err\": \"UOS_USRCRT0024\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Password must contain a minimum of 8 characters including numerals, lower and upper case alphabets and special characters\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
-										}
-									]
-								}
-							]
-						},
-						{
 							"name": "Positive",
 							"item": [
 								{
@@ -2334,6 +1249,1091 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v3\",\n    \"ts\": \"2023-09-12 10:17:22:061+0000\",\n    \"params\": {\n        \"resmsgid\": \"51950166030d95f800ff42add7b29113\",\n        \"msgid\": \"51950166030d95f800ff42add7b29113\",\n        \"err\": null,\n        \"status\": \"SUCCESS\",\n        \"errmsg\": null\n    },\n    \"responseCode\": \"OK\",\n    \"result\": {\n        \"userId\": \"da6b6684-04b8-446a-a7e9-3e0d4947c9d9\",\n        \"response\": \"SUCCESS\",\n        \"errors\": []\n    }\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Negative",
+							"item": [
+								{
+									"name": "400 - Create user with empty access token Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"// Parse the response JSON body\r",
+													"let jsonResponse = pm.response.json();\r",
+													"\r",
+													"// Verification\r",
+													"pm.test(\"Status code is 401\", function () {\r",
+													"    pm.response.to.have.status(401);\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Content-Type header is present\", () => {\r",
+													"    pm.response.to.have.header(\"Content-Type\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Content-Type header is application/json\", () => {\r",
+													"    pm.expect(pm.response.headers.get('Content-Type')).includes('application/json');\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Test data type of the response and keys\", () => {\r",
+													"    pm.expect(jsonResponse).to.be.an(\"object\").that.has.all.keys(\r",
+													"        'message'\r",
+													"    );\r",
+													"\r",
+													"    pm.expect(jsonResponse.message).to.be.a(\"string\");\r",
+													"});\r",
+													"\r",
+													"// Validation\r",
+													"pm.test(\"message should be 'Unauthorized'\", function () {\r",
+													"    pm.expect(jsonResponse.message).to.eql(\"Unauthorized\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": ""
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - Create user with empty access token Copy",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": ""
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Unauthorized",
+											"code": 401,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:07:54 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Content-Length",
+													"value": "27"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "*"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"Unauthorized\"\n}"
+										}
+									]
+								},
+								{
+									"name": "400 - FirstName missing Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let jsonResponse = pm.response.json()\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"pm.test(\"Body matches string\", function () {\r",
+													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Status\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
+													"});\r",
+													"pm.test(\"errmsg\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.errmsg).to.eql(\"Mandatory parameter firstName is missing.\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{kong_api_key}}"
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - FirstName missing Copy",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{kong_api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:16:22 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Content-Length",
+													"value": "307"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "X-RateLimit-Limit-hour",
+													"value": "30000"
+												},
+												{
+													"key": "X-RateLimit-Remaining-hour",
+													"value": "29999"
+												},
+												{
+													"key": "referrer-policy",
+													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+												},
+												{
+													"key": "x-frame-options",
+													"value": "DENY"
+												},
+												{
+													"key": "x-xss-protection",
+													"value": "1; mode=block"
+												},
+												{
+													"key": "x-content-type-options",
+													"value": "nosniff"
+												},
+												{
+													"key": "access-control-allow-origin",
+													"value": "*"
+												},
+												{
+													"key": "x-permitted-cross-domain-policies",
+													"value": "master-only"
+												},
+												{
+													"key": "x-envoy-upstream-service-time",
+													"value": "3"
+												},
+												{
+													"key": "X-Kong-Upstream-Latency",
+													"value": "6"
+												},
+												{
+													"key": "X-Kong-Proxy-Latency",
+													"value": "9"
+												},
+												{
+													"key": "Via",
+													"value": "kong/0.14.1"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:22:266+0000\",\n    \"params\": {\n        \"resmsgid\": \"7fd156eb39be6bfbe0ac63ce6e533f55\",\n        \"msgid\": \"7fd156eb39be6bfbe0ac63ce6e533f55\",\n        \"err\": \"UOS_USRCRT0030\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Mandatory parameter firstName is missing.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
+										}
+									]
+								},
+								{
+									"name": "400 - Email missing",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let jsonResponse = pm.response.json()\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"pm.test(\"Body matches string\", function () {\r",
+													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Status\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
+													"});\r",
+													"pm.test(\"errmsg\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.errmsg).to.eql(\"Please provide valid email or phone.\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{kong_api_key}}"
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - Email missing",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{kong_api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:16:28 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Content-Length",
+													"value": "302"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "X-RateLimit-Limit-hour",
+													"value": "30000"
+												},
+												{
+													"key": "X-RateLimit-Remaining-hour",
+													"value": "29998"
+												},
+												{
+													"key": "referrer-policy",
+													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+												},
+												{
+													"key": "x-frame-options",
+													"value": "DENY"
+												},
+												{
+													"key": "x-xss-protection",
+													"value": "1; mode=block"
+												},
+												{
+													"key": "x-content-type-options",
+													"value": "nosniff"
+												},
+												{
+													"key": "access-control-allow-origin",
+													"value": "*"
+												},
+												{
+													"key": "x-permitted-cross-domain-policies",
+													"value": "master-only"
+												},
+												{
+													"key": "x-envoy-upstream-service-time",
+													"value": "3"
+												},
+												{
+													"key": "X-Kong-Upstream-Latency",
+													"value": "5"
+												},
+												{
+													"key": "X-Kong-Proxy-Latency",
+													"value": "6"
+												},
+												{
+													"key": "Via",
+													"value": "kong/0.14.1"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:28:203+0000\",\n    \"params\": {\n        \"resmsgid\": \"4257fab1cb32b2e1448f725fc0cb0bd8\",\n        \"msgid\": \"4257fab1cb32b2e1448f725fc0cb0bd8\",\n        \"err\": \"UOS_USRCRT0019\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Please provide valid email or phone.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
+										}
+									]
+								},
+								{
+									"name": "400 - invalid email",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let jsonResponse = pm.response.json()\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"pm.test(\"Body matches string\", function () {\r",
+													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Status\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
+													"});\r",
+													"pm.test(\"errmsg\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.errmsg).to.eql(\"Invalid format for given email.\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{kong_api_key}}"
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"&*^*\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - invalid email",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{kong_api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"&*^*\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:16:33 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Content-Length",
+													"value": "297"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "X-RateLimit-Limit-hour",
+													"value": "30000"
+												},
+												{
+													"key": "X-RateLimit-Remaining-hour",
+													"value": "29997"
+												},
+												{
+													"key": "referrer-policy",
+													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+												},
+												{
+													"key": "x-frame-options",
+													"value": "DENY"
+												},
+												{
+													"key": "x-xss-protection",
+													"value": "1; mode=block"
+												},
+												{
+													"key": "x-content-type-options",
+													"value": "nosniff"
+												},
+												{
+													"key": "access-control-allow-origin",
+													"value": "*"
+												},
+												{
+													"key": "x-permitted-cross-domain-policies",
+													"value": "master-only"
+												},
+												{
+													"key": "x-envoy-upstream-service-time",
+													"value": "3"
+												},
+												{
+													"key": "X-Kong-Upstream-Latency",
+													"value": "8"
+												},
+												{
+													"key": "X-Kong-Proxy-Latency",
+													"value": "7"
+												},
+												{
+													"key": "Via",
+													"value": "kong/0.14.1"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:33:282+0000\",\n    \"params\": {\n        \"resmsgid\": \"e5ceaf8ed94dd200385610794f3ec685\",\n        \"msgid\": \"e5ceaf8ed94dd200385610794f3ec685\",\n        \"err\": \"UOS_USRCRT0009\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Invalid format for given email.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
+										}
+									]
+								},
+								{
+									"name": "400 - PhoneNumber Missing",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let jsonResponse = pm.response.json()\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"pm.test(\"Body matches string\", function () {\r",
+													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Status\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
+													"});\r",
+													"pm.test(\"errmsg\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.errmsg).to.eql(\"Please provide valid email or phone.\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{kong_api_key}}"
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - PhoneNumber Missing",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{kong_api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:16:38 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Content-Length",
+													"value": "302"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "X-RateLimit-Limit-hour",
+													"value": "30000"
+												},
+												{
+													"key": "X-RateLimit-Remaining-hour",
+													"value": "29996"
+												},
+												{
+													"key": "referrer-policy",
+													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+												},
+												{
+													"key": "x-frame-options",
+													"value": "DENY"
+												},
+												{
+													"key": "x-xss-protection",
+													"value": "1; mode=block"
+												},
+												{
+													"key": "x-content-type-options",
+													"value": "nosniff"
+												},
+												{
+													"key": "access-control-allow-origin",
+													"value": "*"
+												},
+												{
+													"key": "x-permitted-cross-domain-policies",
+													"value": "master-only"
+												},
+												{
+													"key": "x-envoy-upstream-service-time",
+													"value": "3"
+												},
+												{
+													"key": "X-Kong-Upstream-Latency",
+													"value": "5"
+												},
+												{
+													"key": "X-Kong-Proxy-Latency",
+													"value": "0"
+												},
+												{
+													"key": "Via",
+													"value": "kong/0.14.1"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:38:050+0000\",\n    \"params\": {\n        \"resmsgid\": \"7262dd16c6f21ac1eb9e22ffd2967c90\",\n        \"msgid\": \"7262dd16c6f21ac1eb9e22ffd2967c90\",\n        \"err\": \"UOS_USRCRT0019\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Please provide valid email or phone.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
+										}
+									]
+								},
+								{
+									"name": "400 - Invalid phone number",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let jsonResponse = pm.response.json()\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"pm.test(\"Body matches string\", function () {\r",
+													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Status\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
+													"});\r",
+													"pm.test(\"errmsg\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.errmsg).to.eql(\"Invalid format for given phone.\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{kong_api_key}}"
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"819813^&\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - Invalid phone number",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{kong_api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"819813^&\",\n        \"lastName\": \"\",\n        \"password\": \"{{random_password}}\",\n        \"email\": \"\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:16:42 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Content-Length",
+													"value": "297"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "X-RateLimit-Limit-hour",
+													"value": "30000"
+												},
+												{
+													"key": "X-RateLimit-Remaining-hour",
+													"value": "29995"
+												},
+												{
+													"key": "referrer-policy",
+													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+												},
+												{
+													"key": "x-frame-options",
+													"value": "DENY"
+												},
+												{
+													"key": "x-xss-protection",
+													"value": "1; mode=block"
+												},
+												{
+													"key": "x-content-type-options",
+													"value": "nosniff"
+												},
+												{
+													"key": "access-control-allow-origin",
+													"value": "*"
+												},
+												{
+													"key": "x-permitted-cross-domain-policies",
+													"value": "master-only"
+												},
+												{
+													"key": "x-envoy-upstream-service-time",
+													"value": "3"
+												},
+												{
+													"key": "X-Kong-Upstream-Latency",
+													"value": "5"
+												},
+												{
+													"key": "X-Kong-Proxy-Latency",
+													"value": "4"
+												},
+												{
+													"key": "Via",
+													"value": "kong/0.14.1"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:42:178+0000\",\n    \"params\": {\n        \"resmsgid\": \"bd2e57a8c5080832ceb15f14cf86045a\",\n        \"msgid\": \"bd2e57a8c5080832ceb15f14cf86045a\",\n        \"err\": \"UOS_USRCRT0009\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Invalid format for given phone.\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
+										}
+									]
+								},
+								{
+									"name": "400 - Invalid password",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let jsonResponse = pm.response.json()\r",
+													"\r",
+													"pm.test(\"Status code is 400\", function () {\r",
+													"    pm.response.to.have.status(400);\r",
+													"});\r",
+													"pm.test(\"Body matches string\", function () {\r",
+													"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+													"    pm.expect(pm.response.text()).to.include(\"errmsg\");\r",
+													"});\r",
+													"\r",
+													"pm.test(\"Status\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.status).to.eql(\"FAILED\");\r",
+													"});\r",
+													"pm.test(\"errmsg\", function () {\r",
+													"    var jsonData = pm.response.json();\r",
+													"    pm.expect(jsonData.params.errmsg).to.eql(\"Password must contain a minimum of 8 characters including numerals, lower and upper case alphabets and special characters\");\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "{{kong_api_key}}"
+											},
+											{
+												"key": "x-authenticated-user-token",
+												"value": "{{keycloak_access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"test1234\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
+										},
+										"url": "{{host}}/api/user/v2/create"
+									},
+									"response": [
+										{
+											"name": "400 - Invalid password",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													},
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "{{kong_api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{keycloak_access_token}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"firstName\": \"{{random_first_name}}\",\n        \"phone\": \"\",\n        \"lastName\": \"\",\n        \"password\": \"test1234\",\n        \"email\": \"{{random_email}}\",\n        \"emailVerified\": true\n    }\n}"
+												},
+												"url": "{{host}}/api/user/v2/create"
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Date",
+													"value": "Tue, 12 Sep 2023 10:16:47 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												},
+												{
+													"key": "Content-Length",
+													"value": "387"
+												},
+												{
+													"key": "Connection",
+													"value": "keep-alive"
+												},
+												{
+													"key": "X-RateLimit-Limit-hour",
+													"value": "30000"
+												},
+												{
+													"key": "X-RateLimit-Remaining-hour",
+													"value": "29994"
+												},
+												{
+													"key": "referrer-policy",
+													"value": "origin-when-cross-origin, strict-origin-when-cross-origin"
+												},
+												{
+													"key": "x-frame-options",
+													"value": "DENY"
+												},
+												{
+													"key": "x-xss-protection",
+													"value": "1; mode=block"
+												},
+												{
+													"key": "x-content-type-options",
+													"value": "nosniff"
+												},
+												{
+													"key": "access-control-allow-origin",
+													"value": "*"
+												},
+												{
+													"key": "x-permitted-cross-domain-policies",
+													"value": "master-only"
+												},
+												{
+													"key": "x-envoy-upstream-service-time",
+													"value": "2"
+												},
+												{
+													"key": "X-Kong-Upstream-Latency",
+													"value": "5"
+												},
+												{
+													"key": "X-Kong-Proxy-Latency",
+													"value": "1"
+												},
+												{
+													"key": "Via",
+													"value": "kong/0.14.1"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"id\": \"api.user.create\",\n    \"ver\": \"v2\",\n    \"ts\": \"2023-09-12 10:16:47:074+0000\",\n    \"params\": {\n        \"resmsgid\": \"65d725d6e03f6f290b70ffc9db33e85d\",\n        \"msgid\": \"65d725d6e03f6f290b70ffc9db33e85d\",\n        \"err\": \"UOS_USRCRT0024\",\n        \"status\": \"FAILED\",\n        \"errmsg\": \"Password must contain a minimum of 8 characters including numerals, lower and upper case alphabets and special characters\"\n    },\n    \"responseCode\": \"CLIENT_ERROR\",\n    \"result\": {}\n}"
 										}
 									]
 								}
@@ -4046,12 +4046,12 @@
 										},
 										{
 											"key": "username",
-											"value": "orgadmin",
+											"value": "{{username}}",
 											"type": "text"
 										},
 										{
 											"key": "password",
-											"value": "Admin@123",
+											"value": "{{password}}",
 											"type": "text"
 										}
 									]
@@ -7022,72 +7022,1000 @@
 					"name": "RoleAPIs",
 					"item": [
 						{
-							"name": "RoleAssignV1",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "{{kong_api_key}}",
-										"type": "text"
-									},
-									{
-										"key": "X-Authenticated-User-token",
-										"value": "{{keycloak_access_token}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"organisationId\": \"{{org_id}}\",\n        \"roles\": [\n            \"CONTENT_CREATOR\"\n        ]\n    }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+							"name": "V1 - Role Assign",
+							"item": [
+								{
+									"name": "Positive",
+									"item": [
+										{
+											"name": "Add user",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"add\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}/api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Edit User",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"edit\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Remove User",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"remove\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Multiple Operations",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"remove\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Multiple Roles",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"add\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
 										}
-									}
+									]
 								},
-								"url": "{{host}}/api/user/v1/role/assign"
-							},
-							"response": []
+								{
+									"name": "Negative",
+									"item": [
+										{
+											"name": "Assign role to user -add",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 403\", function () {\r",
+															"    pm.response.to.have.status(403);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "74837yeuw"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"add\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269934121990553633\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}/api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -edit",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"edit\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Remove",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"remove\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Multiple Operations",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"remove\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Multiple Roles",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"add\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										}
+									]
+								}
+							]
 						},
 						{
-							"name": "RoleAssignV2",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "{{kong_api_key}}",
-										"type": "text"
-									},
-									{
-										"key": "X-Authenticated-User-token",
-										"value": "{{keycloak_access_token}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"roles\": [\n            {\n                \"role\": \"CONTENT_CREATOR\",\n                \"scope\": [\n                    {\n                        \"organisationId\": \"{{org_id}}\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
+							"name": "V2- Role Assign",
+							"item": [
+								{
+									"name": "Positive",
+									"item": [
+										{
+											"name": "Assign role to user -add",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"add\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -edit",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"edit\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Remove",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"remove\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Multiple Operations",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"remove\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Multiple Roles",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"add\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
 										}
-									}
+									]
 								},
-								"url": "{{host}}/api/user/v2/role/assign"
-							},
-							"response": []
+								{
+									"name": "Negative",
+									"item": [
+										{
+											"name": "Assign role to user -add",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 403\", function () {\r",
+															"    pm.response.to.have.status(403);\r",
+															"});\r",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "74837yeuw"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"add\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269934121990553633\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}/api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -edit",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"edit\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Remove",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"ORG_ADMIN\",\n                                \"operation\": \"remove\",\n                                \"scope\": [                     \n                        {\n\"organisationId\": \"01269878797503692810\"\n                        }       ]\n                        }\n                        \n                        \n                ]\n        }\n}\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Multiple Operations",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"remove\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										},
+										{
+											"name": "Assign role to user -Multiple Roles",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"let jsonResponse = pm.response.json()\r",
+															"\r",
+															"pm.test(\"Status code is 200\", function () {\r",
+															"    pm.response.to.have.status(200);\r",
+															"});\r",
+															"pm.test(\"Body matches string\", function () {\r",
+															"    pm.expect(pm.response.text()).to.include(\"status\");\r",
+															"    pm.expect(pm.response.text()).to.include(\"response\");\r",
+															"});\r",
+															"pm.test(\"Status\", function () {\r",
+															"    var jsonData = pm.response.json();\r",
+															"    pm.expect(jsonData.result.response).to.eql(\"SUCCESS\");\r",
+															"});"
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{api_key}}"
+													},
+													{
+														"key": "x-authenticated-user-token",
+														"value": "{{access_token1}}"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n        \"request\": {\n                \"userId\": \"{{userId2}}\",\n                \"roles\": [\n                    {\n                                \"role\": \"CONTENT_CREATOR\",\n                                \"operation\": \"add\",\n                                \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n    },\n    {\n      \"role\": \"ORG_ADMIN\",\n      \"operation\": \"add\",\n      \"scope\": [\n        {\n          \"organisationId\": \"01269878797503692810\"\n        },\n        {\n          \"organisationId\": \"0127236218321879040\"\n        }\n      ]\n        }\n                ]\n        }\n}\n\n"
+												},
+												"url": "{{host}}api/user/v2/role/assign"
+											},
+											"response": []
+										}
+									]
+								}
+							]
 						}
 					]
 				},
