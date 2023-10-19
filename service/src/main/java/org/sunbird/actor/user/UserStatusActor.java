@@ -67,7 +67,7 @@ public class UserStatusActor extends UserBaseActor {
 
       List<String> roles = new ArrayList<>();
       if (CollectionUtils.isNotEmpty(userRoles)) {
-        userRoles.forEach(role -> roles.add((String) role.get(JsonKey.ROLE)));
+        userRoles.forEach(role -> roles.add(((String) role.get(JsonKey.ROLE)).toLowerCase()));
       }
 
       userRolesList.addAll(roles);
@@ -75,7 +75,8 @@ public class UserStatusActor extends UserBaseActor {
       List<String> allowedRoles = new ArrayList<>();
       if (ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES) != null)
         allowedRoles =
-            Arrays.asList(ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).split(","));
+            Arrays.asList(
+                ProjectUtil.getConfigValue(JsonKey.USER_DELETION_ROLES).toLowerCase().split(","));
       else allowedRoles.add(JsonKey.PUBLIC);
 
       roles.removeAll(allowedRoles);
