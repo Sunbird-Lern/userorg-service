@@ -80,7 +80,7 @@ public class UserStatusActor extends UserBaseActor {
 
       roles.removeAll(allowedRoles);
 
-      if (roles.size() > 1) {
+      if (!roles.isEmpty()) {
         throw new ProjectCommonException(
             ResponseCode.cannotDeleteUser,
             ResponseCode.cannotDeleteUser.getErrorMessage(),
