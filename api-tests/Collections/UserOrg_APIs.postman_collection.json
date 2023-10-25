@@ -938,12 +938,12 @@
 										},
 										{
 											"key": "username",
-											"value": "orgadmin",
+											"value": "{{username}}",
 											"type": "text"
 										},
 										{
 											"key": "password",
-											"value": "Admin@123",
+											"value": "{{password}}",
 											"type": "text"
 										}
 									]
@@ -1029,10 +1029,6 @@
 									{
 										"key": "Content-Type",
 										"value": "application/x-www-form-urlencoded"
-									},
-									{
-										"key": "Cookie",
-										"value": "connect.sid=s%3Ad3chYLP8OfuB2bWgfEFohiWpDxM7GFol.gOPmzH3d2nP9enZ5qSHlVx1e%2BozTleCjXtfz7LUycCk"
 									}
 								],
 								"body": {
@@ -1115,7 +1111,7 @@
 										"value": "application/json"
 									}
 								],
-								"url": "{{host}}/api/user/v1/read/40db1ee1-206c-48f5-8e48-a38554eaeafd"
+								"url": "{{host}}/api/user/v1/read/{{user_id}}"
 							},
 							"response": []
 						},
@@ -1962,7 +1958,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"roles\": [\n            {\n                \"role\": \"CONTENT_CREATOR\",\n                \"scope\": [\n                    {\n                        \"organisationId\": \"{{org_id}}\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"roles\": [\n            {\n                \"role\": \"CONTENT_CREATOR\",\n                \"operation\": \"remove\",\n                \"scope\": [\n                    {\n                        \"organisationId\": \"{{org_id}}\"\n                    }\n                ]\n            }\n        ]\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"

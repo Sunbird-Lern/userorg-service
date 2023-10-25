@@ -4137,10 +4137,6 @@
 									{
 										"key": "Content-Type",
 										"value": "application/x-www-form-urlencoded"
-									},
-									{
-										"key": "Cookie",
-										"value": "connect.sid=s%3Ad3chYLP8OfuB2bWgfEFohiWpDxM7GFol.gOPmzH3d2nP9enZ5qSHlVx1e%2BozTleCjXtfz7LUycCk"
 									}
 								],
 								"body": {
