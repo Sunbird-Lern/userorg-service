@@ -105,6 +105,7 @@ public class UserStatusService {
       esUserMap.put(JsonKey.FIRST_NAME, "");
       esUserMap.put(JsonKey.LAST_NAME, "");
       esUserMap.put(JsonKey.PHONE, "");
+      esUserMap.put(JsonKey.EMAIL, "");
       esUserMap.put(JsonKey.PREV_USED_EMAIL, "");
       esUserMap.put(JsonKey.PREV_USED_PHONE, "");
       esUserMap.put(JsonKey.PROFILE_LOCATION, new ArrayList<>());
