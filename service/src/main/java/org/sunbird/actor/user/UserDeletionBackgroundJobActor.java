@@ -54,7 +54,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
             List<Map<String, Object>> userMapList =
                 (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
 
-            if (userMapList.size() != 0) {
+            if (!userMapList.isEmpty()) {
               Map<String, Object> roleUsersMap = new HashMap<>();
               roleUsersMap.put(JsonKey.ROLE, role);
               List<String> roleUsersList = new ArrayList<>();
@@ -80,7 +80,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     Map<String, Object> result = userService.searchUser(searchDto, request.getRequestContext());
     List<Map<String, Object>> userMapList = (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
 
-    if (userMapList.size() != 0) {
+    if (!userMapList.isEmpty()) {
       for (Map<String, Object> userMap : userMapList) {
         managedUsersList.add((String) userMap.get(JsonKey.USER_ID));
       }

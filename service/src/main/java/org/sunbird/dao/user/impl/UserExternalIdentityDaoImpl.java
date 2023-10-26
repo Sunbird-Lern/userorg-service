@@ -88,7 +88,6 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     map.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
     map.remove(JsonKey.ORIGINAL_ID_TYPE);
     map.remove(JsonKey.ORIGINAL_PROVIDER);
-    // map.remove(JsonKey.STATUS);
     cassandraOperation.deleteRecord(
         ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE),
         JsonKey.USR_EXT_IDNT_TABLE,
