@@ -175,7 +175,7 @@ public class SSOUserCreateActor extends UserBaseActor {
     String rootOrgId = (String) requestMap.get(JsonKey.ROOT_ORG_ID);
     String custodianRootOrgId = DataCacheHandler.getConfigSettings().get(JsonKey.CUSTODIAN_ORG_ID);
     // if the user is creating for non-custodian(i.e state) the value is set as true else false
-    userBooleanMap.put(JsonKey.STATE_VALIDATED, true);
+    userBooleanMap.put(JsonKey.STATE_VALIDATED, !custodianRootOrgId.equals(rootOrgId));
   }
 
   private int userFlagsToNum(Map<String, Boolean> userBooleanMap) {
