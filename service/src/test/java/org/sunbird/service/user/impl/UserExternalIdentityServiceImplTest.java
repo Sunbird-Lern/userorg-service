@@ -101,6 +101,7 @@ public class UserExternalIdentityServiceImplTest {
         .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
 
     UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
-    userExternalIdentityService.deleteUserExternalIds(userExtIdRespList, new RequestContext());
+    Assert.assertTrue(
+        userExternalIdentityService.deleteUserExternalIds(userExtIdRespList, new RequestContext()));
   }
 }

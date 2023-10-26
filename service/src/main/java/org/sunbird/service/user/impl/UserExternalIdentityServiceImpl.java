@@ -144,10 +144,11 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   }
 
   @Override
-  public void deleteUserExternalIds(
+  public boolean deleteUserExternalIds(
       List<Map<String, String>> dbUserExternalIds, RequestContext context) {
     for (Map<String, String> extIdMap : dbUserExternalIds) {
       userExternalIdentityDao.deleteUserExternalId(extIdMap, context);
     }
+    return true;
   }
 }
