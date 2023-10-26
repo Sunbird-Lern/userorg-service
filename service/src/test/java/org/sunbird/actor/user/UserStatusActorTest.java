@@ -46,6 +46,7 @@ import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.SSOManager;
 import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
@@ -62,7 +63,8 @@ import scala.concurrent.Promise;
   UserExternalIdentityService.class,
   UserExternalIdentityServiceImpl.class,
   UserRoleService.class,
-  UserRoleServiceImpl.class
+  UserRoleServiceImpl.class,
+  ProjectUtil.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -120,6 +122,9 @@ public class UserStatusActorTest {
     UserRoleService userRoleService = PowerMockito.mock(UserRoleService.class);
     PowerMockito.mockStatic(UserRoleServiceImpl.class);
     PowerMockito.when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
+
+    PowerMockito.mockStatic(ProjectUtil.class);
+    when(ProjectUtil.getConfigValue(Mockito.anyString())).thenReturn("public");
 
     List<Map<String, Object>> roleList = new ArrayList<>();
     Map<String, Object> orgMap = new HashMap<>();
