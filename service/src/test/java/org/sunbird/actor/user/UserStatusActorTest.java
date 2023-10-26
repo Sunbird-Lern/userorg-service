@@ -60,7 +60,9 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   CassandraOperationImpl.class,
   UserExternalIdentityService.class,
-  UserExternalIdentityServiceImpl.class
+  UserExternalIdentityServiceImpl.class,
+  UserRoleService.class,
+  UserRoleServiceImpl.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -114,6 +116,22 @@ public class UserStatusActorTest {
     UserResource userResource = mock(UserResource.class);
     when(usersResource.get(Mockito.any())).thenReturn(userResource);
     when(userResource.toRepresentation()).thenReturn(userRepresentation);
+
+    UserRoleService userRoleService = PowerMockito.mock(UserRoleService.class);
+    PowerMockito.mockStatic(UserRoleServiceImpl.class);
+    PowerMockito.when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
+
+    List<Map<String, Object>> roleList = new ArrayList<>();
+    Map<String, Object> orgMap = new HashMap<>();
+    orgMap.put(JsonKey.ID, "ORGANISATION_ID");
+    orgMap.put(JsonKey.USER_ID, "USER_ID");
+    orgMap.put(JsonKey.ROLE, "public");
+    orgMap.put(
+        JsonKey.SCOPE,
+        "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
+    roleList.add(orgMap);
+
+    when(userRoleService.getUserRoles(Mockito.anyString(), Mockito.any())).thenReturn(roleList);
   }
 
   @Test
@@ -238,22 +256,6 @@ public class UserStatusActorTest {
   @Test
   public void testDeleteUserSuccess() {
     try {
-      UserRoleService userRoleService = PowerMockito.mock(UserRoleService.class);
-      PowerMockito.mockStatic(UserRoleServiceImpl.class);
-      PowerMockito.when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
-
-      List<Map<String, Object>> roleList = new ArrayList<>();
-      Map<String, Object> orgMap = new HashMap<>();
-      orgMap.put(JsonKey.ID, "ORGANISATION_ID");
-      orgMap.put(JsonKey.USER_ID, "USER_ID");
-      orgMap.put(JsonKey.ROLE, "public");
-      orgMap.put(
-          JsonKey.SCOPE,
-          "[{\"organisationId\":\"ORGANISATION_ID1\"},{\"organisationId\":\"ORGANISATION_ID\"}]");
-      roleList.add(orgMap);
-
-      when(userRoleService.getUserRoles(Mockito.anyString(), Mockito.any())).thenReturn(roleList);
-
       Response userDetailsById = new Response();
       Map<String, Object> user = new HashMap<>();
       user.put(JsonKey.ID, "46545665465465");
