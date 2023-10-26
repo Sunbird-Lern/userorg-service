@@ -66,7 +66,7 @@ public class UserDeletionBackgroundJobActorTest {
     PowerMockito.when(userService.getUserById(Mockito.anyString(), Mockito.any())).thenReturn(user);
 
     Map<String, Object> searchResult = new HashMap<>();
-    searchResult.put(JsonKey.CONTENT, new ArrayList<>());
+    searchResult.put(JsonKey.CONTENT, getUsersList());
     PowerMockito.when(userService.searchUser(Mockito.any(), Mockito.any()))
         .thenReturn(searchResult);
   }
@@ -88,5 +88,13 @@ public class UserDeletionBackgroundJobActorTest {
 
     subject.tell(reqObj, probe.getRef());
     probe.expectNoMessage();
+  }
+
+  public List<Map<String, Object>> getUsersList() {
+    List<Map<String, Object>> userMapList = new ArrayList<>();
+    Map<String, Object> userMap = new HashMap<>();
+    userMap.put(JsonKey.USER_ID, "dummyuser");
+    userMapList.add(userMap);
+    return userMapList;
   }
 }
