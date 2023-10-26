@@ -286,8 +286,8 @@ public class UserStatusActorTest {
       when(externalIdentityService.getUserExternalIds(Mockito.anyString(), Mockito.any()))
           .thenReturn(userExtIdRespList);
 
-      doNothing()
-          .when(externalIdentityService, "deleteUserExternalIds", Mockito.any(), Mockito.any());
+      when(externalIdentityService, "deleteUserExternalIds", Mockito.any(), Mockito.any())
+          .thenReturn(true);
 
       boolean result = testScenario(false, ActorOperations.DELETE_USER, true, null);
       assertTrue(result);
