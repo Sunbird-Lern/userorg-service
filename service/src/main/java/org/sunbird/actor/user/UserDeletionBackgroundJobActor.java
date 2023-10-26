@@ -9,7 +9,6 @@ import org.sunbird.common.ElasticSearchHelper;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.kafka.InstructionEventGenerator;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.service.user.UserService;
@@ -19,7 +18,6 @@ import org.sunbird.util.PropertiesCache;
 public class UserDeletionBackgroundJobActor extends BaseActor {
 
   private final UserService userService = UserServiceImpl.getInstance();
-  private final LoggerUtil logger = new LoggerUtil(UserDeletionBackgroundJobActor.class);
 
   @Override
   public void onReceive(Request request) throws Throwable {
