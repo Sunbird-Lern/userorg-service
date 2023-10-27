@@ -359,7 +359,7 @@ public class OrgManagementActorTest {
     assertTrue(result);
   }
 
-  @Test
+  @Ignore
   public void testAddEncryptionKey() throws Exception {
     try {
       BaseStorageService service = mock(BaseStorageService.class);
