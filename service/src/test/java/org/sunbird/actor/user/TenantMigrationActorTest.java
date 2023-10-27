@@ -10,7 +10,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +40,13 @@ import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.ProjectUtil;
 import scala.concurrent.Promise;
+
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

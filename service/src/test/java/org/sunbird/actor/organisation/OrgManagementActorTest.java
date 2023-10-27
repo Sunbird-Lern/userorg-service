@@ -1,5 +1,6 @@
 package org.sunbird.actor.organisation;
 
+
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.*;
 
@@ -9,6 +10,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,6 +57,19 @@ import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.Util;
 import scala.Option;
 import scala.concurrent.Promise;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
@@ -516,10 +531,11 @@ public class OrgManagementActorTest {
     subject.tell(request, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(Duration.ofSeconds(20), Response.class);
+      Response res = probe.expectMsgClass(duration("5 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
-      ProjectCommonException res = probe.expectMsgClass(ProjectCommonException.class);
+      ProjectCommonException res =
+          probe.expectMsgClass(ProjectCommonException.class);
       return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
@@ -548,7 +564,7 @@ public class OrgManagementActorTest {
           new File(
               Paths.get("").toAbsolutePath()
                   + File.separator
-                  + "src/test/resources/samplepublic.pem");
+                  + "service/src/test/resources/samplepublic.pem");
       Path path = Paths.get(file.getPath());
       bytes = Files.readAllBytes(path);
     } catch (Exception e) {

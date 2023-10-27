@@ -34,6 +34,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
+
 <!--                     <forkCount>0</forkCount>  Refer to https://www.eclemma.org/jacoco/trunk/doc/maven.html -->
                     <!--<reuseForks>false</reuseForks>-->
                     <useSystemClassLoader>false</useSystemClassLoader>
