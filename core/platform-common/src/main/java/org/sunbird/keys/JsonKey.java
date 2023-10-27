@@ -16,6 +16,8 @@ public final class JsonKey {
   public static final String IS_FORM_VALIDATION_REQUIRED = "isFormValidationRequired";
   public static final String USER_PROFILE_CONFIG_MAP = "userProfileConfigMap";
   public static final String ACCOUNT_NAME = "sunbird_account_name";
+
+  public static final String ACCOUNT_ENDPOINT = "sunbird_account_endpoint";
   public static final String DOWNLOAD_LINK_EXPIRY_TIMEOUT = "download_link_expiry_timeout";
   public static final String ACTION_GROUP = "action_group";
   public static final String ACTION_GROUPS = "actionGroups";
@@ -412,8 +414,6 @@ public final class JsonKey {
   public static final String SUNBIRD_GZIP_ENABLE = "sunbird_gzip_enable";
   public static final String SUNBIRD_SYNC_READ_WAIT_TIME = "sunbird_sync_read_wait_time";
   public static final String SUNBIRD_GZIP_SIZE_THRESHOLD = "sunbird_gzip_size_threshold";
-  public static final String ANALYTICS_ACCOUNT_NAME = "sunbird_analytics_blob_account_name";
-  public static final String ANALYTICS_ACCOUNT_KEY = "sunbird_analytics_blob_account_key";
   public static final String SIGNUP_TYPE = "signupType";
   public static final String REQUEST_SOURCE = "source";
 
@@ -644,6 +644,13 @@ public final class JsonKey {
   public static final String DATA_SECURITY_POLICY = "dataSecurityPolicy";
   public static final String JOB = "job";
   public static final String USER_PRIVATE_FIELDS = "userPrivateFields";
+  //Release 5.4.0 LR-102
+  public static final String SUNBIRD_KEYSPACE = "sunbird_keyspace";
+  public static final String ES_LOCATION_INDEX = "es_location_index";
+  public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
+  public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
+  public static final String ES_USER_INDEX_ALIAS = "user_index_alias";
+  public static final String ES_ORG_INDEX_INDEX = "org_index_alias";
 
   private JsonKey() {}
 }

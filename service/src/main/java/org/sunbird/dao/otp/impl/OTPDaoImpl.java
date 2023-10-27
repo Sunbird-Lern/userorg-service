@@ -10,6 +10,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 
 public class OTPDaoImpl implements OTPDao {
@@ -45,7 +46,7 @@ public class OTPDaoImpl implements OTPDao {
     ttlFields.add(JsonKey.OTP);
     Response result =
         cassandraOperation.getRecordWithTTLById(
-            JsonKey.SUNBIRD, TABLE_NAME, request, ttlFields, fields, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, request, ttlFields, fields, context);
     List<Map<String, Object>> otpMapList = (List<Map<String, Object>>) result.get(JsonKey.RESPONSE);
     if (CollectionUtils.isEmpty(otpMapList)) {
       return null;
@@ -64,7 +65,7 @@ public class OTPDaoImpl implements OTPDao {
     String expirationInSeconds =
         PropertiesCache.getInstance().getProperty(JsonKey.SUNBIRD_OTP_EXPIRATION);
     int ttl = Integer.valueOf(expirationInSeconds);
-    cassandraOperation.insertRecordWithTTL(JsonKey.SUNBIRD, TABLE_NAME, request, ttl, context);
+    cassandraOperation.insertRecordWithTTL(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, request, ttl, context);
   }
 
   @Override
@@ -72,7 +73,7 @@ public class OTPDaoImpl implements OTPDao {
     Map<String, String> compositeKeyMap = new HashMap<>();
     compositeKeyMap.put(JsonKey.TYPE, type);
     compositeKeyMap.put(JsonKey.KEY, key);
-    cassandraOperation.deleteRecord(JsonKey.SUNBIRD, TABLE_NAME, compositeKeyMap, context);
+    cassandraOperation.deleteRecord(ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, compositeKeyMap, context);
     logger.debug(context, "OTPDaoImpl:deleteOtp:otp deleted");
   }
 
@@ -88,6 +89,6 @@ public class OTPDaoImpl implements OTPDao {
     compositeKey.put(JsonKey.TYPE, otpDetails.get(JsonKey.TYPE));
     compositeKey.put(JsonKey.KEY, otpDetails.get(JsonKey.KEY));
     cassandraOperation.updateRecordWithTTL(
-        JsonKey.SUNBIRD, TABLE_NAME, request, compositeKey, ttl, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), TABLE_NAME, request, compositeKey, ttl, context);
   }
 }

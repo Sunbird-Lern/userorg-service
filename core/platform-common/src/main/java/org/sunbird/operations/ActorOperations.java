@@ -12,6 +12,7 @@ import java.util.Map;
  * @author Manzarul
  */
 public enum ActorOperations {
+
     CREATE_USER("createUser", "USRCRT"),
     CREATE_SSO_USER("createSSOUser", "USRCRT"),
 

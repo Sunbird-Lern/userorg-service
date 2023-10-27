@@ -12,12 +12,13 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class SystemSettingDaoImpl implements SystemSettingDao {
 
   private final CassandraOperation cassandraOperation = ServiceFactory.getInstance();
   private final ObjectMapper mapper = new ObjectMapper();
-  private static final String KEYSPACE_NAME = JsonKey.SUNBIRD;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
   private static final String TABLE_NAME = JsonKey.SYSTEM_SETTINGS_DB;
 
   @Override

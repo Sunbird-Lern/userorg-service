@@ -67,18 +67,6 @@ data:
   {{- printf "ERROR | %s | Please provide a value for \"cloud_public_storage_secret\"" .Chart.Name | fail }}
   {{- end }}
 
-  sunbird_analytics_blob_account_name: {{ if .Values.cloud_private_storage_accountname }}
-  {{- .Values.cloud_private_storage_accountname }}
-  {{- else -}}
-  {{- printf "ERROR | %s | Please provide a value for \"cloud_private_storage_accountname\"" .Chart.Name | fail }}
-  {{- end }}
-
-  sunbird_analytics_blob_account_key: {{ if .Values.cloud_private_storage_secret }}
-  {{- .Values.cloud_private_storage_secret }}
-  {{- else -}}
-  {{- printf "ERROR | %s | Please provide a value for \"cloud_private_storage_secret\"" .Chart.Name | fail }}
-  {{- end }}
-
   sunbird_cloud_service_provider: {{ if eq (include "common.csp.validation" .Values.cloud_service_provider) "true" }}
   {{- .Values.cloud_service_provider }}
   {{- else -}}
@@ -220,7 +208,6 @@ data:
   sunbird_cassandra_port: {{ .Values.sunbird_cassandra_port | quote }}
   sunbird_cassandra_username: {{ .Values.sunbird_cassandra_username }}
   sunbird_cert_service_base_url: {{ .Values.sunbird_cert_service_base_url }}
-  sunbird_content_azure_storage_container: {{ .Values.sunbird_content_azure_storage_container }}
   sunbird_course_batch_notification_enabled: {{ .Values.sunbird_course_batch_notification_enabled | quote }}
   sunbird_course_batch_notification_signature: {{ .Values.sunbird_course_batch_notification_signature }}
   sunbird_cs_search_path: {{ .Values.sunbird_cs_search_path }}

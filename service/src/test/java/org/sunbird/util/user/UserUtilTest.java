@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -56,10 +58,12 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UserUtilTest {
   private static Response response;
   public static CassandraOperationImpl cassandraOperationImpl;
   private static ElasticSearchService esService;
+  private static final String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
 
   public void beforeEachTest() {
     PowerMockito.mockStatic(DataCacheHandler.class);
@@ -79,13 +83,13 @@ public class UserUtilTest {
     reqMap.put(JsonKey.TYPE, JsonKey.EMAIL);
     reqMap.put(JsonKey.VALUE, "test@test.com");
     when(cassandraOperationImpl.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_LOOKUP, reqMap, null))
+            KEYSPACE_NAME, JsonKey.USER_LOOKUP, reqMap, null))
         .thenReturn(response);
     Map<String, Object> reqMapPhone = new HashMap<>();
     reqMap.put(JsonKey.TYPE, JsonKey.PHONE);
     reqMap.put(JsonKey.VALUE, "9663890400");
     when(cassandraOperationImpl.getRecordsByCompositeKey(
-            JsonKey.SUNBIRD, JsonKey.USER_LOOKUP, reqMapPhone, null))
+            KEYSPACE_NAME, JsonKey.USER_LOOKUP, reqMapPhone, null))
         .thenReturn(existResponse);
     when(DataCacheHandler.getConfigSettings()).thenReturn(settingMap);
 

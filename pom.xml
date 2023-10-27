@@ -23,7 +23,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -32,9 +32,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
+                <version>3.0.0</version>
                 <configuration>
-                    <!-- <forkCount>0</forkCount> -->
+                     <forkCount>0</forkCount>
                     <!--<reuseForks>false</reuseForks>-->
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <argLine>
@@ -55,7 +55,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
+                <version>0.8.6</version>
                 <configuration>
                     <destFile>${basedir}/target/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/jacoco-unit.exec</dataFile>

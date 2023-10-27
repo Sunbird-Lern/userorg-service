@@ -10,6 +10,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class SmsTemplateUtil {
   private static final LoggerUtil logger = new LoggerUtil(SmsTemplateUtil.class);
@@ -18,7 +19,7 @@ public class SmsTemplateUtil {
   public static Map<String, Map<String, String>> getSmsTemplateConfigMap() {
     Response response =
         cassandraOperation.getRecordById(
-            JsonKey.SUNBIRD, JsonKey.SYSTEM_SETTINGS_DB, JsonKey.SMS_TEMPLATE_CONFIG, null);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.SYSTEM_SETTINGS_DB, JsonKey.SMS_TEMPLATE_CONFIG, null);
     List<Map<String, Object>> responseList =
         (List<Map<String, Object>>) response.get(JsonKey.RESPONSE);
     if (null != responseList && !responseList.isEmpty()) {

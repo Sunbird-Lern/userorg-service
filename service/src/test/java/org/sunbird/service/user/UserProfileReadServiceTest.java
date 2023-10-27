@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -76,6 +78,7 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class UserProfileReadServiceTest {
 
   private String tncConfig =
@@ -337,7 +340,7 @@ public class UserProfileReadServiceTest {
       Assert.assertEquals(ex.getErrorCode(), ResponseCode.userAccountlocked.getErrorCode());
     }
   }
-  
+
   @Test
   public void getUserIdByExternalIdTest() {
     UserProfileReadService userProfileReadService = new UserProfileReadService();
@@ -345,9 +348,12 @@ public class UserProfileReadServiceTest {
     request.getContext().put(JsonKey.PROVIDER, "4578963210");
     request.getContext().put(JsonKey.ID_TYPE, "4578963210");
     PowerMockito.mockStatic(UserExternalIdentityServiceImpl.class);
-    UserExternalIdentityServiceImpl userExternalIdentityService = PowerMockito.mock(UserExternalIdentityServiceImpl.class);
+    UserExternalIdentityServiceImpl userExternalIdentityService =
+        PowerMockito.mock(UserExternalIdentityServiceImpl.class);
     when(UserExternalIdentityServiceImpl.getInstance()).thenReturn(userExternalIdentityService);
-    when(userExternalIdentityService.getUserV1(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any())).thenReturn("");
+    when(userExternalIdentityService.getUserV1(
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        .thenReturn("");
     try {
       userProfileReadService.getUserProfileData(request);
     } catch (ProjectCommonException ex) {

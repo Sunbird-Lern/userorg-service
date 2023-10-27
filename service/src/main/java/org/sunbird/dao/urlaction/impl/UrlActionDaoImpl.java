@@ -10,6 +10,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.urlaction.UrlAction;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class UrlActionDaoImpl implements UrlActionDao {
 
@@ -26,7 +27,7 @@ public class UrlActionDaoImpl implements UrlActionDao {
 
   @Override
   public List<UrlAction> getUrlActions() {
-    String KEYSPACE_NAME = "sunbird";
+    String KEYSPACE_NAME = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE);
     String TABLE_NAME = "url_action";
     Response urlActionResults = cassandraOperation.getAllRecords(KEYSPACE_NAME, TABLE_NAME, null);
     TypeReference<List<UrlAction>> urlActionType = new TypeReference<>() {};

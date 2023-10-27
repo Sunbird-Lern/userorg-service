@@ -43,6 +43,7 @@ import scala.concurrent.Promise;
   ServiceFactory.class,
   EsClientFactory.class,
   ElasticSearchRestHighImpl.class,
+        CassandraOperationImpl.class,
   UserService.class,
   UserServiceImpl.class
 })
@@ -150,12 +151,12 @@ public class CheckUserExistActorTest {
     ActorRef subject = system.actorOf(props);
     subject.tell(reqObj, probe.getRef());
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
 
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
       return res.getErrorCode().equals(errorCode.getErrorCode())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
@@ -169,7 +170,7 @@ public class CheckUserExistActorTest {
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 }

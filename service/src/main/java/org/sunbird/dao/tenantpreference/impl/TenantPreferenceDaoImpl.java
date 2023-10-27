@@ -9,6 +9,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.util.ProjectUtil;
 
 public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
 
@@ -30,7 +31,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
     properties.put(JsonKey.KEY, key);
     Response tenantPreferences =
         cassandraOperation.getRecordsByProperties(
-            JsonKey.SUNBIRD, JsonKey.TENANT_PREFERENCE_V2_DB, properties, context);
+                ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.TENANT_PREFERENCE_V2_DB, properties, context);
     return (List<Map<String, Object>>) tenantPreferences.get(JsonKey.RESPONSE);
   }
 
@@ -38,7 +39,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
   public Response insertTenantPreference(
       Map<String, Object> tenantPreference, RequestContext context) {
     return cassandraOperation.insertRecord(
-        JsonKey.SUNBIRD, JsonKey.TENANT_PREFERENCE_V2_DB, tenantPreference, context);
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE), JsonKey.TENANT_PREFERENCE_V2_DB, tenantPreference, context);
   }
 
   @Override
@@ -47,7 +48,7 @@ public class TenantPreferenceDaoImpl implements TenantPreferenceDao {
       Map<String, Object> clusteringKeys,
       RequestContext context) {
     return cassandraOperation.updateRecord(
-        JsonKey.SUNBIRD,
+            ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE),
         JsonKey.TENANT_PREFERENCE_V2_DB,
         tenantPreference,
         clusteringKeys,
