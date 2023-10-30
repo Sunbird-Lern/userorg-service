@@ -138,3 +138,6 @@ GET     /v1/system/settings/get/:field          @controllers.systemsettings.Syst
 GET     /v1/system/settings/list                @controllers.systemsettings.SystemSettingsController.getAllSystemSettings(request: play.mvc.Http.Request)
 POST    /v1/system/settings/set                 @controllers.systemsettings.SystemSettingsController.setSystemSetting(request: play.mvc.Http.Request)
 
+
+POST	/v1/user/delete                         @controllers.usermanagement.UserStatusController.deleteUser(request: play.mvc.Http.Request)
+

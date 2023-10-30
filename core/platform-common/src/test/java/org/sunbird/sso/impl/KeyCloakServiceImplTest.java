@@ -28,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.request.RequestContext;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
@@ -41,7 +42,6 @@ import org.sunbird.util.PropertiesCache;
   KeycloakRequiredActionLinkUtil.class,
   PropertiesCache.class
 })
-@Ignore
 public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
@@ -95,7 +95,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Response response = mock(Response.class);
     PowerMockito.mockStatic(KeyCloakConnectionProvider.class);
     try {
-
+      KeyCloakConnectionProvider.SSO_REALM = "sunbird";
       doReturn(kcp).when(KeyCloakConnectionProvider.class, "getConnection");
       doReturn(realmRes).when(kcp).realm(Mockito.anyString());
       doReturn(usersRes).when(realmRes).users();
@@ -197,5 +197,10 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   public void testUpdatePassword() throws Exception {
     boolean updated = keyCloakService.updatePassword(userId.get(JsonKey.USER_ID), "password", null);
     Assert.assertNotNull(updated);
+  }
+
+  @Test
+  public void testRemovePII() {
+    keyCloakService.removePII(userId.get(JsonKey.USER_ID), new RequestContext());
   }
 }
