@@ -29,7 +29,6 @@ public enum ActorOperations {
   GET_USER_DETAILS_BY_LOGINID("getUserDetailsByLoginId", "USRRED"),
   GET_USER_BY_KEY("getUserByKey", "USRRED"),
   BLOCK_USER("blockUser", "USRBLOK"),
-  DELETE_USER("deleteUser", "USRDLT"),
   BULK_UPLOAD("bulkUpload", "BLKUPLD"),
   PROCESS_BULK_UPLOAD("processBulkUpload", "BLKUPLD"),
   ASSIGN_ROLES("assignRoles", "ROLUPD"),
@@ -148,7 +147,8 @@ public enum ActorOperations {
   UPSERT_LOCATION_TO_ES("upsertLocationDataToES", "LBKGUPSRT"),
   DELETE_LOCATION_FROM_ES("deleteLocationDataFromES", "LBKGDEL"),
   ADD_ENCRYPTION_KEY("addEncryptionKey", "ADENCKEY"),
-  USER_CURRENT_LOGIN("userCurrentLogin", "USRLOG");
+  USER_CURRENT_LOGIN("userCurrentLogin", "USRLOG"),
+  DELETE_USER("deleteUser", "USRDLT");
 
   private String value;
 
