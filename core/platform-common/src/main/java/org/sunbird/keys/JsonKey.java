@@ -128,6 +128,7 @@ public final class JsonKey {
   public static final String IS_SELF_DECLARATION = "isSelfDeclaration";
   public static final String IS_SYSTEM_UPLOAD = "isSystemUpload";
   public static final String IS_AUTH_REQ = "isAuthReq";
+  public static final String IS_BLOCKED = "isBlocked";
   public static final String IS_DELETED = "isDeleted";
   public static final String JOB_PROFILE = "jobProfile";
   public static final String LANGUAGE = "language";
@@ -296,6 +297,7 @@ public final class JsonKey {
   public static final String URL_ACTION = "url_action";
   public static final String URL_ACTION_ID = "url_action_ids";
   public static final String USER = "user";
+  public static final String USER_OWNERSHIP_TRANSFER = "user_ownership_transfer";
   public static final String USER_ACTION_ROLE = "user_action_role";
   public static final String USER_DB = "user_db";
   public static final String USER_ID = "userId";
@@ -591,6 +593,8 @@ public final class JsonKey {
   public static final String STATE_ID = "stateId";
   public static final String BLOCK_USER = "BlockUser";
   public static final String UNBLOCK_USER = "UnblockUser";
+  public static final String DELETE_USER = "DeleteUser";
+  public static final String DELETE_USER_STATUS = "DeleteUserStatus";
   public static final String ROLE_OPERATION = "roleOperation";
   public static final String SCOPE_STR = "scopeString";
   public static final String SUNBIRD_SSO_LB_IP = "sunbird_sso_lb_ip";
@@ -651,6 +655,28 @@ public final class JsonKey {
   public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
   public static final String ES_USER_INDEX_ALIAS = "user_index_alias";
   public static final String ES_ORG_INDEX_INDEX = "org_index_alias";
+
+  //Release 5.4.0 LR-102
+  public static final String SUNBIRD_KEYSPACE = "sunbird_keyspace";
+  public static final String ES_LOCATION_INDEX = "es_location_index";
+  public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
+  public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
+  public static final String ES_USER_INDEX_ALIAS = "user_index_alias";
+  public static final String ES_ORG_INDEX_INDEX = "org_index_alias";
+
+  public static final String USER_DELETION_STATUS = "user_deletion_status";
+  public static final String CREDENTIALS_STATUS = "keycloakCredentials";
+  public static final String USER_LOOK_UP_STATUS = "userLookUpTable";
+  public static final String USER_EXTERNAL_ID_STATUS = "userExternalIdTable";
+  public static final String USERS = "users";
+  public static final String USER_TABLE_STATUS = "userTable";
+  public static final String SUGGESTED_USERS = "suggested_users";
+  public static final String DELETE_USER_ACTON = "delete-user";
+  public static final String OBJECT = "object";
+  public static final String EDATA = "eData";
+  public static final String MANAGED_USERS = "managed_users";
+  public static final String USER_DELETION_TOPIC = "user-deletion-broadcast-topic";
+  public static final String USER_DELETION_ROLES = "user-deletion-roles";
 
   private JsonKey() {}
 }

@@ -1,7 +1,6 @@
 package org.sunbird.service.user.impl;
 
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,5 +83,25 @@ public class UserExternalIdentityServiceImplTest {
     List<Map<String, String>> externalIds =
         userExternalIdentityService.getExternalIds("userId", true, new RequestContext());
     Assert.assertNotNull(externalIds);
+  }
+
+  @Test
+  public void deleteExternalIdsTest() {
+    Map<String, String> userExtIdMap = new HashMap<>();
+    userExtIdMap.put("provider", "0132818330295992324");
+    userExtIdMap.put("idtype", "teacherId");
+    userExtIdMap.put("externalid", "cedd456");
+    userExtIdMap.put("userid", "46545665465465");
+
+    List<Map<String, String>> userExtIdRespList = new ArrayList<>();
+    userExtIdRespList.add(userExtIdMap);
+
+    doNothing()
+        .when(cassandraOperationImpl)
+        .deleteRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any());
+
+    UserExternalIdentityService userExternalIdentityService = new UserExternalIdentityServiceImpl();
+    Assert.assertTrue(
+        userExternalIdentityService.deleteUserExternalIds(userExtIdRespList, new RequestContext()));
   }
 }

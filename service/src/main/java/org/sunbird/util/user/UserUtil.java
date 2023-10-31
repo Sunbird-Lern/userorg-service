@@ -830,6 +830,15 @@ public class UserUtil {
               + (String) userDbMap.get(JsonKey.USERNAME));
       reqMap.add(deleteLookUp);
     }
+
+    if (identifiers.contains(JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID)
+        && StringUtils.isNotBlank((String) userDbMap.get(JsonKey.EXTERNAL_ID))) {
+      deleteLookUp = new HashMap<>();
+      deleteLookUp.put(JsonKey.TYPE, JsonKey.USER_LOOKUP_FILED_EXTERNAL_ID);
+      deleteLookUp.put(JsonKey.VALUE, (String) userDbMap.get(JsonKey.EXTERNAL_ID));
+      reqMap.add(deleteLookUp);
+    }
+
     if (CollectionUtils.isNotEmpty(reqMap)) {
       userLookupService.deleteRecords(reqMap, context);
     }
