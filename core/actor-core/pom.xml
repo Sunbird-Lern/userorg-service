@@ -45,6 +45,12 @@
 			<groupId>com.typesafe.akka</groupId>
 			<artifactId>akka-remote_2.11</artifactId>
 			<version>${learner.akka.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -54,7 +60,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.10.5</version>
+			<version>2.12.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
