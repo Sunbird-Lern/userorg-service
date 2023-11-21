@@ -21,7 +21,7 @@ public class OtpRequestValidator extends BaseRequestValidator {
           JsonKey.RESET_PASSWORD_TEMPLATE_ID,
           JsonKey.WARD_LOGIN_OTP_TEMPLATE_ID,
           JsonKey.CONTACT_UPDATE_TEMPLATE_ID,
-          JsonKey.OTP_DELETE_USER_EMAIL_TEMPLATE);
+          JsonKey.OTP_DELETE_USER_TEMPLATE_ID);
 
   public void validateGenerateOtpRequest(Request otpRequest) {
     commonValidation(otpRequest, false);

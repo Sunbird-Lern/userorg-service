@@ -98,6 +98,8 @@ public final class OTPUtil {
       sms = otpService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate, context);
     } else if (StringUtils.equals(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
       sms = otpService.getSmsBody(JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_SMS, smsTemplate, context);
+    } else if (StringUtils.equals(JsonKey.OTP_DELETE_USER_TEMPLATE_ID, templateId)) {
+      sms = otpService.getSmsBody(JsonKey.OTP_DELETE_USER_TEMPLATE_SMS, smsTemplate, context);
     }
     logger.debug(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
 
@@ -153,6 +155,9 @@ public final class OTPUtil {
     } else if (StringUtils.equalsIgnoreCase(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_EMAIL);
       emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT);
+    } else if (StringUtils.equalsIgnoreCase(JsonKey.OTP_DELETE_USER_TEMPLATE_ID, templateId)) {
+      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_DELETE_USER_EMAIL_TEMPLATE);
+      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.DELETE_USER_VERIFICATION_SUBJECT);
     }
     emailTemplateMap.put(JsonKey.INSTALLATION_NAME, envName);
     request = new Request();

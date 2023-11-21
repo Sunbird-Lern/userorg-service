@@ -187,6 +187,7 @@ public final class JsonKey {
   public static final String OTP_PHONE_RESET_PASSWORD_TEMPLATE = "otpPhoneResetPasswordTemplate";
   public static final String VERIFY_PHONE_OTP_TEMPLATE = "verifyPhoneOtpTemplate";
   public static final String OTP_DELETE_USER_EMAIL_TEMPLATE = "otpEmailDeleteUserTemplate";
+  public static final String OTP_DELETE_USER_TEMPLATE_ID = "otpDeleteUserTemplate";
   public static final String PARAMS = "params";
   public static final String PASSWORD = "password";
 
@@ -610,8 +611,11 @@ public final class JsonKey {
   public static final String CONTACT_UPDATE_TEMPLATE_ID = "otpContactUpdateTemplate";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_EMAIL = "otpContactUpdateTemplateEmail";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_SMS = "otpContactUpdateTemplateSms";
+  public static final String OTP_DELETE_USER_TEMPLATE_SMS = "otpDeleteUserTemplateSms";
   public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
       "OTP to edit Diksha Profile";
+  public static final String DELETE_USER_VERIFICATION_SUBJECT =
+      "OTP to proceed with profile deletion.";
   public static final String X_Source = "x-source";
   public static final String IDS = "ids";
   public static final String NOTIFICATIONS = "notifications";
@@ -650,7 +654,7 @@ public final class JsonKey {
   public static final String JOB = "job";
   public static final String USER_PRIVATE_FIELDS = "userPrivateFields";
 
-  //Release 5.4.0 LR-102
+  // Release 5.4.0 LR-102
   public static final String SUNBIRD_KEYSPACE = "sunbird_userorg_keyspace";
   public static final String ES_LOCATION_INDEX = "es_location_index";
   public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
