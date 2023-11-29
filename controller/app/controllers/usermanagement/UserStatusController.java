@@ -10,6 +10,8 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;
+import util.Attrs;
+import util.Common;
 
 public class UserStatusController extends BaseController {
 
@@ -36,6 +38,19 @@ public class UserStatusController extends BaseController {
         httpRequest.body().asJson(),
         request -> {
           new UserStatusRequestValidator().validateUnblockUserRequest((Request) request);
+          return null;
+        },
+        httpRequest);
+  }
+
+  public CompletionStage<Result> deleteUser(Http.Request httpRequest) {
+    return handleRequest(
+        userStatusActor,
+        ActorOperations.DELETE_USER.getValue(),
+        httpRequest.body().asJson(),
+        request -> {
+          new UserStatusRequestValidator()
+              .validateUserId(Common.getFromRequest(httpRequest, Attrs.USER_ID));
           return null;
         },
         httpRequest);
