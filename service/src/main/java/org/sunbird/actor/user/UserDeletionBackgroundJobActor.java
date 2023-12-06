@@ -38,34 +38,35 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     Map<String, Object> searchFilter = new HashMap<>();
     searchFilter.put(JsonKey.ROOT_ORG_ID, rootOrgId);
 
-    if (!roles.isEmpty()) {
-      // for each role in the organisation, fetch list of other users to pass it as part of event
-      List<String> queryFields = new ArrayList<>();
-      queryFields.add(JsonKey.USER_ID);
-      searchQueryMap.put(JsonKey.FIELDS, queryFields);
-      logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
-      roles.forEach(
-          role -> {
-            searchFilter.put(JsonKey.ROLES + "." + JsonKey.ROLE, role);
-            searchQueryMap.put(JsonKey.FILTERS, searchFilter);
-            SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
-            Map<String, Object> result =
-                userService.searchUser(searchDto, request.getRequestContext());
-            List<Map<String, Object>> userMapList =
-                (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+    if (!roles.contains(JsonKey.ORG_ADMIN)) roles.add(JsonKey.ORG_ADMIN);
 
-            if (!userMapList.isEmpty()) {
-              Map<String, Object> roleUsersMap = new HashMap<>();
-              roleUsersMap.put(JsonKey.ROLE, role);
-              List<String> roleUsersList = new ArrayList<>();
-              for (Map<String, Object> userMap : userMapList) {
-                roleUsersList.add((String) userMap.get(JsonKey.USER_ID));
-              }
-              roleUsersMap.put(JsonKey.USERS, roleUsersList);
-              suggestedUsersList.add(roleUsersMap);
+    // for each role in the organisation, fetch list of other users to pass it as part of event
+    List<String> queryFields = new ArrayList<>();
+    queryFields.add(JsonKey.USER_ID);
+    searchQueryMap.put(JsonKey.FIELDS, queryFields);
+    logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
+    roles.forEach(
+        role -> {
+          searchFilter.put(JsonKey.ROLES + "." + JsonKey.ROLE, role);
+          searchQueryMap.put(JsonKey.FILTERS, searchFilter);
+          SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
+          Map<String, Object> result =
+              userService.searchUser(searchDto, request.getRequestContext());
+          List<Map<String, Object>> userMapList =
+              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+
+          if (!userMapList.isEmpty()) {
+            Map<String, Object> roleUsersMap = new HashMap<>();
+            roleUsersMap.put(JsonKey.ROLE, role);
+            List<String> roleUsersList = new ArrayList<>();
+            for (Map<String, Object> userMap : userMapList) {
+              roleUsersList.add((String) userMap.get(JsonKey.USER_ID));
             }
-          });
-    }
+            roleUsersMap.put(JsonKey.USERS, roleUsersList);
+            suggestedUsersList.add(roleUsersMap);
+          }
+        });
+
     logger.info(
         "UserDeletionBackgroundJobActor::inputKafkaTopic:: suggestedUsersList size:: "
             + suggestedUsersList.size());
