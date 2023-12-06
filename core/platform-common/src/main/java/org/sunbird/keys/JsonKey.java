@@ -650,7 +650,7 @@ public final class JsonKey {
   public static final String JOB = "job";
   public static final String USER_PRIVATE_FIELDS = "userPrivateFields";
 
-  //Release 5.4.0 LR-102
+  // Release 5.4.0 LR-102
   public static final String SUNBIRD_KEYSPACE = "sunbird_userorg_keyspace";
   public static final String ES_LOCATION_INDEX = "es_location_index";
   public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
@@ -667,7 +667,7 @@ public final class JsonKey {
   public static final String SUGGESTED_USERS = "suggested_users";
   public static final String DELETE_USER_ACTON = "delete-user";
   public static final String OBJECT = "object";
-  public static final String EDATA = "eData";
+  public static final String EDATA = "edata";
   public static final String MANAGED_USERS = "managed_users";
   public static final String USER_DELETION_TOPIC = "user-deletion-broadcast-topic";
   public static final String USER_DELETION_ROLES = "user-deletion-roles";
