@@ -30,7 +30,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     User user = userService.getUserById(userId, request.getRequestContext());
     String rootOrgId = user.getRootOrgId();
 
-    List<Map<String, Object>> suggestedUsersList = new ArrayList<>();
+    ArrayList<Map<String, Object>> suggestedUsersList = new ArrayList<>();
 
     if (!roles.isEmpty()) {
       suggestedUsersList = fetchUsersByRoles(roles, rootOrgId, request);
@@ -38,8 +38,8 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
 
     if (!roles.contains(JsonKey.ORG_ADMIN)) {
       // Add logic to fetch and add orgAdmins to suggestedUsersList
-      List<Map<String, Object>> orgAdminUsersList =
-          fetchUsersByRoles((ArrayList) Arrays.asList("JsonKey.ORG_ADMIN"), rootOrgId, request);
+      ArrayList<Map<String, Object>> orgAdminUsersList =
+          fetchUsersByRoles((ArrayList) Arrays.asList(JsonKey.ORG_ADMIN), rootOrgId, request);
       if (!orgAdminUsersList.isEmpty()) suggestedUsersList.addAll(orgAdminUsersList);
     }
 
@@ -98,14 +98,14 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     InstructionEventGenerator.pushInstructionEvent(userDeletionTopic, data);
   }
 
-  private List fetchUsersByRoles(ArrayList roles, String rootOrgId, Request request) {
-    List<Map<String, Object>> suggestedUsersList = new ArrayList<>();
+  private ArrayList fetchUsersByRoles(ArrayList roles, String rootOrgId, Request request) {
+    ArrayList<Map<String, Object>> suggestedUsersList = new ArrayList<>();
     Map<String, Object> searchQueryMap = new HashMap<>();
     Map<String, Object> searchFilter = new HashMap<>();
     searchFilter.put(JsonKey.ROOT_ORG_ID, rootOrgId);
 
     // for each role in the organisation, fetch list of other users to pass it as part of event
-    List<String> queryFields = new ArrayList<>();
+    ArrayList<String> queryFields = new ArrayList<>();
     queryFields.add(JsonKey.USER_ID);
     searchQueryMap.put(JsonKey.FIELDS, queryFields);
     logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
@@ -116,13 +116,13 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
           SearchDTO searchDto = ElasticSearchHelper.createSearchDTO(searchQueryMap);
           Map<String, Object> result =
               userService.searchUser(searchDto, request.getRequestContext());
-          List<Map<String, Object>> userMapList =
-              (List<Map<String, Object>>) result.get(JsonKey.CONTENT);
+          ArrayList<Map<String, Object>> userMapList =
+              (ArrayList<Map<String, Object>>) result.get(JsonKey.CONTENT);
 
           if (!userMapList.isEmpty()) {
             Map<String, Object> roleUsersMap = new HashMap<>();
             roleUsersMap.put(JsonKey.ROLE, role);
-            List<String> roleUsersList = new ArrayList<>();
+            ArrayList<String> roleUsersList = new ArrayList<>();
             for (Map<String, Object> userMap : userMapList) {
               roleUsersList.add((String) userMap.get(JsonKey.USER_ID));
             }
