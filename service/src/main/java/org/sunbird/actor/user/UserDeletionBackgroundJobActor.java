@@ -32,6 +32,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
     User user = userService.getUserById(userId, request.getRequestContext());
     String rootOrgId = user.getRootOrgId();
+    String userName = user.getUserName();
 
     List<Map<String, Object>> suggestedUsersList = new ArrayList<>();
     Map<String, Object> searchQueryMap = new HashMap<>();
@@ -110,6 +111,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     Map<String, Object> eData = new HashMap<>();
     eData.put(JsonKey.ORGANISATION_ID, rootOrgId);
     eData.put(JsonKey.USER_ID, userId);
+    eData.put(JsonKey.USERNAME, userName);
     eData.put(JsonKey.SUGGESTED_USERS, suggestedUsersList);
     eData.put(JsonKey.MANAGED_USERS, managedUsersList);
     eData.put(JsonKey.ACTION, JsonKey.DELETE_USER_ACTON);
