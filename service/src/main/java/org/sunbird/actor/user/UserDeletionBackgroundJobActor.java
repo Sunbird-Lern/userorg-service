@@ -14,6 +14,7 @@ import org.sunbird.request.Request;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.user.UserUtil;
 
 public class UserDeletionBackgroundJobActor extends BaseActor {
 
@@ -32,7 +33,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
     User user = userService.getUserById(userId, request.getRequestContext());
     String rootOrgId = user.getRootOrgId();
-    String userName = user.getUserName();
+    String userName = UserUtil.getDecryptedData(user.getUserName(), request.getRequestContext());
 
     List<Map<String, Object>> suggestedUsersList = new ArrayList<>();
     Map<String, Object> searchQueryMap = new HashMap<>();
