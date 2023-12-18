@@ -33,6 +33,7 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     logger.info("UserDeletionBackgroundJobActor::inputKafkaTopic:: roles size:: " + roles.size());
     User user = userService.getUserById(userId, request.getRequestContext());
     String rootOrgId = user.getRootOrgId();
+
     String userName = UserUtil.getDecryptedData(user.getUserName(), request.getRequestContext());
 
     List<Map<String, Object>> suggestedUsersList = new ArrayList<>();
