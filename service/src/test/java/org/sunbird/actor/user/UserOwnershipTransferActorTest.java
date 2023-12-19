@@ -75,7 +75,7 @@ public class UserOwnershipTransferActorTest {
             Request request = createTestRequest();
             request.setRequestContext(new RequestContext());
             userOwnershipTransferActor.tell(request, getRef());
-            Object msg = expectMsgAnyClassOf(duration("30 second"), Response.class, ProjectCommonException.class);
+            Object msg = expectMsgAnyClassOf(duration("10 second"), Response.class, ProjectCommonException.class);
             if (msg instanceof Response) {
                 Response res = (Response) msg;
                 assertSame(res.getResponseCode(), ResponseCode.OK);
