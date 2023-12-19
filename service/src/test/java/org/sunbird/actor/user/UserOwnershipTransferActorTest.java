@@ -105,9 +105,9 @@ public class UserOwnershipTransferActorTest {
 
         Response response2 = new Response();
         Map<String, Object> user = new HashMap<>();
-        user.put(JsonKey.ID, "46545665465465");
+        user.put(JsonKey.ID, "c9e6006e-5811-4337-aa7c-48d0f535e3b8");
         user.put(JsonKey.IS_DELETED, false);
-        user.put(JsonKey.FIRST_NAME, "firstName");
+        user.put(JsonKey.FIRST_NAME, "Testuser");
         user.put(JsonKey.STATUS, 1);
         List<Map<String, Object>> userList = new ArrayList<>();
         userList.add(user);
