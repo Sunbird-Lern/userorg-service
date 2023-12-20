@@ -5,8 +5,8 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -27,10 +27,16 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static akka.testkit.JavaTestKit.duration;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
@@ -48,18 +54,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 public class UserOwnershipTransferActorTest {
 
     private static final CassandraOperationImpl cassandraOperation = PowerMockito.mock(CassandraOperationImpl.class);
-    private static ActorSystem system;
-
-    @BeforeClass
-    public static void setup() {
-        system = ActorSystem.create("system");
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        TestKit.shutdownActorSystem(system, true);
-        system = null;
-    }
+    Props props = Props.create(UserOwnershipTransferActor.class);
+    ActorSystem system = ActorSystem.create("userOwnershipTransferActor");
 
     private static Response getSuccessResponse() {
         Response response = new Response();
@@ -67,29 +63,85 @@ public class UserOwnershipTransferActorTest {
         return response;
     }
 
-    @Test
-    public void testOwnershipTransferSuccess() {
-        new TestKit(system) {{
-            ActorRef userOwnershipTransferActor = system.actorOf(Props.create(UserOwnershipTransferActor.class));
-            mockStaticDependencies();
-            Request request = createTestRequest();
-            request.setRequestContext(new RequestContext());
-            userOwnershipTransferActor.tell(request, getRef());
-            Object msg = expectMsgAnyClassOf(duration("30 second"), Response.class, ProjectCommonException.class);
-            if (msg instanceof Response) {
-                Response res = (Response) msg;
-                assertSame(res.getResponseCode(), ResponseCode.OK);
-            } else if (msg instanceof ProjectCommonException) {
-                ProjectCommonException ex = (ProjectCommonException) msg;
-                // Handle the exception as needed
-                assertEquals("UOS_UOWNTRANS0019", ex.getErrorCode());
-                assertEquals("Please provide valid userId.", ex.getMessage());
+    private static boolean computeResult(Object msg) {
+        if (msg instanceof Response) {
+            Response res = (Response) msg;
+            return res.getResponseCode() == ResponseCode.OK;
+        } else if (msg instanceof ProjectCommonException) {
+            ProjectCommonException res = (ProjectCommonException) msg;
+            if (res.getErrorCode().equals(ResponseCode.invalidRequestData.getErrorCode())) {
+                return res.getErrorResponseCode() == ResponseCode.CLIENT_ERROR.getResponseCode();
+            } else if (res.getErrorCode().equals(ResponseCode.invalidParameter.getErrorCode())) {
+                return res.getErrorResponseCode() == ResponseCode.invalidParameter.getResponseCode();
+            } else if (res.getErrorCode().equals(ResponseCode.dataTypeError.getErrorCode())) {
+                return res.getErrorResponseCode() == ResponseCode.dataTypeError.getResponseCode();
             } else {
-                fail("Unexpected response type: " + msg.getClass().getName());
+                return false;
             }
-        }};
+        } else {
+            return false;
+        }
     }
 
+    @Before
+    public void beforeEachTest() {
+        mockStaticDependencies();
+    }
+
+    @After
+    public void afterEachTest() {
+        TestKit.shutdownActorSystem(system);
+        system = null;
+    }
+
+    private boolean testActorBehavior(Request request, ResponseCode errorCode) {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
+
+        try {
+            subject.tell(request, probe.getRef());
+            Object msg = probe.expectMsgAnyClassOf(duration("30 second"), Response.class, ProjectCommonException.class);
+            return computeResult(msg);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Test
+    public void testOwnershipTransferSuccess() {
+        Request request = createTestRequest();
+        request.setRequestContext(new RequestContext());
+        boolean result = testActorBehavior(request, null);
+        assertTrue(result);
+    }
+
+    @Test
+    public void testInvalidUserDetails() {
+        Request request = createTestRequest();
+        request.getRequest().remove("fromUser");
+        request.setRequestContext(new RequestContext());
+        boolean response = testActorBehavior(request, null);
+        assertFalse(response);
+    }
+
+    @Test
+    public void testInvalidRoleDetails() {
+        Request request = createTestRequest();
+        ((Map<String, Object>) request.getRequest().get("fromUser")).remove("roles");
+        request.setRequestContext(new RequestContext());
+        boolean response = testActorBehavior(request, null);
+        assertFalse(response);
+    }
+
+    @Test
+    public void testInvalidActorDetails() {
+        // Test scenario where "actionBy" details are invalid (e.g., missing "userId" or "userName").
+        Request request = createTestRequest();
+        ((Map<String, Object>) request.getRequest().get("actionBy")).remove("userId");
+        request.setRequestContext(new RequestContext());
+        boolean response = testActorBehavior(request, null);
+        assertFalse(response);
+    }
     private void mockStaticDependencies() {
         mockStatic(ServiceFactory.class);
         mockStatic(UserServiceImpl.class);

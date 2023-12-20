@@ -42,9 +42,17 @@ public class UserOwnershipTransferActor extends BaseActor {
     }
 
     private void validateUserDetails(Map<String, Object> data, RequestContext requestContext) {
-        validateUser(data.get("actionBy"), "actionBy", requestContext);
-        validateUser(data.get("fromUser"), "fromUser", requestContext);
-        validateUser(data.get("toUser"), "toUser", requestContext);
+        validateAndProceed(data, "actionBy", requestContext);
+        validateAndProceed(data, "fromUser", requestContext);
+        validateAndProceed(data, "toUser", requestContext);
+    }
+
+    private void validateAndProceed(Map<String, Object> data, String key, RequestContext requestContext) {
+        if (data.containsKey(key)) {
+            validateUser(data.get(key), key, requestContext);
+        } else {
+            throwInvalidRequestDataException(key + " key is not present in the data.");
+        }
     }
 
     private void validateUser(Object userNode, String userLabel, RequestContext requestContext) {
@@ -55,7 +63,7 @@ public class UserOwnershipTransferActor extends BaseActor {
 
             if (StringUtils.isBlank(StringUtils.trimToNull(userId)) ||
                     StringUtils.isBlank(StringUtils.trimToNull(userName))) {
-                throwInvalidRequestDataException(userLabel);
+                throwInvalidRequestDataException("User id / user name key is not present in the " + userLabel);
             }
 
             if (validUser(userId, requestContext)) {
@@ -67,6 +75,9 @@ public class UserOwnershipTransferActor extends BaseActor {
     }
 
     private void validateRoles(Map<String, Object> user, String userLabel) {
+        if (!userLabel.equals("actionBy") && !user.containsKey(JsonKey.ROLES)) {
+            throwInvalidRequestDataException("Roles key is not present for " + userLabel);
+        }
         if (user.containsKey(JsonKey.ROLES)) {
             Object roles = user.get(JsonKey.ROLES);
             if (roles instanceof List) {
