@@ -208,7 +208,7 @@ public class UserOwnershipTransferActorTest {
         List<Map<String, Object>> objects = new ArrayList<>();
         Map<String, Object> object1 = new HashMap<>();
         object1.put("objectType", "Content");
-        object1.put("identifier", "do_id1");
+        object1.put("identifier", "do_id12");
         object1.put("primaryCategory", "ExplanationContent");
         object1.put("name", "TestContent");
         objects.add(object1);
