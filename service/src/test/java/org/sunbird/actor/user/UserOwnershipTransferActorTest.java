@@ -88,12 +88,6 @@ public class UserOwnershipTransferActorTest {
         mockStaticDependencies();
     }
 
-    @After
-    public void afterEachTest() {
-        TestKit.shutdownActorSystem(system);
-        system = null;
-    }
-
     private boolean testActorBehavior(Request request, ResponseCode errorCode) {
         TestKit probe = new TestKit(system);
         ActorRef subject = system.actorOf(props);
