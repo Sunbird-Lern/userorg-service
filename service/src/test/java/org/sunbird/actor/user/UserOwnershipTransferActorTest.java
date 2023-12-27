@@ -88,6 +88,12 @@ public class UserOwnershipTransferActorTest {
         mockStaticDependencies();
     }
 
+    @After
+    public void afterEachTest() {
+        TestKit.shutdownActorSystem(system);
+        system = null;
+    }
+
     private boolean testActorBehavior(Request request, ResponseCode errorCode) {
         TestKit probe = new TestKit(system);
         ActorRef subject = system.actorOf(props);
@@ -193,7 +199,7 @@ public class UserOwnershipTransferActorTest {
     private Map<String, Object> getUserDetailsMap() {
         Map<String, Object> userDetails = new HashMap<>();
         userDetails.put("userId", "c9e6006e-5811-4337-aa7c-48d0f535e3b8");
-        userDetails.put("userName", "TestUser");
+        userDetails.put("userName", "Testuser");
         userDetails.put("roles", List.of("ORG_ADMIN"));
         return userDetails;
     }
