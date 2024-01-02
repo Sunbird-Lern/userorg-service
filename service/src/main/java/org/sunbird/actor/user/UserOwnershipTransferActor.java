@@ -35,7 +35,7 @@ public class UserOwnershipTransferActor extends BaseActor {
     private void handleOwnershipTransfer(Request request) {
         validateUserDetails(request.getRequest(), request.getRequestContext());
         String userId = (String) ((Map<String, Object>) request.getRequest().get("actionBy")).get("userId");
-        validateUserRole(userId, request);
+        validateActionByUserRole(userId, request);
         List<Map<String, Object>> objects = getObjectsFromRequest(request);
         objects.forEach(object -> sendInstructionEvent(request, object));
         sendResponse("Ownership transfer process is submitted successfully!");
@@ -125,7 +125,7 @@ public class UserOwnershipTransferActor extends BaseActor {
         }
     }
 
-    private void validateUserRole(String userId, Request request) {
+    private void validateActionByUserRole(String userId, Request request) {
         List<Map<String, Object>> userRoles = userRoleService.getUserRoles(userId, request.getRequestContext());
         boolean hasOrgAdminRole = userRoles.stream().anyMatch(role -> JsonKey.ORG_ADMIN.equals(role.get("role")));
         if (!hasOrgAdminRole) {
@@ -153,7 +153,7 @@ public class UserOwnershipTransferActor extends BaseActor {
     private Map<String, Object> prepareEventData(Request request, Map<String, Object> object) {
         Map<String, Object> actor = Map.of("id", "ownership-transfer", "type", "System");
         Map<String, Object> context = Map.of(
-                "channel", "01309282781705830427",
+                "channel", getActionByUserChannel(request),
                 "pdata", Map.of("id", "org.sunbird.platform", "ver", "1.0"),
                 "env", request.getEnv()
         );
@@ -183,6 +183,13 @@ public class UserOwnershipTransferActor extends BaseActor {
         result.put("edata", edata);
 
         return result;
+    }
+
+    private String getActionByUserChannel(Request request) {
+        Map<String, Object> actionByUserDetails = userService.getUserDetailsById((String)
+                ((Map<String, Object>) request.getRequest().get("actionBy")).get("userId"),
+                request.getRequestContext());
+        return String.valueOf(actionByUserDetails.get("channel"));
     }
 
     private void sendResponse(String statusMessage) {
