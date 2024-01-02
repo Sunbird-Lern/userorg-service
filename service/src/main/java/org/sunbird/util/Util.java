@@ -146,7 +146,6 @@ public final class Util {
     Map<String, Object> user = new HashMap<>();
     user.put("avatar", null);
     user.put("gender", null);
-    user.put("grade", null);
     user.put("language", null);
     user.put("lastLoginTime", null);
     user.put("location", null);
@@ -156,7 +155,6 @@ public final class Util {
     user.put("thumbnail", null);
     user.put("registryId", null);
     user.put("accesscode", null);
-    user.put("subject", null);
     user.put("webPages", null);
     user.put("currentLoginTime", null);
     user.put("password", null);
