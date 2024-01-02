@@ -155,7 +155,7 @@ public class UserOwnershipTransferActor extends BaseActor {
         Map<String, Object> context = Map.of(
                 "channel", "01309282781705830427",
                 "pdata", Map.of("id", "org.sunbird.platform", "ver", "1.0"),
-                "env", "dev"
+                "env", request.getEnv()
         );
         Map<String, Object> edataBase = Map.of(
                 "action", "ownership-transfer",

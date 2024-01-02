@@ -13,6 +13,7 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.validator.BaseRequestValidator;
+import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
 import util.Attrs;
@@ -476,6 +477,9 @@ public class UserController extends BaseController {
         httpRequest);
   }
     public CompletionStage<Result> ownershipTransferUser(Http.Request httpRequest) {
+        TypedKey<Integer> environmentKey = TypedKey.create();
+        int environment = getEnvironment();
+        httpRequest = httpRequest.addAttr(environmentKey, environment);
         return handleRequest(userOwnershipTransferActor,
                 ActorOperations.USER_OWNERSHIP_TRANSFER.getValue(),
                 httpRequest.body().asJson(), httpRequest);
