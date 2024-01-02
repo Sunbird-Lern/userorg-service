@@ -85,8 +85,14 @@ public class UserOwnershipTransferActorTest {
         ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         request.setRequestContext(new RequestContext());
-        subject.tell(request, probe.getRef());
-        Response response = probe.expectMsgClass(Duration.ofSeconds(120), Response.class);
+        probe.send(subject, request);
+        Response response = probe.expectMsgPF(Duration.ofSeconds(30), "Expected response", msg -> {
+            if (msg instanceof Response) {
+                return (Response) msg;
+            } else {
+                throw new AssertionError("Unexpected message received: " + msg);
+            }
+        });
         Map<String, Object> result = response.getResult();
         assertNotNull(result);
         assertEquals("Ownership transfer process is submitted successfully!", result.get("status"));
