@@ -5,7 +5,10 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -24,16 +27,14 @@ import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
-import scala.concurrent.duration.FiniteDuration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -53,10 +54,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 public class UserOwnershipTransferActorTest {
 
     private static final CassandraOperationImpl cassandraOperation = PowerMockito.mock(CassandraOperationImpl.class);
-    Props props = Props.create(UserOwnershipTransferActor.class);
-    private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("30 second");
     private static ActorSystem system;
-
+    Props props = Props.create(UserOwnershipTransferActor.class);
 
     private static Response getSuccessResponse() {
         Response response = new Response();
@@ -64,34 +63,9 @@ public class UserOwnershipTransferActorTest {
         return response;
     }
 
-    private static boolean computeResult(Object msg) {
-        if (msg instanceof Response) {
-            Response res = (Response) msg;
-            return res.getResponseCode() == ResponseCode.OK;
-        } else if (msg instanceof ProjectCommonException) {
-            ProjectCommonException res = (ProjectCommonException) msg;
-            if (res.getErrorCode().equals(ResponseCode.invalidRequestData.getErrorCode())) {
-                return res.getErrorResponseCode() == ResponseCode.CLIENT_ERROR.getResponseCode();
-            } else if (res.getErrorCode().equals(ResponseCode.invalidParameter.getErrorCode())) {
-                return res.getErrorResponseCode() == ResponseCode.invalidParameter.getResponseCode();
-            } else if (res.getErrorCode().equals(ResponseCode.dataTypeError.getErrorCode())) {
-                return res.getErrorResponseCode() == ResponseCode.dataTypeError.getResponseCode();
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
     @BeforeClass
     public static void setup() {
         system = ActorSystem.create("system");
-    }
-
-    @Before
-    public void beforeEachTest() {
-        mockStaticDependencies();
     }
 
     @AfterClass
@@ -99,54 +73,68 @@ public class UserOwnershipTransferActorTest {
         TestKit.shutdownActorSystem(system, true);
     }
 
-    private boolean testActorBehavior(Request request, ResponseCode errorCode) {
-        TestKit probe = new TestKit(system);
-        ActorRef subject = system.actorOf(props);
-
-        try {
-            subject.tell(request, probe.getRef());
-            Object msg = probe.expectMsgAnyClassOf(ACTOR_MAX_WAIT_DURATION, Response.class, ProjectCommonException.class);
-            return computeResult(msg);
-        } catch (Exception e) {
-            return false;
-        }
+    @Before
+    public void beforeEachTest() {
+        mockStaticDependencies();
     }
 
     @Test
     public void testOwnershipTransferSuccess() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         request.setRequestContext(new RequestContext());
-        boolean result = testActorBehavior(request, null);
-        assertTrue(result);
+        subject.tell(request, probe.getRef());
+        Response response = probe.expectMsgClass(Response.class);
+        Map<String, Object> result = response.getResult();
+        assertNotNull(result);
+        assertEquals("Ownership transfer process is submitted successfully!", result.get("status"));
     }
 
     @Test
     public void testInvalidUserDetails() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         request.getRequest().remove("fromUser");
         request.setRequestContext(new RequestContext());
-        boolean response = testActorBehavior(request, null);
-        assertFalse(response);
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("fromUser key is not present in the data.", errorResponse.getMessage());
+        assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
 
     @Test
     public void testInvalidRoleDetails() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         ((Map<String, Object>) request.getRequest().get("fromUser")).remove("roles");
         request.setRequestContext(new RequestContext());
-        boolean response = testActorBehavior(request, null);
-        assertFalse(response);
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("Roles key is not present for fromUser", errorResponse.getMessage());
+        assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
 
     @Test
     public void testInvalidActorDetails() {
         // Test scenario where "actionBy" details are invalid (e.g., missing "userId" or "userName").
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         ((Map<String, Object>) request.getRequest().get("actionBy")).remove("userId");
         request.setRequestContext(new RequestContext());
-        boolean response = testActorBehavior(request, null);
-        assertFalse(response);
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("User id / user name key is not present in the actionBy",
+                errorResponse.getMessage());
+        assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
+
     private void mockStaticDependencies() {
         mockStatic(ServiceFactory.class);
         mockStatic(UserServiceImpl.class);
