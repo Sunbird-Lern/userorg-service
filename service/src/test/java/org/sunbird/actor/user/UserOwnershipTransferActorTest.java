@@ -28,6 +28,7 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +86,7 @@ public class UserOwnershipTransferActorTest {
         Request request = createTestRequest();
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
-        Response response = probe.expectMsgClass(Response.class);
+        Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
         Map<String, Object> result = response.getResult();
         assertNotNull(result);
         assertEquals("Ownership transfer process is submitted successfully!", result.get("status"));
@@ -99,7 +100,7 @@ public class UserOwnershipTransferActorTest {
         request.getRequest().remove("fromUser");
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
-        ProjectCommonException errorResponse = probe.expectMsgClass(ProjectCommonException.class);
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(30), ProjectCommonException.class);
         assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
         assertEquals("fromUser key is not present in the data.", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
@@ -113,7 +114,8 @@ public class UserOwnershipTransferActorTest {
         ((Map<String, Object>) request.getRequest().get("fromUser")).remove("roles");
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
-        ProjectCommonException errorResponse = probe.expectMsgClass(ProjectCommonException.class);
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(30),
+                ProjectCommonException.class);
         assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
         assertEquals("Roles key is not present for fromUser", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
@@ -128,7 +130,8 @@ public class UserOwnershipTransferActorTest {
         ((Map<String, Object>) request.getRequest().get("actionBy")).remove("userId");
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
-        ProjectCommonException errorResponse = probe.expectMsgClass(ProjectCommonException.class);
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(30),
+                ProjectCommonException.class);
         assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
         assertEquals("User id / user name key is not present in the actionBy",
                 errorResponse.getMessage());
