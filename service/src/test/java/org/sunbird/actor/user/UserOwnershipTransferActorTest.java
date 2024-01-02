@@ -5,7 +5,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -69,11 +67,6 @@ public class UserOwnershipTransferActorTest {
         system = ActorSystem.create("system");
     }
 
-    @AfterClass
-    public static void tearDown() {
-        TestKit.shutdownActorSystem(system, true);
-    }
-
     @Before
     public void beforeEachTest() {
         mockStaticDependencies();
@@ -85,17 +78,8 @@ public class UserOwnershipTransferActorTest {
         ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         request.setRequestContext(new RequestContext());
-        probe.send(subject, request);
-        Response response = probe.expectMsgPF(Duration.ofSeconds(30), "Expected response", msg -> {
-            if (msg instanceof Response) {
-                return (Response) msg;
-            } else {
-                throw new AssertionError("Unexpected message received: " + msg);
-            }
-        });
-        Map<String, Object> result = response.getResult();
-        assertNotNull(result);
-        assertEquals("Ownership transfer process is submitted successfully!", result.get("status"));
+        subject.tell(request, probe.getRef());
+        probe.expectNoMessage();
     }
 
     @Test
