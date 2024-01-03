@@ -477,9 +477,6 @@ public class UserController extends BaseController {
         httpRequest);
   }
     public CompletionStage<Result> ownershipTransferUser(Http.Request httpRequest) {
-        TypedKey<Integer> environmentKey = TypedKey.create();
-        int environment = getEnvironment();
-        httpRequest = httpRequest.addAttr(environmentKey, environment);
         return handleRequest(userOwnershipTransferActor,
                 ActorOperations.USER_OWNERSHIP_TRANSFER.getValue(),
                 httpRequest.body().asJson(), httpRequest);

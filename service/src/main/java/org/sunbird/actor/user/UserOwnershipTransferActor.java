@@ -23,7 +23,6 @@ import static org.sunbird.validator.orgvalidator.BaseOrgRequestValidator.ERROR_C
 
 public class UserOwnershipTransferActor extends BaseActor {
 
-    private static final String USER_TRANSFER_TOPIC = "user_transfer_topic";
     private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     private final UserService userService = UserServiceImpl.getInstance();
 
@@ -34,7 +33,8 @@ public class UserOwnershipTransferActor extends BaseActor {
 
     private void handleOwnershipTransfer(Request request) {
         validateUserDetails(request.getRequest(), request.getRequestContext());
-        String userId = (String) ((Map<String, Object>) request.getRequest().get("actionBy")).get("userId");
+        String userId = (String) ((Map<String, Object>) request.getRequest().get(JsonKey.ACTION_BY))
+                .get(JsonKey.USER_ID);
         validateActionByUserRole(userId, request);
         List<Map<String, Object>> objects = getObjectsFromRequest(request);
         objects.forEach(object -> sendInstructionEvent(request, object));
@@ -42,9 +42,9 @@ public class UserOwnershipTransferActor extends BaseActor {
     }
 
     private void validateUserDetails(Map<String, Object> data, RequestContext requestContext) {
-        validateAndProceed(data, "actionBy", requestContext);
-        validateAndProceed(data, "fromUser", requestContext);
-        validateAndProceed(data, "toUser", requestContext);
+        validateAndProceed(data, JsonKey.ACTION_BY, requestContext);
+        validateAndProceed(data, JsonKey.FROM_USER, requestContext);
+        validateAndProceed(data, JsonKey.TO_USER, requestContext);
     }
 
     private void validateAndProceed(Map<String, Object> data, String key, RequestContext requestContext) {
@@ -58,8 +58,8 @@ public class UserOwnershipTransferActor extends BaseActor {
     private void validateUser(Object userNode, String userLabel, RequestContext requestContext) {
         if (userNode instanceof Map) {
             Map<String, Object> user = (Map<String, Object>) userNode;
-            String userId = StringUtils.trimToNull(Objects.toString(user.get("userId"), ""));
-            String userName = StringUtils.trimToNull(Objects.toString(user.get("userName"), ""));
+            String userId = StringUtils.trimToNull(Objects.toString(user.get(JsonKey.USER_ID), ""));
+            String userName = StringUtils.trimToNull(Objects.toString(user.get(JsonKey.USERNAME), ""));
 
             if (StringUtils.isBlank(StringUtils.trimToNull(userId)) ||
                     StringUtils.isBlank(StringUtils.trimToNull(userName))) {
@@ -75,7 +75,7 @@ public class UserOwnershipTransferActor extends BaseActor {
     }
 
     private void validateRoles(Map<String, Object> user, String userLabel) {
-        if (!userLabel.equals("actionBy") && !user.containsKey(JsonKey.ROLES)) {
+        if (!userLabel.equals(JsonKey.ACTION_BY) && !user.containsKey(JsonKey.ROLES)) {
             throwInvalidRequestDataException("Roles key is not present for " + userLabel);
         }
         if (user.containsKey(JsonKey.ROLES)) {
@@ -127,7 +127,7 @@ public class UserOwnershipTransferActor extends BaseActor {
 
     private void validateActionByUserRole(String userId, Request request) {
         List<Map<String, Object>> userRoles = userRoleService.getUserRoles(userId, request.getRequestContext());
-        boolean hasOrgAdminRole = userRoles.stream().anyMatch(role -> JsonKey.ORG_ADMIN.equals(role.get("role")));
+        boolean hasOrgAdminRole = userRoles.stream().anyMatch(role -> JsonKey.ORG_ADMIN.equals(role.get(JsonKey.ROLE)));
         if (!hasOrgAdminRole) {
             throw new ProjectCommonException(
                     ResponseCode.cannotTransferOwnership,
@@ -144,7 +144,7 @@ public class UserOwnershipTransferActor extends BaseActor {
     private void sendInstructionEvent(Request request, Map<String, Object> object) {
         Map<String, Object> data = prepareEventData(request, object);
         try {
-            InstructionEventGenerator.pushInstructionEvent(USER_TRANSFER_TOPIC, data);
+            InstructionEventGenerator.pushInstructionEvent(JsonKey.USER_TRANSFER_TOPIC, data);
         } catch (Exception e) {
             logger.error("Error pushing to instruction event", e);
         }
@@ -152,44 +152,26 @@ public class UserOwnershipTransferActor extends BaseActor {
 
     private Map<String, Object> prepareEventData(Request request, Map<String, Object> object) {
         Map<String, Object> actor = Map.of("id", "ownership-transfer", "type", "System");
-        Map<String, Object> context = Map.of(
-                "channel", getActionByUserChannel(request),
-                "pdata", Map.of("id", "org.sunbird.platform", "ver", "1.0"),
-                "env", request.getEnv()
-        );
         Map<String, Object> edataBase = Map.of(
-                "action", "ownership-transfer",
-                "organisationId", request.getRequest().get("organisationId"),
-                "context", request.getRequest().get("context"),
-                "actionBy", request.getRequest().get("actionBy"),
-                "fromUserProfile", request.getRequest().get("fromUser"),
-                "toUserProfile", request.getRequest().get("toUser")
+                JsonKey.ACTION, JsonKey.USER_OWNERSHIP_TRANSFER_ACTION,
+                JsonKey.ORGANISATION_ID, request.getRequest().get(JsonKey.ORGANISATION_ID),
+                JsonKey.CONTEXT, request.getRequest().get(JsonKey.CONTEXT),
+                JsonKey.ACTION_BY, request.getRequest().get(JsonKey.ACTION_BY),
+                JsonKey.FROM_USER_PROFILE, request.getRequest().get(JsonKey.FROM_USER),
+                JsonKey.TO_USER_PROFILE, request.getRequest().get(JsonKey.TO_USER)
         );
         Map<String, Object> edata = new HashMap<>(edataBase);
         Map<String, Object> assetInformation = new HashMap<>(object);
-        edata.put("assetInformation", assetInformation);
+        edata.put(JsonKey.ASSET_INFORMATION, assetInformation);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("eid", JsonKey.BE_JOB_REQUEST);
-        result.put("ets", System.currentTimeMillis());
-        result.put("mid", "LP." + System.currentTimeMillis() + "." + UUID.randomUUID());
+        Map<String, Object> fromUserDetails = (Map<String, Object>) request.getRequest().get(JsonKey.FROM_USER);
+        Map<String, Object> objectDetails = Map.of(JsonKey.ID, fromUserDetails.get(JsonKey.USER_ID), JsonKey.TYPE,
+                JsonKey.USER);
         result.put("actor", actor);
-        result.put("context", context);
-
-        // Use 'fromUser' details for 'object'
-        Map<String, Object> fromUserDetails = (Map<String, Object>) request.getRequest().get("fromUser");
-        Map<String, Object> objectDetails = Map.of("id", fromUserDetails.get("userId"), "type", JsonKey.USER);
-        result.put("object", objectDetails);
-        result.put("edata", edata);
-
+        result.put(JsonKey.OBJECT, objectDetails);
+        result.put(JsonKey.EDATA, edata);
         return result;
-    }
-
-    private String getActionByUserChannel(Request request) {
-        Map<String, Object> actionByUserDetails = userService.getUserDetailsById((String)
-                ((Map<String, Object>) request.getRequest().get("actionBy")).get("userId"),
-                request.getRequestContext());
-        return String.valueOf(actionByUserDetails.get("channel"));
     }
 
     private void sendResponse(String statusMessage) {
@@ -202,7 +184,7 @@ public class UserOwnershipTransferActor extends BaseActor {
         params.setStatus(String.valueOf(ResponseParams.StatusType.SUCCESSFUL));
         response.setParams(params);
         response.setResponseCode(ResponseCode.OK);
-        Map<String, Object> result = Map.of("status", statusMessage);
+        Map<String, Object> result = Map.of(JsonKey.STATUS, statusMessage);
         response.putAll(result);
         sender().tell(response, self());
     }
