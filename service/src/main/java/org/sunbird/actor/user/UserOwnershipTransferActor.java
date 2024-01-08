@@ -18,6 +18,7 @@ import org.sunbird.util.ProjectUtil;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static org.sunbird.validator.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
 
@@ -37,8 +38,13 @@ public class UserOwnershipTransferActor extends BaseActor {
                 .get(JsonKey.USER_ID);
         validateActionByUserRole(userId, request);
         List<Map<String, Object>> objects = getObjectsFromRequest(request);
-        objects.forEach(object -> sendInstructionEvent(request, object));
-        sendResponse("Ownership transfer process is submitted successfully!");
+        if (!objects.isEmpty()) {
+            objects.forEach(object -> sendInstructionEvent(request, object));
+        } else {
+            sendInstructionEvent(request, Collections.emptyMap());
+        }
+        Response response = sendResponse("Ownership transfer process is submitted successfully!");
+        sender().tell(response, self());
     }
 
     private void validateUserDetails(Map<String, Object> data, RequestContext requestContext) {
@@ -143,11 +149,13 @@ public class UserOwnershipTransferActor extends BaseActor {
 
     private void sendInstructionEvent(Request request, Map<String, Object> object) {
         Map<String, Object> data = prepareEventData(request, object);
-        try {
-            InstructionEventGenerator.pushInstructionEvent(JsonKey.USER_TRANSFER_TOPIC, data);
-        } catch (Exception e) {
-            logger.error("Error pushing to instruction event", e);
-        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                InstructionEventGenerator.pushInstructionEvent(JsonKey.USER_TRANSFER_TOPIC, data);
+            } catch (Exception e) {
+                logger.error("Error pushing to instruction event", e);
+            }
+        });
     }
 
     private Map<String, Object> prepareEventData(Request request, Map<String, Object> object) {
@@ -174,7 +182,7 @@ public class UserOwnershipTransferActor extends BaseActor {
         return result;
     }
 
-    private void sendResponse(String statusMessage) {
+    Response sendResponse(String statusMessage) {
         Response response = new Response();
         response.setId("api.user.ownership.transfer");
         response.setVer("1.0");
@@ -186,6 +194,6 @@ public class UserOwnershipTransferActor extends BaseActor {
         response.setResponseCode(ResponseCode.OK);
         Map<String, Object> result = Map.of(JsonKey.STATUS, statusMessage);
         response.putAll(result);
-        sender().tell(response, self());
+        return response;
     }
 }

@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -78,8 +79,26 @@ public class UserOwnershipTransferActorTest {
         ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
         request.setRequestContext(new RequestContext());
+        String statusMessage = "Ownership transfer process is submitted successfully!";
         subject.tell(request, probe.getRef());
-        probe.expectNoMessage();
+        Response response = probe.expectMsgClass(Duration.ofSeconds(120), Response.class);
+        assertEquals(statusMessage, response.getResult().get(JsonKey.STATUS));
+    }
+
+    @Test
+    public void testSendResponse() {
+        new TestKit(system) {
+            {
+                Props props = Props.create(UserOwnershipTransferActor.class);
+                TestActorRef<UserOwnershipTransferActor> ref = TestActorRef.create(system, props);
+                UserOwnershipTransferActor actor = ref.underlyingActor();
+                String statusMessage = "Ownership transfer process is submitted successfully!";
+                Response response = actor.sendResponse(statusMessage);
+                assertEquals("api.user.ownership.transfer", response.getId());
+                assertEquals("1.0", response.getVer());
+                assertEquals(statusMessage, response.getResult().get(JsonKey.STATUS));
+            }
+        };
     }
 
     @Test
