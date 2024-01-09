@@ -86,6 +86,40 @@ public class UserOwnershipTransferActorTest {
     }
 
     @Test
+    public void testOwnershipTransferWithEmptyObjectsList() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
+        Request request = createTestRequest();
+        request.getRequest().put("objects", new ArrayList<>());
+        request.setRequestContext(new RequestContext());
+        subject.tell(request, probe.getRef());
+        Response response = probe.expectMsgClass(Duration.ofSeconds(120), Response.class);
+        assertEquals("Ownership transfer process is submitted successfully!", response.getResult().get(JsonKey.STATUS));
+    }
+
+    @Test
+    public void testInvalidUser() {
+        // Arrange
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
+        Request request = createTestRequestWithInvalidUser();
+        request.setRequestContext(new RequestContext());
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("User id / user name key is not present in the fromUser", errorResponse.getMessage());
+        assertEquals(400, errorResponse.getErrorResponseCode());
+    }
+
+    private Request createTestRequestWithInvalidUser() {
+        Request request = createTestRequest();
+        Map<String, Object> invalidUserDetails = new HashMap<>();
+        invalidUserDetails.put("userName", "testUserName");
+        request.getRequest().put("fromUser", invalidUserDetails);
+        return request;
+    }
+
+    @Test
     public void testSendResponse() {
         new TestKit(system) {
             {
