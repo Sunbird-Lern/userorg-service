@@ -29,10 +29,7 @@ import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -111,6 +108,7 @@ public class UserOwnershipTransferActorTest {
         assertEquals(400, errorResponse.getErrorResponseCode());
     }
 
+
     private Request createTestRequestWithInvalidUser() {
         Request request = createTestRequest();
         Map<String, Object> invalidUserDetails = new HashMap<>();
@@ -118,6 +116,7 @@ public class UserOwnershipTransferActorTest {
         request.getRequest().put("fromUser", invalidUserDetails);
         return request;
     }
+
 
     @Test
     public void testSendResponse() {
@@ -149,6 +148,7 @@ public class UserOwnershipTransferActorTest {
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
 
+
     @Test
     public void testInvalidRoleDetails() {
         TestKit probe = new TestKit(system);
@@ -163,6 +163,50 @@ public class UserOwnershipTransferActorTest {
         assertEquals("Roles key is not present for fromUser", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
+
+    @Test
+    public void testOwnershipTransferWithInvalidActorRoles() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
+        Request request = createTestRequest();
+        ((Map<String, Object>) request.getRequest().get(JsonKey.ACTION_BY)).put(JsonKey.ROLES, "INVALID_ROLE");
+        request.setRequestContext(new RequestContext());
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0003", errorResponse.getErrorCode());
+        assertEquals("Data type of roles should be List.", errorResponse.getMessage());
+        assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
+    }
+
+    @Test
+    public void testOwnershipTransferWithEmptyRoles() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
+        Request request = createTestRequest();
+        ((Map<String, Object>) request.getRequest().get(JsonKey.FROM_USER)).put(JsonKey.ROLES, Collections.emptyList());
+        request.setRequestContext(new RequestContext());
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("Roles are empty in fromUser details.", errorResponse.getMessage());
+        assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
+    }
+
+    @Test
+    public void testOwnershipTransferWithInvalidUserId() {
+        TestKit probe = new TestKit(system);
+        ActorRef subject = system.actorOf(props);
+        Request request = createTestRequest();
+        ((Map<String, Object>) request.getRequest().get(JsonKey.FROM_USER)).put(JsonKey.USER_ID, "");
+        request.setRequestContext(new RequestContext());
+        subject.tell(request, probe.getRef());
+        ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
+                ProjectCommonException.class);
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("User id / user name key is not present in the fromUser", errorResponse.getMessage());
+        assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
+    }
+
 
     @Test
     public void testInvalidActorDetails() {
