@@ -24,7 +24,9 @@ import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
+import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
+import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
@@ -33,6 +35,7 @@ import java.time.Duration;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -40,7 +43,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
         ServiceFactory.class,
-        UserServiceImpl.class
+        UserServiceImpl.class,
+        UserRoleServiceImpl.class
 })
 @PowerMockIgnore({
         "javax.management.*",
@@ -170,12 +174,12 @@ public class UserOwnershipTransferActorTest {
         TestKit probe = new TestKit(system);
         ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
-        ((Map<String, Object>) request.getRequest().get(JsonKey.ACTION_BY)).put(JsonKey.ROLES, "INVALID_ROLE");
+        ((Map<String, Object>) request.getRequest().get(JsonKey.ACTION_BY)).put(JsonKey.USER_ID, "1234");
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0003", errorResponse.getErrorCode());
-        assertEquals("Data type of roles should be List.", errorResponse.getMessage());
+        assertEquals("UOS_UOWNTRANS0084", errorResponse.getErrorCode());
+        assertEquals("User is restricted from transfering the ownership based on roles!", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
 
@@ -229,8 +233,11 @@ public class UserOwnershipTransferActorTest {
     private void mockStaticDependencies() {
         mockStatic(ServiceFactory.class);
         mockStatic(UserServiceImpl.class);
+        mockStatic(UserRoleServiceImpl.class);
         UserService userServiceMock = mock(UserService.class);
+        UserRoleService userRoleServiceMock = mock(UserRoleService.class);
         when(UserServiceImpl.getInstance()).thenReturn(userServiceMock);
+        when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleServiceMock);
         when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
         Promise<Boolean> booleanPromise = Futures.promise();
         booleanPromise.success(true);
@@ -239,7 +246,7 @@ public class UserOwnershipTransferActorTest {
         when(cassandraOperation.insertRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                 .thenReturn(getSuccessResponse());
         PowerMockito.when(userServiceMock.getUserById(
-                        Mockito.argThat(argument -> "123".equals(argument)), Mockito.any(RequestContext.class)))
+                        Mockito.argThat("123"::equals), Mockito.any(RequestContext.class)))
                 .thenThrow(new ProjectCommonException(
                         ResponseCode.resourceNotFound,
                         MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
@@ -261,14 +268,23 @@ public class UserOwnershipTransferActorTest {
         Map<String, Object> mockRoleData = new HashMap<>();
         mockRoleData.put(JsonKey.ROLE, "ORG_ADMIN");
         mockRoles.add(mockRoleData);
-        mockResponse.getResult().put(JsonKey.RESPONSE, mockRoles);
-        PowerMockito.when(cassandraOperation.getRecordById(
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.anyMap(),
-                        Mockito.any(RequestContext.class)))
-                .thenReturn(mockResponse);
+        PowerMockito.when(userRoleServiceMock.getUserRoles(
+                        Mockito.anyString(), Mockito.any(RequestContext.class)))
+                .thenReturn(mockRoles);
+        PowerMockito.when(userRoleServiceMock.getUserRoles(
+                        eq("1234"), Mockito.any(RequestContext.class)))
+                .thenReturn(getInvalidRoleResponse());
     }
+
+    private List<Map<String, Object>> getInvalidRoleResponse() {
+        Map<String, Object> invalidUserRole = new HashMap<>();
+        invalidUserRole.put(JsonKey.USER_ID, "1234");
+        invalidUserRole.put(JsonKey.ROLE, "INVALID_ROLE");
+        List<Map<String, Object>> userRolesList = new ArrayList<>();
+        userRolesList.add(invalidUserRole);
+        return userRolesList;
+    }
+
 
     private Request createTestRequest() {
         Request request = new Request();
