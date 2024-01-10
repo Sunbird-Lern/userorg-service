@@ -28,6 +28,7 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import scala.concurrent.Promise;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.*;
 
@@ -197,13 +198,13 @@ public class UserOwnershipTransferActorTest {
         TestKit probe = new TestKit(system);
         ActorRef subject = system.actorOf(props);
         Request request = createTestRequest();
-        ((Map<String, Object>) request.getRequest().get(JsonKey.FROM_USER)).put(JsonKey.USER_ID, "");
+        ((Map<String, Object>) request.getRequest().get(JsonKey.FROM_USER)).put(JsonKey.USER_ID, "123");
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
                 ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
-        assertEquals("User id / user name key is not present in the fromUser", errorResponse.getMessage());
+        assertEquals("UOS_UOWNTRANS0019", errorResponse.getErrorCode());
+        assertEquals("Please provide valid userId.", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
 
@@ -237,7 +238,12 @@ public class UserOwnershipTransferActorTest {
                 .thenReturn(getSuccessResponse());
         when(cassandraOperation.insertRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                 .thenReturn(getSuccessResponse());
-
+        PowerMockito.when(userServiceMock.getUserById(
+                        Mockito.argThat(argument -> "123".equals(argument)), Mockito.any(RequestContext.class)))
+                .thenThrow(new ProjectCommonException(
+                        ResponseCode.resourceNotFound,
+                        MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
+                        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode()));
         Response response2 = new Response();
         Map<String, Object> user = new HashMap<>();
         user.put(JsonKey.ID, "c9e6006e-5811-4337-aa7c-48d0f535e3b8");
@@ -250,7 +256,6 @@ public class UserOwnershipTransferActorTest {
         PowerMockito.when(cassandraOperation.getRecordById(
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.any()))
                 .thenReturn(response2);
-
         Response mockResponse = new Response();
         List<Map<String, Object>> mockRoles = new ArrayList<>();
         Map<String, Object> mockRoleData = new HashMap<>();
