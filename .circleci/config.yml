@@ -3,6 +3,8 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:202008-01
+    docker:
+      - image: circleci/openjdk:17-jdk-buster-node-browsers-legacy
     steps:
       - checkout
       - restore_cache:
