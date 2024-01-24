@@ -85,16 +85,17 @@ public class UserOwnershipTransferActor extends BaseActor {
         if (!userLabel.equals(JsonKey.ACTION_BY) && !user.containsKey(JsonKey.ROLES)) {
             throwInvalidRequestDataException("Roles key is not present for " + userLabel);
         }
-
         if (user.containsKey(JsonKey.ROLES)) {
             Object roles = user.get(JsonKey.ROLES);
             if (roles instanceof List) {
-                List<String> filteredRoles = filterRolesByOrganisationId((List<?>) roles,
-                        (String) data.get(JsonKey.ORGANISATION_ID));
-                if (filteredRoles.isEmpty()) {
-                    throwInvalidRequestDataException("No roles match the specified organisationId in " + userLabel);
+                List<?> rolesList = (List<?>) roles;
+                if (rolesList.isEmpty()) {
+                    throwInvalidRequestDataException("Roles are empty in " + userLabel + " details.");
+                } else {
+                    List<String> filteredRoles = filterRolesByOrganisationId((List<?>) roles,
+                            (String) data.get(JsonKey.ORGANISATION_ID));
+                    user.put(JsonKey.ROLES, filteredRoles);
                 }
-                user.put(JsonKey.ROLES, filteredRoles);
             } else {
                 throwDataTypeErrorException();
             }
