@@ -140,6 +140,7 @@ telemetry_pdata_id: learner
 telemetry_pdata_pid: learner-service
 telemetry_queue_threshold_value: 100
 user_index_alias: user_alias
+sunbird_support_email: support@sunbird.org
 
 
 ## Variables that can be deprecated
