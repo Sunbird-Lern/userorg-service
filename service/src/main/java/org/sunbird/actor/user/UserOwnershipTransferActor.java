@@ -55,13 +55,14 @@ public class UserOwnershipTransferActor extends BaseActor {
 
     private void validateAndProceed(Map<String, Object> data, String key, RequestContext requestContext) {
         if (data.containsKey(key)) {
-            validateUser(data.get(key), key, requestContext);
+            validateUser(data.get(key), key, requestContext, data);
         } else {
             throwInvalidRequestDataException(key + " key is not present in the data.");
         }
     }
 
-    private void validateUser(Object userNode, String userLabel, RequestContext requestContext) {
+    private void validateUser(Object userNode, String userLabel, RequestContext requestContext,
+                              Map<String, Object> data) {
         if (userNode instanceof Map) {
             Map<String, Object> user = (Map<String, Object>) userNode;
             String userId = StringUtils.trimToNull(Objects.toString(user.get(JsonKey.USER_ID), ""));
@@ -73,28 +74,51 @@ public class UserOwnershipTransferActor extends BaseActor {
             }
 
             if (validUser(userId, requestContext)) {
-                validateRoles(user, userLabel);
+                validateAndFilterRoles(user, userLabel, data);
             } else {
                 throwClientErrorException();
             }
         }
     }
 
-    private void validateRoles(Map<String, Object> user, String userLabel) {
+    private void validateAndFilterRoles(Map<String, Object> user, String userLabel, Map<String, Object> data) {
         if (!userLabel.equals(JsonKey.ACTION_BY) && !user.containsKey(JsonKey.ROLES)) {
             throwInvalidRequestDataException("Roles key is not present for " + userLabel);
         }
+
         if (user.containsKey(JsonKey.ROLES)) {
             Object roles = user.get(JsonKey.ROLES);
             if (roles instanceof List) {
-                List<?> rolesList = (List<?>) roles;
-                if (rolesList.isEmpty()) {
-                    throwInvalidRequestDataException("Roles are empty in " + userLabel + " details.");
+                List<String> filteredRoles = filterRolesByOrganisationId((List<?>) roles,
+                        (String) data.get(JsonKey.ORGANISATION_ID));
+                if (filteredRoles.isEmpty()) {
+                    throwInvalidRequestDataException("No roles match the specified organisationId in " + userLabel);
                 }
+                user.put(JsonKey.ROLES, filteredRoles);
             } else {
                 throwDataTypeErrorException();
             }
         }
+    }
+
+    private List<String> filterRolesByOrganisationId(List<?> roles, String targetOrganisationId) {
+        List<String> filteredRoles = new ArrayList<>();
+        for (Object role : roles) {
+            if (role instanceof Map) {
+                Map<String, Object> roleMap = (Map<String, Object>) role;
+                List<Map<String, Object>> scopeList = (List<Map<String, Object>>) roleMap.get("scope");
+                if (scopeList != null && !scopeList.isEmpty()) {
+                    for (Map<String, Object> scope : scopeList) {
+                        String organisationId = (String) scope.get("organisationId");
+                        if (targetOrganisationId.equals(organisationId)) {
+                            filteredRoles.add((String) roleMap.get("role"));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return filteredRoles;
     }
 
     private void throwInvalidRequestDataException(String message) {
