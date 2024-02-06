@@ -196,11 +196,12 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   @Test
   public void testUpdatePassword() throws Exception {
     boolean updated = keyCloakService.updatePassword(userId.get(JsonKey.USER_ID), "password", null);
-    Assert.assertNotNull(updated);
+    Assert.assertTrue(updated);
   }
 
   @Test
   public void testRemovePII() {
-    keyCloakService.removePII(userId.get(JsonKey.USER_ID), new RequestContext());
+    boolean piiRemoved = keyCloakService.removePII(userId.get(JsonKey.USER_ID), new RequestContext());
+    Assert.assertTrue(piiRemoved);
   }
 }
