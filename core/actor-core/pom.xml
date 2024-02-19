@@ -44,7 +44,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-remote_2.11</artifactId>
+			<artifactId>akka-remote_${scala.major.version}</artifactId>
 			<version>${typesafe.akka.version}</version>
 		</dependency>
 		<dependency>
@@ -75,7 +75,7 @@
         <dependency>
           <groupId>org.javassist</groupId>
           <artifactId>javassist</artifactId>
-          <version>3.24.1-GA</version>
+          <version>3.30.2-GA</version>
         </dependency>
         <dependency>
           <groupId>javax.annotation</groupId>

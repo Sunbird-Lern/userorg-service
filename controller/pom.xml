@@ -158,6 +158,10 @@
 					<groupId>com.google.code.gson</groupId>
 					<artifactId>gson</artifactId>
 				</exclusion>
+				<exclusion>
+					<artifactId>byte-buddy</artifactId>
+					<groupId>net.bytebuddy</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

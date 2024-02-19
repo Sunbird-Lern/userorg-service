@@ -131,7 +131,7 @@
                 </exclusion>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.module</groupId>
-                    <artifactId>jackson-module-scala_2.11</artifactId>
+                    <artifactId>jackson-module-scala_${scala.major.version}</artifactId>
                 </exclusion>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -199,7 +199,7 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play_2.11</artifactId>
+            <artifactId>play_${scala.major.version}</artifactId>
             <version>${play2.version}</version>
             <scope>compile</scope>
         </dependency>
