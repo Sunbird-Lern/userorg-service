@@ -35,7 +35,6 @@
 	<properties>
 		<play2.version>2.7.2</play2.version>
 		<play2.plugin.version>1.0.0-rc5</play2.plugin.version>
-		<sbt-compiler.plugin.version>1.0.0</sbt-compiler.plugin.version>
 		<scala.major.version>2.12</scala.major.version>
 		<scala.version>2.12.11</scala.version>
 		<typesafe.akka.version>2.5.22</typesafe.akka.version>
@@ -259,14 +258,6 @@
 				<artifactId>play2-maven-plugin</artifactId>
 				<version>${play2.plugin.version}</version>
 				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
-				<artifactId>sbt-compiler-maven-plugin</artifactId>
-				<version>${sbt-compiler.plugin.version}</version>
-				<configuration>
-					<scalacOptions>-feature -deprecation -Xfatal-warnings</scalacOptions>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
