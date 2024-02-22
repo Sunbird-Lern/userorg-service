@@ -159,8 +159,8 @@
 					<artifactId>gson</artifactId>
 				</exclusion>
 				<exclusion>
-					<artifactId>byte-buddy</artifactId>
 					<groupId>net.bytebuddy</groupId>
+					<artifactId>byte-buddy</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
