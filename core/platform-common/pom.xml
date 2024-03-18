@@ -22,6 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <typesafe.akka.version>2.5.22</typesafe.akka.version>
         <play2.version>2.7.2</play2.version>
+        <jackson.version>2.13.5</jackson.version>
         <CLOUD_STORE_GROUP_ID>org.sunbird</CLOUD_STORE_GROUP_ID>
         <CLOUD_STORE_ARTIFACT_ID>cloud-store-sdk_2.12</CLOUD_STORE_ARTIFACT_ID>
         <CLOUD_STORE_VERSION>1.4.6</CLOUD_STORE_VERSION>
@@ -52,17 +53,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.10.5</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.10.5.1</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.10.5</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
