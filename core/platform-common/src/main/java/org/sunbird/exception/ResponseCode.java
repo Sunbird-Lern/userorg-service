@@ -180,6 +180,9 @@ public enum ResponseCode {
       ResponseMessage.Message.INVALID_TENANT_SECURITY_LEVEL_LOWER),
   cannotDeleteUser(
       ResponseMessage.Key.CANNOT_DELETE_USER, ResponseMessage.Message.CANNOT_DELETE_USER),
+
+  cannotTransferOwnership(
+          ResponseMessage.Key.CANNOT_TRANSFER_OWNERSHIP, ResponseMessage.Message.CANNOT_TRANSFER_OWNERSHIP),
   OK(200),
   SUCCESS(200),
   CLIENT_ERROR(400),

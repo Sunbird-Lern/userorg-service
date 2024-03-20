@@ -148,7 +148,8 @@ public enum ActorOperations {
   DELETE_LOCATION_FROM_ES("deleteLocationDataFromES", "LBKGDEL"),
   ADD_ENCRYPTION_KEY("addEncryptionKey", "ADENCKEY"),
   USER_CURRENT_LOGIN("userCurrentLogin", "USRLOG"),
-  DELETE_USER("deleteUser", "USRDLT");
+  DELETE_USER("deleteUser", "USRDLT"),
+  USER_OWNERSHIP_TRANSFER("userOwnershipTransfer","UOWNTRANS");
 
   private String value;
 

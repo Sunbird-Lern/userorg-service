@@ -103,7 +103,8 @@ public enum ACTORS {
   USER_UPDATE_ACTOR(UserUpdateActor.class, "user_update_actor"),
   BACKGROUND_JOB_MANAGER_ACTOR(BackgroundJobManager.class, "background_job_manager_actor"),
   USER_DELETION_BACKGROUND_JOB_ACTOR(
-      UserDeletionBackgroundJobActor.class, "user_deletion_background_job_actor");
+      UserDeletionBackgroundJobActor.class, "user_deletion_background_job_actor"),
+  USER_OWNERSHIP_TRANSFER_ACTOR(UserOwnershipTransferActor.class,"user_ownership_transfer_actor");
 
   ACTORS(Class clazz, String name) {
     actorClass = clazz;

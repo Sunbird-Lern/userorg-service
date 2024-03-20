@@ -123,6 +123,7 @@ public interface ResponseMessage {
     String INVALID_TENANT_SECURITY_LEVEL_LOWER =
         "Tenant level's security {0} cannot be lower than system level's security {1}. Please provide a valid data security level.";
     String CANNOT_DELETE_USER = "User is restricted from deleting account based on roles!";
+    String CANNOT_TRANSFER_OWNERSHIP = "User is restricted from transfering the ownership based on roles!";
   }
 
   interface Key {
@@ -208,5 +209,6 @@ public interface ResponseMessage {
     String MISSING_DEFAULT_SECURITY_LEVEL = "0081";
     String INVALID_TENANT_SECURITY_LEVEL_LOWER = "0082";
     String CANNOT_DELETE_USER = "0083";
+    String CANNOT_TRANSFER_OWNERSHIP = "0084";
   }
 }
