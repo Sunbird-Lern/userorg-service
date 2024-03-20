@@ -176,7 +176,7 @@ public class UserOwnershipTransferActor extends BaseActor {
         Map<String, Object> data = prepareEventData(request, object);
         CompletableFuture.runAsync(() -> {
             try {
-                InstructionEventGenerator.pushInstructionEvent(JsonKey.USER_TRANSFER_TOPIC, data);
+                InstructionEventGenerator.pushInstructionEvent(JsonKey.USER_OWNERSHIP_TRANSFER_TOPIC, data);
             } catch (Exception e) {
                 logger.error("Error pushing to instruction event", e);
             }
