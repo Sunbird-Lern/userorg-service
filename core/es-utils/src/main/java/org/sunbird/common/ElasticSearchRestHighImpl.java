@@ -1,12 +1,6 @@
 package org.sunbird.common;
 
 import akka.dispatch.Futures;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +20,11 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
-import org.elasticsearch.index.query.*;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.SimpleQueryStringBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -44,6 +42,9 @@ import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * This class will provide all required operation for elastic search.
  *
@@ -52,6 +53,8 @@ import scala.concurrent.Promise;
 public class ElasticSearchRestHighImpl implements ElasticSearchService {
   private static final String ERROR = "ERROR";
   private static final LoggerUtil logger = new LoggerUtil(ElasticSearchRestHighImpl.class);
+
+//  private static ObjectMapper mapper = new ObjectMapper();
 
   /**
    * This method will put a new data entry inside Elastic search. identifier value becomes _id
@@ -132,7 +135,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
           }
         };
 
-    ConnectionManager.getRestClient().indexAsync(indexRequest, listener);
+    ConnectionManager.getRestClient().indexAsync(indexRequest, RequestOptions.DEFAULT, listener);
 
     return promise.future();
   }
@@ -141,14 +144,14 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
    * This method will update data entry inside Elastic search, using identifier and provided data .
    *
    * @param index String ES index name
-   * @param identifier ES column identifier as an String
-   * @param data Map<String,Object>
+   * @param documentId ES column identifier as an String
+   * @param document Map<String,Object>
    * @param context
    * @return true or false
    */
   @Override
   public Future<Boolean> update(
-      String index, String identifier, Map<String, Object> data, RequestContext context) {
+      String index, String documentId, Map<String, Object> document, RequestContext context) {
     long startTime = System.currentTimeMillis();
     logger.debug(
         context,
@@ -157,10 +160,14 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             + " for Index "
             + index);
     Promise<Boolean> promise = Futures.promise();
-    data.put("identifier", identifier);
+    document.put("identifier", documentId);
 
-    if (!StringUtils.isBlank(index) && !StringUtils.isBlank(identifier) && data != null) {
-      UpdateRequest updateRequest = new UpdateRequest(index, _DOC, identifier).doc(data);
+    if (!StringUtils.isBlank(index) && !StringUtils.isBlank(documentId) && document != null) {
+//      UpdateRequest updateRequest = new UpdateRequest(index, _DOC, documentId).doc(document);
+//      Map<String, Object> doc = mapper.readValue(document, new TypeReference<Map<String, Object>>() {});
+//      Map<String, Object> updatedDoc = checkDocStringLength(doc);
+      IndexRequest indexRequest = new IndexRequest(index).id(documentId).source(document);
+      UpdateRequest updateRequest = new UpdateRequest().index(index).id(documentId).doc(document).upsert(indexRequest);
 
       ActionListener<UpdateResponse> listener =
           new ActionListener<UpdateResponse>() {
@@ -173,8 +180,8 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
                       + updateResponse.getResult()
                       + " response from elastic search for index"
                       + index
-                      + ",identifier : "
-                      + identifier);
+                      + ",documentId : "
+                      + documentId);
               logger.debug(
                   context,
                   "ElasticSearchRestHighImpl:update: method end =="
@@ -193,7 +200,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
               promise.failure(e);
             }
           };
-      ConnectionManager.getRestClient().updateAsync(updateRequest, listener);
+      ConnectionManager.getRestClient().updateAsync(updateRequest, RequestOptions.DEFAULT, listener);
 
     } else {
       logger.info(context, "ElasticSearchRestHighImpl:update: Requested data is invalid.");
@@ -259,7 +266,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             }
           };
 
-      ConnectionManager.getRestClient().getAsync(getRequest, listener);
+      ConnectionManager.getRestClient().getAsync(getRequest, RequestOptions.DEFAULT, listener);
     } else {
       logger.info(
           context,
@@ -314,7 +321,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             }
           };
 
-      ConnectionManager.getRestClient().deleteAsync(delRequest, listener);
+      ConnectionManager.getRestClient().deleteAsync(delRequest, RequestOptions.DEFAULT, listener);
     } else {
       logger.info(
           context,
@@ -456,7 +463,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
           public void onResponse(SearchResponse response) {
             logger.debug(
                 context, "ElasticSearchRestHighImpl:search:onResponse  response1 = " + response);
-            if (response.getHits() == null || response.getHits().getTotalHits() == 0) {
+            if (response.getHits() == null || response.getHits().getTotalHits().value == 0) {
 
               Map<String, Object> responseMap = new HashMap<>();
               List<Map<String, Object>> esSource = new ArrayList<>();
@@ -490,7 +497,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
           }
         };
 
-    ConnectionManager.getRestClient().searchAsync(searchRequest, listener);
+    ConnectionManager.getRestClient().searchAsync(searchRequest, RequestOptions.DEFAULT, listener);
     return promise.future();
   }
 
@@ -522,7 +529,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             logger.error("ElasticSearchRestHighImpl:healthCheck: error " + e.getMessage(), e);
           }
         };
-    ConnectionManager.getRestClient().indices().existsAsync(indexRequest, listener);
+    ConnectionManager.getRestClient().indices().existsAsync(indexRequest, RequestOptions.DEFAULT, listener);
 
     return promise.future();
   }
@@ -581,7 +588,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
             promise.success(false);
           }
         };
-    ConnectionManager.getRestClient().bulkAsync(request, listener);
+    ConnectionManager.getRestClient().bulkAsync(request, RequestOptions.DEFAULT, listener);
 
     logger.debug(
         context,
@@ -687,7 +694,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
               promise.failure(e);
             }
           };
-      ConnectionManager.getRestClient().updateAsync(updateRequest, listener);
+      ConnectionManager.getRestClient().updateAsync(updateRequest, RequestOptions.DEFAULT, listener);
       return promise.future();
     } else {
       logger.info(context, "ElasticSearchRestHighImpl:upsert: Requested data is invalid.");
