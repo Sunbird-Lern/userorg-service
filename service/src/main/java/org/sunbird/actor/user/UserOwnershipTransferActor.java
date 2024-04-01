@@ -15,6 +15,7 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
+import org.sunbird.util.PropertiesCache;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -176,7 +177,8 @@ public class UserOwnershipTransferActor extends BaseActor {
         Map<String, Object> data = prepareEventData(request, object);
         CompletableFuture.runAsync(() -> {
             try {
-                InstructionEventGenerator.pushInstructionEvent(JsonKey.USER_OWNERSHIP_TRANSFER_TOPIC, data);
+                PropertiesCache propertiesCache = PropertiesCache.getInstance();
+                InstructionEventGenerator.pushInstructionEvent(propertiesCache.getProperty(JsonKey.USER_OWNERSHIP_TRANSFER_TOPIC), data);
             } catch (Exception e) {
                 logger.error("Error pushing to instruction event", e);
             }
