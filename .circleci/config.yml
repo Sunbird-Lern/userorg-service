@@ -3,6 +3,9 @@ jobs:
   build:
     machine:
       image: ubuntu-2004:202201-02
+    # parallelism: 4
+    # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
+    resource_class: large
     steps:
       - checkout
       - restore_cache:
@@ -15,8 +18,6 @@ jobs:
       - run:
          name: Analyze on SonarCloud
          command: mvn verify -DskipTests sonar:sonar -Dsonar.projectKey=Sunbird-Lern_userorg-service -Dsonar.organization=sunbird-lern -Dsonar.host.url=https://sonarcloud.io -Dsonar.coverage.exclusions=**/cassandra-utils/**,**/es-utils/**,**/models/**,**/model/**,**/bean/**,**/dto/**,**/bulkupload/**,**/error/**,**/exception/**,**/util/search/** -Dsonar.coverage.jacoco.xmlReportPaths=/home/circleci/project/reports/target/jacoco/jacoco.xml
-         # The resource_class feature allows configuring CPU and RAM resources for each job. Different resource classes are available for different executors. https://circleci.com/docs/2.0/configuration-reference/#resourceclass
-         resource_class: large
 
 workflows:
   version: 2.1
