@@ -34,6 +34,7 @@ public class UserOwnershipTransferActor extends BaseActor {
     }
 
     private void handleOwnershipTransfer(Request request) {
+        validateOrganizationId(request.getRequest());
         validateUserDetails(request.getRequest(), request.getRequestContext());
         String userId = (String) ((Map<String, Object>) request.getRequest().get(JsonKey.ACTION_BY))
                 .get(JsonKey.USER_ID);
@@ -46,6 +47,13 @@ public class UserOwnershipTransferActor extends BaseActor {
         }
         Response response = sendResponse("Ownership transfer process is submitted successfully!");
         sender().tell(response, self());
+    }
+
+    private void validateOrganizationId(Map<String, Object> requestData) {
+        if (!requestData.containsKey(JsonKey.ORGANISATION_ID) ||
+                StringUtils.isBlank((String) requestData.get(JsonKey.ORGANISATION_ID))) {
+            throwInvalidRequestDataException("Organization ID is mandatory in the request.");
+        }
     }
 
     private void validateUserDetails(Map<String, Object> data, RequestContext requestContext) {
