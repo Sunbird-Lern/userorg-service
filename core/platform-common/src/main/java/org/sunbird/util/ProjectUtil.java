@@ -4,14 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.sunbird.exception.ProjectCommonException;
@@ -20,6 +12,15 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class will contains all the common utility methods.
@@ -229,25 +230,6 @@ public class ProjectUtil {
     PUT,
     DELETE,
     PATCH
-  }
-
-  /**
-   * Enum to hold the index name for Elastic search.
-   *
-   * @author Manzarul
-   */
-  public enum EsIndex {
-    sunbird("searchindex");
-
-    private String indexName;
-
-    private EsIndex(String name) {
-      this.indexName = name;
-    }
-
-    public String getIndexName() {
-      return indexName;
-    }
   }
 
   /**
