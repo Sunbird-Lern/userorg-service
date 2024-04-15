@@ -1,23 +1,27 @@
 package org.sunbird.actor.user;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.kafka.InstructionEventGenerator;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
+import org.sunbird.service.organisation.OrgService;
+import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
+import org.sunbird.util.user.UserUtil;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,6 +31,7 @@ public class UserOwnershipTransferActor extends BaseActor {
 
     private final UserRoleService userRoleService = UserRoleServiceImpl.getInstance();
     private final UserService userService = UserServiceImpl.getInstance();
+    private final OrgService orgService = OrgServiceImpl.getInstance();
 
     @Override
     public void onReceive(Request request) throws Throwable {
@@ -34,11 +39,8 @@ public class UserOwnershipTransferActor extends BaseActor {
     }
 
     private void handleOwnershipTransfer(Request request) {
-        validateOrganizationId(request.getRequest());
-        validateUserDetails(request.getRequest(), request.getRequestContext());
-        String userId = (String) ((Map<String, Object>) request.getRequest().get(JsonKey.ACTION_BY))
-                .get(JsonKey.USER_ID);
-        validateActionByUserRole(userId, request);
+        validateOrganizationId(request.getRequest(), request.getRequestContext());
+        validateUserDetails(request, request.getRequestContext());
         List<Map<String, Object>> objects = getObjectsFromRequest(request);
         if (!objects.isEmpty()) {
             objects.forEach(object -> sendInstructionEvent(request, object));
@@ -49,43 +51,54 @@ public class UserOwnershipTransferActor extends BaseActor {
         sender().tell(response, self());
     }
 
-    private void validateOrganizationId(Map<String, Object> requestData) {
+    private void validateOrganizationId(Map<String, Object> requestData, RequestContext requestContext) {
         if (!requestData.containsKey(JsonKey.ORGANISATION_ID) ||
                 StringUtils.isBlank((String) requestData.get(JsonKey.ORGANISATION_ID))) {
             throwInvalidRequestDataException("Organization ID is mandatory in the request.");
         }
+        String orgId = (String) requestData.get(JsonKey.ORGANISATION_ID);
+        if (!organisationExists(orgId, requestContext)) {
+            throwInvalidRequestDataException("Organization with ID " + orgId + " does not exist.");
+        }
     }
 
-    private void validateUserDetails(Map<String, Object> data, RequestContext requestContext) {
-        validateAndProceed(data, JsonKey.ACTION_BY, requestContext);
-        validateAndProceed(data, JsonKey.FROM_USER, requestContext);
-        validateAndProceed(data, JsonKey.TO_USER, requestContext);
+    private boolean organisationExists(String orgId, RequestContext context) {
+        try {
+            Map<String, Object> organisation = orgService.getOrgById(orgId, context);
+            return MapUtils.isNotEmpty(organisation);
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
-    private void validateAndProceed(Map<String, Object> data, String key, RequestContext requestContext) {
-        if (data.containsKey(key)) {
-            validateUser(data.get(key), key, requestContext, data);
+    private void validateUserDetails(Request request, RequestContext requestContext) {
+        validateAndProceed(request, JsonKey.ACTION_BY, requestContext);
+        validateAndProceed(request, JsonKey.FROM_USER, requestContext);
+        validateAndProceed(request, JsonKey.TO_USER, requestContext);
+    }
+
+    private void validateAndProceed(Request request, String key, RequestContext requestContext) {
+        if (request.getRequest().containsKey(key)) {
+            validateUser(request.getRequest().get(key), key, requestContext, request);
         } else {
             throwInvalidRequestDataException(key + " key is not present in the data.");
         }
     }
 
     private void validateUser(Object userNode, String userLabel, RequestContext requestContext,
-                              Map<String, Object> data) {
+                              Request request) {
         if (userNode instanceof Map) {
             Map<String, Object> user = (Map<String, Object>) userNode;
             String userId = StringUtils.trimToNull(Objects.toString(user.get(JsonKey.USER_ID), ""));
-            String userName = StringUtils.trimToNull(Objects.toString(user.get(JsonKey.USERNAME), ""));
-
-            if (StringUtils.isBlank(StringUtils.trimToNull(userId)) ||
-                    StringUtils.isBlank(StringUtils.trimToNull(userName))) {
-                throwInvalidRequestDataException("User id / user name key is not present in the " + userLabel);
-            }
-
-            if (validUser(userId, requestContext)) {
-                validateAndFilterRoles(user, userLabel, data);
+            if (StringUtils.isBlank(StringUtils.trimToNull(userId)) || !userExists(userId, requestContext)) {
+                throwInvalidRequestDataException("given user id under " + userLabel + " is not present or blank");
             } else {
-                throwClientErrorException();
+                if (userLabel.equals(JsonKey.ACTION_BY)) {
+                    validateActionByUserRole(userId, request);
+                } else {
+                    validateAndFilterRoles(user, userLabel, request.getRequest());
+                }
+                addUserInfo(userId, user, userLabel, requestContext);
             }
         }
     }
@@ -138,12 +151,6 @@ public class UserOwnershipTransferActor extends BaseActor {
                 ResponseCode.CLIENT_ERROR.getResponseCode());
     }
 
-    private void throwClientErrorException() {
-        ProjectCommonException.throwClientErrorException(
-                ResponseCode.invalidParameter,
-                MessageFormat.format(ResponseCode.invalidParameter.getErrorMessage(), JsonKey.USER_ID));
-    }
-
     private void throwDataTypeErrorException() {
         throw new ProjectCommonException(
                 ResponseCode.dataTypeError,
@@ -152,14 +159,18 @@ public class UserOwnershipTransferActor extends BaseActor {
                 ERROR_CODE);
     }
 
-    private boolean validUser(String userId, RequestContext context) {
-        return StringUtils.isNotBlank(userId) && userExists(userId, context);
+    private void addUserInfo(String userId, Map<String, Object> userRequestData, String userLabel, RequestContext context) {
+        User user = userService.getUserById(userId, context);
+        userRequestData.put(JsonKey.USERNAME, UserUtil.getDecryptedData(user.getUserName(), context));
+        if (userLabel.equals(JsonKey.TO_USER)) {
+            userRequestData.put(JsonKey.FIRST_NAME, user.getFirstName());
+            userRequestData.put(JsonKey.LAST_NAME, user.getLastName());
+        }
     }
 
     private boolean userExists(String userId, RequestContext context) {
         try {
-            userService.getUserById(userId, context);
-            return true;
+            return userService.getUserById(userId, context) != null;
         } catch (Exception ex) {
             return false;
         }
