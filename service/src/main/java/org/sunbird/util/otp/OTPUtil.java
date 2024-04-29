@@ -84,11 +84,9 @@ public final class OTPUtil {
     Map<String, String> smsTemplate = new HashMap<>();
     String templateId = (String) otpMap.get(JsonKey.TEMPLATE_ID);
     smsTemplate.put(JsonKey.OTP, (String) otpMap.get(JsonKey.OTP));
-    smsTemplate.put(
-        JsonKey.OTP_EXPIRATION_IN_MINUTES, (String) otpMap.get(JsonKey.OTP_EXPIRATION_IN_MINUTES));
-    smsTemplate.put(
-        JsonKey.INSTALLATION_NAME,
-        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME));
+    smsTemplate.put(JsonKey.OTP_EXPIRATION_IN_MINUTES, (String) otpMap.get(JsonKey.OTP_EXPIRATION_IN_MINUTES));
+    smsTemplate.put(JsonKey.INSTALLATION_NAME, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME));
+    smsTemplate.put(JsonKey.SUPPORT_EMAIL, ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SUPPORT_EMAIL));
     String sms = "";
     if (StringUtils.isBlank(templateId)) {
       sms = otpService.getSmsBody(JsonKey.VERIFY_PHONE_OTP_TEMPLATE, smsTemplate, context);
@@ -98,6 +96,8 @@ public final class OTPUtil {
       sms = otpService.getSmsBody(JsonKey.OTP_PHONE_RESET_PASSWORD_TEMPLATE, smsTemplate, context);
     } else if (StringUtils.equals(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
       sms = otpService.getSmsBody(JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_SMS, smsTemplate, context);
+    } else if (StringUtils.equals(JsonKey.OTP_DELETE_USER_TEMPLATE_ID, templateId)) {
+      sms = otpService.getSmsBody(JsonKey.OTP_DELETE_USER_TEMPLATE_SMS, smsTemplate, context);
     }
     logger.debug(context, "OTPUtil:sendOTPViaSMS: SMS text = " + sms);
 
@@ -136,6 +136,7 @@ public final class OTPUtil {
     }
     String templateId = (String) emailTemplateMap.get(JsonKey.TEMPLATE_ID);
     String envName = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_INSTALLATION_DISPLAY_NAME);
+    String supportEmail = ProjectUtil.getConfigValue(JsonKey.SUNBIRD_SUPPORT_EMAIL);
     List<String> reciptientsMail = new ArrayList<>();
     reciptientsMail.add((String) emailTemplateMap.get(JsonKey.EMAIL));
     emailTemplateMap.put(JsonKey.RECIPIENT_EMAILS, reciptientsMail);
@@ -153,8 +154,12 @@ public final class OTPUtil {
     } else if (StringUtils.equalsIgnoreCase(JsonKey.CONTACT_UPDATE_TEMPLATE_ID, templateId)) {
       emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_CONTACT_UPDATE_TEMPLATE_EMAIL);
       emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT);
+    } else if (StringUtils.equalsIgnoreCase(JsonKey.OTP_DELETE_USER_TEMPLATE_ID, templateId)) {
+      emailTemplateMap.put(JsonKey.EMAIL_TEMPLATE_TYPE, JsonKey.OTP_DELETE_USER_EMAIL_TEMPLATE);
+      emailTemplateMap.put(JsonKey.SUBJECT, JsonKey.DELETE_USER_VERIFICATION_SUBJECT);
     }
     emailTemplateMap.put(JsonKey.INSTALLATION_NAME, envName);
+    emailTemplateMap.put(JsonKey.SUPPORT_EMAIL, supportEmail);
     request = new Request();
     request.setOperation(ActorOperations.EMAIL_SERVICE.getValue());
     request.put(JsonKey.EMAIL_REQUEST, emailTemplateMap);

@@ -186,6 +186,8 @@ public final class JsonKey {
   public static final String OTP_EMAIL_RESET_PASSWORD_TEMPLATE = "otpEmailResetPasswordTemplate";
   public static final String OTP_PHONE_RESET_PASSWORD_TEMPLATE = "otpPhoneResetPasswordTemplate";
   public static final String VERIFY_PHONE_OTP_TEMPLATE = "verifyPhoneOtpTemplate";
+  public static final String OTP_DELETE_USER_EMAIL_TEMPLATE = "otpEmailDeleteUserTemplate";
+  public static final String OTP_DELETE_USER_TEMPLATE_ID = "otpDeleteUserTemplate";
   public static final String PARAMS = "params";
   public static final String PASSWORD = "password";
 
@@ -338,8 +340,8 @@ public final class JsonKey {
   public static final String EDIT = "edit";
   public static final String DEFAULT_FRAMEWORK = "defaultFramework";
   public static final String EXTERNAL_ID_PROVIDER = "externalIdProvider";
-  public static final String SUNBIRD_INSTALLATION_DISPLAY_NAME =
-      "sunbird_installation_display_name_for_sms";
+  public static final String SUNBIRD_INSTALLATION_DISPLAY_NAME = "sunbird_installation_display_name_for_sms";
+  public static final String SUNBIRD_SUPPORT_EMAIL = "sunbird_support_email";
   public static final String USR_EXT_IDNT_TABLE = "usr_external_identity";
   public static final String RESPONSE_CODE = "responseCode";
   public static final String OK = "ok";
@@ -404,6 +406,7 @@ public final class JsonKey {
   public static final String RATE_LIMIT_UNIT = "unit";
   public static final String RATE = "rate";
   public static final String INSTALLATION_NAME = "installationName";
+  public static final String SUPPORT_EMAIL = "supportEmail";
   public static final String LOCATION_CODES = "locationCodes";
   public static final String USER_LOCATIONS = "userLocations";
   public static final String USER_ID_TYPE = "userIdType";
@@ -609,8 +612,11 @@ public final class JsonKey {
   public static final String CONTACT_UPDATE_TEMPLATE_ID = "otpContactUpdateTemplate";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_EMAIL = "otpContactUpdateTemplateEmail";
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_SMS = "otpContactUpdateTemplateSms";
+  public static final String OTP_DELETE_USER_TEMPLATE_SMS = "otpDeleteUserTemplateSms";
   public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
       "OTP to edit Diksha Profile";
+  public static final String DELETE_USER_VERIFICATION_SUBJECT =
+      "OTP to proceed with profile deletion.";
   public static final String X_Source = "x-source";
   public static final String IDS = "ids";
   public static final String NOTIFICATIONS = "notifications";
@@ -656,8 +662,8 @@ public final class JsonKey {
   public static final String ES_USER_INDEX_ALIAS = "user_index_alias";
   public static final String ES_ORG_INDEX_INDEX = "org_index_alias";
 
-  //Release 5.4.0 LR-102
-  public static final String SUNBIRD_KEYSPACE = "sunbird_keyspace";
+  // Release 5.4.0 LR-102
+  public static final String SUNBIRD_KEYSPACE = "sunbird_userorg_keyspace";
   public static final String ES_LOCATION_INDEX = "es_location_index";
   public static final String ES_USER_FEED_INDEX = "es_user_feed_index";
   public static final String ES_USER_NOTES_INDEX = "es_user_notes_index";
@@ -672,8 +678,16 @@ public final class JsonKey {
   public static final String USER_TABLE_STATUS = "userTable";
   public static final String SUGGESTED_USERS = "suggested_users";
   public static final String DELETE_USER_ACTON = "delete-user";
+  public static final String ACTION_BY = "actionBy";
+  public static final String FROM_USER = "fromUser";
+  public static final String TO_USER = "toUser";
+  public static final String USER_OWNERSHIP_TRANSFER_ACTION = "ownership-transfer";
+  public static final String FROM_USER_PROFILE = "fromUserProfile";
+  public static final String TO_USER_PROFILE = "toUserProfile";
+  public static final String ASSET_INFORMATION = "assetInformation";
+  public static final String USER_OWNERSHIP_TRANSFER_TOPIC = "user-ownership-transfer-topic";
   public static final String OBJECT = "object";
-  public static final String EDATA = "eData";
+  public static final String EDATA = "edata";
   public static final String MANAGED_USERS = "managed_users";
   public static final String USER_DELETION_TOPIC = "user-deletion-broadcast-topic";
   public static final String USER_DELETION_ROLES = "user-deletion-roles";

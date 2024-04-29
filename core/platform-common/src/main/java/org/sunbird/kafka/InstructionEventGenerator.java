@@ -19,7 +19,7 @@ public class InstructionEventGenerator {
   private static String beJobRequesteventId = "BE_JOB_REQUEST";
   private static int iteration = 1;
 
-  private static String actorId = "Sunbird LMS Samza Job";
+  private static String actorId = "Sunbird LMS Flink Job";
   private static String actorType = "System";
   private static String pdataId = "org.sunbird.platform";
   private static String pdataVersion = "1.0";

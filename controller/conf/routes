@@ -140,4 +140,4 @@ POST    /v1/system/settings/set                 @controllers.systemsettings.Syst
 
 
 POST	/v1/user/delete                         @controllers.usermanagement.UserStatusController.deleteUser(request: play.mvc.Http.Request)
-
+POST    /v1/user/ownership/transfer             @controllers.usermanagement.UserController.ownershipTransferUser(request: play.mvc.Http.Request)

@@ -6,6 +6,7 @@ import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.RSATokenVerifier;
@@ -94,6 +95,9 @@ public class KeyCloakServiceImpl implements SSOManager {
       user.setEnabled(false);
       logger.info("KeyCloakServiceImpl::removePII:: userId:: " + fedUserId);
       userResource.update(user);
+      List userSessions = userResource.getUserSessions();
+      for (Object userSession : userSessions)
+        userSessions.remove(userSession);
       return true;
     } catch (Exception e) {
       logger.error(context, "removePII: Exception occurred: ", e);

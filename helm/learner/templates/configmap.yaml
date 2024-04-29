@@ -261,7 +261,7 @@ data:
   telemetry_pdata_pid: {{ .Values.telemetry_pdata_pid }}
   telemetry_queue_threshold_value: {{ .Values.telemetry_queue_threshold_value | quote }}
   user_index_alias: {{ .Values.user_index_alias }}
-
+  sunbird_support_email: {{ .Values.sunbird_support_email }}
 ---
 apiVersion: v1
 kind: ConfigMap
