@@ -3,7 +3,6 @@ package org.sunbird.actor.user;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.dispatch.Futures;
 import akka.testkit.TestActorRef;
 import akka.testkit.javadsl.TestKit;
 import org.junit.Before;
@@ -20,6 +19,7 @@ import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.model.user.User;
 import org.sunbird.operations.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
@@ -28,9 +28,7 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import scala.concurrent.Promise;
 
-import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.*;
 
@@ -109,7 +107,7 @@ public class UserOwnershipTransferActorTest {
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
         assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
-        assertEquals("User id / user name key is not present in the fromUser", errorResponse.getMessage());
+        assertEquals("given user id under fromUser is not present or blank", errorResponse.getMessage());
         assertEquals(400, errorResponse.getErrorResponseCode());
     }
 
@@ -207,8 +205,8 @@ public class UserOwnershipTransferActorTest {
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
                 ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0019", errorResponse.getErrorCode());
-        assertEquals("Please provide valid userId.", errorResponse.getMessage());
+        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("given user id under fromUser is not present or blank", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
 
@@ -225,7 +223,7 @@ public class UserOwnershipTransferActorTest {
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
                 ProjectCommonException.class);
         assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
-        assertEquals("User id / user name key is not present in the actionBy",
+        assertEquals("given user id under actionBy is not present or blank",
                 errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
@@ -239,18 +237,14 @@ public class UserOwnershipTransferActorTest {
         when(UserServiceImpl.getInstance()).thenReturn(userServiceMock);
         when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleServiceMock);
         when(ServiceFactory.getInstance()).thenReturn(cassandraOperation);
-        Promise<Boolean> booleanPromise = Futures.promise();
-        booleanPromise.success(true);
         when(cassandraOperation.updateRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                 .thenReturn(getSuccessResponse());
         when(cassandraOperation.insertRecord(Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
                 .thenReturn(getSuccessResponse());
-        PowerMockito.when(userServiceMock.getUserById(
-                        Mockito.argThat("123"::equals), Mockito.any(RequestContext.class)))
-                .thenThrow(new ProjectCommonException(
-                        ResponseCode.resourceNotFound,
-                        MessageFormat.format(ResponseCode.resourceNotFound.getErrorMessage(), JsonKey.USER),
-                        ResponseCode.RESOURCE_NOT_FOUND.getResponseCode()));
+        when(userServiceMock.getUserById(eq("c9e6006e-5811-4337-aa7c-48d0f535e3b8"), Mockito.any(RequestContext.class)))
+                .thenReturn(getValidUserResponse()); // Return valid user response for valid user ID
+        when(userServiceMock.getUserById(eq("1234"), Mockito.any(RequestContext.class)))
+                .thenReturn(getValidUserResponse());
         Response response2 = new Response();
         Map<String, Object> user = new HashMap<>();
         user.put(JsonKey.ID, "c9e6006e-5811-4337-aa7c-48d0f535e3b8");
@@ -283,6 +277,15 @@ public class UserOwnershipTransferActorTest {
         List<Map<String, Object>> userRolesList = new ArrayList<>();
         userRolesList.add(invalidUserRole);
         return userRolesList;
+    }
+
+    private User getValidUserResponse() {
+        User user = new User();
+        user.setId("c9e6006e-5811-4337-aa7c-48d0f535e3b8");
+        user.setIsDeleted(false);
+        user.setFirstName("Testuser");
+        user.setStatus(1);
+        return user;
     }
 
 
