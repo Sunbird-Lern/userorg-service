@@ -237,7 +237,13 @@
           <groupId>ch.qos.logback.contrib</groupId>
           <artifactId>logback-json-classic</artifactId>
           <version>0.1.5</version>
-        </dependency>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
         <dependency>
           <groupId>net.logstash.logback</groupId>
           <artifactId>logstash-logback-encoder</artifactId>

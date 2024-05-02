@@ -1,10 +1,6 @@
 package controllers.otp.validator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.exception.ResponseMessage;
@@ -13,6 +9,11 @@ import org.sunbird.request.Request;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.StringFormatter;
 import org.sunbird.validator.BaseRequestValidator;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class OtpRequestValidator extends BaseRequestValidator {
 
