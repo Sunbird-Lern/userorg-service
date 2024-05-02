@@ -1,7 +1,7 @@
 package org.sunbird.model.adminutil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 

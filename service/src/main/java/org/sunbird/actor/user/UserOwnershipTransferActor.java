@@ -1,7 +1,7 @@
 package org.sunbird.actor.user;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
