@@ -139,7 +139,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     if (!StringUtils.isBlank(index) && !StringUtils.isBlank(documentId)) {
 //      Map<String, Object> updatedDoc = checkDocStringLength(document);
       IndexRequest indexRequest = new IndexRequest(index).id(documentId).source(document);
-      UpdateRequest updateRequest = new UpdateRequest().index(index).id(documentId).doc(document).upsert(indexRequest);
+      UpdateRequest updateRequest = new UpdateRequest().index(index).type(_DOC).id(documentId).doc(document).upsert(indexRequest);
 
       ActionListener<UpdateResponse> listener =
           new ActionListener<UpdateResponse>() {
