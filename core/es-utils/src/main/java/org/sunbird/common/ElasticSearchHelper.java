@@ -717,7 +717,7 @@ public class ElasticSearchHelper {
     long count = 0;
     if (response != null) {
       SearchHits hits = response.getHits();
-      count = hits.getTotalHits().value;
+      count = hits.getTotalHits();
 
       for (SearchHit hit : hits) {
         esSource.add(hit.getSourceAsMap());

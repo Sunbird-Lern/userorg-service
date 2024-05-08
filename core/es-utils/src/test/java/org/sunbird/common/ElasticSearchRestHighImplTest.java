@@ -1,5 +1,16 @@
 package org.sunbird.common;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.mock;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -38,14 +49,6 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.util.PropertiesCache;
 import scala.concurrent.Future;
 
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-import static org.powermock.api.mockito.PowerMockito.mock;
-
 /**
  * Test class for Elastic search Rest High level client Impl
  *
@@ -54,23 +57,23 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
-  "javax.management.*",
-  "javax.net.ssl.*",
-  "javax.security.*",
-  "jdk.internal.reflect.*"
+        "javax.management.*",
+        "javax.net.ssl.*",
+        "javax.security.*",
+        "jdk.internal.reflect.*"
 })
 @PrepareForTest({
-  ConnectionManager.class,
-  RestHighLevelClient.class,
-  AcknowledgedResponse.class,
-  GetRequestBuilder.class,
-  BulkProcessor.class,
-  FutureUtils.class,
-  SearchHit.class,
-  SearchHits.class,
-  Aggregations.class,
-  ElasticSearchHelper.class,
-  PropertiesCache.class
+        ConnectionManager.class,
+        RestHighLevelClient.class,
+        AcknowledgedResponse.class,
+        GetRequestBuilder.class,
+        BulkProcessor.class,
+        FutureUtils.class,
+        SearchHit.class,
+        SearchHits.class,
+        Aggregations.class,
+        ElasticSearchHelper.class,
+        PropertiesCache.class
 })
 public class ElasticSearchRestHighImplTest {
 
@@ -299,13 +302,13 @@ public class ElasticSearchRestHighImplTest {
               new Answer() {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
-                  ((ActionListener<BulkResponse>) invocation.getArguments()[2])
-                      .onResponse(response);
+                  ((ActionListener<BulkResponse>) invocation.getArguments()[1])
+                          .onResponse(response);
                   return null;
                 }
               })
-          .when(client)
-          .bulkAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .bulkAsync(Mockito.any(), Mockito.any());
     } else {
 
       doAnswer(
@@ -313,13 +316,13 @@ public class ElasticSearchRestHighImplTest {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
 
-                  ((ActionListener<BulkResponse>) invocation.getArguments()[2])
-                      .onFailure(new NullPointerException());
+                  ((ActionListener<BulkResponse>) invocation.getArguments()[1])
+                          .onFailure(new NullPointerException());
                   return null;
                 }
               })
-          .when(client)
-          .bulkAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .bulkAsync(Mockito.any(), Mockito.any());
     }
   }
 
@@ -333,12 +336,12 @@ public class ElasticSearchRestHighImplTest {
               new Answer() {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
-                  ((ActionListener<IndexResponse>) invocation.getArguments()[2]).onResponse(ir);
+                  ((ActionListener<IndexResponse>) invocation.getArguments()[1]).onResponse(ir);
                   return null;
                 }
               })
-          .when(client)
-          .indexAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .indexAsync(Mockito.any(), Mockito.any());
     } else {
 
       doAnswer(
@@ -346,13 +349,13 @@ public class ElasticSearchRestHighImplTest {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
 
-                  ((ActionListener<IndexResponse>) invocation.getArguments()[2])
-                      .onFailure(new NullPointerException());
+                  ((ActionListener<IndexResponse>) invocation.getArguments()[1])
+                          .onFailure(new NullPointerException());
                   return null;
                 }
               })
-          .when(client)
-          .indexAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .indexAsync(Mockito.any(), Mockito.any());
     }
   }
 
@@ -367,13 +370,13 @@ public class ElasticSearchRestHighImplTest {
               new Answer() {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
-                  ((ActionListener<UpdateResponse>) invocation.getArguments()[2])
-                      .onResponse(updateRes);
+                  ((ActionListener<UpdateResponse>) invocation.getArguments()[1])
+                          .onResponse(updateRes);
                   return null;
                 }
               })
-          .when(client)
-          .updateAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .updateAsync(Mockito.any(), Mockito.any());
     } else {
 
       doAnswer(
@@ -382,13 +385,13 @@ public class ElasticSearchRestHighImplTest {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
 
-                  ((ActionListener<UpdateResponse>) invocation.getArguments()[2])
-                      .onFailure(new NullPointerException());
+                  ((ActionListener<UpdateResponse>) invocation.getArguments()[1])
+                          .onFailure(new NullPointerException());
                   return null;
                 }
               })
-          .when(client)
-          .updateAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .updateAsync(Mockito.any(), Mockito.any());
     }
   }
 
@@ -407,13 +410,13 @@ public class ElasticSearchRestHighImplTest {
                 @SuppressWarnings("unchecked")
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
-                  ((ActionListener<GetResponse>) invocation.getArguments()[2])
-                      .onResponse(getResponse);
+                  ((ActionListener<GetResponse>) invocation.getArguments()[1])
+                          .onResponse(getResponse);
                   return null;
                 }
               })
-          .when(client)
-          .getAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .getAsync(Mockito.any(), Mockito.any());
     } else {
 
       doAnswer(
@@ -421,13 +424,13 @@ public class ElasticSearchRestHighImplTest {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
 
-                  ((ActionListener<GetResponse>) invocation.getArguments()[2])
-                      .onFailure(new NullPointerException());
+                  ((ActionListener<GetResponse>) invocation.getArguments()[1])
+                          .onFailure(new NullPointerException());
                   return null;
                 }
               })
-          .when(client)
-          .getAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .getAsync(Mockito.any(), Mockito.any());
     }
   }
 
@@ -443,13 +446,13 @@ public class ElasticSearchRestHighImplTest {
               new Answer() {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
-                  ((ActionListener<DeleteResponse>) invocation.getArguments()[2])
-                      .onResponse(delResponse);
+                  ((ActionListener<DeleteResponse>) invocation.getArguments()[1])
+                          .onResponse(delResponse);
                   return null;
                 }
               })
-          .when(client)
-          .deleteAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .deleteAsync(Mockito.any(), Mockito.any());
     } else {
 
       doAnswer(
@@ -457,13 +460,13 @@ public class ElasticSearchRestHighImplTest {
                 @Override
                 public Object answer(InvocationOnMock invocation) throws Throwable {
 
-                  ((ActionListener<DeleteResponse>) invocation.getArguments()[2])
-                      .onFailure(new NullPointerException());
+                  ((ActionListener<DeleteResponse>) invocation.getArguments()[1])
+                          .onFailure(new NullPointerException());
                   return null;
                 }
               })
-          .when(client)
-          .deleteAsync(Mockito.any(), Mockito.any(), Mockito.any());
+              .when(client)
+              .deleteAsync(Mockito.any(), Mockito.any());
     }
   }
 }
