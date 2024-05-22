@@ -67,5 +67,4 @@ public class TelemetryBJREvent {
   public void setEdata(Map<String, Object> edata) {
     this.edata = edata;
   }
-
 }
