@@ -110,6 +110,10 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     objectMap.put(JsonKey.TYPE, JsonKey.USER);
     data.put(JsonKey.OBJECT, objectMap);
 
+    Map<String, Object> cData = new HashMap<>();
+    cData.put(JsonKey.X_REQUEST_ID,request.getRequestContext().getReqId());
+    data.put(JsonKey.CDATA, cData);
+
     Map<String, Object> eData = new HashMap<>();
     eData.put(JsonKey.ORGANISATION_ID, rootOrgId);
     eData.put(JsonKey.USER_ID, userId);

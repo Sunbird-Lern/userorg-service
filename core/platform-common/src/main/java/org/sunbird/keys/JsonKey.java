@@ -681,6 +681,7 @@ public final class JsonKey {
   public static final String USER_OWNERSHIP_TRANSFER_TOPIC = "user-ownership-transfer-topic";
   public static final String OBJECT = "object";
   public static final String EDATA = "edata";
+  public static final String CDATA = "cdata";
   public static final String MANAGED_USERS = "managed_users";
   public static final String USER_DELETION_TOPIC = "user-deletion-broadcast-topic";
   public static final String USER_DELETION_ROLES = "user-deletion-roles";

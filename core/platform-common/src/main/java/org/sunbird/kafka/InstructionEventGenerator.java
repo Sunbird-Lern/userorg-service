@@ -53,6 +53,7 @@ public class InstructionEventGenerator {
     Map<String, Object> context = new HashMap<>();
     Map<String, Object> object = new HashMap<>();
     Map<String, Object> edata = new HashMap<>();
+    Map<String, Object> cdata = new HashMap<>();
     if (MapUtils.isNotEmpty((Map) data.get("actor"))) {
       actor.putAll((Map<String, Object>) data.get("actor"));
     } else {
@@ -71,17 +72,20 @@ public class InstructionEventGenerator {
 
     if (MapUtils.isNotEmpty((Map) data.get("edata"))) edata.putAll((Map) data.get("edata"));
 
+    if (MapUtils.isNotEmpty((Map) data.get("cdata"))) cdata.putAll((Map) data.get("cdata"));
+
     if (StringUtils.isNotBlank((String) data.get("action")))
       edata.put("action", data.get("action"));
 
-    return logInstructionEvent(actor, context, object, edata);
+    return logInstructionEvent(actor, context, object, edata,cdata);
   }
 
   private static String logInstructionEvent(
       Map<String, Object> actor,
       Map<String, Object> context,
       Map<String, Object> object,
-      Map<String, Object> edata) {
+      Map<String, Object> edata,
+      Map<String, Object> cdata) {
 
     TelemetryBJREvent te = new TelemetryBJREvent();
     long unixTime = System.currentTimeMillis();
@@ -95,6 +99,7 @@ public class InstructionEventGenerator {
     te.setContext(context);
     te.setObject(object);
     te.setEdata(edata);
+    te.setCdata(cdata);
 
     String jsonMessage = null;
     try {
