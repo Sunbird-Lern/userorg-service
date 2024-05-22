@@ -11,7 +11,6 @@ public class TelemetryBJREvent {
   private Map<String, Object> context;
   private Map<String, Object> object;
   private Map<String, Object> edata;
-  private Map<String, Object> cdata;
 
   public String getEid() {
     return eid;
@@ -69,11 +68,4 @@ public class TelemetryBJREvent {
     this.edata = edata;
   }
 
-  public Map<String, Object> getCdata() {
-    return cdata;
-  }
-
-  public void setCdata(Map<String, Object> cdata) {
-    this.cdata = cdata;
-  }
 }

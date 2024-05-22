@@ -8,6 +8,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.telemetry.dto.TelemetryBJREvent;
 
@@ -53,7 +54,6 @@ public class InstructionEventGenerator {
     Map<String, Object> context = new HashMap<>();
     Map<String, Object> object = new HashMap<>();
     Map<String, Object> edata = new HashMap<>();
-    Map<String, Object> cdata = new HashMap<>();
     if (MapUtils.isNotEmpty((Map) data.get("actor"))) {
       actor.putAll((Map<String, Object>) data.get("actor"));
     } else {
@@ -68,24 +68,20 @@ public class InstructionEventGenerator {
     pdata.put("id", pdataId);
     pdata.put("ver", pdataVersion);
     context.put("pdata", pdata);
+    context.put(JsonKey.CDATA,data.get(JsonKey.CDATA));
     if (MapUtils.isNotEmpty((Map) data.get("object"))) object.putAll((Map) data.get("object"));
 
     if (MapUtils.isNotEmpty((Map) data.get("edata"))) edata.putAll((Map) data.get("edata"));
-
-    if (MapUtils.isNotEmpty((Map) data.get("cdata"))) cdata.putAll((Map) data.get("cdata"));
-
     if (StringUtils.isNotBlank((String) data.get("action")))
       edata.put("action", data.get("action"));
-
-    return logInstructionEvent(actor, context, object, edata,cdata);
+    return logInstructionEvent(actor, context, object, edata);
   }
 
   private static String logInstructionEvent(
       Map<String, Object> actor,
       Map<String, Object> context,
       Map<String, Object> object,
-      Map<String, Object> edata,
-      Map<String, Object> cdata) {
+      Map<String, Object> edata) {
 
     TelemetryBJREvent te = new TelemetryBJREvent();
     long unixTime = System.currentTimeMillis();
@@ -99,7 +95,6 @@ public class InstructionEventGenerator {
     te.setContext(context);
     te.setObject(object);
     te.setEdata(edata);
-    te.setCdata(cdata);
 
     String jsonMessage = null;
     try {
