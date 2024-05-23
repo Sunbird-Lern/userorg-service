@@ -8,6 +8,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
+import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.telemetry.dto.TelemetryBJREvent;
 
@@ -67,13 +68,12 @@ public class InstructionEventGenerator {
     pdata.put("id", pdataId);
     pdata.put("ver", pdataVersion);
     context.put("pdata", pdata);
+    context.put(JsonKey.CDATA,data.get(JsonKey.CDATA));
     if (MapUtils.isNotEmpty((Map) data.get("object"))) object.putAll((Map) data.get("object"));
 
     if (MapUtils.isNotEmpty((Map) data.get("edata"))) edata.putAll((Map) data.get("edata"));
-
     if (StringUtils.isNotBlank((String) data.get("action")))
       edata.put("action", data.get("action"));
-
     return logInstructionEvent(actor, context, object, edata);
   }
 

@@ -18,6 +18,7 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.ProjectUtil;
 import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.user.UserUtil;
@@ -218,12 +219,17 @@ public class UserOwnershipTransferActor extends BaseActor {
         Map<String, Object> assetInformation = new HashMap<>(object);
         edata.put(JsonKey.ASSET_INFORMATION, assetInformation);
 
+        Map<String, Object> cData = new HashMap<>();
+        cData.put(JsonKey.ID,request.getRequestContext().getReqId());
+        cData.put(JsonKey.TYPE, TelemetryEnvKey.REQUEST_UPPER_CAMEL);
+
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> fromUserDetails = (Map<String, Object>) request.getRequest().get(JsonKey.FROM_USER);
         Map<String, Object> objectDetails = Map.of(JsonKey.ID, fromUserDetails.get(JsonKey.USER_ID), JsonKey.TYPE,
                 JsonKey.USER);
         result.put("actor", actor);
         result.put(JsonKey.OBJECT, objectDetails);
+        result.put(JsonKey.CDATA, cData);
         result.put(JsonKey.EDATA, edata);
         return result;
     }
