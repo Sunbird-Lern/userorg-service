@@ -1,11 +1,11 @@
 {
 	"info": {
-		"_postman_id": "dbb9ef35-6501-41d3-aadf-96dd74f9b906",
+		"_postman_id": "3bec4286-bb4a-4a19-b81e-75b29644aeb5",
 		"name": "UserOrg_APIs Test",
 		"description": "The User ORG API is a collection of API's for creation and management of User and Org in sunbird platform.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "4875988",
-		"_collection_link": "https://dark-star-147860.postman.co/workspace/LernBBAPIs~32e17cc4-6806-407e-b8ef-485ad4d0b712/collection/4875988-dbb9ef35-6501-41d3-aadf-96dd74f9b906?action=share&source=collection_link&creator=4875988"
+		"_collection_link": "https://dark-star-147860.postman.co/workspace/LernBBAPIs~32e17cc4-6806-407e-b8ef-485ad4d0b712/collection/4875988-3bec4286-bb4a-4a19-b81e-75b29644aeb5?action=share&source=collection_link&creator=4875988"
 	},
 	"item": [
 		{
@@ -4014,7 +4014,8 @@
 											"    pm.expect(jsonResponse.token_type).to.eql('bearer');",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -4046,12 +4047,12 @@
 										},
 										{
 											"key": "username",
-											"value": "{{username}}",
+											"value": "{{org_admin_username}}",
 											"type": "text"
 										},
 										{
 											"key": "password",
-											"value": "{{password}}",
+											"value": "{{org_admin_password}}",
 											"type": "text"
 										}
 									]
@@ -21973,6 +21974,43 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
+					"const requiresHeaders = () => {",
+					"    const requestUrl = pm.request.url.toString();",
+					"",
+					"    // List of paths to ignore",
+					"    const ignoredPaths = [",
+					"        '/health',",
+					"        '/auth/realms/sunbird/protocol/openid-connect/token',",
+					"        '/auth/v1/refresh/token'",
+					"    ];",
+					"",
+					"    // Check if the request URL contains any of the ignored paths",
+					"    return !ignoredPaths.some(path => requestUrl.includes(path));",
+					"};",
+					"",
+					"// Function to check if a specific header is present and not empty",
+					"const isHeaderProvided = (headerName) => {",
+					"    const headers = pm.request.headers;",
+					"    if (!headers) return false; // Check if headers exist",
+					"",
+					"    // Find the specified header",
+					"    const header = headers.find(h => h.key.toLowerCase() === headerName.toLowerCase());",
+					"",
+					"    // Check if the header exists and is not disabled and its value is not empty",
+					"    return header && !header.disabled && header.value.trim() !== '';",
+					"};",
+					"",
+					"// Check if the current endpoint requires headers",
+					"if (requiresHeaders()) {",
+					"    // Check if Authorization header is provided",
+					"    if (!isHeaderProvided('Authorization')) {",
+					"        // If Authorization header is missing or empty, throw an error",
+					"        throw new Error('Authorization header is missing or empty. Please provide a valid Authorization header.');",
+					"    }",
+					"} else {",
+					"    console.log('Skipping header checks for this endpoint.');",
+					"}",
+					"",
 					"const getRandomName = () => {",
 					"const firstNames = [\"Aarav\", \"Aarya\", \"Advait\", \"Aishwarya\", \"Akshay\", \"Ananya\", \"Aaradhya\", \"Ayush\", \"Deepika\", \"Ishaan\"];",
 					"const lastNames = [\"Sharma\", \"Verma\", \"Singh\", \"Patel\", \"Gupta\", \"Kumar\", \"Joshi\", \"Shah\", \"Chopra\", \"Mehra\"];",
