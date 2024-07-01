@@ -21,7 +21,7 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   private final UserExternalIdentityDao userExternalIdentityDao = new UserExternalIdentityDaoImpl();
   private final LocationService locationService = LocationServiceImpl.getInstance();
   private static UserExternalIdentityService selfDeclarationService = null;
-  
+
   public static UserExternalIdentityService getInstance() {
     if (selfDeclarationService == null) {
       selfDeclarationService = new UserExternalIdentityServiceImpl();
@@ -141,5 +141,14 @@ public class UserExternalIdentityServiceImpl implements UserExternalIdentityServ
   @Override
   public String getUserV2(String extId, String orgId, String idType, RequestContext context) {
     return userExternalIdentityDao.getUserIdByExternalId(extId.toLowerCase(), orgId, context);
+  }
+
+  @Override
+  public boolean deleteUserExternalIds(
+      List<Map<String, String>> dbUserExternalIds, RequestContext context) {
+    for (Map<String, String> extIdMap : dbUserExternalIds) {
+      userExternalIdentityDao.deleteUserExternalId(extIdMap, context);
+    }
+    return true;
   }
 }

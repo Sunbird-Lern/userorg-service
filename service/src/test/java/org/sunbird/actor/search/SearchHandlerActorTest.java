@@ -1,6 +1,5 @@
 package org.sunbird.actor.search;
 
-import static akka.testkit.JavaTestKit.duration;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -9,13 +8,13 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.javadsl.TestKit;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -36,7 +35,12 @@ import org.sunbird.response.Response;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceFactory.class, ElasticSearchRestHighImpl.class, EsClientFactory.class, OrgTypeValidator.class})
+@PrepareForTest({
+  ServiceFactory.class,
+  ElasticSearchRestHighImpl.class,
+  EsClientFactory.class,
+  OrgTypeValidator.class
+})
 @PowerMockIgnore({
   "javax.management.*",
   "javax.net.ssl.*",
@@ -44,7 +48,6 @@ import scala.concurrent.Promise;
   "jdk.internal.reflect.*",
   "javax.crypto.*"
 })
-
 public class SearchHandlerActorTest {
 
   private static ActorSystem system;
@@ -131,7 +134,7 @@ public class SearchHandlerActorTest {
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     try {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
       Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
     } catch (Exception ex) {
       Assert.assertNotNull(ex);
@@ -175,7 +178,7 @@ public class SearchHandlerActorTest {
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     try {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
       Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
     } catch (Exception ex) {
       Assert.assertNotNull(ex);
@@ -221,7 +224,7 @@ public class SearchHandlerActorTest {
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     try {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
       Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
     } catch (Exception ex) {
       Assert.assertNotNull(ex);
@@ -258,7 +261,7 @@ public class SearchHandlerActorTest {
     reqObj.setRequest(innerMap);
     subject.tell(reqObj, probe.getRef());
     try {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
       Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
     } catch (Exception ex) {
       Assert.assertNotNull(ex);
@@ -275,7 +278,7 @@ public class SearchHandlerActorTest {
 
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException exc =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != exc);
   }
 }

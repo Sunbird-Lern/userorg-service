@@ -16,4 +16,7 @@ public interface UserExternalIdentityService {
   String getUserV1(String extId, String provider, String idType, RequestContext context);
 
   String getUserV2(String extId, String orgId, String idType, RequestContext context);
+
+  boolean deleteUserExternalIds(
+      List<Map<String, String>> dbUserExternalIds, RequestContext context);
 }

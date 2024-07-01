@@ -20,6 +20,9 @@ public interface SSOManager {
   /** Update password in SSO server (keycloak). */
   boolean updatePassword(String userId, String password, RequestContext context);
 
+  /** Cleanup User PII Information * */
+  boolean removePII(String userId, RequestContext context);
+
   /**
    * Method to remove user from keycloak account on basis of userId .
    *

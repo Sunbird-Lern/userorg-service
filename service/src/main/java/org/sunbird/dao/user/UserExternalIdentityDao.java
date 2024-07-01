@@ -12,4 +12,6 @@ public interface UserExternalIdentityDao {
 
   public List<Map<String, Object>> getUserSelfDeclaredDetails(
       String userId, RequestContext context);
+
+  public void deleteUserExternalId(Map<String, String> map, RequestContext context);
 }

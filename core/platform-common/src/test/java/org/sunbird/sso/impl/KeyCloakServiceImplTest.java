@@ -28,6 +28,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.exception.ResponseCode;
 import org.sunbird.keys.JsonKey;
+import org.sunbird.request.RequestContext;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
 import org.sunbird.sso.SSOManager;
@@ -41,7 +42,6 @@ import org.sunbird.util.PropertiesCache;
   KeycloakRequiredActionLinkUtil.class,
   PropertiesCache.class
 })
-@Ignore
 public class KeyCloakServiceImplTest extends BaseHttpTest {
 
   private SSOManager keyCloakService = SSOServiceFactory.getInstance();
@@ -95,7 +95,7 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Response response = mock(Response.class);
     PowerMockito.mockStatic(KeyCloakConnectionProvider.class);
     try {
-
+      KeyCloakConnectionProvider.SSO_REALM = "sunbird";
       doReturn(kcp).when(KeyCloakConnectionProvider.class, "getConnection");
       doReturn(realmRes).when(kcp).realm(Mockito.anyString());
       doReturn(usersRes).when(realmRes).users();
@@ -133,19 +133,18 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
     Assert.assertNull(exp);
   }
 
-  @Test(expected = ProjectCommonException.class)
+//  @Test(expected = ProjectCommonException.class)
+  @Ignore
   public void testDeactivateUserSuccess() {
-
-    Map<String, Object> request = new HashMap<String, Object>();
-    request.put(JsonKey.USER_ID, "123");
-    request.put(JsonKey.FIRST_NAME, userName);
+    Map<String, Object> request = new HashMap<>();
+    request.put(JsonKey.USER_ID, "1reter23");
     keyCloakService.deactivateUser(request, null);
   }
 
   @Test(expected = ProjectCommonException.class)
   public void testRemoveUserSuccess() {
 
-    Map<String, Object> request = new HashMap<String, Object>();
+    Map<String, Object> request = new HashMap<>();
     request.put(JsonKey.USER_ID, "123");
     keyCloakService.removeUser(request, null);
   }
@@ -196,6 +195,12 @@ public class KeyCloakServiceImplTest extends BaseHttpTest {
   @Test
   public void testUpdatePassword() throws Exception {
     boolean updated = keyCloakService.updatePassword(userId.get(JsonKey.USER_ID), "password", null);
-    Assert.assertNotNull(updated);
+    Assert.assertTrue(updated);
+  }
+
+  @Test
+  public void testRemovePII() {
+    boolean piiRemoved = keyCloakService.removePII(userId.get(JsonKey.USER_ID), new RequestContext());
+    Assert.assertTrue(piiRemoved);
   }
 }

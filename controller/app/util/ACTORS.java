@@ -101,7 +101,9 @@ public enum ACTORS {
   USER_TNC_ACTOR(UserTnCActor.class, "user_tnc_actor"),
   USER_TYPE_ACTOR(UserTypeActor.class, "user_type_actor"),
   USER_UPDATE_ACTOR(UserUpdateActor.class, "user_update_actor"),
-  BACKGROUND_JOB_MANAGER_ACTOR(BackgroundJobManager.class, "background_job_manager_actor");
+  BACKGROUND_JOB_MANAGER_ACTOR(BackgroundJobManager.class, "background_job_manager_actor"),
+  USER_DELETION_BACKGROUND_JOB_ACTOR(
+      UserDeletionBackgroundJobActor.class, "user_deletion_background_job_actor");
 
   ACTORS(Class clazz, String name) {
     actorClass = clazz;

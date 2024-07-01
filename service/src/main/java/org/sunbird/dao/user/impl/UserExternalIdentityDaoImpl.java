@@ -71,4 +71,21 @@ public class UserExternalIdentityDaoImpl implements UserExternalIdentityDao {
     }
     return dbResExternalIds;
   }
+
+  @Override
+  public void deleteUserExternalId(Map<String, String> map, RequestContext context) {
+    map.remove(JsonKey.LAST_UPDATED_BY);
+    map.remove(JsonKey.CREATED_BY);
+    map.remove(JsonKey.LAST_UPDATED_ON);
+    map.remove(JsonKey.CREATED_ON);
+    map.remove(JsonKey.ORIGINAL_EXTERNAL_ID);
+    map.remove(JsonKey.ORIGINAL_ID_TYPE);
+    map.remove(JsonKey.ORIGINAL_PROVIDER);
+    map.remove(JsonKey.USER_ID);
+    cassandraOperation.deleteRecord(
+        ProjectUtil.getConfigValue(JsonKey.SUNBIRD_KEYSPACE),
+        JsonKey.USR_EXT_IDNT_TABLE,
+        map,
+        context);
+  }
 }
