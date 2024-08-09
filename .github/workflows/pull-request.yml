@@ -1,0 +1,53 @@
+name: Build and Deploy
+on:
+  pull-request:
+    types: [opened, synchronize]
+
+jobs:
+  Test-and-Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore Maven cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: userorg-dependency-cache-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            userorg-dependency-cache-
+
+      - name: Build and Run test cases
+        run: mvn clean install
+
+      - name: Store build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: userorg-service
+          path: controller/target/userorg-service-1.0-SNAPSHOT-dist.zip
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn verify -DskipTests org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=Sunbird-Lern_userorg-service \
+            -Dsonar.organization=sunbird-lern \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.exclusions=**/cassandra-utils/**,**/es-utils/**,**/models/**,**/model/**,**/bean/**,**/dto/**,**/bulkupload/**,**/error/**,**/exception/**,**/util/search/** \
+            -Dsonar.coverage.jacoco.xmlReportPaths=/home/runner/work/userorg-service/userorg-service/reports/target/jacoco/jacoco.xml
