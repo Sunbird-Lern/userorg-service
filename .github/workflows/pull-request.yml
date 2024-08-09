@@ -1,6 +1,6 @@
 name: Build and Deploy
 on:
-  pull-request:
+  pull_request:
     types: [opened, synchronize]
 
 jobs:
