@@ -48,7 +48,7 @@ public class UserControllerTest2 extends BaseApplicationTest {
   private static String query = "query";
   private static String language = "any-language";
   private static String role = "user";
-  private static final String UPDATE_URL = "/v1/user/update";
+  //private static final String UPDATE_URL = "/v1/user/update";
   public static final String USER_EXISTS_API = "/v1/user/exists/";
 
   public static Map<String, List<String>> headerMap;

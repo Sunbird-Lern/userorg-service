@@ -33,7 +33,7 @@ public class RequestInterceptor {
 
   static {
     restrictedUriList = new ArrayList<>();
-    restrictedUriList.add("/v1/user/update");
+    //restrictedUriList.add("/v1/user/update");
     restrictedUriList.add("/v1/note/create");
     restrictedUriList.add("/v1/note/update");
     restrictedUriList.add("/v1/note/search");
@@ -43,12 +43,12 @@ public class RequestInterceptor {
 
     // ---------------------------
     short var = 1;
-    apiHeaderIgnoreMap.put("/v1/user/create", var);
-    apiHeaderIgnoreMap.put("/v2/user/create", var);
+    //apiHeaderIgnoreMap.put("/v1/user/create", var);
+    //apiHeaderIgnoreMap.put("/v2/user/create", var);
     apiHeaderIgnoreMap.put("/v2/org/search", var);
     apiHeaderIgnoreMap.put("/v2/org/preferences/read", var);
-    apiHeaderIgnoreMap.put("/v3/user/create", var);
-    apiHeaderIgnoreMap.put("/v1/user/signup", var);
+    //apiHeaderIgnoreMap.put("/v3/user/create", var);
+    //apiHeaderIgnoreMap.put("/v1/user/signup", var);
     apiHeaderIgnoreMap.put("/v1/org/create", var);
     apiHeaderIgnoreMap.put("/v1/system/settings/set", var);
     apiHeaderIgnoreMap.put("/v1/org/update/encryptionkey", var);
@@ -58,7 +58,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/org/assign/key", var);
     apiHeaderIgnoreMap.put("/v2/user/signup", var);
     apiHeaderIgnoreMap.put("/v1/ssouser/create", var);
-    apiHeaderIgnoreMap.put("/v1/org/search", var);
+    //apiHeaderIgnoreMap.put("/v1/org/search", var);
     apiHeaderIgnoreMap.put("/service/health", var);
     apiHeaderIgnoreMap.put("/health", var);
     apiHeaderIgnoreMap.put("/v1/notification/email", var);
@@ -73,7 +73,7 @@ public class RequestInterceptor {
     apiHeaderIgnoreMap.put("/v1/location/update", var);
     apiHeaderIgnoreMap.put("/v1/location/search", var);
     apiHeaderIgnoreMap.put("/v1/location/delete", var);
-    apiHeaderIgnoreMap.put("/v1/otp/generate", var);
+    //apiHeaderIgnoreMap.put("/v1/otp/generate", var);
     apiHeaderIgnoreMap.put("/v1/otp/verify", var);
     apiHeaderIgnoreMap.put("/v2/otp/generate", var);
     apiHeaderIgnoreMap.put("/v2/otp/verify", var);

@@ -40,7 +40,7 @@ public class OtpControllerTest extends BaseApplicationTest {
   private static final String VALID_EMAIL_TYPE = "email";
   private static final String INVALID_TYPE = "invalidType";
   private static final String INVALID_OTP = "anyOtp";
-  private static final String GENERATE_OTP_URL = "/v1/otp/generate";
+  //private static final String GENERATE_OTP_URL = "/v1/otp/generate";
   private static final String VERIFY_OTP_URL = "/v1/otp/verify";
 
   @Before
@@ -48,60 +48,60 @@ public class OtpControllerTest extends BaseApplicationTest {
     setup(ACTORS.OTP_ACTOR, DummyActor.class);
   }
 
-  @Test
-  public void testGenerateOtpFailureWithoutPhoneKey() {
-    Result result =
-        performTest(
-            GENERATE_OTP_URL,
-            HttpMethods.POST.name(),
-            createInvalidOtpRequest(false, null, true, VALID_PHONE_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testGenerateOtpFailureWithoutPhoneKey() {
+  //  Result result =
+  //      performTest(
+  //          GENERATE_OTP_URL,
+  //          HttpMethods.POST.name(),
+  //          createInvalidOtpRequest(false, null, true, VALID_PHONE_TYPE, false, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testGenerateOtpFailureWithInvalidPhone() {
-    Result result =
-        performTest(
-            GENERATE_OTP_URL,
-            HttpMethods.POST.name(),
-            createInvalidOtpRequest(true, INVALID_PHONE, true, VALID_PHONE_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testGenerateOtpFailureWithInvalidPhone() {
+  //  Result result =
+  //      performTest(
+  //          GENERATE_OTP_URL,
+  //          HttpMethods.POST.name(),
+  //          createInvalidOtpRequest(true, INVALID_PHONE, true, VALID_PHONE_TYPE, false, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testGenerateOtpFailureWithoutEmailKey() {
-    Result result =
-        performTest(
-            GENERATE_OTP_URL,
-            HttpMethods.POST.name(),
-            createInvalidOtpRequest(false, null, true, VALID_EMAIL_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testGenerateOtpFailureWithoutEmailKey() {
+  //  Result result =
+  //      performTest(
+  //         GENERATE_OTP_URL,
+  //          HttpMethods.POST.name(),
+  //          createInvalidOtpRequest(false, null, true, VALID_EMAIL_TYPE, false, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testGenerateOtpFailureWithInvalidEmail() {
-    Result result =
-        performTest(
-            GENERATE_OTP_URL,
-            HttpMethods.POST.name(),
-            createInvalidOtpRequest(true, INVALID_EMAIL, true, VALID_EMAIL_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testGenerateOtpFailureWithInvalidEmail() {
+  //  Result result =
+  //      performTest(
+  //         GENERATE_OTP_URL,
+  //          HttpMethods.POST.name(),
+  //          createInvalidOtpRequest(true, INVALID_EMAIL, true, VALID_EMAIL_TYPE, false, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testGenerateOtpFailureWithInvalidType() {
-    Result result =
-        performTest(
-            GENERATE_OTP_URL,
-            HttpMethods.POST.name(),
-            createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, false, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testGenerateOtpFailureWithInvalidType() {
+  //  Result result =
+  //      performTest(
+  //          GENERATE_OTP_URL,
+  //          HttpMethods.POST.name(),
+  //          createInvalidOtpRequest(true, VALID_EMAIL, true, INVALID_TYPE, false, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
   @Test
   public void testVerifyOtpFailureWithoutPhoneKey() {

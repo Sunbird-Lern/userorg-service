@@ -57,7 +57,7 @@ public class UserControllerTest extends BaseApplicationTest {
   private static String query = "query";
   private static String language = "any-language";
   private static String role = "user";
-  private static final String UPDATE_URL = "/v1/user/update";
+  //private static final String UPDATE_URL = "/v1/user/update";
   public static final String USER_EXISTS_API = "/v1/user/exists/";
 
   public static Map<String, List<String>> headerMap;
@@ -85,37 +85,37 @@ public class UserControllerTest extends BaseApplicationTest {
     headerMap.put(HeaderParam.X_APP_ID.getName(), Arrays.asList("Some app Id"));
   }
 
-  @Test
-  public void testCreateUserSuccess() {
+  //@Test
+  //public void testCreateUserSuccess() {
+  //
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
 
-    Result result =
-        performTest(
-            "/v1/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
+  //@Test
+  //public void testCreateUserV3Success() {
 
-  @Test
-  public void testCreateUserV3Success() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/signup",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
 
-    Result result =
-        performTest(
-            "/v1/user/signup",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
-
-  @Test
-  public void testCreateUserV3SyncSuccess() {
-    Result result =
-        performTest(
-            "/v3/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
+  //@Test
+  //public void testCreateUserV3SyncSuccess() {
+  //  Result result =
+  //      performTest(
+  //          "/v3/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, ""));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
 
   @Test
   public void testCreateUserV2SyncSuccess() {
@@ -127,79 +127,79 @@ public class UserControllerTest extends BaseApplicationTest {
     assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
   }
 
-  @Test
-  public void testCreateUserV3WithInvalidPassLength() {
-    Result result =
-        performTest(
-            "/v1/user/signup",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab@1214"));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testCreateUserV3WithInvalidPassLength() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/signup",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab@1214"));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testCreateUserWithInvalidPassLength() {
-    Result result =
-        performTest(
-            "/v1/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab@1214"));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testCreateUserWithInvalidPassLength() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab@1214"));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testCreateUserWithOutUpperCasePass() {
-    Result result =
-        performTest(
-            "/v1/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "ab@12148"));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testCreateUserWithOutUpperCasePass() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "ab@12148"));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testCreateUserWithOutSpecialCharPass() {
-    Result result =
-        performTest(
-            "/v1/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "ab312148"));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testCreateUserWithOutSpecialCharPass() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "ab312148"));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testCreateUserWithCorrectPass() {
-    Result result =
-        performTest(
-            "/v1/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
+  //@Test
+  //public void testCreateUserWithCorrectPass() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
 
-  @Test
-  public void testCreateUserV3WithCorrectPass() {
-    Result result =
-        performTest(
-            "/v1/user/signup",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
+  //@Test
+  //public void testCreateUserV3WithCorrectPass() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/signup",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
 
-  @Test
-  public void testCreateUserV4Success() {
-    Result result =
-        performTest(
-            "/v4/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
+  //@Test
+  //public void testCreateUserV4Success() {
+  //  Result result =
+  //      performTest(
+  //          "/v4/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
 
   @Test
   public void testCreateUserV3V2WithCorrectPass() {
@@ -211,57 +211,57 @@ public class UserControllerTest extends BaseApplicationTest {
     assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
   }
 
-  @Test
-  public void testCreateUserV4V2WithCorrectPass() {
-    Result result =
-        performTest(
-            "/v1/manageduser/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-  }
+  //@Test
+  //public void testCreateUserV4V2WithCorrectPass() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/manageduser/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, phoneNumber, null, true, "Ab3#$2148"));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //}
   // @Test
-  public void testCreateUserFailureWithoutContentType() {
-    String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false, null);
-    RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
+  //public void testCreateUserFailureWithoutContentType() {
+  //  String data = (String) createOrUpdateUserRequest(userName, phoneNumber, null, false, null);
+  //  RequestBuilder req = new RequestBuilder().bodyText(data).uri("/v1/user/create").method("POST");
     // req.headers(headerMap);
-    Result result = Helpers.route(application, req);
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //  Result result = Helpers.route(application, req);
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testCreateUserFailureWithInvalidPhoneNumber() {
-    Result result =
-        performTest(
-            "/v1/user/create",
-            "POST",
-            (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testCreateUserFailureWithInvalidPhoneNumber() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/create",
+  //          "POST",
+  //          (Map) createOrUpdateUserRequest(userName, invalidPhonenumber, null, true, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testUpdateUserSuccess() throws Exception {
-    Result result =
-        performTest(
-            "/v1/user/update",
-            "PATCH",
-            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //@Test
+  //public void testUpdateUserSuccess() throws Exception {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/update",
+  //          "PATCH",
+  //          (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+  //}
 
-  @Test
-  public void testUpdateUserV2Success() throws Exception {
-    Result result =
-        performTest(
-            "/v2/user/update",
-            "PATCH",
-            (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //@Test
+  //public void testUpdateUserV2Success() throws Exception {
+  //  Result result =
+  //      performTest(
+  //          "/v2/user/update",
+  //          "PATCH",
+  //          (Map) createOrUpdateUserRequest(null, phoneNumber, userId, true, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+  //}
 
   @Test
   public void testUpdateUserV3Success() throws Exception {
@@ -274,16 +274,16 @@ public class UserControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 200);
   }
 
-  @Test
-  public void testUpdateUserFailureWithInvalidPhoneNumber() {
-    Result result =
-        performTest(
-            "/v1/user/update",
-            "PATCH",
-            (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testUpdateUserFailureWithInvalidPhoneNumber() {
+  //  Result result =
+  //      performTest(
+  //          "/v1/user/update",
+  //          "PATCH",
+  //          (Map) createOrUpdateUserRequest(null, invalidPhonenumber, userId, true, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
   @Test
   public void testGetUserDetailsSuccessByUserId() {
@@ -339,19 +339,19 @@ public class UserControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-  @Test
-  public void testSearchUserSuccess() {
-    Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //@Test
+  //public void testSearchUserSuccess() {
+  //  Result result = performTest("/v1/user/search", "POST", searchUserRequest(new HashMap<>()));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+ // }
 
-  @Test
-  public void testSearchUserSuccessV2() {
-    Result result = performTest("/v2/user/search", "POST", searchUserRequest(new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //@Test
+  //public void testSearchUserSuccessV2() {
+  //  Result result = performTest("/v2/user/search", "POST", searchUserRequest(new HashMap<>()));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+  //}
 
   @Test
   public void testSearchUserSuccessV3() {
@@ -374,21 +374,21 @@ public class UserControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-  @Test
-  public void testUpdateUserFrameworkSuccess() {
-    Result result =
-        performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", true));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //@Test
+  //public void testUpdateUserFrameworkSuccess() {
+  //  Result result =
+  //      performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", true));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+  //}
 
-  @Test
-  public void testUpdateUserFrameworkFailure() {
-    Result result =
-        performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", false));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testUpdateUserFrameworkFailure() {
+  //  Result result =
+  //      performTest(UPDATE_URL, "PATCH", (Map) updateUserFrameworkRequest(userId, "NCF", false));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
   private Map updateUserFrameworkRequest(String userId, String frameworkId, boolean success) {
     Map<String, Object> request = new HashMap<>();

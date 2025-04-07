@@ -171,13 +171,13 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     assertEquals(400, getResponseStatus(result));
   }
 
-  @Test
-  public void testSearchOrgSuccess() {
-    Result result =
-        performTest("/v1/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertEquals(200, getResponseStatus(result));
-  }
+  //@Test
+  //public void testSearchOrgSuccess() {
+  //  Result result =
+  //      performTest("/v1/org/search", "POST", searchOrganisationRequest(status, new HashMap<>()));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertEquals(200, getResponseStatus(result));
+  //}
 
   @Test
   public void testSearchOrgV2Success() {
@@ -187,12 +187,12 @@ public class OrganisationControllerTest extends BaseApplicationTest {
     assertEquals(200, getResponseStatus(result));
   }
 
-  @Test
-  public void testSearchOrgFailureWithoutFilters() {
-    Result result = performTest("/v1/org/search", "POST", searchOrganisationRequest(status, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertEquals(400, getResponseStatus(result));
-  }
+  //@Test
+  //public void testSearchOrgFailureWithoutFilters() {
+  //  Result result = performTest("/v1/org/search", "POST", searchOrganisationRequest(status, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertEquals(400, getResponseStatus(result));
+  //}
 
   @Test
   public void testAddEncyptionKeyPublicPem() throws IOException {

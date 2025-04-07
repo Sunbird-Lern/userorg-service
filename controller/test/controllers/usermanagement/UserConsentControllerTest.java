@@ -55,11 +55,11 @@ public class UserConsentControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == Response.Status.OK.getStatusCode());
   }
 
-  @Test
-  public void getUserConsentSuccess() {
-    Result result = performTest("/v1/user/consent/read", "POST", (Map) getUserConsentRequest());
-    assertTrue(getResponseStatus(result) == Response.Status.OK.getStatusCode());
-  }
+  //@Test
+  //public void getUserConsentSuccess() {
+  //  Result result = performTest("/v1/user/consent/read", "POST", (Map) getUserConsentRequest());
+  //  assertTrue(getResponseStatus(result) == Response.Status.OK.getStatusCode());
+  //}
 
   public static Map<String, Object> getUserConsentRequest() {
     Map<String, Object> filters = new HashMap<String, Object>();

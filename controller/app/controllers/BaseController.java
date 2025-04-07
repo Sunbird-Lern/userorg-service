@@ -469,12 +469,12 @@ public class BaseController extends Controller {
   private static void handleBackwardCompatibility(
       Request request, ProjectCommonException exception, Response response) {
     // This code is for backwards compatibility
-    if (request.path() != null && request.path().startsWith("/v1/otp/generate")) {
-      if ("errorRateLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
-        response.getParams().setErr("ERROR_RATE_LIMIT_EXCEEDED");
-        response.getParams().setStatus("ERROR_RATE_LIMIT_EXCEEDED");
-      }
-    }
+    //if (request.path() != null && request.path().startsWith("/v1/otp/generate")) {
+    //  if ("errorRateLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
+    //    response.getParams().setErr("ERROR_RATE_LIMIT_EXCEEDED");
+    //    response.getParams().setStatus("ERROR_RATE_LIMIT_EXCEEDED");
+    //  }
+    //}
 
     if (request.path() != null
         && request.path().startsWith("/v1/otp/verify")
@@ -491,12 +491,12 @@ public class BaseController extends Controller {
       response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
     }
 
-    if (request.path() != null
-        && (request.path().startsWith("/v1/user/consent/read"))
-        && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
-      response.getParams().setErr("USER_CONSENT_NOT_FOUND");
-      response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
-    }
+    //if (request.path() != null
+    //    && (request.path().startsWith("/v1/user/consent/read"))
+    //    && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+    //  response.getParams().setErr("USER_CONSENT_NOT_FOUND");
+    //  response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
+    //}
     if (request.path() != null
             && (request.path().startsWith("/v1/user/get/"))
             && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {

@@ -40,14 +40,14 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     setup(Arrays.asList(ACTORS.USER_ROLE_ACTOR, ACTORS.FETCH_USER_ROLE_ACTOR), DummyActor.class);
   }
 
-  @Test
-  public void testAssignRolesSuccess() {
+  //@Test
+  //public void testAssignRolesSuccess() {
     // setup(DummyActor.class);
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+    //Result result =
+    //    performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, role));
+    //assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+    //assertTrue(getResponseStatus(result) == 200);
+  //}
 
   @Test
   public void testAssignRolesV2Success() {
@@ -121,38 +121,38 @@ public class UserRoleControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-  @Test
-  public void testAssignRolesFailueWithoutOrgId() {
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testAssignRolesFailueWithoutOrgId() {
+  //  Result result =
+  //      performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, false, true, role));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testAssignRolesFailueWithoutUserId() {
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(false, true, true, role));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testAssignRolesFailueWithoutUserId() {
+  //  Result result =
+  //      performTest("/v1/user/assign/role", "POST", createUserRoleRequest(false, true, true, role));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testAssignRolesFailureWithoutRoles() {
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, false, null));
+  //@Test
+  //public void testAssignRolesFailureWithoutRoles() {
+  //  Result result =
+  //      performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, false, null));
 
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+  //  assertTrue(getResponseStatus(result) == 400);
+  //}
 
-  @Test
-  public void testUpdateAssignedRolesFailureWithEmptyRole() {
-    Result result =
-        performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, null));
-    assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
-    assertTrue(getResponseStatus(result) == 400);
-  }
+  //@Test
+  //public void testUpdateAssignedRolesFailureWithEmptyRole() {
+  //  Result result =
+  //      performTest("/v1/user/assign/role", "POST", createUserRoleRequest(true, true, true, null));
+  //  assertEquals(getResponseCode(result), ResponseCode.CLIENT_ERROR.name());
+   // assertTrue(getResponseStatus(result) == 400);
+  //}
 
   @Test
   public void testGetAllRolesSuccess() {

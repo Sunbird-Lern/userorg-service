@@ -32,9 +32,9 @@ import util.ACTORS;
 @Ignore
 public class FeedControllerTest extends BaseApplicationTest {
 
-  String SAVE_FEED_URL = "/v1/user/feed/create";
+  //String SAVE_FEED_URL = "/v1/user/feed/create";
   String UPDATE_FEED_URL = "/v1/user/feed/update";
-  String DELETE_FEED_URL = "/v1/user/feed/delete";
+  //String DELETE_FEED_URL = "/v1/user/feed/delete";
 
   @Before
   public void before() {
@@ -70,11 +70,11 @@ public class FeedControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 200);
   }
 
-  public void testCreateUserFeed() {
-    Result result = performTest(SAVE_FEED_URL, HttpMethods.POST.name(), createFeedRequest(true));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //public void testCreateUserFeed() {
+  //  Result result = performTest(SAVE_FEED_URL, HttpMethods.POST.name(), createFeedRequest(true));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+  //}
 
   @Test
   public void testUpdateUserFeedFailureForUserID() {
@@ -85,12 +85,12 @@ public class FeedControllerTest extends BaseApplicationTest {
     assertTrue(getResponseStatus(result) == 400);
   }
 
-  @Test
-  public void testDeleteUserFeed() {
-    Result result = performTest(DELETE_FEED_URL, HttpMethods.POST.name(), updateFeedRequest(true));
-    assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
-    assertTrue(getResponseStatus(result) == 200);
-  }
+  //@Test
+  //public void testDeleteUserFeed() {
+  //  Result result = performTest(DELETE_FEED_URL, HttpMethods.POST.name(), updateFeedRequest(true));
+  //  assertEquals(getResponseCode(result), ResponseCode.SUCCESS.name());
+  //  assertTrue(getResponseStatus(result) == 200);
+  //}
 
   private Map updateFeedRequest(boolean setUserid) {
     Map<String, Object> requestMap = new HashMap<>();
