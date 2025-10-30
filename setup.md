@@ -1,5 +1,5 @@
 ## Pre-requisites
-1. Akka middleware actors should be up and running. Follow these [instructions](https://github.com/project-sunbird/sunbird-lms-mw/blob/master/setup.md) to run the akka actors.
+1. Pekko middleware actors should be up and running. Follow these [instructions](https://github.com/project-sunbird/sunbird-lms-mw/blob/master/setup.md) to run the pekko actors.
 
 ## Configuration
 1. Environment Variabls

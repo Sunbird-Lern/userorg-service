@@ -62,9 +62,9 @@ public class BaseController extends Controller {
   private static final LoggerUtil logger = new LoggerUtil(BaseController.class);
 
   private static final ObjectMapper objectMapper = new ObjectMapper();
-  public static final int AKKA_WAIT_TIME = 30;
+  public static final int PEKKO_WAIT_TIME = 30;
   private static final String version = "v1";
-  protected Timeout timeout = new Timeout(AKKA_WAIT_TIME, TimeUnit.SECONDS);
+  protected Timeout timeout = new Timeout(PEKKO_WAIT_TIME, TimeUnit.SECONDS);
   private static final String debugEnabled = "false";
 
   private org.sunbird.request.Request initRequest(
@@ -680,7 +680,7 @@ public class BaseController extends Controller {
   }
 
   /**
-   * This method will make a call to Akka actor and return CompletionStage.
+   * This method will make a call to Pekko actor and return CompletionStage.
    *
    * @param actorRef ActorSelection
    * @param request Request
