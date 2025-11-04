@@ -2,7 +2,7 @@
 1. Pekko middleware actors should be up and running. Follow these [instructions](https://github.com/project-sunbird/sunbird-lms-mw/blob/master/setup.md) to run the pekko actors.
 
 ## Configuration
-1. Environment Variabls
+1. Environment Variables
     1. sunbird_learnerstate_actor_host: host of the actor service, e.g.: actor-service
     2. sunbird_learnerstate_actor_port: port on which the remote actors are running
     3. sunbird_sso_publickey : sso public key
