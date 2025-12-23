@@ -1,19 +1,20 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.pattern.Patterns;
-import akka.pattern.PipeToSupport;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.pattern.PipeToSupport;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import java.util.*;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -513,12 +514,12 @@ public abstract class UserManagementActorTestBase {
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(1000), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       String errString = ActorOperations.getOperationCodeByActorOperation(reqObj.getOperation());
       ProjectCommonException res =
-          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+          probe.expectMsgClass(Duration.ofSeconds(1000), ProjectCommonException.class);
       return res.getErrorCode().equals("UOS_" + errString + errorCode.getErrorCode())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
@@ -531,11 +532,11 @@ public abstract class UserManagementActorTestBase {
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(1000), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+          probe.expectMsgClass(Duration.ofSeconds(1000), ProjectCommonException.class);
       return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
@@ -548,12 +549,12 @@ public abstract class UserManagementActorTestBase {
     subject.tell(reqObj, probe.getRef());
 
     if (responseCode != null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
       return null != res && res.getResponseCode() == responseCode;
     }
     if (errorCode != null) {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
       return res.getErrorCode().equals(errorCode.getErrorCode())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }

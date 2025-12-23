@@ -125,8 +125,8 @@ sunbird_quartz_mode: cluster
 sunbird_redis_host: redis.lern.svc.cluster.local
 sunbird_redis_port: 6379
 sunbird_registry_service_baseurl: http://registry-service.registry.svc.cluster.local:8081/
-sunbird_remote_bg_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/user/BackgroundRequestRouter
-sunbird_remote_req_router_path: akka.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
+sunbird_remote_bg_req_router_path: pekko.tcp://SunbirdMWSystem@actor-service:8088/user/BackgroundRequestRouter
+sunbird_remote_req_router_path: pekko.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
 sunbird_reset_pass_msg: 'You have requested to reset password. Click on the link to set a password: {0}'
 sunbird_search_service_api_base_url: http://search-service.knowlg.svc.cluster.local:9000
 sunbird_sso_lb_ip: http://keycloak.lern.svc.cluster.local:8080

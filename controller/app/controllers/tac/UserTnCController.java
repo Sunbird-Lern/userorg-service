@@ -1,6 +1,6 @@
 package controllers.tac;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import controllers.BaseController;
 import controllers.tac.validator.UserTnCRequestValidator;
 import java.util.concurrent.CompletionStage;

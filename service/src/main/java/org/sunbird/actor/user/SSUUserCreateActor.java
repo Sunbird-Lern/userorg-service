@@ -1,8 +1,8 @@
 package org.sunbird.actor.user;
 
-import akka.dispatch.Futures;
-import akka.dispatch.Mapper;
-import akka.pattern.Patterns;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.dispatch.Mapper;
+import org.apache.pekko.pattern.Patterns;
 import java.util.HashMap;
 import java.util.Map;
 import org.sunbird.exception.ResponseMessage;

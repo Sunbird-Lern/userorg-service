@@ -1,13 +1,14 @@
 package org.sunbird.actor.bulkupload;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,7 +91,7 @@ public class LocationBulkUploadActorTest {
     String jsonString = createLines(headerLine, firstDataLine);
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     String processId = (String) res.get(JsonKey.PROCESS_ID);
     Assert.assertTrue(null != processId);
   }
@@ -127,7 +128,7 @@ public class LocationBulkUploadActorTest {
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException res =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != res);
   }
 
@@ -142,7 +143,7 @@ public class LocationBulkUploadActorTest {
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException res =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != res);
   }
 
@@ -156,7 +157,7 @@ public class LocationBulkUploadActorTest {
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException res =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != res);
   }
 
@@ -177,7 +178,7 @@ public class LocationBulkUploadActorTest {
     Request reqObj = getRequestObjectForLocationBulkUpload(LOCATION_TYPE, jsonString.getBytes());
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException res =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != res);
   }
 

@@ -3,7 +3,7 @@ package controllers.feed;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import akka.http.javadsl.model.HttpMethods;
+import org.apache.pekko.http.javadsl.model.HttpMethods;
 import controllers.BaseApplicationTest;
 import controllers.DummyActor;
 import controllers.feed.validator.FeedRequestValidator;

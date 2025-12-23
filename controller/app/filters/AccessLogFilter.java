@@ -1,6 +1,6 @@
 package filters;
 
-import akka.util.ByteString;
+import org.apache.pekko.util.ByteString;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import play.libs.streams.Accumulator;

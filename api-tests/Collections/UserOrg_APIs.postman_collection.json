@@ -1,11 +1,11 @@
 {
 	"info": {
-		"_postman_id": "b3270121-69ca-422c-a273-17edf98135fd",
+		"_postman_id": "5ed5cbe6-8c1c-4638-a156-acb98d507d31",
 		"name": "UserOrg_APIs",
 		"description": "The User ORG API is a collection of API's for creation and management of User and Org in sunbird platform.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "4875988",
-		"_collection_link": "https://dark-star-147860.postman.co/workspace/LernBBAPIs~32e17cc4-6806-407e-b8ef-485ad4d0b712/collection/4875988-b3270121-69ca-422c-a273-17edf98135fd?action=share&source=collection_link&creator=4875988"
+		"_collection_link": "https://dark-star-147860.postman.co/workspace/LernBBAPIs~32e17cc4-6806-407e-b8ef-485ad4d0b712/collection/4875988-5ed5cbe6-8c1c-4638-a156-acb98d507d31?action=share&source=collection_link&creator=4875988"
 	},
 	"item": [
 		{
@@ -247,7 +247,18 @@
 											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -255,12 +266,14 @@
 								"method": "POST",
 								"header": [
 									{
-										"key": "Authorization",
-										"value": "{{kong_api_key}}"
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
 									},
 									{
-										"key": "Content-Type",
-										"value": "application/json"
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
 									}
 								],
 								"body": {
@@ -410,7 +423,8 @@
 											"    pm.expect(jsonResponse.responseCode).to.eql(\"OK\");",
 											"});"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -418,16 +432,19 @@
 								"method": "POST",
 								"header": [
 									{
-										"key": "Authorization",
-										"value": "{{kong_api_key}}"
-									},
-									{
 										"key": "X-Authenticated-User-token",
-										"value": "{{access_token}}"
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
 									},
 									{
 										"key": "Content-Type",
-										"value": "application/json"
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
 									}
 								],
 								"body": {
@@ -1893,6 +1910,83 @@
 									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\",\n        \"phone\": \"{{random_phone_number}}\"\n    }\n}"
 								},
 								"url": "{{host}}/api/user/v3/update"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "DeleteUser",
+					"item": [
+						{
+							"name": "DeleteUserV1",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"userId\": \"{{user_id}}\"\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/delete"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "OwnershipTransferUser",
+					"item": [
+						{
+							"name": "Ownership Transfer",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{kong_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "X-Authenticated-User-token",
+										"value": "{{keycloak_access_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"context\": \"User Deletion\",\n        \"organisationId\": \"01379163320993382431\",\n        \"actionBy\": {\n            \"userId\": \"842e2f00-16d3-487b-99c2-576667e99f22\"\n        },\n        \"fromUser\": {\n            \"userId\": \"9b199b2b-54fa-47ba-9272-bb441645ca63\",\n            \"roles\": [\n                {\n                    \"role\": \"BOOK_CREATOR\",\n                    \"scope\": [\n                        {\n                            \"organisationId\": \"01379163320993382431\"\n                        }\n                    ]\n                },\n                {\n                    \"role\": \"CONTENT_CREATOR\",\n                    \"scope\": [\n                        {\n                            \"organisationId\": \"01379163320993382431\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"toUser\": {\n            \"userId\": \"30122dd1-5bb0-4bf6-9f90-6969e059cb83\",\n            \"roles\": [\n                {\n                    \"role\": \"BOOK_CREATOR\",\n                    \"scope\": [\n                        {\n                            \"organisationId\": \"01379163320993382431\"\n                        }\n                    ]\n                },\n                {\n                    \"role\": \"CONTENT_CREATOR\",\n                    \"scope\": [\n                        {\n                            \"organisationId\": \"01379163320993382431\"\n                        }\n                    ]\n                }\n            ]\n        },\n        \"objects\": []\n    }\n}"
+								},
+								"url": "{{host}}/api/user/v1/ownership/transfer"
 							},
 							"response": []
 						}
@@ -4799,6 +4893,42 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
+					"const requiresHeaders = () => {",
+					"    const requestUrl = pm.request.url.toString();",
+					"",
+					"    // List of paths to ignore",
+					"    const ignoredPaths = [",
+					"        '/health',",
+					"        '/auth/realms/sunbird/protocol/openid-connect/token',",
+					"        '/auth/v1/refresh/token'",
+					"    ];",
+					"",
+					"    // Check if the request URL contains any of the ignored paths",
+					"    return !ignoredPaths.some(path => requestUrl.includes(path));",
+					"};",
+					"",
+					"// Function to check if a specific header is present and not empty",
+					"const isHeaderProvided = (headerName) => {",
+					"    const headers = pm.request.headers;",
+					"    if (!headers) return false; // Check if headers exist",
+					"",
+					"    // Find the specified header",
+					"    const header = headers.find(h => h.key.toLowerCase() === headerName.toLowerCase());",
+					"",
+					"    // Check if the header exists and is not disabled and its value is not empty",
+					"    return header && !header.disabled && header.value.trim() !== '';",
+					"};",
+					"",
+					"// Check if the current endpoint requires headers",
+					"if (requiresHeaders()) {",
+					"    // Check if Authorization header is provided",
+					"    if (!isHeaderProvided('Authorization')) {",
+					"        // If Authorization header is missing or empty, throw an error",
+					"        throw new Error('Authorization header is missing or empty. Please provide a valid Authorization header.');",
+					"    }",
+					"} else {",
+					"    console.log('Skipping header checks for this endpoint.');",
+					"}",
 					"const getRandomName = () => {",
 					"const firstNames = [\"Aarav\", \"Aarya\", \"Advait\", \"Aishwarya\", \"Akshay\", \"Ananya\", \"Aaradhya\", \"Ayush\", \"Deepika\", \"Ishaan\"];",
 					"const lastNames = [\"Sharma\", \"Verma\", \"Singh\", \"Patel\", \"Gupta\", \"Kumar\", \"Joshi\", \"Shah\", \"Chopra\", \"Mehra\"];",

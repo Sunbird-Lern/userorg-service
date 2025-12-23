@@ -1,12 +1,13 @@
 package org.sunbird.actor.sync;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.pattern.Patterns;
-import akka.testkit.javadsl.TestKit;
+
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public class ESSyncActorTest {
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
     subject.tell(reqObj, probe.getRef());
     ProjectCommonException res =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != res);
   }
 
@@ -69,7 +70,7 @@ public class ESSyncActorTest {
     reqMap.put(JsonKey.OBJECT_TYPE, JsonKey.USER);
     reqObj.getRequest().put(JsonKey.DATA, reqMap);
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(null != res);
   }
 }

@@ -1,6 +1,6 @@
 package org.sunbird.actor.user;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.text.MessageFormat;
 import java.util.*;
 import javax.inject.Inject;

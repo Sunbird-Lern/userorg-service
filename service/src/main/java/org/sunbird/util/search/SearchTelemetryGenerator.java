@@ -1,6 +1,6 @@
 package org.sunbird.util.search;
 
-import akka.util.Timeout;
+import org.apache.pekko.util.Timeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

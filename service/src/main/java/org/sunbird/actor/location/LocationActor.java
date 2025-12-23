@@ -1,6 +1,6 @@
 package org.sunbird.actor.location;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
 import javax.inject.Inject;

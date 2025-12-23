@@ -20,6 +20,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<scoverage.plugin.version>1.1.1</scoverage.plugin.version>
 		<cassandra.driver.version>3.7.0</cassandra.driver.version>
+		<jackson.version>2.13.5</jackson.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -54,7 +55,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.10.5.1</version>
+			<version>${jackson.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.sunbird</groupId>

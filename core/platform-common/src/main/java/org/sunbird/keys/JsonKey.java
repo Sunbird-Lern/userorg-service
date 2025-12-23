@@ -614,7 +614,7 @@ public final class JsonKey {
   public static final String OTP_CONTACT_UPDATE_TEMPLATE_SMS = "otpContactUpdateTemplateSms";
   public static final String OTP_DELETE_USER_TEMPLATE_SMS = "otpDeleteUserTemplateSms";
   public static final String CONTACT_DETAILS_UPDATE_VERIFICATION_SUBJECT =
-      "OTP to edit Diksha Profile";
+      "OTP to edit Profile";
   public static final String DELETE_USER_VERIFICATION_SUBJECT =
       "OTP to proceed with profile deletion.";
   public static final String X_Source = "x-source";
@@ -671,8 +671,17 @@ public final class JsonKey {
   public static final String USER_TABLE_STATUS = "userTable";
   public static final String SUGGESTED_USERS = "suggested_users";
   public static final String DELETE_USER_ACTON = "delete-user";
+  public static final String ACTION_BY = "actionBy";
+  public static final String FROM_USER = "fromUser";
+  public static final String TO_USER = "toUser";
+  public static final String USER_OWNERSHIP_TRANSFER_ACTION = "ownership-transfer";
+  public static final String FROM_USER_PROFILE = "fromUserProfile";
+  public static final String TO_USER_PROFILE = "toUserProfile";
+  public static final String ASSET_INFORMATION = "assetInformation";
+  public static final String USER_OWNERSHIP_TRANSFER_TOPIC = "user-ownership-transfer-topic";
   public static final String OBJECT = "object";
   public static final String EDATA = "edata";
+  public static final String CDATA = "cdata";
   public static final String MANAGED_USERS = "managed_users";
   public static final String USER_DELETION_TOPIC = "user-deletion-broadcast-topic";
   public static final String USER_DELETION_ROLES = "user-deletion-roles";

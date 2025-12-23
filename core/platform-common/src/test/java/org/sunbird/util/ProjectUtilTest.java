@@ -200,11 +200,6 @@ public class ProjectUtilTest extends BaseHttpTest {
   }
 
   @Test
-  public void testEsIndexSuccess() {
-    assertEquals("searchindex", ProjectUtil.EsIndex.sunbird.getIndexName());
-  }
-
-  @Test
   public void testBulkProcessStatusSuccess() {
     assertEquals(0, ProjectUtil.BulkProcessStatus.NEW.getValue());
     assertEquals(1, ProjectUtil.BulkProcessStatus.IN_PROGRESS.getValue());

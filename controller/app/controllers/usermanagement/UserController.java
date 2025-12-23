@@ -1,6 +1,6 @@
 package controllers.usermanagement;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import controllers.BaseController;
 import controllers.usermanagement.validator.UserGetRequestValidator;
 import java.util.HashMap;
@@ -55,6 +55,9 @@ public class UserController extends BaseController {
   @Inject
   @Named("user_self_declaration_management_actor")
   private ActorRef userSelfDeclarationManagementActor;
+  @Inject
+  @Named("user_ownership_transfer_actor")
+  private ActorRef userOwnershipTransferActor;
 
   public CompletionStage<Result> createUser(Http.Request httpRequest) {
     return handleRequest(
@@ -472,4 +475,9 @@ public class UserController extends BaseController {
         true,
         httpRequest);
   }
+    public CompletionStage<Result> ownershipTransferUser(Http.Request httpRequest) {
+        return handleRequest(userOwnershipTransferActor,
+                ActorOperations.USER_OWNERSHIP_TRANSFER.getValue(),
+                httpRequest.body().asJson(), httpRequest);
+    }
 }

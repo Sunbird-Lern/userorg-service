@@ -1,9 +1,9 @@
 package org.sunbird.actor.user;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,6 +69,20 @@ public class UserDeletionBackgroundJobActorTest {
     searchResult.put(JsonKey.CONTENT, getUsersList());
     PowerMockito.when(userService.searchUser(Mockito.any(), Mockito.any()))
         .thenReturn(searchResult);
+
+    // Mock RequestContext and ReqId
+    RequestContext requestContext = PowerMockito.mock(RequestContext.class);
+    PowerMockito.when(requestContext.getReqId()).thenReturn("test-req-id");
+
+    // Mock Request to include RequestContext
+    Request request = PowerMockito.mock(Request.class);
+    PowerMockito.when(request.getRequestContext()).thenReturn(requestContext);
+
+    // Ensure Request object returns expected data
+    Map<String, Object> requestData = new HashMap<>();
+    requestData.put(JsonKey.USER_ID, "46545665465465");
+    requestData.put(JsonKey.USER_ROLES, new ArrayList<>(Arrays.asList(JsonKey.PUBLIC)));
+    PowerMockito.when(request.getRequest()).thenReturn(requestData);
   }
 
   @Test
@@ -85,6 +99,10 @@ public class UserDeletionBackgroundJobActorTest {
     Request reqObj = new Request();
     reqObj.getRequest().putAll(userData);
     reqObj.setOperation("inputKafkaTopic");
+
+    RequestContext requestContext = new RequestContext();
+    requestContext.setReqId("test-req-id");
+    reqObj.setRequestContext(requestContext);
 
     subject.tell(reqObj, probe.getRef());
     probe.expectNoMessage();

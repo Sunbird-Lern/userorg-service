@@ -10,6 +10,6 @@ ENV  M2_HOME /opt/apache-maven-3.3.9
 ENV  PATH ${M2_HOME}/bin:${PATH}
 COPY userorg /opt/userorg/
 WORKDIR /opt/userorg/services
-RUN mvn clean install -DskipTests -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORE_VERSION=1.4.6
+RUN mvn clean install -DskipTests -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk_2.12 -DCLOUD_STORE_VERSION=1.4.7
 WORKDIR /opt/userorg/services/userorg-service
 CMD ["mvn", "play2:dist"]

@@ -15,9 +15,9 @@
 
 	<repositories>
 		<repository>
-			<id>scalaz-bintray</id>
-			<name>Scalaz Bintray - releases</name>
-			<url>https://dl.bintray.com/scalaz/releases/</url>
+			<id>maven-central</id>
+			<name>Maven Central</name>
+			<url>https://repo.maven.apache.org/maven2/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -25,38 +25,69 @@
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>typesafe-releases-plugins</id>
-			<url>https://repo.typesafe.com/typesafe/releases/</url>
+			<id>maven-central-plugins</id>
+			<url>https://repo.maven.apache.org/maven2/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
 	<properties>
-		<play2.version>2.7.2</play2.version>
+		<play2.version>3.0.5</play2.version>
 		<play2.plugin.version>1.0.0-rc5</play2.plugin.version>
-		<sbt-compiler.plugin.version>1.0.0</sbt-compiler.plugin.version>
-		<scala.major.version>2.11</scala.major.version>
-		<scala.version>2.11.12</scala.version>
-		<learner.akka.version>2.5.19</learner.akka.version>
+		<scala.major.version>2.13</scala.major.version>
+		<scala.version>2.13.12</scala.version>
+		<pekko.version>1.0.3</pekko.version>
+		<pekko-http.version>1.0.1</pekko-http.version>
+		<jackson.version>2.14.3</jackson.version>
+		<guice.version>5.1.0</guice.version>
+		<slf4j.version>2.0.9</slf4j.version>
+		<logback.version>1.4.14</logback.version>
 	</properties>
 
 	<dependencies>
 		<!-- Don't move this dependency below play dependency otherwise it will
 			be overriden by play jackson jar, which uses older version -->
+		<!-- Add Scala collection compatibility library -->
+       
+        
+        <!-- Ensure consistent Scala library version -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        
+        <!-- Add scala-reflect with consistent version -->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.10.5.1</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<!-- Add actor here itself to avoid netty jar conflict. -->
 		<dependency>
 			<groupId>org.sunbird</groupId>
 			<artifactId>platform-common</artifactId>
 			<version>1.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-reflect</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.play</groupId>
+			<groupId>org.playframework</groupId>
 			<artifactId>play-guice_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
             <exclusions>
@@ -68,22 +99,26 @@
                 <groupId>com.google.inject.extensions</groupId>
                 <artifactId>guice-assistedinject</artifactId>
               </exclusion>
+              <exclusion>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+              </exclusion>
             </exclusions>
 		</dependency>
         <dependency>
           <groupId>com.google.inject</groupId>
           <artifactId>guice</artifactId>
-          <version>3.0</version>
+          <version>${guice.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.inject.extensions/guice-assistedinject -->
         <dependency>
           <groupId>com.google.inject.extensions</groupId>
           <artifactId>guice-assistedinject</artifactId>
-          <version>3.0</version>
+          <version>${guice.version}</version>
         </dependency>
 		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-logback_2.11</artifactId>
+			<groupId>org.playframework</groupId>
+			<artifactId>play-logback_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 			<scope>runtime</scope>
 			<exclusions>
@@ -94,8 +129,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-netty-server_2.11</artifactId>
+			<groupId>org.playframework</groupId>
+			<artifactId>play-netty-server_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 			<scope>runtime</scope>
 			<exclusions>
@@ -103,7 +138,16 @@
 					<groupId>org.scala-lang</groupId>
 					<artifactId>scala-library</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>netty-codec-http</artifactId>
+				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec-http</artifactId>
+			<version>4.1.93.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>com.typesafe</groupId>
@@ -119,10 +163,18 @@
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-reflect</artifactId>
+				</exclusion>
             </exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.play</groupId>
+			<groupId>org.playframework</groupId>
 			<artifactId>play_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 			<exclusions>
@@ -143,21 +195,13 @@
                     <groupId>org.slf4j</groupId>
                 </exclusion>
                 <exclusion>
-                  <groupId>com.typesafe.akka</groupId>
-                  <artifactId>akka-protobuf_2.11</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>com.typesafe.akka</groupId>
-                  <artifactId>akka-stream_2.11</artifactId>
-                </exclusion>
-                <exclusion>
-                  <groupId>com.typesafe.akka</groupId>
-                  <artifactId>akka-actor_2.11</artifactId>
+                  <groupId>org.scala-lang</groupId>
+                  <artifactId>scala-library</artifactId>
                 </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.play</groupId>
+			<groupId>org.playframework</groupId>
 			<artifactId>play-specs2_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 			<scope>test</scope>
@@ -165,6 +209,14 @@
 				<exclusion>
 					<groupId>com.google.code.gson</groupId>
 					<artifactId>gson</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.bytebuddy</groupId>
+					<artifactId>byte-buddy</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -177,24 +229,24 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.1</version>
+			<version>4.5.13</version>
 		</dependency>
 
 		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-slf4j_${scala.major.version}</artifactId>
-			<version>${learner.akka.version}</version>
+			<groupId>org.apache.pekko</groupId>
+			<artifactId>pekko-slf4j_${scala.major.version}</artifactId>
+			<version>${pekko.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-testkit_${scala.major.version}</artifactId>
-			<version>${learner.akka.version}</version>
+			<groupId>org.apache.pekko</groupId>
+			<artifactId>pekko-testkit_${scala.major.version}</artifactId>
+			<version>${pekko.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-module-junit4</artifactId>
-			<version>2.0.2</version>
+			<version>2.0.9</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -206,7 +258,7 @@
 		<dependency>
 			<groupId>org.powermock</groupId>
 			<artifactId>powermock-api-mockito2</artifactId>
-			<version>2.0.2</version>
+			<version>2.0.9</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -216,13 +268,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>filters-helpers_${scala.major.version}</artifactId>
-			<version>${play2.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-akka-http-server_${scala.major.version}</artifactId>
+			<groupId>org.playframework</groupId>
+			<artifactId>play-pekko-http-server_${scala.major.version}</artifactId>
 			<version>${play2.version}</version>
 		</dependency>
 		<dependency>
@@ -241,12 +288,33 @@
           <groupId>ch.qos.logback.contrib</groupId>
           <artifactId>logback-json-classic</artifactId>
           <version>0.1.5</version>
-        </dependency>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
         <dependency>
           <groupId>net.logstash.logback</groupId>
           <artifactId>logstash-logback-encoder</artifactId>
-          <version>6.3</version>
+          <version>6.6</version>
         </dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
     </dependencies>
 	<build>
 		<finalName>userorg-service-${version}</finalName>
@@ -263,14 +331,6 @@
 				<artifactId>play2-maven-plugin</artifactId>
 				<version>${play2.plugin.version}</version>
 				<extensions>true</extensions>
-			</plugin>
-			<plugin>
-				<groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
-				<artifactId>sbt-compiler-maven-plugin</artifactId>
-				<version>${sbt-compiler.plugin.version}</version>
-				<configuration>
-					<scalacOptions>-feature -deprecation -Xfatal-warnings</scalacOptions>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,6 +1,6 @@
 package controllers.otp;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import controllers.BaseController;
 import controllers.otp.validator.OtpRequestValidator;
 import java.util.concurrent.CompletionStage;

@@ -1,6 +1,6 @@
 package org.sunbird.actor.otp;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;

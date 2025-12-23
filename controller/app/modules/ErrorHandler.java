@@ -48,7 +48,7 @@ public class ErrorHandler extends DefaultHttpErrorHandler {
       response =
           BaseController.createResponseOnException(
               request.path(), request.method(), (ProjectCommonException) t);
-    } else if (t instanceof akka.pattern.AskTimeoutException) {
+    } else if (t instanceof org.apache.pekko.pattern.AskTimeoutException) {
       commonException =
           new ProjectCommonException(
               ResponseCode.serverError,

@@ -1,11 +1,12 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +54,7 @@ public class UserTypeActorTest {
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.GET_USER_TYPES.getValue());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(1000), Response.class);
     Assert.assertTrue(res.getResponseCode() == ResponseCode.OK && getResponse(res));
   }
 

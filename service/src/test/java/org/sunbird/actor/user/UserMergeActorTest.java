@@ -1,17 +1,10 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
-
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.typesafe.config.Config;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.kafka.clients.producer.Producer;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +35,14 @@ import org.sunbird.util.ConfigUtil;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.user.KafkaConfigConstants;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
   SSOServiceFactory.class,
@@ -61,7 +62,11 @@ import org.sunbird.util.user.KafkaConfigConstants;
   "javax.net.ssl.*",
   "javax.security.*",
   "jdk.internal.reflect.*",
-  "javax.crypto.*"
+  "javax.crypto.*",
+  "javax.script.*",
+  "javax.xml.*",
+  "com.sun.org.apache.xerces.*",
+  "org.xml.*"
 })
 @SuppressStaticInitializationFor("org.sunbird.kafka.KafkaClient")
 public class UserMergeActorTest {
@@ -184,11 +189,11 @@ public class UserMergeActorTest {
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+          probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
       return res.getResponseCode().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }

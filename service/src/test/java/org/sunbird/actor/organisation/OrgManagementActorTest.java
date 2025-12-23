@@ -1,15 +1,16 @@
 package org.sunbird.actor.organisation;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.*;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -520,7 +521,7 @@ public class OrgManagementActorTest {
     subject.tell(request, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("5 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(5), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res = probe.expectMsgClass(ProjectCommonException.class);

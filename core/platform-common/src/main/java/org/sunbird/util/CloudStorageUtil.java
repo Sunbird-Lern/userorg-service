@@ -25,7 +25,7 @@ public class CloudStorageUtil {
 
   public static String getSignedUrl(IStorageService storageService, String container, String objectKey,String cloudType) {
     int timeoutInSeconds = getTimeoutInSeconds();
-    return storageService.getSignedURLV2(container, objectKey, Some.apply(timeoutInSeconds), Some.apply("r"), Some.apply("application/pdf"));
+    return storageService.getSignedURLV2(container, objectKey, Some.apply(timeoutInSeconds), Some.apply("r"), Some.apply("application/pdf"), Option.empty());
   }
 
   public static void deleteFile(String storageType, String container, String objectKey) {

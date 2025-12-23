@@ -1,13 +1,14 @@
 package org.sunbird.actor.otp;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -137,7 +138,7 @@ public class OTPActorTest {
             Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -164,7 +165,7 @@ public class OTPActorTest {
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(100), ProjectCommonException.class);
     Assert.assertEquals(
         exception.getErrorCode(), "UOS_OTPVERFY" + ResponseCode.errorInvalidOTP.getErrorCode());
   }
@@ -175,7 +176,7 @@ public class OTPActorTest {
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -206,7 +207,7 @@ public class OTPActorTest {
             Mockito.any()))
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
@@ -227,7 +228,7 @@ public class OTPActorTest {
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(100), ProjectCommonException.class);
     Assert.assertTrue(
         ((ProjectCommonException) exception)
             .getErrorCode()
@@ -251,7 +252,7 @@ public class OTPActorTest {
         .thenReturn(mockedCassandraResponse);
     subject.tell(request, probe.getRef());
     ClientErrorResponse errorResponse =
-        probe.expectMsgClass(duration("100 second"), ClientErrorResponse.class);
+        probe.expectMsgClass(Duration.ofSeconds(100), ClientErrorResponse.class);
     Assert.assertTrue(
         (errorResponse.getResponseCode().name()).equals(ResponseCode.CLIENT_ERROR.name()));
   }
@@ -282,7 +283,7 @@ public class OTPActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -312,7 +313,7 @@ public class OTPActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
@@ -341,7 +342,7 @@ public class OTPActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
@@ -373,7 +374,7 @@ public class OTPActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 
@@ -402,7 +403,7 @@ public class OTPActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(createCassandraInsertSuccessResponse());
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(response.getResponseCode().equals(ResponseCode.OK));
   }
 

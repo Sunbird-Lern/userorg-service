@@ -1,13 +1,14 @@
 package org.sunbird.actor.health;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -70,7 +71,7 @@ public class HealthActorTest {
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.HEALTH_CHECK.getValue());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("200 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(200), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
@@ -82,7 +83,7 @@ public class HealthActorTest {
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.ACTOR.getValue());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("200 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(200), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
@@ -99,7 +100,7 @@ public class HealthActorTest {
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.ES.getValue());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("200 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(200), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
@@ -116,7 +117,7 @@ public class HealthActorTest {
     Request reqObj = new Request();
     reqObj.setOperation(ActorOperations.CASSANDRA.getValue());
     subject.tell(reqObj, probe.getRef());
-    Response res = probe.expectMsgClass(duration("200 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(200), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 }

@@ -1,6 +1,6 @@
 package org.sunbird.service.user;
 
-import akka.dispatch.Futures;
+import org.apache.pekko.dispatch.Futures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

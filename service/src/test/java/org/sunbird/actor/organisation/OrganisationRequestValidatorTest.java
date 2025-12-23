@@ -2,7 +2,7 @@ package org.sunbird.actor.organisation;
 
 import static org.powermock.api.mockito.PowerMockito.*;
 
-import akka.dispatch.Futures;
+import org.apache.pekko.dispatch.Futures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

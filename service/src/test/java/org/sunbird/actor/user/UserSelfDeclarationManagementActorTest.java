@@ -1,16 +1,17 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -181,7 +182,7 @@ public class UserSelfDeclarationManagementActorTest {
     request.setRequest(requestMap);
 
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
   }
@@ -202,7 +203,7 @@ public class UserSelfDeclarationManagementActorTest {
     requestMap.put(JsonKey.DECLARATIONS, list);
     request.setRequest(requestMap);
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
   }
@@ -221,7 +222,7 @@ public class UserSelfDeclarationManagementActorTest {
     requestMap.put(JsonKey.DECLARATIONS, list);
     request.setRequest(requestMap);
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
   }
@@ -240,7 +241,7 @@ public class UserSelfDeclarationManagementActorTest {
     requestMap.put(JsonKey.DECLARATIONS, list);
     request.setRequest(requestMap);
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
   }
@@ -263,7 +264,7 @@ public class UserSelfDeclarationManagementActorTest {
     requestMap.put(JsonKey.DECLARATIONS, list);
     request.setRequest(requestMap);
     subject.tell(request, probe.getRef());
-    probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+    probe.expectMsgClass(Duration.ofSeconds(100), ProjectCommonException.class);
   }
 
   private UserDeclareEntity addUserDeclaredEntity() {
@@ -330,7 +331,7 @@ public class UserSelfDeclarationManagementActorTest {
     requestMap.put(JsonKey.DECLARATIONS, userDeclareEntity);
     request.setRequest(requestMap);
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(null != response && response.getResponseCode() == ResponseCode.OK);
     Assert.assertEquals(JsonKey.SUCCESS, response.getResult().get(JsonKey.RESPONSE));
   }
@@ -348,7 +349,7 @@ public class UserSelfDeclarationManagementActorTest {
     request.setRequest(requestMap);
     subject.tell(request, probe.getRef());
     ProjectCommonException projectCommonException =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertEquals(
         ResponseCode.declaredUserErrorStatusNotUpdated.getErrorMessage(),
         projectCommonException.getMessage());
@@ -404,7 +405,7 @@ public class UserSelfDeclarationManagementActorTest {
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -438,11 +439,11 @@ public class UserSelfDeclarationManagementActorTest {
     subject.tell(reqObj, probe.getRef());
 
     if (errorCode == null) {
-      Response res = probe.expectMsgClass(duration("1000 second"), Response.class);
+      Response res = probe.expectMsgClass(Duration.ofSeconds(1000), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
       ProjectCommonException res =
-          probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+          probe.expectMsgClass(Duration.ofSeconds(1000), ProjectCommonException.class);
       return res.getErrorCode().equals(errorCode.getErrorCode())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }

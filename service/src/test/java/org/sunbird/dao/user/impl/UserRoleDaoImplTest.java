@@ -6,7 +6,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.*;
 
-import akka.dispatch.Futures;
+import org.apache.pekko.dispatch.Futures;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

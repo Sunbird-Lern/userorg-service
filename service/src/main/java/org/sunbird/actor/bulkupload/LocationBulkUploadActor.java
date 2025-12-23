@@ -1,6 +1,6 @@
 package org.sunbird.actor.bulkupload;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,10 +1,7 @@
 package org.sunbird.actor.notification;
 
-import akka.actor.ActorRef;
-import java.util.*;
-import javax.inject.Inject;
-import javax.inject.Named;
-import org.apache.commons.lang.StringUtils;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.operations.ActorOperations;
@@ -12,6 +9,10 @@ import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.notification.NotificationService;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 public class SendNotificationActor extends BaseActor {
 

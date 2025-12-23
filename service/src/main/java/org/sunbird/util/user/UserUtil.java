@@ -860,20 +860,26 @@ public class UserUtil {
       } else {
         frameworkIdList = (List<String>) framework.get(JsonKey.ID);
       }
+
+      for(Map.Entry<String, Object> entry: framework.entrySet()){
+        String key = entry.getKey();
+        Object value = entry.getValue();
+        if(!JsonKey.ID.equals(key) && value instanceof String) {
+          framework.put(key, Arrays.asList((String) value));
+        }
+      }
+      
       userRequestMap.put(JsonKey.FRAMEWORK, framework);
-      List<String> frameworkFields =
-          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
-      List<String> frameworkMandatoryFields =
-          DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.MANDATORY_FIELDS);
-      userRequestValidator.validateMandatoryFrameworkFields(
-          userRequestMap, frameworkFields, frameworkMandatoryFields);
+      Map<String, List<Map<String, String>>> frameworkCachedValue = getFrameworkDetails(frameworkIdList.get(0), context);
+
+      List<String> frameworkFields = new ArrayList<>(frameworkCachedValue.keySet());
+      frameworkFields.add(JsonKey.ID);
+      List<String> frameworkMandatoryFields = new ArrayList<>();
+      userRequestValidator.validateMandatoryFrameworkFields(userRequestMap, frameworkFields, frameworkMandatoryFields);
       Map<String, Object> rootOrgMap =
           orgService.getOrgById((String) userDbRecord.get(JsonKey.ROOT_ORG_ID), context);
       String hashTagId = (String) rootOrgMap.get(JsonKey.HASHTAGID);
-
       verifyFrameworkId(hashTagId, frameworkIdList, context);
-      Map<String, List<Map<String, String>>> frameworkCachedValue =
-          getFrameworkDetails(frameworkIdList.get(0), context);
       ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK)).remove(JsonKey.ID);
       userRequestValidator.validateFrameworkCategoryValues(userRequestMap, frameworkCachedValue);
       ((Map<String, Object>) userRequestMap.get(JsonKey.FRAMEWORK))
@@ -909,7 +915,7 @@ public class UserUtil {
   private static void handleGetFrameworkDetails(String frameworkId, RequestContext context) {
     Map<String, Object> response = ContentStoreUtil.readFramework(frameworkId, context);
     Map<String, List<Map<String, String>>> frameworkCacheMap = new HashMap<>();
-    List<String> supportedfFields = DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
+    //List<String> supportedfFields = DataCacheHandler.getFrameworkFieldsConfig().get(JsonKey.FIELDS);
     Map<String, Object> result = (Map<String, Object>) response.get(JsonKey.RESULT);
     if (MapUtils.isNotEmpty(result)) {
       Map<String, Object> frameworkDetails = (Map<String, Object>) result.get(JsonKey.FRAMEWORK);
@@ -919,24 +925,22 @@ public class UserUtil {
         if (CollectionUtils.isNotEmpty(frameworkCategories)) {
           for (Map<String, Object> frameworkCategoriesValue : frameworkCategories) {
             String frameworkField = (String) frameworkCategoriesValue.get(JsonKey.CODE);
-            if (supportedfFields.contains(frameworkField)) {
-              List<Map<String, String>> listOfFields = new ArrayList<>();
-              List<Map<String, Object>> frameworkTermList =
+            List<Map<String, String>> listOfFields = new ArrayList<>();
+            List<Map<String, Object>> frameworkTermList =
                   (List<Map<String, Object>>) frameworkCategoriesValue.get(JsonKey.TERMS);
-              if (CollectionUtils.isNotEmpty(frameworkTermList)) {
-                for (Map<String, Object> frameworkTerm : frameworkTermList) {
-                  String id = (String) frameworkTerm.get(JsonKey.IDENTIFIER);
-                  String name = (String) frameworkTerm.get(JsonKey.NAME);
-                  Map<String, String> writtenValue = new HashMap<>();
-                  writtenValue.put(JsonKey.ID, id);
-                  writtenValue.put(JsonKey.NAME, name);
-                  listOfFields.add(writtenValue);
-                }
+            if (CollectionUtils.isNotEmpty(frameworkTermList)) {
+              for (Map<String, Object> frameworkTerm : frameworkTermList) {
+                String id = (String) frameworkTerm.get(JsonKey.IDENTIFIER);
+                String name = (String) frameworkTerm.get(JsonKey.NAME);
+                Map<String, String> writtenValue = new HashMap<>();
+                writtenValue.put(JsonKey.ID, id);
+                writtenValue.put(JsonKey.NAME, name);
+                listOfFields.add(writtenValue);
               }
-              if (StringUtils.isNotBlank(frameworkField)
-                  && CollectionUtils.isNotEmpty(listOfFields))
-                frameworkCacheMap.put(frameworkField, listOfFields);
             }
+            if (StringUtils.isNotBlank(frameworkField)
+                && CollectionUtils.isNotEmpty(listOfFields))
+              frameworkCacheMap.put(frameworkField, listOfFields);
             if (MapUtils.isNotEmpty(frameworkCacheMap))
               DataCacheHandler.updateFrameworkCategoriesMap(frameworkId, frameworkCacheMap);
           }

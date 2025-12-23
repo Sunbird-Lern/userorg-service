@@ -15,15 +15,18 @@
 	<name>actor-core</name>
 
 	<properties>
+		<scala.major.version>2.13</scala.major.version>
+		<scala.version>2.13.12</scala.version>
         <maven.compiler.release>11</maven.compiler.release>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<scoverage.plugin.version>1.1.1</scoverage.plugin.version>
-		<slf4j.version>1.6.1</slf4j.version>
-		<logback.version>1.0.7</logback.version>
-		<learner.akka.version>2.5.19</learner.akka.version>
+		<slf4j.version>2.0.9</slf4j.version>
+		<logback.version>1.4.14</logback.version>
+		<pekko.version>1.0.3</pekko.version>
+		<jackson.version>2.14.3</jackson.version>
 	</properties>
 	<dependencies>
         <dependency>
@@ -32,19 +35,30 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
 		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-actor_2.11</artifactId>
-			<version>${learner.akka.version}</version>
+			<groupId>org.apache.pekko</groupId>
+			<artifactId>pekko-actor_${scala.major.version}</artifactId>
+			<version>${pekko.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-slf4j_2.11</artifactId>
-			<version>${learner.akka.version}</version>
+			<groupId>org.apache.pekko</groupId>
+			<artifactId>pekko-slf4j_${scala.major.version}</artifactId>
+			<version>${pekko.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-remote_2.11</artifactId>
-			<version>${learner.akka.version}</version>
+			<groupId>org.apache.pekko</groupId>
+			<artifactId>pekko-remote_${scala.major.version}</artifactId>
+			<version>${pekko.version}</version>
+			<exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.77.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
@@ -54,12 +68,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>2.10.5</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.10.5.1</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
@@ -74,7 +88,7 @@
         <dependency>
           <groupId>org.javassist</groupId>
           <artifactId>javassist</artifactId>
-          <version>3.24.1-GA</version>
+          <version>3.30.2-GA</version>
         </dependency>
         <dependency>
           <groupId>javax.annotation</groupId>

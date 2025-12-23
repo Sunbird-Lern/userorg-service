@@ -3,7 +3,7 @@ package org.sunbird.actor.user;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.Props;
+import org.apache.pekko.actor.Props;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

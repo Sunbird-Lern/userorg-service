@@ -61,12 +61,14 @@ public class CloudStorageUtilTest {
               Mockito.anyString(),
               Mockito.any(Option.class),
               Mockito.any(Option.class),
+              Mockito.any(Option.class),
               Mockito.any(Option.class)))
           .thenReturn(PUT_SIGNED_URL);
 
       when(service.getSignedURLV2(
               Mockito.eq("azurecontainer"),
               Mockito.anyString(),
+              Mockito.any(Option.class),
               Mockito.any(Option.class),
               Mockito.any(Option.class),
               Mockito.any(Option.class)))
@@ -77,12 +79,14 @@ public class CloudStorageUtilTest {
               Mockito.anyString(),
               Mockito.any(Option.class),
               Mockito.any(Option.class),
+              Mockito.any(Option.class),
               Mockito.any(Option.class)))
           .thenReturn(PUT_SIGNED_URL);
 
       when(service.getSignedURLV2(
               Mockito.eq("awscontainer"),
               Mockito.anyString(),
+              Mockito.any(Option.class),
               Mockito.any(Option.class),
               Mockito.any(Option.class),
               Mockito.any(Option.class)))

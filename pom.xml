@@ -11,6 +11,8 @@
       <maven.compiler.release>11</maven.compiler.release>
       <maven.compiler.source>11</maven.compiler.source>
       <maven.compiler.target>11</maven.compiler.target>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
   <modules>
@@ -34,7 +36,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0</version>
                 <configuration>
-
 <!--                     <forkCount>0</forkCount>  Refer to https://www.eclemma.org/jacoco/trunk/doc/maven.html -->
                     <!--<reuseForks>false</reuseForks>-->
                     <useSystemClassLoader>false</useSystemClassLoader>
@@ -56,7 +57,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.8</version>
                 <configuration>
                     <destFile>${basedir}/target/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/jacoco-unit.exec</dataFile>

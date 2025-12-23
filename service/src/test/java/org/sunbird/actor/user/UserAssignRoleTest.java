@@ -1,18 +1,18 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -62,7 +62,7 @@ import scala.concurrent.duration.FiniteDuration;
 @SuppressStaticInitializationFor("org.sunbird.common.ElasticSearchUtil")
 public class UserAssignRoleTest {
 
-  private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = duration("120 second");
+  private static final FiniteDuration ACTOR_MAX_WAIT_DURATION = FiniteDuration.apply(120, TimeUnit.SECONDS);
   private static String ID = "id001";
   private static String orgId = "testOrg001";
   private static String userId = "testUser001";

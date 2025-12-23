@@ -1,15 +1,16 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.*;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -254,7 +255,7 @@ public class UserStatusActorTest {
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -343,12 +344,12 @@ public class UserStatusActorTest {
     subject.tell(getRequestObject(operation.getValue()), probe.getRef());
     Response res;
     if (isSuccess) {
-      res = probe.expectMsgClass(duration("100 second"), Response.class);
+      res = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
       return (res != null && "SUCCESS".equals(res.getResult().get(JsonKey.RESPONSE)));
     } else {
       String errString = ActorOperations.getOperationCodeByActorOperation(operation.getValue());
       ProjectCommonException exception =
-          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+          probe.expectMsgClass(Duration.ofSeconds(100), ProjectCommonException.class);
       return (exception.getErrorCode().equals("UOS_" + errString + expectedErrorResponse));
     }
   }

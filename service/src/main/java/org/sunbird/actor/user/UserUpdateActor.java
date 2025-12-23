@@ -1,6 +1,6 @@
 package org.sunbird.actor.user;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
@@ -172,7 +172,6 @@ public class UserUpdateActor extends UserBaseActor {
     } else {
       userService.validateUserId(actorMessage, managedById, actorMessage.getRequestContext());
     }
-
     UserUtil.validateUserFrameworkData(userMap, userDbRecord, actorMessage.getRequestContext());
     // Check if the user is Custodian Org user
     boolean isCustodianOrgUser = isCustodianOrgUser((String) userDbRecord.get(JsonKey.ROOT_ORG_ID));

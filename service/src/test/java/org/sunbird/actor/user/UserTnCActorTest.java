@@ -1,14 +1,15 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class UserTnCActorTest {
         .thenReturn(getUser(null));
 
     Response response =
-        setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("100 second"), Response.class);
+        setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -127,7 +128,7 @@ public class UserTnCActorTest {
 
     Response response =
         setManagedUSerRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("10 second"), Response.class);
+            .expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -140,7 +141,7 @@ public class UserTnCActorTest {
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -168,7 +169,7 @@ public class UserTnCActorTest {
         .thenReturn(getUser(LATEST_VERSION));
 
     Response response =
-        setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(duration("10 second"), Response.class);
+        setRequest(ACCEPTED_CORRECT_VERSION).expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -185,7 +186,7 @@ public class UserTnCActorTest {
 
     ProjectCommonException response =
         setRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("10 second"), ProjectCommonException.class);
+            .expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertEquals(ResponseCode.userAccountlocked.getErrorCode(), response.getErrorCode());
     Assert.assertEquals("User account has been blocked .", response.getMessage());
   }
@@ -194,7 +195,7 @@ public class UserTnCActorTest {
   public void testAcceptUserTncFailureWithInvalidVersion() {
     ProjectCommonException exception =
         setRequest(ACCEPTED_INVALID_VERSION)
-            .expectMsgClass(duration("10 second"), ProjectCommonException.class);
+            .expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(
         null != exception
             && exception
@@ -213,7 +214,7 @@ public class UserTnCActorTest {
 
     Response response =
         setGroupsTncRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("1000 second"), Response.class);
+            .expectMsgClass(Duration.ofSeconds(1000), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -228,7 +229,7 @@ public class UserTnCActorTest {
 
     Response response =
         setGroupsTncRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("1000 second"), Response.class);
+            .expectMsgClass(Duration.ofSeconds(1000), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }
@@ -244,7 +245,7 @@ public class UserTnCActorTest {
 
     Response response =
         setOrgAdminTncRequest(ACCEPTED_CORRECT_VERSION)
-            .expectMsgClass(duration("1000 second"), Response.class);
+            .expectMsgClass(Duration.ofSeconds(1000), Response.class);
     Assert.assertTrue(
         null != response && "SUCCESS".equals(response.getResult().get(JsonKey.RESPONSE)));
   }

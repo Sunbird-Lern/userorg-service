@@ -1,15 +1,16 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("10 second"), Response.class);
+      probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -145,7 +146,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("100 second"), Response.class);
+      probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -181,7 +182,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("1000 second"), ProjectCommonException.class);
+      probe.expectMsgClass(Duration.ofSeconds(1000), ProjectCommonException.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }
@@ -218,7 +219,7 @@ public class ManagedUserActorTest extends UserManagementActorTestBase {
       TestKit probe = new TestKit(system);
       ActorRef subject = system.actorOf(props);
       subject.tell(reqObj, probe.getRef());
-      probe.expectMsgClass(duration("10 second"), Response.class);
+      probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     } catch (Exception ex) {
       assertNotNull(ex);
     }

@@ -1,6 +1,6 @@
 package controllers.feed;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import controllers.BaseController;
 import controllers.feed.validator.FeedRequestValidator;
 import java.util.concurrent.CompletionStage;

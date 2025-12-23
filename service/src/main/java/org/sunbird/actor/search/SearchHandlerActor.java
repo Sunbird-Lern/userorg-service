@@ -1,8 +1,8 @@
 package org.sunbird.actor.search;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Mapper;
-import akka.pattern.Patterns;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.Mapper;
+import org.apache.pekko.pattern.Patterns;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.inject.Inject;

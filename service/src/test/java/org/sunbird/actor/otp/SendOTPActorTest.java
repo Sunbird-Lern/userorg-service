@@ -1,13 +1,14 @@
 package org.sunbird.actor.otp;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
@@ -99,7 +100,7 @@ public class SendOTPActorTest {
     request.setOperation("invalidOperation");
     subject.tell(request, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertNotNull(exception);
   }
 
@@ -110,7 +111,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -122,7 +123,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -134,7 +135,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -146,7 +147,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -158,7 +159,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -170,7 +171,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -181,7 +182,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 
@@ -192,7 +193,7 @@ public class SendOTPActorTest {
         .thenReturn(
             "OTP to reset your password on $installationName is $otp. This is valid for $otpExpiryInMinutes minutes only.");
     subject.tell(request, probe.getRef());
-    Response response = probe.expectMsgClass(duration("30 second"), Response.class);
+    Response response = probe.expectMsgClass(Duration.ofSeconds(30), Response.class);
     Assert.assertEquals(ResponseCode.OK, response.getResponseCode());
   }
 

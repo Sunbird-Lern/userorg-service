@@ -1,5 +1,5 @@
 ## Pre-requisites
-1. Akka middleware actors should be up and running. Follow these [instructions](https://github.com/project-sunbird/sunbird-lms-mw/blob/master/setup.md) to run the akka actors.
+1. Pekko middleware actors should be up and running. Follow these [instructions](https://github.com/project-sunbird/sunbird-lms-mw/blob/master/setup.md) to run the pekko actors.
 
 ## Configuration
 1. Environment Variabls
@@ -78,7 +78,7 @@
 
 ## Build
 1. Run "git submodule foreach git pull origin master" to pull the latest sunbird-common submodule.
-2. Run "mvn clean install -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk -DCLOUD_STORE_VERSION=1.4.6" to build the services.
+2. Run "mvn clean install -DCLOUD_STORE_GROUP_ID=org.sunbird -DCLOUD_STORE_ARTIFACT_ID=cloud-store-sdk_2.13 -DCLOUD_STORE_VERSION=1.4.8" to build the services.
 2. Go to "controller" and run the command "mvn play2:dist" to generate the dist file for controller.
 3. The build file "controller-1.0-SNAPSHOT-dist.zip" is generated in "userorg-service/controller/target" folder.
 

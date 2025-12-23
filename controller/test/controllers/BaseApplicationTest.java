@@ -1,15 +1,8 @@
 package controllers;
 
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-
-import akka.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSelection;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import modules.OnRequestHandler;
 import modules.StartModule;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +18,6 @@ import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
 import org.sunbird.telemetry.util.TelemetryWriter;
 import play.Application;
-import play.Mode;
 import play.inject.Bindings;
 import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.Json;
@@ -34,6 +26,14 @@ import play.mvc.Result;
 import play.test.Helpers;
 import util.ACTORS;
 import util.RequestInterceptor;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({
@@ -59,7 +59,7 @@ public abstract class BaseApplicationTest {
       application =
           new GuiceApplicationBuilder()
               .in(new File("path/to/app"))
-              .in(Mode.TEST)
+//              .in(Mode.TEST)
               .disable(StartModule.class)
               .overrides(Bindings.bind(actor.getActorClass()).to(actorClass))
               .build();
@@ -81,7 +81,7 @@ public abstract class BaseApplicationTest {
       GuiceApplicationBuilder applicationBuilder =
           new GuiceApplicationBuilder()
               .in(new File("path/to/app"))
-              .in(Mode.TEST)
+//              .in(Mode.TEST)
               .disable(StartModule.class);
       for (ACTORS actor : actors) {
         applicationBuilder =

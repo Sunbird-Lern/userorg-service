@@ -1,10 +1,10 @@
 package org.sunbird.actor.user;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Futures;
-import akka.dispatch.Mapper;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.dispatch.Mapper;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.util.Timeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

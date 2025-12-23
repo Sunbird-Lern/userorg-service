@@ -13,6 +13,7 @@ import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
+import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.PropertiesCache;
 import org.sunbird.util.user.UserUtil;
 
@@ -109,6 +110,11 @@ public class UserDeletionBackgroundJobActor extends BaseActor {
     objectMap.put(JsonKey.ID, userId);
     objectMap.put(JsonKey.TYPE, JsonKey.USER);
     data.put(JsonKey.OBJECT, objectMap);
+
+    Map<String, Object> cData = new HashMap<>();
+    cData.put(JsonKey.ID,request.getRequestContext().getReqId());
+    cData.put(JsonKey.TYPE, TelemetryEnvKey.REQUEST_UPPER_CAMEL);
+    data.put(JsonKey.CDATA, cData);
 
     Map<String, Object> eData = new HashMap<>();
     eData.put(JsonKey.ORGANISATION_ID, rootOrgId);

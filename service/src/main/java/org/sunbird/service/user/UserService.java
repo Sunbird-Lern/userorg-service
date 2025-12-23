@@ -1,6 +1,6 @@
 package org.sunbird.service.user;
 
-import akka.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import java.util.List;
 import java.util.Map;
 import org.sunbird.dto.SearchDTO;

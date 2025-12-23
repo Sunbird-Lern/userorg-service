@@ -1,13 +1,14 @@
 package org.sunbird.actor.tenantpreference;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.javadsl.TestKit;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.testkit.javadsl.TestKit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,7 +109,7 @@ public class TenantPreferenceManagementActorTest {
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(100), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
   }
 
@@ -127,7 +128,7 @@ public class TenantPreferenceManagementActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(100), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
@@ -146,7 +147,7 @@ public class TenantPreferenceManagementActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(null != res.get(JsonKey.RESPONSE));
   }
 
@@ -166,7 +167,7 @@ public class TenantPreferenceManagementActorTest {
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
     Assert.assertEquals(
         "UOS_TPREFUPD" + ResponseCode.resourceNotFound.getErrorCode(), exception.getErrorCode());
@@ -188,7 +189,7 @@ public class TenantPreferenceManagementActorTest {
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
     Assert.assertEquals(
         "UOS_TPREFUPD" + ResponseCode.resourceNotFound.getErrorCode(), exception.getErrorCode());
@@ -208,7 +209,7 @@ public class TenantPreferenceManagementActorTest {
             Mockito.anyString(), Mockito.anyString(), Mockito.anyMap(), Mockito.any()))
         .thenReturn(cassandraGetRecordByProperty());
     subject.tell(actorMessage, probe.getRef());
-    Response res = probe.expectMsgClass(duration("10 second"), Response.class);
+    Response res = probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
     Assert.assertTrue(null != res);
   }
 
@@ -227,7 +228,7 @@ public class TenantPreferenceManagementActorTest {
         .thenReturn(cassandraGetRecordByPropertiesEmptyResponse());
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exception =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != exception);
     Assert.assertEquals(
         "UOS_TPREFRED" + ResponseCode.resourceNotFound.getErrorCode(), exception.getErrorCode());
@@ -250,7 +251,7 @@ public class TenantPreferenceManagementActorTest {
 
     subject.tell(actorMessage, probe.getRef());
     ProjectCommonException exc =
-        probe.expectMsgClass(duration("10 second"), ProjectCommonException.class);
+        probe.expectMsgClass(Duration.ofSeconds(10), ProjectCommonException.class);
     Assert.assertTrue(null != exc);
   }
 

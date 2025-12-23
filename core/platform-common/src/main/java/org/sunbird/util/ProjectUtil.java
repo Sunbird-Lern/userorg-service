@@ -232,25 +232,6 @@ public class ProjectUtil {
   }
 
   /**
-   * Enum to hold the index name for Elastic search.
-   *
-   * @author Manzarul
-   */
-  public enum EsIndex {
-    sunbird("searchindex");
-
-    private String indexName;
-
-    private EsIndex(String name) {
-      this.indexName = name;
-    }
-
-    public String getIndexName() {
-      return indexName;
-    }
-  }
-
-  /**
    * This enum will hold all the ES type name.
    *
    * @author Manzarul

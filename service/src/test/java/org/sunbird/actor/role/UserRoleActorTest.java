@@ -1,19 +1,18 @@
 package org.sunbird.actor.role;
 
-import static akka.testkit.JavaTestKit.duration;
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.dispatch.Futures;
-import akka.pattern.Patterns;
-import akka.pattern.PipeToSupport;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorSelection;
+import org.apache.pekko.actor.ActorSystem;
+import org.apache.pekko.actor.Props;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.pattern.PipeToSupport;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -216,15 +215,15 @@ public class UserRoleActorTest {
       subject.tell(getRequestObj(isOrgIdReq), probe.getRef());
     }
     if (errorResponse == null) {
-      Response res = probe.expectMsgClass(duration("100 second"), Response.class);
+      Response res = probe.expectMsgClass(java.time.Duration.ofSeconds(100), Response.class);
       return null != res && res.getResponseCode() == ResponseCode.OK;
     } else {
-      Response res1 = probe.expectMsgClass(duration("100 second"), Response.class);
+      Response res1 = probe.expectMsgClass(java.time.Duration.ofSeconds(100), Response.class);
       if (res1.getResult().size() <= 1) {
         return false;
       }
       ProjectCommonException res =
-          probe.expectMsgClass(duration("100 second"), ProjectCommonException.class);
+          probe.expectMsgClass(java.time.Duration.ofSeconds(100), ProjectCommonException.class);
       return res.getErrorResponseCode() == errorResponse.getResponseCode();
     }
   }

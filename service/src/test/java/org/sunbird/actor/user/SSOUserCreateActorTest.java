@@ -1,14 +1,15 @@
 package org.sunbird.actor.user;
 
-import static akka.testkit.JavaTestKit.duration;
+import java.time.Duration;
+
 import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import akka.actor.ActorRef;
-import akka.dispatch.Futures;
-import akka.pattern.Patterns;
-import akka.testkit.javadsl.TestKit;
-import akka.util.Timeout;
+import org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.dispatch.Futures;
+import org.apache.pekko.pattern.Patterns;
+import org.apache.pekko.testkit.javadsl.TestKit;
+import org.apache.pekko.util.Timeout;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -349,6 +350,6 @@ public class SSOUserCreateActorTest extends UserManagementActorTestBase {
     subject.tell(
         getRequest(true, true, true, getAdditionalMapData(reqMap), ActorOperations.CREATE_USER),
         probe.getRef());
-    probe.expectMsgClass(duration("10 second"), Response.class);
+    probe.expectMsgClass(Duration.ofSeconds(10), Response.class);
   }
 }
