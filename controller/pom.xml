@@ -42,7 +42,7 @@
 		<jackson.version>2.14.3</jackson.version>
 		<guice.version>5.1.0</guice.version>
 		<slf4j.version>2.0.9</slf4j.version>
-		<logback.version>1.4.14</logback.version>
+		<logback.version>1.5.19</logback.version>
 	</properties>
 
 	<dependencies>
