@@ -1,6 +1,7 @@
 package org.sunbird.cassandra;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.UserType;
 import com.google.common.util.concurrent.FutureCallback;
 import java.util.List;
 import java.util.Map;
@@ -779,4 +780,12 @@ public interface CassandraOperation {
       Map<String, Object> partitionKeyMap,
       RequestContext requestContext);
 
+  /**
+   * Retrieves a User Defined Type (UDT) from a Cassandra keyspace.
+   *
+   * @param keyspaceName The Cassandra keyspace name.
+   * @param typeName The name of the user-defined type to retrieve.
+   * @return UserType object representing the specified user-defined type.
+   */
+  UserType getUDTType(String keyspaceName, String typeName);
 }

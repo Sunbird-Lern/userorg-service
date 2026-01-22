@@ -11,6 +11,8 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.UserType;
+import com.datastax.driver.core.KeyspaceMetadata;
 import com.datastax.driver.core.WriteType;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
 import com.datastax.driver.core.exceptions.QueryExecutionException;
@@ -4125,6 +4127,65 @@ public abstract class CassandraOperationImpl implements CassandraOperation {
     }
 
     return response;
+  }
+
+  /**
+   * Retrieves a User Defined Type (UDT) from a Cassandra keyspace.
+   * Accesses the cluster metadata to fetch the specified user-defined type definition.
+   *
+   * @param keyspaceName The Cassandra keyspace name containing the user-defined type.
+   * @param typeName The name of the user-defined type to retrieve.
+   * @return UserType object representing the specified user-defined type.
+   * @throws ProjectCommonException if the keyspace or type is not found, or if no hosts are available.
+   */
+  @Override
+  public UserType getUDTType(String keyspaceName, String typeName){
+    logDebug(null, formatLogMessage("Retrieving UDT - keyspace: {}, type: {}", keyspaceName, typeName));
+
+    try {
+      Session session = connectionManager.getSession(keyspaceName);
+      KeyspaceMetadata keyspaceMetadata = session.getCluster().getMetadata().getKeyspace(keyspaceName);
+      
+      if (keyspaceMetadata == null) {
+        String errorMsg = formatLogMessage("Keyspace not found - keyspace: {}", keyspaceName);
+        logError(null, errorMsg);
+        throw new ProjectCommonException(
+            ResponseCode.SERVER_ERROR.getErrorCode(),
+            errorMsg,
+            ResponseCode.SERVER_ERROR.getResponseCode());
+      }
+      
+      UserType userType = keyspaceMetadata.getUserType(typeName);
+      
+      if (userType == null) {
+        String errorMsg = formatLogMessage("User-defined type not found - keyspace: {}, type: {}", keyspaceName, typeName);
+        logError(null, errorMsg);
+        throw new ProjectCommonException(
+            ResponseCode.SERVER_ERROR.getErrorCode(),
+            errorMsg,
+            ResponseCode.SERVER_ERROR.getResponseCode());
+      }
+      
+      logInfo(null, formatLogMessage("Successfully retrieved UDT - keyspace: {}, type: {}", keyspaceName, typeName));
+      return userType;
+      
+    } catch (ProjectCommonException e) {
+      throw e;
+    } catch (NoHostAvailableException e) {
+      String errorMsg = formatLogMessage("No Cassandra hosts available - keyspace: {}, type: {}", keyspaceName, typeName);
+      logError(null, errorMsg, e);
+      throw new ProjectCommonException(
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          errorMsg,
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    } catch (Exception e) {
+      String errorMsg = formatLogMessage("Failed to retrieve UDT - keyspace: {}, type: {}, error: {}", keyspaceName, typeName, e.getMessage());
+      logError(null, errorMsg, e);
+      throw new ProjectCommonException(
+          ResponseCode.SERVER_ERROR.getErrorCode(),
+          ResponseCode.SERVER_ERROR.getErrorMessage(),
+          ResponseCode.SERVER_ERROR.getResponseCode());
+    }
   }
 
   /**
