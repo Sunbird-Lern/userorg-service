@@ -127,6 +127,24 @@ public interface CassandraOperation {
 
 
   /**
+   * Retrieves records from a Cassandra table where a specific property matches a given value.
+   *
+   * @param keyspaceName The Cassandra keyspace name.
+   * @param tableName The table name to query.
+   * @param propertyName The name of the property/column to filter by.
+   * @param propertyValue The value to match against the property.
+   * @param requestContext The request context for tracking and logging.
+   * @return Response object containing the matching records.
+   */
+  @Deprecated
+  Response getRecordsByProperty(
+      String keyspaceName,
+      String tableName,
+      String propertyName,
+      Object propertyValue,
+      RequestContext requestContext);
+
+  /**
    * Retrieves specific fields from records in a Cassandra table where a property matches a given
    * value. This method allows selective field retrieval to optimize query performance and reduce
    * data transfer.
@@ -428,6 +446,24 @@ public interface CassandraOperation {
       String keyspaceName,
       String tableName,
       List<Map<String, Object>> records,
+      RequestContext requestContext);
+
+  /**
+   * Performs a batch delete operation to delete multiple records in a single atomic operation.
+   * Each record is identified by its composite primary key provided in the list.
+   * More efficient than individual delete operations for bulk deletions.
+   *
+   * @param keyspaceName The Cassandra keyspace name.
+   * @param tableName The table name from which records will be deleted.
+   * @param primaryKeys A list of maps, each containing the composite primary key columns and values
+   *                    for a record to delete.
+   * @param requestContext The request context for tracking and logging.
+   * @return Response object containing the operation result.
+   */
+  Response batchDelete(
+      String keyspaceName,
+      String tableName,
+      List<Map<String, Object>> primaryKeys,
       RequestContext requestContext);
 
   /**
