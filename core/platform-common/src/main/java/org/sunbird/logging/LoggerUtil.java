@@ -75,6 +75,37 @@ public class LoggerUtil {
     telemetryProcess(requestContext, telemetryInfo, e, message);
   }
 
+  /**
+   * Backward-compatible error method with 5 parameters for legacy code.
+   *
+   * @param requestContext The request context
+   * @param message The error message
+   * @param object Additional object data
+   * @param param Additional parameters
+   * @param e The throwable exception
+   */
+  public void error(RequestContext requestContext, String message, Map<String, Object> object, Map<String, Object> param, Throwable e) {
+    if (requestContext != null) {
+      Map<String, Object> context =
+          (Map<String, Object>) requestContext.getTelemetryContext().get(JsonKey.CONTEXT);
+      Map<String, Object> params = new HashMap<>();
+      if (param != null) {
+        params.putAll(param);
+      }
+      params.put(JsonKey.ERR_TYPE, JsonKey.API_ACCESS);
+      Map<String, Object> telemetryInfo = new HashMap<>();
+      telemetryInfo.put(JsonKey.CONTEXT, context);
+      telemetryInfo.put(JsonKey.PARAMS, params);
+      error(requestContext, message, e, telemetryInfo);
+    } else {
+      if (e != null) {
+        error(message, e);
+      } else {
+        logger.error(message);
+      }
+    }
+  }
+
   public void warn(RequestContext requestContext, String message, Throwable e) {
     if (null != requestContext) {
       logger.warn(Markers.appendEntries(requestContext.getContextMap()), message, e);
