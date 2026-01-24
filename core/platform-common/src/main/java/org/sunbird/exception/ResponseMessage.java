@@ -28,6 +28,7 @@ public interface ResponseMessage {
     String USER_STATUS_MSG = "User is already {0}.";
     String DATA_FORMAT_ERROR = "Invalid format for given {0}.";
     String INVALID_CSV_FILE = "Please provide valid csv file.";
+    String INVALID_DATA = "Incorrect data.";
     String INVALID_OBJECT_TYPE = "Invalid Object Type.";
     String EMPTY_CSV_FILE = "CSV file is Empty.";
     String INTERNAL_ERROR = "Process failed, please try again later.";
@@ -216,5 +217,6 @@ public interface ResponseMessage {
     String INVALID_TENANT_SECURITY_LEVEL_LOWER = "0082";
     String CANNOT_DELETE_USER = "0083";
     String CANNOT_TRANSFER_OWNERSHIP = "0084";
+    String INVALID_DATA = "INVALID DATA";
   }
 }
