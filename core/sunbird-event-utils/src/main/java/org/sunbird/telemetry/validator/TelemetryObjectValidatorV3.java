@@ -1,6 +1,5 @@
 package org.sunbird.telemetry.validator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,14 +9,23 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.telemetry.dto.Telemetry;
 import org.sunbird.telemetry.util.TelemetryEvents;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-/** @author arvind */
+/**
+ * Validator class for Version 3 Telemetry events.
+ * Implements the TelemetryObjectValidator interface to provide validation logic for various telemetry event types.
+ */
 public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
+  
   private static final LoggerUtil logger = new LoggerUtil(TelemetryObjectValidatorV3.class);
   private static TelemetryObjectValidator telemetryObjectValidator = null;
-
   private final ObjectMapper mapper = new ObjectMapper();
 
+  /**
+   * Returns the singleton instance of TelemetryObjectValidatorV3.
+   *
+   * @return The singleton instance.
+   */
   public static TelemetryObjectValidator getInstance() {
     if (telemetryObjectValidator == null) {
       telemetryObjectValidator = new TelemetryObjectValidatorV3();
@@ -27,56 +35,69 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
 
   @Override
   public boolean validateAudit(String jsonString) {
-
     boolean validationSuccess = true;
     List<String> missingFields = new ArrayList<>();
     Telemetry telemetryObj = null;
     try {
+      // Parse JSON string to Telemetry object
       telemetryObj = mapper.readValue(jsonString, Telemetry.class);
+      
+      // Validate basic fields
       validateBasics(telemetryObj, missingFields);
+      // Validate Audit specific data
       validateAuditEventData(telemetryObj.getEdata(), missingFields);
+      
       if (!missingFields.isEmpty()) {
         logger.info(
-            "Telemetry Object Creation Error for event : "
+            "TelemetryObjectValidatorV3:validateAudit: Validation failed for event: "
                 + TelemetryEvents.AUDIT.getName()
-                + "  missing required fields :"
-                + String.join(",", missingFields));
+                + ". Missing required fields: "
+                + String.join(", ", missingFields));
         validationSuccess = false;
       }
     } catch (IOException e) {
       validationSuccess = false;
-      logger.error(e.getMessage(), e);
+      logger.error("TelemetryObjectValidatorV3:validateAudit: Error parsing JSON: " + e.getMessage(), e);
     }
     return validationSuccess;
   }
 
   @Override
   public boolean validateSearch(String jsonString) {
-
     boolean validationSuccess = true;
     List<String> missingFields = new ArrayList<>();
     Telemetry telemetryObj = null;
     try {
+      // Parse JSON string to Telemetry object
       telemetryObj = mapper.readValue(jsonString, Telemetry.class);
+      
+      // Validate basic fields
       validateBasics(telemetryObj, missingFields);
+      // Validate Search specific data
       validateSearchEventData(telemetryObj.getEdata(), missingFields);
+      
       if (!missingFields.isEmpty()) {
         logger.info(
-            "Telemetry Object Creation Error for event : "
+            "TelemetryObjectValidatorV3:validateSearch: Validation failed for event: "
                 + TelemetryEvents.SEARCH.getName()
-                + "  missing required fields :"
-                + String.join(",", missingFields));
+                + ". Missing required fields: "
+                + String.join(", ", missingFields));
         validationSuccess = false;
       }
     } catch (IOException e) {
       validationSuccess = false;
-      logger.error("validateSearch" + e.getMessage(), e);
+      logger.error("TelemetryObjectValidatorV3:validateSearch: Error parsing JSON: " + e.getMessage(), e);
     }
     return validationSuccess;
   }
 
+  /**
+   * Validates search event data structure.
+   *
+   * @param edata         The event data map.
+   * @param missingFields List to populate with missing keys.
+   */
   private void validateSearchEventData(Map<String, Object> edata, List<String> missingFields) {
-
     if (edata == null || edata.isEmpty()) {
       missingFields.add("edata");
     } else {
@@ -92,14 +113,26 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
     }
   }
 
+  /**
+   * Validates audit event data presence.
+   *
+   * @param edata         The event data map.
+   * @param missingFields List to populate with missing keys.
+   */
   private void validateAuditEventData(Map<String, Object> edata, List<String> missingFields) {
     if (edata == null) {
       missingFields.add("edata");
     }
   }
 
+  /**
+   * Validates basic telemetry fields (eid, mid, ver, actor, context).
+   *
+   * @param telemetryObj   The telemetry object.
+   * @param missingFields  List to populate with missing keys.
+   */
   private void validateBasics(Telemetry telemetryObj, List<String> missingFields) {
-
+    // Check mandatory top-level fields
     if (StringUtils.isBlank(telemetryObj.getEid())) {
       missingFields.add("eid");
     }
@@ -110,6 +143,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       missingFields.add("ver");
     }
 
+    // Check actor details
     if (null == telemetryObj.getActor()) {
       missingFields.add("actor");
     } else {
@@ -121,6 +155,7 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
       }
     }
 
+    // Check context details
     if (null == telemetryObj.getContext()) {
       missingFields.add(JsonKey.CONTEXT);
     } else {
@@ -133,31 +168,47 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
     }
   }
 
+  /**
+   * Validates a LOG telemetry event.
+   *
+   * @param jsonString The JSON string representation of the telemetry event.
+   * @return true if valid, false otherwise.
+   */
   @Override
   public boolean validateLog(String jsonString) {
-
     boolean validationSuccess = true;
     List<String> missingFields = new ArrayList<>();
     Telemetry telemetryObj = null;
     try {
+      // Parse JSON string to Telemetry object
       telemetryObj = mapper.readValue(jsonString, Telemetry.class);
+      
+      // Validate basic fields
       validateBasics(telemetryObj, missingFields);
+      // Validate Log specific data
       validateLogEventData(telemetryObj.getEdata(), missingFields);
+      
       if (!missingFields.isEmpty()) {
         logger.info(
-            "Telemetry Object Creation Error for event : "
+            "TelemetryObjectValidatorV3:validateLog: Validation failed for event: "
                 + TelemetryEvents.LOG.getName()
-                + "  missing required fields :"
-                + String.join(",", missingFields));
+                + ". Missing required fields: "
+                + String.join(", ", missingFields));
         validationSuccess = false;
       }
     } catch (IOException e) {
       validationSuccess = false;
-      logger.error("validateLog" + e.getMessage(), e);
+      logger.error("TelemetryObjectValidatorV3:validateLog: Error parsing JSON: " + e.getMessage(), e);
     }
     return validationSuccess;
   }
 
+  /**
+   * Validates log event data structure.
+   *
+   * @param edata         The event data map.
+   * @param missingFields List to populate with missing keys.
+   */
   private void validateLogEventData(Map<String, Object> edata, List<String> missingFields) {
     if (edata == null || edata.isEmpty()) {
       missingFields.add("edata");
@@ -175,31 +226,47 @@ public class TelemetryObjectValidatorV3 implements TelemetryObjectValidator {
     }
   }
 
+  /**
+   * Validates an ERROR telemetry event.
+   *
+   * @param jsonString The JSON string representation of the telemetry event.
+   * @return true if valid, false otherwise.
+   */
   @Override
   public boolean validateError(String jsonString) {
-
     boolean validationSuccess = true;
     List<String> missingFields = new ArrayList<>();
     Telemetry telemetryObj = null;
     try {
+      // Parse JSON string to Telemetry object
       telemetryObj = mapper.readValue(jsonString, Telemetry.class);
+      
+      // Validate basic fields
       validateBasics(telemetryObj, missingFields);
+      // Validate Error specific data
       validateErrorEventData(telemetryObj.getEdata(), missingFields);
+      
       if (!missingFields.isEmpty()) {
         logger.info(
-            "Telemetry Object Creation Error for event : "
+            "TelemetryObjectValidatorV3:validateError: Validation failed for event: "
                 + TelemetryEvents.ERROR.getName()
-                + "  missing required fields :"
-                + String.join(",", missingFields));
+                + ". Missing required fields: "
+                + String.join(", ", missingFields));
         validationSuccess = false;
       }
     } catch (IOException e) {
       validationSuccess = false;
-      logger.error("validateError" + e.getMessage(), e);
+      logger.error("TelemetryObjectValidatorV3:validateError: Error parsing JSON: " + e.getMessage(), e);
     }
     return validationSuccess;
   }
 
+  /**
+   * Validates error event data structure.
+   *
+   * @param edata         The event data map.
+   * @param missingFields List to populate with missing keys.
+   */
   private void validateErrorEventData(Map<String, Object> edata, List<String> missingFields) {
     if (edata == null || edata.isEmpty()) {
       missingFields.add("edata");

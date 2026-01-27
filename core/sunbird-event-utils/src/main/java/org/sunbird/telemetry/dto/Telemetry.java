@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/** Telemetry V3 POJO to generate telemetry event. */
+/**
+ * Telemetry V3 POJO to generate telemetry event.
+ * Represents the structure of a standard Sunbird telemetry event.
+ */
 @JsonInclude(Include.NON_NULL)
 public class Telemetry {
 
@@ -20,8 +23,20 @@ public class Telemetry {
   private Map<String, Object> edata;
   private List<String> tags;
 
+  /**
+   * Default constructor.
+   */
   public Telemetry() {}
 
+  /**
+   * Parameterized constructor.
+   *
+   * @param eid     The event ID (e.g., AUDIT, LOG, SEARCH)
+   * @param actor   The actor performing the event
+   * @param context The context of the event
+   * @param edata   The event data
+   * @param object  The target object of the event
+   */
   public Telemetry(
       String eid, Actor actor, Context context, Map<String, Object> edata, Target object) {
     super();
@@ -32,6 +47,14 @@ public class Telemetry {
     this.object = object;
   }
 
+  /**
+   * Parameterized constructor (without target object).
+   *
+   * @param eid     The event ID
+   * @param actor   The actor performing the event
+   * @param context The context of the event
+   * @param edata   The event data
+   */
   public Telemetry(String eid, Actor actor, Context context, Map<String, Object> edata) {
     super();
     this.eid = eid;
@@ -40,92 +63,164 @@ public class Telemetry {
     this.edata = edata;
   }
 
-  /** @return the eid */
+  /**
+   * Gets the event ID.
+   *
+   * @return the eid
+   */
   public String getEid() {
     return eid;
   }
 
-  /** @param eid the eid to set */
+  /**
+   * Sets the event ID.
+   *
+   * @param eid the eid to set
+   */
   public void setEid(String eid) {
     this.eid = eid;
   }
 
-  /** @return the ets */
+  /**
+   * Gets the event timestamp.
+   *
+   * @return the ets
+   */
   public long getEts() {
     return ets;
   }
 
-  /** @param ets the ets to set */
+  /**
+   * Sets the event timestamp.
+   *
+   * @param ets the ets to set
+   */
   public void setEts(long ets) {
     this.ets = ets;
   }
 
-  /** @return the ver */
+  /**
+   * Gets the version.
+   *
+   * @return the ver
+   */
   public String getVer() {
     return ver;
   }
 
-  /** @param ver the ver to set */
+  /**
+   * Sets the version.
+   *
+   * @param ver the ver to set
+   */
   public void setVer(String ver) {
     this.ver = ver;
   }
 
-  /** @return the mid */
+  /**
+   * Gets the message ID.
+   *
+   * @return the mid
+   */
   public String getMid() {
     return mid;
   }
 
-  /** @param mid the mid to set */
+  /**
+   * Sets the message ID.
+   *
+   * @param mid the mid to set
+   */
   public void setMid(String mid) {
     this.mid = mid;
   }
 
-  /** @return the actor */
+  /**
+   * Gets the actor.
+   *
+   * @return the actor
+   */
   public Actor getActor() {
     return actor;
   }
 
-  /** @param actor the actor to set */
+  /**
+   * Sets the actor.
+   *
+   * @param actor the actor to set
+   */
   public void setActor(Actor actor) {
     this.actor = actor;
   }
 
-  /** @return the context */
+  /**
+   * Gets the context.
+   *
+   * @return the context
+   */
   public Context getContext() {
     return context;
   }
 
-  /** @param context the context to set */
+  /**
+   * Sets the context.
+   *
+   * @param context the context to set
+   */
   public void setContext(Context context) {
     this.context = context;
   }
 
-  /** @return the object */
+  /**
+   * Gets the target object.
+   *
+   * @return the object
+   */
   public Target getObject() {
     return object;
   }
 
-  /** @param object the object to set */
+  /**
+   * Sets the target object.
+   *
+   * @param object the object to set
+   */
   public void setObject(Target object) {
     this.object = object;
   }
 
-  /** @return the edata */
+  /**
+   * Gets the event data.
+   *
+   * @return the edata
+   */
   public Map<String, Object> getEdata() {
     return edata;
   }
 
-  /** @param edata the edata to set */
+  /**
+   * Sets the event data.
+   *
+   * @param edata the edata to set
+   */
   public void setEdata(Map<String, Object> edata) {
     this.edata = edata;
   }
 
-  /** @return the tags */
+  /**
+   * Gets the tags.
+   *
+   * @return the tags
+   */
   public List<String> getTags() {
     return tags;
   }
 
-  /** @param tags the tags to set */
+  /**
+   * Sets the tags.
+   *
+   * @param tags the tags to set
+   */
   public void setTags(List<String> tags) {
     this.tags = tags;
   }
