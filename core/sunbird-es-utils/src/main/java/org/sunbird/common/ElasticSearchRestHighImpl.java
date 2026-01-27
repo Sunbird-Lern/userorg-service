@@ -14,6 +14,7 @@ import org.apache.pekko.dispatch.Futures;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -455,8 +456,9 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
     Promise<Boolean> promise = Futures.promise();
     
     try {
-      // Use a common index for health check (can be made configurable)
-      GetIndexRequest indexRequest = new GetIndexRequest().indices(ProjectUtil.EsType.courseBatch.getTypeName());
+      GetIndexRequest indexRequest = new GetIndexRequest()
+          .indices(ProjectUtil.EsType.courseBatch.getTypeName(), ProjectUtil.EsType.user.getTypeName())
+          .indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
       
       ActionListener<Boolean> listener = new ActionListener<Boolean>() {
         @Override
