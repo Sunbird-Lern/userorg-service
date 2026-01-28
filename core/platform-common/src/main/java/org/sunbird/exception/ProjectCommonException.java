@@ -101,6 +101,23 @@ public class ProjectCommonException extends RuntimeException {
     this.errorResponseCode = responseCode;
   }
 
+  /**
+   * Backward-compatible constructor that accepts String error code.
+   * This is for legacy code compatibility.
+   *
+   * @param errorCode String error code
+   * @param message String error message
+   * @param responseCode int HTTP response code
+   */
+  public ProjectCommonException(String errorCode, String message, int responseCode) {
+    super();
+    this.errorCode = errorCode;
+    this.errorMessage = message;
+    this.errorResponseCode = responseCode;
+    // Try to find matching ResponseCode enum
+    this.responseCode = null;
+  }
+
   public ProjectCommonException(ProjectCommonException pce, String actorOperation) {
     super();
     super.setStackTrace(pce.getStackTrace());
