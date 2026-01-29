@@ -106,7 +106,7 @@ public class UserOwnershipTransferActorTest {
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("UOS_UOWNTRANS0029", errorResponse.getErrorCode());
         assertEquals("given user id under fromUser is not present or blank", errorResponse.getMessage());
         assertEquals(400, errorResponse.getErrorResponseCode());
     }
@@ -146,7 +146,7 @@ public class UserOwnershipTransferActorTest {
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("UOS_UOWNTRANS0029", errorResponse.getErrorCode());
         assertEquals("fromUser key is not present in the data.", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
@@ -162,7 +162,7 @@ public class UserOwnershipTransferActorTest {
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
                 ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("UOS_UOWNTRANS0029", errorResponse.getErrorCode());
         assertEquals("Roles key is not present for fromUser", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
@@ -190,7 +190,7 @@ public class UserOwnershipTransferActorTest {
         request.setRequestContext(new RequestContext());
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120), ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("UOS_UOWNTRANS0029", errorResponse.getErrorCode());
         assertEquals("Roles are empty in fromUser details.", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
@@ -205,7 +205,7 @@ public class UserOwnershipTransferActorTest {
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
                 ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("UOS_UOWNTRANS0029", errorResponse.getErrorCode());
         assertEquals("given user id under fromUser is not present or blank", errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
     }
@@ -222,7 +222,7 @@ public class UserOwnershipTransferActorTest {
         subject.tell(request, probe.getRef());
         ProjectCommonException errorResponse = probe.expectMsgClass(Duration.ofSeconds(120),
                 ProjectCommonException.class);
-        assertEquals("UOS_UOWNTRANS0028", errorResponse.getErrorCode());
+        assertEquals("UOS_UOWNTRANS0029", errorResponse.getErrorCode());
         assertEquals("given user id under actionBy is not present or blank",
                 errorResponse.getMessage());
         assertEquals(ResponseCode.CLIENT_ERROR.getResponseCode(), errorResponse.getErrorResponseCode());
