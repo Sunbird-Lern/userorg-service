@@ -3,10 +3,10 @@ package org.sunbird.validator.orgvalidator;
 import java.text.MessageFormat;
 import java.util.List;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
-import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.validators.BaseRequestValidator;
 
 /**
  * this class is used to validate the request of the OrgAssignKeys Controller

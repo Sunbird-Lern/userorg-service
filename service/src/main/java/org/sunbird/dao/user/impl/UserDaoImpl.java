@@ -13,14 +13,14 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import scala.concurrent.Future;
 
 /**

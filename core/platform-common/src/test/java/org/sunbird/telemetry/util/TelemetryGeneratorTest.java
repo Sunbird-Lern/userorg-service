@@ -17,8 +17,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.common.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PropertiesCache.class, ProjectUtil.class})

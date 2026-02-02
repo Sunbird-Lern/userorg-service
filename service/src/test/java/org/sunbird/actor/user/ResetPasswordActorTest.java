@@ -25,7 +25,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
@@ -34,9 +34,9 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.sso.KeycloakBruteForceAttackUtil;
 import org.sunbird.sso.KeycloakUtil;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.keycloak.SSOManager;
+import org.sunbird.keycloak.SSOServiceFactory;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.UserUtility;
 
 @RunWith(PowerMockRunner.class)

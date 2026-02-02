@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 

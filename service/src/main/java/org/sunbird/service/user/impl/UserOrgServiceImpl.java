@@ -13,7 +13,7 @@ import org.sunbird.model.user.UserOrg;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserOrgService;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class UserOrgServiceImpl implements UserOrgService {
   private static UserOrgServiceImpl userOrgService = null;

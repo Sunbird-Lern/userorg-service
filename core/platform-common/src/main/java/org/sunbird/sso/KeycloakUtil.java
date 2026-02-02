@@ -9,7 +9,7 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class KeycloakUtil {
   private static final LoggerUtil logger = new LoggerUtil(KeycloakUtil.class);

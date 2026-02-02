@@ -3,7 +3,7 @@ package org.sunbird.response;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 
 /**
  * This is a common response class for all the layer. All layer will send same response object.

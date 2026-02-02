@@ -25,7 +25,7 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 /** @author Amit Kumar */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

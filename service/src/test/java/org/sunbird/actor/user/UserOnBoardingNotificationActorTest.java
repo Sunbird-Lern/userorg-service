@@ -19,14 +19,14 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
+import org.sunbird.keycloak.SSOManager;
+import org.sunbird.keycloak.SSOServiceFactory;
 import org.sunbird.util.UserUtility;
 
 @RunWith(PowerMockRunner.class)

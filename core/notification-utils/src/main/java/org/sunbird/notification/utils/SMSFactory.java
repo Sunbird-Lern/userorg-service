@@ -5,7 +5,7 @@ import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.provider.ISmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
 import org.sunbird.notification.sms.providerimpl.NICGatewaySmsProviderFactory;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 /**
  * This class will provide object of factory.

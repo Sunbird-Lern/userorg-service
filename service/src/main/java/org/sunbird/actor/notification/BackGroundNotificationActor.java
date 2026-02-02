@@ -7,7 +7,7 @@ import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.request.Request;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class BackGroundNotificationActor extends BaseActor {
 

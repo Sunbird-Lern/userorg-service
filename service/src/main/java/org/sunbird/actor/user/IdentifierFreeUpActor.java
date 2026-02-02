@@ -15,8 +15,8 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.keycloak.SSOServiceFactory;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.user.UserUtil;
 
 /**

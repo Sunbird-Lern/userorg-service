@@ -14,7 +14,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 @PrepareForTest({ProjectUtil.class, HttpClientUtil.class, KeycloakUtil.class})
 @RunWith(PowerMockRunner.class)

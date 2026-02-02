@@ -2,14 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>userorg-service</artifactId>
-        <groupId>org.sunbird</groupId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.sunbird</groupId>
+        <artifactId>userorg-service</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-     <properties>
+    <artifactId>core</artifactId>
+    <packaging>pom</packaging>
+    <name>Sunbird Core</name>
+
+    <properties>
         <!-- Java Compiler Settings -->
         <maven.compiler.release>11</maven.compiler.release>
         <maven.compiler.source>11</maven.compiler.source>
@@ -29,17 +34,49 @@
         <httpcomponents.httpclient.version>4.5.14</httpcomponents.httpclient.version>
         <httpcomponents.httpcore.version>4.4.16</httpcomponents.httpcore.version>
         <httpcomponents.httpasyncclient.version>4.1.5</httpcomponents.httpasyncclient.version>
+        <httpcomponents.httpmime.version>4.5.14</httpcomponents.httpmime.version>
         
         <!-- Jackson -->
         <jackson.version>2.13.5</jackson.version>
         
+        <!--  Apache Pekko -->
+        <pekko.version>1.0.3</pekko.version>
+        
+        <!-- Apache Kafka -->
+        <kafka.version>3.7.1</kafka.version>
+        
         <!-- Logging -->
         <logback.version>1.2.3</logback.version>
-        <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>7.3</logstash-logback-encoder.version>
         
         <!-- Apache Commons -->
         <commons-collections.version>3.2.2</commons-collections.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
+        <commons-validator.version>1.7</commons-validator.version>
+        
+        <!-- Apache Velocity -->
+        <velocity-tools.version>2.0</velocity-tools.version>
+        
+        <!-- Keycloak and RestEasy -->
+        <keycloak.version>21.1.2</keycloak.version>
+        <jaxrs-api.version>3.0.11.Final</jaxrs-api.version>
+        <resteasy-client.version>4.7.9.Final</resteasy-client.version>
+        <resteasy-jackson2-provider.version>3.1.3.Final</resteasy-jackson2-provider.version>
+        
+        <!-- Google Libraries -->
+        <libphonenumber.version>8.10.2</libphonenumber.version>
+        <guava.version>18.0</guava.version>
+        
+        <!-- Cloud Storage -->
+        <cloud-store-sdk.version>1.4.8.1</cloud-store-sdk.version>
+        
+        <!-- Unirest HTTP Client -->
+        <unirest.version>1.4.9</unirest.version>
+        
+        <!-- Play Framework -->
+        <play2.version>3.0.5</play2.version>
+        <scala.major.version>2.13</scala.major.version>
         
         <!-- Testing -->
         <junit.version>4.13.1</junit.version>
@@ -48,20 +85,70 @@
         <!-- Build Plugins -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
-        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
         <scoverage.plugin.version>1.1.1</scoverage.plugin.version>
     </properties>
 
-    <artifactId>core</artifactId>
-    <packaging>pom</packaging>
     <modules>
-        <module>platform-common</module>
-        <module>actor-core</module>
+        <module>sunbird-platform-common</module>
         <module>sunbird-cassandra-utils</module>
         <module>sunbird-es-utils</module>
-        <module>notification-utils</module>
+        <module>actor-core</module>
         <module>sunbird-event-utils</module>
     </modules>
 
+    <build>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>11</release>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <argLine>--illegal-access=warn</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <configuration>
+                    <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
+                    <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -12,7 +12,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class SystemSettingDaoImpl implements SystemSettingDao {
 

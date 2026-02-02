@@ -23,7 +23,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.sso.KeyCloakConnectionProvider;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 // ** @author kirti. Junit test cases *//*

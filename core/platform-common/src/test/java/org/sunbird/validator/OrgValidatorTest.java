@@ -16,10 +16,10 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 import org.sunbird.validator.orgvalidator.OrgRequestValidator;
 
 @RunWith(PowerMockRunner.class)

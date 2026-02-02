@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;

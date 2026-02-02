@@ -9,8 +9,8 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.common.PropertiesCache;
 
 /** @author Amit Kumar */
 public class URLShortnerImpl implements URLShortner {

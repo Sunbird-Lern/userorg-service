@@ -4,7 +4,7 @@ package org.sunbird.response;
 import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 
 /** @author Manzarul */
 public class ResponseTest {

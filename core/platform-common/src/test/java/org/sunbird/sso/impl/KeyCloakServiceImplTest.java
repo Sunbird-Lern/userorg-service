@@ -26,15 +26,15 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.sso.KeyCloakConnectionProvider;
 import org.sunbird.sso.KeycloakRequiredActionLinkUtil;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.keycloak.SSOManager;
+import org.sunbird.keycloak.SSOServiceFactory;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.common.PropertiesCache;
 
 @PrepareForTest({
   ProjectUtil.class,

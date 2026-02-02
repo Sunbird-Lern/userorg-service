@@ -15,7 +15,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 /** Created by arvind on 24/4/18. */
 public class BulkUploadProcessDaoImpl implements BulkUploadProcessDao {

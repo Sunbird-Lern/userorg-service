@@ -13,9 +13,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.UserBaseActor;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -24,7 +24,7 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 import org.sunbird.util.Util;
 
 public class UserRoleActor extends UserBaseActor {

@@ -12,7 +12,7 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.dao.user.UserOrgDao;
 import org.sunbird.dao.user.impl.UserOrgDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.UserDeclareEntity;
 import org.sunbird.request.Request;

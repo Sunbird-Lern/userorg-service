@@ -10,14 +10,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.sso.SSOManager;
+import org.sunbird.keycloak.SSOManager;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.user.UserUtil;
 

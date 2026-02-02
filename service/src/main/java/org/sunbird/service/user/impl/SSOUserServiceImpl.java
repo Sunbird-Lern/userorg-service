@@ -10,8 +10,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
-import org.sunbird.exception.ResponseMessage;
+import org.sunbird.response.ResponseCode;
+import org.sunbird.response.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.organisation.Organisation;
@@ -26,8 +26,8 @@ import org.sunbird.service.user.SSOUserService;
 import org.sunbird.service.user.UserLookupService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.StringFormatter;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.utils.StringFormatter;
 import org.sunbird.util.user.UserUtil;
 
 public class SSOUserServiceImpl implements SSOUserService {

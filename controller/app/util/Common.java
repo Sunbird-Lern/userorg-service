@@ -1,7 +1,7 @@
 package util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.ResponseParams;
 import play.libs.typedmap.TypedKey;

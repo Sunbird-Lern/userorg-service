@@ -25,7 +25,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.ShadowUserMigrationService;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

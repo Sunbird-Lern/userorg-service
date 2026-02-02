@@ -1,7 +1,7 @@
 package org.sunbird.response;
 
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 
 public class ClientErrorResponse extends Response {
 

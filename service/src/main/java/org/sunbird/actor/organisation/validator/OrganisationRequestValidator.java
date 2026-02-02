@@ -10,7 +10,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.location.validator.LocationRequestValidator;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.location.Location;
@@ -20,8 +20,8 @@ import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgExternalServiceImpl;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Slug;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.utils.Slug;
 
 public class OrganisationRequestValidator {
 

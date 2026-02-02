@@ -16,14 +16,14 @@ import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
-import org.sunbird.exception.ResponseMessage;
+import org.sunbird.response.ResponseCode;
+import org.sunbird.response.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.sso.KeyCloakConnectionProvider;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.keycloak.SSOManager;
+import org.sunbird.common.ProjectUtil;
 
 /**
  * Single sign out service implementation with Key Cloak.

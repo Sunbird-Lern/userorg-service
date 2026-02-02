@@ -19,7 +19,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 /** Class to fetch SSO public key from Keycloak server using 'certs' HTTP API call. */
 public class KeyCloakRsaKeyFetcher {

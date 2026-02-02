@@ -19,10 +19,10 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.organisation.validator.OrgTypeValidator;
 import org.sunbird.actor.organisation.validator.OrganisationRequestValidator;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -30,11 +30,11 @@ import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
 import org.sunbird.telemetry.util.TelemetryUtil;
-import org.sunbird.util.CloudStorageUtil;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.Slug;
+import org.sunbird.utils.CloudStorageUtil;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.utils.Slug;
 import org.sunbird.util.Util;
-import org.sunbird.validator.EmailValidator;
+import org.sunbird.validators.EmailValidator;
 
 public class OrganisationManagementActor extends BaseActor {
   private final OrgService orgService = OrgServiceImpl.getInstance();

@@ -120,7 +120,7 @@
         <!-- Sunbird Dependencies -->
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>platform-common</artifactId>
+            <artifactId>sunbird-platform-common</artifactId>
             <version>1.0-SNAPSHOT</version>
             <exclusions>
                 <exclusion>

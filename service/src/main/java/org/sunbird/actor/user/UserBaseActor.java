@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.actor.user.validator.UserCreateRequestValidator;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.kafka.KafkaClient;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
@@ -30,7 +30,7 @@ import org.sunbird.service.user.impl.UserLookUpServiceImpl;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.util.DataCacheHandler;
 import org.sunbird.util.FormApiUtil;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.Util;
 
 public abstract class UserBaseActor extends BaseActor {

@@ -8,9 +8,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
-import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.validators.BaseRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
 

@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.apache.http.HttpHeaders;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.HeaderParam;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import play.mvc.EssentialAction;
 import play.mvc.EssentialFilter;
 import play.mvc.Http;

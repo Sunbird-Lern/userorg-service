@@ -8,13 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class LocationServiceImpl implements LocationService {
   public static LocationService locationService = null;

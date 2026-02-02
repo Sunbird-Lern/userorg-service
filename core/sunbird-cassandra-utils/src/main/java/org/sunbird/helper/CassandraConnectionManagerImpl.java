@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.common.CassandraPropertyReader;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 
 /**
  * Implementation of {@link CassandraConnectionManager} for managing Cassandra database connections.
