@@ -822,7 +822,6 @@ public final class JsonKey {
   public static final String IS_BLOCKED = "isBlocked";
   public static final String OTP_EMAIL_RESET_PASSWORD_TEMPLATE = "otpEmailResetPasswordTemplate";
   public static final String OTP_PHONE_RESET_PASSWORD_TEMPLATE = "otpPhoneResetPasswordTemplate";
-  public static final String VERIFY_EMAIL_OTP_TEMPLATE = "verifyEmailOtpTemplate";
   public static final String VERIFY_PHONE_OTP_TEMPLATE = "verifyPhoneOtpTemplate";
   public static final String TERMS = "terms";
   public static final String SUNBIRD_INSTALLATION_DISPLAY_NAME = "sunbird_installation_display_name_for_sms";
