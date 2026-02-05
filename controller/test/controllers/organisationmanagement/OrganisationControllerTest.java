@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import play.mvc.Http;
 import play.mvc.Result;

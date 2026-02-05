@@ -32,17 +32,17 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.HeaderParam;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.ClientErrorResponse;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryEvents;
 import org.sunbird.telemetry.util.TelemetryWriter;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -450,6 +450,9 @@ public class BaseController extends Controller {
     response.setResponseCode(ResponseCode.getResponseCodeByCode(exception.getErrorResponseCode()));
     ResponseCode code = exception.getResponseCode();
     if (code == null) {
+      code = ResponseCode.getResponseCodeByCode(exception.getErrorResponseCode());
+    }
+    if (code == null) {
       code = ResponseCode.SERVER_ERROR;
     }
     response.setParams(
@@ -470,7 +473,7 @@ public class BaseController extends Controller {
       Request request, ProjectCommonException exception, Response response) {
     // This code is for backwards compatibility
     if (request.path() != null && request.path().startsWith("/v1/otp/generate")) {
-      if ("errorRateLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
+      if (exception.getResponseCode() != null && "errorRateLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name())) {
         response.getParams().setErr("ERROR_RATE_LIMIT_EXCEEDED");
         response.getParams().setStatus("ERROR_RATE_LIMIT_EXCEEDED");
       }
@@ -478,7 +481,7 @@ public class BaseController extends Controller {
 
     if (request.path() != null
         && request.path().startsWith("/v1/otp/verify")
-        && ("otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name()))) {
+        && (exception.getResponseCode() != null && "otpVerificationFailed".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("OTP_VERIFICATION_FAILED");
       response.getParams().setStatus("OTP_VERIFICATION_FAILED");
     }
@@ -486,20 +489,20 @@ public class BaseController extends Controller {
     if (request.path() != null
         && (request.path().startsWith("/v1/manageduser/create")
             || request.path().startsWith("/v4/user/create"))
-        && ("managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name()))) {
+        && (exception.getResponseCode() != null && "managedUserLimitExceeded".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("MANAGED_USER_LIMIT_EXCEEDED");
       response.getParams().setStatus("MANAGED_USER_LIMIT_EXCEEDED");
     }
 
     if (request.path() != null
         && (request.path().startsWith("/v1/user/consent/read"))
-        && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+        && (exception.getResponseCode() != null && "resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("USER_CONSENT_NOT_FOUND");
       response.getParams().setStatus("USER_CONSENT_NOT_FOUND");
     }
     if (request.path() != null
             && (request.path().startsWith("/v1/user/get/"))
-            && ("resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
+            && (exception.getResponseCode() != null && "resourceNotFound".equalsIgnoreCase(exception.getResponseCode().name()))) {
       response.getParams().setErr("USER_NOT_FOUND");
       response.getParams().setStatus("USER_NOT_FOUND");
     }
@@ -517,7 +520,7 @@ public class BaseController extends Controller {
     response.setVer(getApiVersion(path));
     response.setId(getApiResponseId(path, method));
     response.setTs(ProjectUtil.getFormattedDate());
-    response.setResponseCode(exception.getResponseCode());
+    response.setResponseCode(exception.getResponseCode() != null ? exception.getResponseCode() : ResponseCode.getResponseCodeByCode(exception.getErrorResponseCode()));
     ResponseCode code = exception.getResponseCode();
     response.setParams(createResponseParamObj(code, exception.getMessage(), null));
     return response;

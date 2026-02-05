@@ -22,7 +22,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.HeaderParam;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;

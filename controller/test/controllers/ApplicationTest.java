@@ -6,7 +6,7 @@ import modules.OnRequestHandler;
 import org.junit.Test;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import play.mvc.Result;
 
 /**

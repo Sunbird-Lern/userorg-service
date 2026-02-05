@@ -5,7 +5,7 @@ import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import play.mvc.Http;
 import play.mvc.Result;

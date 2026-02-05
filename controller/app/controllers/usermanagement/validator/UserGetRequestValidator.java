@@ -1,13 +1,13 @@
 package controllers.usermanagement.validator;
 
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.StringFormatter;
-import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.utils.StringFormatter;
+import org.sunbird.validators.BaseRequestValidator;
 import play.mvc.Http;
 import util.CaptchaHelper;
 

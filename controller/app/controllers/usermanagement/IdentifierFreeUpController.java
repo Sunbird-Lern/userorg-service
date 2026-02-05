@@ -5,9 +5,9 @@ import controllers.BaseController;
 import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
-import org.sunbird.validator.UserFreeUpRequestValidator;
+import org.sunbird.validators.UserFreeUpRequestValidator;
 import play.mvc.Http;
 import play.mvc.Result;
 

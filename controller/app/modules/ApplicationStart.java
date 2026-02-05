@@ -9,7 +9,7 @@ import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionMngrFactory;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.user.SchedulerManager;
 import play.api.Environment;
 import play.api.inject.ApplicationLifecycle;
