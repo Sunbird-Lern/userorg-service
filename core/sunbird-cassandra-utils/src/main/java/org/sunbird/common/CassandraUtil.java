@@ -30,7 +30,7 @@ import org.sunbird.common.CassandraPropertyReader;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.response.Response;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 
 /**
  * Utility class providing helper methods for Cassandra database operations.
