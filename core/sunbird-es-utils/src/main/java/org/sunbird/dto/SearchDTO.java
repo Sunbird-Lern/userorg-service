@@ -1,4 +1,3 @@
-/** */
 package org.sunbird.dto;
 
 import java.util.ArrayList;
@@ -7,47 +6,73 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class will take input for elastic search query
- *
- * @author Manzarul
+ * Data Transfer Object for Elasticsearch query operations.
+ * Encapsulates all parameters required for building and executing ES queries including
+ * search criteria, pagination, sorting, facets, and fuzzy search options.
  */
 public class SearchDTO {
 
+  /** List of property filters for the search query. */
   @SuppressWarnings("rawtypes")
   private List<Map> properties;
 
+  /** List of facet aggregations to compute. */
   private List<Map<String, String>> facets = new ArrayList<>();
+
+  /** Fields to include in search results. */
   private List<String> fields;
+
+  /** Fields to exclude from search results. */
   private List<String> excludedFields;
+
+  /** Sorting criteria as field-order pairs. */
   private Map<String, Object> sortBy = new HashMap<>();
+
+  /** Logical operation for combining search criteria (AND/OR). */
   private String operation;
+
+  /** Free-text search query string. */
   private String query;
+
+  /** Specific fields to search within for the query. */
   private List<String> queryFields;
 
-  private Integer limit = 250;
+  /** Maximum number of results to return. Default: 1000 */
+  private Integer limit = 1000;
+
+  /** Number of results to skip for pagination. Default: 0 */
   private Integer offset = 0;
+
+  /** Enable fuzzy matching for search queries. */
   private boolean fuzzySearch = false;
-  // additional properties will hold , filters, exist , not exist
+
+  /** Additional filter properties including filters, exists, and not-exists conditions. */
   private Map<String, Object> additionalProperties = new HashMap<>();
+
+  /** Soft constraints with priority weights for ranking. */
   private Map<String, Integer> softConstraints = new HashMap<>();
 
+  /** Fuzzy search configuration parameters. */
   private Map<String, String> fuzzy = new HashMap<>();
 
+  /** Grouped query clauses for complex boolean queries. */
   private List<Map<String, Object>> groupQuery = new ArrayList<>();
+
+  /** Query execution modes. */
   private List<String> mode = new ArrayList<>();
 
-  public List<Map<String, Object>> getGroupQuery() {
-    return groupQuery;
-  }
-
-  public void setGroupQuery(List<Map<String, Object>> groupQuery) {
-    this.groupQuery = groupQuery;
-  }
-
+  /** Default constructor. */
   public SearchDTO() {
     super();
   }
 
+  /**
+   * Constructor with basic search parameters.
+   *
+   * @param properties list of property filters
+   * @param operation logical operation (AND/OR)
+   * @param limit maximum results to return
+   */
   @SuppressWarnings("rawtypes")
   public SearchDTO(List<Map> properties, String operation, int limit) {
     super();
@@ -114,10 +139,22 @@ public class SearchDTO {
     this.additionalProperties = additionalProperties;
   }
 
+  /**
+   * Retrieves a specific additional property by key.
+   *
+   * @param key property key
+   * @return property value or null if not found
+   */
   public Object getAdditionalProperty(String key) {
     return additionalProperties.get(key);
   }
 
+  /**
+   * Adds a single additional property.
+   *
+   * @param key property key
+   * @param value property value
+   */
   public void addAdditionalProperty(String key, Object value) {
     this.additionalProperties.put(key, value);
   }
@@ -184,5 +221,13 @@ public class SearchDTO {
 
   public void setFuzzy(Map<String, String> fuzzy) {
     this.fuzzy = fuzzy;
+  }
+
+  public List<Map<String, Object>> getGroupQuery() {
+    return groupQuery;
+  }
+
+  public void setGroupQuery(List<Map<String, Object>> groupQuery) {
+    this.groupQuery = groupQuery;
   }
 }

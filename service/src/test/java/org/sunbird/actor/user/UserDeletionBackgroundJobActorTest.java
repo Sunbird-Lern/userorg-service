@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.sunbird.kafka.InstructionEventGenerator;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
@@ -29,7 +30,8 @@ import org.sunbird.util.PropertiesCache;
   UserServiceImpl.class,
   UserRoleService.class,
   UserRoleServiceImpl.class,
-  PropertiesCache.class
+  PropertiesCache.class,
+  InstructionEventGenerator.class
 })
 @PowerMockIgnore({
   "javax.management.*",
@@ -47,6 +49,7 @@ public class UserDeletionBackgroundJobActorTest {
   public void beforeEachTest() throws Exception {
     UserRoleService userRoleService = PowerMockito.mock(UserRoleService.class);
     PowerMockito.mockStatic(UserRoleServiceImpl.class);
+    PowerMockito.mockStatic(InstructionEventGenerator.class);
     PowerMockito.when(UserRoleServiceImpl.getInstance()).thenReturn(userRoleService);
     PowerMockito.when(
             userRoleService.getUserRoles(Mockito.anyString(), Mockito.any(RequestContext.class)))

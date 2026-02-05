@@ -261,6 +261,8 @@ public final class JsonKey {
   public static final String SUNBIRD_ES_CLUSTER = "sunbird_es_cluster";
   public static final String SUNBIRD_ES_IP = "sunbird_es_host";
   public static final String SUNBIRD_ES_PORT = "sunbird_es_port";
+  public static final String ES_COURSE_INDEX = "es_course_index";
+  public static final String ES_COURSE_BATCH_INDEX = "es_course_batch_index";
   public static final String SUNBIRD_INSTALLATION = "sunbird_installation";
   public static final String SUNBIRD_SSO_CLIENT_ID = "sunbird_sso_client_id";
   public static final String SUNBIRD_SSO_CLIENT_SECRET = "sunbird_sso_client_secret";

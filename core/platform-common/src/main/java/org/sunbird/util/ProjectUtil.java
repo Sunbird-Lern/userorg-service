@@ -242,7 +242,9 @@ public class ProjectUtil {
     organisation(getConfigValue(JsonKey.ES_ORG_INDEX_INDEX)),
     usernotes(getConfigValue(JsonKey.ES_USER_NOTES_INDEX)),
     location(getConfigValue(JsonKey.ES_LOCATION_INDEX)),
-    userfeed(getConfigValue(JsonKey.ES_USER_FEED_INDEX));
+    userfeed(getConfigValue(JsonKey.ES_USER_FEED_INDEX)),
+    course(getConfigValue(JsonKey.ES_COURSE_INDEX)),
+    courseBatch(getConfigValue(JsonKey.ES_COURSE_BATCH_INDEX));
 
     private String typeName;
 
@@ -505,6 +507,10 @@ public class ProjectUtil {
             x -> {
               map.remove(x);
             });
+  }
+
+   public static boolean isNotNull(Object obj) {
+    return null != obj ? true : false;
   }
 
   /**

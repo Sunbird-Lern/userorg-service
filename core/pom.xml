@@ -9,13 +9,56 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+     <properties>
+        <!-- Java Compiler Settings -->
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        
+        <!-- Encoding Settings -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        
+        <!-- Cassandra Dependencies -->
+        <cassandra.driver.version>3.7.0</cassandra.driver.version>
+        
+        <!-- Elasticsearch Dependencies -->
+        <elasticsearch.version>7.10.2</elasticsearch.version>
+        
+        <!-- Apache HTTP Components -->
+        <httpcomponents.httpclient.version>4.5.14</httpcomponents.httpclient.version>
+        <httpcomponents.httpcore.version>4.4.16</httpcomponents.httpcore.version>
+        <httpcomponents.httpasyncclient.version>4.1.5</httpcomponents.httpasyncclient.version>
+        
+        <!-- Jackson -->
+        <jackson.version>2.14.3</jackson.version>
+        
+        <!-- Logging -->
+        <logback.version>1.2.3</logback.version>
+        <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
+        
+        <!-- Apache Commons -->
+        <commons-collections.version>3.2.2</commons-collections.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        
+        <!-- Testing -->
+        <junit.version>4.13.1</junit.version>
+        <powermock.version>2.0.9</powermock.version>
+        
+        <!-- Build Plugins -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <scoverage.plugin.version>1.1.1</scoverage.plugin.version>
+    </properties>
+
     <artifactId>core</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>platform-common</module>
         <module>actor-core</module>
         <module>sunbird-cassandra-utils</module>
-        <module>es-utils</module>
+        <module>sunbird-es-utils</module>
         <module>notification-utils</module>
     </modules>
 
