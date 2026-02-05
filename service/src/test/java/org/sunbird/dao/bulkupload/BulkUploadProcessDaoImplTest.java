@@ -21,7 +21,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 @PrepareForTest({ServiceFactory.class, CassandraOperationImpl.class})
 @RunWith(PowerMockRunner.class)

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 
@@ -20,9 +20,16 @@ public class RateLimit {
   public RateLimit(String key, Map<String, Object> rateLimitMap) {
     this.key = key;
     this.unit = (String) rateLimitMap.get(JsonKey.RATE_LIMIT_UNIT);
-    this.limit = (int) rateLimitMap.get(JsonKey.RATE);
-    this.count = (int) rateLimitMap.get(JsonKey.COUNT);
-    this.ttl = (int) rateLimitMap.get(JsonKey.TTL);
+    this.limit = getIntValue(rateLimitMap.get(JsonKey.RATE));
+    this.count = getIntValue(rateLimitMap.get(JsonKey.COUNT));
+    this.ttl = getIntValue(rateLimitMap.get(JsonKey.TTL));
+  }
+
+  private int getIntValue(Object obj) {
+    if (obj instanceof Number) {
+      return ((Number) obj).intValue();
+    }
+    return 0;
   }
 
   public RateLimit(String key, String unit, Integer limit, int ttl) {

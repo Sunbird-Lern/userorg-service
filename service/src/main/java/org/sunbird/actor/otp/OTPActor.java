@@ -9,9 +9,9 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.ClientErrorResponse;
@@ -20,7 +20,7 @@ import org.sunbird.service.otp.OTPService;
 import org.sunbird.service.ratelimit.RateLimitService;
 import org.sunbird.service.ratelimit.RateLimitServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.Util;
 import org.sunbird.util.otp.OTPUtil;
 import org.sunbird.util.ratelimit.OtpRateLimiter;
@@ -173,7 +173,10 @@ public class OTPActor extends BaseActor {
             + OTPUtil.maskId(key, type)
             + ",remaining attempt is "
             + remainingCount);
-    int attemptedCount = (int) otpDetails.get(JsonKey.ATTEMPTED_COUNT);
+    int attemptedCount = 0;
+    if (otpDetails.get(JsonKey.ATTEMPTED_COUNT) instanceof Number) {
+      attemptedCount = ((Number) otpDetails.get(JsonKey.ATTEMPTED_COUNT)).intValue();
+    }
     if (remainingCount <= 0) {
       otpService.deleteOtp(type, key, context);
     } else {
@@ -202,7 +205,10 @@ public class OTPActor extends BaseActor {
 
   private int getRemainingAttemptedCount(Map<String, Object> otpDetails) {
     int allowedAttempt = Integer.parseInt(ProjectUtil.getConfigValue(SUNBIRD_OTP_ALLOWED_ATTEMPT));
-    int attemptedCount = (int) otpDetails.get(JsonKey.ATTEMPTED_COUNT);
+    int attemptedCount = 0;
+    if (otpDetails.get(JsonKey.ATTEMPTED_COUNT) instanceof Number) {
+      attemptedCount = ((Number) otpDetails.get(JsonKey.ATTEMPTED_COUNT)).intValue();
+    }
     return (allowedAttempt - (attemptedCount + 1));
   }
 

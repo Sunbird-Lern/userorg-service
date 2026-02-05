@@ -15,12 +15,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.user.UserRoleDao;
 import org.sunbird.dao.user.impl.UserRoleDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.user.UserRoleService;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class UserRoleServiceImpl implements UserRoleService {
   private final LoggerUtil logger = new LoggerUtil(UserRoleServiceImpl.class);

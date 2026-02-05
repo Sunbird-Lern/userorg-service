@@ -13,7 +13,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.telemetry.util.TelemetryUtil;
 import org.sunbird.telemetry.util.TelemetryWriter;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 /** @author Amit Kumar */
 public abstract class BaseLocationActor extends BaseActor {

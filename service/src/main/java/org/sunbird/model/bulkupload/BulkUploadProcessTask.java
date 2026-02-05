@@ -27,7 +27,7 @@ public class BulkUploadProcessTask implements Serializable {
   private String successResult;
   private Timestamp createdOn;
   private Timestamp lastUpdatedOn;
-  private Integer iterationId = new Integer(0);
+  private Integer iterationId = 0;
   private Integer status;
 
   public String getData() {

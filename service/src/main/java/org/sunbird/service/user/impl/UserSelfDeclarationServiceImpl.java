@@ -9,7 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.sunbird.dao.user.UserSelfDeclarationDao;
 import org.sunbird.dao.user.impl.UserSelfDeclarationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.UserDeclareEntity;

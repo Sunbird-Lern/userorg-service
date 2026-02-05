@@ -9,9 +9,9 @@ import org.apache.pekko.actor.Props;
 import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Assert;
 import org.junit.Test;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 

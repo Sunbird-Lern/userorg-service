@@ -4,7 +4,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.kafka.InstructionEventGenerator;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
@@ -19,14 +19,14 @@ import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.common.PropertiesCache;
 import org.sunbird.util.user.UserUtil;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-import static org.sunbird.validator.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
+import static org.sunbird.validators.orgvalidator.BaseOrgRequestValidator.ERROR_CODE;
 
 public class UserOwnershipTransferActor extends BaseActor {
 

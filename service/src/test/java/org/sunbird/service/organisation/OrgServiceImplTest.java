@@ -28,7 +28,7 @@ import org.sunbird.model.organisation.Organisation;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

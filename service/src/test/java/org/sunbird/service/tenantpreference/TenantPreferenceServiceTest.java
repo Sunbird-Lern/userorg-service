@@ -25,7 +25,7 @@ import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseMessage;
+import org.sunbird.response.ResponseMessage;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;

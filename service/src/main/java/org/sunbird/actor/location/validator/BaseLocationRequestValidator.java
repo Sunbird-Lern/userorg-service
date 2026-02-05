@@ -5,10 +5,10 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
-import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.validators.BaseRequestValidator;
 
 /** Created by arvind on 25/4/18. */
 public class BaseLocationRequestValidator extends BaseRequestValidator {

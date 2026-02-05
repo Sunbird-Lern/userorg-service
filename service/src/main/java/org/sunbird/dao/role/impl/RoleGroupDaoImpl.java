@@ -11,7 +11,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.RoleGroup;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class RoleGroupDaoImpl implements RoleGroupDao {
 

@@ -32,13 +32,13 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.organisation.Organisation;
 import org.sunbird.model.user.User;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -537,7 +537,7 @@ public abstract class UserManagementActorTestBase {
     } else {
       ProjectCommonException res =
           probe.expectMsgClass(Duration.ofSeconds(1000), ProjectCommonException.class);
-      return res.getResponseCode().name().equals(errorCode.name())
+      return res.getResponseCodeEnum().name().equals(errorCode.name())
           || res.getErrorResponseCode() == errorCode.getResponseCode();
     }
   }

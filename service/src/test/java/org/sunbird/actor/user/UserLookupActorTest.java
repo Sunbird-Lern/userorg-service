@@ -23,7 +23,7 @@ import org.sunbird.dao.user.UserDao;
 import org.sunbird.dao.user.impl.UserDaoImpl;
 import org.sunbird.dao.user.impl.UserLookupDaoImpl;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;

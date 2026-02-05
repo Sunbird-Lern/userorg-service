@@ -16,6 +16,7 @@ public class UserLookupActor extends BaseActor {
     searchUser(request);
   }
 
+  @SuppressWarnings("unchecked")
   private void searchUser(Request request) {
     UserService userService = UserServiceImpl.getInstance();
     Map<String, Object> reqMap = request.getRequest();

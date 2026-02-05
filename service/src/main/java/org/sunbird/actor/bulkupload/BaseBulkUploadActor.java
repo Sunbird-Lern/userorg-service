@@ -13,7 +13,7 @@ import org.sunbird.dao.bulkupload.BulkUploadProcessTaskDao;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
@@ -22,7 +22,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

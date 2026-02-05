@@ -16,7 +16,7 @@ import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 /**
  * Data access implementation for BulkUploadProcessTask entity.

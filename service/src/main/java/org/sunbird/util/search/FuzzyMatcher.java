@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 public class FuzzyMatcher {
   private static final LoggerUtil logger = new LoggerUtil(FuzzyMatcher.class);

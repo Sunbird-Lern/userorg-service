@@ -11,7 +11,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.user.UserUtil;
 import scala.concurrent.Future;
 

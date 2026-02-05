@@ -28,13 +28,13 @@ import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.datasecurity.impl.DefaultDecryptionServiceImpl;
 import org.sunbird.datasecurity.impl.DefaultEncryptionServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.sms.provider.ISmsProvider;
 import org.sunbird.notification.sms.providerimpl.Msg91SmsProviderFactory;
 import org.sunbird.notification.utils.SMSFactory;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 

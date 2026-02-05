@@ -5,7 +5,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class LocationBackgroundActor extends BaseLocationActor {
 

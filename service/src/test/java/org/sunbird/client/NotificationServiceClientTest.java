@@ -16,7 +16,7 @@ import org.sunbird.http.HttpClientUtil;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({PropertiesCache.class, HttpClientUtil.class})

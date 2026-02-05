@@ -6,7 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 import org.sunbird.client.NotificationServiceClient;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.Feed;

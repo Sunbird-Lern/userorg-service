@@ -32,7 +32,7 @@ import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.util.Util;

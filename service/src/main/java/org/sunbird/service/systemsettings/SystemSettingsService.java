@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.sunbird.dao.systemsettings.impl.SystemSettingDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.systemsettings.SystemSetting;
 import org.sunbird.request.RequestContext;

@@ -30,10 +30,10 @@ import org.sunbird.model.user.User;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
-import org.sunbird.sso.KeyCloakConnectionProvider;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.keycloak.KeyCloakConnectionProvider;
+import org.sunbird.keycloak.SSOManager;
+import org.sunbird.keycloak.SSOServiceFactory;
+import org.sunbird.common.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({
