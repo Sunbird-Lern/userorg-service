@@ -31,7 +31,7 @@
 	<dependencies>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>platform-common</artifactId>
+            <artifactId>sunbird-platform-common</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 		<dependency>
@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>18.0</version>
+			<version>${guava.version}</version>
 		</dependency>
 
         <!--These below dependency required for testcase to pass with jdk-11 upgrade else throws exception related to
