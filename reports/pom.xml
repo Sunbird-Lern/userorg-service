@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.sunbird</groupId>
-            <artifactId>notification-utils</artifactId>
+            <artifactId>sunbird-notification-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
