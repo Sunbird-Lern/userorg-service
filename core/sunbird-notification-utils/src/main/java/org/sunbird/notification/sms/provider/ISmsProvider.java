@@ -22,12 +22,10 @@ public interface ISmsProvider {
   default String getTemplateId(String sms, String provider) {
     Map<String, Map<String, String>> smsTemplateConfig = SmsTemplateUtil.getSmsTemplateConfigMap();
     Map<String, String> providerTemplateConfig = smsTemplateConfig.get(provider);
-    if (providerTemplateConfig != null) {
-      for (Map.Entry<String, String> entry : providerTemplateConfig.entrySet()) {
-        String pattern = entry.getKey().replaceAll("\\$[^ .]+", ".*?");
-        if (sms.matches(pattern)) {
-          return entry.getValue();
-        }
+    for (Map.Entry<String, String> entry : providerTemplateConfig.entrySet()) {
+      String pattern = entry.getKey().replaceAll("\\$[^ .]+", ".*?");
+      if (sms.matches(pattern)) {
+        return entry.getValue();
       }
     }
     return "";
