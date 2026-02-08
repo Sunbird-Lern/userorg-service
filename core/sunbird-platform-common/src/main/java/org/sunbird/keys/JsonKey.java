@@ -953,5 +953,51 @@ public final class JsonKey {
 //   public static final String TELEMETRY_IMPLICIT = "telemetry_implicit";
 //   public static final String CONTEXT_TELEMETRY = "context_telemetry";
 
+
+
+// Notification keys
+  public static final String DELIVERY_TYPE = "deliveryType";
+  public static final String MANDATORY_PARAMETER_MISSING = "MANDATORY_PARAMETER_MISSING";
+  public static final String INVALID_VALUE = "INVALID_VALUE";
+  public static final String VERIFY_OTP = "verifyOtp";
+  public static final String READ_FEED = "readFeed";
+  public static final String READ_V1_FEED = "readV1Feed";
+  public static final String UPDATE_FEED = "updateFeed";
+  public static final String UPDATE_V1_FEED = "updateV1Feed";
+  public static final String DELETE_FEED = "deleteFeed";
+  public static final String DELETE_V1_FEED = "deleteV1Feed";
+  public static final String CREATE_NOTIFICATION = "createNotification";
+  public static final String TEMPLATES = "templates";
+  public static final String TEMPLATE_SCHEMA = "template_schema";
+  public static final String API_VERSION = "v1";
+  public static final String DEBUG_ENABLED = "debug-enabled";
+  public static final String SUNBIRD_NOTIFICATIONS = "sunbird_notifications";
+  public static final String SENDER = "sender";
+  public static final String CONFIG = "config";
+  public static final String RAW_DATA = "rawData";
+  public static final String AUDIT = "ERROR";
+  public static final String ACTION_DATA = "actionData";
+  public static final String ACTION_TYPE = "actionType";
+  public static final String NOTIFICATION_CATEGORY_TYPE_CONFIG = "notification_category_type_config";
+  public static final String VERSION_SUPPORT_CONFIG_ENABLE = "version_support_config_enable";
+  public static final String FEED_LIMIT = "feed_limit";
+  public static final String LIST_TEMPLATE = "listTemplate";
+  public static final String CREATE_TEMPLATE = "createTemplate";
+  public static final String UPDATE_TEMPLATE = "updateTemplate";
+  public static final String DELETE_TEMPLATE = "deleteTemplate";
+  public static final String MAP_ACTION_TEMPLATE = "mapActionTemplate";
+  public static final String READ_ACTION_TEMPLATE = "readActionTemplate";
+  public static final String DELETED = "deleted";
+  public static final String SUNBIRD_NOTIFICATION_KEYSPACE = "sunbird_notification_keyspace";
+  public static final String USER_SERVICE_BASE_URL = "sunbird_user_service_base_url";
+  public static final String USER_SERVICE_SYSTEM_SETTING_URL = "sunbird_user_service_system_setting_url";
+  public static final String USER_SERVICE_ORG_READ_URL = "sunbird_user_service_org_read_url";
+  public static final String REQUEST_MESSAGE_ID = "msgId";
+  public static final String V1 = "v1";
+  public static final String ADMIN = "admin";
+  public static final String MEMBER = "member";
+  public static final String MEMBERS = "members";
+  public static final String ACTIVITIES = "activities";
+
   private JsonKey() {}
 }
