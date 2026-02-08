@@ -30,6 +30,8 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
+import org.sunbird.keys.JsonKey;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * HTTP client utility for making REST API calls.
@@ -93,7 +95,7 @@ public class HttpClientUtil {
             .setKeepAliveStrategy(keepAliveStrategy)
             .build();
     
-    logger.info(null, "HttpClientUtil initialized with max connections: " + MAX_TOTAL_CONNECTIONS);
+    logger.info("HttpClientUtil initialized with max connections: " + MAX_TOTAL_CONNECTIONS);
   }
 
   /**
@@ -118,13 +120,14 @@ public class HttpClientUtil {
    *
    * @param requestURL The target URL for the GET request
    * @param headers Optional HTTP headers to include in the request
-   * @param context Request context for logging and tracking
+   * @param context Request context (RequestContext or Map<String, Object>) for logging and tracking. nullable.
    * @return Response body as a string, or empty string if request fails
    */
-  public static String get(String requestURL, Map<String, String> headers, RequestContext context) {
+  public static String get(String requestURL, Map<String, String> headers, Object context) {
+    RequestContext requestContext = resolveContext(context);
     CloseableHttpResponse response = null;
     try {
-      logger.debug(context, "HttpClientUtil:get: Making GET request to URL: " + requestURL);
+      logger.debug(requestContext, "HttpClientUtil:get: Making GET request to URL: " + requestURL);
       HttpGet httpGet = new HttpGet(requestURL);
       
       if (MapUtils.isNotEmpty(headers)) {
@@ -134,12 +137,12 @@ public class HttpClientUtil {
       }
       
       response = httpclient.execute(httpGet);
-      return getResponse(response, context, "GET");
+      return getResponse(response, requestContext, "GET");
     } catch (Exception ex) {
-      logger.error(context, "HttpClientUtil:get: Exception occurred while calling GET method for URL: " + requestURL, ex);
+      logger.error(requestContext, "HttpClientUtil:get: Exception occurred while calling GET method for URL: " + requestURL, ex);
       return "";
     } finally {
-      closeResponse(response, context, "GET");
+      closeResponse(response, requestContext, "GET");
     }
   }
 
@@ -149,14 +152,15 @@ public class HttpClientUtil {
    * @param requestURL The target URL for the POST request
    * @param params The request body as a JSON string
    * @param headers Optional HTTP headers to include in the request
-   * @param context Request context for logging and tracking
+   * @param context Request context (RequestContext or Map<String, Object>) for logging and tracking. nullable.
    * @return Response body as a string, or empty string if request fails
    */
   public static String post(
-      String requestURL, String params, Map<String, String> headers, RequestContext context) {
+      String requestURL, String params, Map<String, String> headers, Object context) {
+    RequestContext requestContext = resolveContext(context);
     CloseableHttpResponse response = null;
     try {
-      logger.debug(context, "HttpClientUtil:post: Making POST request to URL: " + requestURL);
+      logger.debug(requestContext, "HttpClientUtil:post: Making POST request to URL: " + requestURL);
       HttpPost httpPost = new HttpPost(requestURL);
       
       if (MapUtils.isNotEmpty(headers)) {
@@ -169,12 +173,12 @@ public class HttpClientUtil {
       httpPost.setEntity(entity);
 
       response = httpclient.execute(httpPost);
-      return getResponse(response, context, "POST");
+      return getResponse(response, requestContext, "POST");
     } catch (Exception ex) {
-      logger.error(context, "HttpClientUtil:post: Exception occurred while calling POST method for URL: " + requestURL, ex);
+      logger.error(requestContext, "HttpClientUtil:post: Exception occurred while calling POST method for URL: " + requestURL, ex);
       return "";
     } finally {
-      closeResponse(response, context, "POST");
+      closeResponse(response, requestContext, "POST");
     }
   }
 
@@ -184,17 +188,18 @@ public class HttpClientUtil {
    * @param requestURL The target URL for the POST request
    * @param params Form parameters as key-value pairs
    * @param headers Optional HTTP headers to include in the request
-   * @param context Request context for logging and tracking
+   * @param context Request context (RequestContext or Map<String, Object>) for logging and tracking. nullable.
    * @return Response body as a string, or empty string if request fails
    */
   public static String postFormData(
       String requestURL,
       Map<String, String> params,
       Map<String, String> headers,
-      RequestContext context) {
+      Object context) {
+    RequestContext requestContext = resolveContext(context);
     CloseableHttpResponse response = null;
     try {
-      logger.debug(context, "HttpClientUtil:postFormData: Making POST form data request to URL: " + requestURL);
+      logger.debug(requestContext, "HttpClientUtil:postFormData: Making POST form data request to URL: " + requestURL);
       HttpPost httpPost = new HttpPost(requestURL);
       
       if (MapUtils.isNotEmpty(headers)) {
@@ -211,12 +216,12 @@ public class HttpClientUtil {
       httpPost.setEntity(entity);
 
       response = httpclient.execute(httpPost);
-      return getResponse(response, context, "POST_FORM");
+      return getResponse(response, requestContext, "POST_FORM");
     } catch (Exception ex) {
-      logger.error(context, "HttpClientUtil:postFormData: Exception occurred while calling POST form data method for URL: " + requestURL, ex);
+      logger.error(requestContext, "HttpClientUtil:postFormData: Exception occurred while calling POST form data method for URL: " + requestURL, ex);
       return "";
     } finally {
-      closeResponse(response, context, "POST_FORM");
+      closeResponse(response, requestContext, "POST_FORM");
     }
   }
 
@@ -226,14 +231,15 @@ public class HttpClientUtil {
    * @param requestURL The target URL for the PATCH request
    * @param params The request body as a JSON string
    * @param headers Optional HTTP headers to include in the request
-   * @param context Request context for logging and tracking
+   * @param context Request context (RequestContext or Map<String, Object>) for logging and tracking. nullable.
    * @return Response body as a string, or empty string if request fails
    */
   public static String patch(
-      String requestURL, String params, Map<String, String> headers, RequestContext context) {
+      String requestURL, String params, Map<String, String> headers, Object context) {
+    RequestContext requestContext = resolveContext(context);
     CloseableHttpResponse response = null;
     try {
-      logger.debug(context, "HttpClientUtil:patch: Making PATCH request to URL: " + requestURL);
+      logger.debug(requestContext, "HttpClientUtil:patch: Making PATCH request to URL: " + requestURL);
       HttpPatch httpPatch = new HttpPatch(requestURL);
       
       if (MapUtils.isNotEmpty(headers)) {
@@ -246,12 +252,12 @@ public class HttpClientUtil {
       httpPatch.setEntity(entity);
 
       response = httpclient.execute(httpPatch);
-      return getResponse(response, context, "PATCH");
+      return getResponse(response, requestContext, "PATCH");
     } catch (Exception ex) {
-      logger.error(context, "HttpClientUtil:patch: Exception occurred while calling PATCH method for URL: " + requestURL, ex);
+      logger.error(requestContext, "HttpClientUtil:patch: Exception occurred while calling PATCH method for URL: " + requestURL, ex);
       return "";
     } finally {
-      closeResponse(response, context, "PATCH");
+      closeResponse(response, requestContext, "PATCH");
     }
   }
 
@@ -260,14 +266,15 @@ public class HttpClientUtil {
    *
    * @param requestURL The target URL for the DELETE request
    * @param headers Optional HTTP headers to include in the request
-   * @param context Request context for logging and tracking
+   * @param context Request context (RequestContext or Map<String, Object>) for logging and tracking. nullable.
    * @return Response body as a string, or empty string if request fails
    */
   public static String delete(
-      String requestURL, Map<String, String> headers, RequestContext context) {
+      String requestURL, Map<String, String> headers, Object context) {
+    RequestContext requestContext = resolveContext(context);
     CloseableHttpResponse response = null;
     try {
-      logger.debug(context, "HttpClientUtil:delete: Making DELETE request to URL: " + requestURL);
+      logger.debug(requestContext, "HttpClientUtil:delete: Making DELETE request to URL: " + requestURL);
       HttpDelete httpDelete = new HttpDelete(requestURL);
       
       if (MapUtils.isNotEmpty(headers)) {
@@ -277,13 +284,24 @@ public class HttpClientUtil {
       }
       
       response = httpclient.execute(httpDelete);
-      return getResponse(response, context, "DELETE");
+      return getResponse(response, requestContext, "DELETE");
     } catch (Exception ex) {
-      logger.error(context, "HttpClientUtil:delete: Exception occurred while calling DELETE method for URL: " + requestURL, ex);
+      logger.error(requestContext, "HttpClientUtil:delete: Exception occurred while calling DELETE method for URL: " + requestURL, ex);
       return "";
     } finally {
-      closeResponse(response, context, "DELETE");
+      closeResponse(response, requestContext, "DELETE");
     }
+  }
+
+  // Helper method to resolve context
+  @SuppressWarnings("unchecked")
+  private static RequestContext resolveContext(Object context) {
+    if (context instanceof RequestContext) {
+      return (RequestContext) context;
+    } else if (context instanceof Map) {
+      return getRequestContext((Map<String, Object>) context);
+    }
+    return new RequestContext();
   }
 
   /**
@@ -351,7 +369,8 @@ public class HttpClientUtil {
               + " - Status: "
               + sl.getStatusCode()
               + " - "
-              + sl.getReasonPhrase(),
+              + sl.getReasonPhrase()
+              + " - URL: " + method, 
           null);
     } catch (Exception ex) {
       logger.error(context, "HttpClientUtil:getErrorResponse: Exception occurred while fetching error response for " + method + " method", ex);
@@ -376,5 +395,31 @@ public class HttpClientUtil {
             context, "HttpClientUtil:closeResponse: Exception occurred while closing " + method + " response object", ex);
       }
     }
+  }
+
+  private static RequestContext getRequestContext(Map<String, Object> context) {
+    RequestContext requestContext = new RequestContext();
+    if (MapUtils.isNotEmpty(context)) {
+      requestContext.setRequestId((String) context.get(JsonKey.REQUEST_ID));
+      if (StringUtils.isBlank(requestContext.getRequestId())) {
+        requestContext.setRequestId((String) context.get(JsonKey.X_REQUEST_ID));
+      }
+      requestContext.setDid((String) context.get(JsonKey.DEVICE_ID));
+      requestContext.setSid((String) context.get(JsonKey.X_SESSION_ID));
+      requestContext.setAppId((String) context.get(JsonKey.APP_ID));
+      requestContext.setAppVer((String) context.get(JsonKey.X_APP_VERSION));
+      requestContext.setSource((String) context.get(JsonKey.SOURCE));
+      requestContext.setEnv((String) context.get(JsonKey.ENV));
+      requestContext.setChannel((String) context.get(JsonKey.CHANNEL));
+      if (StringUtils.isBlank(requestContext.getChannel())) {
+        requestContext.setChannel((String) context.get(JsonKey.X_CHANNEL_ID));
+      }
+      requestContext.setActorId((String) context.get(JsonKey.ACTOR_ID));
+      requestContext.setActorType((String) context.get(JsonKey.ACTOR_TYPE));
+      
+      // Also map the entire context to the request context map
+      requestContext.setContextMap(context);
+    }
+    return requestContext;
   }
 }
