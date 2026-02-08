@@ -60,6 +60,10 @@ public class LoggerUtil {
     }
   }
 
+  public void info(Map<String, Object> context, String message) {
+    info((RequestContext) null, message);
+  }
+
   /**
    * Logs an INFO message with request context.
    *
@@ -108,6 +112,10 @@ public class LoggerUtil {
    */
   public void debug(RequestContext requestContext, String message) {
     debug(requestContext, message, null, null);
+  }
+
+  public void debug(Map<String, Object> context, String message) {
+    debug((RequestContext) null, message);
   }
 
   /**
@@ -179,6 +187,14 @@ public class LoggerUtil {
     error(requestContext, message, null, null, e);
   }
 
+  public void error(Map<String, Object> context, String message, Throwable e) {
+    error((RequestContext) null, message, e);
+  }
+
+  public void error(Map<String, Object> context, String message) {
+    error((RequestContext) null, message, null);
+  }
+
   /**
    * Logs a simple ERROR message with exception.
    *
@@ -234,6 +250,14 @@ public class LoggerUtil {
    */
   public void warn(RequestContext requestContext, String message, Throwable e) {
     warn(requestContext, message, null, null, e);
+  }
+
+  public void warn(Map<String, Object> context, String message, Throwable e) {
+    warn((RequestContext) null, message, e);
+  }
+
+  public void warn(Map<String, Object> context, String message) {
+    warn((RequestContext) null, message, null);
   }
 
   /**

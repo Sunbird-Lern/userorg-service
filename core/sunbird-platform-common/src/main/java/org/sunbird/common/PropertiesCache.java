@@ -11,13 +11,12 @@ import org.sunbird.logging.LoggerUtil;
 /**
  * Singleton class to load and manage application configuration properties.
  * Reads attributes from multiple property files and provides access validation/defaults.
- * 
- * @author Amit Kumar
  */
 public class PropertiesCache {
 
   private static final LoggerUtil logger = new LoggerUtil(PropertiesCache.class);
   private final String[] fileName = {
+    "configuration.properties",
     "elasticsearch.config.properties",
     "cassandra.config.properties",
     "dbconfig.properties",
@@ -25,7 +24,10 @@ public class PropertiesCache {
     "sso.properties",
     "userencryption.properties",
     "profilecompleteness.properties",
-    "mailTemplates.properties"
+    "mailTemplates.properties",
+    "cassandratablecolumn.properties",
+    "telemetry.config.properties",
+    "notification.config.properties"
   };
   private final Properties configProp = new Properties();
   public final Map<String, Float> attributePercentageMap = new ConcurrentHashMap<>();

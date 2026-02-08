@@ -937,6 +937,15 @@ public enum ResponseCode {
   }
 
   /**
+   * Gets the HTTP response code.
+   *
+   * @return int - The HTTP status code.
+   */
+  public int getCode() {
+    return responseCode;
+  }
+
+  /**
    * Sets the HTTP response code.
    *
    * @param responseCode int - The HTTP status code to set.
