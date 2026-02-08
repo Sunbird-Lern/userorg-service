@@ -104,8 +104,8 @@
         <module>sunbird-cassandra-utils</module>
         <module>sunbird-es-utils</module>
         <module>sunbird-actor-utils</module>
-        <module>sunbird-redis-utils</module>
         <module>sunbird-notification-utils</module>
+        <module>sunbird-redis-utils</module>
     </modules>
 
     <build>

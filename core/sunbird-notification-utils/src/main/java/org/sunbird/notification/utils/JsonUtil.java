@@ -28,6 +28,16 @@ public class JsonUtil {
   }
 
   /**
+   * Converts an object to its JSON string representation. (Overload without RequestContext)
+   *
+   * @param object The object to convert.
+   * @return JSON string or null if conversion fails.
+   */
+  public static String toJson(Object object) {
+    return toJson(object, null);
+  }
+
+  /**
    * Checks if a string is null or empty (including whitespace).
    *
    * @param value The string to check.
@@ -57,5 +67,17 @@ public class JsonUtil {
       logger.error(context, "Exception occurred while converting String to Object", e);
     }
     return result;
+  }
+
+  /**
+   * Converts a JSON string to an object of the specified class. (Overload without RequestContext)
+   *
+   * @param res The JSON string.
+   * @param clazz The target class.
+   * @param <T> Target type.
+   * @return The converted object or null if conversion fails.
+   */
+  public static <T> T getAsObject(String res, Class<T> clazz) {
+    return getAsObject(res, clazz, null);
   }
 }
