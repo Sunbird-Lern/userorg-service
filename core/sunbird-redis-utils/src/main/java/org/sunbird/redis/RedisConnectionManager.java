@@ -32,9 +32,9 @@ public class RedisConnectionManager {
    */
   public static RedissonClient getClient() {
     if (client == null) {
-      logger.info(null, "RedisConnectionManager:getClient: Redis client is null, initializing...");
+      logger.info( "RedisConnectionManager:getClient: Redis client is null, initializing...");
       boolean start = initialiseConnection();
-      logger.info(null, "RedisConnectionManager:getClient: Connection status = " + start);
+      logger.info( "RedisConnectionManager:getClient: Connection status = " + start);
     }
     return client;
   }
@@ -53,7 +53,6 @@ public class RedisConnectionManager {
       }
     } catch (Exception e) {
       logger.error(
-          null,
           "RedisConnectionManager:initialiseConnection: Error occurred: " + e.getMessage(),
           e);
       return false;
@@ -68,7 +67,7 @@ public class RedisConnectionManager {
    * @param port Redis port.
    */
   private static void initialiseSingleServer(String host, String port) {
-    logger.info(null, "RedisConnectionManager: initialiseSingleServer called");
+    logger.info( "RedisConnectionManager: initialiseSingleServer called");
 
     Config config = new Config();
     SingleServerConfig singleServerConfig = config.useSingleServer();
@@ -86,7 +85,6 @@ public class RedisConnectionManager {
    */
   private static void initialisingClusterServer(String host, String port) {
     logger.info(
-        null,
         "RedisConnectionManager: initialisingClusterServer called with host = "
             + host
             + " port = "
@@ -109,10 +107,9 @@ public class RedisConnectionManager {
       }
 
       client = Redisson.create(config);
-      logger.info(null, "RedisConnectionManager:initialisingClusterServer: Redis client created.");
+      logger.info( "RedisConnectionManager:initialisingClusterServer: Redis client created.");
     } catch (Exception e) {
       logger.error(
-          null,
           "RedisConnectionManager:initialisingClusterServer: Error occurred: " + e.getMessage(),
           e);
     }

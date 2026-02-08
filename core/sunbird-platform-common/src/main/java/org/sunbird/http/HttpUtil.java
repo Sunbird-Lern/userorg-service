@@ -36,10 +36,10 @@ public class HttpUtil {
     if(200 == httpResponse.getStatus()) {
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
-      logger.info(null, "HttpUtil:sendGetRequest: Execution finished for URL: " + requestURL + ", duration: " + elapsedTime + " ms");
+      logger.info("HttpUtil:sendGetRequest: Execution finished for URL: " + requestURL + ", duration: " + elapsedTime + " ms");
       return httpResponse.getBody();
     } else {
-      logger.error(null, "HttpUtil:sendGetRequest: Failed for URL: " + requestURL + ", Status: " + httpResponse.getStatus() + ", Response: " + httpResponse.getBody(), null);
+      logger.error("HttpUtil:sendGetRequest: Failed for URL: " + requestURL + ", Status: " + httpResponse.getStatus() + ", Response: " + httpResponse.getBody(), null);
       return "";
     }
   }
@@ -61,7 +61,7 @@ public class HttpUtil {
     String str = httpResponse.getBody();
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    logger.info( null,
+    logger.info(
         "HttpUtil:sendPostRequest: Execution finished for URL: "
             + requestURL
             + ", Duration: "
@@ -87,7 +87,7 @@ public class HttpUtil {
     String str = httpResponse.getBody();
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    logger.info( null,
+    logger.info(
         "HttpUtil:sendPostRequest: Execution finished for URL: "
             + requestURL
             + ", Duration: "
@@ -114,11 +114,11 @@ public class HttpUtil {
       HttpResponse<String> httpResponse = Unirest.post(requestURL).headers(headers).body(params).asString();
       response = new HttpUtilResponse(httpResponse.getBody(), httpResponse.getStatus());
     } catch (Exception ex) {
-      logger.error(null, "HttpUtil:doPostRequest: Exception occurred while reading response body for URL: " + requestURL, ex);
+      logger.error("HttpUtil:doPostRequest: Exception occurred while reading response body for URL: " + requestURL, ex);
     }
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    logger.info(null, 
+    logger.info(
         "HttpUtil:doPostRequest: Execution finished for URL: "
             + requestURL
             + ", Duration: "
@@ -138,7 +138,7 @@ public class HttpUtil {
   public static String sendPatchRequest(
       String requestURL, String params, Map<String, String> headers) {
     long startTime = System.currentTimeMillis();
-    logger.info(null, 
+    logger.info(
         "HttpUtil:sendPatchRequest: Started for URL: "
             + requestURL
             + " with params: "
@@ -150,7 +150,7 @@ public class HttpUtil {
       if (ResponseCode.OK.getResponseCode() == httpResponse.getStatus()) {
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
-        logger.info(null,
+        logger.info(
                 "HttpUtil:sendPatchRequest: Success for URL: "
                 + requestURL
                 + ", Status: "
@@ -162,7 +162,7 @@ public class HttpUtil {
       }
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
-      logger.info(null,
+      logger.info(
               "HttpUtil:sendPatchRequest: Failed for URL: "
               + requestURL
               + ", Status: "
@@ -172,11 +172,11 @@ public class HttpUtil {
               + " ms");
       return "Failure";
     } catch (Exception e) {
-      logger.error(null, "HttpUtil:sendPatchRequest: Exception for URL: " + requestURL, e);
+      logger.error("HttpUtil:sendPatchRequest: Exception for URL: " + requestURL, e);
     }
     long stopTime = System.currentTimeMillis();
     long elapsedTime = stopTime - startTime;
-    logger.info( null, 
+    logger.info(
         "HttpUtil:sendPatchRequest: Ended with failure for URL: "
             + requestURL
             + ", Duration: "

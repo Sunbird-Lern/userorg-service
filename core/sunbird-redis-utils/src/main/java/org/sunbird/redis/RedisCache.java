@@ -31,7 +31,6 @@ public class RedisCache implements Cache {
       return map.get(key);
     } catch (Exception e) {
       logger.error(
-          null,
           "RedisCache:get: Error occurred for mapName = " + mapName + ", key = " + key,
           e);
     }
@@ -40,21 +39,21 @@ public class RedisCache implements Cache {
 
   @Override
   public boolean clear(String mapName) {
-    logger.info(null, "RedisCache:clear: mapName = " + mapName);
+    logger.info( "RedisCache:clear: mapName = " + mapName);
     try {
       RMap<String, String> map = client.getMap(mapName);
       map.clear();
       return true;
     } catch (Exception e) {
       logger.error(
-          null, "RedisCache:clear: Error occurred for mapName = " + mapName, e);
+          "RedisCache:clear: Error occurred for mapName = " + mapName, e);
     }
     return false;
   }
 
   @Override
   public void clearAll() {
-    logger.info(null, "RedisCache: clearAll called");
+    logger.info( "RedisCache: clearAll called");
     for (String mapName : mapNameList) {
       clear(mapName);
     }
@@ -64,7 +63,6 @@ public class RedisCache implements Cache {
   public boolean setMapExpiry(String name, long seconds) {
     boolean result = client.getMap(name).expire(seconds, TimeUnit.SECONDS);
     logger.info(
-        null,
         "RedisCache:setMapExpiry: name = "
             + name
             + ", seconds = "
@@ -77,7 +75,7 @@ public class RedisCache implements Cache {
   @Override
   public boolean put(String mapName, String key, Object value) {
     logger.info(
-        null, "RedisCache:put: mapName = " + mapName + ", key = " + key);
+        "RedisCache:put: mapName = " + mapName + ", key = " + key);
     try {
       String res;
       if (value instanceof String) {
@@ -90,7 +88,6 @@ public class RedisCache implements Cache {
       return true;
     } catch (Exception e) {
       logger.error(
-          null,
           "RedisCache:put: Error occurred for mapName = "
               + mapName
               + ", key = "
@@ -108,7 +105,6 @@ public class RedisCache implements Cache {
       return JsonUtil.getAsObject(s, cls);
     } catch (Exception e) {
       logger.error(
-          null,
           "RedisCache:get: Error occurred for mapName = " + mapName + ", key = " + key,
           e);
     }

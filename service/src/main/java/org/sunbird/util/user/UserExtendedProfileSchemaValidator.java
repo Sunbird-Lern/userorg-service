@@ -37,7 +37,7 @@ public class UserExtendedProfileSchemaValidator {
                     ResponseCode.extendUserProfileNotLoaded.getErrorMessage(),
                     ResponseCode.extendUserProfileNotLoaded.getResponseCode());
         }
-        logger.info(null, String.format("schemas size :- " + schemas.size()));
+        logger.info( String.format("schemas size :- " + schemas.size()));
     }
 
     public static boolean validate(String entityType, JSONObject payload) throws Exception {

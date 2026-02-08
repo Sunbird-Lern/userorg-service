@@ -38,7 +38,7 @@ public class EsClientFactory {
     if (JsonKey.REST.equalsIgnoreCase(type)) {
       return getRestClient();
     }
-    logger.info(null, "EsClientFactory:getInstance: Unsupported client type provided: " + type);
+    logger.info("EsClientFactory:getInstance: Unsupported client type provided: " + type);
     return null;
   }
 
@@ -52,7 +52,7 @@ public class EsClientFactory {
     if (restClient == null) {
       synchronized (EsClientFactory.class) {
         if (restClient == null) {
-          logger.info(null, "EsClientFactory:getRestClient: Initializing new ElasticSearchRestHighImpl.");
+          logger.info("EsClientFactory:getRestClient: Initializing new ElasticSearchRestHighImpl.");
           restClient = new ElasticSearchRestHighImpl();
         }
       }

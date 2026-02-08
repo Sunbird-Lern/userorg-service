@@ -464,12 +464,12 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
         @Override
         public void onResponse(Boolean getResponse) {
           promise.success(getResponse != null ? getResponse : false);
-          logger.info(null, "ElasticSearchRestHighImpl:healthCheck: Health check successful, index exists: " + getResponse);
+          logger.info("ElasticSearchRestHighImpl:healthCheck: Health check successful, index exists: " + getResponse);
         }
 
         @Override
         public void onFailure(Exception e) {
-          logger.error(null, "ElasticSearchRestHighImpl:healthCheck: Health check failed", e);
+          logger.error("ElasticSearchRestHighImpl:healthCheck: Health check failed", e);
           promise.failure(e);
         }
       };
@@ -477,7 +477,7 @@ public class ElasticSearchRestHighImpl implements ElasticSearchService {
       ConnectionManager.getRestClient().indices().existsAsync(indexRequest, RequestOptions.DEFAULT, listener);
       
     } catch (Exception e) {
-      logger.error(null, "ElasticSearchRestHighImpl:healthCheck: Failed to prepare health check request", e);
+      logger.error("ElasticSearchRestHighImpl:healthCheck: Failed to prepare health check request", e);
       promise.failure(e);
     }
 

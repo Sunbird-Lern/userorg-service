@@ -23,7 +23,7 @@ class RedisCacheUtil {
   private val redis_port: Int = Platform.getInteger(JsonKey.REDIS_PORT_VALUE, 6379)
   private val index: Int = Platform.getInteger(JsonKey.REDIS_INDEX_VALUE, 0)
 
-  logger.info(null, s"RedisCacheUtil: Initializing with host: $redis_host, port: $redis_port, index: $index")
+  logger.info( s"RedisCacheUtil: Initializing with host: $redis_host, port: $redis_port, index: $index")
 
   private def buildPoolConfig: JedisPoolConfig = {
     val poolConfig = new JedisPoolConfig
@@ -114,7 +114,7 @@ class RedisCacheUtil {
       if (ttl > 0) jedis.expire(key, ttl)
     } catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:set: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:set: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -139,7 +139,7 @@ class RedisCacheUtil {
       data
     } catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:get: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:get: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -169,7 +169,7 @@ class RedisCacheUtil {
       }
     } catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:getAsync: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:getAsync: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -186,7 +186,7 @@ class RedisCacheUtil {
     try jedis.incrByFloat(key, inc)
     catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:incrementAndGet: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:incrementAndGet: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -208,7 +208,7 @@ class RedisCacheUtil {
       if (ttl > 0 && !isPartialUpdate) jedis.expire(key, ttl)
     } catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:saveList: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:saveList: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -243,7 +243,7 @@ class RedisCacheUtil {
       data
     } catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:getList: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:getList: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -273,7 +273,7 @@ class RedisCacheUtil {
       }
     } catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:getListAsync: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:getListAsync: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -289,7 +289,7 @@ class RedisCacheUtil {
     try data.foreach(entry => jedis.srem(key, entry))
     catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:removeFromList: Exception for key: $key", e)
+        logger.error( s"RedisCacheUtil:removeFromList: Exception for key: $key", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -304,7 +304,7 @@ class RedisCacheUtil {
     try jedis.del(keys.map(_.asInstanceOf[String]): _*)
     catch {
       case e: Exception =>
-        logger.error(null, s"RedisCacheUtil:delete: Exception for keys: ${keys.mkString(",")}", e)
+        logger.error( s"RedisCacheUtil:delete: Exception for keys: ${keys.mkString(",")}", e)
         throw e
     } finally returnConnection(jedis)
   }
@@ -323,7 +323,7 @@ class RedisCacheUtil {
           jedis.del(keys.toArray.map(_.asInstanceOf[String]): _*)
       } catch {
         case e: Exception =>
-          logger.error(null, s"RedisCacheUtil:deleteByPattern: Exception for pattern: $pattern", e)
+          logger.error( s"RedisCacheUtil:deleteByPattern: Exception for pattern: $pattern", e)
           throw e
       } finally returnConnection(jedis)
     }

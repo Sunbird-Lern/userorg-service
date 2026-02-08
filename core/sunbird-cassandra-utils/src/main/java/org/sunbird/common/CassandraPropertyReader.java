@@ -31,7 +31,7 @@ public class CassandraPropertyReader {
           properties.load(in);
         }
       } catch (IOException e) {
-        logger.error(null, "Error in properties cache", e);
+        logger.error("Error in properties cache", e);
       }
     }
   }

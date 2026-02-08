@@ -124,7 +124,7 @@ public class BaseMWService {
       } else {
         conf = config.getConfig(name);
       }
-      logger.info(null, "BaseMWService: ActorSystem starting with mode: " + getMode());
+      logger.info( "BaseMWService: ActorSystem starting with mode: " + getMode());
       system = ActorSystem.create(name, conf);
     }
     return system;
@@ -156,7 +156,7 @@ public class BaseMWService {
    * configuration.
    */
   protected static void initRouters() {
-    logger.info(null, "BaseMWService: RequestRouter mode: " + RequestRouter.getMode());
+    logger.info( "BaseMWService: RequestRouter mode: " + RequestRouter.getMode());
     if (!RouterMode.OFF.name().equalsIgnoreCase(RequestRouter.getMode())) {
       requestRouter =
           system.actorOf(
@@ -164,8 +164,7 @@ public class BaseMWService {
                   .props(Props.create(RequestRouter.class).withDispatcher("rr-dispatcher")),
               RequestRouter.class.getSimpleName());
     }
-    logger.info(
-        null, "BaseMWService: BackgroundRequestRouter mode: " + BackgroundRequestRouter.getMode());
+    logger.info("BaseMWService: BackgroundRequestRouter mode: " + BackgroundRequestRouter.getMode());
     if (!RouterMode.OFF.name().equalsIgnoreCase(BackgroundRequestRouter.getMode())) {
       bgRequestRouter =
           system.actorOf(

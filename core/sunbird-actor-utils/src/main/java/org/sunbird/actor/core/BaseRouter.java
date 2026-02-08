@@ -89,7 +89,7 @@ public abstract class BaseRouter extends BaseActor {
             createActor(context, actor, operations, dispatcher);
             break;
           default:
-            logger.info(null, "Router with name '" + name + "' not supported.");
+            logger.info( "Router with name '" + name + "' not supported.");
             break;
         }
       }
@@ -162,7 +162,7 @@ public abstract class BaseRouter extends BaseActor {
 
   @Override
   public void onReceiveException(String callerName, Exception e) {
-    logger.error(null, callerName + ": exception in message processing = " + e.getMessage(), e);
+    logger.error( callerName + ": exception in message processing = " + e.getMessage(), e);
     sender().tell(e, ActorRef.noSender());
   }
 }

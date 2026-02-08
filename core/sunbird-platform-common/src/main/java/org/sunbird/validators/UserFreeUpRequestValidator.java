@@ -47,10 +47,10 @@ public class UserFreeUpRequestValidator extends BaseRequestValidator {
    * Performs checks for ID presence and identifier list validity.
    */
   public void validate() {
-    logger.debug(null, "UserFreeUpRequestValidator:validate: Starting validation");
+    logger.debug("UserFreeUpRequestValidator:validate: Starting validation");
     validateIdPresence();
     validateIdentifier();
-    logger.debug(null, "UserFreeUpRequestValidator:validate: Validation successful");
+    logger.debug("UserFreeUpRequestValidator:validate: Validation successful");
   }
 
   private void validateIdPresence() {

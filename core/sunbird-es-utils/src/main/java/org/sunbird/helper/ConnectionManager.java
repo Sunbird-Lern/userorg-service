@@ -57,9 +57,7 @@ public class ConnectionManager {
       
       // Validate required configuration
       if (StringUtils.isBlank(hostName) || StringUtils.isBlank(port)) {
-        logger.warn(
-            null,
-            "Elasticsearch configuration incomplete - SUNBIRD_ES_IP or SUNBIRD_ES_PORT not set",
+        logger.warn("Elasticsearch configuration incomplete - SUNBIRD_ES_IP or SUNBIRD_ES_PORT not set",
             null);
         return false;
       }
@@ -81,7 +79,7 @@ public class ConnectionManager {
           try {
             ports.add(Integer.parseInt(trimmedPort));
           } catch (NumberFormatException e) {
-            logger.warn(null, "Invalid port number in SUNBIRD_ES_PORT: " + trimmedPort, null);
+            logger.warn("Invalid port number in SUNBIRD_ES_PORT: " + trimmedPort, null);
           }
         }
       }
@@ -92,16 +90,14 @@ public class ConnectionManager {
       if (success) {
         String clusterName = cluster != null ? cluster : "default";
         String hostList = String.join(",", hosts);
-        logger.info(
-            null,
-            "Elasticsearch connection established successfully - cluster: " + clusterName 
+        logger.info("Elasticsearch connection established successfully - cluster: " + clusterName 
                 + ", hosts: " + hostList + ", port: 9200");
       }
       
       return success;
       
     } catch (Exception e) {
-      logger.error(null, "Failed to initialize Elasticsearch REST client connection", e);
+      logger.error("Failed to initialize Elasticsearch REST client connection", e);
       return false;
     }
   }
@@ -117,16 +113,14 @@ public class ConnectionManager {
       synchronized (lock) {
         // Double-check after acquiring lock
         if (restClient == null) {
-          logger.info(null, "REST client is null, attempting to initialize connection");
+          logger.info("REST client is null, attempting to initialize connection");
           
           boolean initialized = initialiseRestClientConnection();
           
           if (initialized && restClient != null) {
-            logger.info(null, "REST client initialized successfully");
+            logger.info("REST client initialized successfully");
           } else {
-            logger.error(
-                null,
-                "Failed to initialize REST client - check Elasticsearch configuration",
+            logger.error("Failed to initialize REST client - check Elasticsearch configuration",
                 null);
           }
         }
@@ -145,7 +139,7 @@ public class ConnectionManager {
   private static boolean createRestClient(String clusterName, List<String> hostList) {
     try {
       if (hostList == null || hostList.isEmpty()) {
-        logger.warn(null, "No Elasticsearch hosts provided for client initialization", null);
+        logger.warn("No Elasticsearch hosts provided for client initialization", null);
         return false;
       }
       
@@ -153,20 +147,18 @@ public class ConnectionManager {
       HttpHost[] httpHosts = new HttpHost[hostList.size()];
       for (int i = 0; i < hostList.size(); i++) {
         httpHosts[i] = new HttpHost(hostList.get(i), 9200, "http");
-        logger.debug(null, "Adding Elasticsearch node: " + hostList.get(i) + ":9200");
+        logger.debug("Adding Elasticsearch node: " + hostList.get(i) + ":9200");
       }
       
       // Create REST high-level client
       restClient = new RestHighLevelClient(RestClient.builder(httpHosts));
       
-      logger.info(
-          null,
-          "Elasticsearch REST client created successfully with " + hostList.size() + " host(s)");
+      logger.info("Elasticsearch REST client created successfully with " + hostList.size() + " host(s)");
       
       return true;
       
     } catch (Exception e) {
-      logger.error(null, "Failed to create Elasticsearch REST client", e);
+      logger.error("Failed to create Elasticsearch REST client", e);
       return false;
     }
   }
@@ -177,17 +169,15 @@ public class ConnectionManager {
     public void run() {
       if (restClient != null) {
         try {
-          logger.info(null, "Shutting down Elasticsearch REST client");
+          logger.info("Shutting down Elasticsearch REST client");
           restClient.close();
-          logger.info(null, "Elasticsearch REST client closed successfully");
+          logger.info("Elasticsearch REST client closed successfully");
         } catch (IOException e) {
-          logger.error(
-              null,
-              "Error occurred during Elasticsearch REST client resource cleanup: " + e.getMessage(),
+          logger.error("Error occurred during Elasticsearch REST client resource cleanup: " + e.getMessage(),
               e);
         }
       } else {
-        logger.debug(null, "No Elasticsearch REST client to clean up");
+        logger.debug("No Elasticsearch REST client to clean up");
       }
     }
   }
@@ -196,6 +186,6 @@ public class ConnectionManager {
   static void registerShutDownHook() {
     Runtime runtime = Runtime.getRuntime();
     runtime.addShutdownHook(new ResourceCleanUp());
-    logger.debug(null, "Elasticsearch connection cleanup shutdown hook registered");
+    logger.debug("Elasticsearch connection cleanup shutdown hook registered");
   }
 }

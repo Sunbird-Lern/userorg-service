@@ -96,7 +96,7 @@ public class BaseRequestValidator {
    */
   public ProjectCommonException createExceptionByResponseCode(ResponseCode code, int errorCode) {
     if (code == null) {
-      logger.info(null, "ResponseCode object is coming as null");
+      logger.info("ResponseCode object is coming as null");
       return new ProjectCommonException(
           ResponseCode.invalidData.getErrorCode(),
           ResponseCode.invalidData.getErrorMessage(),
@@ -117,7 +117,7 @@ public class BaseRequestValidator {
   public ProjectCommonException createExceptionByResponseCode(
       ResponseCode code, int errorCode, String errorMsgArgument) {
     if (code == null) {
-      logger.info(null, "ResponseCode object is coming as null");
+      logger.info("ResponseCode object is coming as null");
       return new ProjectCommonException(
           ResponseCode.invalidData.getErrorCode(),
           ResponseCode.invalidData.getErrorMessage(),

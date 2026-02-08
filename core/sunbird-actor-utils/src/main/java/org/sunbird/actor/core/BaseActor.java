@@ -64,7 +64,7 @@ public abstract class BaseActor extends UntypedAbstractActor {
         onReceiveException(request, e);
       }
     } else {
-      logger.info(null, "BaseActor: onReceive called for unsupported message type");
+      logger.info( "BaseActor: onReceive called for unsupported message type");
       unSupportedMessage();
     }
   }
@@ -99,7 +99,7 @@ public abstract class BaseActor extends UntypedAbstractActor {
    * @throws Exception If an error occurs while sending the message.
    */
   public void onReceiveUnsupportedOperation(String callerName) throws Exception {
-    logger.info(null, callerName + ": unsupported operation");
+    logger.info( callerName + ": unsupported operation");
     unSupportedMessage();
   }
 
@@ -113,7 +113,7 @@ public abstract class BaseActor extends UntypedAbstractActor {
    * @param callerName The name of the caller for logging context.
    */
   public void onReceiveUnsupportedMessage(String callerName) {
-    logger.info(null, callerName + ": unsupported message");
+    logger.info( callerName + ": unsupported message");
     ProjectCommonException exception =
         new ProjectCommonException(
             ResponseCode.invalidOperationName.getErrorCode(),
@@ -153,7 +153,6 @@ public abstract class BaseActor extends UntypedAbstractActor {
    */
   protected void onReceiveException(String callerName, Exception exception) throws Exception {
     logger.error(
-        null,
         "Exception in message processing for: "
             + callerName
             + " :: message: "
@@ -186,7 +185,6 @@ public abstract class BaseActor extends UntypedAbstractActor {
           actor = futureActor.toCompletableFuture().get();
         } catch (Exception e) {
           logger.error(
-              null,
               "InterServiceCommunicationImpl : getResponse - unable to get actorref from actorselection "
                   + e.getMessage(),
               e);

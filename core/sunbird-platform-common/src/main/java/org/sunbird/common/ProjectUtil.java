@@ -681,7 +681,7 @@ public class ProjectUtil {
     if (StringUtils.isBlank(logoUrl)) {
       logoUrl = getConfigValue(JsonKey.SUNBIRD_ENV_LOGO_URL);
     }
-    logger.info(null,"ProjectUtil:getSunbirdLogoUrl: url = " + logoUrl);
+    logger.info("ProjectUtil:getSunbirdLogoUrl: url = " + logoUrl);
     return logoUrl;
   }
 
@@ -700,7 +700,7 @@ public class ProjectUtil {
     if (StringUtils.isBlank(fromEmail)) {
       fromEmail = getConfigValue(JsonKey.EMAIL_SERVER_FROM);
     }
-    logger.info(null,"ProjectUtil:getFromEmail: fromEmail = " + fromEmail);
+    logger.info("ProjectUtil:getFromEmail: fromEmail = " + fromEmail);
     return fromEmail;
   }
 
@@ -776,7 +776,7 @@ public class ProjectUtil {
       throws Exception {
     String tagStatus = "";
     try {
-      logger.info(null,"start call for registering the tag ==" + tagId);
+      logger.info("start call for registering the tag ==" + tagId);
       String analyticsBaseUrl = getConfigValue(JsonKey.ANALYTICS_API_BASE_URL);
       tagStatus =
           HttpUtil.sendPostRequest(
@@ -786,7 +786,7 @@ public class ProjectUtil {
                   + tagId,
               body,
               header);
-      logger.info(null,
+      logger.info(
           "end call for tag registration id and status  ==" + tagId + " " + tagStatus);
     } catch (Exception e) {
       throw e;
@@ -885,8 +885,8 @@ public class ProjectUtil {
       phoneNumber = phoneNumberUtil.parse(phNumber, isoCode);
       return phoneNumberUtil.isValidNumber(phoneNumber);
     } catch (NumberParseException e) {
-      logger.error(null,"Exception occurred while validating phone number : ", e);
-      logger.info(null,phNumber + "this phone no. is not a valid one.");
+      logger.error("Exception occurred while validating phone number : ", e);
+      logger.info(phNumber + "this phone no. is not a valid one.");
     }
     return false;
   }
@@ -945,7 +945,7 @@ public class ProjectUtil {
       t.merge(context, writer);
       return writer.toString();
     } catch (Exception ex) {
-      logger.error(null,"Exception occurred while formating and sending SMS ", ex);
+      logger.error("Exception occurred while formating and sending SMS ", ex);
     }
     return "";
   }
@@ -966,7 +966,7 @@ public class ProjectUtil {
         date = null;
       }
     } catch (ParseException ex) {
-      logger.error(null, ex.getMessage(), ex);
+      logger.error(ex.getMessage(), ex);
     }
     return date != null;
   }
@@ -1072,7 +1072,7 @@ public class ProjectUtil {
     try {
       return mapper.writeValueAsString(mapList);
     } catch (IOException e) {
-      logger.error(null, e.getMessage(), e);
+      logger.error(e.getMessage(), e);
     }
     return null;
   }

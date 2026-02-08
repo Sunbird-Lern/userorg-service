@@ -114,7 +114,7 @@ public class ElasticSearchHelper {
         return Await.result(future, timeout.duration());
       }
     } catch (Exception e) {
-      logger.error(null, "ElasticSearchHelper:getResponseFromFuture: Error occurred while waiting for future result", e);
+      logger.error("ElasticSearchHelper:getResponseFromFuture: Error occurred while waiting for future result", e);
     }
     return null;
   }
@@ -129,7 +129,7 @@ public class ElasticSearchHelper {
   public static SearchRequestBuilder addAggregations(
       SearchRequestBuilder searchRequestBuilder, List<Map<String, String>> facets) {
     long startTime = System.currentTimeMillis();
-    logger.debug(null, "ElasticSearchHelper:addAggregations: method started at " + startTime);
+    logger.debug("ElasticSearchHelper:addAggregations: method started at " + startTime);
 
     if (searchRequestBuilder != null && CollectionUtils.isNotEmpty(facets)) {
       Map<String, String> map = facets.get(0);
@@ -152,7 +152,7 @@ public class ElasticSearchHelper {
     }
 
     long elapsedTime = calculateEndTime(startTime);
-    logger.debug(null, "ElasticSearchHelper:addAggregations: method ended. Total time elapsed = " + elapsedTime);
+    logger.debug("ElasticSearchHelper:addAggregations: method ended. Total time elapsed = " + elapsedTime);
     return searchRequestBuilder;
   }
 
@@ -193,7 +193,7 @@ public class ElasticSearchHelper {
   public static void addAdditionalProperties(
       BoolQueryBuilder query, Entry<String, Object> entry, Map<String, Float> constraintsMap) {
     long startTime = System.currentTimeMillis();
-    logger.debug(null, "ElasticSearchHelper:addAdditionalProperties: method started at " + startTime);
+    logger.debug("ElasticSearchHelper:addAdditionalProperties: method started at " + startTime);
 
     String key = entry.getKey();
     Object value = entry.getValue();
@@ -220,7 +220,7 @@ public class ElasticSearchHelper {
     }
 
     long elapsedTime = calculateEndTime(startTime);
-    logger.debug(null, "ElasticSearchHelper:addAdditionalProperties: method ended. Total time elapsed = " + elapsedTime);
+    logger.debug("ElasticSearchHelper:addAdditionalProperties: method ended. Total time elapsed = " + elapsedTime);
   }
 
   /**
