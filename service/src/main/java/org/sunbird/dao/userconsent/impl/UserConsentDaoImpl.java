@@ -8,7 +8,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class UserConsentDaoImpl implements UserConsentDao {
   private final String TABLE_NAME = "user_consent";

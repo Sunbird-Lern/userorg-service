@@ -45,7 +45,7 @@ import org.sunbird.response.Response;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.CassandraConnectionManager;
 import org.sunbird.helper.CassandraConnectionManagerImpl;
 import org.sunbird.helper.CassandraConnectionMngrFactory;

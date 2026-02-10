@@ -21,7 +21,7 @@ import org.sunbird.cassandra.CassandraOperation;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.datasecurity.EncryptionService;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;

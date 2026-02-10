@@ -17,15 +17,15 @@ import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.impl.DefaultDataMaskServiceImpl;
 import org.sunbird.datasecurity.impl.LogMaskServiceImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.response.ResponseParams;
-import org.sunbird.util.EntryExitLogEvent;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.logging.EntryExitLogEvent;
+import org.sunbird.common.ProjectUtil;
 
 public class PrintEntryExitLog {
 
@@ -108,7 +108,7 @@ public class PrintEntryExitLog {
                 ResponseCode.SERVER_ERROR.getResponseCode());
       }
 
-      ResponseCode code = exception.getResponseCode();
+      ResponseCode code = exception.getResponseCodeEnum();
       if (code == null) {
         code = ResponseCode.SERVER_ERROR;
       }

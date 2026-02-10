@@ -13,7 +13,7 @@ import org.sunbird.dao.organisation.impl.OrgDaoImpl;
 import org.sunbird.dao.userconsent.UserConsentDao;
 import org.sunbird.dao.userconsent.impl.UserConsentDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.Request;
@@ -21,7 +21,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.userconsent.UserConsentService;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.user.DateUtil;
 
 public class UserConsentServiceImpl implements UserConsentService {

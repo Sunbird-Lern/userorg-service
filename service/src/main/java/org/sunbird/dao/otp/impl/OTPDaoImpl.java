@@ -10,8 +10,8 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.ProjectUtil;
+import org.sunbird.common.PropertiesCache;
 
 public class OTPDaoImpl implements OTPDao {
   private final LoggerUtil logger = new LoggerUtil(OTPDaoImpl.class);

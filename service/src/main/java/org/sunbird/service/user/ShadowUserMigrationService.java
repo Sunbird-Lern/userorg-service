@@ -11,7 +11,7 @@ import org.sunbird.model.ClaimStatus;
 import org.sunbird.model.ShadowUser;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class ShadowUserMigrationService {
   private static final LoggerUtil logger = new LoggerUtil(ShadowUserMigrationService.class);

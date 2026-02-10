@@ -32,11 +32,11 @@ import org.sunbird.common.ElasticSearchRestHighImpl;
 import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.user.User;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
@@ -44,10 +44,10 @@ import org.sunbird.service.user.UserExternalIdentityService;
 import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.impl.UserExternalIdentityServiceImpl;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
-import org.sunbird.sso.KeyCloakConnectionProvider;
-import org.sunbird.sso.SSOManager;
-import org.sunbird.sso.SSOServiceFactory;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.keycloak.KeyCloakConnectionProvider;
+import org.sunbird.keycloak.SSOManager;
+import org.sunbird.keycloak.SSOServiceFactory;
+import org.sunbird.common.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

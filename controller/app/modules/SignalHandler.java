@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import play.api.Application;
 import play.api.Play;
 import scala.concurrent.duration.Duration;

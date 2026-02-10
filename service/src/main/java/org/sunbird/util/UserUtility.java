@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.sunbird.common.PropertiesCache;
 import org.sunbird.datasecurity.DataMaskingService;
 import org.sunbird.datasecurity.DecryptionService;
 import org.sunbird.datasecurity.EncryptionService;

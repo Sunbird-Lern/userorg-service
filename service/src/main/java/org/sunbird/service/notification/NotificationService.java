@@ -7,7 +7,7 @@ import org.apache.velocity.VelocityContext;
 import org.sunbird.dao.notification.EmailTemplateDao;
 import org.sunbird.dao.notification.impl.EmailTemplateDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.model.user.User;
@@ -18,7 +18,7 @@ import org.sunbird.service.organisation.OrgService;
 import org.sunbird.service.organisation.impl.OrgServiceImpl;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 import java.text.MessageFormat;
 import java.util.*;

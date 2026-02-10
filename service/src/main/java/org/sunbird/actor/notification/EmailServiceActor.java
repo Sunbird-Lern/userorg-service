@@ -8,12 +8,12 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.mail.SendEmail;
 import org.sunbird.mail.SendgridConnection;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.notification.NotificationService;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 import java.io.StringWriter;
 import java.util.ArrayList;

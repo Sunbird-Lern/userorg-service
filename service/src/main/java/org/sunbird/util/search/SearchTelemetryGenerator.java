@@ -14,7 +14,7 @@ import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryWriter;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 

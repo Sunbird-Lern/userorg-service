@@ -1,6 +1,6 @@
 package org.sunbird.common;
 
-import static org.sunbird.util.ProjectUtil.isNotNull;
+import static org.sunbird.common.ProjectUtil.isNotNull;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

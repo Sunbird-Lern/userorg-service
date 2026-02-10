@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;

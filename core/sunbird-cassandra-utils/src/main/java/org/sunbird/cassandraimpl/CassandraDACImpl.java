@@ -18,7 +18,7 @@ import org.sunbird.common.Constants;
 import org.sunbird.exception.ProjectCommonException;
 import org.sunbird.response.Response;
 import org.sunbird.request.RequestContext;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 
 /**
  * Extended Cassandra Data Access Component (DAC) implementation.

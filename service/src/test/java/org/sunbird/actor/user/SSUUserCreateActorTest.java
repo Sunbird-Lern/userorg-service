@@ -11,7 +11,7 @@ import org.apache.pekko.testkit.javadsl.TestKit;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 
 public class SSUUserCreateActorTest extends UserManagementActorTestBase {
 

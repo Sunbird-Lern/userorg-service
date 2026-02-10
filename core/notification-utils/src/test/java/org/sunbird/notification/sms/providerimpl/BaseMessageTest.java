@@ -21,7 +21,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.notification.utils.PropertiesCache;
 import org.sunbird.notification.utils.SmsTemplateUtil;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockIgnore({"javax.management.*", "javax.net.ssl.*", "javax.security.*"})

@@ -5,10 +5,10 @@ import java.util.Map;
 import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
-import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.validators.BaseRequestValidator;
 
 /** This call will validate the Feed API request */
 public class FeedRequestValidator extends BaseRequestValidator {

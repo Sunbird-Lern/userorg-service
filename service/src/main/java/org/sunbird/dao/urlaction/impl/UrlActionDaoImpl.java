@@ -10,7 +10,7 @@ import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.urlaction.UrlAction;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class UrlActionDaoImpl implements UrlActionDao {
 

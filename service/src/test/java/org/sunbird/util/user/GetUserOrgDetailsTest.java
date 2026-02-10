@@ -17,7 +17,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.cassandraimpl.CassandraOperationImpl;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.Util;
 import org.sunbird.response.Response;
 

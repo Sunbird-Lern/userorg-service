@@ -11,7 +11,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.RequestContext;
-import org.sunbird.sso.KeycloakUtil;
+import org.sunbird.keycloak.KeycloakUtil;
 
 import java.util.HashMap;
 import java.util.Map;

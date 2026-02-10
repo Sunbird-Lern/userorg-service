@@ -25,14 +25,14 @@ import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.dao.location.impl.LocationDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import scala.concurrent.Promise;
 
 @RunWith(PowerMockRunner.class)

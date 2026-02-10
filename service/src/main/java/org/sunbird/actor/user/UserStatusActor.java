@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.apache.commons.collections4.CollectionUtils;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
@@ -17,7 +17,7 @@ import org.sunbird.service.user.UserStatusService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.Util;
 
 public class UserStatusActor extends UserBaseActor {

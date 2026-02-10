@@ -7,14 +7,14 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
-import org.sunbird.util.CloudStorageUtil;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.utils.CloudStorageUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class FileUploadServiceActor extends BaseActor {
 

@@ -13,19 +13,19 @@ import javax.inject.Named;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.location.Location;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import org.sunbird.util.Util;
 
 public class LocationBulkUploadBackGroundJobActor extends BaseBulkUploadBackgroundJobActor {

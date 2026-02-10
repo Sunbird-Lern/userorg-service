@@ -10,7 +10,7 @@ import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.sunbird.actor.core.BaseActor;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
 import org.sunbird.request.RequestContext;

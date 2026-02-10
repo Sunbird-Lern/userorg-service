@@ -10,7 +10,7 @@ import org.apache.commons.collections.MapUtils;
 import org.sunbird.dao.role.RoleDao;
 import org.sunbird.dao.role.impl.RoleDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.role.Role;
 import org.sunbird.request.RequestContext;

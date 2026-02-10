@@ -27,17 +27,17 @@ import org.sunbird.actor.core.BaseActor;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessDaoImpl;
 import org.sunbird.dao.bulkupload.impl.BulkUploadProcessTaskDaoImpl;
 import org.sunbird.datasecurity.EncryptionService;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.helper.ServiceFactory;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.bulkupload.BulkUploadProcess;
 import org.sunbird.model.bulkupload.BulkUploadProcessTask;
 import org.sunbird.model.organisation.Organisation;
-import org.sunbird.operations.ActorOperations;
+import org.sunbird.operations.userorg.ActorOperations;
 import org.sunbird.request.Request;
 import org.sunbird.response.Response;
 import org.sunbird.telemetry.util.TelemetryWriter;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 @PrepareForTest({
   ServiceFactory.class,

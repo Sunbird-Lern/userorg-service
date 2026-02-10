@@ -7,7 +7,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.sunbird.http.HttpClientUtil;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 import javax.ws.rs.core.MediaType;
 import java.util.Arrays;

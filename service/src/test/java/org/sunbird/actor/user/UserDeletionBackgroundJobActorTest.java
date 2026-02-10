@@ -22,7 +22,7 @@ import org.sunbird.service.user.UserRoleService;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserRoleServiceImpl;
 import org.sunbird.service.user.impl.UserServiceImpl;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({

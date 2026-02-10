@@ -11,7 +11,7 @@ import org.sunbird.common.factory.EsClientFactory;
 import org.sunbird.common.inf.ElasticSearchService;
 import org.sunbird.dto.SearchDTO;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.GeoLocationJsonKey;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
@@ -19,7 +19,7 @@ import org.sunbird.model.location.UpsertLocationRequest;
 import org.sunbird.request.RequestContext;
 import org.sunbird.service.location.LocationService;
 import org.sunbird.service.location.LocationServiceImpl;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 import scala.concurrent.Future;
 
 /** @author Amit Kumar */

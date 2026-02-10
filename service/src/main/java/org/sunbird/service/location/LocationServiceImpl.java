@@ -8,13 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.sunbird.dao.location.LocationDao;
 import org.sunbird.dao.location.impl.LocationDaoFactory;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.model.location.Location;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataCacheHandler;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class LocationServiceImpl implements LocationService {
   public static LocationService locationService = null;
@@ -46,6 +46,7 @@ public class LocationServiceImpl implements LocationService {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public List<Map<String, String>> getValidatedRelatedLocationIdAndType(
       List<String> codeList, RequestContext context) {
     List<Location> locationIdTypeList = locationSearch(JsonKey.CODE, codeList, context);
@@ -65,7 +66,7 @@ public class LocationServiceImpl implements LocationService {
             .entrySet()
             .forEach(
                 m -> {
-                  Map<String, String> locationIdTypeMap = new HashMap();
+                  Map<String, String> locationIdTypeMap = new HashMap<>();
                   locationIdTypeMap.put(JsonKey.ID, m.getValue().getId());
                   locationIdTypeMap.put(JsonKey.TYPE, m.getValue().getType());
                   locationIdType.add(locationIdTypeMap);
@@ -102,6 +103,7 @@ public class LocationServiceImpl implements LocationService {
     return locationIdList;
   }
 
+  @SuppressWarnings("unchecked")
   public List<Location> locationSearch(String param, Object value, RequestContext context) {
     Map<String, Object> filter = new HashMap<>();
     Map<String, Object> searchRequestMap = new HashMap<>();
@@ -182,6 +184,7 @@ public class LocationServiceImpl implements LocationService {
         ResponseCode.CLIENT_ERROR.getResponseCode());
   }
 
+  @SuppressWarnings("unchecked")
   public Location getLocationById(String locationId, RequestContext context) {
     Response response = locationDao.read(locationId, context);
     List<Map<String, Object>> responseList =
@@ -194,6 +197,7 @@ public class LocationServiceImpl implements LocationService {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public List<Map<String, Object>> getLocationsByIds(
       List<String> locationIds, List<String> locationFields, RequestContext context) {
     Response response = locationDao.getLocationsByIds(locationIds, locationFields, context);

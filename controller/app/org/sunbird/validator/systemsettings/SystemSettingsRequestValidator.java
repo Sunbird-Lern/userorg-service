@@ -1,9 +1,9 @@
 package org.sunbird.validator.systemsettings;
 
-import org.sunbird.exception.ResponseCode;
+import org.sunbird.response.ResponseCode;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.request.Request;
-import org.sunbird.validator.BaseRequestValidator;
+import org.sunbird.validators.BaseRequestValidator;
 
 public class SystemSettingsRequestValidator extends BaseRequestValidator {
   public void validateSetSystemSetting(Request request) {

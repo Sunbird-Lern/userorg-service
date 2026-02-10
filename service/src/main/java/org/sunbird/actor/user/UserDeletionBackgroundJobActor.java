@@ -14,7 +14,7 @@ import org.sunbird.request.Request;
 import org.sunbird.service.user.UserService;
 import org.sunbird.service.user.impl.UserServiceImpl;
 import org.sunbird.telemetry.dto.TelemetryEnvKey;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 import org.sunbird.util.user.UserUtil;
 
 public class UserDeletionBackgroundJobActor extends BaseActor {

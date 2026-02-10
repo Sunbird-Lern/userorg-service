@@ -12,14 +12,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.sunbird.dao.tenantpreference.TenantPreferenceDao;
 import org.sunbird.dao.tenantpreference.impl.TenantPreferenceDaoImpl;
 import org.sunbird.exception.ProjectCommonException;
-import org.sunbird.exception.ResponseCode;
-import org.sunbird.exception.ResponseMessage;
+import org.sunbird.response.ResponseCode;
+import org.sunbird.response.ResponseMessage;
 import org.sunbird.keys.JsonKey;
 import org.sunbird.logging.LoggerUtil;
 import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.util.DataSecurityLevelsEnum;
-import org.sunbird.util.ProjectUtil;
+import org.sunbird.common.ProjectUtil;
 
 public class TenantPreferenceService {
 

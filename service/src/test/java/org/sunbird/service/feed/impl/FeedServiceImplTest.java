@@ -23,7 +23,7 @@ import org.sunbird.request.RequestContext;
 import org.sunbird.response.Response;
 import org.sunbird.service.feed.FeedFactory;
 import org.sunbird.service.feed.IFeedService;
-import org.sunbird.util.PropertiesCache;
+import org.sunbird.common.PropertiesCache;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceFactory.class, HttpClientUtil.class, System.class})
